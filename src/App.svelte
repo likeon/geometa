@@ -32,6 +32,8 @@
           } catch (e) {
             error = 'Failed to parse response';
           }
+        } else if (response.status === 404) {
+          error = 'Meta for this location not found';
         } else {
           error = `HTTP error! status: ${response.status}`;
         }
