@@ -3,6 +3,7 @@
 // @namespace    geometa
 // @version      0.1
 // @author       monkey
+// @description  UserScript for GeoGuessr Learnable Meta map
 // @icon         https://www.google.com/s2/favicons?domain=geoguessr.com
 // @downloadURL  https://raw.githubusercontent.com/likeon/geometa/main/dist/geometa.user.js
 // @updateURL    https://raw.githubusercontent.com/likeon/geometa/main/dist/geometa.user.js
