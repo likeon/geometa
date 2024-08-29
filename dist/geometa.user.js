@@ -1,16 +1,18 @@
 // ==UserScript==
-// @name       GeoGuessr Learnable Meta
-// @namespace  geometa
-// @version    0.1
-// @author     monkey
-// @icon       https://www.google.com/s2/favicons?domain=geoguessr.com
-// @match      *://*.geoguessr.com/game/*
-// @require    https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/3d3dcb7084098be16fa510b17294a5a3140dfa70/geoguessr-event-framework.min.js
-// @connect    geometa-info-service.i-a38.workers.dev
-// @grant      GM_addStyle
-// @grant      GM_xmlhttpRequest
-// @grant      unsafeWindow
-// @run-at     document-start
+// @name         GeoGuessr Learnable Meta
+// @namespace    geometa
+// @version      0.1
+// @author       monkey
+// @icon         https://www.google.com/s2/favicons?domain=geoguessr.com
+// @downloadURL  https://raw.githubusercontent.com/likeon/geometa/main/dist/geometa.user.js
+// @updateURL    https://raw.githubusercontent.com/likeon/geometa/main/dist/geometa.user.js
+// @match        *://*.geoguessr.com/game/*
+// @require      https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/3d3dcb7084098be16fa510b17294a5a3140dfa70/geoguessr-event-framework.min.js
+// @connect      geometa-info-service.i-a38.workers.dev
+// @grant        GM_addStyle
+// @grant        GM_xmlhttpRequest
+// @grant        unsafeWindow
+// @run-at       document-start
 // ==/UserScript==
 
 (t=>{if(typeof GM_addStyle=="function"){GM_addStyle(t);return}const e=document.createElement("style");e.textContent=t,document.head.append(e)})(" .loadership_ZOJAQ.svelte-1fzfwt6.svelte-1fzfwt6{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-1fzfwt6-loadership_ZOJAQ_scale 1.2s infinite,svelte-1fzfwt6-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.geometa-container.svelte-gp99li{position:absolute;top:50%;transform:translateY(-50%);left:1rem;z-index:9;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:12px;opacity:.75;width:min(25%,500px);max-width:min(25%,500px)} ");
