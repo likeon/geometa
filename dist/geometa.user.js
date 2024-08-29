@@ -1047,6 +1047,8 @@
             } catch (e) {
               $$invalidate(1, error = "Failed to parse response");
             }
+          } else if (response.status === 404) {
+            $$invalidate(1, error = "Meta for this location not found");
           } else {
             $$invalidate(1, error = `HTTP error! status: ${response.status}`);
           }
