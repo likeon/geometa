@@ -13,7 +13,7 @@ export default defineConfig({
         version: '0.1',
         namespace: 'geometa',
         name: 'GeoGuessr Learnable Meta',
-        match: ['*://*.geoguessr.com/game/*'],
+        match: ['*://*.geoguessr.com/*'],
         connect: ['geometa-info-service.i-a38.workers.dev'],
         updateURL: 'https://raw.githubusercontent.com/likeon/geometa/main/dist/geometa.user.js',
         downloadURL: 'https://raw.githubusercontent.com/likeon/geometa/main/dist/geometa.user.js',
