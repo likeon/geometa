@@ -694,6 +694,10 @@
       });
     });
   }
+  function cutToTwoDecimals(num) {
+    const fixed = num.toFixed(2);
+    return fixed.replace(/\.?0+$/, "");
+  }
   function get_each_context(ctx, list, i) {
     const child_ctx = ctx.slice();
     child_ctx[4] = list[i];
@@ -1059,8 +1063,8 @@
     let geoInfo = null;
     let error = null;
     onMount(() => {
-      const cutLat = lat.toFixed(2);
-      const cutLng = lng.toFixed(2);
+      const cutLat = cutToTwoDecimals(lat);
+      const cutLng = cutToTwoDecimals(lng);
       const url = `https://geometa-info-service.i-a38.workers.dev/?coordinates=${cutLat},${cutLng}`;
       _GM_xmlhttpRequest({
         method: "GET",

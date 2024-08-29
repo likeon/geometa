@@ -29,6 +29,7 @@ export function waitForElement(selector: string): Promise<Element> {
 }
 
 export function cutToTwoDecimals(num: number): string {
-  const truncated = Math.floor(num * 100) / 100;
-  return truncated.toFixed(2);
+  const fixed = num.toFixed(2);
+  // Remove trailing zeros after the decimal point
+  return fixed.replace(/\.?0+$/, '');
 }

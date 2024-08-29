@@ -19,8 +19,8 @@
   let error: string | null = null;
 
   onMount(() => {
-    const cutLat = lat.toFixed(2);
-    const cutLng = lng.toFixed(2);
+    const cutLat = cutToTwoDecimals(lat);
+    const cutLng = cutToTwoDecimals(lng);
     const url = `https://geometa-info-service.i-a38.workers.dev/?coordinates=${cutLat},${cutLng}`;
 
     GM_xmlhttpRequest({
