@@ -669,6 +669,35 @@
       init(this, options, instance$1, create_fragment$1, safe_not_equal, { countryName: 0 });
     }
   }
+  function waitForElement(selector) {
+    return new Promise((resolve) => {
+      const existingElement = document.querySelector(selector);
+      if (existingElement) {
+        resolve(existingElement);
+        return;
+      }
+      const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (mutation.type === "childList") {
+            const element2 = document.querySelector(selector);
+            if (element2) {
+              observer.disconnect();
+              resolve(element2);
+              return;
+            }
+          }
+        }
+      });
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
+    });
+  }
+  function cutToTwoDecimals(num) {
+    const truncated = Math.floor(num * 100) / 100;
+    return truncated.toFixed(2);
+  }
   function get_each_context(ctx, list, i) {
     const child_ctx = ctx.slice();
     child_ctx[4] = list[i];
@@ -1034,9 +1063,9 @@
     let geoInfo = null;
     let error = null;
     onMount(() => {
-      const roundedLat = lat.toFixed(2);
-      const roundedLng = lng.toFixed(2);
-      const url = `https://geometa-info-service.i-a38.workers.dev/?coordinates=${roundedLat},${roundedLng}`;
+      const cutLat = cutToTwoDecimals(lat);
+      const cutLng = cutToTwoDecimals(lng);
+      const url = `https://geometa-info-service.i-a38.workers.dev/?coordinates=${cutLat},${cutLng}`;
       _GM_xmlhttpRequest({
         method: "GET",
         url,
@@ -1070,31 +1099,6 @@
       super();
       init(this, options, instance, create_fragment, safe_not_equal, { lat: 2, lng: 3 });
     }
-  }
-  function waitForElement(selector) {
-    return new Promise((resolve) => {
-      const existingElement = document.querySelector(selector);
-      if (existingElement) {
-        resolve(existingElement);
-        return;
-      }
-      const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-          if (mutation.type === "childList") {
-            const element2 = document.querySelector(selector);
-            if (element2) {
-              observer.disconnect();
-              resolve(element2);
-              return;
-            }
-          }
-        }
-      });
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-    });
   }
   const GeoGuessrEventFramework = _unsafeWindow.GeoGuessrEventFramework;
   const metaMapId = "66c0d3feff4dbe492e06174e";

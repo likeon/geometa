@@ -3,6 +3,7 @@
   import {GM_xmlhttpRequest} from '$';
   import Spinner from "./lib/Spinner.svelte";
   import CountryFlag from "./lib/CountryFlag.svelte";
+  import {cutToTwoDecimals} from "./lib/utils";
 
   export let lat: number = 0;
   export let lng: number = 0;
@@ -18,9 +19,9 @@
   let error: string | null = null;
 
   onMount(() => {
-    const roundedLat = lat.toFixed(2);
-    const roundedLng = lng.toFixed(2);
-    const url = `https://geometa-info-service.i-a38.workers.dev/?coordinates=${roundedLat},${roundedLng}`;
+    const cutLat = cutToTwoDecimals(lat);
+    const cutLng = cutToTwoDecimals(lng);
+    const url = `https://geometa-info-service.i-a38.workers.dev/?coordinates=${cutLat},${cutLng}`;
 
     GM_xmlhttpRequest({
       method: 'GET',

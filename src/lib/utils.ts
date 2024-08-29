@@ -27,3 +27,8 @@ export function waitForElement(selector: string): Promise<Element> {
     });
   });
 }
+
+export function cutToTwoDecimals(num: number): string {
+  const truncated = Math.floor(num * 100) / 100;
+  return truncated.toFixed(2);
+}
