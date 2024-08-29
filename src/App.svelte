@@ -81,9 +81,8 @@
     background: var(--ds-color-purple-100);
     padding: 6px 10px;
     border-radius: 5px;
-    font-size: 12px;
-    opacity: 0.75;
-    width: min(25%, 500px);
-    max-width: min(25%, 500px);
+    font-size: 17px;
+    width: min(33%, 700px);
+    max-width: min(33%, 700px);
   }
 </style>
