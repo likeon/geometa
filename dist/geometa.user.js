@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.2
+// @version      0.3
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta map
 // @icon         https://www.google.com/s2/favicons?domain=geoguessr.com
@@ -499,12 +499,14 @@
       "China": "cn",
       "Colombia": "co",
       "Comoros": "km",
-      "Congo (Congo-Brazzaville)": "cg",
+      "Congo": "cg",
       "Costa Rica": "cr",
       "Croatia": "hr",
       "Cuba": "cu",
+      "Curacao": "cw",
       "Cyprus": "cy",
-      "Czechia (Czech Republic)": "cz",
+      "Czechia": "cz",
+      "Christmas Island": "cx",
       "Democratic Republic of the Congo": "cd",
       "Denmark": "dk",
       "Djibouti": "dj",
@@ -516,7 +518,7 @@
       "Equatorial Guinea": "gq",
       "Eritrea": "er",
       "Estonia": "ee",
-      'Eswatini (fmr. "Swaziland")': "sz",
+      "Eswatini": "sz",
       "Ethiopia": "et",
       "Fiji": "fj",
       "Finland": "fi",
@@ -577,7 +579,7 @@
       "Montenegro": "me",
       "Morocco": "ma",
       "Mozambique": "mz",
-      "Myanmar (formerly Burma)": "mm",
+      "Myanmar": "mm",
       "Namibia": "na",
       "Nauru": "nr",
       "Nepal": "np",
@@ -587,7 +589,7 @@
       "Niger": "ne",
       "Nigeria": "ng",
       "North Korea": "kp",
-      "North Macedonia (formerly Macedonia)": "mk",
+      "North Macedonia": "mk",
       "Norway": "no",
       "Oman": "om",
       "Pakistan": "pk",
@@ -600,6 +602,7 @@
       "Philippines": "ph",
       "Poland": "pl",
       "Portugal": "pt",
+      "Puerto Rico": "pr",
       "Qatar": "qa",
       "Romania": "ro",
       "Russia": "ru",
@@ -647,6 +650,7 @@
       "United Arab Emirates": "ae",
       "United Kingdom": "gb",
       "United States of America": "us",
+      "United States": "us",
       "Uruguay": "uy",
       "Uzbekistan": "uz",
       "Vanuatu": "vu",
