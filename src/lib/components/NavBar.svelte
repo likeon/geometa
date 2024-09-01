@@ -12,7 +12,7 @@
   <NavHamburger  />
   <NavUl {activeUrl}>
     <NavLi href="/">Home</NavLi>
-    <NavLi href="/#content">How To</NavLi>
-    <NavLi href="/submit">Community Submissions</NavLi>
+    <NavLi href="/about">How To</NavLi>
+    <NavLi href="/submissions">Community Submissions</NavLi>
   </NavUl>
 </Navbar>

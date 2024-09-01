@@ -5,7 +5,7 @@
 
 <div class="app">
 	<NavBar />
-	<main class="mt-[70px]">
+	<main>
 		<slot />
 	</main>
 </div>
