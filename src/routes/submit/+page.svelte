@@ -1,14 +1,11 @@
-<script lang="ts">
-  import HeroSection from '$lib/components/HeroSection.svelte';
-	import { Heading } from 'flowbite-svelte';
+<script>
+import { Heading } from 'flowbite-svelte';
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<title>Community Submissions</title>
 </svelte:head>
 
-<HeroSection />
 <div id="content" class="bg-white px-6 py-10 lg:px-8">
   <div class="mx-auto max-w-3xl text-base leading-7 text-gray-700">
     <p class="text-base font-semibold leading-7 text-blue-500">Introducing</p>

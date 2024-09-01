@@ -2,6 +2,7 @@
   import background from '$lib/assets/background.jpg?enhanced';
   import video from '$lib/assets/1.webm';
   import GeoIcon from '~icons/wpf/geo-fence'
+  import { Button } from 'flowbite-svelte';
 </script>
 
 <div class="bg-cover bg-center bg-no-repeat relative isolate overflow-hidden bg-white">
@@ -12,8 +13,7 @@
       <GeoIcon style="color: dodgerblue" width="2rem" height="2rem"/>
       <h1  style="text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.75);" class="mt-10 text-4xl font-bold tracking-tight text-white sm:text-6xl">New way to learn <span class="whitespace-nowrap">Geo Guessing</span></h1>
       <div class="mt-10 flex items-center gap-x-6">
-        <a href="#" class="rounded-md bg-blue-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Get started</a>
-        <a href="#" class="text-sm font-semibold leading-6 text-white">Learn more <span aria-hidden="true">→</span></a>
+        <Button href="#content" color="blue">Learn more</Button>
       </div>
     </div>
     <div class="mx-auto mt-16 flex max-w-2xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-xl lg:flex-none xl:ml-32">
