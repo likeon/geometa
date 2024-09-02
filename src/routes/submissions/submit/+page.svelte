@@ -30,6 +30,7 @@
 				<Textarea name="description" required rows={5} aria-invalid={$errors.description ? 'true' : undefined} bind:value={$form.description}  {...$constraints.description}/>
 			</Label>
 			<Checkbox bind:checked={leaderboardCheckbox}>Add me to the leaderboard</Checkbox>
+			<p class="text-gray-700 text-sm">Shows up on the leaderborad only after approval</p>
 			{#if leaderboardCheckbox}
 				<Label class="my-2 space-y-2">
 					<span>Nickname</span>

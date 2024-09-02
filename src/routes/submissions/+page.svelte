@@ -17,6 +17,7 @@
 			Submit a location to be added on the map!
 		</Button>
 		<h2 class="mt-3 text-xl text-green-600">Leaderboard</h2>
+		<p class="text-gray-700 text-sm">Includes only approved submissions</p>
 		<div class="mt-2 flow-root">
 			<div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
 				<div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
