@@ -7,7 +7,7 @@
 
 <div class="bg-cover bg-center bg-no-repeat relative isolate overflow-hidden min-h-screen">
 <!--  <div style="background-image: url('path/to/your/image.jpg');" class="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]" aria-hidden="true"></div>-->
-  <enhanced:img src={background} class="absolute inset-0 -z-10 h-full w-full object-cover object-center" />
+  <enhanced:img src={background} alt="background" class="absolute inset-0 -z-10 h-full w-full object-cover object-center" />
   <div class="items-center mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-40">
     <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
 <!--      <GeoIcon style="color: dodgerblue" width="2rem" height="2rem"/>-->
