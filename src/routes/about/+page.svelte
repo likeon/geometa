@@ -34,14 +34,14 @@
 		<Heading tag="h4" class="mt-4 mb-[-20px]">Here's how to do it</Heading>
 		<ul role="list" class="mt-8 max-w-xl space-y-4 text-gray-600">
 			<li class="flex gap-x-3">
-				<Icon icon="icon-park-solid:check-one" width="2rem" height="2rem" color="blue" />
+				<Icon icon="icon-park-solid:check-one" color="blue" class="h-6 w-6 flex-shrink-0" />
 				<span><strong class="font-semibold text-gray-900">Install the Browser Extension.</strong> First, you need to
 					install a userscript manager extension for your browser. Tampermonkey is available for
 					<a href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" target="_blank">Chrome</a> or
 					<a href="https://addons.mozilla.org/firefox/addon/tampermonkey" target="_blank">Firefox</a>.</span>
 			</li>
 			<li class="flex gap-x-3">
-				<Icon icon="icon-park-solid:check-one" width="2rem" height="2rem" color="blue" />
+				<Icon icon="icon-park-solid:check-one" color="blue" class="h-6 w-6 flex-shrink-0"/>
 				<span><strong class="font-semibold text-gray-900">Install the Userscript.</strong>
 				Once you have the extension installed, you can install the userscript by clicking <a href="https://github.com/likeon/geometa/raw/main/dist/geometa.user.js" target="_blank">this link</a>.</span>
 			</li>
@@ -52,19 +52,19 @@
 			You'll need to manually copy the Google Street View URL into the sheet to retrieve the information.</p>
 		<ul role="list" class="mt-8 max-w-xl space-y-4 text-gray-600">
 			<li class="flex gap-x-3">
-				<Icon icon="icon-park-solid:check-one" width="2rem" height="2rem" color="blue" />
+				<Icon icon="icon-park-solid:check-one" color="blue" class="h-6 w-6 flex-shrink-0" />
 				<span><strong class="font-semibold text-gray-900">Copy the Google Sheet so you can modify it.</strong> Open the <a
 					href="https://docs.google.com/spreadsheets/d/1cQnat5d9DxDX-swSOIZYHdnsnw-b9mBQpa-GA3WQOTU" target="_blank">the spreadsheet</a>
 				and click File -> Make a copy.</span>
 			</li>
 			<li class="flex gap-x-3">
-				<Icon icon="icon-park-solid:check-one" width="2rem" height="2rem" color="blue" />
+				<Icon icon="icon-park-solid:check-one" class="h-6 w-6 flex-shrink-0" color="blue" />
 				<span><strong class="font-semibold text-gray-900">Play the map.</strong>
 				Guess a location on <a href="https://www.geoguessr.com/maps/66c0d3feff4dbe492e06174e">the map</a>. On the result
 					screen click on the location marker to open Google Street View.</span>
 			</li>
 			<li class="flex gap-x-3">
-				<Icon icon="icon-park-solid:check-one" width="2rem" height="2rem" color="blue" />
+				<Icon icon="icon-park-solid:check-one" class="h-6 w-6 flex-shrink-0" color="blue" />
 				<span><strong class="font-semibold text-gray-900">Copy the url.</strong>
 				Copy the Google Street View url into the main page of your spreadsheet copy, to the right of the column named "Enter Link".</span>
 			</li>
