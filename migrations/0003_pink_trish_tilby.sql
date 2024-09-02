@@ -1,0 +1,1 @@
+ALTER TABLE `meta_suggestions` ADD `status` text DEFAULT 'new';

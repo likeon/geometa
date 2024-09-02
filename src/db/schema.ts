@@ -22,3 +22,12 @@ export const metaEntryTags = sqliteTable('meta_entries_tags', {
 	entry: integer('entry_id').notNull().references(() => metaEntries.id),
 	tag: integer('tag_id').notNull().references(() => metaTags.id),
 });
+
+export const metaSuggestions = sqliteTable('meta_suggestions', {
+	id: integer('id').primaryKey(),
+	secret: text('secret').notNull(),
+	url: text('url').notNull(),
+	description: text('description').notNull(),
+	author_nickname: text('author_nickname'),
+	status: text('status').default('new'),
+});
