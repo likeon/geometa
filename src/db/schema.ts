@@ -31,3 +31,31 @@ export const metaSuggestions = sqliteTable('meta_suggestions', {
 	author_nickname: text('author_nickname'),
 	status: text('status').default('new'),
 });
+
+export const maps = sqliteTable(
+	'maps',
+	{
+		id: integer('id').primaryKey(),
+		name: text('name').notNull(),
+		geoguessrId: text('geoguessr_id').notNull(),
+	},
+	(maps) => ({
+		nameIdx: uniqueIndex('maps_nameIdx').on(maps.name),
+		geoguessrIdx: uniqueIndex('maps_geoguessrIdx').on(maps.geoguessrId),
+	})
+);
+
+export const mapMetas = sqliteTable(
+	'mapMetas',
+	{
+		id: integer('id').primaryKey(),
+		mapId: integer('map_id').notNull().references(() => maps.id),
+		type: text('type').notNull(),
+		note: text('note').notNull(),
+		imageUrl: text('image_url'),
+		detailUrl: text('detail_url'),
+	},
+	(mapMeta) => ({
+		metaUniqueIdx: uniqueIndex('mapmetas_UniqueIdx').on(mapMeta.mapId, mapMeta.type)
+	})
+);
