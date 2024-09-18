@@ -17,11 +17,10 @@
 			specific clues, but by the time those clues appeared again, they had already forgotten them. To help with this, I
 			created a map highlighting the most common "metas" - anything from landscapes, bollards, and signs to unique
 			Google Street View cars that are useful to learn at the beginning.</p>
-		<p>While there might be other maps like this available, mine includes a Google Sheet that explains
-			each round and
-			highlights the clues you might have missed that could help you identify the country. You can simply post the
-			location link in the google sheet, and it will tell you what you missed, or you can use a script that shows a note
-			about the location after you make your guess in GeoGuessr.
+		<p>While there might be other maps like this available, mine includes a script that shows a note about the location 
+			after you make your guess in GeoGuessr, explaining each round and highlighting the clues you might 
+			have missed that could help you identify the country. Alternatively, as a backup, you can post 
+			the location link in the Google Sheet, and it will tell you what you missed.
 			The map is designed for No Move/NMPZ (for the rounds with google car meta will be harder because it won't be fully
 			visible but, it’s easily doable).
 		</p>
