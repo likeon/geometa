@@ -13,6 +13,6 @@
   <NavUl {activeUrl}>
     <NavLi href="/">Home</NavLi>
     <NavLi href="/about">How To</NavLi>
-    <NavLi href="/submissions">Community Submissions</NavLi>
+    <!-- <NavLi href="/submissions">Community Submissions</NavLi> -->
   </NavUl>
 </Navbar>
