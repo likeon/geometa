@@ -1,5 +1,5 @@
 import { createInsertSchema } from 'drizzle-zod';
-import { metaSuggestions } from '$db/schema';
+import { metaSuggestions } from '$lib/db/schema';
 import { fail } from '@sveltejs/kit';
 import { message, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';

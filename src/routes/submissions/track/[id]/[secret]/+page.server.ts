@@ -1,5 +1,5 @@
 import { db } from '$lib/drizzle';
-import { metaSuggestions } from '$db/schema';
+import { metaSuggestions } from '$lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 
