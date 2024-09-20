@@ -1104,6 +1104,12 @@
       init(this, options, instance, create_fragment, safe_not_equal, { lat: 2, lng: 3 });
     }
   }
+  function changelog() {
+    return { "0.4": "Updated GeoGuessr Event Framework version. Fixes the disappearing daily challenge from GeoGuessr home page." };
+  }
+  if (_unsafeWindow.notAValidVariable) {
+    console.log(changelog());
+  }
   const GeoGuessrEventFramework = _unsafeWindow.GeoGuessrEventFramework;
   const metaMapId = "66c0d3feff4dbe492e06174e";
   GeoGuessrEventFramework.init().then(() => {

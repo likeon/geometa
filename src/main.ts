@@ -3,8 +3,14 @@ import {waitForElement} from './lib/utils'
 
 import {unsafeWindow} from "$";
 
-const changelog = {
-  '0.4': 'Updated GeoGuessr Event Framework version. Fixes the disappearing daily challenge from GeoGuessr home page.'
+function changelog() {
+  return {'0.4': 'Updated GeoGuessr Event Framework version. Fixes the disappearing daily challenge from GeoGuessr home page.'}
+}
+
+//@ts-ignore
+// so changelog doesn't get removed from the final script
+if (unsafeWindow.notAValidVariable) {
+  console.log(changelog());
 }
 
 //@ts-ignore
