@@ -7,7 +7,7 @@
 	<title>How To</title>
 </svelte:head>
 
-<div id="content" class="bg-white px-6 py-10 lg:px-8 mt-[70px]">
+<div id="content" class="container bg-white px-6 py-10 lg:px-8 mt-[70px]">
 	<div class="mx-auto max-w-3xl text-base leading-7 text-gray-700">
 		<p class="text-base font-semibold leading-7 text-green-500">Introducing</p>
 		<Heading tag="h1">A Learnable Meta World map</Heading>
@@ -17,9 +17,9 @@
 			specific clues, but by the time those clues appeared again, they had already forgotten them. To help with this, I
 			created a map highlighting the most common "metas" - anything from landscapes, bollards, and signs to unique
 			Google Street View cars that are useful to learn at the beginning.</p>
-		<p>While there might be other maps like this available, mine includes a script that shows a note about the location 
-			after you make your guess in GeoGuessr, explaining each round and highlighting the clues you might 
-			have missed that could help you identify the country. Alternatively, as a backup, you can post 
+		<p>While there might be other maps like this available, mine includes a script that shows a note about the location
+			after you make your guess in GeoGuessr, explaining each round and highlighting the clues you might
+			have missed that could help you identify the country. Alternatively, as a backup, you can post
 			the location link in the Google Sheet, and it will tell you what you missed.
 			The map is designed for No Move/NMPZ (for the rounds with google car meta will be harder because it won't be fully
 			visible but, it’s easily doable).
@@ -32,20 +32,27 @@
 		</p>
 		<Heading tag="h4" class="mt-4 mb-[-20px]">Here's how to do it</Heading>
 		<ul role="list" class="mt-8 max-w-xl space-y-4 text-gray-600">
+			<li>
+				<div class="flex gap-x-3">
+					<Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
+					<span><strong class="font-semibold text-gray-900">Install the Browser Extension.</strong> First, you need to
+					install a userscript manager extension for your browser. Tampermonkey is available for
+					<a href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo"
+						 target="_blank">Chrome</a>* or
+					<a href="https://addons.mozilla.org/firefox/addon/tampermonkey" target="_blank">Firefox</a>.</span></div>
+				<p class="text-gray-600 ml-9 italic">* - Chrome: <a href="https://www.tampermonkey.net/faq.php?locale=en#Q209"
+																														target="_blank">Enable developer mode</a> in extensions to
+					ensure Tampermonkey works properly</p>
+			</li>
 			<li class="flex gap-x-3">
 				<Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
-				<span><strong class="font-semibold text-gray-900">Install the Browser Extension.</strong> First, you need to
-					install a userscript manager extension for your browser. Tampermonkey is available for
-					<a href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo" target="_blank">Chrome</a> or
-					<a href="https://addons.mozilla.org/firefox/addon/tampermonkey" target="_blank">Firefox</a>.</span>
-			</li>
-			<li class="flex gap-x-3">
-				<Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0"/>
 				<span><strong class="font-semibold text-gray-900">Install the Userscript.</strong>
-				Once you have the extension installed, you can install the userscript by clicking <a href="https://github.com/likeon/geometa/raw/main/dist/geometa.user.js" target="_blank">this link</a>.</span>
+				Once you have the extension installed, you can install the userscript by clicking <a
+						href="https://github.com/likeon/geometa/raw/main/dist/geometa.user.js" target="_blank">this link</a>.</span>
 			</li>
 		</ul>
-		<p>The userscript is fully open-source and <a href="https://github.com/likeon/geometa" target="_blank">available on GitHub</a>.</p>
+		<p>The userscript is fully open-source and <a href="https://github.com/likeon/geometa" target="_blank">available on
+			GitHub</a>.</p>
 		<Heading tag="h4" class="mt-4 mb-[-10px]">An alternative way</Heading>
 		<p>If, for any reason, you prefer not to use the script, you can opt for a Google Sheet instead.
 			You'll need to manually copy the Google Street View URL into the sheet to retrieve the information.</p>
@@ -69,11 +76,13 @@
 			</li>
 		</ul>
 
+		<p class="font-semibold">If you have any questions or feedback you can join <a href="https://discord.gg/trausi" target="_blank">my discord server</a> and type in #geoguessr channel.</p>
+
 	</div>
 </div>
 
 <style lang="postcss">
-	p {
-			@apply mt-4;
-	}
+    p {
+        @apply mt-4;
+    }
 </style>
