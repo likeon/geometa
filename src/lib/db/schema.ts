@@ -1,4 +1,5 @@
 import { text, integer, sqliteTable, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { relations } from 'drizzle-orm';
 
 export const metaTags = sqliteTable(
 	'meta_tags',
@@ -45,6 +46,10 @@ export const maps = sqliteTable(
 	})
 );
 
+export const mapsRelations = relations(maps, ({ many }) => ({
+  metas: many(mapMetas),
+}));
+
 export const mapMetas = sqliteTable(
 	'mapMetas',
 	{
@@ -52,10 +57,14 @@ export const mapMetas = sqliteTable(
 		mapId: integer('map_id').notNull().references(() => maps.id),
 		type: text('type').notNull(),
 		note: text('note').notNull(),
-		imageUrl: text('image_url'),
-		detailUrl: text('detail_url'),
+		noteFromPlonkit: integer('note_from_plonkit', { mode: 'boolean' }).notNull().default(false),
+		hasImage: integer('has_image', { mode: 'boolean' }).notNull().default(false),
 	},
 	(mapMeta) => ({
 		metaUniqueIdx: uniqueIndex('mapmetas_UniqueIdx').on(mapMeta.mapId, mapMeta.type)
 	})
 );
+
+export const mapMetasRelations = relations(mapMetas, ({ one }) => ({
+  map: one(maps, { fields: [mapMetas.mapId], references: [maps.id] }),
+}));

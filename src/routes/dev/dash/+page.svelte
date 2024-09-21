@@ -5,30 +5,13 @@
 </script>
 
 <svelte:head>
-	<title>Entries</title>
+	<title>Maps</title>
 </svelte:head>
 
-<div>
-	<table>
-		<thead>
-		<tr>
-			<th>Tags</th>
-			<th>Type</th>
-			<th>Description</th>
-		</tr>
-		</thead>
-		<tbody>
-		{#each data.entries as entry }
-			<tr>
-				<td>
-					{#each JSON.parse(entry.tagsJSON) as parsedTag, index }
-						{#if index !== 0}, {/if}{parsedTag.tagName}
-					{/each}
-				</td>
-				<td>{entry.type}</td>
-				<td>{entry.description}</td>
-			</tr>
-		{/each}
-		</tbody>
-	</table>
-</div>
+<ul>
+	{#each data.maps as map}
+		<li>
+			<a href="/dev/dash/maps/{map.id}">{map.name}</a>
+		</li>
+	{/each}
+</ul>

@@ -24,6 +24,10 @@ export default {
 					800: '#166534',
 					900: '#14532D'
 				}
+			},
+			container: {
+				center: true,
+				padding: '1rem'
 			}
 		}
 	},

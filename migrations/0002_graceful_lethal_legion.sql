@@ -1,1 +1,0 @@
-ALTER TABLE `meta_suggestions` ADD `secret` text NOT NULL;
