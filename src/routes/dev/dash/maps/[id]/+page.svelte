@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Checkbox, Input, Label, Modal, Textarea, Toggle } from 'flowbite-svelte';
+  import { Alert, Button, Checkbox, Input, Label, Modal, Textarea, Toggle } from 'flowbite-svelte';
   import { superForm } from 'sveltekit-superforms';
 
   export let data;
