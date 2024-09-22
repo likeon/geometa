@@ -28,6 +28,8 @@
         fully
         visible but, it’s easily doable).
       </p>
+
+      <div class="text-center"><a href="https://www.geoguessr.com/maps/66c0d3feff4dbe492e06174e" class="font-bold text-3xl">Map on GeoGuessr</a></div>
       <Heading tag="h2" class="mt-4 mb-[-10px]">How to use</Heading>
       <p>
         To get helpful hints in GeoGuessr, you'll need a browser extension that allows you to run userscripts, such as
