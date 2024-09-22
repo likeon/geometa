@@ -1,3 +1,3 @@
-<div class="container mt-[90px]">
+<div class="container">
 	<slot />
 </div>

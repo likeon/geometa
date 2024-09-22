@@ -6,7 +6,7 @@
   $: activeUrl = $page.url.pathname;
 </script>
 
-<Navbar class="px-2 sm:px-4 py-2.5 fixed w-full z-20 top-0 start-0 border-b" >
+<Navbar class="px-2 sm:px-4 py-2.5 w-full border-b" >
   <NavBrand href="/" class="text-gray-700">
     <enhanced:img src={logo} class="h-6 sm:h-9 w-auto" alt="Logo" />
     <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">LearnableMeta</span>

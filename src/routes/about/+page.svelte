@@ -7,7 +7,7 @@
   <title>How To</title>
 </svelte:head>
 
-<div id="content" class="container bg-white px-6 py-10 lg:px-8 mt-[70px]">
+<div id="content" class="container bg-white px-6 py-10 lg:px-8">
   <div class="mx-auto max-w-3xl text-base leading-7 text-gray-700">
     <div class="main-content">
       <p class="text-base font-semibold leading-7 text-green-500">Introducing</p>
