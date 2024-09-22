@@ -3,8 +3,7 @@
 </script>
 
 <svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<title>Learnable Meta - New way to learn Geo Guessing</title>
 </svelte:head>
 
 <HeroSection />
