@@ -55,13 +55,14 @@ export const mapMetas = sqliteTable(
 	{
 		id: integer('id').primaryKey(),
 		mapId: integer('map_id').notNull().references(() => maps.id),
-		type: text('type').notNull(),
+		tagName: text('tag_name').notNull(),
+		name: text('name').notNull(),
 		note: text('note').notNull(),
 		noteFromPlonkit: integer('note_from_plonkit', { mode: 'boolean' }).notNull().default(false),
 		hasImage: integer('has_image', { mode: 'boolean' }).notNull().default(false),
 	},
 	(mapMeta) => ({
-		metaUniqueIdx: uniqueIndex('mapmetas_UniqueIdx').on(mapMeta.mapId, mapMeta.type)
+		metaUniqueIdx: uniqueIndex('mapmetas_UniqueIdx').on(mapMeta.mapId, mapMeta.tagName)
 	})
 );
 

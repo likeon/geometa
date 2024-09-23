@@ -1,7 +1,8 @@
 CREATE TABLE `mapMetas` (
 	`id` integer PRIMARY KEY NOT NULL,
 	`map_id` integer NOT NULL,
-	`type` text NOT NULL,
+	`tag_name` text NOT NULL,
+	`name` text NOT NULL,
 	`note` text NOT NULL,
 	`note_from_plonkit` integer DEFAULT false NOT NULL,
 	`has_image` integer DEFAULT false NOT NULL,
@@ -42,7 +43,7 @@ CREATE TABLE `meta_tags` (
 	`name` text NOT NULL
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `mapmetas_UniqueIdx` ON `mapMetas` (`map_id`,`type`);--> statement-breakpoint
+CREATE UNIQUE INDEX `mapmetas_UniqueIdx` ON `mapMetas` (`map_id`,`tag_name`);--> statement-breakpoint
 CREATE UNIQUE INDEX `maps_nameIdx` ON `maps` (`name`);--> statement-breakpoint
 CREATE UNIQUE INDEX `maps_geoguessrIdx` ON `maps` (`geoguessr_id`);--> statement-breakpoint
 CREATE UNIQUE INDEX `nameIdx` ON `meta_tags` (`name`);

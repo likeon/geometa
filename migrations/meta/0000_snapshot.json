@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "4d32f802-c819-4ee5-9a3c-7a41b70ae712",
+  "id": "4f5ea95c-2f4f-43c4-bfc7-9552164f8a65",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "mapMetas": {
@@ -21,8 +21,15 @@
           "notNull": true,
           "autoincrement": false
         },
-        "type": {
-          "name": "type",
+        "tag_name": {
+          "name": "tag_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -57,7 +64,7 @@
           "name": "mapmetas_UniqueIdx",
           "columns": [
             "map_id",
-            "type"
+            "tag_name"
           ],
           "isUnique": true
         }
