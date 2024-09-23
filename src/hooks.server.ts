@@ -1,8 +1,7 @@
 import type { Handle } from '@sveltejs/kit';
 
 export const handle: Handle = async ({ event, resolve }) => {
-  // Check if the request URL starts with /dev
-  if (event.url.pathname.startsWith('/dev')) {
+  if (event.url.pathname.startsWith('/dev/dash')) {
     const auth = event.request.headers.get('Authorization');
     if (auth) {
       const [scheme, encoded] = auth.split(' ');
