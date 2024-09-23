@@ -1,5 +1,5 @@
 <script>
-	import '../app.css';
+	import '../../app.css';
 	import NavBar from '$lib/components/NavBar.svelte';
   import { dev } from '$app/environment';
 </script>
@@ -11,7 +11,7 @@
 </svelte:head>
 
 <div class="app">
-	<NavBar />
+	<NavBar admin={false} />
 	<main>
 		<slot />
 	</main>
