@@ -6,6 +6,13 @@
   export let data;
   type MetaType = typeof data.map.metas[number];
   let isModalOpen = false;
+  let searchText = '';
+
+  $: filteredMetas = data.map.metas.filter(item =>
+    item.name.toLowerCase().includes(searchText.toLowerCase()) ||
+    item.tagName.toLowerCase().includes(searchText.toLowerCase())
+  );
+
   const { form, errors, constraints, enhance } = superForm(data.form, {
     onResult() {
       isModalOpen = false;
@@ -47,7 +54,10 @@
       </Button>
     </div>
   </div>
-  <div class="mt-8 flow-root">
+  <div class="w-1/3">
+    <Input type="text" placeholder="Search..." autocomplete="off" bind:value={searchText} />
+  </div>
+  <div class="mt-3 flow-root">
     <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
       <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
         <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
@@ -67,7 +77,7 @@
             </tr>
             </thead>
             <tbody class="divide-y divide-gray-400">
-            {#each data.map.metas as meta (meta.id) }
+            {#each filteredMetas as meta (meta.id) }
               <tr role="link" on:click={() => selectMeta(meta)}>
                 <td>{meta.tagName}</td>
                 <td>{meta.name}</td>
