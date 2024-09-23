@@ -1,6 +1,4 @@
-// src/hooks.server.ts
 import type { Handle } from '@sveltejs/kit';
-import { Buffer } from 'buffer';
 
 export const handle: Handle = async ({ event, resolve }) => {
   // Check if the request URL starts with /dev
@@ -10,7 +8,8 @@ export const handle: Handle = async ({ event, resolve }) => {
       const [scheme, encoded] = auth.split(' ');
 
       if (scheme === 'Basic' && encoded) {
-        const decoded = Buffer.from(encoded, 'base64').toString('utf-8');
+        // Decode from Base64
+        const decoded = atob(encoded);
         const [username, password] = decoded.split(':');
 
         const validUsername = 'hokkaido';
