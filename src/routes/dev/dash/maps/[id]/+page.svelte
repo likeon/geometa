@@ -1,6 +1,7 @@
 <script lang="ts">
   import { Alert, Button, Input, Label, Modal, Textarea } from 'flowbite-svelte';
   import { superForm } from 'sveltekit-superforms';
+  import Icon from '@iconify/svelte';
 
   export let data;
   type MetaType = typeof data.map.metas[number];
@@ -70,8 +71,16 @@
               <tr role="link" on:click={() => selectMeta(meta)}>
                 <td>{meta.tagName}</td>
                 <td>{meta.name}</td>
-                <td>{meta.noteFromPlonkit}</td>
-                <td>{meta.hasImage}</td>
+                <td>
+                  {#if meta.noteFromPlonkit}
+                    <Icon icon="ei:check" class="w-5 h-5" color="green" />
+                  {/if}
+                </td>
+                <td>
+                  {#if meta.hasImage}
+                    <Icon icon="ei:check" class="w-5 h-5" color="green" />
+                  {/if}
+                </td>
               </tr>
             {/each}
             </tbody>
