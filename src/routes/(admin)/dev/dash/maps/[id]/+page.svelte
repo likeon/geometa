@@ -70,8 +70,8 @@
             </colgroup>
             <thead class="bg-green-100">
             <tr class="m-10">
-              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Type</th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Note</th>
+              <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Tag name</th>
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Name</th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">From Plonkit</th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Has image</th>
             </tr>
