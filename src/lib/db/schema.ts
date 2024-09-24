@@ -1,28 +1,5 @@
-import { text, integer, sqliteTable, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { text, integer, sqliteTable, uniqueIndex, blob } from 'drizzle-orm/sqlite-core';
 import { relations } from 'drizzle-orm';
-
-export const metaTags = sqliteTable(
-	'meta_tags',
-	{
-		id: integer('id').primaryKey(),
-		name: text('name').notNull()
-	},
-	(metaTags) => ({
-		nameIdx: uniqueIndex('nameIdx').on(metaTags.name)
-	})
-);
-
-export const metaEntries = sqliteTable('meta_entries', {
-	id: integer('id').primaryKey(),
-	type: text('type').notNull(),
-	description: text('description').notNull()
-});
-
-export const metaEntryTags = sqliteTable('meta_entries_tags', {
-	id: integer('id').primaryKey(),
-	entry: integer('entry_id').notNull().references(() => metaEntries.id),
-	tag: integer('tag_id').notNull().references(() => metaTags.id),
-});
 
 export const metaSuggestions = sqliteTable('meta_suggestions', {
 	id: integer('id').primaryKey(),
@@ -33,39 +10,54 @@ export const metaSuggestions = sqliteTable('meta_suggestions', {
 	status: text('status').default('new'),
 });
 
-export const maps = sqliteTable(
-	'maps',
+export const mapGroups = sqliteTable(
+	'map_groups',
 	{
 		id: integer('id').primaryKey(),
 		name: text('name').notNull(),
-		geoguessrId: text('geoguessr_id').notNull(),
-	},
-	(maps) => ({
-		nameIdx: uniqueIndex('maps_nameIdx').on(maps.name),
-		geoguessrIdx: uniqueIndex('maps_geoguessrIdx').on(maps.geoguessrId),
-	})
+    data: blob('data'),
+	}
 );
 
-export const mapsRelations = relations(maps, ({ many }) => ({
-  metas: many(mapMetas),
+export const mapGroupsRelations = relations(mapGroups, ({ many }) => ({
+  metas: many(metas),
+  maps: many(maps),
 }));
 
-export const mapMetas = sqliteTable(
-	'mapMetas',
+export const metas = sqliteTable(
+	'metas',
 	{
 		id: integer('id').primaryKey(),
-		mapId: integer('map_id').notNull().references(() => maps.id),
+		mapGroupId: integer('map_group_id').notNull().references(() => mapGroups.id),
 		tagName: text('tag_name').notNull(),
 		name: text('name').notNull(),
 		note: text('note').notNull(),
 		noteFromPlonkit: integer('note_from_plonkit', { mode: 'boolean' }).notNull().default(false),
 		hasImage: integer('has_image', { mode: 'boolean' }).notNull().default(false),
+    level: integer('level').notNull().default(10)
 	},
-	(mapMeta) => ({
-		metaUniqueIdx: uniqueIndex('mapmetas_UniqueIdx').on(mapMeta.mapId, mapMeta.tagName)
+	(t) => ({
+		metaUnique: uniqueIndex('metas_unique').on(t.mapGroupId, t.tagName)
 	})
 );
+export const metasRelations = relations(metas, ({ one }) => ({
+  mapGroup: one(mapGroups, { fields: [metas.mapGroupId], references: [mapGroups.id] }),
+}));
 
-export const mapMetasRelations = relations(mapMetas, ({ one }) => ({
-  map: one(maps, { fields: [mapMetas.mapId], references: [maps.id] }),
+export const maps = sqliteTable(
+	'maps',
+	{
+		id: integer('id').primaryKey(),
+    mapGroupId: integer('map_group_id').notNull().references(() => mapGroups.id),
+		name: text('name').notNull(),
+		geoguessrId: text('geoguessr_id').notNull(),
+    filters: blob('filters'),
+	},
+	(t) => ({
+		nameUnique: uniqueIndex('maps_name_unique').on(t.name),
+		geoguessrIdUnique: uniqueIndex('maps_geoguessr_id_unique').on(t.geoguessrId),
+	})
+);
+export const mapsRelations = relations(maps, ({ one }) => ({
+  mapGroup: one(mapGroups, { fields: [maps.mapGroupId], references: [mapGroups.id] }),
 }));
