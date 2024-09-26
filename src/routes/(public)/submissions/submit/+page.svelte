@@ -3,7 +3,7 @@
 	import { superForm } from 'sveltekit-superforms';
 
 	export let data;
-	const { form, errors, constraints, message } = superForm(data.form);
+	const { metaForm, errors, constraints, message } = superForm(data.metaForm);
 	let leaderboardCheckbox = false;
 </script>
 
@@ -18,26 +18,26 @@
 			<Alert>Thank you for contributing! You can track the status of your submission <a href="/submissions/track/{$message.id}/{$message.secret}">via this link</a></Alert>
 		{/if}
 		<h1 class="text-3xl">Submit location</h1>
-		<form method="POST">
+		<metaForm method="POST">
 			<Label class="my-2 space-y-2">
       <span>Google Street View
 						url</span>
-				<Input type="text" name="url" autocomplete="off" aria-invalid={$errors.url ? 'true' : undefined} bind:value={$form.url} {...$constraints.url} />
+				<Input type="text" name="url" autocomplete="off" aria-invalid={$errors.url ? 'true' : undefined} bind:value={$metaForm.url} {...$constraints.url} />
 				{#if $errors.url}<Alert color="red">{$errors.url}</Alert>{/if}
 			</Label>
 			<Label class="my-2 space-y-2">
 				<span>Describe the meta</span>
-				<Textarea name="description" required rows={5} aria-invalid={$errors.description ? 'true' : undefined} bind:value={$form.description}  {...$constraints.description}/>
+				<Textarea name="description" required rows={5} aria-invalid={$errors.description ? 'true' : undefined} bind:value={$metaForm.description}  {...$constraints.description}/>
 			</Label>
 			<Checkbox bind:checked={leaderboardCheckbox}>Add me to the leaderboard</Checkbox>
 			<p class="text-gray-700 text-sm">Shows up on the leaderborad only after approval</p>
 			{#if leaderboardCheckbox}
 				<Label class="my-2 space-y-2">
 					<span>Nickname</span>
-					<Input type="text" name="author_nickname" required aria-invalid={$errors.author_nickname ? 'true' : undefined} bind:value={$form.author_nickname}   {...$constraints.author_nickname}/>
+					<Input type="text" name="author_nickname" required aria-invalid={$errors.author_nickname ? 'true' : undefined} bind:value={$metaForm.author_nickname}   {...$constraints.author_nickname}/>
 				</Label>
 			{/if}
 			<Button type="submit" class="w-full mt-3">Submit</Button>
-		</form>
+		</metaForm>
 	</div>
 </div>

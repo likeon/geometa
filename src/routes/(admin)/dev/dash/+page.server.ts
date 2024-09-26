@@ -1,13 +1,35 @@
 import { db } from '$lib/drizzle';
 import type { PageServerLoad } from './$types';
-import { and, asc, eq, not } from 'drizzle-orm';
-import { metas, levels, metaLevels } from '$lib/db/schema';
+import { and, asc, eq, not, notInArray, sql, SQL } from 'drizzle-orm';
+import { metas, levels, metaLevels, mapGroupLocations } from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
 import { createInsertSchema } from 'drizzle-zod';
-import { superValidate } from 'sveltekit-superforms';
+import { setError, superValidate, withFiles } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
+import { extractJsonData } from '$lib/utils';
+
+const insertMetasSchema = createInsertSchema(metas).extend({ levels: z.array(z.number()) });
+const mapUploadSchema = z.object({
+	file: z.instanceof(File, { message: 'Please upload a file.' })
+});
+const mapJsonSchema = z.object({
+	customCoordinates: z
+		.object({
+			lat: z.number(),
+			lng: z.number(),
+			heading: z.number(),
+			pitch: z.number(),
+			zoom: z.number(),
+			extra: z.object({
+				tags: z.string().array().length(1),
+				panoId: z.string().optional(),
+				panoDate: z.string()
+			})
+		})
+		.array()
+});
 
 export const load: PageServerLoad = async () => {
 	const group = await db.query.mapGroups.findFirst({
@@ -24,19 +46,19 @@ export const load: PageServerLoad = async () => {
 	}
 	const levelList = await db.query.levels.findMany({ where: eq(levels.mapGroupId, group?.id) });
 
-	const form = await superValidate(zod(insertMetasSchema));
+	const metaForm = await superValidate(zod(insertMetasSchema));
+	const mapUploadForm = await superValidate(zod(mapUploadSchema));
 
 	return {
 		group,
-		form,
-		levelList
+		metaForm,
+		levelList,
+		mapUploadForm
 	};
 };
 
-const insertMetasSchema = createInsertSchema(metas).extend({ levels: z.array(z.number()) });
-
 export const actions = {
-	default: async ({ request }) => {
+	updateMeta: async ({ request }) => {
 		const form = await superValidate(request, zod(insertMetasSchema));
 
 		if (!form.valid) {
@@ -47,19 +69,75 @@ export const actions = {
 		form.data.hasImage = form.data.hasImage ?? false;
 
 		const { id, levels, ...dataNoId } = form.data;
-    console.debug(levels);
-    let metaId;
+		let metaId;
 
 		if (id === undefined) {
-			const insertResult = await db.insert(metas).values(form.data).returning({ insertedId: metas.id });
-      metaId = insertResult[0].insertedId;
+			const insertResult = await db
+				.insert(metas)
+				.values(form.data)
+				.returning({ insertedId: metas.id });
+			metaId = insertResult[0].insertedId;
 		} else {
 			await db.update(metas).set(dataNoId).where(eq(metas.id, id));
-      metaId = id;
+			metaId = id;
 		}
 
-    await db.delete(metaLevels).where(and(eq(metaLevels.metaId, metaId), not(inArray(metaLevels.levelId, levels))))
-    const levelsInsertValues = levels.map((levelId => ({'levelId': levelId, 'metaId': metaId})));
-    await db.insert(metaLevels).values(levelsInsertValues).onConflictDoNothing()
+		await db
+			.delete(metaLevels)
+			.where(and(eq(metaLevels.metaId, metaId), not(inArray(metaLevels.levelId, levels))));
+		const levelsInsertValues = levels.map((levelId) => ({ levelId: levelId, metaId: metaId }));
+		await db.insert(metaLevels).values(levelsInsertValues).onConflictDoNothing();
+	},
+	uploadMapJson: async ({ request }) => {
+		const form = await superValidate(request, zod(mapUploadSchema));
+
+		if (!form.valid) {
+			return fail(400, withFiles({ form }));
+		}
+
+		const jsonData = await extractJsonData(form.data.file);
+		const validationResult = mapJsonSchema.safeParse(jsonData);
+
+		if (!validationResult.success) {
+			return setError(form, 'file', "JSON doesn't match the expected format");
+		}
+
+		const upsertValues = validationResult.data.customCoordinates.map((location) => ({
+			mapGroupId: 1, // todo: get id properly
+			lat: location.lat,
+			lng: location.lng,
+			heading: location.heading,
+			pitch: location.pitch,
+			zoom: location.zoom,
+			extraTag: location.extra.tags[0],
+			extraPanoId: location.extra.panoId || null,
+			extraPanoDate: location.extra.panoDate
+		}));
+
+		const upsertResult = await db
+			.insert(mapGroupLocations)
+			.values(upsertValues)
+			.onConflictDoUpdate({
+				target: [mapGroupLocations.mapGroupId, mapGroupLocations.lat, mapGroupLocations.lng],
+				set: {
+					heading: sql`excluded.heading`,
+					pitch: sql`excluded.pitch`,
+					zoom: sql`excluded.zoom`,
+					extraTag: sql`excluded.extra_tag`,
+					extraPanoId: sql`excluded.extra_pano_id`,
+					extraPanoDate: sql`excluded.extra_pano_date`
+				}
+			})
+			.returning({ id: mapGroupLocations.id });
+
+		await db.delete(mapGroupLocations).where(
+			and(
+				eq(mapGroupLocations.id, 1), // todo: get id properly
+				notInArray(
+					mapGroupLocations.id,
+					upsertResult.map((item) => item.id)
+				)
+			)
+		);
 	}
 };

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `map_group_locations_unique` ON `map_group_locations` (`map_group_id`,`lat`,`lng`);

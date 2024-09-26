@@ -18,18 +18,29 @@ export const mapGroups = sqliteTable('map_groups', {
 export const mapGroupsRelations = relations(mapGroups, ({ many }) => ({
 	metas: many(metas),
 	maps: many(maps),
-	locations: many(mapGroupLocations),
+	locations: many(mapGroupLocations)
 }));
 
-export const mapGroupLocations = sqliteTable('map_group_locations', {
-	id: integer('id').primaryKey(),
-	mapGroupId: integer('map_group_id')
-		.notNull()
-		.references(() => mapGroups.id, { onDelete: 'cascade' }),
-	lat: real('lat'),
-	lng: real('lng'),
-	tag: text('tag')
-});
+export const mapGroupLocations = sqliteTable(
+	'map_group_locations',
+	{
+		id: integer('id').primaryKey(),
+		mapGroupId: integer('map_group_id')
+			.notNull()
+			.references(() => mapGroups.id, { onDelete: 'cascade' }),
+		lat: real('lat'),
+		lng: real('lng'),
+		heading: real('heading').notNull(),
+		pitch: real('pitch').notNull(),
+		zoom: integer('zoom').notNull(),
+		extraTag: text('extra_tag').notNull(),
+		extraPanoId: text('extra_pano_id'),
+		extraPanoDate: text('extra_pano_date').notNull()
+	},
+	(t) => ({
+		mapLocationUnique: uniqueIndex('map_group_locations_unique').on(t.mapGroupId, t.lat, t.lng)
+	})
+);
 export const mapGroupLocationsRelations = relations(mapGroupLocations, ({ one }) => ({
 	mapGroup: one(mapGroups, { fields: [mapGroupLocations.mapGroupId], references: [mapGroups.id] })
 }));
