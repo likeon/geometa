@@ -56,12 +56,23 @@
           <span><strong class="font-semibold text-gray-900">Install the Userscript.</strong>
 				Once you have the extension installed, you can install the userscript by clicking <a
               href="https://github.com/likeon/geometa/raw/main/dist/geometa.user.js"
-              target="_blank">this link</a>.</span>
+              target="_blank">this link</a>.
+              Make sure to open new window with geoguessr after installing the script for first time.
+              <p>The userscript is fully open-source and <a href="https://github.com/likeon/geometa" target="_blank">available
+                on
+                GitHub</a>.</p>
+            </span>
+              
+        </li>
+        
+        <li class="flex gap-x-3">
+          <Icon icon="icon-park-solid:check-one" class="h-6 w-6 flex-shrink-0" color="green" />
+          <span><strong class="font-semibold text-gray-900">Play the map.</strong>
+				Guess a location on <a href="https://www.geoguessr.com/maps/66c0d3feff4dbe492e06174e">the map</a>. On the results screen, 
+        a note will be displayed showing the meta that was in the round, in case you missed it.</span>
         </li>
       </ul>
-      <p>The userscript is fully open-source and <a href="https://github.com/likeon/geometa" target="_blank">available
-        on
-        GitHub</a>.</p>
+      
       <Heading tag="h4" class="mt-4 mb-[-10px]">An alternative way</Heading>
       <p>If, for any reason, you prefer not to use the script, you can opt for a Google Sheet instead.
         You'll need to manually copy the Google Street View URL into the sheet to retrieve the information.</p>
@@ -85,9 +96,9 @@
         </li>
       </ul>
 
-      <p class="font-semibold">If you have any questions or feedback you can join <a href="https://discord.gg/trausi"
-                                                                                     target="_blank">my discord
-        server</a> and type in #geoguessr channel.</p>
+      <p class="font-semibold">Feel free to join our <a href="https://discord.gg/AcXEWznYZe"
+                                                                                     target="_blank">discord
+        server</a> if you have any questions or feedback.</p>
     </div>
     <Heading tag="h3" class="mt-4">Credits</Heading>
     <p><strong>Map Creator</strong>: trausi</p>
