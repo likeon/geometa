@@ -1,175 +1,229 @@
 <script lang="ts">
-  import {
-    Alert,
-    Button,
-    Input,
-    Label,
-    Modal,
-    MultiSelect,
-    Textarea
-  } from 'flowbite-svelte';
-  import { fileProxy, superForm } from 'sveltekit-superforms';
-  import Icon from '@iconify/svelte';
-  import Metas from './Metas.svelte';
+	import { Alert, Button, Input, Label, Modal, MultiSelect, Textarea } from 'flowbite-svelte';
+	import { fileProxy, superForm } from 'sveltekit-superforms';
+	import Icon from '@iconify/svelte';
+	import Metas from './Metas.svelte';
 
-  export let data;
-  type MetaType = typeof data.group.metas[number];
-  let isMetaModalOpen = false;
-  let isUploadModalOpen = false;
-  let searchText = '';
+	export let data;
+	type MetaType = (typeof data.group.metas)[number];
+	let isMetaModalOpen = false;
+	let isUploadModalOpen = false;
+	let searchText = '';
+	let isMissingNote = false;
+	let isMissingImage = false;
 
-  $: filteredMetas = data.group.metas.filter(item =>
-    item.name.toLowerCase().includes(searchText.toLowerCase()) ||
-    item.tagName.toLowerCase().includes(searchText.toLowerCase())
-  );
+	$: filteredMetas = data.group.metas.filter((item) => {
+		const matchesSearchText =
+			item.name.toLowerCase().includes(searchText.toLowerCase()) ||
+			item.tagName.toLowerCase().includes(searchText.toLowerCase());
 
-  const {
-    form: metaForm,
-    errors: metaErrors,
-    constraints: metaConstraints,
-    enhance: metaEnhance
-  } = superForm(data.metaForm, {
-    dataType: 'json',
-    onResult() {
-      isMetaModalOpen = false;
-    }
-  });
+		const matchesNoteCondition = isMissingNote ? item.note === '' : true;
+		const matchesImageCondition = isMissingImage ? !item.hasImage : true;
 
-  const levelChoices = data.levelList.map(item => ({
-    value: item.id,
-    name: item.name
-  }));
+		return matchesSearchText && matchesNoteCondition && matchesImageCondition;
+	});
 
-  const {
-    form: mapUploadForm,
-    errors: mapUploadFormErrors,
-    enhance: mapUploadFormEnhance,
-    submit: mapUploadFormSubmit
-  } = superForm(data.mapUploadForm, {
-    onResult() {
-      window.location.reload()
-    }
-  });
-  const file = fileProxy(mapUploadForm, 'file');
+	const {
+		form: metaForm,
+		errors: metaErrors,
+		constraints: metaConstraints,
+		enhance: metaEnhance
+	} = superForm(data.metaForm, {
+		dataType: 'json',
+		onResult() {
+			isMetaModalOpen = false;
+		}
+	});
 
-  function addMeta() {
-    $metaForm.id = undefined;
-    $metaForm.mapGroupId = data.group.id;
-    $metaForm.tagName = '';
-    $metaForm.name = '';
-    $metaForm.note = '';
-    $metaForm.noteFromPlonkit = false;
-    $metaForm.hasImage = false;
-    $metaForm.levels = [];
-    isMetaModalOpen = true;
-  }
+	const levelChoices = data.levelList.map((item) => ({
+		value: item.id,
+		name: item.name
+	}));
 
-  function selectMeta(meta: MetaType) {
-    $metaForm.id = meta.id;
-    $metaForm.mapGroupId = meta.mapGroupId;
-    $metaForm.tagName = meta.tagName;
-    $metaForm.name = meta.name;
-    $metaForm.note = meta.note;
-    $metaForm.noteFromPlonkit = meta.noteFromPlonkit;
-    $metaForm.hasImage = meta.hasImage;
-    $metaForm.levels = meta.metaLevels.map(item => (item.levelId));
-    isMetaModalOpen = true;
-  }
+	const {
+		form: mapUploadForm,
+		errors: mapUploadFormErrors,
+		enhance: mapUploadFormEnhance,
+		submit: mapUploadFormSubmit
+	} = superForm(data.mapUploadForm, {
+		onResult() {
+			window.location.reload();
+		}
+	});
+	const file = fileProxy(mapUploadForm, 'file');
 
-  import { page } from '$app/stores';
+	function addMeta() {
+		$metaForm.id = undefined;
+		$metaForm.mapGroupId = data.group.id;
+		$metaForm.tagName = '';
+		$metaForm.name = '';
+		$metaForm.note = '';
+		$metaForm.noteFromPlonkit = false;
+		$metaForm.hasImage = false;
+		$metaForm.levels = [];
+		isMetaModalOpen = true;
+	}
+
+	function selectMeta(meta: MetaType) {
+		$metaForm.id = meta.id;
+		$metaForm.mapGroupId = meta.mapGroupId;
+		$metaForm.tagName = meta.tagName;
+		$metaForm.name = meta.name;
+		$metaForm.note = meta.note;
+		$metaForm.noteFromPlonkit = meta.noteFromPlonkit;
+		$metaForm.hasImage = meta.hasImage;
+		$metaForm.levels = meta.metaLevels.map((item) => item.levelId);
+		isMetaModalOpen = true;
+	}
+
+	import { page } from '$app/stores';
 </script>
 
 <svelte:head>
-  <title>{data.group.name} - Metas</title>
+	<title>{data.group.name} - Metas</title>
 </svelte:head>
 
 <div>
-  <div class="flex">
-    <h1 class="text-xl">{data.group.name}</h1>
-    <a href="/" on:click|preventDefault={() => isUploadModalOpen = true} class="ml-3">
-      <Icon icon="ri:upload-2-fill" width="1.5rem" height="1.5rem" color="green" />
-    </a>
-  </div>
-  <div>
-    <div class="border-b border-gray-200 mb-4">
-      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-        <a href={`/dev/dash/groups/${$page.params.id}`} class="whitespace-nowrap border-b-2 border-green-500 px-1 py-4 text-sm font-medium text-green-600" aria-current="page">Metas</a>
-        <a href={`/dev/dash/groups/${$page.params.id}/maps`} class="whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">Maps</a>
-      </nav>
-    </div>
-  </div>
-  <div class="sm:flex sm:items-center">
-    <div class="w-1/3">
-      <Input type="text" placeholder="Search..." autocomplete="off" bind:value={searchText} />
-    </div>
-    <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
-      <Button on:click={addMeta}>
-        Add meta
-      </Button>
-    </div>
-  </div>
-  <Metas filteredMetas={filteredMetas} selectMeta={selectMeta} />
+	<div class="flex">
+		<h1 class="text-xl">{data.group.name}</h1>
+		<a href="/" on:click|preventDefault={() => (isUploadModalOpen = true)} class="ml-3">
+			<Icon icon="ri:upload-2-fill" width="1.5rem" height="1.5rem" color="green" />
+		</a>
+	</div>
+	<div>
+		<div class="border-b border-gray-200 mb-4">
+			<nav class="-mb-px flex space-x-8" aria-label="Tabs">
+				<a
+					href={`/dev/dash/groups/${$page.params.id}`}
+					class="whitespace-nowrap border-b-2 border-green-500 px-1 py-4 text-sm font-medium text-green-600"
+					aria-current="page">Metas</a
+				>
+				<a
+					href={`/dev/dash/groups/${$page.params.id}/maps`}
+					class="whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+					>Maps</a
+				>
+			</nav>
+		</div>
+	</div>
+	<div class="flex flex-wrap items-center">
+		<div class="w-1/3">
+			<Input type="text" placeholder="Search..." autocomplete="off" bind:value={searchText} />
+		</div>
+		<div class="ml-1 flex items-center">
+			Missing:
+			<input
+				class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 ml-1 dark:bg-gray-700 dark:border-gray-600
+    rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600"
+				type="checkbox"
+				name="isMissingNote"
+				bind:checked={isMissingNote}
+			/>
+			<span class="ml-1 mr-1">Note</span>
+
+			<input
+				class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 me-0 dark:bg-gray-700 dark:border-gray-600
+      rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600"
+				type="checkbox"
+				name="isMissingImage"
+				bind:checked={isMissingImage}
+			/>
+			<span class="ml-1 mr-1">Image</span>
+		</div>
+
+		<div class="flex-grow flex items-center justify-end">
+			<Button on:click={addMeta}>Add meta</Button>
+		</div>
+	</div>
+	<Metas {filteredMetas} {selectMeta} />
 </div>
 
 <Modal bind:open={isMetaModalOpen}>
-  <form action="?/updateMeta" class="flex flex-col space-y-6" method="post" use:metaEnhance>
-    <Input type="hidden" name="id" bind:value={$metaForm.id} />
-    <Input type="hidden" name="mapGroupId" bind:value={$metaForm.mapGroupId} />
-    <Label class="space-y-2">
-      <span>Tag name</span>
-      <Input type="text" name="tagName" aria-invalid={$metaErrors.tagName ? 'true' : undefined}
-             bind:value={$metaForm.tagName}
-             {...$metaConstraints.tagName} />
-      {#if $metaErrors.tagName}
-        <Alert color="red">{$metaErrors.tagName}</Alert>
-      {/if}
-    </Label>
-    <Label class="space-y-2">
-      <span>Name</span>
-      <Input type="text" name="name" aria-invalid={$metaErrors.name ? 'true' : undefined} bind:value={$metaForm.name}
-             {...$metaConstraints.name} />
-      {#if $metaErrors.name}
-        <Alert color="red">{$metaErrors.name}</Alert>
-      {/if}
-    </Label>
-    <Label class="space-y-2">
-      <span>Note</span>
-      <Textarea rows="6" name="note" aria-invalid={$metaErrors.note ? 'true' : undefined}
-                bind:value={$metaForm.note}
-                {...$metaConstraints.note} />
-      {#if $metaErrors.note}
-        <Alert color="red">{$metaErrors.note}</Alert>
-      {/if}
-    </Label>
-    <Label><input
-      class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 me-2 dark:bg-gray-700 dark:border-gray-600 rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600"
-      type="checkbox" name="noteFromPlonkit" bind:checked={$metaForm.noteFromPlonkit}>Note from Plonkit</Label>
-    <Label><input
-      class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 me-2 dark:bg-gray-700 dark:border-gray-600 rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600"
-      type="checkbox" name="hasImage" bind:checked={$metaForm.hasImage}>Has image</Label>
-    <Label>
-      <span>Levels</span>
-      <MultiSelect items={levelChoices} bind:value={$metaForm.levels} size="lg" />
-    </Label>
-    <Button type="submit" class="w-full">Save</Button>
-  </form>
+	<form action="?/updateMeta" class="flex flex-col space-y-6" method="post" use:metaEnhance>
+		<Input type="hidden" name="id" bind:value={$metaForm.id} />
+		<Input type="hidden" name="mapGroupId" bind:value={$metaForm.mapGroupId} />
+		<Label class="space-y-2">
+			<span>Tag name</span>
+			<Input
+				type="text"
+				name="tagName"
+				aria-invalid={$metaErrors.tagName ? 'true' : undefined}
+				bind:value={$metaForm.tagName}
+				{...$metaConstraints.tagName}
+			/>
+			{#if $metaErrors.tagName}
+				<Alert color="red">{$metaErrors.tagName}</Alert>
+			{/if}
+		</Label>
+		<Label class="space-y-2">
+			<span>Name</span>
+			<Input
+				type="text"
+				name="name"
+				aria-invalid={$metaErrors.name ? 'true' : undefined}
+				bind:value={$metaForm.name}
+				{...$metaConstraints.name}
+			/>
+			{#if $metaErrors.name}
+				<Alert color="red">{$metaErrors.name}</Alert>
+			{/if}
+		</Label>
+		<Label class="space-y-2">
+			<span>Note</span>
+			<Textarea
+				rows="6"
+				name="note"
+				aria-invalid={$metaErrors.note ? 'true' : undefined}
+				bind:value={$metaForm.note}
+				{...$metaConstraints.note}
+			/>
+			{#if $metaErrors.note}
+				<Alert color="red">{$metaErrors.note}</Alert>
+			{/if}
+		</Label>
+		<Label
+			><input
+				class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 me-2 dark:bg-gray-700 dark:border-gray-600 rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600"
+				type="checkbox"
+				name="noteFromPlonkit"
+				bind:checked={$metaForm.noteFromPlonkit}
+			/>Note from Plonkit</Label
+		>
+		<Label
+			><input
+				class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 me-2 dark:bg-gray-700 dark:border-gray-600 rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600"
+				type="checkbox"
+				name="hasImage"
+				bind:checked={$metaForm.hasImage}
+			/>Has image</Label
+		>
+		<Label>
+			<span>Levels</span>
+			<MultiSelect items={levelChoices} bind:value={$metaForm.levels} size="lg" />
+		</Label>
+		<Button type="submit" class="w-full">Save</Button>
+	</form>
 </Modal>
 
 <Modal bind:open={isUploadModalOpen}>
-  <form class="flex flex-col space-y-6" method="post" action="?/uploadMapJson" enctype="multipart/form-data"
-        use:mapUploadFormEnhance>
-    <label>
-      Upload map json: <input
-      bind:files={$file}
-      accept="application/json"
-      name="file"
-      type="file"
-      on:change={() => mapUploadFormSubmit()}
-    />
-      {#if $mapUploadFormErrors.file}
-        <div class="invalid">{$mapUploadFormErrors.file}</div>
-      {/if}
-    </label>
-
-  </form>
+	<form
+		class="flex flex-col space-y-6"
+		method="post"
+		action="?/uploadMapJson"
+		enctype="multipart/form-data"
+		use:mapUploadFormEnhance
+	>
+		<label>
+			Upload map json: <input
+				bind:files={$file}
+				accept="application/json"
+				name="file"
+				type="file"
+				on:change={() => mapUploadFormSubmit()}
+			/>
+			{#if $mapUploadFormErrors.file}
+				<div class="invalid">{$mapUploadFormErrors.file}</div>
+			{/if}
+		</label>
+	</form>
 </Modal>
