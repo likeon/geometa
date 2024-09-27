@@ -2,7 +2,7 @@
 	"name": "geometa-web",
 	"version": "0.0.1",
 	"scripts": {
-    "prepare": "husky install",
+		"prepare": "husky",
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
