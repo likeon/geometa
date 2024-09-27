@@ -52,8 +52,8 @@
 						<Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
 						<span
 							><strong class="font-semibold text-gray-900">Install the Browser Extension.</strong>
-							First, you need to install a userscript manager extension for your browser.
-							Tampermonkey is available for
+							First, you need to install a userscript manager extension for your browser. Tampermonkey
+							is available for
 							<a
 								href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo"
 								target="_blank">Chrome</a
