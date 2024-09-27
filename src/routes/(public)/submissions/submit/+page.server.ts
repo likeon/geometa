@@ -15,10 +15,14 @@ export const actions = {
 		}
 
 		const insertData = { ...form.data, secret: generateRandomString(16), status: 'new' };
-		const insertResult = await db.insert(metaSuggestions).values(insertData).returning({
-			id: metaSuggestions.id,
-			secret: metaSuggestions.secret
-		}).run();
+		const insertResult = await db
+			.insert(metaSuggestions)
+			.values(insertData)
+			.returning({
+				id: metaSuggestions.id,
+				secret: metaSuggestions.secret
+			})
+			.run();
 
 		const result = insertResult.rows[0];
 

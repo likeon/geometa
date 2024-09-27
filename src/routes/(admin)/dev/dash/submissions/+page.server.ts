@@ -1,13 +1,13 @@
 import { db } from '$lib/drizzle';
 import type { PageServerLoad } from './$types';
-import { sql } from 'drizzle-orm'
+import { sql } from 'drizzle-orm';
 
 type EntryQueryResult = {
-	id: number,
-	type: string,
-	description: string
-	tagsJSON: string
-}[]
+	id: number;
+	type: string;
+	description: string;
+	tagsJSON: string;
+}[];
 const entriesSql = sql`
 SELECT
   e.id,
@@ -24,8 +24,8 @@ SELECT
   ) AS tagsJSON
 FROM
   meta_entries e
-`
+`;
 
 export const load: PageServerLoad = async () => {
-	return { entries: await db.all(entriesSql) as EntryQueryResult, q: 1 };
+	return { entries: (await db.all(entriesSql)) as EntryQueryResult, q: 1 };
 };

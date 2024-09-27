@@ -4,7 +4,7 @@
 </script>
 
 <div class="app">
-	<NavBar admin={true}/>
+	<NavBar admin={true} />
 	<main>
 		<slot />
 	</main>

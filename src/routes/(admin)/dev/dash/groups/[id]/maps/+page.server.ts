@@ -11,19 +11,20 @@ export const load = async ({ params }) => {
 		with: {
 			maps: {
 				extras: {
-					locationsCount: sql`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`.as(
-						'locations_count'
-					)
+					locationsCount:
+						sql`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`.as(
+							'locations_count'
+						)
 				},
-        with: {
-          level: true
-        }
+				with: {
+					level: true
+				}
 			}
 		},
 		where: eq(mapGroups.id, groupId)
 	});
 
-  if (!group) {
+	if (!group) {
 		error(404, 'No group');
 	}
 

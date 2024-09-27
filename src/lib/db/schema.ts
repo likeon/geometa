@@ -27,7 +27,7 @@ export const mapGroupsRelations = relations(mapGroups, ({ many }) => ({
 	metas: many(metas),
 	maps: many(maps),
 	locations: many(mapGroupLocations),
-	levels: many(levels),
+	levels: many(levels)
 }));
 
 export const mapGroupLocations = sqliteTable(
@@ -73,7 +73,7 @@ export const maps = sqliteTable(
 );
 export const mapsRelations = relations(maps, ({ one }) => ({
 	mapGroup: one(mapGroups, { fields: [maps.mapGroupId], references: [mapGroups.id] }),
-	level: one(levels, { fields: [maps.levelId], references: [levels.id] }),
+	level: one(levels, { fields: [maps.levelId], references: [levels.id] })
 }));
 
 export const levels = sqliteTable(
@@ -143,7 +143,7 @@ export const locationMetas = sqliteView('location_metas_view', {
 	heading: real('heading').notNull(),
 	pitch: real('pitch').notNull(),
 	zoom: integer('zoom').notNull(),
-  panoId: text('pano_id'),
+	panoId: text('pano_id'),
 	extraTag: text('extra_tag').notNull(),
 	extraPanoId: text('extra_pano_id'),
 	extraPanoDate: text('extra_pano_date').notNull()
@@ -163,7 +163,7 @@ export const mapLocations = sqliteView('map_locations_view', {
 	heading: real('heading').notNull(),
 	pitch: real('pitch').notNull(),
 	zoom: integer('zoom').notNull(),
-  panoId: text('pano_id'),
+	panoId: text('pano_id'),
 	metaName: text('meta_name').notNull(),
 	extraPanoId: text('extra_pano_id'),
 	extraPanoDate: text('extra_pano_date').notNull()

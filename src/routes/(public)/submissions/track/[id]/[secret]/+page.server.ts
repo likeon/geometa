@@ -18,5 +18,5 @@ export const load = async ({ params }) => {
 	if (!result.length) {
 		error(404, 'Submission not found');
 	}
-	return {'submission': result[0]};
+	return { submission: result[0] };
 };

@@ -171,8 +171,8 @@ export const actions = {
 		const metaInsertValues = Array.from(usedTags).map((tagName) => ({
 			mapGroupId: groupId,
 			tagName: tagName,
-      name: '',
-      note: ''
+			name: '',
+			note: ''
 		}));
 		await db.insert(metas).values(metaInsertValues).onConflictDoNothing();
 	}
