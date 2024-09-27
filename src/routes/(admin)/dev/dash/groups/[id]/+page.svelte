@@ -10,8 +10,6 @@
   } from 'flowbite-svelte';
   import { fileProxy, superForm } from 'sveltekit-superforms';
   import Icon from '@iconify/svelte';
-
-  import { Dropzone } from 'flowbite-svelte';
   import Metas from './Metas.svelte';
 
   export let data;
@@ -77,10 +75,12 @@
     $metaForm.levels = meta.metaLevels.map(item => (item.levelId));
     isMetaModalOpen = true;
   }
+
+  import { page } from '$app/stores';
 </script>
 
 <svelte:head>
-  <title>Admin</title>
+  <title>{data.group.name} - Metas</title>
 </svelte:head>
 
 <div>
@@ -89,6 +89,14 @@
     <a href="/" on:click|preventDefault={() => isUploadModalOpen = true} class="ml-3">
       <Icon icon="ri:upload-2-fill" width="1.5rem" height="1.5rem" color="green" />
     </a>
+  </div>
+  <div>
+    <div class="border-b border-gray-200 mb-4">
+      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <a href={`/dev/dash/groups/${$page.params.id}`} class="whitespace-nowrap border-b-2 border-green-500 px-1 py-4 text-sm font-medium text-green-600" aria-current="page">Metas</a>
+        <a href={`/dev/dash/groups/${$page.params.id}/maps`} class="whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700">Maps</a>
+      </nav>
+    </div>
   </div>
   <div class="sm:flex sm:items-center">
     <div class="w-1/3">

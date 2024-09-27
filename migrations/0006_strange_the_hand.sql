@@ -1,0 +1,1 @@
+ALTER TABLE `map_group_locations` ADD `pano_id` text;

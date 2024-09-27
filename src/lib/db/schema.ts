@@ -1,5 +1,13 @@
-import { text, integer, sqliteTable, uniqueIndex, blob, real } from 'drizzle-orm/sqlite-core';
-import { relations } from 'drizzle-orm';
+import {
+	text,
+	integer,
+	sqliteTable,
+	uniqueIndex,
+	blob,
+	real,
+	sqliteView
+} from 'drizzle-orm/sqlite-core';
+import { relations, sql } from 'drizzle-orm';
 
 export const metaSuggestions = sqliteTable('meta_suggestions', {
 	id: integer('id').primaryKey(),
@@ -18,7 +26,8 @@ export const mapGroups = sqliteTable('map_groups', {
 export const mapGroupsRelations = relations(mapGroups, ({ many }) => ({
 	metas: many(metas),
 	maps: many(maps),
-	locations: many(mapGroupLocations)
+	locations: many(mapGroupLocations),
+	levels: many(levels),
 }));
 
 export const mapGroupLocations = sqliteTable(
@@ -28,11 +37,12 @@ export const mapGroupLocations = sqliteTable(
 		mapGroupId: integer('map_group_id')
 			.notNull()
 			.references(() => mapGroups.id, { onDelete: 'cascade' }),
-		lat: real('lat'),
-		lng: real('lng'),
+		lat: real('lat').notNull(),
+		lng: real('lng').notNull(),
 		heading: real('heading').notNull(),
 		pitch: real('pitch').notNull(),
 		zoom: integer('zoom').notNull(),
+		panoId: text('pano_id'),
 		extraTag: text('extra_tag').notNull(),
 		extraPanoId: text('extra_pano_id'),
 		extraPanoDate: text('extra_pano_date').notNull()
@@ -54,7 +64,7 @@ export const maps = sqliteTable(
 			.references(() => mapGroups.id, { onDelete: 'cascade' }),
 		name: text('name').notNull(),
 		geoguessrId: text('geoguessr_id').notNull(),
-		filters: blob('filters')
+		levelId: integer('level_id').references(() => levels.id, { onDelete: 'set null' })
 	},
 	(t) => ({
 		nameUnique: uniqueIndex('maps_name_unique').on(t.name),
@@ -62,7 +72,8 @@ export const maps = sqliteTable(
 	})
 );
 export const mapsRelations = relations(maps, ({ one }) => ({
-	mapGroup: one(mapGroups, { fields: [maps.mapGroupId], references: [mapGroups.id] })
+	mapGroup: one(mapGroups, { fields: [maps.mapGroupId], references: [mapGroups.id] }),
+	level: one(levels, { fields: [maps.levelId], references: [levels.id] }),
 }));
 
 export const levels = sqliteTable(
@@ -78,6 +89,10 @@ export const levels = sqliteTable(
 		nameUnique: uniqueIndex('levels_unique').on(t.name, t.mapGroupId)
 	})
 );
+export const levelsRelations = relations(levels, ({ one, many }) => ({
+	mapGroup: one(mapGroups, { fields: [levels.mapGroupId], references: [mapGroups.id] }),
+	metaLevels: many(maps)
+}));
 
 export const metas = sqliteTable(
 	'metas',
@@ -120,3 +135,43 @@ export const metaLevelRelations = relations(metaLevels, ({ one }) => ({
 	meta: one(metas, { fields: [metaLevels.metaId], references: [metas.id] }),
 	level: one(levels, { fields: [metaLevels.levelId], references: [levels.id] })
 }));
+
+export const locationMetas = sqliteView('location_metas_view', {
+	mapGroupId: integer('map_group_id').notNull(),
+	lat: real('lat').notNull(),
+	lng: real('lng').notNull(),
+	heading: real('heading').notNull(),
+	pitch: real('pitch').notNull(),
+	zoom: integer('zoom').notNull(),
+  panoId: text('pano_id'),
+	extraTag: text('extra_tag').notNull(),
+	extraPanoId: text('extra_pano_id'),
+	extraPanoDate: text('extra_pano_date').notNull()
+}).as(sql`
+  SELECT
+    mgl.*,
+    m.*
+  FROM
+  ${mapGroupLocations} mgl
+    JOIN ${metas} m ON m.tag_name = mgl.extra_tag AND m.map_group_id = mgl.map_group_id
+`);
+
+export const mapLocations = sqliteView('map_locations_view', {
+	mapId: integer('map_id').notNull(),
+	lat: real('lat').notNull(),
+	lng: real('lng').notNull(),
+	heading: real('heading').notNull(),
+	pitch: real('pitch').notNull(),
+	zoom: integer('zoom').notNull(),
+  panoId: text('pano_id'),
+	metaName: text('meta_name').notNull(),
+	extraPanoId: text('extra_pano_id'),
+	extraPanoDate: text('extra_pano_date').notNull()
+}).as(sql`
+  select m.id as map_id, lmv.lat, lmv.lng, lmv.heading, lmv.pitch, lmv.zoom, lmv.meta_name, lmv.extra_pano_id, lmv.extra_pano_date
+  from ${locationMetas} lmv
+  join ${metaLevels} ml on ml.meta_id = lmv.meta_id
+  join ${levels} l on l.id = ml.level_id
+  join ${maps} m on m.map_group_id = lmv.map_group_id and (m.level_id = l.id or m.level_id is null)
+`);
+
