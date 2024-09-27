@@ -2,6 +2,7 @@
 	"name": "geometa-web",
 	"version": "0.0.1",
 	"scripts": {
+    "prepare": "husky install",
 		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
@@ -33,6 +34,7 @@
 		"flowbite": "^2.5.1",
 		"flowbite-svelte": "^0.46.15",
 		"globals": "^15.0.0",
+		"husky": "^9.1.6",
 		"postcss": "^8.4.41",
 		"prettier": "^3.1.1",
 		"prettier-plugin-svelte": "^3.1.2",
