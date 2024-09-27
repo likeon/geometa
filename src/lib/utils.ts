@@ -21,3 +21,29 @@ export async function extractJsonData(file: File): Promise<any> {
 		throw error;
 	}
 }
+
+const countryMap = new Map<string, string>([
+	['NewZealand', 'New Zealand'],
+	['AmericanSamoa', 'American Samoa'],
+	['UnitedStates', 'United States'],
+	['DominicanRepublic', 'Dominican Republic'],
+	['USVirginIslands', 'US Virgin Islands'],
+	['IsleOfMan', 'Isle Of Man'],
+	['UnitedKingdom', 'United Kingdom'],
+	['ChristmasIsland', 'Christmas Island'],
+	['SriLanka', 'Sri Lanka'],
+	['SouthKorea', 'South Korea'],
+	['SouthAfrica', 'South Africa'],
+	['PuertoRico', 'Puerto Rico']
+]);
+
+export function getCountryFromTagName(tagName: string) {
+	const countryRaw = tagName.split('-')[0];
+	return countryMap.get(countryRaw) || countryRaw;
+}
+
+export function cutToTwoDecimals(num: number): string {
+	const fixed = num.toFixed(2);
+	// Remove trailing zeros after the decimal point
+	return fixed.replace(/\.?0+$/, '');
+}

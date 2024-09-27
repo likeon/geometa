@@ -1,14 +1,22 @@
 import { db } from '$lib/drizzle';
 import type { PageServerLoad } from './$types';
 import { and, asc, eq, not, notInArray, sql } from 'drizzle-orm';
-import { levels, mapGroupLocations, mapGroups, metaLevels, metas } from '$lib/db/schema';
+import {
+	levels,
+	mapGroupLocations,
+	mapGroups,
+	mapLocations,
+	maps,
+	metaLevels,
+	metas
+} from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
 import { createInsertSchema } from 'drizzle-zod';
 import { setError, superValidate, withFiles } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
-import { extractJsonData } from '$lib/utils';
+import { extractJsonData, getCountryFromTagName } from '$lib/utils';
 import { getGroupId } from './utils';
 
 const insertMetasSchema = createInsertSchema(metas).extend({ levels: z.array(z.number()) });
@@ -167,7 +175,7 @@ export const actions = {
 			)
 		);
 
-		// upsert into tag names into metas
+		// upsert tag names into metas
 		const metaInsertValues = Array.from(usedTags).map((tagName) => ({
 			mapGroupId: groupId,
 			tagName: tagName,
