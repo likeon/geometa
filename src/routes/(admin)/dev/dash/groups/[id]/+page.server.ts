@@ -16,7 +16,7 @@ import { setError, superValidate, withFiles } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
-import { extractJsonData, getCountryFromTagName } from '$lib/utils';
+import { cloudflareKvBulkPut, extractJsonData, getCountryFromTagName } from '$lib/utils';
 import { getGroupId } from './utils';
 
 const insertMetasSchema = createInsertSchema(metas).extend({ levels: z.array(z.number()) });
@@ -183,5 +183,28 @@ export const actions = {
 			note: ''
 		}));
 		await db.insert(metas).values(metaInsertValues).onConflictDoNothing();
+	},
+	prepareUserScriptData: async (event) => {
+		const groupId = getGroupId(event.params);
+		const dbValues = await db
+			.select()
+			.from(mapLocations)
+			.innerJoin(maps, eq(mapLocations.mapId, maps.id))
+			.where(eq(maps.mapGroupId, groupId))
+			.orderBy(asc(maps.id));
+
+		const kvData = [];
+		for (const item of dbValues) {
+			const key = `${item.maps.geoguessrId}:${item.map_locations_view.lat}:${item.map_locations_view.lng}`;
+			const value = {
+				country: getCountryFromTagName(item.map_locations_view.tagName),
+				metaName: item.map_locations_view.metaName,
+				note: item.map_locations_view.metaNote,
+				noteFromPlonkit: item.map_locations_view.metaNoteFromPlonkit
+			};
+			kvData.push({ key: key, value: JSON.stringify(value), base64: false });
+		}
+
+		await cloudflareKvBulkPut(kvData);
 	}
 };

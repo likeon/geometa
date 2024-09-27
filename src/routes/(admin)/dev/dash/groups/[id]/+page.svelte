@@ -1,8 +1,20 @@
 <script lang="ts">
-	import { Alert, Button, Input, Label, Modal, MultiSelect, Textarea } from 'flowbite-svelte';
+	import {
+		Alert,
+		Button,
+		GradientButton,
+		Input,
+		Label,
+		Modal,
+		MultiSelect,
+		Textarea
+	} from 'flowbite-svelte';
 	import { fileProxy, superForm } from 'sveltekit-superforms';
 	import Icon from '@iconify/svelte';
 	import Metas from './Metas.svelte';
+	import { applyAction, enhance } from '$app/forms';
+	import { SvelteToast } from '@zerodevx/svelte-toast';
+	import { toast } from '@zerodevx/svelte-toast';
 
 	export let data;
 	type MetaType = (typeof data.group.metas)[number];
@@ -133,6 +145,21 @@
 
 		<div class="flex-grow flex items-center justify-end">
 			<Button on:click={addMeta}>Add meta</Button>
+			<form
+				method="post"
+				action="?/prepareUserScriptData"
+				use:enhance={() => {
+					return async ({ result }) => {
+						// `result` is an `ActionResult` object
+						await applyAction(result);
+						toast.push('Updated');
+					};
+				}}
+			>
+				<GradientButton color="pinkToOrange" class="ml-3" type="submit"
+					>Sync UserScript
+				</GradientButton>
+			</form>
 		</div>
 	</div>
 	<Metas {filteredMetas} {selectMeta} />
@@ -227,3 +254,5 @@
 		</label>
 	</form>
 </Modal>
+
+<SvelteToast />

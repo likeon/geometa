@@ -1,3 +1,5 @@
+import { CLOUDFLARE_BEARER, CLOUDFLARE_KV_NAMESPACE_ID } from '$env/static/private';
+
 export function generateRandomString(length: number): string {
 	const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 	return Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join(
@@ -46,4 +48,27 @@ export function cutToTwoDecimals(num: number): string {
 	const fixed = num.toFixed(2);
 	// Remove trailing zeros after the decimal point
 	return fixed.replace(/\.?0+$/, '');
+}
+
+export async function cloudflareKvBulkPut(data: any) {
+	const url = `https://api.cloudflare.com/client/v4/accounts/a38064a092904c941dedaf866ea6977e/storage/kv/namespaces/${CLOUDFLARE_KV_NAMESPACE_ID}/bulk`;
+
+	if (!CLOUDFLARE_KV_NAMESPACE_ID || !CLOUDFLARE_BEARER) {
+		throw new Error('set cloudflare variables');
+	}
+
+	const headers = {
+		Authorization: `Bearer ${CLOUDFLARE_BEARER}`,
+		'Content-Type': 'application/json'
+	};
+
+	const response = await fetch(url, {
+		method: 'PUT',
+		headers: headers,
+		body: JSON.stringify(data)
+	});
+
+	if (response.status !== 200) {
+		throw new Error(`Request failed with status code ${response.status}`);
+	}
 }
