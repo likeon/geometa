@@ -32,6 +32,18 @@ const mapJsonSchema = z.object({
 		})
 		.array()
 });
+type UpsertValue = {
+	mapGroupId: number;
+	lat: number;
+	lng: number;
+	heading: number;
+	pitch: number;
+	zoom: number;
+	panoId: string | null;
+	extraTag: string;
+	extraPanoId: string | null;
+	extraPanoDate: string;
+};
 
 export const load: PageServerLoad = async ({ params }) => {
 	const id = getGroupId(params);
@@ -108,19 +120,25 @@ export const actions = {
 			return setError(form, 'file', "JSON doesn't match the expected format");
 		}
 
-		const upsertValues = validationResult.data.customCoordinates.map((location) => ({
-			mapGroupId: groupId,
-			lat: location.lat,
-			lng: location.lng,
-			heading: location.heading,
-			pitch: location.pitch,
-			zoom: location.zoom,
-			panoId: location.panoId || null,
-			extraTag: location.extra.tags[0],
-			extraPanoId: location.extra.panoId || null,
-			extraPanoDate: location.extra.panoDate
-		}));
+		const upsertValues: UpsertValue[] = [];
+		const usedTags = new Set<string>();
+		validationResult.data.customCoordinates.forEach((location) => {
+			upsertValues.push({
+				mapGroupId: groupId,
+				lat: location.lat,
+				lng: location.lng,
+				heading: location.heading,
+				pitch: location.pitch,
+				zoom: location.zoom,
+				panoId: location.panoId || null,
+				extraTag: location.extra.tags[0],
+				extraPanoId: location.extra.panoId || null,
+				extraPanoDate: location.extra.panoDate
+			});
+			usedTags.add(location.extra.tags[0]);
+		});
 
+		// upsert data
 		const upsertResult = await db
 			.insert(mapGroupLocations)
 			.values(upsertValues)
@@ -138,6 +156,7 @@ export const actions = {
 			})
 			.returning({ id: mapGroupLocations.id });
 
+		// delete rows that weren't updated
 		await db.delete(mapGroupLocations).where(
 			and(
 				eq(mapGroupLocations.id, groupId),
@@ -147,5 +166,14 @@ export const actions = {
 				)
 			)
 		);
+
+		// upsert into tag names into metas
+		const metaInsertValues = Array.from(usedTags).map((tagName) => ({
+			mapGroupId: groupId,
+			tagName: tagName,
+      name: '',
+      note: ''
+		}));
+		await db.insert(metas).values(metaInsertValues).onConflictDoNothing();
 	}
 };

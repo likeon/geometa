@@ -47,7 +47,7 @@
     submit: mapUploadFormSubmit
   } = superForm(data.mapUploadForm, {
     onResult() {
-      isUploadModalOpen = false;
+      window.location.reload()
     }
   });
   const file = fileProxy(mapUploadForm, 'file');
