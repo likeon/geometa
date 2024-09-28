@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.5
+// @version      0.6
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
@@ -1034,6 +1034,7 @@
   }
   function changelog() {
     return [
+      { "0.6": "Bugfixes" },
       { "0.5": "New note format and prepared for multiple maps support" },
       {
         "0.4": "Updated GeoGuessr Event Framework version. Fixes the disappearing daily challenge from GeoGuessr home page."

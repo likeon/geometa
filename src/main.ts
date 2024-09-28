@@ -5,6 +5,7 @@ import { unsafeWindow } from "$";
 
 function changelog() {
   return [
+    { "0.6": "Bugfixes" },
     { "0.5": "New note format and prepared for multiple maps support" },
     {
       "0.4":
