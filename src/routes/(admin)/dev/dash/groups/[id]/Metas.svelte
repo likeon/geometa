@@ -3,40 +3,9 @@
 	import type { PageData } from './$types';
 	export let filteredMetas: PageData['group']['metas'];
 	export let selectMeta;
-
-	let selectedHeader = 'tag';
-	let sortModifier = -1;
-
-	$: sortArrow = sortModifier == 1 ? '▼' : '▲';
-
-	function sortTable(header: string) {
-		if (selectedHeader == header) {
-			sortModifier *= -1;
-		} else {
-			sortModifier = 1;
-		}
-		selectedHeader = header;
-
-		if (header == 'tag') {
-			filteredMetas.sort((a, b) => {
-				if (a.tagName < b.tagName) return -1 * sortModifier;
-				if (a.tagName > b.tagName) return 1 * sortModifier;
-				return 0;
-			});
-		}
-		if (header == 'level') {
-			filteredMetas.sort((a, b) => (a.metaLevels.length - b.metaLevels.length) * sortModifier);
-		}
-		if (header == 'name') {
-			filteredMetas.sort((a, b) => {
-				if (a.name < b.name) return -1 * sortModifier;
-				if (a.name > b.name) return 1 * sortModifier;
-				return 0;
-			});
-		}
-		filteredMetas = [...filteredMetas];
-	}
-	sortTable(selectedHeader);
+	export let selectHeader;
+	export let selectedHeader;
+	export let sortArrow;
 </script>
 
 <div class="mt-3 flow-root">
@@ -58,7 +27,7 @@
 								class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 cursor-pointer hover:bg-green-200"
 								class:hover:bg-green-200={selectedHeader !== 'tag'}
 								class:bg-blue-300={selectedHeader === 'tag'}
-								on:click={() => sortTable('tag')}
+								on:click={() => selectHeader('tag')}
 							>
 								Tag name {selectedHeader === 'tag' ? sortArrow : ''}
 							</th>
@@ -67,7 +36,7 @@
 								class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
 								class:bg-blue-300={selectedHeader === 'name'}
 								class:hover:bg-green-200={selectedHeader !== 'name'}
-								on:click={() => sortTable('name')}
+								on:click={() => selectHeader('name')}
 							>
 								Name {selectedHeader === 'name' ? sortArrow : ''}
 							</th>
@@ -82,7 +51,7 @@
 								class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-green-200"
 								class:hover:bg-green-200={selectedHeader !== 'level'}
 								class:bg-blue-300={selectedHeader === 'level'}
-								on:click={() => sortTable('level')}
+								on:click={() => selectHeader('level')}
 							>
 								Level {selectedHeader === 'level' ? sortArrow : ''}
 							</th>
@@ -90,7 +59,11 @@
 					</thead>
 					<tbody class="divide-y divide-gray-400">
 						{#each filteredMetas as meta (meta.id)}
-							<tr role="link" on:click={() => selectMeta(meta)}>
+							<tr
+								class="cursor-pointer hover:bg-green-200"
+								role="link"
+								on:click={() => selectMeta(meta)}
+							>
 								<td>{meta.tagName}</td>
 								<td>{meta.name}</td>
 								<td>
