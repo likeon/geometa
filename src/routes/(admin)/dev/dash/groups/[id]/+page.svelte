@@ -24,16 +24,42 @@
 	let isMissingNote = false;
 	let isMissingImage = false;
 
-	$: filteredMetas = data.group.metas.filter((item) => {
-		const matchesSearchText =
-			item.name.toLowerCase().includes(searchText.toLowerCase()) ||
-			item.tagName.toLowerCase().includes(searchText.toLowerCase());
+	let selectedHeader = 'tag';
+	let sortModifier = 1;
+	$: sortArrow = sortModifier == 1 ? '▼' : '▲';
 
-		const matchesNoteCondition = isMissingNote ? item.note === '' : true;
-		const matchesImageCondition = isMissingImage ? !item.hasImage : true;
+	$: filteredMetas = data.group.metas
+		.filter((item) => {
+			// Apply your filtering logic here
+			const matchesSearchText =
+				item.name.toLowerCase().includes(searchText.toLowerCase()) ||
+				item.tagName.toLowerCase().includes(searchText.toLowerCase());
 
-		return matchesSearchText && matchesNoteCondition && matchesImageCondition;
-	});
+			const matchesNoteCondition = isMissingNote ? item.note === '' : true;
+			const matchesImageCondition = isMissingImage ? !item.hasImage : true;
+
+			return matchesSearchText && matchesNoteCondition && matchesImageCondition;
+		})
+		.sort((a, b) => {
+			// Apply sorting logic based on selectedHeader and sortModifier
+			if (selectedHeader === 'tag') {
+				return a.tagName.localeCompare(b.tagName) * sortModifier;
+			} else if (selectedHeader === 'level') {
+				return (a.metaLevels.length - b.metaLevels.length) * sortModifier;
+			} else if (selectedHeader === 'name') {
+				return a.name.localeCompare(b.name) * sortModifier;
+			}
+			return 0;
+		});
+
+	function selectHeader(header: string) {
+		if (selectedHeader == header) {
+			sortModifier *= -1;
+		} else {
+			sortModifier = 1;
+			selectedHeader = header;
+		}
+	}
 
 	const {
 		form: metaForm,
@@ -162,7 +188,7 @@
 			</form>
 		</div>
 	</div>
-	<Metas {filteredMetas} {selectMeta} />
+	<Metas {filteredMetas} {selectMeta} {selectedHeader} {sortArrow} {selectHeader} />
 </div>
 
 <Modal bind:open={isMetaModalOpen}>
