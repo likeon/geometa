@@ -212,7 +212,6 @@ export const actions = {
       kvData.push({ key: key, value: JSON.stringify(value), base64: false });
     }
 
-    console.debug(kvData);
-    // await cloudflareKvBulkPut(kvData);
+    await cloudflareKvBulkPut(kvData);
   }
 };
