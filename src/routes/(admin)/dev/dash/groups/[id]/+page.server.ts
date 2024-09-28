@@ -209,7 +209,7 @@ export const actions = {
         note: item.map_locations_view.metaNote,
         plonkitCountryUrl: plonkitCountryUrl
       };
-      kvData.push({ key: key, value: value, base64: false });
+      kvData.push({ key: key, value: JSON.stringify(value), base64: false });
     }
 
     await cloudflareKvBulkPut(kvData);
