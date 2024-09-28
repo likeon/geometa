@@ -1,22 +1,21 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.4
+// @version      0.5
 // @author       monkey
-// @description  UserScript for GeoGuessr Learnable Meta map
-// @icon         https://www.google.com/s2/favicons?domain=geoguessr.com
+// @description  UserScript for GeoGuessr Learnable Meta maps
+// @icon         https://learnablemeta.com/favicon.png
 // @downloadURL  https://github.com/likeon/geometa/raw/main/dist/geometa.user.js
 // @updateURL    https://github.com/likeon/geometa/raw/main/dist/geometa.user.js
 // @match        *://*.geoguessr.com/*
 // @require      https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/dbbeb296542ad6c171767e43638c1ecf7adc3bc1/geoguessr-event-framework.js
-// @connect      geometa-info-service.i-a38.workers.dev
+// @connect      learnablemeta.com
 // @grant        GM_addStyle
-// @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==
 
-(t=>{if(typeof GM_addStyle=="function"){GM_addStyle(t);return}const e=document.createElement("style");e.textContent=t,document.head.append(e)})(" .loadership_ZOJAQ.svelte-1fzfwt6.svelte-1fzfwt6{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-1fzfwt6-loadership_ZOJAQ_scale 1.2s infinite,svelte-1fzfwt6-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.geometa-container.svelte-achwc1{position:absolute;top:50%;transform:translateY(-50%);left:1rem;z-index:9;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);max-width:min(25%,500px)} ");
+(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(` .loadership_ZOJAQ.svelte-1fzfwt6.svelte-1fzfwt6{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-1fzfwt6-loadership_ZOJAQ_scale 1.2s infinite,svelte-1fzfwt6-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.geometa-container.svelte-w42zs8.svelte-w42zs8{position:absolute;top:50%;transform:translateY(-50%);left:1rem;z-index:9;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);max-width:min(25%,500px)}.plonkit-note.svelte-w42zs8.svelte-w42zs8{color:#d3d3d3;font-size:small}a.svelte-w42zs8.svelte-w42zs8{color:#188bd2}a.svelte-w42zs8.svelte-w42zs8:hover{text-decoration:underline}.skill-icons--discord.svelte-w42zs8.svelte-w42zs8{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-w42zs8.svelte-w42zs8{display:inline-block;width:1.2rem;height:1.2rem;margin-left:5px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--discord.svelte-w42zs8.svelte-w42zs8,.flat-color-icons--globe.svelte-w42zs8.svelte-w42zs8{display:inline-block;vertical-align:middle}.flex.svelte-w42zs8.svelte-w42zs8{display:flex;align-items:center}.icons.svelte-w42zs8 a span.svelte-w42zs8{align-items:center;justify-content:center} `);
 
 (function () {
   'use strict';
@@ -62,11 +61,6 @@
   function detach(node) {
     if (node.parentNode) {
       node.parentNode.removeChild(node);
-    }
-  }
-  function destroy_each(iterations, detaching) {
-    for (let i = 0; i < iterations.length; i += 1) {
-      if (iterations[i]) iterations[i].d(detaching);
     }
   }
   function element(name) {
@@ -215,9 +209,6 @@
       callback();
     }
   }
-  function ensure_array_like(array_like_or_iterator) {
-    return (array_like_or_iterator == null ? void 0 : array_like_or_iterator.length) !== void 0 ? array_like_or_iterator : Array.from(array_like_or_iterator);
-  }
   function create_component(block) {
     block && block.c();
   }
@@ -361,7 +352,6 @@
   const PUBLIC_VERSION = "4";
   if (typeof window !== "undefined")
     (window.__svelte || (window.__svelte = { v: /* @__PURE__ */ new Set() })).v.add(PUBLIC_VERSION);
-  var _GM_xmlhttpRequest = /* @__PURE__ */ (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
   var _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != "undefined" ? unsafeWindow : void 0)();
   function create_fragment$2(ctx) {
     let div12;
@@ -702,12 +692,6 @@
     const fixed = num.toFixed(2);
     return fixed.replace(/\.?0+$/, "");
   }
-  function get_each_context(ctx, list, i) {
-    const child_ctx = ctx.slice();
-    child_ctx[4] = list[i];
-    child_ctx[6] = i;
-    return child_ctx;
-  }
   function create_else_block(ctx) {
     let spinner;
     let current;
@@ -736,230 +720,130 @@
     };
   }
   function create_if_block_1(ctx) {
-    let each_1_anchor;
-    let current;
-    let each_value = ensure_array_like(
-      /*geoInfo*/
-      ctx[0]
-    );
-    let each_blocks = [];
-    for (let i = 0; i < each_value.length; i += 1) {
-      each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
-    }
-    const out = (i) => transition_out(each_blocks[i], 1, 1, () => {
-      each_blocks[i] = null;
-    });
-    return {
-      c() {
-        for (let i = 0; i < each_blocks.length; i += 1) {
-          each_blocks[i].c();
-        }
-        each_1_anchor = empty();
-      },
-      m(target, anchor) {
-        for (let i = 0; i < each_blocks.length; i += 1) {
-          if (each_blocks[i]) {
-            each_blocks[i].m(target, anchor);
-          }
-        }
-        insert(target, each_1_anchor, anchor);
-        current = true;
-      },
-      p(ctx2, dirty) {
-        if (dirty & /*geoInfo*/
-        1) {
-          each_value = ensure_array_like(
-            /*geoInfo*/
-            ctx2[0]
-          );
-          let i;
-          for (i = 0; i < each_value.length; i += 1) {
-            const child_ctx = get_each_context(ctx2, each_value, i);
-            if (each_blocks[i]) {
-              each_blocks[i].p(child_ctx, dirty);
-              transition_in(each_blocks[i], 1);
-            } else {
-              each_blocks[i] = create_each_block(child_ctx);
-              each_blocks[i].c();
-              transition_in(each_blocks[i], 1);
-              each_blocks[i].m(each_1_anchor.parentNode, each_1_anchor);
-            }
-          }
-          group_outros();
-          for (i = each_value.length; i < each_blocks.length; i += 1) {
-            out(i);
-          }
-          check_outros();
-        }
-      },
-      i(local) {
-        if (current) return;
-        for (let i = 0; i < each_value.length; i += 1) {
-          transition_in(each_blocks[i]);
-        }
-        current = true;
-      },
-      o(local) {
-        each_blocks = each_blocks.filter(Boolean);
-        for (let i = 0; i < each_blocks.length; i += 1) {
-          transition_out(each_blocks[i]);
-        }
-        current = false;
-      },
-      d(detaching) {
-        if (detaching) {
-          detach(each_1_anchor);
-        }
-        destroy_each(each_blocks, detaching);
-      }
-    };
-  }
-  function create_if_block(ctx) {
-    let p;
-    let t0;
-    let t1;
-    return {
-      c() {
-        p = element("p");
-        t0 = text("Error: ");
-        t1 = text(
-          /*error*/
-          ctx[1]
-        );
-      },
-      m(target, anchor) {
-        insert(target, p, anchor);
-        append(p, t0);
-        append(p, t1);
-      },
-      p(ctx2, dirty) {
-        if (dirty & /*error*/
-        2) set_data(
-          t1,
-          /*error*/
-          ctx2[1]
-        );
-      },
-      i: noop,
-      o: noop,
-      d(detaching) {
-        if (detaching) {
-          detach(p);
-        }
-      }
-    };
-  }
-  function create_if_block_2(ctx) {
-    let hr;
-    return {
-      c() {
-        hr = element("hr");
-      },
-      m(target, anchor) {
-        insert(target, hr, anchor);
-      },
-      d(detaching) {
-        if (detaching) {
-          detach(hr);
-        }
-      }
-    };
-  }
-  function create_each_block(ctx) {
-    let t0;
     let p0;
-    let t1;
+    let t0;
     let countryflag;
-    let t2;
+    let t1;
     let strong0;
-    let t3_value = (
-      /*geoItem*/
-      ctx[4].country + ""
+    let t2_value = (
+      /*geoInfo*/
+      ctx[0].country + ""
     );
+    let t2;
     let t3;
-    let t4;
     let p1;
-    let t5;
+    let t4;
     let strong1;
-    let t6_value = (
-      /*geoItem*/
-      ctx[4].type + ""
+    let t5_value = (
+      /*geoInfo*/
+      ctx[0].metaName + ""
     );
+    let t5;
     let t6;
-    let t7;
     let p2;
+    let t7;
+    let t8_value = (
+      /*geoInfo*/
+      ctx[0].note + ""
+    );
     let t8;
-    let t9_value = (
-      /*geoItem*/
-      ctx[4].notes + ""
-    );
     let t9;
-    let current;
-    let if_block = (
-      /*index*/
-      ctx[6] !== 0 && create_if_block_2()
+    let p3;
+    let t10;
+    let a;
+    let t11;
+    let t12_value = (
+      /*geoInfo*/
+      ctx[0].country + ""
     );
+    let t12;
+    let t13;
+    let a_href_value;
+    let current;
     countryflag = new CountryFlag({
       props: { countryName: (
-        /*geoItem*/
-        ctx[4].country
+        /*geoInfo*/
+        ctx[0].country
       ) }
     });
     return {
       c() {
-        if (if_block) if_block.c();
-        t0 = space();
         p0 = element("p");
-        t1 = text("Country:\n        ");
+        t0 = text("Country:\n      ");
         create_component(countryflag.$$.fragment);
-        t2 = space();
+        t1 = space();
         strong0 = element("strong");
-        t3 = text(t3_value);
-        t4 = space();
+        t2 = text(t2_value);
+        t3 = space();
         p1 = element("p");
-        t5 = text("Meta type: ");
+        t4 = text("Meta type: ");
         strong1 = element("strong");
-        t6 = text(t6_value);
-        t7 = space();
+        t5 = text(t5_value);
+        t6 = space();
         p2 = element("p");
-        t8 = text("Notes: ");
-        t9 = text(t9_value);
+        t7 = text("Note: ");
+        t8 = text(t8_value);
+        t9 = space();
+        p3 = element("p");
+        t10 = text("Check out more ");
+        a = element("a");
+        t11 = text("country clues\n      about ");
+        t12 = text(t12_value);
+        t13 = text(" on Plonk\n      It");
+        attr(a, "href", a_href_value = /*geoInfo*/
+        ctx[0].plonkitCountryUrl);
+        attr(a, "target", "_blank");
+        attr(a, "class", "svelte-w42zs8");
+        attr(p3, "class", "plonkit-note svelte-w42zs8");
       },
       m(target, anchor) {
-        if (if_block) if_block.m(target, anchor);
-        insert(target, t0, anchor);
         insert(target, p0, anchor);
-        append(p0, t1);
+        append(p0, t0);
         mount_component(countryflag, p0, null);
-        append(p0, t2);
+        append(p0, t1);
         append(p0, strong0);
-        append(strong0, t3);
-        insert(target, t4, anchor);
+        append(strong0, t2);
+        insert(target, t3, anchor);
         insert(target, p1, anchor);
-        append(p1, t5);
+        append(p1, t4);
         append(p1, strong1);
-        append(strong1, t6);
-        insert(target, t7, anchor);
+        append(strong1, t5);
+        insert(target, t6, anchor);
         insert(target, p2, anchor);
+        append(p2, t7);
         append(p2, t8);
-        append(p2, t9);
+        insert(target, t9, anchor);
+        insert(target, p3, anchor);
+        append(p3, t10);
+        append(p3, a);
+        append(a, t11);
+        append(a, t12);
+        append(a, t13);
         current = true;
       },
       p(ctx2, dirty) {
         const countryflag_changes = {};
         if (dirty & /*geoInfo*/
-        1) countryflag_changes.countryName = /*geoItem*/
-        ctx2[4].country;
+        1) countryflag_changes.countryName = /*geoInfo*/
+        ctx2[0].country;
         countryflag.$set(countryflag_changes);
         if ((!current || dirty & /*geoInfo*/
-        1) && t3_value !== (t3_value = /*geoItem*/
-        ctx2[4].country + "")) set_data(t3, t3_value);
+        1) && t2_value !== (t2_value = /*geoInfo*/
+        ctx2[0].country + "")) set_data(t2, t2_value);
         if ((!current || dirty & /*geoInfo*/
-        1) && t6_value !== (t6_value = /*geoItem*/
-        ctx2[4].type + "")) set_data(t6, t6_value);
+        1) && t5_value !== (t5_value = /*geoInfo*/
+        ctx2[0].metaName + "")) set_data(t5, t5_value);
         if ((!current || dirty & /*geoInfo*/
-        1) && t9_value !== (t9_value = /*geoItem*/
-        ctx2[4].notes + "")) set_data(t9, t9_value);
+        1) && t8_value !== (t8_value = /*geoInfo*/
+        ctx2[0].note + "")) set_data(t8, t8_value);
+        if ((!current || dirty & /*geoInfo*/
+        1) && t12_value !== (t12_value = /*geoInfo*/
+        ctx2[0].country + "")) set_data(t12, t12_value);
+        if (!current || dirty & /*geoInfo*/
+        1 && a_href_value !== (a_href_value = /*geoInfo*/
+        ctx2[0].plonkitCountryUrl)) {
+          attr(a, "href", a_href_value);
+        }
       },
       i(local) {
         if (current) return;
@@ -972,32 +856,49 @@
       },
       d(detaching) {
         if (detaching) {
-          detach(t0);
           detach(p0);
-          detach(t4);
+          detach(t3);
           detach(p1);
-          detach(t7);
+          detach(t6);
           detach(p2);
+          detach(t9);
+          detach(p3);
         }
-        if (if_block) if_block.d(detaching);
         destroy_component(countryflag);
       }
     };
   }
+  function create_if_block(ctx) {
+    let p;
+    return {
+      c() {
+        p = element("p");
+        p.textContent = `Error: ${error}`;
+      },
+      m(target, anchor) {
+        insert(target, p, anchor);
+      },
+      p: noop,
+      i: noop,
+      o: noop,
+      d(detaching) {
+        if (detaching) {
+          detach(p);
+        }
+      }
+    };
+  }
   function create_fragment(ctx) {
-    let div;
-    let h2;
-    let t1;
+    let div2;
+    let div1;
+    let t3;
     let current_block_type_index;
     let if_block;
+    let t4;
     let current;
     const if_block_creators = [create_if_block, create_if_block_1, create_else_block];
     const if_blocks = [];
     function select_block_type(ctx2, dirty) {
-      if (
-        /*error*/
-        ctx2[1]
-      ) return 0;
       if (
         /*geoInfo*/
         ctx2[0]
@@ -1008,18 +909,21 @@
     if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
     return {
       c() {
-        div = element("div");
-        h2 = element("h2");
-        h2.textContent = "GeoMeta";
-        t1 = space();
+        div2 = element("div");
+        div1 = element("div");
+        div1.innerHTML = `<h2>Learnable Meta</h2> <div class="icons svelte-w42zs8"><a href="https://learnablemeta.com/" target="_blank" class="svelte-w42zs8"><span class="flat-color-icons--globe svelte-w42zs8"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" class="svelte-w42zs8"><span class="skill-icons--discord svelte-w42zs8"></span></a></div>`;
+        t3 = space();
         if_block.c();
-        attr(div, "class", "geometa-container svelte-achwc1");
+        t4 = text("\n\n1");
+        attr(div1, "class", "flex svelte-w42zs8");
+        attr(div2, "class", "geometa-container svelte-w42zs8");
       },
       m(target, anchor) {
-        insert(target, div, anchor);
-        append(div, h2);
-        append(div, t1);
-        if_blocks[current_block_type_index].m(div, null);
+        insert(target, div2, anchor);
+        append(div2, div1);
+        append(div2, t3);
+        if_blocks[current_block_type_index].m(div2, null);
+        insert(target, t4, anchor);
         current = true;
       },
       p(ctx2, [dirty]) {
@@ -1041,7 +945,7 @@
             if_block.p(ctx2, dirty);
           }
           transition_in(if_block, 1);
-          if_block.m(div, null);
+          if_block.m(div2, null);
         }
       },
       i(local) {
@@ -1055,66 +959,58 @@
       },
       d(detaching) {
         if (detaching) {
-          detach(div);
+          detach(div2);
+          detach(t4);
         }
         if_blocks[current_block_type_index].d();
       }
     };
   }
+  let error = null;
   function instance($$self, $$props, $$invalidate) {
-    let { lat = 0 } = $$props;
-    let { lng = 0 } = $$props;
+    let { lat } = $$props;
+    let { lng } = $$props;
+    let { mapId } = $$props;
     let geoInfo = null;
-    let error = null;
     onMount(() => {
-      const cutLat = cutToTwoDecimals(lat);
-      const cutLng = cutToTwoDecimals(lng);
-      const url = `https://geometa-info-service.i-a38.workers.dev/?coordinates=${cutLat},${cutLng}`;
-      _GM_xmlhttpRequest({
-        method: "GET",
-        url,
-        onload: (response) => {
-          if (response.status === 200) {
-            try {
-              $$invalidate(0, geoInfo = JSON.parse(response.responseText));
-            } catch (e) {
-              $$invalidate(1, error = "Failed to parse response");
-            }
-          } else if (response.status === 404) {
-            $$invalidate(1, error = "Meta for this location not found");
-          } else {
-            $$invalidate(1, error = `HTTP error! status: ${response.status}`);
-          }
-        },
-        onerror: (e) => {
-          $$invalidate(1, error = "An error occurred while fetching data");
-          console.error("Error:", e);
-        }
+      cutToTwoDecimals(lat);
+      cutToTwoDecimals(lng);
+      $$invalidate(0, geoInfo = {
+        country: "Test",
+        metaName: "Bollard",
+        note: "Addwweq qwdgr rreg",
+        plonkitCountryUrl: "https://www.plonkit.net/united-states"
       });
     });
     $$self.$$set = ($$props2) => {
-      if ("lat" in $$props2) $$invalidate(2, lat = $$props2.lat);
-      if ("lng" in $$props2) $$invalidate(3, lng = $$props2.lng);
+      if ("lat" in $$props2) $$invalidate(1, lat = $$props2.lat);
+      if ("lng" in $$props2) $$invalidate(2, lng = $$props2.lng);
+      if ("mapId" in $$props2) $$invalidate(3, mapId = $$props2.mapId);
     };
-    return [geoInfo, error, lat, lng];
+    return [geoInfo, lat, lng, mapId];
   }
   class App extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, instance, create_fragment, safe_not_equal, { lat: 2, lng: 3 });
+      init(this, options, instance, create_fragment, safe_not_equal, { lat: 1, lng: 2, mapId: 3 });
     }
   }
   function changelog() {
-    return { "0.4": "Updated GeoGuessr Event Framework version. Fixes the disappearing daily challenge from GeoGuessr home page." };
+    return [
+      { "0.5": "New note format and prepared for multiple maps support" },
+      {
+        "0.4": "Updated GeoGuessr Event Framework version. Fixes the disappearing daily challenge from GeoGuessr home page."
+      }
+    ];
   }
   if (_unsafeWindow.notAValidVariable) {
     console.log(changelog());
   }
   const GeoGuessrEventFramework = _unsafeWindow.GeoGuessrEventFramework;
-  const metaMapId = "66c0d3feff4dbe492e06174e";
+  const metaMapIds = /* @__PURE__ */ new Set(["66c0d3feff4dbe492e06174e"]);
   GeoGuessrEventFramework.init().then(() => {
     GeoGuessrEventFramework.events.addEventListener("round_end", (event) => {
-      if (event.detail.map.id != metaMapId) return;
+      if (!metaMapIds.has(event.detail.map.id)) return;
       waitForElement('div[data-qa="result-view-top"]').then((container) => {
         const element2 = document.createElement("div");
         element2.id = "geometa-summary";
@@ -1124,7 +1020,8 @@
           target: element2,
           props: {
             lat: lastRound.location.lat,
-            lng: lastRound.location.lng
+            lng: lastRound.location.lng,
+            mapId: event.detail.map.id
           }
         });
       });
