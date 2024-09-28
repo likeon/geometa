@@ -59,7 +59,11 @@
 					</thead>
 					<tbody class="divide-y divide-gray-400">
 						{#each filteredMetas as meta (meta.id)}
-							<tr role="link" on:click={() => selectMeta(meta)}>
+							<tr
+								class="cursor-pointer hover:bg-green-200"
+								role="link"
+								on:click={() => selectMeta(meta)}
+							>
 								<td>{meta.tagName}</td>
 								<td>{meta.name}</td>
 								<td>
