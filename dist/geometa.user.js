@@ -11,6 +11,7 @@
 // @require      https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/dbbeb296542ad6c171767e43638c1ecf7adc3bc1/geoguessr-event-framework.js
 // @connect      learnablemeta.com
 // @grant        GM_addStyle
+// @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==
@@ -352,6 +353,7 @@
   const PUBLIC_VERSION = "4";
   if (typeof window !== "undefined")
     (window.__svelte || (window.__svelte = { v: /* @__PURE__ */ new Set() })).v.add(PUBLIC_VERSION);
+  var _GM_xmlhttpRequest = /* @__PURE__ */ (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
   var _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != "undefined" ? unsafeWindow : void 0)();
   function create_fragment$2(ctx) {
     let div12;
@@ -870,15 +872,30 @@
   }
   function create_if_block(ctx) {
     let p;
+    let t0;
+    let t1;
     return {
       c() {
         p = element("p");
-        p.textContent = `Error: ${error}`;
+        t0 = text("Error: ");
+        t1 = text(
+          /*error*/
+          ctx[1]
+        );
       },
       m(target, anchor) {
         insert(target, p, anchor);
+        append(p, t0);
+        append(p, t1);
       },
-      p: noop,
+      p(ctx2, dirty) {
+        if (dirty & /*error*/
+        2) set_data(
+          t1,
+          /*error*/
+          ctx2[1]
+        );
+      },
       i: noop,
       o: noop,
       d(detaching) {
@@ -899,6 +916,10 @@
     const if_block_creators = [create_if_block, create_if_block_1, create_else_block];
     const if_blocks = [];
     function select_block_type(ctx2, dirty) {
+      if (
+        /*error*/
+        ctx2[1]
+      ) return 0;
       if (
         /*geoInfo*/
         ctx2[0]
@@ -966,33 +987,49 @@
       }
     };
   }
-  let error = null;
   function instance($$self, $$props, $$invalidate) {
     let { lat } = $$props;
     let { lng } = $$props;
     let { mapId } = $$props;
     let geoInfo = null;
+    let error = null;
     onMount(() => {
-      cutToTwoDecimals(lat);
-      cutToTwoDecimals(lng);
-      $$invalidate(0, geoInfo = {
-        country: "Test",
-        metaName: "Bollard",
-        note: "Addwweq qwdgr rreg",
-        plonkitCountryUrl: "https://www.plonkit.net/united-states"
+      const cutLat = cutToTwoDecimals(lat);
+      const cutLng = cutToTwoDecimals(lng);
+      const url = `https://learnablemeta.com/location-info?coordinates=${cutLat}:${cutLng}&mapId=${mapId}`;
+      _GM_xmlhttpRequest({
+        method: "GET",
+        url,
+        onload: (response) => {
+          if (response.status === 200) {
+            try {
+              $$invalidate(0, geoInfo = JSON.parse(response.responseText));
+            } catch (e) {
+              $$invalidate(1, error = "Failed to parse response");
+            }
+          } else if (response.status === 404) {
+            $$invalidate(1, error = "Meta for this location not found");
+          } else {
+            $$invalidate(1, error = `HTTP error! status: ${response.status}`);
+          }
+        },
+        onerror: (e) => {
+          $$invalidate(1, error = "An error occurred while fetching data");
+          console.error("Error:", e);
+        }
       });
     });
     $$self.$$set = ($$props2) => {
-      if ("lat" in $$props2) $$invalidate(1, lat = $$props2.lat);
-      if ("lng" in $$props2) $$invalidate(2, lng = $$props2.lng);
-      if ("mapId" in $$props2) $$invalidate(3, mapId = $$props2.mapId);
+      if ("lat" in $$props2) $$invalidate(2, lat = $$props2.lat);
+      if ("lng" in $$props2) $$invalidate(3, lng = $$props2.lng);
+      if ("mapId" in $$props2) $$invalidate(4, mapId = $$props2.mapId);
     };
-    return [geoInfo, lat, lng, mapId];
+    return [geoInfo, error, lat, lng, mapId];
   }
   class App extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, instance, create_fragment, safe_not_equal, { lat: 1, lng: 2, mapId: 3 });
+      init(this, options, instance, create_fragment, safe_not_equal, { lat: 2, lng: 3, mapId: 4 });
     }
   }
   function changelog() {

@@ -24,33 +24,27 @@
     const cutLng = cutToTwoDecimals(lng);
     const url = `https://learnablemeta.com/location-info?coordinates=${cutLat}:${cutLng}&mapId=${mapId}`;
 
-    // GM_xmlhttpRequest({
-    //   method: 'GET',
-    //   url: url,
-    //   onload: (response) => {
-    //     if (response.status === 200) {
-    //       try {
-    //         geoInfo = JSON.parse(response.responseText);
-    //       } catch (e) {
-    //         error = 'Failed to parse response';
-    //       }
-    //     } else if (response.status === 404) {
-    //       error = 'Meta for this location not found';
-    //     } else {
-    //       error = `HTTP error! status: ${response.status}`;
-    //     }
-    //   },
-    //   onerror: (e) => {
-    //     error = 'An error occurred while fetching data';
-    //     console.error('Error:', e);
-    //   }
-    // });
-    geoInfo = {
-      country: 'Test',
-      metaName: 'Bollard',
-      note: 'Addwweq qwdgr rreg',
-      plonkitCountryUrl: 'https://www.plonkit.net/united-states'
-    }
+    GM_xmlhttpRequest({
+      method: 'GET',
+      url: url,
+      onload: (response) => {
+        if (response.status === 200) {
+          try {
+            geoInfo = JSON.parse(response.responseText);
+          } catch (e) {
+            error = 'Failed to parse response';
+          }
+        } else if (response.status === 404) {
+          error = 'Meta for this location not found';
+        } else {
+          error = `HTTP error! status: ${response.status}`;
+        }
+      },
+      onerror: (e) => {
+        error = 'An error occurred while fetching data';
+        console.error('Error:', e);
+      }
+    });
   });
 </script>
 
