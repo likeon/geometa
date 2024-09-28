@@ -1,6 +1,7 @@
 <script>
   import { Heading } from 'flowbite-svelte';
   import Icon from '@iconify/svelte';
+  import geoPin from '$lib/assets/GeoGuessr-Pin.png?enhanced';
 </script>
 
 <svelte:head>
@@ -24,18 +25,20 @@
       <p>
         While there might be other maps like this available, mine includes a script that shows a
         note about the location after you make your guess in GeoGuessr, explaining each round and
-        highlighting the clues you might have missed that could help you identify the country.
-        Alternatively, as a backup, you can post the location link in the Google Sheet, and it will
-        tell you what you missed. The map is designed for No Move/NMPZ (for the rounds with google
-        car meta will be harder because it won't be fully visible but, it’s easily doable).
+        highlighting the clues you might have missed that could help you identify the country. The
+        map is designed for No Move because it's skill itself to find clues and it's good habbit to
+        learn to check google car, poles, roadlines etc.
       </p>
-
-      <div class="text-center">
-        <a
-          href="https://www.geoguessr.com/maps/66c0d3feff4dbe492e06174e"
-          target="_blank"
-          class="font-bold text-3xl">Map on GeoGuessr</a
-        >
+      <p></p>
+      <div class="flex flex-col items-center justify-center text-center">
+        <div class="flex items-center space-x-2">
+          <enhanced:img src={geoPin} class="h-6 sm:h-9 w-auto" alt="Geoguessr pin" />
+          <a
+            href="https://www.geoguessr.com/maps/66c0d3feff4dbe492e06174e"
+            target="_blank"
+            class="font-bold text-3xl">Map on GeoGuessr</a
+          >
+        </div>
       </div>
       <Heading tag="h2" class="mt-4 mb-[-10px]">How to use</Heading>
       <p>
@@ -101,46 +104,6 @@
         </li>
       </ul>
 
-      <Heading tag="h4" class="mt-4 mb-[-10px]">An alternative way</Heading>
-      <p>
-        If, for any reason, you prefer not to use the script, you can opt for a Google Sheet
-        instead. You'll need to manually copy the Google Street View URL into the sheet to retrieve
-        the information.
-      </p>
-      <ul role="list" class="mt-8 max-w-xl space-y-4 text-gray-600">
-        <li class="flex gap-x-3">
-          <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
-          <span
-            ><strong class="font-semibold text-gray-900"
-              >Copy the Google Sheet so you can modify it.</strong
-            >
-            Open the
-            <a
-              href="https://docs.google.com/spreadsheets/d/1cQnat5d9DxDX-swSOIZYHdnsnw-b9mBQpa-GA3WQOTU"
-              target="_blank">the spreadsheet</a
-            >
-            and click File -> Make a copy.</span
-          >
-        </li>
-        <li class="flex gap-x-3">
-          <Icon icon="icon-park-solid:check-one" class="h-6 w-6 flex-shrink-0" color="green" />
-          <span
-            ><strong class="font-semibold text-gray-900">Play the map.</strong>
-            Guess a location on
-            <a href="https://www.geoguessr.com/maps/66c0d3feff4dbe492e06174e">the map</a>. On the
-            result screen click on the location marker to open Google Street View.</span
-          >
-        </li>
-        <li class="flex gap-x-3">
-          <Icon icon="icon-park-solid:check-one" class="h-6 w-6 flex-shrink-0" color="green" />
-          <span
-            ><strong class="font-semibold text-gray-900">Copy the url.</strong>
-            Copy the Google Street View url into the main page of your spreadsheet copy, to the right
-            of the column named "Enter Link".</span
-          >
-        </li>
-      </ul>
-
       <p class="font-semibold">
         Feel free to join our <a href="https://discord.gg/AcXEWznYZe" target="_blank"
           >discord server</a
@@ -149,11 +112,11 @@
     </div>
     <Heading tag="h3" class="mt-4">Credits</Heading>
     <p><strong>Map Creator</strong>: trausi</p>
-    <p><strong>Spreadsheet Creator</strong>: bastu</p>
     <p><strong>UserScript Creator</strong>: plurk</p>
+    <p><i>Also big thanks to Bastu, Gelotris and Micha for help with making the map.</i></p>
     <p>
       <strong>Metas and some meta descriptions</strong>:
-      <a href="https://www.plonkit.net/" target="_blank">PLONK IT</a>
+      <a href="https://www.plonkit.net/" target="_blank">Plonk It</a>
     </p>
   </div>
 </div>
