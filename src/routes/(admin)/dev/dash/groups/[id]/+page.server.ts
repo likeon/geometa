@@ -16,7 +16,12 @@ import { setError, superValidate, withFiles } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
-import { cloudflareKvBulkPut, extractJsonData, getCountryFromTagName } from '$lib/utils';
+import {
+  cloudflareKvBulkPut,
+  cutToTwoDecimals,
+  extractJsonData,
+  getCountryFromTagName
+} from '$lib/utils';
 import { getGroupId } from './utils';
 
 const insertMetasSchema = createInsertSchema(metas).extend({ levels: z.array(z.number()) });
@@ -195,7 +200,7 @@ export const actions = {
 
     const kvData = [];
     for (const item of dbValues) {
-      const key = `${item.maps.geoguessrId}:${item.map_locations_view.lat}:${item.map_locations_view.lng}`;
+      const key = `${item.maps.geoguessrId}:${cutToTwoDecimals(item.map_locations_view.lat)}:${cutToTwoDecimals(item.map_locations_view.lng)}`;
       const countryName = getCountryFromTagName(item.map_locations_view.tagName);
       const plonkitCountryUrl = `https://www.plonkit.net/${countryName.toLowerCase().replace(' ', '-')}`;
       const value = {
@@ -207,6 +212,7 @@ export const actions = {
       kvData.push({ key: key, value: JSON.stringify(value), base64: false });
     }
 
-    await cloudflareKvBulkPut(kvData);
+    console.debug(kvData);
+    // await cloudflareKvBulkPut(kvData);
   }
 };
