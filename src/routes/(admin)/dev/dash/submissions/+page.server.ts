@@ -3,10 +3,10 @@ import type { PageServerLoad } from './$types';
 import { sql } from 'drizzle-orm';
 
 type EntryQueryResult = {
-	id: number;
-	type: string;
-	description: string;
-	tagsJSON: string;
+  id: number;
+  type: string;
+  description: string;
+  tagsJSON: string;
 }[];
 const entriesSql = sql`
 SELECT
@@ -27,5 +27,5 @@ FROM
 `;
 
 export const load: PageServerLoad = async () => {
-	return { entries: (await db.all(entriesSql)) as EntryQueryResult, q: 1 };
+  return { entries: (await db.all(entriesSql)) as EntryQueryResult, q: 1 };
 };

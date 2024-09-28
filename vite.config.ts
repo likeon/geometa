@@ -4,11 +4,11 @@ import { enhancedImages } from '@sveltejs/enhanced-img';
 import Icons from 'unplugin-icons/vite';
 
 export default defineConfig({
-	plugins: [
-		enhancedImages(),
-		Icons({
-			compiler: 'svelte'
-		}),
-		sveltekit()
-	]
+  plugins: [
+    enhancedImages(),
+    Icons({
+      compiler: 'svelte'
+    }),
+    sveltekit()
+  ]
 });
