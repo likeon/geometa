@@ -24,24 +24,13 @@ export async function extractJsonData(file: File): Promise<any> {
   }
 }
 
-const countryMap = new Map<string, string>([
-  ['NewZealand', 'New Zealand'],
-  ['AmericanSamoa', 'American Samoa'],
-  ['UnitedStates', 'United States'],
-  ['DominicanRepublic', 'Dominican Republic'],
-  ['USVirginIslands', 'US Virgin Islands'],
-  ['IsleOfMan', 'Isle Of Man'],
-  ['UnitedKingdom', 'United Kingdom'],
-  ['ChristmasIsland', 'Christmas Island'],
-  ['SriLanka', 'Sri Lanka'],
-  ['SouthKorea', 'South Korea'],
-  ['SouthAfrica', 'South Africa'],
-  ['PuertoRico', 'Puerto Rico']
-]);
-
 export function getCountryFromTagName(tagName: string) {
   const countryRaw = tagName.split('-')[0];
-  return countryMap.get(countryRaw) || countryRaw;
+
+  if (countryRaw === 'UsVirginIslands') {
+    return 'US Virgin Islands';
+  }
+  return countryRaw.replace(/([a-z])([A-Z])/g, '$1 $2').trim();
 }
 
 export function cutToTwoDecimals(num: number): string {

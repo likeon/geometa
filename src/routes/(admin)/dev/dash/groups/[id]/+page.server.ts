@@ -196,11 +196,13 @@ export const actions = {
     const kvData = [];
     for (const item of dbValues) {
       const key = `${item.maps.geoguessrId}:${item.map_locations_view.lat}:${item.map_locations_view.lng}`;
+      const countryName = getCountryFromTagName(item.map_locations_view.tagName);
+      const plonkitCountryUrl = `https://www.plonkit.net/${countryName.toLowerCase().replace(' ', '-')}`;
       const value = {
         country: getCountryFromTagName(item.map_locations_view.tagName),
         metaName: item.map_locations_view.metaName,
         note: item.map_locations_view.metaNote,
-        noteFromPlonkit: item.map_locations_view.metaNoteFromPlonkit
+        plonkitCountryUrl: plonkitCountryUrl
       };
       kvData.push({ key: key, value: JSON.stringify(value), base64: false });
     }
