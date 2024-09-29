@@ -78,18 +78,6 @@
     name: item.name
   }));
 
-  const {
-    form: mapUploadForm,
-    errors: mapUploadFormErrors,
-    enhance: mapUploadFormEnhance,
-    submit: mapUploadFormSubmit
-  } = superForm(data.mapUploadForm, {
-    onResult() {
-      window.location.reload();
-    }
-  });
-  const file = fileProxy(mapUploadForm, 'file');
-
   function addMeta() {
     $metaForm.id = undefined;
     $metaForm.mapGroupId = data.group.id;
@@ -115,6 +103,7 @@
   }
 
   import { page } from '$app/stores';
+  import MapUpload from '$routes/(admin)/dev/dash/groups/[id]/MapUpload.svelte';
 </script>
 
 <svelte:head>
@@ -258,27 +247,6 @@
   </form>
 </Modal>
 
-<Modal bind:open={isUploadModalOpen}>
-  <form
-    class="flex flex-col space-y-6"
-    method="post"
-    action="?/uploadMapJson"
-    enctype="multipart/form-data"
-    use:mapUploadFormEnhance
-  >
-    <label>
-      Upload map json: <input
-        bind:files={$file}
-        accept="application/json"
-        name="file"
-        type="file"
-        on:change={() => mapUploadFormSubmit()}
-      />
-      {#if $mapUploadFormErrors.file}
-        <div class="invalid">{$mapUploadFormErrors.file}</div>
-      {/if}
-    </label>
-  </form>
-</Modal>
+<MapUpload {isUploadModalOpen} data={data.mapUploadForm} />
 
 <SvelteToast />

@@ -28,6 +28,8 @@ const insertMetasSchema = createInsertSchema(metas).extend({ levels: z.array(z.n
 const mapUploadSchema = z.object({
   file: z.instanceof(File, { message: 'Please upload a file.' })
 });
+export type MapUploadSchema = typeof mapUploadSchema;
+
 const mapJsonSchema = z.object({
   customCoordinates: z
     .object({
