@@ -25,6 +25,7 @@ import {
 import { getGroupId } from './utils';
 
 const insertMetasSchema = createInsertSchema(metas).extend({ levels: z.array(z.number()) });
+export type InsertMetasSchema = typeof insertMetasSchema;
 const mapUploadSchema = z.object({
   file: z.instanceof(File, { message: 'Please upload a file.' })
 });

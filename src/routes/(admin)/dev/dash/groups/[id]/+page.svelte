@@ -1,22 +1,16 @@
 <script lang="ts">
-  import {
-    Alert,
-    Button,
-    GradientButton,
-    Input,
-    Label,
-    Modal,
-    MultiSelect,
-    Textarea
-  } from 'flowbite-svelte';
-  import { fileProxy, superForm } from 'sveltekit-superforms';
+  import { Button, GradientButton, Input } from 'flowbite-svelte';
   import Icon from '@iconify/svelte';
-  import Metas from './Metas.svelte';
   import { applyAction, enhance } from '$app/forms';
   import { SvelteToast } from '@zerodevx/svelte-toast';
   import { toast } from '@zerodevx/svelte-toast';
+  import { page } from '$app/stores';
+  import Metas from './Metas.svelte';
+  import MapUploadModal from './MapUploadModal.svelte';
+  import MetaEditModal from './MetaEditModal.svelte';
 
   export let data;
+
   type MetaType = (typeof data.group.metas)[number];
   let isMetaModalOpen = false;
   let isUploadModalOpen = false;
@@ -61,49 +55,23 @@
     }
   }
 
-  const {
-    form: metaForm,
-    errors: metaErrors,
-    constraints: metaConstraints,
-    enhance: metaEnhance
-  } = superForm(data.metaForm, {
-    dataType: 'json',
-    onResult() {
-      isMetaModalOpen = false;
-    }
-  });
+  function addMeta() {
+    selectedMeta = null;
+    isMetaModalOpen = true;
+  }
+
+  function selectMeta(meta: MetaType) {
+    console.log('works');
+    selectedMeta = meta;
+    isMetaModalOpen = true;
+  }
 
   const levelChoices = data.levelList.map((item) => ({
     value: item.id,
     name: item.name
   }));
 
-  function addMeta() {
-    $metaForm.id = undefined;
-    $metaForm.mapGroupId = data.group.id;
-    $metaForm.tagName = '';
-    $metaForm.name = '';
-    $metaForm.note = '';
-    $metaForm.noteFromPlonkit = false;
-    $metaForm.hasImage = false;
-    $metaForm.levels = [];
-    isMetaModalOpen = true;
-  }
-
-  function selectMeta(meta: MetaType) {
-    $metaForm.id = meta.id;
-    $metaForm.mapGroupId = meta.mapGroupId;
-    $metaForm.tagName = meta.tagName;
-    $metaForm.name = meta.name;
-    $metaForm.note = meta.note;
-    $metaForm.noteFromPlonkit = meta.noteFromPlonkit;
-    $metaForm.hasImage = meta.hasImage;
-    $metaForm.levels = meta.metaLevels.map((item) => item.levelId);
-    isMetaModalOpen = true;
-  }
-
-  import { page } from '$app/stores';
-  import MapUpload from '$routes/(admin)/dev/dash/groups/[id]/MapUpload.svelte';
+  let selectedMeta: (typeof data.group.metas)[number] | null = null;
 </script>
 
 <svelte:head>
@@ -180,73 +148,14 @@
   <Metas {filteredMetas} {selectMeta} {selectedHeader} {sortArrow} {selectHeader} />
 </div>
 
-<Modal bind:open={isMetaModalOpen}>
-  <form action="?/updateMeta" class="flex flex-col space-y-6" method="post" use:metaEnhance>
-    <Input type="hidden" name="id" bind:value={$metaForm.id} />
-    <Input type="hidden" name="mapGroupId" bind:value={$metaForm.mapGroupId} />
-    <Label class="space-y-2">
-      <span>Tag name</span>
-      <Input
-        type="text"
-        name="tagName"
-        aria-invalid={$metaErrors.tagName ? 'true' : undefined}
-        bind:value={$metaForm.tagName}
-        {...$metaConstraints.tagName}
-      />
-      {#if $metaErrors.tagName}
-        <Alert color="red">{$metaErrors.tagName}</Alert>
-      {/if}
-    </Label>
-    <Label class="space-y-2">
-      <span>Name</span>
-      <Input
-        type="text"
-        name="name"
-        aria-invalid={$metaErrors.name ? 'true' : undefined}
-        bind:value={$metaForm.name}
-        {...$metaConstraints.name}
-      />
-      {#if $metaErrors.name}
-        <Alert color="red">{$metaErrors.name}</Alert>
-      {/if}
-    </Label>
-    <Label class="space-y-2">
-      <span>Note</span>
-      <Textarea
-        rows="6"
-        name="note"
-        aria-invalid={$metaErrors.note ? 'true' : undefined}
-        bind:value={$metaForm.note}
-        {...$metaConstraints.note}
-      />
-      {#if $metaErrors.note}
-        <Alert color="red">{$metaErrors.note}</Alert>
-      {/if}
-    </Label>
-    <Label
-      ><input
-        class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 me-2 dark:bg-gray-700 dark:border-gray-600 rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600"
-        type="checkbox"
-        name="noteFromPlonkit"
-        bind:checked={$metaForm.noteFromPlonkit}
-      />Note from Plonkit</Label
-    >
-    <Label
-      ><input
-        class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 me-2 dark:bg-gray-700 dark:border-gray-600 rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600"
-        type="checkbox"
-        name="hasImage"
-        bind:checked={$metaForm.hasImage}
-      />Has image</Label
-    >
-    <Label>
-      <span>Levels</span>
-      <MultiSelect items={levelChoices} bind:value={$metaForm.levels} size="lg" />
-    </Label>
-    <Button type="submit" class="w-full">Save</Button>
-  </form>
-</Modal>
+<MetaEditModal
+  bind:isMetaModalOpen
+  data={data.metaForm}
+  {levelChoices}
+  groupId={data.group.id}
+  {selectedMeta}
+/>
 
-<MapUpload {isUploadModalOpen} data={data.mapUploadForm} />
+<MapUploadModal bind:isUploadModalOpen data={data.mapUploadForm} />
 
 <SvelteToast />

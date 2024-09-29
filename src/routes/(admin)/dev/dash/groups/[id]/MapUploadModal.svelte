@@ -5,7 +5,7 @@
 
   import { type SuperValidated, type Infer, fileProxy } from 'sveltekit-superforms';
   import { superForm } from 'sveltekit-superforms';
-  import type { MapUploadSchema } from '$routes/(admin)/dev/dash/groups/[id]/+page.server';
+  import type { MapUploadSchema } from './+page.server';
 
   export let data: SuperValidated<Infer<MapUploadSchema>>;
 
