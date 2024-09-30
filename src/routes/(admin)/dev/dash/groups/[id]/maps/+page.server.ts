@@ -6,8 +6,9 @@ import { error, fail } from '@sveltejs/kit';
 import { createInsertSchema } from 'drizzle-zod';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
+import { z } from 'zod';
 
-const insertMapsSchema = createInsertSchema(maps);
+const insertMapsSchema = createInsertSchema(maps).extend({ filters: z.array(z.string()) });
 export type InsertMapsSchema = typeof insertMapsSchema;
 
 export const load = async ({ params }) => {
@@ -50,7 +51,8 @@ export const actions = {
     form.data.levelId = form.data.levelId == -1 ? null : form.data.levelId;
     const { id, ...dataNoId } = form.data;
     let mapId;
-
+    // temporary: check if filters data is properly received
+    console.log(form.data.filters);
     if (id === undefined) {
       const insertResult = await db
         .insert(maps)

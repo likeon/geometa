@@ -23,12 +23,33 @@
     $form.levelId = selectedMap.levelId;
     $form.mapGroupId = selectedMap.mapGroupId;
     $form.name = selectedMap.name;
+    // placeholders filters to see if stuff works
+    $form.filters = ['test%', 'filtertest', 'Poland'];
   } else {
     $form.id = undefined;
     $form.mapGroupId = groupId;
     $form.geoguessrId = '';
     $form.levelId = -1;
     $form.name = '';
+    $form.filters = [];
+  }
+
+  let filterInput = '';
+
+  // Function to add a tag
+
+  function addFilter() {
+    const trimmedFilter = filterInput.trim();
+    if (trimmedFilter && !$form.filters.includes(trimmedFilter)) {
+      // Update the tags array in the form
+      $form.filters = [...$form.filters, trimmedFilter];
+      filterInput = ''; // Clear the input field
+    }
+  }
+
+  // Function to remove a tag
+  function removeFilter(filter: string) {
+    $form.filters = $form.filters.filter((t) => t !== filter);
   }
 </script>
 
@@ -65,6 +86,22 @@
     <Label>
       <span>Levels</span>
       <Select items={levelChoices} bind:value={$form.levelId} size="lg" />
+    </Label>
+    <Label>
+      <span>Filters:</span>
+      <input type="text" bind:value={filterInput} placeholder="Type a filter..." />
+      <button type="button" on:click={addFilter}>+</button>
+
+      <div>
+        {#each $form.filters as filter}
+          <span class="tag">
+            {filter}
+            <button type="button" on:click={() => removeFilter(filter)}
+              ><span style="color: red;">X</span></button
+            >
+          </span>
+        {/each}
+      </div>
     </Label>
     <Button type="submit" class="w-full">Save</Button>
   </form>
