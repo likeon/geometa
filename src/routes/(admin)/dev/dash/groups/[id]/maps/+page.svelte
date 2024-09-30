@@ -1,6 +1,28 @@
 <script lang="ts">
   export let data;
   import { page } from '$app/stores';
+  import { Button } from 'flowbite-svelte';
+  import MapEditModal from './MapEditModal.svelte';
+
+  type MapType = (typeof data.group.maps)[number];
+  let isMapModalOpen = false;
+  let selectedMap: (typeof data.group.maps)[number] | null = null;
+
+  function addMap() {
+    selectedMap = null;
+    isMapModalOpen = true;
+  }
+
+  function selectMap(map: MapType) {
+    selectedMap = map;
+    isMapModalOpen = true;
+  }
+
+  const levelChoices = data.levelList.map((item) => ({
+    value: item.id,
+    name: item.name
+  }));
+  levelChoices.push({ value: -1, name: 'None' });
 </script>
 
 <div>
@@ -21,6 +43,12 @@
           aria-current="page">Maps</a
         >
       </nav>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap items-center">
+    <div class="flex-grow flex items-center justify-end">
+      <Button on:click={addMap}>Add map</Button>
     </div>
   </div>
 
@@ -48,7 +76,11 @@
             </thead>
             <tbody class="divide-y divide-gray-400">
               {#each data.group.maps as map (map.id)}
-                <tr>
+                <tr
+                  class="cursor-pointer hover:bg-green-200"
+                  role="link"
+                  on:click={() => selectMap(map)}
+                >
                   <td>{map.name}</td>
                   <td>{map.level?.name || ''}</td>
                   <td>{map.locationsCount}</td>
@@ -66,6 +98,14 @@
     </div>
   </div>
 </div>
+
+<MapEditModal
+  bind:isMapModalOpen
+  data={data.mapForm}
+  {levelChoices}
+  groupId={data.group.id}
+  {selectedMap}
+/>
 
 <style lang="postcss">
   td {

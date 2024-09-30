@@ -1,0 +1,71 @@
+<script lang="ts">
+  import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
+  import type { InsertMapsSchema } from './+page.server';
+  import type { PageData } from './$types';
+  import { Alert, Button, Input, Label, Modal, Select, Textarea } from 'flowbite-svelte';
+
+  export let data: SuperValidated<Infer<InsertMapsSchema>>;
+  export let isMapModalOpen: boolean;
+  export let selectedMap: PageData['group']['maps'][number] | null;
+  export let groupId: number;
+  export let levelChoices: { value: number; name: string }[];
+
+  const { form, errors, constraints, enhance } = superForm(data, {
+    dataType: 'json',
+    onResult() {
+      isMapModalOpen = false;
+    }
+  });
+
+  $: if (selectedMap) {
+    $form.geoguessrId = selectedMap.geoguessrId;
+    $form.id = selectedMap.id;
+    $form.levelId = selectedMap.levelId;
+    $form.mapGroupId = selectedMap.mapGroupId;
+    $form.name = selectedMap.name;
+  } else {
+    $form.id = undefined;
+    $form.mapGroupId = groupId;
+    $form.geoguessrId = '';
+    $form.levelId = -1;
+    $form.name = '';
+  }
+</script>
+
+<Modal bind:open={isMapModalOpen}>
+  <form action="?/updateMap" class="flex flex-col space-y-6" method="post" use:enhance>
+    <Input type="hidden" name="id" bind:value={$form.id} />
+    <Input type="hidden" name="mapGroupId" bind:value={$form.mapGroupId} />
+    <Label class="space-y-2">
+      <span>Name</span>
+      <Input
+        type="text"
+        name="name"
+        aria-invalid={$errors.name ? 'true' : undefined}
+        bind:value={$form.name}
+        {...$constraints.name}
+      />
+      {#if $errors.name}
+        <Alert color="red">{$errors.name}</Alert>
+      {/if}
+    </Label>
+    <Label class="space-y-2">
+      <span>Geoguessr Id</span>
+      <Input
+        type="text"
+        name="geoguessrId"
+        aria-invalid={$errors.geoguessrId ? 'true' : undefined}
+        bind:value={$form.geoguessrId}
+        {...$constraints.geoguessrId}
+      />
+      {#if $errors.geoguessrId}
+        <Alert color="red">{$errors.geoguessrId}</Alert>
+      {/if}
+    </Label>
+    <Label>
+      <span>Levels</span>
+      <Select items={levelChoices} bind:value={$form.levelId} size="lg" />
+    </Label>
+    <Button type="submit" class="w-full">Save</Button>
+  </form>
+</Modal>

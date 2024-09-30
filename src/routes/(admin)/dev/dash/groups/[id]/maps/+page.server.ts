@@ -1,8 +1,14 @@
 import { db } from '$lib/drizzle';
 import { getGroupId } from '../utils';
 import { eq, sql } from 'drizzle-orm';
-import { mapGroups, maps } from '$lib/db/schema';
-import { error } from '@sveltejs/kit';
+import { mapGroups, maps, levels } from '$lib/db/schema';
+import { error, fail } from '@sveltejs/kit';
+import { createInsertSchema } from 'drizzle-zod';
+import { superValidate } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
+
+const insertMapsSchema = createInsertSchema(maps);
+export type InsertMapsSchema = typeof insertMapsSchema;
 
 export const load = async ({ params }) => {
   const groupId = getGroupId(params);
@@ -28,5 +34,32 @@ export const load = async ({ params }) => {
     error(404, 'No group');
   }
 
-  return { group };
+  const levelList = await db.query.levels.findMany({ where: eq(levels.mapGroupId, group?.id) });
+  const mapForm = await superValidate(zod(insertMapsSchema));
+
+  return { group, levelList, mapForm };
+};
+
+export const actions = {
+  updateMap: async ({ request }) => {
+    const form = await superValidate(request, zod(insertMapsSchema));
+    if (!form.valid) {
+      return fail(400, { form });
+    }
+
+    form.data.levelId = form.data.levelId == -1 ? null : form.data.levelId;
+    const { id, ...dataNoId } = form.data;
+    let mapId;
+
+    if (id === undefined) {
+      const insertResult = await db
+        .insert(maps)
+        .values(form.data)
+        .returning({ insertedId: maps.id });
+      mapId = insertResult[0].insertedId;
+    } else {
+      await db.update(maps).set(dataNoId).where(eq(maps.id, id));
+      mapId = id;
+    }
+  }
 };
