@@ -144,8 +144,8 @@ export const metaImages = sqliteTable('meta_images', {
     .references(() => metas.id, { onDelete: 'cascade' }),
   image_url: text('image_url').notNull()
 });
-export const metaImagesRelations = relations(metaLevels, ({ one }) => ({
-  meta: one(metas, { fields: [metaLevels.metaId], references: [metas.id] })
+export const metaImagesRelations = relations(metaImages, ({ one }) => ({
+  meta: one(metas, { fields: [metaImages.metaId], references: [metas.id] })
 }));
 
 export const locationMetas = sqliteView('location_metas_view', {
