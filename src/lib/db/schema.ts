@@ -113,7 +113,8 @@ export const metas = sqliteTable(
 );
 export const metasRelations = relations(metas, ({ one, many }) => ({
   mapGroup: one(mapGroups, { fields: [metas.mapGroupId], references: [mapGroups.id] }),
-  metaLevels: many(metaLevels)
+  metaLevels: many(metaLevels),
+  metaImages: many(metaImages)
 }));
 
 export const metaLevels = sqliteTable(
@@ -134,6 +135,17 @@ export const metaLevels = sqliteTable(
 export const metaLevelRelations = relations(metaLevels, ({ one }) => ({
   meta: one(metas, { fields: [metaLevels.metaId], references: [metas.id] }),
   level: one(levels, { fields: [metaLevels.levelId], references: [levels.id] })
+}));
+
+export const metaImages = sqliteTable('meta_images', {
+  id: integer('id').primaryKey(),
+  metaId: integer('meta_id')
+    .notNull()
+    .references(() => metas.id, { onDelete: 'cascade' }),
+  image_url: text('image_url').notNull()
+});
+export const metaImagesRelations = relations(metaLevels, ({ one }) => ({
+  meta: one(metas, { fields: [metaLevels.metaId], references: [metas.id] })
 }));
 
 export const locationMetas = sqliteView('location_metas_view', {

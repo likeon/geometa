@@ -11,8 +11,10 @@
     "lint": "prettier --check . && eslint .",
     "format": "prettier --write .",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "db:migrate": "dotenv -e .env drizzle-kit migrate",
+    "db:migrate:preview": "dotenv -e .env.preview.local -e .env drizzle-kit migrate",
+    "db:migrate:prod": "dotenv -e .env.prod.local -e .env drizzle-kit migrate"
   },
   "devDependencies": {
     "@fontsource/fira-mono": "^5.0.0",
@@ -28,6 +30,7 @@
     "@types/node": "^22.7.0",
     "@zerodevx/svelte-toast": "^0.9.6",
     "autoprefixer": "^10.4.20",
+    "dotenv-cli": "^7.4.2",
     "drizzle-kit": "^0.24.2",
     "eslint": "^9.0.0",
     "eslint-config-prettier": "^9.1.0",
