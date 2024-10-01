@@ -7,12 +7,13 @@ import {
   mapGroups,
   mapLocations,
   maps,
+  metaImages,
   metaLevels,
   metas
 } from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
 import { createInsertSchema } from 'drizzle-zod';
-import { setError, superValidate, withFiles } from 'sveltekit-superforms';
+import { message, setError, superValidate, withFiles } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
@@ -20,16 +21,27 @@ import {
   cloudflareKvBulkPut,
   cutToTwoDecimals,
   extractJsonData,
-  getCountryFromTagName
+  generateRandomString,
+  getCountryFromTagName,
+  getFileExtension
 } from '$lib/utils';
 import { getGroupId } from './utils';
+import { uploadFile } from '$lib/s3';
+import { dev } from '$app/environment';
 
 const insertMetasSchema = createInsertSchema(metas).extend({ levels: z.array(z.number()) });
 export type InsertMetasSchema = typeof insertMetasSchema;
+
 const mapUploadSchema = z.object({
   file: z.instanceof(File, { message: 'Please upload a file.' })
 });
 export type MapUploadSchema = typeof mapUploadSchema;
+
+const imageUploadSchema = z.object({
+  metaId: z.number(),
+  file: z.instanceof(File, { message: 'Please upload an image' })
+});
+export type ImageUploadSchema = typeof imageUploadSchema;
 
 const mapJsonSchema = z.object({
   customCoordinates: z
@@ -68,7 +80,7 @@ export const load: PageServerLoad = async ({ params }) => {
     with: {
       metas: {
         orderBy: [asc(metas.id)],
-        with: { metaLevels: { with: { level: true } } }
+        with: { metaLevels: { with: { level: true } }, images: true }
       }
     },
     where: eq(mapGroups.id, id)
@@ -81,12 +93,14 @@ export const load: PageServerLoad = async ({ params }) => {
 
   const metaForm = await superValidate(zod(insertMetasSchema));
   const mapUploadForm = await superValidate(zod(mapUploadSchema));
+  const imageUploadForm = await superValidate(zod(imageUploadSchema));
 
   return {
     group,
     metaForm,
     levelList,
-    mapUploadForm
+    mapUploadForm,
+    imageUploadForm
   };
 };
 
@@ -191,6 +205,34 @@ export const actions = {
       note: ''
     }));
     await db.insert(metas).values(metaInsertValues).onConflictDoNothing();
+  },
+  uploadMetaImages: async ({ request }) => {
+    const form = await superValidate(request, zod(imageUploadSchema));
+
+    if (!form.valid) {
+      return fail(400, withFiles({ form }));
+    }
+
+    const imageName = `${generateRandomString(36)}.${getFileExtension(form.data.file)}`;
+    uploadFile(form.data.file, imageName);
+
+    const url = `https://static${dev ? '-dev' : ''}.learnablemeta.com/${imageName}`;
+
+    const result = await db
+      .insert(metaImages)
+      .values({ metaId: form.data.metaId, image_url: url })
+      .returning({ id: metaImages.id, metaId: metaImages.metaId, image_url: metaImages.image_url });
+    return message(form, result[0]);
+  },
+  deleteMetaImage: async ({ request }) => {
+    const data = await request.formData();
+    const imageId = parseInt((data.get('imageId') as string) || '', 10);
+    if (isNaN(imageId)) {
+      error(400, 'Invalid ID');
+    }
+
+    await db.delete(metaImages).where(eq(metaImages.id, imageId));
+    return { success: true, imageId: imageId };
   },
   prepareUserScriptData: async (event) => {
     const groupId = getGroupId(event.params);

@@ -61,7 +61,6 @@
   }
 
   function selectMeta(meta: MetaType) {
-    console.log('works');
     selectedMeta = meta;
     isMetaModalOpen = true;
   }
@@ -150,10 +149,11 @@
 
 <MetaEditModal
   bind:isMetaModalOpen
-  data={data.metaForm}
+  metaForm={data.metaForm}
   {levelChoices}
   groupId={data.group.id}
   {selectedMeta}
+  imageUploadForm={data.imageUploadForm}
 />
 
 <MapUploadModal bind:isUploadModalOpen data={data.mapUploadForm} />

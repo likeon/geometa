@@ -114,7 +114,7 @@ export const metas = sqliteTable(
 export const metasRelations = relations(metas, ({ one, many }) => ({
   mapGroup: one(mapGroups, { fields: [metas.mapGroupId], references: [mapGroups.id] }),
   metaLevels: many(metaLevels),
-  metaImages: many(metaImages)
+  images: many(metaImages)
 }));
 
 export const metaLevels = sqliteTable(
