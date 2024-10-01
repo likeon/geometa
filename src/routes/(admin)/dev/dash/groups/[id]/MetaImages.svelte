@@ -59,7 +59,7 @@
 >
   <Input type="hidden" name="metaId" value={metaId} />
   <label>
-    Upload map json: <input
+    Upload an image: <input
       accept="image/png, image/jpeg, image/webp"
       name="file"
       type="file"
