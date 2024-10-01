@@ -214,7 +214,7 @@ export const actions = {
     }
 
     const imageName = `${generateRandomString(36)}.${getFileExtension(form.data.file)}`;
-    uploadFile(form.data.file, imageName);
+    await uploadFile(form.data.file, imageName);
 
     const url = `https://static${dev ? '-dev' : ''}.learnablemeta.com/${imageName}`;
 
