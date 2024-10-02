@@ -1,13 +1,12 @@
 <script lang="ts">
   import { Button, GradientButton, Input } from 'flowbite-svelte';
-  import Icon from '@iconify/svelte';
   import { applyAction, enhance } from '$app/forms';
   import { SvelteToast } from '@zerodevx/svelte-toast';
   import { toast } from '@zerodevx/svelte-toast';
-  import { page } from '$app/stores';
   import Metas from './Metas.svelte';
   import MapUploadModal from './MapUploadModal.svelte';
   import MetaEditModal from './MetaEditModal.svelte';
+  import DashNavBar from '$lib/components/DashNavBar.svelte';
 
   export let data;
 
@@ -78,28 +77,7 @@
 </svelte:head>
 
 <div>
-  <div class="flex">
-    <h1 class="text-xl">{data.group.name}</h1>
-    <a href="/" on:click|preventDefault={() => (isUploadModalOpen = true)} class="ml-3">
-      <Icon icon="ri:upload-2-fill" width="1.5rem" height="1.5rem" color="green" />
-    </a>
-  </div>
-  <div>
-    <div class="border-b border-gray-200 mb-4">
-      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-        <a
-          href={`/dev/dash/groups/${$page.params.id}`}
-          class="whitespace-nowrap border-b-2 border-green-500 px-1 py-4 text-sm font-medium text-green-600"
-          aria-current="page">Metas</a
-        >
-        <a
-          href={`/dev/dash/groups/${$page.params.id}/maps`}
-          class="whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-          >Maps</a
-        >
-      </nav>
-    </div>
-  </div>
+  <DashNavBar groupId={data.group.id}></DashNavBar>
   <div class="flex flex-wrap items-center">
     <div class="w-1/3">
       <Input type="text" placeholder="Search..." autocomplete="off" bind:value={searchText} />

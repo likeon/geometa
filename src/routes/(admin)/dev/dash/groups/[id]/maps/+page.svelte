@@ -1,8 +1,8 @@
 <script lang="ts">
   export let data;
-  import { page } from '$app/stores';
   import { Button } from 'flowbite-svelte';
   import MapEditModal from './MapEditModal.svelte';
+  import DashNavBar from '$lib/components/DashNavBar.svelte';
 
   type MapType = (typeof data.group.maps)[number];
   let isMapModalOpen = false;
@@ -27,25 +27,7 @@
 </script>
 
 <div>
-  <div class="flex">
-    <h1 class="text-xl">{data.group.name}</h1>
-  </div>
-  <div>
-    <div class="border-b border-gray-200 mb-4">
-      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-        <a
-          href={`/dev/dash/groups/${$page.params.id}`}
-          class="whitespace-nowrap border-b-2 border-transparent px-1 py-4 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
-          >Metas</a
-        >
-        <a
-          href={`/dev/dash/groups/${$page.params.id}/maps`}
-          class="whitespace-nowrap border-b-2 border-green-500 px-1 py-4 text-sm font-medium text-green-600"
-          aria-current="page">Maps</a
-        >
-      </nav>
-    </div>
-  </div>
+  <DashNavBar groupId={data.group.id}></DashNavBar>
 
   <div class="flex flex-wrap items-center">
     <div class="flex-grow flex items-center justify-end">
