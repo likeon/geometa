@@ -80,7 +80,13 @@ export const load: PageServerLoad = async ({ params }) => {
     with: {
       metas: {
         orderBy: [asc(metas.id)],
-        with: { metaLevels: { with: { level: true } }, images: true }
+        with: { metaLevels: { with: { level: true } }, images: true },
+        extras: {
+          locationsCount:
+            sql`(select count(*) from location_metas_view lm where lm.meta_id = ${metas.id})`.as(
+              'locations_count'
+            )
+        }
       }
     },
     where: eq(mapGroups.id, id)

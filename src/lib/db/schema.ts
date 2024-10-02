@@ -187,6 +187,7 @@ export const metaImagesRelations = relations(metaImages, ({ one }) => ({
 
 export const locationMetas = sqliteView('location_metas_view', {
   mapGroupId: integer('map_group_id').notNull(),
+  metaId: integer('meta_id').notNull(),
   lat: real('lat').notNull(),
   lng: real('lng').notNull(),
   heading: real('heading').notNull(),

@@ -41,7 +41,7 @@
                 Name {selectedHeader === 'name' ? sortArrow : ''}
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                From Plonkit
+                Locations
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 Has image
@@ -67,9 +67,7 @@
                 <td>{meta.tagName}</td>
                 <td>{meta.name}</td>
                 <td>
-                  {#if meta.noteFromPlonkit}
-                    <Icon icon="ei:check" class="w-5 h-5" color="green" />
-                  {/if}
+                  {meta.locationsCount}
                 </td>
                 <td>
                   {#if meta.hasImage}
