@@ -67,7 +67,7 @@
                   <td>{map.name}</td>
                   <td>{map.mapLevels.map((item) => item.level.name).join(', ')}</td>
                   <td>{map.locationsCount}</td>
-                  <td
+                  <td on:click={(event) => event.stopPropagation()}
                     ><a href={`/dev/dash/groups/${data.group.id}/maps/${map.id}/download`}
                       >Download</a
                     ></td
