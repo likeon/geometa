@@ -63,17 +63,17 @@ export const maps = sqliteTable(
       .notNull()
       .references(() => mapGroups.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
-    geoguessrId: text('geoguessr_id').notNull(),
-    levelId: integer('level_id').references(() => levels.id, { onDelete: 'set null' })
+    geoguessrId: text('geoguessr_id').notNull()
   },
   (t) => ({
     nameUnique: uniqueIndex('maps_name_unique').on(t.name),
     geoguessrIdUnique: uniqueIndex('maps_geoguessr_id_unique').on(t.geoguessrId)
   })
 );
-export const mapsRelations = relations(maps, ({ one }) => ({
+export const mapsRelations = relations(maps, ({ one, many }) => ({
   mapGroup: one(mapGroups, { fields: [maps.mapGroupId], references: [mapGroups.id] }),
-  level: one(levels, { fields: [maps.levelId], references: [levels.id] })
+  mapLevels: many(mapLevels),
+  filters: many(mapFilters)
 }));
 
 export const levels = sqliteTable(
@@ -92,6 +92,43 @@ export const levels = sqliteTable(
 export const levelsRelations = relations(levels, ({ one, many }) => ({
   mapGroup: one(mapGroups, { fields: [levels.mapGroupId], references: [mapGroups.id] }),
   metaLevels: many(maps)
+}));
+
+export const mapLevels = sqliteTable(
+  'map_levels',
+  {
+    id: integer('id').primaryKey(),
+    mapId: integer('map_id')
+      .notNull()
+      .references(() => maps.id, { onDelete: 'cascade' }),
+    levelId: integer('level_id')
+      .notNull()
+      .references(() => levels.id, { onDelete: 'cascade' })
+  },
+  (t) => ({
+    mapLevelUnique: uniqueIndex('map_levels_unique').on(t.mapId, t.levelId)
+  })
+);
+export const mapLevelRelations = relations(mapLevels, ({ one }) => ({
+  map: one(maps, { fields: [mapLevels.mapId], references: [maps.id] }),
+  level: one(levels, { fields: [mapLevels.levelId], references: [levels.id] })
+}));
+
+export const mapFilters = sqliteTable(
+  'map_filters',
+  {
+    id: integer('id').primaryKey(),
+    mapId: integer('map_id')
+      .notNull()
+      .references(() => maps.id, { onDelete: 'cascade' }),
+    tagLike: text('tag_like')
+  },
+  (t) => ({
+    mapFilterUnique: uniqueIndex('map_filters_unique').on(t.mapId, t.tagLike)
+  })
+);
+export const mapFiltersRelations = relations(mapFilters, ({ one }) => ({
+  map: one(maps, { fields: [mapFilters.mapId], references: [maps.id] })
 }));
 
 export const metas = sqliteTable(

@@ -22,7 +22,6 @@
     value: item.id,
     name: item.name
   }));
-  levelChoices.push({ value: -1, name: 'None' });
 </script>
 
 <div>
@@ -65,7 +64,7 @@
                   >Name</th
                 >
                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >Level</th
+                  >Levels</th
                 >
                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                   >Locations count</th
@@ -82,7 +81,7 @@
                   on:click={() => selectMap(map)}
                 >
                   <td>{map.name}</td>
-                  <td>{map.level?.name || ''}</td>
+                  <td>{map.mapLevels.map((item) => item.level.name).join(', ')}</td>
                   <td>{map.locationsCount}</td>
                   <td
                     ><a href={`/dev/dash/groups/${data.group.id}/maps/${map.id}/download`}

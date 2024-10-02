@@ -2,7 +2,16 @@
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import type { InsertMapsSchema } from './+page.server';
   import type { PageData } from './$types';
-  import { Alert, Button, Input, Label, Modal, Select, Textarea } from 'flowbite-svelte';
+  import {
+    Alert,
+    Button,
+    Input,
+    Label,
+    Modal,
+    MultiSelect,
+    Select,
+    Textarea
+  } from 'flowbite-svelte';
 
   export let data: SuperValidated<Infer<InsertMapsSchema>>;
   export let isMapModalOpen: boolean;
@@ -20,17 +29,16 @@
   $: if (selectedMap) {
     $form.geoguessrId = selectedMap.geoguessrId;
     $form.id = selectedMap.id;
-    $form.levelId = selectedMap.levelId;
     $form.mapGroupId = selectedMap.mapGroupId;
     $form.name = selectedMap.name;
-    // placeholders filters to see if stuff works
-    $form.filters = ['test%', 'filtertest', 'Poland'];
+    $form.levels = selectedMap.mapLevels.map((item) => item.levelId);
+    $form.filters = selectedMap.filters.map((item) => item.tagLike as string);
   } else {
     $form.id = undefined;
     $form.mapGroupId = groupId;
     $form.geoguessrId = '';
-    $form.levelId = -1;
     $form.name = '';
+    $form.levels = [];
     $form.filters = [];
   }
 
@@ -85,7 +93,7 @@
     </Label>
     <Label>
       <span>Levels</span>
-      <Select items={levelChoices} bind:value={$form.levelId} size="lg" />
+      <MultiSelect items={levelChoices} bind:value={$form.levels} size="lg" />
     </Label>
     <Label>
       <span>Filters:</span>
