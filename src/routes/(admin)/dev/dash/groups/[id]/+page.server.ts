@@ -195,7 +195,7 @@ export const actions = {
     // delete rows that weren't updated
     await db.delete(mapGroupLocations).where(
       and(
-        eq(mapGroupLocations.id, groupId),
+        eq(mapGroupLocations.mapGroupId, groupId),
         notInArray(
           mapGroupLocations.id,
           upsertResult.map((item) => item.id)
