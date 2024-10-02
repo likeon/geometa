@@ -8,6 +8,8 @@
   let isMapModalOpen = false;
   let selectedMap: (typeof data.group.maps)[number] | null = null;
 
+  $: maps = data.group.maps;
+
   function addMap() {
     selectedMap = null;
     isMapModalOpen = true;
@@ -74,7 +76,7 @@
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-400">
-              {#each data.group.maps as map (map.id)}
+              {#each maps as map (map.id)}
                 <tr
                   class="cursor-pointer hover:bg-green-200"
                   role="link"

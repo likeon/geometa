@@ -81,6 +81,9 @@ export const actions = {
       tagLike: filterName,
       mapId: mapId
     }));
-    await db.insert(mapFilters).values(filtersInsertValues).onConflictDoNothing();
+
+    if (filtersInsertValues.length != 0) {
+      await db.insert(mapFilters).values(filtersInsertValues).onConflictDoNothing();
+    }
   }
 };
