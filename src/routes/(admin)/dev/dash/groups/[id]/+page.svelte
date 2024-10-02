@@ -70,6 +70,10 @@
   }));
 
   let selectedMeta: (typeof data.group.metas)[number] | null = null;
+
+  function uploadLocations() {
+    isUploadModalOpen = true;
+  }
 </script>
 
 <svelte:head>
@@ -77,7 +81,7 @@
 </svelte:head>
 
 <div>
-  <DashNavBar groupId={data.group.id}></DashNavBar>
+  <DashNavBar groupId={data.group.id} groupName={data.group.name}></DashNavBar>
   <div class="flex flex-wrap items-center">
     <div class="w-1/3">
       <Input type="text" placeholder="Search..." autocomplete="off" bind:value={searchText} />
@@ -102,9 +106,11 @@
       />
       <span class="ml-1 mr-1">Image</span>
     </div>
-
     <div class="flex-grow flex items-center justify-end">
-      <Button on:click={addMeta}>Add meta</Button>
+      <GradientButton color="cyanToBlue" class="ml-3" on:click={uploadLocations}
+        >Upload locations</GradientButton
+      >
+      <Button class="ml-3" on:click={addMeta}>Add meta</Button>
       <form
         method="post"
         action="?/prepareUserScriptData"

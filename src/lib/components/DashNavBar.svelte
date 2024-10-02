@@ -2,6 +2,7 @@
   import { page } from '$app/stores'; // Import the page store to get the current route
 
   export let groupId: Number;
+  export let groupName: string;
 
   $: activeRoute = $page.url.pathname;
 
@@ -13,6 +14,9 @@
 </script>
 
 <div class="border-b border-gray-200 mb-4">
+  <span class="text-sm font-semibold text-gray-600">
+    Group: {groupName}
+  </span>
   <nav class="-mb-px flex space-x-8" aria-label="Tabs">
     <a
       href={`/dev/dash/groups/${groupId}`}

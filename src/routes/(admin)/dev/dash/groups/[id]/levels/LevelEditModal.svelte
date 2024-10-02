@@ -2,16 +2,7 @@
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import type { InsertLevelsSchema } from './+page.server';
   import type { PageData } from './$types';
-  import {
-    Alert,
-    Button,
-    Input,
-    Label,
-    Modal,
-    MultiSelect,
-    Select,
-    Textarea
-  } from 'flowbite-svelte';
+  import { Alert, Button, Input, Label, Modal } from 'flowbite-svelte';
 
   export let data: SuperValidated<Infer<InsertLevelsSchema>>;
   export let isLevelModalOpen: boolean;

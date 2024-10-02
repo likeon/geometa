@@ -27,7 +27,7 @@
 </script>
 
 <div>
-  <DashNavBar groupId={data.group.id}></DashNavBar>
+  <DashNavBar groupId={data.group.id} groupName={data.group.name}></DashNavBar>
 
   <div class="flex flex-wrap items-center">
     <div class="flex-grow flex items-center justify-end">
