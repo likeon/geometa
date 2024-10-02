@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.6
+// @version      0.61
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
@@ -756,11 +756,11 @@
     let t11;
     let t12_value = (
       /*geoInfo*/
-      ctx[0].country + ""
+      ctx[0].country.toLocaleLowerCase() + ""
     );
     let t12;
-    let t13;
     let a_href_value;
+    let t13;
     let current;
     countryflag = new CountryFlag({
       props: { countryName: (
@@ -787,11 +787,11 @@
         t8 = text(t8_value);
         t9 = space();
         p3 = element("p");
-        t10 = text("Check out more ");
+        t10 = text("Check out ");
         a = element("a");
-        t11 = text("country clues\n      about ");
+        t11 = text("plonkit.net/");
         t12 = text(t12_value);
-        t13 = text(" on Plonk\n      It");
+        t13 = text(" for more clues.");
         attr(a, "href", a_href_value = /*geoInfo*/
         ctx[0].plonkitCountryUrl);
         attr(a, "target", "_blank");
@@ -820,7 +820,7 @@
         append(p3, a);
         append(a, t11);
         append(a, t12);
-        append(a, t13);
+        append(p3, t13);
         current = true;
       },
       p(ctx2, dirty) {
@@ -840,7 +840,7 @@
         ctx2[0].note + "")) set_data(t8, t8_value);
         if ((!current || dirty & /*geoInfo*/
         1) && t12_value !== (t12_value = /*geoInfo*/
-        ctx2[0].country + "")) set_data(t12, t12_value);
+        ctx2[0].country.toLocaleLowerCase() + "")) set_data(t12, t12_value);
         if (!current || dirty & /*geoInfo*/
         1 && a_href_value !== (a_href_value = /*geoInfo*/
         ctx2[0].plonkitCountryUrl)) {
@@ -1034,6 +1034,7 @@
   }
   function changelog() {
     return [
+      { "0.61": "Added new/placehoder map ids." },
       { "0.6": "Bugfixes" },
       { "0.5": "New note format and prepared for multiple maps support" },
       {
@@ -1045,7 +1046,18 @@
     console.log(changelog());
   }
   const GeoGuessrEventFramework = _unsafeWindow.GeoGuessrEventFramework;
-  const metaMapIds = /* @__PURE__ */ new Set(["66c0d3feff4dbe492e06174e"]);
+  const metaMapIds = /* @__PURE__ */ new Set([
+    "66c0d3feff4dbe492e06174e",
+    "66fd7c30b34ca9145ec96a6a",
+    "66fda2e27e08dc03b5bb3d6e",
+    "66fda2f8ee1c8ee4735e167f",
+    "66fda3097e08dc03b5bb3f0e",
+    "66fda319b477f9e4abdd34fa",
+    "66fda32fbc5afd45d3eb187d",
+    "66fda342413f41ca32ef9d54",
+    "66fda352ee1c8ee4735e1aa8",
+    "66fda3667e08dc03b5bb4309"
+  ]);
   GeoGuessrEventFramework.init().then(() => {
     GeoGuessrEventFramework.events.addEventListener("round_end", (event) => {
       if (!metaMapIds.has(event.detail.map.id)) return;

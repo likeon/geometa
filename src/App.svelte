@@ -63,9 +63,8 @@
       <strong>{geoInfo.country}</strong></p>
     <p>Meta type: <strong>{geoInfo.metaName}</strong></p>
     <p>Note: {geoInfo.note}</p>
-    <p class="plonkit-note">Check out more <a href={geoInfo.plonkitCountryUrl} target="_blank">country clues
-      about {geoInfo.country} on Plonk
-      It</a></p>
+    <p class="plonkit-note">Check out <a href={geoInfo.plonkitCountryUrl} target="_blank"> 
+      plonkit.net/{geoInfo.country.toLocaleLowerCase()}</a> for more clues.</p>
   {:else}
     <Spinner/>
   {/if}

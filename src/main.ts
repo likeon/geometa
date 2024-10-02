@@ -5,6 +5,7 @@ import { unsafeWindow } from "$";
 
 function changelog() {
   return [
+    { "0.61": "Added new/placehoder map ids." },
     { "0.6": "Bugfixes" },
     { "0.5": "New note format and prepared for multiple maps support" },
     {
@@ -23,7 +24,17 @@ if (unsafeWindow.notAValidVariable) {
 //@ts-ignore
 const GeoGuessrEventFramework = unsafeWindow.GeoGuessrEventFramework;
 
-const metaMapIds = new Set(["66c0d3feff4dbe492e06174e"]);
+const metaMapIds = new Set([
+  "66c0d3feff4dbe492e06174e", 
+  "66fd7c30b34ca9145ec96a6a",
+  "66fda2e27e08dc03b5bb3d6e",
+  "66fda2f8ee1c8ee4735e167f",
+   "66fda3097e08dc03b5bb3f0e",
+  "66fda319b477f9e4abdd34fa",
+  "66fda32fbc5afd45d3eb187d",
+  "66fda342413f41ca32ef9d54",
+  "66fda352ee1c8ee4735e1aa8",
+  "66fda3667e08dc03b5bb4309"]);
 
 type GGEvent = {
   detail: {
