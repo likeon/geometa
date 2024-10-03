@@ -97,22 +97,6 @@
             <Alert color="red">{$errors.note}</Alert>
           {/if}
         </Label>
-        <Label
-          ><input
-            class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 me-2 dark:bg-gray-700 dark:border-gray-600 rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600"
-            type="checkbox"
-            name="noteFromPlonkit"
-            bind:checked={$form.noteFromPlonkit}
-          />Note from Plonkit</Label
-        >
-        <Label
-          ><input
-            class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 me-2 dark:bg-gray-700 dark:border-gray-600 rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600"
-            type="checkbox"
-            name="hasImage"
-            bind:checked={$form.hasImage}
-          />Has image</Label
-        >
         <Label>
           <span>Levels</span>
           <MultiSelect items={levelChoices} bind:value={$form.levels} size="lg" />

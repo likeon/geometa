@@ -29,7 +29,9 @@ import { getGroupId } from './utils';
 import { uploadFile } from '$lib/s3';
 import { dev } from '$app/environment';
 
-const insertMetasSchema = createInsertSchema(metas).extend({ levels: z.array(z.number()) });
+const insertMetasSchema = createInsertSchema(metas)
+  .extend({ levels: z.array(z.number()) })
+  .omit({ noteFromPlonkit: true, hasImage: true });
 export type InsertMetasSchema = typeof insertMetasSchema;
 
 const mapUploadSchema = z.object({
