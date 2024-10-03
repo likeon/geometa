@@ -120,9 +120,6 @@ export const actions = {
       return fail(400, { form });
     }
 
-    form.data.noteFromPlonkit = form.data.noteFromPlonkit ?? false;
-    form.data.hasImage = form.data.hasImage ?? false;
-
     const { id, levels, ...dataNoId } = form.data;
     let metaId;
 
@@ -245,7 +242,15 @@ export const actions = {
   prepareUserScriptData: async (event) => {
     const groupId = getGroupId(event.params);
     const dbValues = await db
-      .select()
+      .select({
+        geoguessrId: maps.geoguessrId,
+        lat: mapLocations.lat,
+        lng: mapLocations.lng,
+        tagName: mapLocations.tagName,
+        metaName: mapLocations.metaName,
+        metaNote: mapLocations.metaNote,
+        images: sql`(select GROUP_CONCAT(mi.image_url) from meta_images mi where mi.meta_id = ${mapLocations.metaId})`
+      })
       .from(mapLocations)
       .innerJoin(maps, eq(mapLocations.mapId, maps.id))
       .where(eq(maps.mapGroupId, groupId))
@@ -253,14 +258,23 @@ export const actions = {
 
     const kvData = [];
     for (const item of dbValues) {
-      const key = `${item.maps.geoguessrId}:${cutToTwoDecimals(item.map_locations_view.lat)}:${cutToTwoDecimals(item.map_locations_view.lng)}`;
-      const countryName = getCountryFromTagName(item.map_locations_view.tagName);
+      const key = `${item.geoguessrId}:${cutToTwoDecimals(item.lat)}:${cutToTwoDecimals(item.lng)}`;
+      const countryName = getCountryFromTagName(item.tagName);
       const plonkitCountryUrl = `https://www.plonkit.net/${countryName.toLowerCase().replace(' ', '-')}`;
+
+      let images: string[];
+      if (item.images) {
+        images = (item.images as string).split(',');
+      } else {
+        images = [];
+      }
+
       const value = {
-        country: getCountryFromTagName(item.map_locations_view.tagName),
-        metaName: item.map_locations_view.metaName,
-        note: item.map_locations_view.metaNote,
-        plonkitCountryUrl: plonkitCountryUrl
+        country: getCountryFromTagName(item.tagName),
+        metaName: item.metaName,
+        note: item.metaNote,
+        plonkitCountryUrl: plonkitCountryUrl,
+        images: images
       };
       kvData.push({ key: key, value: JSON.stringify(value), base64: false });
     }
