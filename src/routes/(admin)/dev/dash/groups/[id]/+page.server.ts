@@ -249,7 +249,9 @@ export const actions = {
         tagName: mapLocations.tagName,
         metaName: mapLocations.metaName,
         metaNote: mapLocations.metaNote,
-        images: sql`(select GROUP_CONCAT(mi.image_url) from meta_images mi where mi.meta_id = ${mapLocations.metaId})`
+        images: sql<
+          string | null
+        >`(select GROUP_CONCAT(mi.image_url) from meta_images mi where mi.meta_id = ${mapLocations.metaId})`
       })
       .from(mapLocations)
       .innerJoin(maps, eq(mapLocations.mapId, maps.id))
@@ -264,7 +266,9 @@ export const actions = {
 
       let images: string[];
       if (item.images) {
-        images = (item.images as string).split(',');
+        images = item.images
+          .split(',')
+          .map((url) => `https://learnablemeta.com/cdn-cgi/image/format=avif,quality=80/${url}`);
       } else {
         images = [];
       }
