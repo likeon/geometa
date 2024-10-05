@@ -37,8 +37,6 @@
     $form.tagName = selectedMeta.tagName;
     $form.name = selectedMeta.name;
     $form.note = selectedMeta.note;
-    $form.noteFromPlonkit = selectedMeta.noteFromPlonkit;
-    $form.hasImage = selectedMeta.hasImage;
     $form.levels = selectedMeta.metaLevels.map((item) => item.levelId);
   } else {
     $form.id = undefined;
@@ -46,8 +44,6 @@
     $form.tagName = '';
     $form.name = '';
     $form.note = '';
-    $form.noteFromPlonkit = false;
-    $form.hasImage = false;
     $form.levels = [];
   }
 </script>
