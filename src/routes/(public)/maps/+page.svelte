@@ -17,9 +17,9 @@
       </p>
     </div>
     <div class="relative mt-6">
-      <p class="mx-auto max-w-xl text-lg leading-8 text-black bg-green-200 rounded">
+      <a href="/about" class="mx-auto text-lg leading-8 text-black bg-green-200 rounded p-2">
         Make sure you have our UserScript installed!
-      </p>
+      </a>
     </div>
   </div>
   <div class="flow-root bg-white pb-24 sm:pb-32">

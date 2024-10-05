@@ -12,19 +12,19 @@
   <div class="mx-auto max-w-3xl text-base leading-7 text-gray-700">
     <div class="main-content">
       <p class="text-base font-semibold leading-7 text-green-500">Introducing</p>
-      <Heading tag="h1">A Learnable Meta World map</Heading>
+      <Heading tag="h1">A Learnable Meta World maps</Heading>
       <p>
         When someone wants to improve at GeoGuessr, they often try to memorize lists of bollards,
         signs, Google cars, and other clues. This can be quite overwhelming because there are so
         many different details to remember. I tried teaching my friends some of these "metas" by
         playing the world map with them and pointing out specific clues, but by the time those clues
-        appeared again, they had already forgotten them. To help with this, I created a map
-        highlighting the most common "metas" - anything from landscapes, bollards, and signs to
+        appeared again, they had already forgotten them. To help with this, I created several maps
+        that highlight the most common "metas" - anything from landscapes, bollards, and signs to
         unique Google Street View cars that are useful to learn at the beginning.
       </p>
       <p>
-        While there might be other maps like this available, mine includes a script that shows a
-        note about the location after you make your guess in GeoGuessr, explaining each round and
+        While there might be other maps like this available, ours include a script that shows a note
+        about the location after you make your guess in GeoGuessr, explaining each round and
         highlighting the clues you might have missed that could help you identify the country. The
         map is designed for No Move because it's skill itself to find clues and it's good habbit to
         learn to check google car, poles, roadlines etc.
@@ -33,11 +33,7 @@
       <div class="flex flex-col items-center justify-center text-center">
         <div class="flex items-center space-x-2">
           <enhanced:img src={geoPin} class="h-6 sm:h-9 w-auto" alt="Geoguessr pin" />
-          <a
-            href="https://www.geoguessr.com/maps/66c0d3feff4dbe492e06174e"
-            target="_blank"
-            class="font-bold text-3xl">Map on GeoGuessr</a
-          >
+          <a href="/maps" class="font-bold text-3xl">Our GeoGuessr maps</a>
         </div>
       </div>
       <Heading tag="h2" class="mt-4 mb-[-10px]">How to use</Heading>
@@ -95,11 +91,10 @@
         <li class="flex gap-x-3">
           <Icon icon="icon-park-solid:check-one" class="h-6 w-6 flex-shrink-0" color="green" />
           <span
-            ><strong class="font-semibold text-gray-900">Play the map.</strong>
+            ><strong class="font-semibold text-gray-900">Play one of our maps.</strong>
             Guess a location on
-            <a href="https://www.geoguessr.com/maps/66c0d3feff4dbe492e06174e">the map</a>. On the
-            results screen, a note will be displayed showing the meta that was in the round, in case
-            you missed it.</span
+            <a href="/maps">our maps</a>. On the results screen, a note will be displayed showing
+            the meta that was in the round, in case you missed it.</span
           >
         </li>
       </ul>

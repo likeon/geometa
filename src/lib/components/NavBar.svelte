@@ -22,6 +22,7 @@
   <NavUl {activeUrl}>
     <NavLi href="/">Home</NavLi>
     <NavLi href="/about">How To</NavLi>
+    <NavLi href="/maps">Maps</NavLi>
     <NavLi href="https://discord.gg/AcXEWznYZe" target="_blank"
       ><div class="flex">
         <Icon icon="skill-icons:discord" class="w-5 h-5 flex-shrink-0 mr-1" />Discord
