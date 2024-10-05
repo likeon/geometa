@@ -21,8 +21,18 @@
   export let levelChoices: { value: number; name: string }[];
   export let groupId: number;
   export let imageUploadForm: SuperValidated<Infer<MapUploadSchema>>;
+  export let updateMeta: (meta: PageData['group']['metas'][number]) => void;
 
   $: images = selectedMeta?.images;
+
+  function updateImages(images: PageData['group']['metas'][number]['images']) {
+    if (selectedMeta?.images != undefined) {
+      selectedMeta.images = images;
+    }
+    if (selectedMeta) {
+      updateMeta(selectedMeta);
+    }
+  }
 
   const { form, errors, constraints, enhance } = superForm(metaForm, {
     dataType: 'json',
@@ -102,7 +112,12 @@
     </TabItem>
     {#if selectedMeta?.id}
       <TabItem title="Images">
-        <MetaImages data={imageUploadForm} metaId={selectedMeta.id} images={images || []} />
+        <MetaImages
+          data={imageUploadForm}
+          metaId={selectedMeta.id}
+          images={images || []}
+          {updateImages}
+        />
       </TabItem>
     {/if}
   </Tabs>

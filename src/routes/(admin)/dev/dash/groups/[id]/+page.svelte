@@ -54,6 +54,9 @@
     }
   }
 
+  let selectedMeta: (typeof data.group.metas)[number] | null = null;
+  $: selectedMeta = null;
+
   function addMeta() {
     selectedMeta = null;
     isMetaModalOpen = true;
@@ -69,7 +72,11 @@
     name: item.name
   }));
 
-  let selectedMeta: (typeof data.group.metas)[number] | null = null;
+  function updateMeta(updatedMeta: MetaType) {
+    data.group.metas = data.group.metas.map((meta) =>
+      meta.id === updatedMeta.id ? updatedMeta : meta
+    );
+  }
 
   function uploadLocations() {
     isUploadModalOpen = true;
@@ -138,6 +145,7 @@
   groupId={data.group.id}
   {selectedMeta}
   imageUploadForm={data.imageUploadForm}
+  {updateMeta}
 />
 
 <MapUploadModal bind:isUploadModalOpen data={data.mapUploadForm} />

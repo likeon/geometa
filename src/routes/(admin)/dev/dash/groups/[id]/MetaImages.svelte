@@ -8,6 +8,8 @@
   export let metaId: number;
   export let data: SuperValidated<Infer<MapUploadSchema>>;
   export let images: PageData['group']['metas'][number]['images'];
+  type ImagesType = typeof images;
+  export let updateImages: (images: ImagesType) => void;
 
   let isDragging = false;
 
@@ -20,6 +22,7 @@
     async onUpdated({ form }) {
       if (form.valid) {
         images = [...images, form.message];
+        updateImages(images);
       }
     }
   });
@@ -63,6 +66,7 @@
           return async ({ result }) => {
             if ('data' in result) {
               images = images.filter((image) => image.id !== result.data?.imageId);
+              updateImages(images);
             }
             await applyAction(result);
           };
