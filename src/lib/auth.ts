@@ -5,7 +5,7 @@ import { DrizzleSQLiteAdapter } from '@lucia-auth/adapter-drizzle';
 import { db } from '$lib/drizzle';
 import { sessions, users } from '$lib/db/schema';
 import { Discord } from 'arctic';
-import { env } from '$env/dynamic/private';
+import { LOGIN_RETURN_URL } from '$env/static/private';
 
 const adapter = new DrizzleSQLiteAdapter(db, sessions, users);
 
@@ -38,5 +38,5 @@ interface DatabaseUserAttributes {
 export const discord = new Discord(
   DISCORD_APPLICATION_ID,
   DISCORD_SECRET_ID,
-  env.LOGIN_RETURN_URL ?? 'http://localhost:5173/login/callback'
+  LOGIN_RETURN_URL ?? 'http://localhost:5173/login/callback'
 );
