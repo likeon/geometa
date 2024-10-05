@@ -1,35 +1,41 @@
-import type { Handle } from '@sveltejs/kit';
+import { type Handle, redirect } from '@sveltejs/kit';
+import { lucia } from '$lib/auth';
 
 export const handle: Handle = async ({ event, resolve }) => {
-  if (event.url.pathname.startsWith('/dev/dash')) {
-    const auth = event.request.headers.get('Authorization');
-    if (auth) {
-      const [scheme, encoded] = auth.split(' ');
+  const isAdminUrl = event.url.pathname.startsWith('/dev/dash');
+  let redirectToLogin = isAdminUrl;
 
-      if (scheme === 'Basic' && encoded) {
-        // Decode from Base64
-        const decoded = atob(encoded);
-        const [username, password] = decoded.split(':');
-
-        const validUsername = 'hokkaido';
-        const validPassword = 'krakow';
-
-        if (username === validUsername && password === validPassword) {
-          // Authentication successful, proceed to resolve the request
-          return resolve(event);
-        }
+  const sessionId = event.cookies.get(lucia.sessionCookieName);
+  if (!sessionId) {
+    event.locals.user = null;
+    event.locals.session = null;
+  } else {
+    const { session, user } = await lucia.validateSession(sessionId);
+    if (session) {
+      if (session.fresh) {
+        // session cookie is valid, but needs a refresh
+        const sessionCookie = lucia.createSessionCookie(session.id);
+        event.cookies.set(sessionCookie.name, sessionCookie.value, {
+          path: '.',
+          ...sessionCookie.attributes
+        });
       }
+      redirectToLogin = false;
     }
-
-    // Authentication failed, return 401 Unauthorized
-    return new Response('Unauthorized', {
-      status: 401,
-      headers: {
-        'WWW-Authenticate': 'Basic realm="Restricted Area"'
-      }
-    });
+    if (!session) {
+      const sessionCookie = lucia.createBlankSessionCookie();
+      event.cookies.set(sessionCookie.name, sessionCookie.value, {
+        path: '.',
+        ...sessionCookie.attributes
+      });
+    }
+    event.locals.user = user;
+    event.locals.session = session;
   }
 
-  // For other URLs, proceed as normal
+  if (redirectToLogin) {
+    throw redirect(307, '/login/');
+  }
+
   return resolve(event);
 };

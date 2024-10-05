@@ -202,8 +202,8 @@ export const locationMetas = sqliteView('location_metas_view', {
     mgl.*,
     m.*
   FROM
-  ${mapGroupLocations} mgl
-    JOIN ${metas} m ON m.tag_name = mgl.extra_tag AND m.map_group_id = mgl.map_group_id
+    ${mapGroupLocations} mgl
+      JOIN ${metas} m ON m.tag_name = mgl.extra_tag AND m.map_group_id = mgl.map_group_id
 `);
 
 export const mapLocations = sqliteView('map_locations_view', {
@@ -222,9 +222,56 @@ export const mapLocations = sqliteView('map_locations_view', {
   metaNoteFromPlonkit: integer('meta_note_from_plonkit', { mode: 'boolean' }).notNull(),
   metaId: integer('meta_id').notNull()
 }).as(sql`
-  select m.id as map_id, lmv.lat, lmv.lng, lmv.heading, lmv.pitch, lmv.zoom, lmv.pano_id, lmv.meta_name, lmv.extra_pano_id, lmv.extra_pano_date, lmv.extra_tag as tag_name, lmv.meta_note, lmv.meta_note_from_plonkit
-  from ${locationMetas} lmv
-  join ${metaLevels} ml on ml.meta_id = lmv.meta_id
-  join ${levels} l on l.id = ml.level_id
-  join ${maps} m on m.map_group_id = lmv.map_group_id and (m.level_id = l.id or m.level_id is null)
+  SELECT
+    m.id          AS map_id,
+    lmv.lat,
+    lmv.lng,
+    lmv.heading,
+    lmv.pitch,
+    lmv.zoom,
+    lmv.pano_id,
+    lmv.meta_name,
+    lmv.extra_pano_id,
+    lmv.extra_pano_date,
+    lmv.extra_tag AS tag_name,
+    lmv.meta_note,
+    lmv.meta_note_from_plonkit
+  FROM
+    ${locationMetas} lmv
+      JOIN ${metaLevels} ml ON ml.meta_id = lmv.meta_id
+      JOIN ${levels} l ON l.id = ml.level_id
+      JOIN ${maps} m ON m.map_group_id = lmv.map_group_id AND (m.level_id = l.id OR m.level_id IS NULL)
 `);
+
+export const users = sqliteTable('user', {
+  id: text('id').notNull().primaryKey(),
+  username: text('username').notNull(),
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(false)
+});
+
+export const sessions = sqliteTable('session', {
+  id: text('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id),
+  expiresAt: integer('expires_at').notNull()
+});
+
+export const mapGroupPermissions = sqliteTable(
+  'map_group_permissions',
+  {
+    id: integer('id').primaryKey(),
+    mapGroupId: integer('map_group_id')
+      .notNull()
+      .references(() => mapGroups.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' })
+  },
+  (t) => ({
+    mapGroupPermissionsUnique: uniqueIndex('map_group_permissions_unique').on(
+      t.mapGroupId,
+      t.userId
+    )
+  })
+);

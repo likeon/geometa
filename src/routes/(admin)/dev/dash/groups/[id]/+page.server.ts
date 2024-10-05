@@ -20,6 +20,7 @@ import { inArray } from 'drizzle-orm/sql/expressions/conditions';
 import {
   cloudflareKvBulkPut,
   cutToTwoDecimals,
+  ensurePermissions,
   extractJsonData,
   generateRandomString,
   getCountryFromTagName,
@@ -75,8 +76,9 @@ type UpsertValue = {
   extraPanoDate: string;
 };
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
   const id = getGroupId(params);
+  await ensurePermissions(locals.user?.id, id);
 
   const group = await db.query.mapGroups.findFirst({
     with: {
@@ -113,12 +115,13 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions = {
-  updateMeta: async ({ request }) => {
+  updateMeta: async ({ request, locals }) => {
     const form = await superValidate(request, zod(insertMetasSchema));
 
     if (!form.valid) {
       return fail(400, { form });
     }
+    await ensurePermissions(locals.user?.id, form.data.mapGroupId);
 
     const { id, levels, ...dataNoId } = form.data;
     let metaId;
@@ -130,6 +133,8 @@ export const actions = {
         .returning({ insertedId: metas.id });
       metaId = insertResult[0].insertedId;
     } else {
+      const savedData = await db.query.metas.findFirst({ where: eq(metas.id, id) });
+      await ensurePermissions(locals.user?.id, savedData?.mapGroupId);
       await db.update(metas).set(dataNoId).where(eq(metas.id, id));
       metaId = id;
     }
@@ -140,8 +145,9 @@ export const actions = {
     const levelsInsertValues = levels.map((levelId) => ({ levelId: levelId, metaId: metaId }));
     await db.insert(metaLevels).values(levelsInsertValues).onConflictDoNothing();
   },
-  uploadMapJson: async ({ request, params }) => {
+  uploadMapJson: async ({ request, params, locals }) => {
     const groupId = getGroupId(params);
+    await ensurePermissions(locals.user?.id, groupId);
     const form = await superValidate(request, zod(mapUploadSchema));
 
     if (!form.valid) {
@@ -211,12 +217,14 @@ export const actions = {
     }));
     await db.insert(metas).values(metaInsertValues).onConflictDoNothing();
   },
-  uploadMetaImages: async ({ request }) => {
+  uploadMetaImages: async ({ request, locals }) => {
     const form = await superValidate(request, zod(imageUploadSchema));
 
     if (!form.valid) {
       return fail(400, withFiles({ form }));
     }
+    const meta = await db.query.metas.findFirst({ where: eq(metas.id, form.data.metaId) });
+    await ensurePermissions(locals.user?.id, meta?.mapGroupId);
 
     const imageName = `${generateRandomString(36)}.${getFileExtension(form.data.file)}`;
     await uploadFile(form.data.file, imageName);
@@ -229,18 +237,24 @@ export const actions = {
       .returning({ id: metaImages.id, metaId: metaImages.metaId, image_url: metaImages.image_url });
     return message(form, result[0]);
   },
-  deleteMetaImage: async ({ request }) => {
+  deleteMetaImage: async ({ request, locals }) => {
     const data = await request.formData();
     const imageId = parseInt((data.get('imageId') as string) || '', 10);
     if (isNaN(imageId)) {
       error(400, 'Invalid ID');
     }
+    const savedImage = await db
+      .select()
+      .from(metaImages)
+      .innerJoin(maps, eq(maps.id, metaImages.metaId));
+    await ensurePermissions(locals.user?.id, savedImage[0].maps.mapGroupId);
 
     await db.delete(metaImages).where(eq(metaImages.id, imageId));
     return { success: true, imageId: imageId };
   },
   prepareUserScriptData: async (event) => {
     const groupId = getGroupId(event.params);
+    await ensurePermissions(event.locals.user?.id, groupId);
     const dbValues = await db
       .select({
         geoguessrId: maps.geoguessrId,

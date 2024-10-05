@@ -1,4 +1,8 @@
 import { CLOUDFLARE_BEARER, CLOUDFLARE_KV_NAMESPACE_ID } from '$env/static/private';
+import { db } from '$lib/drizzle';
+import { and, eq } from 'drizzle-orm';
+import { mapGroupPermissions } from '$lib/db/schema';
+import { error } from '@sveltejs/kit';
 
 export function generateRandomString(length: number): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -65,5 +69,18 @@ export async function cloudflareKvBulkPut(data: any) {
 
   if (response.status !== 200) {
     throw new Error(`Request failed with status code ${response.status}`);
+  }
+}
+
+export async function ensurePermissions(userId: string | undefined, groupId: number | undefined) {
+  if (!userId || !groupId) {
+    error(403, 'Permission denied');
+  }
+  const permission = await db.query.mapGroupPermissions.findFirst({
+    where: and(eq(mapGroupPermissions.userId, userId), eq(mapGroupPermissions.mapGroupId, groupId))
+  });
+
+  if (!permission) {
+    error(403, 'Permission denied');
   }
 }
