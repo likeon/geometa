@@ -80,7 +80,7 @@
             >. Make sure to open new window with geoguessr after installing the script for first
             time.
             <p>
-              The userscript is fully open-source and <a
+              The userscript is open-source and <a
                 href="https://github.com/likeon/geometa"
                 target="_blank">available on GitHub</a
               >.
