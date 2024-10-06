@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.61
+// @version      0.62
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
@@ -16,7 +16,7 @@
 // @run-at       document-start
 // ==/UserScript==
 
-(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(` .loadership_ZOJAQ.svelte-1fzfwt6.svelte-1fzfwt6{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-1fzfwt6-loadership_ZOJAQ_scale 1.2s infinite,svelte-1fzfwt6-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.geometa-container.svelte-w42zs8.svelte-w42zs8{position:absolute;top:50%;transform:translateY(-50%);left:1rem;z-index:9;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);max-width:min(25%,500px)}.plonkit-note.svelte-w42zs8.svelte-w42zs8{color:#d3d3d3;font-size:small}a.svelte-w42zs8.svelte-w42zs8{color:#188bd2}a.svelte-w42zs8.svelte-w42zs8:hover{text-decoration:underline}.skill-icons--discord.svelte-w42zs8.svelte-w42zs8{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-w42zs8.svelte-w42zs8{display:inline-block;width:1.2rem;height:1.2rem;margin-left:5px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--discord.svelte-w42zs8.svelte-w42zs8,.flat-color-icons--globe.svelte-w42zs8.svelte-w42zs8{display:inline-block;vertical-align:middle}.flex.svelte-w42zs8.svelte-w42zs8{display:flex;align-items:center}.icons.svelte-w42zs8 a span.svelte-w42zs8{align-items:center;justify-content:center} `);
+(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(` .loadership_ZOJAQ.svelte-1fzfwt6.svelte-1fzfwt6{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-1fzfwt6-loadership_ZOJAQ_scale 1.2s infinite,svelte-1fzfwt6-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.geometa-container.svelte-1bx25y7.svelte-1bx25y7{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);max-width:min(25%,500px)}.plonkit-note.svelte-1bx25y7.svelte-1bx25y7{color:#d3d3d3;font-size:small}a.svelte-1bx25y7.svelte-1bx25y7{color:#188bd2}a.svelte-1bx25y7.svelte-1bx25y7:hover{text-decoration:underline}.skill-icons--discord.svelte-1bx25y7.svelte-1bx25y7{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-1bx25y7.svelte-1bx25y7{display:inline-block;width:1.2rem;height:1.2rem;margin-left:5px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.pajamas--collapse-solid.svelte-1bx25y7.svelte-1bx25y7{display:inline-block;width:1rem;height:1rem;margin-right:5px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23b3b3b3' fill-rule='evenodd' d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 8l-.53-.53l-2.25-2.25a.75.75 0 0 1 1.06-1.061l.97.97v-2.38a.75.75 0 0 1 1.5 0v2.38l.97-.97a.75.75 0 1 1 1.06 1.06L8.53 7.47zl.53.53l2.25 2.25a.75.75 0 0 1-1.06 1.061l-.97-.97v2.38a.75.75 0 0 1-1.5 0v-2.38l-.97.97a.75.75 0 1 1-1.06-1.06l2.25-2.25z' clip-rule='evenodd'/%3E%3C/svg%3E")}.skill-icons--discord.svelte-1bx25y7.svelte-1bx25y7,.flat-color-icons--globe.svelte-1bx25y7.svelte-1bx25y7,.pajamas--collapse-solid.svelte-1bx25y7.svelte-1bx25y7{display:inline-block;vertical-align:middle}.flex.svelte-1bx25y7.svelte-1bx25y7{display:flex;align-items:center}.icons.svelte-1bx25y7 a span.svelte-1bx25y7{align-items:center;justify-content:center}hr.svelte-1bx25y7.svelte-1bx25y7{border:0;border-top:1px solid white;width:100%}.image-wrapper.svelte-1bx25y7.svelte-1bx25y7{width:100%;display:flex;justify-content:center;align-items:center}.responsive-image.svelte-1bx25y7.svelte-1bx25y7{max-width:100%;height:auto;display:block} `);
 
 (function () {
   'use strict';
@@ -75,6 +75,10 @@
   }
   function empty() {
     return text("");
+  }
+  function listen(node, event, handler, options) {
+    node.addEventListener(event, handler, options);
+    return () => node.removeEventListener(event, handler, options);
   }
   function attr(node, attribute, value) {
     if (value == null) node.removeAttribute(attribute);
@@ -694,6 +698,75 @@
     const fixed = num.toFixed(2);
     return fixed.replace(/\.?0+$/, "");
   }
+  function create_if_block(ctx) {
+    let current_block_type_index;
+    let if_block;
+    let if_block_anchor;
+    let current;
+    const if_block_creators = [create_if_block_1, create_if_block_2, create_else_block];
+    const if_blocks = [];
+    function select_block_type(ctx2, dirty) {
+      if (
+        /*error*/
+        ctx2[2]
+      ) return 0;
+      if (
+        /*geoInfo*/
+        ctx2[1]
+      ) return 1;
+      return 2;
+    }
+    current_block_type_index = select_block_type(ctx);
+    if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    return {
+      c() {
+        if_block.c();
+        if_block_anchor = empty();
+      },
+      m(target, anchor) {
+        if_blocks[current_block_type_index].m(target, anchor);
+        insert(target, if_block_anchor, anchor);
+        current = true;
+      },
+      p(ctx2, dirty) {
+        let previous_block_index = current_block_type_index;
+        current_block_type_index = select_block_type(ctx2);
+        if (current_block_type_index === previous_block_index) {
+          if_blocks[current_block_type_index].p(ctx2, dirty);
+        } else {
+          group_outros();
+          transition_out(if_blocks[previous_block_index], 1, 1, () => {
+            if_blocks[previous_block_index] = null;
+          });
+          check_outros();
+          if_block = if_blocks[current_block_type_index];
+          if (!if_block) {
+            if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2);
+            if_block.c();
+          } else {
+            if_block.p(ctx2, dirty);
+          }
+          transition_in(if_block, 1);
+          if_block.m(if_block_anchor.parentNode, if_block_anchor);
+        }
+      },
+      i(local) {
+        if (current) return;
+        transition_in(if_block);
+        current = true;
+      },
+      o(local) {
+        transition_out(if_block);
+        current = false;
+      },
+      d(detaching) {
+        if (detaching) {
+          detach(if_block_anchor);
+        }
+        if_blocks[current_block_type_index].d(detaching);
+      }
+    };
+  }
   function create_else_block(ctx) {
     let spinner;
     let current;
@@ -721,7 +794,7 @@
       }
     };
   }
-  function create_if_block_1(ctx) {
+  function create_if_block_2(ctx) {
     let p0;
     let t0;
     let countryflag;
@@ -729,7 +802,7 @@
     let strong0;
     let t2_value = (
       /*geoInfo*/
-      ctx[0].country + ""
+      ctx[1].country + ""
     );
     let t2;
     let t3;
@@ -738,7 +811,7 @@
     let strong1;
     let t5_value = (
       /*geoInfo*/
-      ctx[0].metaName + ""
+      ctx[1].metaName + ""
     );
     let t5;
     let t6;
@@ -746,7 +819,7 @@
     let t7;
     let t8_value = (
       /*geoInfo*/
-      ctx[0].note + ""
+      ctx[1].note + ""
     );
     let t8;
     let t9;
@@ -756,22 +829,29 @@
     let t11;
     let t12_value = (
       /*geoInfo*/
-      ctx[0].country.toLocaleLowerCase() + ""
+      ctx[1].country.toLocaleLowerCase() + ""
     );
     let t12;
     let a_href_value;
     let t13;
+    let t14;
+    let if_block_anchor;
     let current;
     countryflag = new CountryFlag({
       props: { countryName: (
         /*geoInfo*/
-        ctx[0].country
+        ctx[1].country
       ) }
     });
+    let if_block = (
+      /*geoInfo*/
+      ctx[1].images && /*geoInfo*/
+      ctx[1].images.length && create_if_block_3(ctx)
+    );
     return {
       c() {
         p0 = element("p");
-        t0 = text("Country:\n      ");
+        t0 = text("Country:\n        ");
         create_component(countryflag.$$.fragment);
         t1 = space();
         strong0 = element("strong");
@@ -792,11 +872,14 @@
         t11 = text("plonkit.net/");
         t12 = text(t12_value);
         t13 = text(" for more clues.");
+        t14 = space();
+        if (if_block) if_block.c();
+        if_block_anchor = empty();
         attr(a, "href", a_href_value = /*geoInfo*/
-        ctx[0].plonkitCountryUrl);
+        ctx[1].plonkitCountryUrl);
         attr(a, "target", "_blank");
-        attr(a, "class", "svelte-w42zs8");
-        attr(p3, "class", "plonkit-note svelte-w42zs8");
+        attr(a, "class", "svelte-1bx25y7");
+        attr(p3, "class", "plonkit-note svelte-1bx25y7");
       },
       m(target, anchor) {
         insert(target, p0, anchor);
@@ -821,30 +904,49 @@
         append(a, t11);
         append(a, t12);
         append(p3, t13);
+        insert(target, t14, anchor);
+        if (if_block) if_block.m(target, anchor);
+        insert(target, if_block_anchor, anchor);
         current = true;
       },
       p(ctx2, dirty) {
         const countryflag_changes = {};
         if (dirty & /*geoInfo*/
-        1) countryflag_changes.countryName = /*geoInfo*/
-        ctx2[0].country;
+        2) countryflag_changes.countryName = /*geoInfo*/
+        ctx2[1].country;
         countryflag.$set(countryflag_changes);
         if ((!current || dirty & /*geoInfo*/
-        1) && t2_value !== (t2_value = /*geoInfo*/
-        ctx2[0].country + "")) set_data(t2, t2_value);
+        2) && t2_value !== (t2_value = /*geoInfo*/
+        ctx2[1].country + "")) set_data(t2, t2_value);
         if ((!current || dirty & /*geoInfo*/
-        1) && t5_value !== (t5_value = /*geoInfo*/
-        ctx2[0].metaName + "")) set_data(t5, t5_value);
+        2) && t5_value !== (t5_value = /*geoInfo*/
+        ctx2[1].metaName + "")) set_data(t5, t5_value);
         if ((!current || dirty & /*geoInfo*/
-        1) && t8_value !== (t8_value = /*geoInfo*/
-        ctx2[0].note + "")) set_data(t8, t8_value);
+        2) && t8_value !== (t8_value = /*geoInfo*/
+        ctx2[1].note + "")) set_data(t8, t8_value);
         if ((!current || dirty & /*geoInfo*/
-        1) && t12_value !== (t12_value = /*geoInfo*/
-        ctx2[0].country.toLocaleLowerCase() + "")) set_data(t12, t12_value);
+        2) && t12_value !== (t12_value = /*geoInfo*/
+        ctx2[1].country.toLocaleLowerCase() + "")) set_data(t12, t12_value);
         if (!current || dirty & /*geoInfo*/
-        1 && a_href_value !== (a_href_value = /*geoInfo*/
-        ctx2[0].plonkitCountryUrl)) {
+        2 && a_href_value !== (a_href_value = /*geoInfo*/
+        ctx2[1].plonkitCountryUrl)) {
           attr(a, "href", a_href_value);
+        }
+        if (
+          /*geoInfo*/
+          ctx2[1].images && /*geoInfo*/
+          ctx2[1].images.length
+        ) {
+          if (if_block) {
+            if_block.p(ctx2, dirty);
+          } else {
+            if_block = create_if_block_3(ctx2);
+            if_block.c();
+            if_block.m(if_block_anchor.parentNode, if_block_anchor);
+          }
+        } else if (if_block) {
+          if_block.d(1);
+          if_block = null;
         }
       },
       i(local) {
@@ -865,12 +967,15 @@
           detach(p2);
           detach(t9);
           detach(p3);
+          detach(t14);
+          detach(if_block_anchor);
         }
         destroy_component(countryflag);
+        if (if_block) if_block.d(detaching);
       }
     };
   }
-  function create_if_block(ctx) {
+  function create_if_block_1(ctx) {
     let p;
     let t0;
     let t1;
@@ -880,7 +985,7 @@
         t0 = text("Error: ");
         t1 = text(
           /*error*/
-          ctx[1]
+          ctx[2]
         );
       },
       m(target, anchor) {
@@ -890,10 +995,10 @@
       },
       p(ctx2, dirty) {
         if (dirty & /*error*/
-        2) set_data(
+        4) set_data(
           t1,
           /*error*/
-          ctx2[1]
+          ctx2[2]
         );
       },
       i: noop,
@@ -905,68 +1010,131 @@
       }
     };
   }
+  function create_if_block_3(ctx) {
+    let hr;
+    let t;
+    let div;
+    let img;
+    let img_src_value;
+    let img_alt_value;
+    return {
+      c() {
+        hr = element("hr");
+        t = space();
+        div = element("div");
+        img = element("img");
+        attr(hr, "class", "svelte-1bx25y7");
+        if (!src_url_equal(img.src, img_src_value = /*geoInfo*/
+        ctx[1].images[0])) attr(img, "src", img_src_value);
+        attr(img, "alt", img_alt_value = /*geoInfo*/
+        ctx[1].metaName);
+        attr(img, "class", "responsive-image svelte-1bx25y7");
+        attr(div, "class", "image-wrapper svelte-1bx25y7");
+      },
+      m(target, anchor) {
+        insert(target, hr, anchor);
+        insert(target, t, anchor);
+        insert(target, div, anchor);
+        append(div, img);
+      },
+      p(ctx2, dirty) {
+        if (dirty & /*geoInfo*/
+        2 && !src_url_equal(img.src, img_src_value = /*geoInfo*/
+        ctx2[1].images[0])) {
+          attr(img, "src", img_src_value);
+        }
+        if (dirty & /*geoInfo*/
+        2 && img_alt_value !== (img_alt_value = /*geoInfo*/
+        ctx2[1].metaName)) {
+          attr(img, "alt", img_alt_value);
+        }
+      },
+      d(detaching) {
+        if (detaching) {
+          detach(hr);
+          detach(t);
+          detach(div);
+        }
+      }
+    };
+  }
   function create_fragment(ctx) {
     let div2;
     let div1;
-    let t3;
-    let current_block_type_index;
-    let if_block;
+    let button;
+    let t0;
+    let h2;
+    let t2;
+    let div0;
     let t4;
+    let t5;
     let current;
-    const if_block_creators = [create_if_block, create_if_block_1, create_else_block];
-    const if_blocks = [];
-    function select_block_type(ctx2, dirty) {
-      if (
-        /*error*/
-        ctx2[1]
-      ) return 0;
-      if (
-        /*geoInfo*/
-        ctx2[0]
-      ) return 1;
-      return 2;
-    }
-    current_block_type_index = select_block_type(ctx);
-    if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+    let mounted;
+    let dispose;
+    let if_block = !/*blockCollapsed*/
+    ctx[0] && create_if_block(ctx);
     return {
       c() {
         div2 = element("div");
         div1 = element("div");
-        div1.innerHTML = `<h2>Learnable Meta</h2> <div class="icons svelte-w42zs8"><a href="https://learnablemeta.com/" target="_blank" class="svelte-w42zs8"><span class="flat-color-icons--globe svelte-w42zs8"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" class="svelte-w42zs8"><span class="skill-icons--discord svelte-w42zs8"></span></a></div>`;
-        t3 = space();
-        if_block.c();
-        t4 = text("\n\n1");
-        attr(div1, "class", "flex svelte-w42zs8");
-        attr(div2, "class", "geometa-container svelte-w42zs8");
+        button = element("button");
+        button.innerHTML = `<span class="pajamas--collapse-solid svelte-1bx25y7"></span>`;
+        t0 = space();
+        h2 = element("h2");
+        h2.textContent = "Learnable Meta";
+        t2 = space();
+        div0 = element("div");
+        div0.innerHTML = `<a href="https://learnablemeta.com/" target="_blank" class="svelte-1bx25y7"><span class="flat-color-icons--globe svelte-1bx25y7"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" class="svelte-1bx25y7"><span class="skill-icons--discord svelte-1bx25y7"></span></a>`;
+        t4 = space();
+        if (if_block) if_block.c();
+        t5 = text("\n\n1");
+        attr(div0, "class", "icons svelte-1bx25y7");
+        attr(div1, "class", "flex svelte-1bx25y7");
+        attr(div2, "class", "geometa-container svelte-1bx25y7");
       },
       m(target, anchor) {
         insert(target, div2, anchor);
         append(div2, div1);
-        append(div2, t3);
-        if_blocks[current_block_type_index].m(div2, null);
-        insert(target, t4, anchor);
+        append(div1, button);
+        append(div1, t0);
+        append(div1, h2);
+        append(div1, t2);
+        append(div1, div0);
+        append(div2, t4);
+        if (if_block) if_block.m(div2, null);
+        insert(target, t5, anchor);
         current = true;
+        if (!mounted) {
+          dispose = listen(
+            button,
+            "click",
+            /*toggleCollapsed*/
+            ctx[3]
+          );
+          mounted = true;
+        }
       },
       p(ctx2, [dirty]) {
-        let previous_block_index = current_block_type_index;
-        current_block_type_index = select_block_type(ctx2);
-        if (current_block_type_index === previous_block_index) {
-          if_blocks[current_block_type_index].p(ctx2, dirty);
-        } else {
+        if (!/*blockCollapsed*/
+        ctx2[0]) {
+          if (if_block) {
+            if_block.p(ctx2, dirty);
+            if (dirty & /*blockCollapsed*/
+            1) {
+              transition_in(if_block, 1);
+            }
+          } else {
+            if_block = create_if_block(ctx2);
+            if_block.c();
+            transition_in(if_block, 1);
+            if_block.m(div2, null);
+          }
+        } else if (if_block) {
           group_outros();
-          transition_out(if_blocks[previous_block_index], 1, 1, () => {
-            if_blocks[previous_block_index] = null;
+          transition_out(if_block, 1, 1, () => {
+            if_block = null;
           });
           check_outros();
-          if_block = if_blocks[current_block_type_index];
-          if (!if_block) {
-            if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx2);
-            if_block.c();
-          } else {
-            if_block.p(ctx2, dirty);
-          }
-          transition_in(if_block, 1);
-          if_block.m(div2, null);
         }
       },
       i(local) {
@@ -981,9 +1149,11 @@
       d(detaching) {
         if (detaching) {
           detach(div2);
-          detach(t4);
+          detach(t5);
         }
-        if_blocks[current_block_type_index].d();
+        if (if_block) if_block.d();
+        mounted = false;
+        dispose();
       }
     };
   }
@@ -991,6 +1161,12 @@
     let { lat } = $$props;
     let { lng } = $$props;
     let { mapId } = $$props;
+    const bockSavedCollapsedValue = _unsafeWindow.localStorage.getItem("geometa:collapsed");
+    let blockCollapsed = bockSavedCollapsedValue == "true";
+    function toggleCollapsed() {
+      $$invalidate(0, blockCollapsed = !blockCollapsed);
+      _unsafeWindow.localStorage.setItem("geometa:collapsed", blockCollapsed.toString());
+    }
     let geoInfo = null;
     let error = null;
     onMount(() => {
@@ -1003,37 +1179,38 @@
         onload: (response) => {
           if (response.status === 200) {
             try {
-              $$invalidate(0, geoInfo = JSON.parse(response.responseText));
+              $$invalidate(1, geoInfo = JSON.parse(response.responseText));
             } catch (e) {
-              $$invalidate(1, error = "Failed to parse response");
+              $$invalidate(2, error = "Failed to parse response");
             }
           } else if (response.status === 404) {
-            $$invalidate(1, error = "Meta for this location not found");
+            $$invalidate(2, error = "Meta for this location not found");
           } else {
-            $$invalidate(1, error = `HTTP error! status: ${response.status}`);
+            $$invalidate(2, error = `HTTP error! status: ${response.status}`);
           }
         },
         onerror: (e) => {
-          $$invalidate(1, error = "An error occurred while fetching data");
+          $$invalidate(2, error = "An error occurred while fetching data");
           console.error("Error:", e);
         }
       });
     });
     $$self.$$set = ($$props2) => {
-      if ("lat" in $$props2) $$invalidate(2, lat = $$props2.lat);
-      if ("lng" in $$props2) $$invalidate(3, lng = $$props2.lng);
-      if ("mapId" in $$props2) $$invalidate(4, mapId = $$props2.mapId);
+      if ("lat" in $$props2) $$invalidate(4, lat = $$props2.lat);
+      if ("lng" in $$props2) $$invalidate(5, lng = $$props2.lng);
+      if ("mapId" in $$props2) $$invalidate(6, mapId = $$props2.mapId);
     };
-    return [geoInfo, error, lat, lng, mapId];
+    return [blockCollapsed, geoInfo, error, toggleCollapsed, lat, lng, mapId];
   }
   class App extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, instance, create_fragment, safe_not_equal, { lat: 2, lng: 3, mapId: 4 });
+      init(this, options, instance, create_fragment, safe_not_equal, { lat: 4, lng: 5, mapId: 6 });
     }
   }
   function changelog() {
     return [
+      { "0.62": "Added images to metas." },
       { "0.61": "Added new/placehoder map ids." },
       { "0.6": "Bugfixes" },
       { "0.5": "New note format and prepared for multiple maps support" },

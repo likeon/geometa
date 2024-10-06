@@ -1,6 +1,6 @@
 <script lang="ts">
   import {onMount} from 'svelte';
-  import {GM_xmlhttpRequest} from '$';
+  import {GM_xmlhttpRequest, unsafeWindow} from '$';
   import Spinner from "./lib/Spinner.svelte";
   import CountryFlag from "./lib/CountryFlag.svelte";
   import {cutToTwoDecimals} from "./lib/utils";
@@ -9,11 +9,20 @@
   export let lng: number;
   export let mapId: string
 
+  const bockSavedCollapsedValue = unsafeWindow.localStorage.getItem('geometa:collapsed')
+  let blockCollapsed = (bockSavedCollapsedValue == 'true');
+
+  function toggleCollapsed() {
+    blockCollapsed = !blockCollapsed;
+    unsafeWindow.localStorage.setItem('geometa:collapsed', blockCollapsed.toString())
+  }
+
   type GeoInfo = {
     country: string,
     metaName: string,
     note: string,
-    plonkitCountryUrl: string
+    plonkitCountryUrl: string,
+    images?: string[],
   };
 
   let geoInfo: GeoInfo | null = null;
@@ -49,34 +58,43 @@
 </script>
 
 <div class="geometa-container">
-  <div class="flex"><h2>Learnable Meta</h2>
+  <div class="flex">
+    <button on:click={toggleCollapsed}><span class="pajamas--collapse-solid"></span></button>
+    <h2>Learnable Meta</h2>
     <div class="icons"><a href="https://learnablemeta.com/" target="_blank"><span
       class="flat-color-icons--globe"></span></a>
       <a href="https://discord.gg/AcXEWznYZe" target="_blank"><span
         class="skill-icons--discord"></span></a></div>
   </div>
-  {#if error}
-    <p>Error: {error}</p>
-  {:else if geoInfo}
-    <p>Country:
-      <CountryFlag countryName={geoInfo.country}/>
-      <strong>{geoInfo.country}</strong></p>
-    <p>Meta type: <strong>{geoInfo.metaName}</strong></p>
-    <p>Note: {geoInfo.note}</p>
-    <p class="plonkit-note">Check out <a href={geoInfo.plonkitCountryUrl} target="_blank"> 
-      plonkit.net/{geoInfo.country.toLocaleLowerCase()}</a> for more clues.</p>
-  {:else}
-    <Spinner/>
+  {#if !blockCollapsed}
+    {#if error}
+      <p>Error: {error}</p>
+    {:else if geoInfo}
+      <p>Country:
+        <CountryFlag countryName={geoInfo.country}/>
+        <strong>{geoInfo.country}</strong></p>
+      <p>Meta type: <strong>{geoInfo.metaName}</strong></p>
+      <p>Note: {geoInfo.note}</p>
+      <p class="plonkit-note">Check out <a href={geoInfo.plonkitCountryUrl} target="_blank">
+        plonkit.net/{geoInfo.country.toLocaleLowerCase()}</a> for more clues.</p>
+      {#if geoInfo.images && geoInfo.images.length}
+        <hr>
+        <div class="image-wrapper">
+          <img src={geoInfo.images[0]} alt={geoInfo.metaName} class="responsive-image">
+        </div>
+      {/if}
+    {:else}
+      <Spinner/>
+    {/if}
   {/if}
 </div>
 
 <style>
   .geometa-container {
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 13rem;
     left: 1rem;
-    z-index: 9;
+    z-index: 50;
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -122,8 +140,19 @@
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E");
   }
 
+  .pajamas--collapse-solid {
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    margin-right: 5px;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='%23b3b3b3' fill-rule='evenodd' d='M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M8 8l-.53-.53l-2.25-2.25a.75.75 0 0 1 1.06-1.061l.97.97v-2.38a.75.75 0 0 1 1.5 0v2.38l.97-.97a.75.75 0 1 1 1.06 1.06L8.53 7.47zl.53.53l2.25 2.25a.75.75 0 0 1-1.06 1.061l-.97-.97v2.38a.75.75 0 0 1-1.5 0v-2.38l-.97.97a.75.75 0 1 1-1.06-1.06l2.25-2.25z' clip-rule='evenodd'/%3E%3C/svg%3E");
+  }
+
   .skill-icons--discord,
-  .flat-color-icons--globe {
+  .flat-color-icons--globe,
+  .pajamas--collapse-solid {
     display: inline-block;
     vertical-align: middle; /* This helps with alignment */
   }
@@ -136,5 +165,24 @@
   .icons a span {
     align-items: center;
     justify-content: center;
+  }
+
+  hr {
+    border: 0;
+    border-top: 1px solid white;
+    width: 100%;
+  }
+
+  .image-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .responsive-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
   }
 </style>1

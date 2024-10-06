@@ -5,6 +5,7 @@ import { unsafeWindow } from "$";
 
 function changelog() {
   return [
+    { "0.62": "Added images to metas." },
     { "0.61": "Added new/placehoder map ids." },
     { "0.6": "Bugfixes" },
     { "0.5": "New note format and prepared for multiple maps support" },
@@ -25,7 +26,7 @@ if (unsafeWindow.notAValidVariable) {
 const GeoGuessrEventFramework = unsafeWindow.GeoGuessrEventFramework;
 
 const metaMapIds = new Set([
-  "66c0d3feff4dbe492e06174e", 
+  "66c0d3feff4dbe492e06174e",
   "66fd7c30b34ca9145ec96a6a",
   "66fda2e27e08dc03b5bb3d6e",
   "66fda2f8ee1c8ee4735e167f",
