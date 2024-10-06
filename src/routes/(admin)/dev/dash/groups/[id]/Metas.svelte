@@ -107,6 +107,7 @@
                   class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500 custom-select"
                   bind:value={levelFilter}
                   on:change={handleLevelFilterChange}
+                  on:click={(event) => event.stopPropagation()}
                 >
                   <option value="all">All Levels</option>
                   {#each levelNames as levelName}
