@@ -16,6 +16,7 @@
   let searchText = '';
   let selectedNoteFilter = 'all';
   let selectedImageFilter = 'all';
+  let selectedLevelFilter = 'all';
   let selectedHeader = 'tag';
   let sortModifier = 1;
 
@@ -23,15 +24,21 @@
     const { type, value } = event.detail;
 
     // Handle filters (note or image)
-    if (type === 'note') {
+    if (type == 'note') {
       selectedNoteFilter = value;
-    } else if (type === 'image') {
+    } else if (type == 'image') {
       selectedImageFilter = value;
     }
 
+    // Handle level changes
+
+    if (type == 'level') {
+      selectedLevelFilter = value;
+    }
+
     // Handle header changes
-    if (type === 'header') {
-      if (selectedHeader === value) {
+    if (type == 'header') {
+      if (selectedHeader == value) {
         sortModifier *= -1;
       } else {
         sortModifier = 1;
@@ -49,25 +56,31 @@
 
       // Apply note filter ('all', 'missing', 'has')
       const matchesNoteCondition =
-        selectedNoteFilter === 'all' ||
-        (selectedNoteFilter === 'hasNote' && item.note != '') ||
-        (selectedNoteFilter === 'missingNote' && item.note == '');
+        selectedNoteFilter == 'all' ||
+        (selectedNoteFilter == 'hasNote' && item.note != '') ||
+        (selectedNoteFilter == 'missingNote' && item.note == '');
 
       // Apply image filter ('all', 'missing', 'has')
       const matchesImageCondition =
-        selectedImageFilter === 'all' ||
-        (selectedImageFilter === 'hasImage' && item.images.length != 0) ||
-        (selectedImageFilter === 'missingImage' && !item.images.length);
+        selectedImageFilter == 'all' ||
+        (selectedImageFilter == 'hasImage' && item.images.length != 0) ||
+        (selectedImageFilter == 'missingImage' && !item.images.length);
 
-      return matchesSearchText && matchesNoteCondition && matchesImageCondition;
+      const matchesLevelCondition =
+        selectedLevelFilter == 'all' ||
+        item.metaLevels.some((metaLevel) => metaLevel.level.name == selectedLevelFilter);
+
+      return (
+        matchesSearchText && matchesNoteCondition && matchesImageCondition && matchesLevelCondition
+      );
     })
     .sort((a, b) => {
       // Apply sorting logic based on selectedHeader and sortModifier
-      if (selectedHeader === 'tag') {
+      if (selectedHeader == 'tag') {
         return a.tagName.localeCompare(b.tagName) * sortModifier;
-      } else if (selectedHeader === 'level') {
+      } else if (selectedHeader == 'level') {
         return (a.metaLevels.length - b.metaLevels.length) * sortModifier;
-      } else if (selectedHeader === 'name') {
+      } else if (selectedHeader == 'name') {
         return a.name.localeCompare(b.name) * sortModifier;
       }
       return 0;
@@ -93,7 +106,7 @@
 
   function updateMeta(updatedMeta: MetaType) {
     data.group.metas = data.group.metas.map((meta) =>
-      meta.id === updatedMeta.id ? updatedMeta : meta
+      meta.id == updatedMeta.id ? updatedMeta : meta
     );
   }
 
@@ -134,7 +147,12 @@
       </form>
     </div>
   </div>
-  <Metas {filteredMetas} {selectMeta} on:criteriaChange={handleCriteriaChange} />
+  <Metas
+    {filteredMetas}
+    {selectMeta}
+    on:criteriaChange={handleCriteriaChange}
+    levelNames={levelChoices.map((levelChoice) => levelChoice.name)}
+  />
 </div>
 
 <MetaEditModal

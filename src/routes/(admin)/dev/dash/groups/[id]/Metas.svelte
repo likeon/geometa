@@ -2,11 +2,14 @@
   import Icon from '@iconify/svelte';
   import type { PageData } from './$types';
   import { createEventDispatcher } from 'svelte';
+  import { map } from 'zod';
   export let filteredMetas: PageData['group']['metas'];
   export let selectMeta;
+  export let levelNames;
 
   let noteFilter = 'all';
   let imageFilter = 'all';
+  let levelFilter = 'all';
   const dispatch = createEventDispatcher();
 
   function handleNoteFilterChange() {
@@ -15,6 +18,10 @@
 
   function handleImageFilterChange() {
     dispatch('criteriaChange', { type: 'image', value: imageFilter });
+  }
+
+  function handleLevelFilterChange() {
+    dispatch('criteriaChange', { type: 'level', value: levelFilter });
   }
 
   let selectedHeader = 'tag';
@@ -96,7 +103,17 @@
                 class:bg-blue-300={selectedHeader === 'level'}
                 on:click={() => selectHeader('level')}
               >
-                Level {selectedHeader === 'level' ? sortArrow : ''}
+                <select
+                  class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500 custom-select"
+                  bind:value={levelFilter}
+                  on:change={handleLevelFilterChange}
+                >
+                  <option value="all">All Levels</option>
+                  {#each levelNames as levelName}
+                    <option value={levelName}>{levelName}</option>
+                  {/each}
+                </select>
+                {selectedHeader === 'level' ? sortArrow : ''}
               </th>
             </tr>
           </thead>
