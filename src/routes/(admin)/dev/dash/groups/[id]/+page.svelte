@@ -14,22 +14,50 @@
   let isMetaModalOpen = false;
   let isUploadModalOpen = false;
   let searchText = '';
-  let isMissingNote = false;
-  let isMissingImage = false;
-
+  let selectedNoteFilter = 'all';
+  let selectedImageFilter = 'all';
   let selectedHeader = 'tag';
   let sortModifier = 1;
-  $: sortArrow = sortModifier == 1 ? '▼' : '▲';
+
+  function handleCriteriaChange(event: { detail: { type: string; value: string } }) {
+    const { type, value } = event.detail;
+
+    // Handle filters (note or image)
+    if (type === 'note') {
+      selectedNoteFilter = value;
+    } else if (type === 'image') {
+      selectedImageFilter = value;
+    }
+
+    // Handle header changes
+    if (type === 'header') {
+      if (selectedHeader === value) {
+        sortModifier *= -1;
+      } else {
+        sortModifier = 1;
+        selectedHeader = value;
+      }
+    }
+  }
 
   $: filteredMetas = data.group.metas
     .filter((item) => {
-      // Apply your filtering logic here
+      // Apply text filter
       const matchesSearchText =
         item.name.toLowerCase().includes(searchText.toLowerCase()) ||
         item.tagName.toLowerCase().includes(searchText.toLowerCase());
 
-      const matchesNoteCondition = isMissingNote ? item.note === '' : true;
-      const matchesImageCondition = isMissingImage ? !item.hasImage : true;
+      // Apply note filter ('all', 'missing', 'has')
+      const matchesNoteCondition =
+        selectedNoteFilter === 'all' ||
+        (selectedNoteFilter === 'hasNote' && item.note != '') ||
+        (selectedNoteFilter === 'missingNote' && item.note == '');
+
+      // Apply image filter ('all', 'missing', 'has')
+      const matchesImageCondition =
+        selectedImageFilter === 'all' ||
+        (selectedImageFilter === 'hasImage' && item.images.length != 0) ||
+        (selectedImageFilter === 'missingImage' && !item.images.length);
 
       return matchesSearchText && matchesNoteCondition && matchesImageCondition;
     })
@@ -44,15 +72,6 @@
       }
       return 0;
     });
-
-  function selectHeader(header: string) {
-    if (selectedHeader == header) {
-      sortModifier *= -1;
-    } else {
-      sortModifier = 1;
-      selectedHeader = header;
-    }
-  }
 
   let selectedMeta: (typeof data.group.metas)[number] | null = null;
   $: selectedMeta = null;
@@ -93,26 +112,6 @@
     <div class="w-1/3">
       <Input type="text" placeholder="Search..." autocomplete="off" bind:value={searchText} />
     </div>
-    <div class="ml-1 flex items-center">
-      Missing:
-      <input
-        class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 ml-1 dark:bg-gray-700 dark:border-gray-600
-    rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600"
-        type="checkbox"
-        name="isMissingNote"
-        bind:checked={isMissingNote}
-      />
-      <span class="ml-1 mr-1">Note</span>
-
-      <input
-        class="w-4 h-4 bg-gray-100 border-gray-300 dark:ring-offset-gray-800 focus:ring-2 me-0 dark:bg-gray-700 dark:border-gray-600
-      rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600"
-        type="checkbox"
-        name="isMissingImage"
-        bind:checked={isMissingImage}
-      />
-      <span class="ml-1 mr-1">Image</span>
-    </div>
     <div class="flex-grow flex items-center justify-end">
       <GradientButton color="cyanToBlue" class="ml-3" on:click={uploadLocations}
         >Upload locations</GradientButton
@@ -135,7 +134,7 @@
       </form>
     </div>
   </div>
-  <Metas {filteredMetas} {selectMeta} {selectedHeader} {sortArrow} {selectHeader} />
+  <Metas {filteredMetas} {selectMeta} on:criteriaChange={handleCriteriaChange} />
 </div>
 
 <MetaEditModal

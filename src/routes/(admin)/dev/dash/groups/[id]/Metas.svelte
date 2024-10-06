@@ -1,11 +1,33 @@
 <script lang="ts">
   import Icon from '@iconify/svelte';
   import type { PageData } from './$types';
+  import { createEventDispatcher } from 'svelte';
   export let filteredMetas: PageData['group']['metas'];
   export let selectMeta;
-  export let selectHeader;
-  export let selectedHeader;
-  export let sortArrow;
+
+  let noteFilter = 'all';
+  let imageFilter = 'all';
+  const dispatch = createEventDispatcher();
+
+  function handleNoteFilterChange() {
+    dispatch('criteriaChange', { type: 'note', value: noteFilter });
+  }
+
+  function handleImageFilterChange() {
+    dispatch('criteriaChange', { type: 'image', value: imageFilter });
+  }
+
+  let selectedHeader = 'tag';
+
+  function selectHeader(header: string) {
+    dispatch('criteriaChange', { type: 'header', value: header });
+    if (selectedHeader == header) {
+      sortArrow = sortArrow == '▼' ? '▲' : '▼';
+    }
+    selectedHeader = header;
+  }
+
+  let sortArrow = '▼';
 </script>
 
 <div class="mt-3 flow-root">
@@ -16,6 +38,7 @@
           <colgroup>
             <col class="w-1/3" />
             <col class="w-1/3" />
+            <col class="w-1/6" />
             <col class="w-1/6" />
             <col class="w-1/6" />
             <col class="w-1/6" />
@@ -44,7 +67,27 @@
                 Locations
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Has images
+                <select
+                  class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500"
+                  bind:value={noteFilter}
+                  on:change={handleNoteFilterChange}
+                >
+                  <option value="all">Any Note</option>
+                  <option value="hasNote">Has Note</option>
+                  <option value="missingNote">Missing Note</option>
+                </select>
+              </th>
+
+              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
+                <select
+                  class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500"
+                  bind:value={imageFilter}
+                  on:change={handleImageFilterChange}
+                >
+                  <option value="all">Any Image</option>
+                  <option value="hasImage">Has Image</option>
+                  <option value="missingImage">Missing Image</option>
+                </select>
               </th>
               <th
                 scope="col"
@@ -68,6 +111,11 @@
                 <td>{meta.name}</td>
                 <td>
                   {meta.locationsCount}
+                </td>
+                <td>
+                  {#if meta.note}
+                    <Icon icon="ei:check" class="w-5 h-5" color="green" />
+                  {/if}
                 </td>
                 <td>
                   {#if meta.images.length}
