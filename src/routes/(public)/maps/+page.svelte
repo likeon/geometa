@@ -17,9 +17,11 @@
       </p>
     </div>
     <div class="relative mt-6">
-      <a href="/about" class="mx-auto text-lg leading-8 text-black bg-green-200 rounded p-2">
-        Make sure you have our UserScript installed!
-      </a>
+      <span class="mx-auto text-lg leading-8 text-black bg-green-200 rounded p-2">
+        Make sure you have our
+        <a href="/about" class="underline text-blue-600 hover:text-blue-800"> UserScript </a>
+        installed!
+      </span>
     </div>
   </div>
   <div class="flow-root bg-white pb-24 sm:pb-32">
