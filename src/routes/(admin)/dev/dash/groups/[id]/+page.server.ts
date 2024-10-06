@@ -29,6 +29,7 @@ import {
 import { getGroupId } from './utils';
 import { uploadFile } from '$lib/s3';
 import { dev } from '$app/environment';
+import { meta } from 'eslint-plugin-svelte';
 
 const insertMetasSchema = createInsertSchema(metas)
   .extend({ levels: z.array(z.number()) })
@@ -246,8 +247,9 @@ export const actions = {
     const savedImage = await db
       .select()
       .from(metaImages)
-      .innerJoin(maps, eq(maps.id, metaImages.metaId));
-    await ensurePermissions(locals.user?.id, savedImage[0].maps.mapGroupId);
+      .innerJoin(metas, eq(metas.id, metaImages.metaId))
+      .where(eq(metaImages.id, imageId));
+    await ensurePermissions(locals.user?.id, savedImage[0]?.metas.mapGroupId);
 
     await db.delete(metaImages).where(eq(metaImages.id, imageId));
     return { success: true, imageId: imageId };
