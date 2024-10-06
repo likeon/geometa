@@ -36,12 +36,12 @@
       <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
         <table class="w-full table-fixed border-spacing-y-3 border-separate">
           <colgroup>
-            <col class="w-1/3" />
-            <col class="w-1/3" />
-            <col class="w-1/6" />
-            <col class="w-1/6" />
-            <col class="w-1/6" />
-            <col class="w-1/6" />
+            <col class="w-1/4" />
+            <col class="w-1/4" />
+            <col class="w-1/12" />
+            <col class="w-5/36" />
+            <col class="w-5/36" />
+            <col class="w-5/36" />
           </colgroup>
           <thead class="bg-green-100">
             <tr>
@@ -68,7 +68,7 @@
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 <select
-                  class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500"
+                  class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500 custom-select"
                   bind:value={noteFilter}
                   on:change={handleNoteFilterChange}
                 >
@@ -80,7 +80,7 @@
 
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 <select
-                  class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500"
+                  class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500 custom-select"
                   bind:value={imageFilter}
                   on:change={handleImageFilterChange}
                 >
@@ -143,5 +143,13 @@
 
   th {
     @apply pl-3;
+  }
+
+  .custom-select {
+    width: 110px;
+    font-size: 12px;
+    padding: 4px;
+    display: inline-block;
+    margin-right: 10px;
   }
 </style>
