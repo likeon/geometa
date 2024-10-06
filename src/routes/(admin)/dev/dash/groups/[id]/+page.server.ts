@@ -29,7 +29,6 @@ import {
 import { getGroupId } from './utils';
 import { uploadFile } from '$lib/s3';
 import { dev } from '$app/environment';
-import { meta } from 'eslint-plugin-svelte';
 
 const insertMetasSchema = createInsertSchema(metas)
   .extend({ levels: z.array(z.number()) })
