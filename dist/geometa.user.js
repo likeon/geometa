@@ -1180,7 +1180,7 @@
     let error = null;
     let container;
     let containerWidth = localStorageGetInt("geometa:containerWidth") || 500;
-    let containerHeight = localStorageGetInt("geometa:containerHeight") || 600;
+    let containerHeight = localStorageGetInt("geometa:containerHeight") || 400;
     onMount(() => {
       const cutLat = cutToTwoDecimals(lat);
       const cutLng = cutToTwoDecimals(lng);

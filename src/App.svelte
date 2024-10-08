@@ -30,7 +30,7 @@
 
   let container: HTMLDivElement;
   let containerWidth: number = localStorageGetInt('geometa:containerWidth') || 500;
-  let containerHeight: number = localStorageGetInt('geometa:containerHeight') || 600;
+  let containerHeight: number = localStorageGetInt('geometa:containerHeight') || 400;
 
   onMount(() => {
     const cutLat = cutToTwoDecimals(lat);
