@@ -1172,7 +1172,9 @@
     "66fda32fbc5afd45d3eb187d",
     "66fda342413f41ca32ef9d54",
     "66fda352ee1c8ee4735e1aa8",
-    "66fda3667e08dc03b5bb4309"
+    "66fda3667e08dc03b5bb4309",
+    "6705865c0e65158e29b8201b"
+    // chile
   ]);
   GeoGuessrEventFramework.init().then(() => {
     GeoGuessrEventFramework.events.addEventListener("round_end", (event) => {
