@@ -54,11 +54,11 @@ const mapJsonSchema = z.object({
       heading: z.number(),
       pitch: z.number(),
       zoom: z.number(),
-      panoId: z.string().optional(),
+      panoId: z.string().optional().or(z.null()),
       extra: z.object({
         tags: z.string().array().length(1),
         panoId: z.string().optional(),
-        panoDate: z.string()
+        panoDate: z.string().optional().or(z.null())
       })
     })
     .array()
@@ -73,7 +73,7 @@ type UpsertValue = {
   panoId: string | null;
   extraTag: string;
   extraPanoId: string | null;
-  extraPanoDate: string;
+  extraPanoDate: string | null | undefined;
 };
 
 export const load: PageServerLoad = async ({ params, locals }) => {

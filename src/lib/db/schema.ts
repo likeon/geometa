@@ -45,7 +45,7 @@ export const mapGroupLocations = sqliteTable(
     panoId: text('pano_id'),
     extraTag: text('extra_tag').notNull(),
     extraPanoId: text('extra_pano_id'),
-    extraPanoDate: text('extra_pano_date').notNull()
+    extraPanoDate: text('extra_pano_date')
   },
   (t) => ({
     mapLocationUnique: uniqueIndex('map_group_locations_unique').on(t.mapGroupId, t.lat, t.lng)
