@@ -28,6 +28,5 @@
         <Icon icon="skill-icons:discord" class="w-5 h-5 flex-shrink-0 mr-1" />Discord
       </div></NavLi
     >
-    <!-- <NavLi href="/submissions">Community Submissions</NavLi> -->
   </NavUl>
 </Navbar>
