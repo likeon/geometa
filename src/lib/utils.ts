@@ -1,3 +1,5 @@
+import {unsafeWindow} from "$";
+
 export function waitForElement(selector: string): Promise<Element> {
   return new Promise((resolve) => {
     const existingElement = document.querySelector(selector);
@@ -32,4 +34,19 @@ export function cutToTwoDecimals(num: number): string {
   const fixed = num.toFixed(2);
   // Remove trailing zeros after the decimal point
   return fixed.replace(/\.?0+$/, "");
+}
+
+export function localStorageGetInt(name: string) {
+  const savedValue = unsafeWindow.localStorage.getItem(name);
+
+  if (!savedValue) {
+    return null;
+  }
+
+  const savedInt = parseInt(savedValue, 10)
+  if (isNaN(savedInt)) {
+    return null;
+  }
+
+  return savedInt;
 }

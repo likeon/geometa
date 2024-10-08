@@ -5,6 +5,7 @@ import { unsafeWindow } from "$";
 
 function changelog() {
   return [
+    { "0.63": "Added container resizing." },
     { "0.62": "Added images to metas." },
     { "0.61": "Added new/placehoder map ids." },
     { "0.6": "Bugfixes" },

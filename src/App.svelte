@@ -3,7 +3,7 @@
   import {GM_xmlhttpRequest, unsafeWindow} from '$';
   import Spinner from "./lib/Spinner.svelte";
   import CountryFlag from "./lib/CountryFlag.svelte";
-  import {cutToTwoDecimals} from "./lib/utils";
+  import {cutToTwoDecimals, localStorageGetInt} from "./lib/utils";
 
   export let lat: number;
   export let lng: number;
@@ -27,6 +27,10 @@
 
   let geoInfo: GeoInfo | null = null;
   let error: string | null = null;
+
+  let container: HTMLDivElement;
+  let containerWidth: number = localStorageGetInt('geometa:containerWidth') || 500;
+  let containerHeight: number = localStorageGetInt('geometa:containerHeight') || 600;
 
   onMount(() => {
     const cutLat = cutToTwoDecimals(lat);
@@ -54,10 +58,29 @@
         console.error('Error:', e);
       }
     });
+
+    container.style.width = `${containerWidth}px`
+    container.style.height = `${containerHeight}px`
+
+    const resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        containerWidth = entry.contentRect.width;
+        containerHeight = entry.contentRect.height;
+        if (containerWidth !== 0 && containerHeight !== 0) {
+          unsafeWindow.localStorage.setItem('geometa:containerWidth', Math.floor(containerWidth).toString())
+          unsafeWindow.localStorage.setItem('geometa:containerHeight', Math.floor(containerHeight).toString())
+        }
+      }
+    });
+    resizeObserver.observe(container!);
+
+    return () => {
+      resizeObserver.disconnect();
+    };
   });
 </script>
 
-<div class="geometa-container">
+<div class="geometa-container" bind:this={container}>
   <div class="flex">
     <button on:click={toggleCollapsed}><span class="pajamas--collapse-solid"></span></button>
     <h2>Learnable Meta</h2>
@@ -104,7 +127,9 @@
     border-radius: 5px;
     font-size: 17px;
     width: min(25%, 500px);
-    max-width: min(25%, 500px);
+
+    resize: both; /* Enables horizontal and vertical resizing */
+    overflow: auto; /* scroll on overflow */
   }
 
   .plonkit-note {
@@ -185,4 +210,4 @@
     height: auto;
     display: block;
   }
-</style>1
+</style>
