@@ -33,11 +33,11 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
   const kvCacheKey = `cache:userscript:${groupId}`;
   const cachedKvJson = await kvNamespace.get(kvCacheKey);
 
-  let cachedKvData;
+  let cachedKvData: Map<string, UserScriptDataItem>;
   if (cachedKvJson) {
-    cachedKvData = JSON.parse(cachedKvJson) as Map<string, UserScriptDataItem>;
+    cachedKvData = new Map(Object.entries(JSON.parse(cachedKvJson)));
   } else {
-    cachedKvData = new Map<string, UserScriptDataItem>();
+    cachedKvData = new Map();
   }
 
   const kvData = [];
