@@ -24,7 +24,7 @@
       </span>
     </div>
   </div>
-  <div class="flow-root bg-white pb-24 sm:pb-32">
+  <div class="flow-root pb-24 sm:pb-32">
     <div class="-mt-80">
       <div class="container">
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -87,6 +87,93 @@
             <Button
               class="mt-7"
               href="https://www.geoguessr.com/maps/66fd7c30b34ca9145ec96a6a"
+              target="_blank">Play</Button
+            >
+          </div>
+          <div
+            class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10"
+          >
+            <div>
+              <h3 class="text-xl font-semibold leading-7 text-green-600">
+                A Learnable Meta Latin America
+              </h3>
+              <div class="mt-4 flex items-baseline gap-x-2">
+                <span class="text-xl font-bold tracking-tight text-gray-900">280+ locations</span>
+              </div>
+              <p class="mt-6 text-base leading-7 text-gray-600">
+                A map focused on metas, highlighting only Latin America from our world map, if you'd
+                like to practice specifically in this region.
+              </p>
+            </div>
+            <Button
+              class="mt-7"
+              href="https://www.geoguessr.com/maps/66fda2f8ee1c8ee4735e167f"
+              target="_blank">Play</Button
+            >
+          </div>
+
+          <div
+            class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10"
+          >
+            <div>
+              <h3 class="text-xl font-semibold leading-7 text-green-600">
+                A Learnable Meta Africa
+              </h3>
+              <div class="mt-4 flex items-baseline gap-x-2">
+                <span class="text-xl font-bold tracking-tight text-gray-900">120+ locations</span>
+              </div>
+              <p class="mt-6 text-base leading-7 text-gray-600">
+                A map focused on metas, highlighting only Africa from our world map, if you'd like
+                to practice specifically in this region.
+              </p>
+            </div>
+            <Button
+              class="mt-7"
+              href="https://www.geoguessr.com/maps/66fda3097e08dc03b5bb3f0e"
+              target="_blank">Play</Button
+            >
+          </div>
+
+          <div
+            class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10"
+          >
+            <div>
+              <h3 class="text-xl font-semibold leading-7 text-green-600">
+                A Learnable Meta Europe
+              </h3>
+              <div class="mt-4 flex items-baseline gap-x-2">
+                <span class="text-xl font-bold tracking-tight text-gray-900">670+ locations</span>
+              </div>
+              <p class="mt-6 text-base leading-7 text-gray-600">
+                A map focused on metas, highlighting only Europe from our world map, if you'd like
+                to practice specifically in this region.
+              </p>
+            </div>
+            <Button
+              class="mt-7"
+              href="https://www.geoguessr.com/maps/66fda319b477f9e4abdd34fa"
+              target="_blank">Play</Button
+            >
+          </div>
+
+          <div
+            class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10"
+          >
+            <div>
+              <h3 class="text-xl font-semibold leading-7 text-green-600">
+                A Learnable Meta World - Google Cars
+              </h3>
+              <div class="mt-4 flex items-baseline gap-x-2">
+                <span class="text-xl font-bold tracking-tight text-gray-900">230+ locations</span>
+              </div>
+              <p class="mt-6 text-base leading-7 text-gray-600">
+                A map focused on Google car metas from our world map, if you'd like to practice
+                identifying the look of beautiful Street View cars 😊
+              </p>
+            </div>
+            <Button
+              class="mt-7"
+              href="https://www.geoguessr.com/maps/66fda32fbc5afd45d3eb187d"
               target="_blank">Play</Button
             >
           </div>
