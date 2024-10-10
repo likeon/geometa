@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from '$app/stores'; // Import the page store to get the current route
 
-  export let groupId: Number;
+  export let groupId: number;
   export let groupName: string;
 
   $: activeRoute = $page.url.pathname;

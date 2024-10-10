@@ -1,12 +1,4 @@
-import {
-  text,
-  integer,
-  sqliteTable,
-  uniqueIndex,
-  blob,
-  real,
-  sqliteView
-} from 'drizzle-orm/sqlite-core';
+import { text, integer, sqliteTable, uniqueIndex, real, sqliteView } from 'drizzle-orm/sqlite-core';
 import { relations, sql } from 'drizzle-orm';
 
 export const metaSuggestions = sqliteTable('meta_suggestions', {

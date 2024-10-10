@@ -5,8 +5,6 @@ import {
   levels,
   mapGroupLocations,
   mapGroups,
-  mapLocations,
-  maps,
   metaImages,
   metaLevels,
   metas
@@ -18,17 +16,15 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
 import {
-  cloudflareKvBulkPut,
-  cutToTwoDecimals,
   ensurePermissions,
   extractJsonData,
   generateRandomString,
-  getCountryFromTagName,
   getFileExtension
 } from '$lib/utils';
 import { getGroupId } from './utils';
 import { uploadFile } from '$lib/s3';
 import { dev } from '$app/environment';
+import { syncUserScriptData } from '$lib/user-script';
 
 const insertMetasSchema = createInsertSchema(metas)
   .extend({ levels: z.array(z.number()) })
@@ -269,48 +265,11 @@ export const actions = {
   prepareUserScriptData: async (event) => {
     const groupId = getGroupId(event.params);
     await ensurePermissions(event.locals.user?.id, groupId);
-    const dbValues = await db
-      .select({
-        geoguessrId: maps.geoguessrId,
-        lat: mapLocations.lat,
-        lng: mapLocations.lng,
-        tagName: mapLocations.tagName,
-        metaName: mapLocations.metaName,
-        metaNote: mapLocations.metaNote,
-        images: sql<
-          string | null
-        >`(select GROUP_CONCAT(mi.image_url) from meta_images mi where mi.meta_id = ${mapLocations.metaId})`
-      })
-      .from(mapLocations)
-      .innerJoin(maps, eq(mapLocations.mapId, maps.id))
-      .where(eq(maps.mapGroupId, groupId))
-      .orderBy(asc(maps.id));
 
-    const kvData = [];
-    for (const item of dbValues) {
-      const key = `${item.geoguessrId}:${cutToTwoDecimals(item.lat)}:${cutToTwoDecimals(item.lng)}`;
-      const countryName = getCountryFromTagName(item.tagName);
-      const plonkitCountryUrl = `https://www.plonkit.net/${countryName.toLowerCase().replace(' ', '-')}`;
-
-      let images: string[];
-      if (item.images) {
-        images = item.images
-          .split(',')
-          .map((url) => `https://learnablemeta.com/cdn-cgi/image/format=avif,quality=80/${url}`);
-      } else {
-        images = [];
-      }
-
-      const value = {
-        country: getCountryFromTagName(item.tagName),
-        metaName: item.metaName,
-        note: item.metaNote,
-        plonkitCountryUrl: plonkitCountryUrl,
-        images: images
-      };
-      kvData.push({ key: key, value: JSON.stringify(value), base64: false });
+    if (event.platform === undefined) {
+      error(500, 'platform unavailable');
     }
 
-    await cloudflareKvBulkPut(kvData);
+    await syncUserScriptData(groupId, event.platform.env.geometa_kv);
   }
 };

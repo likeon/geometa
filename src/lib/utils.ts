@@ -17,7 +17,7 @@ export function getFileExtension(file: File): string {
   return lastDotIndex === -1 ? '' : fileName.slice(lastDotIndex + 1);
 }
 
-export async function extractJsonData(file: File): Promise<any> {
+export async function extractJsonData(file: File) {
   try {
     // Read the file content as text
     const text = await file.text();

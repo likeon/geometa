@@ -17,6 +17,7 @@
     "db:migrate:prod": "dotenv -e .env.prod.local -e .env drizzle-kit migrate"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241004.0",
     "@fontsource/fira-mono": "^5.0.0",
     "@iconify/json": "^2.2.243",
     "@iconify/svelte": "^4.0.2",
