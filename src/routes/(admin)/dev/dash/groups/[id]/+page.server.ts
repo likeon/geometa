@@ -145,6 +145,19 @@ export const actions = {
     const levelsInsertValues = levels.map((levelId) => ({ levelId: levelId, metaId: metaId }));
     await db.insert(metaLevels).values(levelsInsertValues).onConflictDoNothing();
   },
+  deleteMeta: async ({ request, locals }) => {
+    const data = await request.formData();
+    const metaId = parseInt((data.get('id') as string) || '', 10);
+
+    if (isNaN(metaId)) {
+      error(400, 'Invalid ID');
+    }
+
+    const meta = await db.query.metas.findFirst({ where: eq(metas.id, metaId) });
+    await ensurePermissions(locals.user?.id, meta?.mapGroupId);
+
+    await db.delete(metas).where(eq(metas.id, metaId));
+  },
   uploadMapJson: async ({ request, params, locals }) => {
     const groupId = getGroupId(params);
     await ensurePermissions(locals.user?.id, groupId);

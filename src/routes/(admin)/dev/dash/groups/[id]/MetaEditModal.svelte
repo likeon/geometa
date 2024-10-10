@@ -2,6 +2,8 @@
   import {
     Alert,
     Button,
+    Dropdown,
+    DropdownItem,
     Input,
     Label,
     Modal,
@@ -14,6 +16,7 @@
   import type { InsertMetasSchema, MapUploadSchema } from './+page.server';
   import type { PageData } from './$types';
   import MetaImages from '$routes/(admin)/dev/dash/groups/[id]/MetaImages.svelte';
+  import Icon from '@iconify/svelte';
 
   export let isMetaModalOpen: boolean;
   export let selectedMeta: PageData['group']['metas'][number] | null;
@@ -119,6 +122,14 @@
           {updateImages}
         />
       </TabItem>
+      <form action="?/deleteMeta" method="post">
+        <div class="items-center flex h-full">
+          <input type="hidden" name="id" value={selectedMeta.id} />
+          <button type="submit">
+            <Icon icon="ic:baseline-delete" width="1rem" height="1rem" color="gray" />
+          </button>
+        </div>
+      </form>
     {/if}
   </Tabs>
 </Modal>
