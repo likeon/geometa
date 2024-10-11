@@ -1,6 +1,5 @@
 import { text, integer, sqliteTable, uniqueIndex, real, sqliteView } from 'drizzle-orm/sqlite-core';
 import { relations, sql } from 'drizzle-orm';
-import { boolean } from 'drizzle-orm/mysql-core';
 
 export const metaSuggestions = sqliteTable('meta_suggestions', {
   id: integer('id').primaryKey(),
