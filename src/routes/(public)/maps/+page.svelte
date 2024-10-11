@@ -1,6 +1,7 @@
 <script>
   import { Button } from 'flowbite-svelte';
   import background from '$lib/assets/background.jpg?enhanced';
+  export let data;
 </script>
 
 <div class="">
@@ -28,155 +29,27 @@
     <div class="-mt-80">
       <div class="container">
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-          <div
-            class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10"
-          >
-            <div>
-              <h3 class="text-xl font-semibold leading-7 text-green-600">A Learnable Meta World</h3>
-              <div class="mt-4 flex items-baseline gap-x-2">
-                <span class="text-xl font-bold tracking-tight text-gray-900">1500+ locations</span>
-              </div>
-              <p class="mt-6 text-base leading-7 text-gray-600">
-                A beginner-friendly map with most common/worth learning metas to recognize the
-                countries.
-              </p>
-            </div>
-            <Button
-              class="mt-7"
-              href="https://www.geoguessr.com/maps/66c0d3feff4dbe492e06174e"
-              target="_blank"
-              >Play
-            </Button>
-          </div>
-          <div
-            class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10"
-          >
-            <div>
-              <h3 class="text-xl font-semibold leading-7 text-green-600">
-                A Learnable Meta World — Regionguessing
-              </h3>
-              <div class="mt-4 flex items-baseline gap-x-2">
-                <span class="text-xl font-bold tracking-tight text-gray-900">350+ locations</span>
-              </div>
-              <p class="mt-6 text-base leading-7 text-gray-600">
-                An advanced map for experienced Geo Guessers with advanced metas that help to
-                determine the region of the country.
-              </p>
-            </div>
-            <Button
-              class="mt-7"
-              href="https://www.geoguessr.com/maps/66fda2e27e08dc03b5bb3d6e"
-              target="_blank"
-              >Play
-            </Button>
-          </div>
-          <div
-            class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10"
-          >
-            <div>
-              <h3 class="text-xl font-semibold leading-7 text-green-600">
-                A Learnable Meta World — Bollards
-              </h3>
-              <div class="mt-4 flex items-baseline gap-x-2">
-                <span class="text-xl font-bold tracking-tight text-gray-900">240+ locations</span>
-              </div>
-              <p class="mt-6 text-base leading-7 text-gray-600">
-                A world map focused on road bollards.
-              </p>
-            </div>
-            <Button
-              class="mt-7"
-              href="https://www.geoguessr.com/maps/66fd7c30b34ca9145ec96a6a"
-              target="_blank">Play</Button
+          {#each data.mapsToPublish as map}
+            <div
+              class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10"
             >
-          </div>
-          <div
-            class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10"
-          >
-            <div>
-              <h3 class="text-xl font-semibold leading-7 text-green-600">
-                A Learnable Meta Latin America
-              </h3>
-              <div class="mt-4 flex items-baseline gap-x-2">
-                <span class="text-xl font-bold tracking-tight text-gray-900">280+ locations</span>
+              <div>
+                <h3 class="text-xl font-semibold leading-7 text-green-600">{map.name}</h3>
+                <!-- <div class="mt-4 flex items-baseline gap-x-2">
+              <span class="text-xl font-bold tracking-tight text-gray-900">1500+ locations</span>
+            </div> -->
+                <p class="mt-6 text-base leading-7 text-gray-600">
+                  {map.description}
+                </p>
               </div>
-              <p class="mt-6 text-base leading-7 text-gray-600">
-                A map focused on metas, highlighting only Latin America from our world map, if you'd
-                like to practice specifically in this region.
-              </p>
+              <Button
+                class="mt-7"
+                href={'https://www.geoguessr.com/maps/' + map.geoguessrId}
+                target="_blank"
+                >Play
+              </Button>
             </div>
-            <Button
-              class="mt-7"
-              href="https://www.geoguessr.com/maps/66fda2f8ee1c8ee4735e167f"
-              target="_blank">Play</Button
-            >
-          </div>
-
-          <div
-            class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10"
-          >
-            <div>
-              <h3 class="text-xl font-semibold leading-7 text-green-600">
-                A Learnable Meta Africa
-              </h3>
-              <div class="mt-4 flex items-baseline gap-x-2">
-                <span class="text-xl font-bold tracking-tight text-gray-900">120+ locations</span>
-              </div>
-              <p class="mt-6 text-base leading-7 text-gray-600">
-                A map focused on metas, highlighting only Africa from our world map, if you'd like
-                to practice specifically in this region.
-              </p>
-            </div>
-            <Button
-              class="mt-7"
-              href="https://www.geoguessr.com/maps/66fda3097e08dc03b5bb3f0e"
-              target="_blank">Play</Button
-            >
-          </div>
-
-          <div
-            class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10"
-          >
-            <div>
-              <h3 class="text-xl font-semibold leading-7 text-green-600">
-                A Learnable Meta Europe
-              </h3>
-              <div class="mt-4 flex items-baseline gap-x-2">
-                <span class="text-xl font-bold tracking-tight text-gray-900">670+ locations</span>
-              </div>
-              <p class="mt-6 text-base leading-7 text-gray-600">
-                A map focused on metas, highlighting only Europe from our world map, if you'd like
-                to practice specifically in this region.
-              </p>
-            </div>
-            <Button
-              class="mt-7"
-              href="https://www.geoguessr.com/maps/66fda319b477f9e4abdd34fa"
-              target="_blank">Play</Button
-            >
-          </div>
-
-          <div
-            class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10"
-          >
-            <div>
-              <h3 class="text-xl font-semibold leading-7 text-green-600">
-                A Learnable Meta World - Google Cars
-              </h3>
-              <div class="mt-4 flex items-baseline gap-x-2">
-                <span class="text-xl font-bold tracking-tight text-gray-900">230+ locations</span>
-              </div>
-              <p class="mt-6 text-base leading-7 text-gray-600">
-                A map focused on Google car metas from our world map, if you'd like to practice
-                identifying the look of beautiful Street View cars 😊
-              </p>
-            </div>
-            <Button
-              class="mt-7"
-              href="https://www.geoguessr.com/maps/66fda32fbc5afd45d3eb187d"
-              target="_blank">Play</Button
-            >
-          </div>
+          {/each}
         </div>
       </div>
     </div>
