@@ -1,7 +1,12 @@
 import { db } from '$lib/drizzle';
 import { mapLocations, maps } from '$lib/db/schema';
 import { asc, eq, sql } from 'drizzle-orm';
-import { cloudflareKvBulkPut, cutToTwoDecimals, getCountryFromTagName } from '$lib/utils';
+import {
+  cloudflareKvBulkPut,
+  cutToTwoDecimals,
+  getCountryFromTagName,
+  isDeepEqual
+} from '$lib/utils';
 import type { KVNamespace } from '@cloudflare/workers-types';
 
 type UserScriptDataItem = {
@@ -63,7 +68,7 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
       images: images
     };
     const cachedValue = cachedKvData.get(key);
-    if (cachedValue != value) {
+    if (!isDeepEqual(value, cachedValue)) {
       cachedKvData.set(key, value);
       kvData.push({ key: key, value: JSON.stringify(value), base64: false });
     }
