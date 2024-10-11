@@ -40,7 +40,7 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
 
   let cachedKvData: Map<string, UserScriptDataItem>;
   if (cachedKvJson) {
-    cachedKvData = new Map(Object.entries(JSON.parse(cachedKvJson)));
+    cachedKvData = new Map(JSON.parse(cachedKvJson));
   } else {
     cachedKvData = new Map();
   }
@@ -69,6 +69,9 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
     };
     const cachedValue = cachedKvData.get(key);
     if (!isDeepEqual(value, cachedValue)) {
+      console.debug('DIFFERENT');
+      console.debug([value, cachedValue]);
+      console.debug(cachedKvData);
       cachedKvData.set(key, value);
       kvData.push({ key: key, value: JSON.stringify(value), base64: false });
     }
