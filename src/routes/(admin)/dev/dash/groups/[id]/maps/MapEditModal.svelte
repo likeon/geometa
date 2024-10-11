@@ -12,6 +12,7 @@
     Select,
     Textarea
   } from 'flowbite-svelte';
+  import Checkbox from 'flowbite-svelte/Checkbox.svelte';
 
   export let data: SuperValidated<Infer<InsertMapsSchema>>;
   export let isMapModalOpen: boolean;
@@ -31,6 +32,8 @@
     $form.id = selectedMap.id;
     $form.mapGroupId = selectedMap.mapGroupId;
     $form.name = selectedMap.name;
+    $form.description = selectedMap.description;
+    $form.isPublished = selectedMap.isPublished;
     $form.levels = selectedMap.mapLevels.map((item) => item.levelId);
     $form.filters = selectedMap.filters.map((item) => item.tagLike as string);
   } else {
@@ -38,6 +41,8 @@
     $form.mapGroupId = groupId;
     $form.geoguessrId = '';
     $form.name = '';
+    $form.description = '';
+    $form.isPublished = false;
     $form.levels = [];
     $form.filters = [];
   }
@@ -90,6 +95,22 @@
       {#if $errors.geoguessrId}
         <Alert color="red">{$errors.geoguessrId}</Alert>
       {/if}
+    </Label>
+    <Label class="space-y-2">
+      <span>Description</span>
+      <Textarea
+        rows="6"
+        name="description"
+        aria-invalid={$errors.description ? 'true' : undefined}
+        bind:value={$form.description}
+        {...$constraints.description}
+      />
+      {#if $errors.description}
+        <Alert color="red">{$errors.description}</Alert>
+      {/if}
+    </Label>
+    <Label>
+      <Checkbox bind:checked={$form.isPublished}>List map on homepage</Checkbox>
     </Label>
     <Label>
       <span>Levels</span>
