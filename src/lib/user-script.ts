@@ -70,6 +70,6 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
   }
   if (kvData) {
     await cloudflareKvBulkPut(kvData);
-    await kvNamespace.put(kvCacheKey, JSON.stringify(cachedKvData));
+    await kvNamespace.put(kvCacheKey, JSON.stringify(Array.from(cachedKvData.entries())));
   }
 }

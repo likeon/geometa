@@ -69,7 +69,7 @@ compatibility_flags = ["nodejs_compat"]
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces
  [[kv_namespaces]]
- binding = "geometa"
+ binding = "geometa_kv"
  id = "7d5e84a6c9a34d8694ffa28fdf091df4"
 
 # Bind an mTLS certificate. Use to present a client certificate when communicating with another service.
