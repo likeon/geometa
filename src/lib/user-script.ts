@@ -69,9 +69,6 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
     };
     const cachedValue = cachedKvData.get(key);
     if (!isDeepEqual(value, cachedValue)) {
-      console.debug('DIFFERENT');
-      console.debug([value, cachedValue]);
-      console.debug(cachedKvData);
       cachedKvData.set(key, value);
       kvData.push({ key: key, value: JSON.stringify(value), base64: false });
     }
