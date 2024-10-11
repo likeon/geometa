@@ -57,6 +57,12 @@
     $form.note = '';
     $form.levels = [];
   }
+
+  const confirmDelete = (event: { preventDefault: () => void }) => {
+    if (!confirm('Are you sure you want to delete this meta?')) {
+      event.preventDefault();
+    }
+  };
 </script>
 
 <Modal bind:open={isMetaModalOpen}>
@@ -120,7 +126,7 @@
           {updateImages}
         />
       </TabItem>
-      <form action="?/deleteMeta" method="post">
+      <form action="?/deleteMeta" method="post" on:submit={confirmDelete}>
         <div class="items-center flex h-full">
           <input type="hidden" name="id" value={selectedMeta.id} />
           <button type="submit">
