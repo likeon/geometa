@@ -1,5 +1,6 @@
 import { text, integer, sqliteTable, uniqueIndex, real, sqliteView } from 'drizzle-orm/sqlite-core';
 import { relations, sql } from 'drizzle-orm';
+import { boolean } from 'drizzle-orm/mysql-core';
 
 export const metaSuggestions = sqliteTable('meta_suggestions', {
   id: integer('id').primaryKey(),
@@ -55,7 +56,9 @@ export const maps = sqliteTable(
       .notNull()
       .references(() => mapGroups.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
-    geoguessrId: text('geoguessr_id').notNull()
+    geoguessrId: text('geoguessr_id').notNull(),
+    description: text('description'),
+    isPublished: integer('is_published', { mode: 'boolean' }).notNull().default(false)
   },
   (t) => ({
     nameUnique: uniqueIndex('maps_name_unique').on(t.name),

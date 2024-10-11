@@ -169,6 +169,13 @@
       "when": 1728399871771,
       "tag": "0023_shallow_queen_noir",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1728634984400,
+      "tag": "0024_cute_quentin_quire",
+      "breakpoints": true
     }
   ]
 }
