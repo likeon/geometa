@@ -35,9 +35,11 @@
             >
               <div>
                 <h3 class="text-xl font-semibold leading-7 text-green-600">{map.name}</h3>
-                <!-- <div class="mt-4 flex items-baseline gap-x-2">
-              <span class="text-xl font-bold tracking-tight text-gray-900">1500+ locations</span>
-            </div> -->
+                <div class="mt-4 flex items-baseline gap-x-2">
+                  <span class="text-xl font-bold tracking-tight text-gray-900"
+                    >{map.locationsCount}+ locations</span
+                  >
+                </div>
                 <p class="mt-6 text-base leading-7 text-gray-600">
                   {map.description}
                 </p>
