@@ -9,8 +9,7 @@
     <script
       defer
       src="https://cloud.umami.is/script.js"
-      data-website-id="3cb09286-f8f9-43c8-85ee-8df2b972c113"
-    ></script>
+      data-website-id="3cb09286-f8f9-43c8-85ee-8df2b972c113"></script>
   {/if}
 </svelte:head>
 

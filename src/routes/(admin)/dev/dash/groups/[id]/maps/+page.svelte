@@ -45,14 +45,11 @@
                 <th
                   scope="col"
                   class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                  >Name</th
-                >
+                  >Name</th>
                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >Levels</th
-                >
+                  >Levels</th>
                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >Locations count</th
-                >
+                  >Locations count</th>
                 <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
                 ></th>
               </tr>
@@ -62,16 +59,14 @@
                 <tr
                   class="cursor-pointer hover:bg-green-200"
                   role="link"
-                  on:click={() => selectMap(map)}
-                >
+                  on:click={() => selectMap(map)}>
                   <td>{map.name}</td>
                   <td>{map.mapLevels.map((item) => item.level.name).join(', ')}</td>
                   <td>{map.locationsCount}</td>
                   <td on:click={(event) => event.stopPropagation()}
                     ><a href={`/dev/dash/groups/${data.group.id}/maps/${map.id}/download`}
                       >Download</a
-                    ></td
-                  >
+                    ></td>
                 </tr>
               {/each}
             </tbody>
@@ -87,8 +82,7 @@
   data={data.mapForm}
   {levelChoices}
   groupId={data.group.id}
-  {selectedMap}
-/>
+  {selectedMap} />
 
 <style lang="postcss">
   td {

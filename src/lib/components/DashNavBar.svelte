@@ -22,24 +22,21 @@
       href={`/dev/dash/groups/${groupId}`}
       class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium {isActive(
         `/dev/dash/groups/${groupId}`
-      )}"
-    >
+      )}">
       Metas
     </a>
     <a
       href={`/dev/dash/groups/${groupId}/maps`}
       class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium {isActive(
         `/dev/dash/groups/${groupId}/maps`
-      )}"
-    >
+      )}">
       Maps
     </a>
     <a
       href={`/dev/dash/groups/${groupId}/levels`}
       class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium {isActive(
         `/dev/dash/groups/${groupId}/levels`
-      )}"
-    >
+      )}">
       Levels
     </a>
   </nav>

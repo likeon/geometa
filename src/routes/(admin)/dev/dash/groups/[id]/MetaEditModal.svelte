@@ -78,8 +78,7 @@
             name="tagName"
             aria-invalid={$errors.tagName ? 'true' : undefined}
             bind:value={$form.tagName}
-            {...$constraints.tagName}
-          />
+            {...$constraints.tagName} />
           {#if $errors.tagName}
             <Alert color="red">{$errors.tagName}</Alert>
           {/if}
@@ -91,8 +90,7 @@
             name="name"
             aria-invalid={$errors.name ? 'true' : undefined}
             bind:value={$form.name}
-            {...$constraints.name}
-          />
+            {...$constraints.name} />
           {#if $errors.name}
             <Alert color="red">{$errors.name}</Alert>
           {/if}
@@ -104,8 +102,7 @@
             name="note"
             aria-invalid={$errors.note ? 'true' : undefined}
             bind:value={$form.note}
-            {...$constraints.note}
-          />
+            {...$constraints.note} />
           {#if $errors.note}
             <Alert color="red">{$errors.note}</Alert>
           {/if}
@@ -123,8 +120,7 @@
           data={imageUploadForm}
           metaId={selectedMeta.id}
           images={images || []}
-          {updateImages}
-        />
+          {updateImages} />
       </TabItem>
       <form action="?/deleteMeta" method="post" on:submit={confirmDelete}>
         <div class="items-center flex h-full">

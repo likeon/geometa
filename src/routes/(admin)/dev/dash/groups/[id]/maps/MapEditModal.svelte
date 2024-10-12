@@ -77,8 +77,7 @@
         name="name"
         aria-invalid={$errors.name ? 'true' : undefined}
         bind:value={$form.name}
-        {...$constraints.name}
-      />
+        {...$constraints.name} />
       {#if $errors.name}
         <Alert color="red">{$errors.name}</Alert>
       {/if}
@@ -90,8 +89,7 @@
         name="geoguessrId"
         aria-invalid={$errors.geoguessrId ? 'true' : undefined}
         bind:value={$form.geoguessrId}
-        {...$constraints.geoguessrId}
-      />
+        {...$constraints.geoguessrId} />
       {#if $errors.geoguessrId}
         <Alert color="red">{$errors.geoguessrId}</Alert>
       {/if}
@@ -103,8 +101,7 @@
         name="description"
         aria-invalid={$errors.description ? 'true' : undefined}
         bind:value={$form.description}
-        {...$constraints.description}
-      />
+        {...$constraints.description} />
       {#if $errors.description}
         <Alert color="red">{$errors.description}</Alert>
       {/if}
@@ -126,8 +123,7 @@
           <span class="tag">
             {filter}
             <button type="button" on:click={() => removeFilter(filter)}
-              ><span style="color: red;">X</span></button
-            >
+              ><span style="color: red;">X</span></button>
           </span>
         {/each}
       </div>

@@ -59,14 +59,12 @@
               >* or
               <a href="https://addons.mozilla.org/firefox/addon/tampermonkey" target="_blank"
                 >Firefox</a
-              >.</span
-            >
+              >.</span>
           </div>
           <p class="text-gray-600 ml-9 italic">
             * - Chrome: <a
               href="https://www.tampermonkey.net/faq.php?locale=en#Q209"
-              target="_blank">Enable developer mode</a
-            > in extensions to ensure Tampermonkey works properly
+              target="_blank">Enable developer mode</a> in extensions to ensure Tampermonkey works properly
           </p>
         </li>
         <li class="flex gap-x-3">
@@ -94,15 +92,13 @@
             ><strong class="font-semibold text-gray-900">Play one of our maps.</strong>
             Guess a location on
             <a href="/maps">our maps</a>. On the results screen, a note will be displayed showing
-            the meta that was in the round, in case you missed it.</span
-          >
+            the meta that was in the round, in case you missed it.</span>
         </li>
       </ul>
 
       <p class="font-semibold">
         Feel free to join our <a href="https://discord.gg/AcXEWznYZe" target="_blank"
-          >discord server</a
-        > if you have any questions or feedback.
+          >discord server</a> if you have any questions or feedback.
       </p>
     </div>
     <Heading tag="h3" class="mt-4">Credits</Heading>

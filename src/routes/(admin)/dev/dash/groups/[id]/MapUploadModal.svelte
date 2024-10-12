@@ -23,16 +23,14 @@
     method="post"
     action="?/uploadMapJson"
     enctype="multipart/form-data"
-    use:enhance
-  >
+    use:enhance>
     <label>
       Upload map json: <input
         bind:files={$file}
         accept="application/json"
         name="file"
         type="file"
-        on:change={() => submit()}
-      />
+        on:change={() => submit()} />
       {#if $errors.file}
         <div class="invalid">{$errors.file}</div>
       {/if}

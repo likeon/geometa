@@ -70,13 +70,11 @@
             }
             await applyAction(result);
           };
-        }}
-      >
+        }}>
         <Input type="hidden" name="imageId" value={image.id} />
         <img src={image.image_url} alt="#" class="w-full h-auto" />
         <div
-          class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-        >
+          class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
           <Button type="submit" color="light">Delete</Button>
         </div>
       </form>
@@ -89,8 +87,7 @@
   method="post"
   action="?/uploadMetaImages"
   enctype="multipart/form-data"
-  use:imageEnhance
->
+  use:imageEnhance>
   <Input type="hidden" name="metaId" value={metaId} />
 
   <label>
@@ -100,8 +97,7 @@
       name="file"
       type="file"
       bind:files={$file}
-      on:change={handleFileUpload}
-    />
+      on:change={handleFileUpload} />
     {#if $imageErrors.file}
       <div class="invalid">{$imageErrors.file}</div>
     {/if}
@@ -112,8 +108,7 @@
     class="drop-area {isDragging ? 'dragging' : ''}"
     on:dragover={handleDragOver}
     on:dragleave={handleDragLeave}
-    on:drop={handleDrop}
-  >
+    on:drop={handleDrop}>
     <p>Drag & Drop your image here or click above to browse</p>
   </div>
 </form>

@@ -57,8 +57,7 @@
                 class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6 cursor-pointer hover:bg-green-200"
                 class:hover:bg-green-200={selectedHeader !== 'tag'}
                 class:bg-blue-300={selectedHeader === 'tag'}
-                on:click={() => selectHeader('tag')}
-              >
+                on:click={() => selectHeader('tag')}>
                 Tag name {selectedHeader === 'tag' ? sortArrow : ''}
               </th>
               <th
@@ -66,8 +65,7 @@
                 class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
                 class:bg-blue-300={selectedHeader === 'name'}
                 class:hover:bg-green-200={selectedHeader !== 'name'}
-                on:click={() => selectHeader('name')}
-              >
+                on:click={() => selectHeader('name')}>
                 Name {selectedHeader === 'name' ? sortArrow : ''}
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
@@ -77,8 +75,7 @@
                 <select
                   class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500 custom-select"
                   bind:value={noteFilter}
-                  on:change={handleNoteFilterChange}
-                >
+                  on:change={handleNoteFilterChange}>
                   <option value="all">Any Note</option>
                   <option value="hasNote">Has Note</option>
                   <option value="missingNote">Missing Note</option>
@@ -89,8 +86,7 @@
                 <select
                   class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500 custom-select"
                   bind:value={imageFilter}
-                  on:change={handleImageFilterChange}
-                >
+                  on:change={handleImageFilterChange}>
                   <option value="all">Any Image</option>
                   <option value="hasImage">Has Image</option>
                   <option value="missingImage">Missing Image</option>
@@ -101,14 +97,12 @@
                 class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-green-200"
                 class:hover:bg-green-200={selectedHeader !== 'level'}
                 class:bg-blue-300={selectedHeader === 'level'}
-                on:click={() => selectHeader('level')}
-              >
+                on:click={() => selectHeader('level')}>
                 <select
                   class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500 custom-select"
                   bind:value={levelFilter}
                   on:change={handleLevelFilterChange}
-                  on:click={(event) => event.stopPropagation()}
-                >
+                  on:click={(event) => event.stopPropagation()}>
                   <option value="all">All Levels</option>
                   {#each levelNames as levelName}
                     <option value={levelName}>{levelName}</option>
@@ -123,8 +117,7 @@
               <tr
                 class="cursor-pointer hover:bg-green-200"
                 role="link"
-                on:click={() => selectMeta(meta)}
-              >
+                on:click={() => selectMeta(meta)}>
                 <td>{meta.tagName}</td>
                 <td>{meta.name}</td>
                 <td>

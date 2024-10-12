@@ -38,8 +38,7 @@
         name="name"
         aria-invalid={$errors.name ? 'true' : undefined}
         bind:value={$form.name}
-        {...$constraints.name}
-      />
+        {...$constraints.name} />
       {#if $errors.name}
         <Alert color="red">{$errors.name}</Alert>
       {/if}

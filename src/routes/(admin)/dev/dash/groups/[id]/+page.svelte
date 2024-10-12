@@ -127,8 +127,7 @@
     </div>
     <div class="flex-grow flex items-center justify-end">
       <GradientButton color="cyanToBlue" class="ml-3" on:click={uploadLocations}
-        >Upload locations</GradientButton
-      >
+        >Upload locations</GradientButton>
       <Button class="ml-3" on:click={addMeta}>Add meta</Button>
       <form
         method="post"
@@ -139,8 +138,7 @@
             await applyAction(result);
             toast.push('Updated');
           };
-        }}
-      >
+        }}>
         <GradientButton color="pinkToOrange" class="ml-3" type="submit"
           >Sync UserScript
         </GradientButton>
@@ -151,8 +149,7 @@
     {filteredMetas}
     {selectMeta}
     on:criteriaChange={handleCriteriaChange}
-    levelNames={levelChoices.map((levelChoice) => levelChoice.name)}
-  />
+    levelNames={levelChoices.map((levelChoice) => levelChoice.name)} />
 </div>
 
 <MetaEditModal
@@ -162,8 +159,7 @@
   groupId={data.group.id}
   {selectedMeta}
   imageUploadForm={data.imageUploadForm}
-  {updateMeta}
-/>
+  {updateMeta} />
 
 <MapUploadModal bind:isUploadModalOpen data={data.mapUploadForm} />
 

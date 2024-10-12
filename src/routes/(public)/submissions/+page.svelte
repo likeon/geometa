@@ -43,8 +43,7 @@
                       >{row.authorNickname}
                     </td>
                     <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"
-                      >{row.submissionsCount}</td
-                    >
+                      >{row.submissionsCount}</td>
                   </tr>
                 {/each}
                 <!-- More people... -->

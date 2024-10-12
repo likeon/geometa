@@ -10,8 +10,7 @@
   <enhanced:img
     src={background}
     alt="background"
-    class="absolute inset-0 -z-10 h-full w-full object-cover object-center"
-  />
+    class="absolute inset-0 -z-10 h-full w-full object-cover object-center" />
   <div class="items-center mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-40">
     <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
       <!--      <GeoIcon style="color: dodgerblue" width="2rem" height="2rem"/>-->
@@ -23,12 +22,10 @@
       </div>
     </div>
     <div
-      class="mx-auto mt-16 flex max-w-xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-xl lg:flex-none xl:ml-32"
-    >
+      class="mx-auto mt-16 flex max-w-xl sm:mt-24 lg:ml-10 lg:mr-0 lg:mt-0 lg:max-w-xl lg:flex-none xl:ml-32">
       <div class="max-w-xl flex-none sm:max-w-5xl lg:max-w-3xl">
         <div
-          class="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4"
-        >
+          class="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
           <!--          <img src="https://tailwindui.com/img/component-images/project-app-screenshot.png" alt="App screenshot" width="2432" height="1442" class="w-[76rem] rounded-md shadow-2xl ring-1 ring-gray-900/10">-->
           <video autoplay loop muted playsinline>
             <source src={video} type="video/webm" />

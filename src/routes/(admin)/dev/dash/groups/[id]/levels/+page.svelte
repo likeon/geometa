@@ -37,8 +37,7 @@
                 <th
                   scope="col"
                   class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                  >Name</th
-                >
+                  >Name</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-400">
@@ -46,8 +45,7 @@
                 <tr
                   class="cursor-pointer hover:bg-green-200"
                   role="link"
-                  on:click={() => selectLevel(level)}
-                >
+                  on:click={() => selectLevel(level)}>
                   <td>{level.name}</td>
                 </tr>
               {/each}
@@ -63,8 +61,7 @@
   bind:isLevelModalOpen
   data={data.levelForm}
   groupId={data.group.id}
-  {selectedLevel}
-/>
+  {selectedLevel} />
 
 <style lang="postcss">
   td {
