@@ -63,6 +63,6 @@
     </li>
   </ul>
   <p class="mt-3 mb-10">
-    Drop a message in <strong>#help-desc</strong> channel in our Discord to sign up.
+    Drop a message in <strong>#help-desk</strong> channel in our Discord to sign up.
   </p>
 </div>
