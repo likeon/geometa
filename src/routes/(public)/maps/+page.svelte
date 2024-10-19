@@ -2,6 +2,21 @@
   import { Button } from 'flowbite-svelte';
   import background from '$lib/assets/background.jpg?enhanced';
   export let data;
+
+  data.mapsToPublish.sort((a, b) => {
+    const order = ['Beginner', 'Novice', 'Intermediate'];
+
+    const aIndex = order.indexOf(a.name.split(' ')[0]);
+    const bIndex = order.indexOf(b.name.split(' ')[0]);
+
+    if (aIndex === -1 && bIndex === -1) {
+      return a.name.localeCompare(b.name);
+    }
+    if (aIndex === -1) return 1;
+    if (bIndex === -1) return -1;
+
+    return aIndex - bIndex;
+  });
 </script>
 
 <div class="">
