@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.64
+// @version      0.65
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
@@ -705,6 +705,36 @@
     }
     return savedInt;
   }
+  async function fetchMapInfo(url) {
+    return new Promise((resolve, reject) => {
+      _GM_xmlhttpRequest({
+        method: "GET",
+        url,
+        onload: (response) => {
+          if (response.status === 200 || response.status === 404) {
+            try {
+              const mapInfo = JSON.parse(response.responseText);
+              resolve(mapInfo);
+            } catch (e) {
+              reject("Failed to parse response");
+            }
+          } else {
+            reject(`HTTP error! status: ${response.status}`);
+          }
+        },
+        onerror: () => {
+          reject("An error occurred while fetching data");
+        }
+      });
+    });
+  }
+  async function getMapInfo(geoguessrId, forceUpdate) {
+    const localStorageKey = `geometa:map-info:${geoguessrId}`;
+    const url = `https://learnablemeta.com/api/map-info/${geoguessrId}`;
+    const mapInfo = await fetchMapInfo(url);
+    _unsafeWindow.localStorage.setItem(localStorageKey, JSON.stringify(mapInfo));
+    return mapInfo;
+  }
   function create_else_block(ctx) {
     let spinner;
     let current;
@@ -1148,6 +1178,7 @@
   }
   function changelog() {
     return [
+      { "0.65": "Check map ids via API" },
       { "0.64": "Added more placeholder map ids" },
       { "0.63": "Added container resizing." },
       { "0.62": "Added images to metas." },
@@ -1163,33 +1194,13 @@
     console.log(changelog());
   }
   const GeoGuessrEventFramework = _unsafeWindow.GeoGuessrEventFramework;
-  const metaMapIds = /* @__PURE__ */ new Set([
-    "66c0d3feff4dbe492e06174e",
-    "66fd7c30b34ca9145ec96a6a",
-    "66fda2e27e08dc03b5bb3d6e",
-    "66fda2f8ee1c8ee4735e167f",
-    "66fda3097e08dc03b5bb3f0e",
-    "66fda319b477f9e4abdd34fa",
-    "66fda32fbc5afd45d3eb187d",
-    "66fda342413f41ca32ef9d54",
-    "66fda352ee1c8ee4735e1aa8",
-    "66fda3667e08dc03b5bb4309",
-    "6705865c0e65158e29b8201b",
-    // chile
-    "671370b073245b1f487ac27d",
-    "671370d28613d77183c43bfb",
-    "671370ea73245b1f487ac30e",
-    "671370ff7433ad4314f4b758",
-    "6713711a8613d77183c43cc0",
-    "6713712d431b709d11bc8c18",
-    "6713714dd5420110ae17b1ef",
-    "67137161c524d372dd22c16b",
-    "67137174fc08b9e2422e5627",
-    "6713718673245b1f487ac4af"
-  ]);
   GeoGuessrEventFramework.init().then(() => {
-    GeoGuessrEventFramework.events.addEventListener("round_end", (event) => {
-      if (!metaMapIds.has(event.detail.map.id)) return;
+    GeoGuessrEventFramework.events.addEventListener("game_start", async (event) => {
+      await getMapInfo(event.detail.map.id);
+    });
+    GeoGuessrEventFramework.events.addEventListener("round_end", async (event) => {
+      const mapInfo = await getMapInfo(event.detail.map.id);
+      if (!mapInfo.mapFound) return;
       waitForElement('div[data-qa="result-view-top"]').then((container) => {
         const element2 = document.createElement("div");
         element2.id = "geometa-summary";

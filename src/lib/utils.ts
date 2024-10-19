@@ -1,4 +1,4 @@
-import {unsafeWindow} from "$";
+import { GM_xmlhttpRequest, unsafeWindow } from "$";
 
 export function waitForElement(selector: string): Promise<Element> {
   return new Promise((resolve) => {
@@ -43,10 +43,52 @@ export function localStorageGetInt(name: string) {
     return null;
   }
 
-  const savedInt = parseInt(savedValue, 10)
+  const savedInt = parseInt(savedValue, 10);
   if (isNaN(savedInt)) {
     return null;
   }
 
   return savedInt;
+}
+
+type MapInfoResponse = {
+  mapFound: boolean;
+};
+
+async function fetchMapInfo(url: string): Promise<MapInfoResponse> {
+  return new Promise((resolve, reject) => {
+    GM_xmlhttpRequest({
+      method: "GET",
+      url: url,
+      onload: (response) => {
+        if (response.status === 200 || response.status === 404) {
+          try {
+            const mapInfo = JSON.parse(response.responseText) as MapInfoResponse;
+            resolve(mapInfo);
+          } catch (e) {
+            reject("Failed to parse response");
+          }
+        } else {
+          reject(`HTTP error! status: ${response.status}`);
+        }
+      },
+      onerror: () => {
+        reject("An error occurred while fetching data");
+      },
+    });
+  });
+}
+
+export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
+  const localStorageKey = `geometa:map-info:${geoguessrId}`
+  if (!forceUpdate) {
+    const savedMapInfo = unsafeWindow.localStorage.getItem(localStorageKey);
+    if (savedMapInfo) {
+      return JSON.parse(savedMapInfo) as MapInfoResponse;
+    }
+  }
+  const url = `https://learnablemeta.com/api/map-info/${geoguessrId}`;
+  const mapInfo = await fetchMapInfo(url);
+  unsafeWindow.localStorage.setItem(localStorageKey, JSON.stringify(mapInfo));
+  return mapInfo;
 }
