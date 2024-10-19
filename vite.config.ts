@@ -10,7 +10,7 @@ export default defineConfig({
       entry: "src/main.ts",
       userscript: {
         icon: "https://learnablemeta.com/favicon.png",
-        version: "0.63",
+        version: "0.64",
         namespace: "geometa",
         name: "GeoGuessr Learnable Meta",
         description: "UserScript for GeoGuessr Learnable Meta maps",
