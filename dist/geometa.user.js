@@ -730,6 +730,12 @@
   }
   async function getMapInfo(geoguessrId, forceUpdate) {
     const localStorageKey = `geometa:map-info:${geoguessrId}`;
+    if (!forceUpdate) {
+      const savedMapInfo = _unsafeWindow.localStorage.getItem(localStorageKey);
+      if (savedMapInfo) {
+        return JSON.parse(savedMapInfo);
+      }
+    }
     const url = `https://learnablemeta.com/api/map-info/${geoguessrId}`;
     const mapInfo = await fetchMapInfo(url);
     _unsafeWindow.localStorage.setItem(localStorageKey, JSON.stringify(mapInfo));
@@ -1196,10 +1202,10 @@
   const GeoGuessrEventFramework = _unsafeWindow.GeoGuessrEventFramework;
   GeoGuessrEventFramework.init().then(() => {
     GeoGuessrEventFramework.events.addEventListener("game_start", async (event) => {
-      await getMapInfo(event.detail.map.id);
+      await getMapInfo(event.detail.map.id, true);
     });
     GeoGuessrEventFramework.events.addEventListener("round_end", async (event) => {
-      const mapInfo = await getMapInfo(event.detail.map.id);
+      const mapInfo = await getMapInfo(event.detail.map.id, false);
       if (!mapInfo.mapFound) return;
       waitForElement('div[data-qa="result-view-top"]').then((container) => {
         const element2 = document.createElement("div");

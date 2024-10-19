@@ -47,7 +47,7 @@ GeoGuessrEventFramework.init().then(() => {
     await getMapInfo(event.detail.map.id, true);
   });
   GeoGuessrEventFramework.events.addEventListener("round_end", async (event: GGEvent) => {
-    const mapInfo = await getMapInfo(event.detail.map.id, true);
+    const mapInfo = await getMapInfo(event.detail.map.id, false);
     if (!mapInfo.mapFound) return;
     waitForElement('div[data-qa="result-view-top"]').then((container) => {
       const element = document.createElement("div");
