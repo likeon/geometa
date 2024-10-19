@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.63
+// @version      0.64
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
@@ -1148,6 +1148,7 @@
   }
   function changelog() {
     return [
+      { "0.64": "Added more placeholder map ids" },
       { "0.63": "Added container resizing." },
       { "0.62": "Added images to metas." },
       { "0.61": "Added new/placehoder map ids." },
@@ -1173,8 +1174,18 @@
     "66fda342413f41ca32ef9d54",
     "66fda352ee1c8ee4735e1aa8",
     "66fda3667e08dc03b5bb4309",
-    "6705865c0e65158e29b8201b"
+    "6705865c0e65158e29b8201b",
     // chile
+    "671370b073245b1f487ac27d",
+    "671370d28613d77183c43bfb",
+    "671370ea73245b1f487ac30e",
+    "671370ff7433ad4314f4b758",
+    "6713711a8613d77183c43cc0",
+    "6713712d431b709d11bc8c18",
+    "6713714dd5420110ae17b1ef",
+    "67137161c524d372dd22c16b",
+    "67137174fc08b9e2422e5627",
+    "6713718673245b1f487ac4af"
   ]);
   GeoGuessrEventFramework.init().then(() => {
     GeoGuessrEventFramework.events.addEventListener("round_end", (event) => {
