@@ -6,8 +6,8 @@
   data.mapsToPublish.sort((a, b) => {
     const order = ['Beginner', 'Novice', 'Intermediate'];
 
-    const aIndex = order.indexOf(a.name.split(' ')[0]);
-    const bIndex = order.indexOf(b.name.split(' ')[0]);
+    const aIndex = order.findIndex((term) => a.name.endsWith(term));
+    const bIndex = order.findIndex((term) => b.name.endsWith(term));
 
     if (aIndex === -1 && bIndex === -1) {
       return a.name.localeCompare(b.name);
