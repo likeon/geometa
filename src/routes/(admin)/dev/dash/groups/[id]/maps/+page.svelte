@@ -3,6 +3,7 @@
   import { Button } from 'flowbite-svelte';
   import MapEditModal from './MapEditModal.svelte';
   import DashNavBar from '$lib/components/DashNavBar.svelte';
+  import Icon from '@iconify/svelte';
 
   type MapType = (typeof data.group.maps)[number];
   let isMapModalOpen = false;
@@ -60,7 +61,17 @@
                   class="cursor-pointer hover:bg-green-200"
                   role="link"
                   on:click={() => selectMap(map)}>
-                  <td>{map.name}</td>
+                  <td class="flex items-center space-x-2">
+                    {map.name}
+                    <a
+                      on:click={(event) => event.stopPropagation()}
+                      href={`https://www.geoguessr.com/maps/${map.geoguessrId}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="text-blue-500 hover:text-blue-700">
+                      <Icon icon="mdi:link" class="ml-1 w-5 h-5 inline" />
+                    </a>
+                  </td>
                   <td>{map.mapLevels.map((item) => item.level.name).join(', ')}</td>
                   <td>{map.locationsCount}</td>
                   <td on:click={(event) => event.stopPropagation()}
