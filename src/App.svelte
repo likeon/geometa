@@ -1,13 +1,13 @@
 <script lang="ts">
-  import {onMount} from 'svelte';
-  import {GM_xmlhttpRequest, unsafeWindow} from '$';
+  import { onMount } from 'svelte';
+  import { GM_xmlhttpRequest, unsafeWindow } from '$';
   import Spinner from "./lib/Spinner.svelte";
   import CountryFlag from "./lib/CountryFlag.svelte";
-  import {cutToTwoDecimals, localStorageGetInt} from "./lib/utils";
+  import { cutToTwoDecimals, localStorageGetInt } from "./lib/utils";
 
   export let lat: number;
   export let lng: number;
-  export let mapId: string
+  export let mapId: string;
 
   type GeoInfo = {
     country: string,
@@ -23,6 +23,54 @@
   let container: HTMLDivElement;
   let containerWidth: number = localStorageGetInt('geometa:containerWidth') || 500;
   let containerHeight: number = localStorageGetInt('geometa:containerHeight') || 400;
+
+  let isDragging = false;
+  let dragOffset = { x: 0, y: 0 };
+
+  const onMouseDown = (event: MouseEvent) => {
+    isDragging = true;
+    dragOffset = {
+      x: event.clientX - container.getBoundingClientRect().left,
+      y: event.clientY - container.getBoundingClientRect().top
+    };
+    event.preventDefault();
+  };
+
+ const onMouseMove = (event: MouseEvent) => {
+  if (isDragging) {
+    // Get viewport dimensions
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    // Get the container's dimensions
+    const containerWidth = container.offsetWidth;
+    const containerHeight = container.offsetHeight;
+
+    // Calculate the new position of the note
+    let newLeft = event.clientX - dragOffset.x;
+    let newTop = event.clientY - dragOffset.y;
+
+    // Ensure the container stays within the left boundary (cannot be negative)
+    if (newLeft < 0) newLeft = 0;
+    // Ensure the container stays within the right boundary (cannot go off-screen)
+    if (newLeft + containerWidth > windowWidth) newLeft = windowWidth - containerWidth;
+
+    // Ensure the container stays within the top boundary (cannot be negative)
+    if (newTop < 0) newTop = 0;
+    // Ensure the container stays within the bottom boundary (cannot go off-screen)
+    if (newTop + containerHeight > windowHeight) newTop = windowHeight - containerHeight;
+
+    // Set the new position
+    container.style.left = `${newLeft}px`;
+    container.style.top = `${newTop}px`;
+  }
+};
+
+  const onMouseUp = () => {
+    isDragging = false;
+    unsafeWindow.localStorage.setItem('geometa:containerStyleLeft',  container.style.left);
+    unsafeWindow.localStorage.setItem('geometa:containerStyleTop',  container.style.top);
+  };
 
   onMount(() => {
     const cutLat = cutToTwoDecimals(lat);
@@ -51,41 +99,54 @@
       }
     });
 
-    container.style.width = `${containerWidth}px`
-    container.style.height = `${containerHeight}px`
+    container.style.width = `${containerWidth}px`;
+    container.style.height = `${containerHeight}px`;
+    container.style.left = localStorage.getItem('geometa:containerStyleLeft') ??  container.style.left;
+    container.style.top = localStorage.getItem('geometa:containerStyleTop') ??  container.style.top;
 
     const resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
         containerWidth = entry.contentRect.width;
         containerHeight = entry.contentRect.height;
         if (containerWidth !== 0 && containerHeight !== 0) {
-          unsafeWindow.localStorage.setItem('geometa:containerWidth', Math.floor(containerWidth).toString())
-          unsafeWindow.localStorage.setItem('geometa:containerHeight', Math.floor(containerHeight).toString())
+          unsafeWindow.localStorage.setItem('geometa:containerWidth', Math.floor(containerWidth).toString());
+          unsafeWindow.localStorage.setItem('geometa:containerHeight', Math.floor(containerHeight).toString());
         }
       }
     });
     resizeObserver.observe(container!);
 
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+
     return () => {
       resizeObserver.disconnect();
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
     };
   });
 </script>
 
 <div class="geometa-container" bind:this={container}>
-  <div class="flex">
+  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <div class="flex header" on:mousedown={onMouseDown}>
     <h2>Learnable Meta</h2>
-    <div class="icons"><a href="https://learnablemeta.com/" target="_blank"><span
-      class="flat-color-icons--globe"></span></a>
-      <a href="https://discord.gg/AcXEWznYZe" target="_blank"><span
-        class="skill-icons--discord"></span></a></div>
+    <div class="icons">
+      <a href="https://learnablemeta.com/" target="_blank">
+        <span class="flat-color-icons--globe"></span>
+      </a>
+      <a href="https://discord.gg/AcXEWznYZe" target="_blank">
+        <span class="skill-icons--discord"></span>
+      </a>
+    </div>
   </div>
   {#if error}
     <p>Error: {error}</p>
   {:else if geoInfo}
     <p>Country:
       <CountryFlag countryName={geoInfo.country}/>
-      <strong>{geoInfo.country}</strong></p>
+      <strong>{geoInfo.country}</strong>
+    </p>
     <p>Meta type: <strong>{geoInfo.metaName}</strong></p>
     <p>Note: {geoInfo.note}</p>
     <p class="plonkit-note">Check out <a href={geoInfo.plonkitCountryUrl} target="_blank">
@@ -100,6 +161,7 @@
     <Spinner/>
   {/if}
 </div>
+
 
 <style>
   .geometa-container {
@@ -188,4 +250,13 @@
     height: auto;
     display: block;
   }
+
+  .header {
+  cursor: move;
+  border-bottom: 1px solid #aaa;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
 </style>
