@@ -5,6 +5,7 @@ import { unsafeWindow } from "$";
 
 function changelog() {
   return [
+    { "0.66": "Made note movable" },
     { "0.65": "Check map ids via API" },
     { "0.64": "Added more placeholder map ids" },
     { "0.63": "Added container resizing." },

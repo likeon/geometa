@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.65
+// @version      0.66
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
@@ -16,7 +16,7 @@
 // @run-at       document-start
 // ==/UserScript==
 
-(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(` .loadership_ZOJAQ.svelte-1fzfwt6.svelte-1fzfwt6{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-1fzfwt6-loadership_ZOJAQ_scale 1.2s infinite,svelte-1fzfwt6-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.geometa-container.svelte-1xhdpp1.svelte-1xhdpp1{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);resize:both;overflow:auto}.plonkit-note.svelte-1xhdpp1.svelte-1xhdpp1{color:#d3d3d3;font-size:small}a.svelte-1xhdpp1.svelte-1xhdpp1{color:#188bd2}a.svelte-1xhdpp1.svelte-1xhdpp1:hover{text-decoration:underline}.skill-icons--discord.svelte-1xhdpp1.svelte-1xhdpp1{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-1xhdpp1.svelte-1xhdpp1{display:inline-block;width:1.2rem;height:1.2rem;margin-left:5px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--discord.svelte-1xhdpp1.svelte-1xhdpp1,.flat-color-icons--globe.svelte-1xhdpp1.svelte-1xhdpp1{display:inline-block;vertical-align:middle}.flex.svelte-1xhdpp1.svelte-1xhdpp1{display:flex;align-items:center}.icons.svelte-1xhdpp1 a span.svelte-1xhdpp1{align-items:center;justify-content:center}hr.svelte-1xhdpp1.svelte-1xhdpp1{border:0;border-top:1px solid white;width:100%}.image-wrapper.svelte-1xhdpp1.svelte-1xhdpp1{width:100%;display:flex;justify-content:center;align-items:center}.responsive-image.svelte-1xhdpp1.svelte-1xhdpp1{max-width:100%;height:auto;display:block} `);
+(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(` .loadership_ZOJAQ.svelte-1fzfwt6.svelte-1fzfwt6{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-1fzfwt6-loadership_ZOJAQ_scale 1.2s infinite,svelte-1fzfwt6-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div.svelte-1fzfwt6:nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.geometa-container.svelte-1qzn3ve.svelte-1qzn3ve{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);resize:both;overflow:auto}.plonkit-note.svelte-1qzn3ve.svelte-1qzn3ve{color:#d3d3d3;font-size:small}a.svelte-1qzn3ve.svelte-1qzn3ve{color:#188bd2}a.svelte-1qzn3ve.svelte-1qzn3ve:hover{text-decoration:underline}.skill-icons--discord.svelte-1qzn3ve.svelte-1qzn3ve{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-1qzn3ve.svelte-1qzn3ve{display:inline-block;width:1.2rem;height:1.2rem;margin-left:5px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--discord.svelte-1qzn3ve.svelte-1qzn3ve,.flat-color-icons--globe.svelte-1qzn3ve.svelte-1qzn3ve{display:inline-block;vertical-align:middle}.flex.svelte-1qzn3ve.svelte-1qzn3ve{display:flex;align-items:center}.icons.svelte-1qzn3ve a span.svelte-1qzn3ve{align-items:center;justify-content:center}hr.svelte-1qzn3ve.svelte-1qzn3ve{border:0;border-top:1px solid white;width:100%}.image-wrapper.svelte-1qzn3ve.svelte-1qzn3ve{width:100%;display:flex;justify-content:center;align-items:center}.responsive-image.svelte-1qzn3ve.svelte-1qzn3ve{max-width:100%;height:auto;display:block}.header.svelte-1qzn3ve.svelte-1qzn3ve{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center} `);
 
 (function () {
   'use strict';
@@ -75,6 +75,10 @@
   }
   function empty() {
     return text("");
+  }
+  function listen(node, event, handler, options) {
+    node.addEventListener(event, handler, options);
+    return () => node.removeEventListener(event, handler, options);
   }
   function attr(node, attribute, value) {
     if (value == null) node.removeAttribute(attribute);
@@ -852,8 +856,8 @@
         attr(a, "href", a_href_value = /*geoInfo*/
         ctx[0].plonkitCountryUrl);
         attr(a, "target", "_blank");
-        attr(a, "class", "svelte-1xhdpp1");
-        attr(p3, "class", "plonkit-note svelte-1xhdpp1");
+        attr(a, "class", "svelte-1qzn3ve");
+        attr(p3, "class", "plonkit-note svelte-1qzn3ve");
       },
       m(target, anchor) {
         insert(target, p0, anchor);
@@ -997,13 +1001,13 @@
         t = space();
         div = element("div");
         img = element("img");
-        attr(hr, "class", "svelte-1xhdpp1");
+        attr(hr, "class", "svelte-1qzn3ve");
         if (!src_url_equal(img.src, img_src_value = /*geoInfo*/
         ctx[0].images[0])) attr(img, "src", img_src_value);
         attr(img, "alt", img_alt_value = /*geoInfo*/
         ctx[0].metaName);
-        attr(img, "class", "responsive-image svelte-1xhdpp1");
-        attr(div, "class", "image-wrapper svelte-1xhdpp1");
+        attr(img, "class", "responsive-image svelte-1qzn3ve");
+        attr(div, "class", "image-wrapper svelte-1qzn3ve");
       },
       m(target, anchor) {
         insert(target, hr, anchor);
@@ -1039,6 +1043,8 @@
     let current_block_type_index;
     let if_block;
     let current;
+    let mounted;
+    let dispose;
     const if_block_creators = [create_if_block, create_if_block_1, create_else_block];
     const if_blocks = [];
     function select_block_type(ctx2, dirty) {
@@ -1058,19 +1064,28 @@
       c() {
         div2 = element("div");
         div1 = element("div");
-        div1.innerHTML = `<h2>Learnable Meta</h2> <div class="icons svelte-1xhdpp1"><a href="https://learnablemeta.com/" target="_blank" class="svelte-1xhdpp1"><span class="flat-color-icons--globe svelte-1xhdpp1"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" class="svelte-1xhdpp1"><span class="skill-icons--discord svelte-1xhdpp1"></span></a></div>`;
+        div1.innerHTML = `<h2>Learnable Meta</h2> <div class="icons svelte-1qzn3ve"><a href="https://learnablemeta.com/" target="_blank" class="svelte-1qzn3ve"><span class="flat-color-icons--globe svelte-1qzn3ve"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" class="svelte-1qzn3ve"><span class="skill-icons--discord svelte-1qzn3ve"></span></a></div>`;
         t3 = space();
         if_block.c();
-        attr(div1, "class", "flex svelte-1xhdpp1");
-        attr(div2, "class", "geometa-container svelte-1xhdpp1");
+        attr(div1, "class", "flex header svelte-1qzn3ve");
+        attr(div2, "class", "geometa-container svelte-1qzn3ve");
       },
       m(target, anchor) {
         insert(target, div2, anchor);
         append(div2, div1);
         append(div2, t3);
         if_blocks[current_block_type_index].m(div2, null);
-        ctx[6](div2);
+        ctx[7](div2);
         current = true;
+        if (!mounted) {
+          dispose = listen(
+            div1,
+            "mousedown",
+            /*onMouseDown*/
+            ctx[3]
+          );
+          mounted = true;
+        }
       },
       p(ctx2, [dirty]) {
         let previous_block_index = current_block_type_index;
@@ -1108,7 +1123,9 @@
           detach(div2);
         }
         if_blocks[current_block_type_index].d();
-        ctx[6](null);
+        ctx[7](null);
+        mounted = false;
+        dispose();
       }
     };
   }
@@ -1121,6 +1138,37 @@
     let container;
     let containerWidth = localStorageGetInt("geometa:containerWidth") || 500;
     let containerHeight = localStorageGetInt("geometa:containerHeight") || 400;
+    let isDragging = false;
+    let dragOffset = { x: 0, y: 0 };
+    const onMouseDown = (event) => {
+      isDragging = true;
+      dragOffset = {
+        x: event.clientX - container.getBoundingClientRect().left,
+        y: event.clientY - container.getBoundingClientRect().top
+      };
+      event.preventDefault();
+    };
+    const onMouseMove = (event) => {
+      if (isDragging) {
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
+        const containerWidth2 = container.offsetWidth;
+        const containerHeight2 = container.offsetHeight;
+        let newLeft = event.clientX - dragOffset.x;
+        let newTop = event.clientY - dragOffset.y;
+        if (newLeft < 0) newLeft = 0;
+        if (newLeft + containerWidth2 > windowWidth) newLeft = windowWidth - containerWidth2;
+        if (newTop < 0) newTop = 0;
+        if (newTop + containerHeight2 > windowHeight) newTop = windowHeight - containerHeight2;
+        $$invalidate(2, container.style.left = `${newLeft}px`, container);
+        $$invalidate(2, container.style.top = `${newTop}px`, container);
+      }
+    };
+    const onMouseUp = () => {
+      isDragging = false;
+      _unsafeWindow.localStorage.setItem("geometa:containerStyleLeft", container.style.left);
+      _unsafeWindow.localStorage.setItem("geometa:containerStyleTop", container.style.top);
+    };
     onMount(() => {
       const cutLat = cutToTwoDecimals(lat);
       const cutLng = cutToTwoDecimals(lng);
@@ -1148,6 +1196,8 @@
       });
       $$invalidate(2, container.style.width = `${containerWidth}px`, container);
       $$invalidate(2, container.style.height = `${containerHeight}px`, container);
+      $$invalidate(2, container.style.left = localStorage.getItem("geometa:containerStyleLeft") ?? container.style.left, container);
+      $$invalidate(2, container.style.top = localStorage.getItem("geometa:containerStyleTop") ?? container.style.top, container);
       const resizeObserver = new ResizeObserver((entries) => {
         for (let entry of entries) {
           containerWidth = entry.contentRect.width;
@@ -1159,8 +1209,12 @@
         }
       });
       resizeObserver.observe(container);
+      window.addEventListener("mousemove", onMouseMove);
+      window.addEventListener("mouseup", onMouseUp);
       return () => {
         resizeObserver.disconnect();
+        window.removeEventListener("mousemove", onMouseMove);
+        window.removeEventListener("mouseup", onMouseUp);
       };
     });
     function div2_binding($$value) {
@@ -1170,20 +1224,21 @@
       });
     }
     $$self.$$set = ($$props2) => {
-      if ("lat" in $$props2) $$invalidate(3, lat = $$props2.lat);
-      if ("lng" in $$props2) $$invalidate(4, lng = $$props2.lng);
-      if ("mapId" in $$props2) $$invalidate(5, mapId = $$props2.mapId);
+      if ("lat" in $$props2) $$invalidate(4, lat = $$props2.lat);
+      if ("lng" in $$props2) $$invalidate(5, lng = $$props2.lng);
+      if ("mapId" in $$props2) $$invalidate(6, mapId = $$props2.mapId);
     };
-    return [geoInfo, error, container, lat, lng, mapId, div2_binding];
+    return [geoInfo, error, container, onMouseDown, lat, lng, mapId, div2_binding];
   }
   class App extends SvelteComponent {
     constructor(options) {
       super();
-      init(this, options, instance, create_fragment, safe_not_equal, { lat: 3, lng: 4, mapId: 5 });
+      init(this, options, instance, create_fragment, safe_not_equal, { lat: 4, lng: 5, mapId: 6 });
     }
   }
   function changelog() {
     return [
+      { "0.66": "Made note movable" },
       { "0.65": "Check map ids via API" },
       { "0.64": "Added more placeholder map ids" },
       { "0.63": "Added container resizing." },
