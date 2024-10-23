@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, GradientButton, Input } from 'flowbite-svelte';
+  import { Button, Dropdown, DropdownItem, GradientButton, Input } from 'flowbite-svelte';
   import { applyAction, enhance } from '$app/forms';
   import { SvelteToast } from '@zerodevx/svelte-toast';
   import { toast } from '@zerodevx/svelte-toast';
@@ -7,6 +7,7 @@
   import MapUploadModal from './MapUploadModal.svelte';
   import MetaEditModal from './MetaEditModal.svelte';
   import DashNavBar from '$lib/components/DashNavBar.svelte';
+  import Icon from '@iconify/svelte';
 
   let { data } = $props();
 
@@ -129,6 +130,14 @@
   function uploadLocations() {
     isUploadModalOpen = true;
   }
+
+  function submitPopulateNotesHtmlForm() {
+    if (populateNotesHtmlForm) {
+      populateNotesHtmlForm.submit();
+    }
+  }
+
+  let populateNotesHtmlForm: HTMLFormElement;
 </script>
 
 <svelte:head>
@@ -143,7 +152,8 @@
     </div>
     <div class="flex-grow flex items-center justify-end">
       <GradientButton color="cyanToBlue" class="ml-3" on:click={uploadLocations}
-        >Upload locations</GradientButton>
+        >Upload locations
+      </GradientButton>
       <Button class="ml-3" on:click={addMeta}>Add meta</Button>
       <form
         method="post"
@@ -175,6 +185,24 @@
         <GradientButton color="pinkToOrange" class="ml-3" type="submit"
           >Sync UserScript
         </GradientButton>
+      </form>
+      <a href="/" on:click|preventDefault>
+        <Icon icon="pepicons-pop:dots-y" width="1rem" height="1rem" style="color: black" />
+      </a>
+      <Dropdown>
+        <DropdownItem on:click={submitPopulateNotesHtmlForm}>Populate notes html</DropdownItem>
+      </Dropdown>
+      <form
+        bind:this={populateNotesHtmlForm}
+        method="post"
+        action="?/populateNotesHtml"
+        use:enhance={() => {
+          return async ({ result }) => {
+            await applyAction(result);
+            toast.push('Updated');
+          };
+        }}>
+        <input type="hidden" name="groupId" value={data.group.id} />
       </form>
     </div>
   </div>

@@ -1,0 +1,1 @@
+ALTER TABLE `metas` ADD `note_html` text DEFAULT '' NOT NULL;

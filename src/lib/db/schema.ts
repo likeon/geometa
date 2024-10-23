@@ -138,6 +138,7 @@ export const metas = sqliteTable(
     tagName: text('tag_name').notNull(),
     name: text('name').notNull(),
     note: text('note').notNull(),
+    noteHtml: text('note_html').notNull().default(''),
     noteFromPlonkit: integer('note_from_plonkit', { mode: 'boolean' }).notNull().default(false),
     hasImage: integer('has_image', { mode: 'boolean' }).notNull().default(false)
   },

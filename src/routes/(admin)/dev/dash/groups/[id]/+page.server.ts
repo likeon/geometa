@@ -29,10 +29,15 @@ import { uploadFile } from '$lib/s3';
 import { dev } from '$app/environment';
 import { syncUserScriptData } from '$lib/user-script';
 import { env } from '$env/dynamic/private';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeStringify from 'rehype-stringify';
 
 const insertMetasSchema = createInsertSchema(metas)
   .extend({ levels: z.array(z.number()) })
-  .omit({ noteFromPlonkit: true, hasImage: true });
+  .omit({ noteFromPlonkit: true, hasImage: true, noteHtml: true });
 export type InsertMetasSchema = typeof insertMetasSchema;
 
 const mapUploadSchema = z.object({
@@ -123,18 +128,29 @@ export const actions = {
     await ensurePermissions(locals.user?.id, form.data.mapGroupId);
 
     const { id, levels, ...dataNoId } = form.data;
+    const noteHtml = String(
+      await unified()
+        .use(remarkParse)
+        .use(remarkRehype)
+        .use(rehypeSanitize)
+        .use(rehypeStringify)
+        .process(dataNoId.note)
+    );
     let metaId;
 
     if (id === undefined) {
       const insertResult = await db
         .insert(metas)
-        .values(form.data)
+        .values({ ...form.data, noteHtml: noteHtml })
         .returning({ insertedId: metas.id });
       metaId = insertResult[0].insertedId;
     } else {
       const savedData = await db.query.metas.findFirst({ where: eq(metas.id, id) });
       await ensurePermissions(locals.user?.id, savedData?.mapGroupId);
-      await db.update(metas).set(dataNoId).where(eq(metas.id, id));
+      await db
+        .update(metas)
+        .set({ ...dataNoId, noteHtml: noteHtml })
+        .where(eq(metas.id, id));
       metaId = id;
     }
 
@@ -306,6 +322,25 @@ export const actions = {
       const errorMessage = (err as Error).message || 'An error occurred';
       const errorStatus = (err as { status?: number }).status || 500;
       throw error(errorStatus, errorMessage);
+    }
+  },
+  populateNotesHtml: async (event) => {
+    const groupId = getGroupId(event.params);
+    await ensurePermissions(event.locals.user?.id, groupId);
+
+    const metaEntries = await db.query.metas.findMany({ where: eq(metas.mapGroupId, groupId) });
+
+    for (const meta of metaEntries) {
+      const html = await unified()
+        .use(remarkParse)
+        .use(remarkRehype)
+        .use(rehypeSanitize)
+        .use(rehypeStringify)
+        .process(meta.note);
+      await db
+        .update(metas)
+        .set({ noteHtml: String(html) })
+        .where(eq(metas.id, meta.id));
     }
   }
 };

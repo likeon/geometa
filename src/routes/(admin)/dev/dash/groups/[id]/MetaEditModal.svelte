@@ -15,6 +15,11 @@
   import type { PageData } from './$types';
   import MetaImages from '$routes/(admin)/dev/dash/groups/[id]/MetaImages.svelte';
   import Icon from '@iconify/svelte';
+  import { Carta, MarkdownEditor } from 'carta-md';
+  // Component default theme
+  import 'carta-md/default.css';
+
+  const carta = new Carta();
 
   let {
     isMetaModalOpen = $bindable(),
@@ -111,12 +116,7 @@
         </Label>
         <Label class="space-y-2">
           <span>Note</span>
-          <Textarea
-            rows="6"
-            name="note"
-            aria-invalid={$errors.note ? 'true' : undefined}
-            bind:value={$form.note}
-            {...$constraints.note} />
+          <MarkdownEditor {carta} mode="tabs" theme="test" bind:value={$form.note} />
           {#if $errors.note}
             <Alert color="red">{$errors.note}</Alert>
           {/if}
@@ -147,3 +147,32 @@
     {/if}
   </Tabs>
 </Modal>
+
+<style lang="postcss">
+  :global(.carta-font-code) {
+    font-family: '...', monospace;
+    font-size: 1.1rem;
+    caret-color: black;
+  }
+
+  :global(textarea.carta-font-code, div.carta-font-code) {
+    line-height: 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  :global(.carta-active) {
+    @apply mx-3;
+  }
+
+  :global(.carta-container) {
+    @apply border-2;
+  }
+
+  :global(.markdown-body ul) {
+    @apply list-disc ml-5;
+  }
+
+  :global(.markdown-body ol) {
+    @apply list-decimal ml-5;
+  }
+</style>
