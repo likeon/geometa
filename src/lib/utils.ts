@@ -3,6 +3,7 @@ import { db } from '$lib/drizzle';
 import { and, eq } from 'drizzle-orm';
 import { mapGroupPermissions } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
+import { promises as fs } from 'fs';
 
 export function generateRandomString(length: number): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -49,11 +50,19 @@ export function cutToTwoDecimals(num: number): string {
   return fixed.replace(/\.?0+$/, '');
 }
 
-export async function cloudflareKvBulkPut(data: any) {
+export function chunkArray<T>(array: T[], chunkSize: number): T[][] {
+  const chunks: T[][] = [];
+  for (let i = 0; i < array.length; i += chunkSize) {
+    chunks.push(array.slice(i, i + chunkSize));
+  }
+  return chunks;
+}
+
+export async function cloudflareKvBulkPut(data: any[]) {
   const url = `https://api.cloudflare.com/client/v4/accounts/a38064a092904c941dedaf866ea6977e/storage/kv/namespaces/${CLOUDFLARE_KV_NAMESPACE_ID}/bulk`;
 
   if (!CLOUDFLARE_KV_NAMESPACE_ID || !CLOUDFLARE_BEARER) {
-    throw new Error('set cloudflare variables');
+    throw new Error('Set Cloudflare variables');
   }
 
   const headers = {
@@ -61,15 +70,21 @@ export async function cloudflareKvBulkPut(data: any) {
     'Content-Type': 'application/json'
   };
 
-  const response = await fetch(url, {
-    method: 'PUT',
-    headers: headers,
-    body: JSON.stringify(data)
-  });
+  const chunks = chunkArray(data, 10000);
 
-  if (response.status !== 200) {
-    throw new Error(`Request failed with status code ${response.status}`);
-  }
+  await Promise.all(
+    chunks.map(async (chunk) => {
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(chunk)
+      });
+
+      if (response.status !== 200) {
+        throw new Error(`Request failed with status code ${response.status}`);
+      }
+    })
+  );
 }
 
 export async function ensurePermissions(userId: string | undefined, groupId: number | undefined) {
