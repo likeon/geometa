@@ -115,7 +115,8 @@ export const mapFilters = sqliteTable(
     mapId: integer('map_id')
       .notNull()
       .references(() => maps.id, { onDelete: 'cascade' }),
-    tagLike: text('tag_like')
+    tagLike: text('tag_like'),
+    isExclude: integer('is_exclude', { mode: 'boolean' }).notNull().default(false)
   },
   (t) => ({
     mapFilterUnique: uniqueIndex('map_filters_unique').on(t.mapId, t.tagLike)

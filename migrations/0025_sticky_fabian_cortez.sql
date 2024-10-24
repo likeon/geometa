@@ -1,0 +1,1 @@
+ALTER TABLE `map_filters` ADD `is_exclude` integer DEFAULT false NOT NULL;
