@@ -6,9 +6,8 @@
 
   export let data: SuperValidated<Infer<InsertLevelsSchema>>;
   export let isLevelModalOpen: boolean;
+  export let mapGroupId: number;
   export let selectedLevel: PageData['group']['levels'][number] | null;
-  export let groupId: number;
-
   const { form, errors, constraints, enhance } = superForm(data, {
     dataType: 'json',
     onResult() {
@@ -16,14 +15,16 @@
     }
   });
 
-  $: if (selectedLevel) {
-    $form.id = selectedLevel.id;
-    $form.name = selectedLevel.name;
-    $form.mapGroupId = selectedLevel.mapGroupId;
-  } else {
-    $form.id = undefined;
-    $form.mapGroupId = groupId;
-    $form.name = '';
+  $: if (isLevelModalOpen) {
+    $form.mapGroupId = mapGroupId;
+
+    if (selectedLevel) {
+      $form.id = selectedLevel.id;
+      $form.name = selectedLevel.name;
+    } else {
+      $form.name = '';
+      $form.id = undefined;
+    }
   }
 </script>
 

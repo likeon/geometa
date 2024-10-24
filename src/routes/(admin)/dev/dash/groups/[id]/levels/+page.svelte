@@ -60,7 +60,7 @@
 <LevelEditModal
   bind:isLevelModalOpen
   data={data.levelForm}
-  groupId={data.group.id}
+  mapGroupId={data.group.id}
   {selectedLevel} />
 
 <style lang="postcss">
