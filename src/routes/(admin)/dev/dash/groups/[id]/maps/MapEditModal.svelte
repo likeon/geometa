@@ -13,6 +13,7 @@
     Textarea
   } from 'flowbite-svelte';
   import Checkbox from 'flowbite-svelte/Checkbox.svelte';
+  import FilterManager from './FilterManager.svelte';
 
   export let data: SuperValidated<Infer<InsertMapsSchema>>;
   export let isMapModalOpen: boolean;
@@ -35,7 +36,12 @@
     $form.description = selectedMap.description;
     $form.isPublished = selectedMap.isPublished;
     $form.levels = selectedMap.mapLevels.map((item) => item.levelId);
-    $form.filters = selectedMap.filters.map((item) => item.tagLike as string);
+    $form.includeFilters = selectedMap.filters
+      .filter((item) => item.isExclude == false)
+      .map((item) => item.tagLike as string);
+    $form.excludeFilters = selectedMap.filters
+      .filter((item) => item.isExclude == true)
+      .map((item) => item.tagLike as string);
   } else {
     $form.id = undefined;
     $form.mapGroupId = groupId;
@@ -44,25 +50,20 @@
     $form.description = '';
     $form.isPublished = false;
     $form.levels = [];
-    $form.filters = [];
+    $form.includeFilters = [];
+    $form.excludeFilters = [];
   }
 
-  let filterInput = '';
+  let includeFilterInput = '';
 
-  // Function to add a tag
+  let excludeFilterInput = '';
 
-  function addFilter() {
-    const trimmedFilter = filterInput.trim();
-    if (trimmedFilter && !$form.filters.includes(trimmedFilter)) {
-      // Update the tags array in the form
-      $form.filters = [...$form.filters, trimmedFilter];
-      filterInput = ''; // Clear the input field
-    }
+  function handleIncludeUpdate(event: { detail: string[] }) {
+    $form.includeFilters = event.detail; // Update include filters in the form
   }
 
-  // Function to remove a tag
-  function removeFilter(filter: string) {
-    $form.filters = $form.filters.filter((t) => t !== filter);
+  function handleExcludeUpdate(event: { detail: string[] }) {
+    $form.excludeFilters = event.detail; // Keep track of exclude filters in a separate list
   }
 </script>
 
@@ -113,21 +114,24 @@
       <span>Levels</span>
       <MultiSelect items={levelChoices} bind:value={$form.levels} size="lg" />
     </Label>
-    <Label>
-      <span>Filters:</span>
-      <input type="text" bind:value={filterInput} placeholder="Type a filter..." />
-      <button type="button" on:click={addFilter}>+</button>
+    <!-- Include Filters Section -->
+    <FilterManager
+      bind:filters={$form.includeFilters}
+      bind:filterInput={includeFilterInput}
+      oppositeFilters={$form.excludeFilters}
+      title="Include Filters"
+      placeholder="Type an include filter..."
+      on:updateFilters={handleIncludeUpdate} />
 
-      <div>
-        {#each $form.filters as filter}
-          <span class="tag">
-            {filter}
-            <button type="button" on:click={() => removeFilter(filter)}
-              ><span style="color: red;">X</span></button>
-          </span>
-        {/each}
-      </div>
-    </Label>
+    <!-- Exclude Filters Section -->
+    <FilterManager
+      bind:filters={$form.excludeFilters}
+      bind:filterInput={excludeFilterInput}
+      oppositeFilters={$form.includeFilters}
+      title="Exclude Filters"
+      placeholder="Type an exclude filter..."
+      on:updateFilters={handleExcludeUpdate} />
+
     <Button type="submit" class="w-full">Save</Button>
   </form>
 </Modal>

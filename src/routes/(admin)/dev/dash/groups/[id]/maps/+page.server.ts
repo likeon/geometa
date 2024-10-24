@@ -10,7 +10,8 @@ import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
 
 const insertMapsSchema = createInsertSchema(maps).extend({
-  filters: z.array(z.string()),
+  includeFilters: z.array(z.string()),
+  excludeFilters: z.array(z.string()),
   levels: z.array(z.number())
 });
 export type InsertMapsSchema = typeof insertMapsSchema;
@@ -53,7 +54,11 @@ export const actions = {
       return fail(400, { form });
     }
 
-    const { id, levels, filters, ...dataNoId } = form.data;
+    const { id, levels, includeFilters, excludeFilters, ...dataNoId } = form.data;
+    const combinedFilters = [
+      ...includeFilters.map((filter) => ({ name: filter, isExclude: false })),
+      ...excludeFilters.map((filter) => ({ name: filter, isExclude: true }))
+    ];
 
     let mapId;
     if (id === undefined) {
@@ -74,12 +79,21 @@ export const actions = {
     const levelsInsertValues = levels.map((levelId) => ({ levelId: levelId, mapId: mapId }));
     await db.insert(mapLevels).values(levelsInsertValues).onConflictDoNothing();
 
-    await db
-      .delete(mapFilters)
-      .where(and(eq(mapFilters.mapId, mapId), not(inArray(mapFilters.tagLike, filters))));
-    const filtersInsertValues = filters.map((filterName) => ({
-      tagLike: filterName,
-      mapId: mapId
+    await db.delete(mapFilters).where(
+      and(
+        eq(mapFilters.mapId, mapId),
+        not(
+          inArray(
+            mapFilters.tagLike,
+            combinedFilters.map((filter) => filter.name)
+          )
+        )
+      )
+    );
+    const filtersInsertValues = combinedFilters.map((filter) => ({
+      tagLike: filter.name,
+      mapId: mapId,
+      isExclude: filter.isExclude
     }));
 
     if (filtersInsertValues.length != 0) {
