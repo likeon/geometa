@@ -183,6 +183,13 @@
       "when": 1729752319684,
       "tag": "0025_sticky_fabian_cortez",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "6",
+      "when": 1729754513201,
+      "tag": "0026_furry_naoko",
+      "breakpoints": true
     }
   ]
 }
