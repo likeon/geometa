@@ -77,7 +77,9 @@ export const actions = {
       .delete(mapLevels)
       .where(and(eq(mapLevels.mapId, mapId), not(inArray(mapLevels.levelId, levels))));
     const levelsInsertValues = levels.map((levelId) => ({ levelId: levelId, mapId: mapId }));
-    await db.insert(mapLevels).values(levelsInsertValues).onConflictDoNothing();
+    if (levels.length != 0) {
+      await db.insert(mapLevels).values(levelsInsertValues).onConflictDoNothing();
+    }
 
     await db.delete(mapFilters).where(
       and(
