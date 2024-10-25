@@ -2,21 +2,6 @@
   import { Button } from 'flowbite-svelte';
   import background from '$lib/assets/background.jpg?enhanced';
   export let data;
-
-  data.mapsToPublish.sort((a, b) => {
-    const order = ['Beginner', 'Novice', 'Intermediate'];
-
-    const aIndex = order.findIndex((term) => a.name.endsWith(term));
-    const bIndex = order.findIndex((term) => b.name.endsWith(term));
-
-    if (aIndex === -1 && bIndex === -1) {
-      return a.name.localeCompare(b.name);
-    }
-    if (aIndex === -1) return 1;
-    if (bIndex === -1) return -1;
-
-    return aIndex - bIndex;
-  });
 </script>
 
 <svelte:head>

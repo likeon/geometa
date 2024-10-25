@@ -2,16 +2,7 @@
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import type { InsertMapsSchema } from './+page.server';
   import type { PageData } from './$types';
-  import {
-    Alert,
-    Button,
-    Input,
-    Label,
-    Modal,
-    MultiSelect,
-    Select,
-    Textarea
-  } from 'flowbite-svelte';
+  import { Alert, Button, Input, Label, Modal, MultiSelect, Textarea } from 'flowbite-svelte';
   import Checkbox from 'flowbite-svelte/Checkbox.svelte';
   import FilterManager from './FilterManager.svelte';
 
@@ -20,6 +11,7 @@
   export let selectedMap: PageData['group']['maps'][number] | null;
   export let groupId: number;
   export let levelChoices: { value: number; name: string }[];
+  export let user: PageData['user'];
 
   const { form, errors, constraints, enhance } = superForm(data, {
     dataType: 'json',
@@ -33,6 +25,7 @@
     $form.id = selectedMap.id;
     $form.mapGroupId = selectedMap.mapGroupId;
     $form.name = selectedMap.name;
+    $form.ordering = selectedMap.ordering;
     $form.description = selectedMap.description;
     $form.isPublished = selectedMap.isPublished;
     $form.levels = selectedMap.mapLevels.map((item) => item.levelId);
@@ -47,6 +40,7 @@
     $form.mapGroupId = groupId;
     $form.geoguessrId = '';
     $form.name = '';
+    $form.ordering = 0;
     $form.description = '';
     $form.isPublished = false;
     $form.levels = [];
@@ -83,6 +77,20 @@
         <Alert color="red">{$errors.name}</Alert>
       {/if}
     </Label>
+    {#if user.isSuperadmin}
+      <Label class="space-y-2">
+        <span>Ordering</span>
+        <Input
+          type="number"
+          name="ordering"
+          aria-invalid={$errors.ordering ? 'true' : undefined}
+          bind:value={$form.ordering}
+          {...$constraints.ordering} />
+        {#if $errors.ordering}
+          <Alert color="red">{$errors.ordering}</Alert>
+        {/if}
+      </Label>
+    {/if}
     <Label class="space-y-2">
       <span>Geoguessr Id</span>
       <Input

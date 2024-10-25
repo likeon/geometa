@@ -57,7 +57,8 @@ export const maps = sqliteTable(
     name: text('name').notNull(),
     geoguessrId: text('geoguessr_id').notNull(),
     description: text('description'),
-    isPublished: integer('is_published', { mode: 'boolean' }).notNull().default(false)
+    isPublished: integer('is_published', { mode: 'boolean' }).notNull().default(false),
+    ordering: integer('ordering').notNull().default(0)
   },
   (t) => ({
     nameUnique: uniqueIndex('maps_name_unique').on(t.name),
@@ -241,7 +242,8 @@ export const mapLocations = sqliteView('map_locations_view', {
 export const users = sqliteTable('user', {
   id: text('id').notNull().primaryKey(),
   username: text('username').notNull(),
-  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(false)
+  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(false),
+  isSuperadmin: integer('is_superadmin', { mode: 'boolean' }).notNull().default(false)
 });
 
 export const sessions = sqliteTable('session', {

@@ -1,5 +1,5 @@
 import { db } from '$lib/drizzle';
-import { and, eq, not, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, not, sql } from 'drizzle-orm';
 import { maps } from '$lib/db/schema';
 
 export const load = async () => {
@@ -12,7 +12,8 @@ export const load = async () => {
           'locations_count'
         )
     },
-    where: and(eq(maps.isPublished, true), eq(maps.mapGroupId, 1))
+    where: and(eq(maps.isPublished, true), eq(maps.mapGroupId, 1)),
+    orderBy: [desc(maps.ordering), asc(maps.id)]
   });
   return { mapsToPublish };
 };

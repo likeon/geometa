@@ -93,7 +93,8 @@
   data={data.mapForm}
   {levelChoices}
   groupId={data.group.id}
-  {selectedMap} />
+  {selectedMap}
+  user={data.user} />
 
 <style lang="postcss">
   td {
