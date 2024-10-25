@@ -34,7 +34,7 @@
   </div>
 </div>
 
-<div id="content" class="mx-auto max-w-3xl mt-10">
+<div id="content" class="mx-auto max-w-3xl mt-10 container">
   <Heading tag="h2">Learnable Meta for Map Creators</Heading>
   <p class="text-base font-semibold leading-7 text-green-500">
     Enhance your map with our UserScript in 2 easy steps
