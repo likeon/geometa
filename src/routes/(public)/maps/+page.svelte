@@ -19,6 +19,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Maps</title>
+</svelte:head>
+
 <div class="">
   <enhanced:img
     src={background}

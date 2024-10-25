@@ -4,6 +4,10 @@
   import Icon from '@iconify/svelte';
 </script>
 
+<svelte:head>
+  <title>For Map Creators</title>
+</svelte:head>
+
 <div
   class="bg-gradient-to-r from-emerald-200 via-rose-200 to-blue-200 relative isolate overflow-hidden">
   <div class="items-center mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-10">
