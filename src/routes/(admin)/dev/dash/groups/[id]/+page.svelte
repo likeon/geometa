@@ -8,17 +8,17 @@
   import MetaEditModal from './MetaEditModal.svelte';
   import DashNavBar from '$lib/components/DashNavBar.svelte';
 
-  export let data;
+  let { data } = $props();
 
   type MetaType = (typeof data.group.metas)[number];
-  let isMetaModalOpen = false;
-  let isUploadModalOpen = false;
-  let searchText = '';
-  let selectedNoteFilter = 'all';
-  let selectedImageFilter = 'all';
-  let selectedLevelFilter = 'all';
-  let selectedHeader = 'tag';
-  let sortModifier = 1;
+  let isMetaModalOpen = $state(false);
+  let isUploadModalOpen = $state(false);
+  let searchText = $state('');
+  let selectedNoteFilter = $state('all');
+  let selectedImageFilter = $state('all');
+  let selectedLevelFilter = $state('all');
+  let selectedHeader = $state('tag');
+  let sortModifier = $state(1);
 
   function handleCriteriaChange(event: { detail: { type: string; value: string } }) {
     const { type, value } = event.detail;
@@ -47,47 +47,51 @@
     }
   }
 
-  $: filteredMetas = data.group.metas
-    .filter((item) => {
-      // Apply text filter
-      const matchesSearchText =
-        item.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        item.tagName.toLowerCase().includes(searchText.toLowerCase());
+  let filteredMetas = $derived(
+    data.group.metas
+      .filter((item) => {
+        // Apply text filter
+        const matchesSearchText =
+          item.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          item.tagName.toLowerCase().includes(searchText.toLowerCase());
 
-      // Apply note filter ('all', 'missing', 'has')
-      const matchesNoteCondition =
-        selectedNoteFilter == 'all' ||
-        (selectedNoteFilter == 'hasNote' && item.note != '') ||
-        (selectedNoteFilter == 'missingNote' && item.note == '');
+        // Apply note filter ('all', 'missing', 'has')
+        const matchesNoteCondition =
+          selectedNoteFilter == 'all' ||
+          (selectedNoteFilter == 'hasNote' && item.note != '') ||
+          (selectedNoteFilter == 'missingNote' && item.note == '');
 
-      // Apply image filter ('all', 'missing', 'has')
-      const matchesImageCondition =
-        selectedImageFilter == 'all' ||
-        (selectedImageFilter == 'hasImage' && item.images.length != 0) ||
-        (selectedImageFilter == 'missingImage' && !item.images.length);
+        // Apply image filter ('all', 'missing', 'has')
+        const matchesImageCondition =
+          selectedImageFilter == 'all' ||
+          (selectedImageFilter == 'hasImage' && item.images.length != 0) ||
+          (selectedImageFilter == 'missingImage' && !item.images.length);
 
-      const matchesLevelCondition =
-        selectedLevelFilter == 'all' ||
-        item.metaLevels.some((metaLevel) => metaLevel.level.name == selectedLevelFilter);
+        const matchesLevelCondition =
+          selectedLevelFilter == 'all' ||
+          item.metaLevels.some((metaLevel) => metaLevel.level.name == selectedLevelFilter);
 
-      return (
-        matchesSearchText && matchesNoteCondition && matchesImageCondition && matchesLevelCondition
-      );
-    })
-    .sort((a, b) => {
-      // Apply sorting logic based on selectedHeader and sortModifier
-      if (selectedHeader == 'tag') {
-        return a.tagName.localeCompare(b.tagName) * sortModifier;
-      } else if (selectedHeader == 'level') {
-        return (a.metaLevels.length - b.metaLevels.length) * sortModifier;
-      } else if (selectedHeader == 'name') {
-        return a.name.localeCompare(b.name) * sortModifier;
-      }
-      return 0;
-    });
+        return (
+          matchesSearchText &&
+          matchesNoteCondition &&
+          matchesImageCondition &&
+          matchesLevelCondition
+        );
+      })
+      .sort((a, b) => {
+        // Apply sorting logic based on selectedHeader and sortModifier
+        if (selectedHeader == 'tag') {
+          return a.tagName.localeCompare(b.tagName) * sortModifier;
+        } else if (selectedHeader == 'level') {
+          return (a.metaLevels.length - b.metaLevels.length) * sortModifier;
+        } else if (selectedHeader == 'name') {
+          return a.name.localeCompare(b.name) * sortModifier;
+        }
+        return 0;
+      })
+  );
 
-  let selectedMeta: (typeof data.group.metas)[number] | null = null;
-  $: selectedMeta = null;
+  let selectedMeta: (typeof data.group.metas)[number] | null = $state(null);
 
   function addMeta() {
     selectedMeta = null;
