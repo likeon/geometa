@@ -2,9 +2,11 @@ import App from "./App.svelte";
 import {getMapInfo, waitForElement} from "./lib/utils";
 
 import { unsafeWindow } from "$";
+import { mount } from "svelte";
 
 function changelog() {
   return [
+    { "0.67": "Updated to Svelte 5" },
     { "0.66": "Made note movable" },
     { "0.65": "Check map ids via API" },
     { "0.64": "Added more placeholder map ids" },
@@ -55,14 +57,14 @@ GeoGuessrEventFramework.init().then(() => {
       element.id = "geometa-summary";
       container.appendChild(element);
       const lastRound = event.detail.rounds[event.detail.rounds.length - 1];
-      new App({
-        target: element,
-        props: {
-          lat: lastRound.location.lat,
-          lng: lastRound.location.lng,
-          mapId: event.detail.map.id,
-        },
-      });
+      mount(App, {
+                target: element,
+                props: {
+                  lat: lastRound.location.lat,
+                  lng: lastRound.location.lng,
+                  mapId: event.detail.map.id,
+                },
+              });
     });
   });
 });

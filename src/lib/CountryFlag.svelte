@@ -1,5 +1,9 @@
 <script lang="ts">
-  export let countryName: string;
+  interface Props {
+    countryName: string;
+  }
+
+  let { countryName }: Props = $props();
 
   const countryCodes: { [key: string]: string } = {
     'Afghanistan': 'af',

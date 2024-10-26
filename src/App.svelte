@@ -1,13 +1,17 @@
 <script lang="ts">
-  import { onMount } from 'svelte';
-  import { GM_xmlhttpRequest, unsafeWindow } from '$';
+  import {onMount} from 'svelte';
+  import {GM_xmlhttpRequest, unsafeWindow} from '$';
   import Spinner from "./lib/Spinner.svelte";
   import CountryFlag from "./lib/CountryFlag.svelte";
-  import { cutToTwoDecimals, localStorageGetInt } from "./lib/utils";
+  import {cutToTwoDecimals, localStorageGetInt} from "./lib/utils";
 
-  export let lat: number;
-  export let lng: number;
-  export let mapId: string;
+  interface Props {
+    lat: number;
+    lng: number;
+    mapId: string;
+  }
+
+  let {lat, lng, mapId}: Props = $props();
 
   type GeoInfo = {
     country: string,
@@ -17,15 +21,15 @@
     images?: string[],
   };
 
-  let geoInfo: GeoInfo | null = null;
-  let error: string | null = null;
+  let geoInfo: GeoInfo | null = $state(null);
+  let error: string | null = $state(null);
 
   let container: HTMLDivElement;
   let containerWidth: number = localStorageGetInt('geometa:containerWidth') || 500;
   let containerHeight: number = localStorageGetInt('geometa:containerHeight') || 400;
 
   let isDragging = false;
-  let dragOffset = { x: 0, y: 0 };
+  let dragOffset = {x: 0, y: 0};
 
   const onMouseDown = (event: MouseEvent) => {
     isDragging = true;
@@ -36,40 +40,40 @@
     event.preventDefault();
   };
 
- const onMouseMove = (event: MouseEvent) => {
-  if (isDragging) {
-    // Get viewport dimensions
-    const windowWidth = window.innerWidth;
-    const windowHeight = window.innerHeight;
+  const onMouseMove = (event: MouseEvent) => {
+    if (isDragging) {
+      // Get viewport dimensions
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
 
-    // Get the container's dimensions
-    const containerWidth = container.offsetWidth;
-    const containerHeight = container.offsetHeight;
+      // Get the container's dimensions
+      const containerWidth = container.offsetWidth;
+      const containerHeight = container.offsetHeight;
 
-    // Calculate the new position of the note
-    let newLeft = event.clientX - dragOffset.x;
-    let newTop = event.clientY - dragOffset.y;
+      // Calculate the new position of the note
+      let newLeft = event.clientX - dragOffset.x;
+      let newTop = event.clientY - dragOffset.y;
 
-    // Ensure the container stays within the left boundary (cannot be negative)
-    if (newLeft < 0) newLeft = 0;
-    // Ensure the container stays within the right boundary (cannot go off-screen)
-    if (newLeft + containerWidth > windowWidth) newLeft = windowWidth - containerWidth;
+      // Ensure the container stays within the left boundary (cannot be negative)
+      if (newLeft < 0) newLeft = 0;
+      // Ensure the container stays within the right boundary (cannot go off-screen)
+      if (newLeft + containerWidth > windowWidth) newLeft = windowWidth - containerWidth;
 
-    // Ensure the container stays within the top boundary (cannot be negative)
-    if (newTop < 0) newTop = 0;
-    // Ensure the container stays within the bottom boundary (cannot go off-screen)
-    if (newTop + containerHeight > windowHeight) newTop = windowHeight - containerHeight;
+      // Ensure the container stays within the top boundary (cannot be negative)
+      if (newTop < 0) newTop = 0;
+      // Ensure the container stays within the bottom boundary (cannot go off-screen)
+      if (newTop + containerHeight > windowHeight) newTop = windowHeight - containerHeight;
 
-    // Set the new position
-    container.style.left = `${newLeft}px`;
-    container.style.top = `${newTop}px`;
-  }
-};
+      // Set the new position
+      container.style.left = `${newLeft}px`;
+      container.style.top = `${newTop}px`;
+    }
+  };
 
   const onMouseUp = () => {
     isDragging = false;
-    unsafeWindow.localStorage.setItem('geometa:containerStyleLeft',  container.style.left);
-    unsafeWindow.localStorage.setItem('geometa:containerStyleTop',  container.style.top);
+    unsafeWindow.localStorage.setItem('geometa:containerStyleLeft', container.style.left);
+    unsafeWindow.localStorage.setItem('geometa:containerStyleTop', container.style.top);
   };
 
   onMount(() => {
@@ -101,8 +105,8 @@
 
     container.style.width = `${containerWidth}px`;
     container.style.height = `${containerHeight}px`;
-    container.style.left = localStorage.getItem('geometa:containerStyleLeft') ??  container.style.left;
-    container.style.top = localStorage.getItem('geometa:containerStyleTop') ??  container.style.top;
+    container.style.left = localStorage.getItem('geometa:containerStyleLeft') ?? container.style.left;
+    container.style.top = localStorage.getItem('geometa:containerStyleTop') ?? container.style.top;
 
     const resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
@@ -128,14 +132,14 @@
 </script>
 
 <div class="geometa-container" bind:this={container}>
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <div class="flex header" on:mousedown={onMouseDown}>
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
+  <div class="flex header" onmousedown={onMouseDown}>
     <h2>Learnable Meta</h2>
     <div class="icons">
-      <a href="https://learnablemeta.com/" target="_blank">
+      <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website">
         <span class="flat-color-icons--globe"></span>
       </a>
-      <a href="https://discord.gg/AcXEWznYZe" target="_blank">
+      <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord">
         <span class="skill-icons--discord"></span>
       </a>
     </div>
@@ -252,11 +256,11 @@
   }
 
   .header {
-  cursor: move;
-  border-bottom: 1px solid #aaa;
-  width: 100%;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+    cursor: move;
+    border-bottom: 1px solid #aaa;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
 </style>
