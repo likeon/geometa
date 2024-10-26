@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import type { InsertMapsSchema } from './+page.server';
   import type { PageData } from './$types';
@@ -33,7 +31,7 @@
     }
   });
 
-  run(() => {
+  $effect(() => {
     if (selectedMap) {
       $form.geoguessrId = selectedMap.geoguessrId;
       $form.id = selectedMap.id;

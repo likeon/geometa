@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { run } from 'svelte/legacy';
-
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import type { InsertLevelsSchema } from './+page.server';
   import type { PageData } from './$types';
@@ -23,7 +21,7 @@
     }
   });
 
-  run(() => {
+  $effect(() => {
     if (isLevelModalOpen) {
       $form.mapGroupId = mapGroupId;
 
