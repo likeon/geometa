@@ -19,7 +19,7 @@ spec:
           ports:
             - containerPort: 8080
           volumeMounts:
-            - mountPath: /var/lib/libsql/data
+            - mountPath: /var/lib/sqld
               name: libsql-data-disk
       volumes:
         - name: libsql-data-disk
