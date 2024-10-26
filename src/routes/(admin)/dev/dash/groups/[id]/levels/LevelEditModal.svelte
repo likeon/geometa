@@ -10,8 +10,10 @@
   export let selectedLevel: PageData['group']['levels'][number] | null;
   const { form, errors, constraints, enhance } = superForm(data, {
     dataType: 'json',
-    onResult() {
-      isLevelModalOpen = false;
+    onResult({ result }) {
+      if (result.type === 'success') {
+        isLevelModalOpen = false;
+      }
     }
   });
 

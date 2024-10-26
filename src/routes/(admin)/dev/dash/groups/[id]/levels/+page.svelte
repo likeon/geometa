@@ -1,13 +1,14 @@
 <script lang="ts">
-  export let data;
+  let { data } = $props();
   import DashNavBar from '$lib/components/DashNavBar.svelte';
   import { Button } from 'flowbite-svelte';
   import LevelEditModal from './LevelEditModal.svelte';
-  $: levels = data.group.levels;
+
+  let levels = $derived(data.group.levels);
 
   type LevelType = (typeof data.group.levels)[number];
-  let isLevelModalOpen = false;
-  let selectedLevel: LevelType | null = null;
+  let isLevelModalOpen = $state(false);
+  let selectedLevel: LevelType | null = $state(null);
 
   function addLevel() {
     selectedLevel = null;
@@ -24,7 +25,7 @@
   <DashNavBar groupId={data.group.id} groupName={data.group.name}></DashNavBar>
   <div class="flex flex-wrap items-center">
     <div class="flex-grow flex items-center justify-end">
-      <Button on:click={addLevel}>Add level</Button>
+      <Button onclick={addLevel}>Add level</Button>
     </div>
   </div>
   <div class="mt-3 flow-root">
@@ -45,7 +46,7 @@
                 <tr
                   class="cursor-pointer hover:bg-green-200"
                   role="link"
-                  on:click={() => selectLevel(level)}>
+                  onclick={() => selectLevel(level)}>
                   <td>{level.name}</td>
                 </tr>
               {/each}

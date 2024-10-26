@@ -16,15 +16,25 @@
   import MetaImages from '$routes/(admin)/dev/dash/groups/[id]/MetaImages.svelte';
   import Icon from '@iconify/svelte';
 
-  export let isMetaModalOpen: boolean;
-  export let selectedMeta: PageData['group']['metas'][number] | null;
-  export let metaForm: SuperValidated<Infer<InsertMetasSchema>>;
-  export let levelChoices: { value: number; name: string }[];
-  export let groupId: number;
-  export let imageUploadForm: SuperValidated<Infer<MapUploadSchema>>;
-  export let updateMeta: (meta: PageData['group']['metas'][number]) => void;
+  let {
+    isMetaModalOpen = $bindable(),
+    selectedMeta,
+    metaForm,
+    levelChoices,
+    groupId,
+    imageUploadForm,
+    updateMeta
+  }: {
+    isMetaModalOpen: boolean;
+    selectedMeta: PageData['group']['metas'][number] | null;
+    metaForm: SuperValidated<Infer<InsertMetasSchema>>;
+    levelChoices: { value: number; name: string }[];
+    groupId: number;
+    imageUploadForm: SuperValidated<Infer<MapUploadSchema>>;
+    updateMeta: (meta: PageData['group']['metas'][number]) => void;
+  } = $props();
 
-  $: images = selectedMeta?.images;
+  let images = $derived(selectedMeta?.images);
 
   function updateImages(images: PageData['group']['metas'][number]['images']) {
     if (selectedMeta?.images != undefined) {
@@ -42,21 +52,23 @@
     }
   });
 
-  $: if (selectedMeta) {
-    $form.id = selectedMeta.id;
-    $form.mapGroupId = selectedMeta.mapGroupId;
-    $form.tagName = selectedMeta.tagName;
-    $form.name = selectedMeta.name;
-    $form.note = selectedMeta.note;
-    $form.levels = selectedMeta.metaLevels.map((item) => item.levelId);
-  } else {
-    $form.id = undefined;
-    $form.mapGroupId = groupId;
-    $form.tagName = '';
-    $form.name = '';
-    $form.note = '';
-    $form.levels = [];
-  }
+  $effect(() => {
+    if (selectedMeta) {
+      $form.id = selectedMeta.id;
+      $form.mapGroupId = selectedMeta.mapGroupId;
+      $form.tagName = selectedMeta.tagName;
+      $form.name = selectedMeta.name;
+      $form.note = selectedMeta.note;
+      $form.levels = selectedMeta.metaLevels.map((item) => item.levelId);
+    } else {
+      $form.id = undefined;
+      $form.mapGroupId = groupId;
+      $form.tagName = '';
+      $form.name = '';
+      $form.note = '';
+      $form.levels = [];
+    }
+  });
 
   const confirmDelete = (event: { preventDefault: () => void }) => {
     if (!confirm('Are you sure you want to delete this meta?')) {
@@ -122,7 +134,7 @@
           images={images || []}
           {updateImages} />
       </TabItem>
-      <form action="?/deleteMeta" method="post" on:submit={confirmDelete}>
+      <form action="?/deleteMeta" method="post" onsubmit={confirmDelete}>
         <div class="items-center flex h-full">
           <input type="hidden" name="id" value={selectedMeta.id} />
           <button type="submit">
