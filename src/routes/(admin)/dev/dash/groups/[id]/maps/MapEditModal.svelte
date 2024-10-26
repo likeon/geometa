@@ -128,9 +128,11 @@
         <Alert color="red">{$errors.description}</Alert>
       {/if}
     </Label>
-    <Label>
-      <Checkbox bind:checked={$form.isPublished}>List map on homepage</Checkbox>
-    </Label>
+    {#if user.isSuperadmin}
+      <Label>
+        <Checkbox bind:checked={$form.isPublished}>List map on homepage</Checkbox>
+      </Label>
+    {/if}
     <Label>
       <span>Levels</span>
       <MultiSelect items={levelChoices} bind:value={$form.levels} size="lg" />

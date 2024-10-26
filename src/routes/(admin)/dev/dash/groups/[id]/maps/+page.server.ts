@@ -70,8 +70,11 @@ export const actions = {
     if (!user) {
       error(500);
     }
-    if (!user?.isSuperadmin) {
+    if (!user!.isSuperadmin) {
+      // @ts-ignore
+      // do not update those if user isn't an admin
       dataNoId.ordering = undefined;
+      dataNoId.isPublished = undefined;
     }
 
     let mapId;
