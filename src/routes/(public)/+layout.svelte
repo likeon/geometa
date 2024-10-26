@@ -2,6 +2,13 @@
   import '../../app.css';
   import NavBar from '$lib/components/NavBar.svelte';
   import { dev } from '$app/environment';
+  /**
+   * @typedef {Object} Props
+   * @property {import('svelte').Snippet} [children]
+   */
+
+  /** @type {Props} */
+  let { children } = $props();
 </script>
 
 <svelte:head>
@@ -16,6 +23,6 @@
 <div class="app">
   <NavBar admin={false} />
   <main>
-    <slot />
+    {@render children?.()}
   </main>
 </div>

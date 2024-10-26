@@ -1,13 +1,16 @@
 <script lang="ts">
   import { Modal } from 'flowbite-svelte';
 
-  export let isUploadModalOpen: boolean;
-
   import { type SuperValidated, type Infer, fileProxy } from 'sveltekit-superforms';
   import { superForm } from 'sveltekit-superforms';
   import type { MapUploadSchema } from './+page.server';
 
-  export let data: SuperValidated<Infer<MapUploadSchema>>;
+  interface Props {
+    isUploadModalOpen: boolean;
+    data: SuperValidated<Infer<MapUploadSchema>>;
+  }
+
+  let { isUploadModalOpen = $bindable(), data }: Props = $props();
 
   const { form, errors, enhance, submit } = superForm(data, {
     onResult() {
@@ -30,7 +33,7 @@
         accept="application/json"
         name="file"
         type="file"
-        on:change={() => submit()} />
+        onchange={() => submit()} />
       {#if $errors.file}
         <div class="invalid">{$errors.file}</div>
       {/if}

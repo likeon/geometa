@@ -4,9 +4,9 @@
   import { page } from '$app/stores';
   import Icon from '@iconify/svelte';
 
-  export let admin;
+  let { admin } = $props();
 
-  $: activeUrl = $page.url.pathname;
+  let activeUrl = $derived($page.url.pathname);
 </script>
 
 <Navbar

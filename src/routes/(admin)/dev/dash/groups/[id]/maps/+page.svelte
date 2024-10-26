@@ -1,15 +1,15 @@
 <script lang="ts">
-  export let data;
   import { Button } from 'flowbite-svelte';
   import MapEditModal from './MapEditModal.svelte';
   import DashNavBar from '$lib/components/DashNavBar.svelte';
   import Icon from '@iconify/svelte';
+  let { data } = $props();
 
   type MapType = (typeof data.group.maps)[number];
-  let isMapModalOpen = false;
-  let selectedMap: (typeof data.group.maps)[number] | null = null;
+  let isMapModalOpen = $state(false);
+  let selectedMap: (typeof data.group.maps)[number] | null = $state(null);
 
-  $: maps = data.group.maps;
+  let maps = $derived(data.group.maps);
 
   function addMap() {
     selectedMap = null;
@@ -60,11 +60,11 @@
                 <tr
                   class="cursor-pointer hover:bg-green-200"
                   role="link"
-                  on:click={() => selectMap(map)}>
+                  onclick={() => selectMap(map)}>
                   <td class="flex items-center space-x-2">
                     {map.name}
                     <a
-                      on:click={(event) => event.stopPropagation()}
+                      onclick={(event) => event.stopPropagation()}
                       href={`https://www.geoguessr.com/maps/${map.geoguessrId}`}
                       target="_blank"
                       rel="noopener noreferrer"
@@ -74,7 +74,7 @@
                   </td>
                   <td>{map.mapLevels.map((item) => item.level.name).join(', ')}</td>
                   <td>{map.locationsCount}</td>
-                  <td on:click={(event) => event.stopPropagation()}
+                  <td onclick={(event) => event.stopPropagation()}
                     ><a href={`/dev/dash/groups/${data.group.id}/maps/${map.id}/download`}
                       >Download</a
                     ></td>

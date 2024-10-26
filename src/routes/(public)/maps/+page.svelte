@@ -1,7 +1,7 @@
 <script>
   import { Button } from 'flowbite-svelte';
   import background from '$lib/assets/background.jpg?enhanced';
-  export let data;
+  let { data } = $props();
 </script>
 
 <svelte:head>

@@ -1,12 +1,6 @@
 <script lang="ts">
   import { Label } from 'flowbite-svelte';
 
-  export let filters: string[] = [];
-  export let filterInput: string = '';
-  export let title: string = 'Filters';
-  export let placeholder: string = 'Type a filter...';
-  export let oppositeFilters: string[] = [];
-
   // Dispatch event to update parent filter list
   const addFilter = () => {
     const trimmedFilter = filterInput.trim();
@@ -30,19 +24,34 @@
 
   // Event dispatcher to notify parent
   import { createEventDispatcher } from 'svelte';
+  interface Props {
+    filters?: string[];
+    filterInput?: string;
+    title?: string;
+    placeholder?: string;
+    oppositeFilters?: string[];
+  }
+
+  let {
+    filters = $bindable([]),
+    filterInput = $bindable(''),
+    title = 'Filters',
+    placeholder = 'Type a filter...',
+    oppositeFilters = []
+  }: Props = $props();
   const dispatch = createEventDispatcher();
 </script>
 
 <Label>
   <span>{title}</span>
   <input type="text" bind:value={filterInput} {placeholder} />
-  <button type="button" on:click={addFilter}>+</button>
+  <button type="button" onclick={addFilter}>+</button>
 
   <div class="mt-2">
     {#each filters as filter}
       <span class="tag">
         {filter}
-        <button type="button" on:click={() => removeFilter(filter)}
+        <button type="button" onclick={() => removeFilter(filter)}
           ><span style="color: red;">X</span></button>
       </span>
     {/each}

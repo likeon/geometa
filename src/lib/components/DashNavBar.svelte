@@ -1,10 +1,14 @@
 <script lang="ts">
   import { page } from '$app/stores'; // Import the page store to get the current route
 
-  export let groupId: number;
-  export let groupName: string;
+  interface Props {
+    groupId: number;
+    groupName: string;
+  }
 
-  $: activeRoute = $page.url.pathname;
+  let { groupId, groupName }: Props = $props();
+
+  let activeRoute = $derived($page.url.pathname);
 
   function isActive(route: string) {
     return activeRoute === route

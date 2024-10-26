@@ -1,13 +1,19 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import type { InsertLevelsSchema } from './+page.server';
   import type { PageData } from './$types';
   import { Alert, Button, Input, Label, Modal } from 'flowbite-svelte';
 
-  export let data: SuperValidated<Infer<InsertLevelsSchema>>;
-  export let isLevelModalOpen: boolean;
-  export let mapGroupId: number;
-  export let selectedLevel: PageData['group']['levels'][number] | null;
+  interface Props {
+    data: SuperValidated<Infer<InsertLevelsSchema>>;
+    isLevelModalOpen: boolean;
+    mapGroupId: number;
+    selectedLevel: PageData['group']['levels'][number] | null;
+  }
+
+  let { data, isLevelModalOpen = $bindable(), mapGroupId, selectedLevel }: Props = $props();
   const { form, errors, constraints, enhance } = superForm(data, {
     dataType: 'json',
     onResult({ result }) {
@@ -17,17 +23,19 @@
     }
   });
 
-  $: if (isLevelModalOpen) {
-    $form.mapGroupId = mapGroupId;
+  run(() => {
+    if (isLevelModalOpen) {
+      $form.mapGroupId = mapGroupId;
 
-    if (selectedLevel) {
-      $form.id = selectedLevel.id;
-      $form.name = selectedLevel.name;
-    } else {
-      $form.name = '';
-      $form.id = undefined;
+      if (selectedLevel) {
+        $form.id = selectedLevel.id;
+        $form.name = selectedLevel.name;
+      } else {
+        $form.name = '';
+        $form.id = undefined;
+      }
     }
-  }
+  });
 </script>
 
 <Modal bind:open={isLevelModalOpen}>

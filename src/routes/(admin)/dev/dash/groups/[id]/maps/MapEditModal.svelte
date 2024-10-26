@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { run } from 'svelte/legacy';
+
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import type { InsertMapsSchema } from './+page.server';
   import type { PageData } from './$types';
@@ -6,12 +8,23 @@
   import Checkbox from 'flowbite-svelte/Checkbox.svelte';
   import FilterManager from './FilterManager.svelte';
 
-  export let data: SuperValidated<Infer<InsertMapsSchema>>;
-  export let isMapModalOpen: boolean;
-  export let selectedMap: PageData['group']['maps'][number] | null;
-  export let groupId: number;
-  export let levelChoices: { value: number; name: string }[];
-  export let user: PageData['user'];
+  interface Props {
+    data: SuperValidated<Infer<InsertMapsSchema>>;
+    isMapModalOpen: boolean;
+    selectedMap: PageData['group']['maps'][number] | null;
+    groupId: number;
+    levelChoices: { value: number; name: string }[];
+    user: PageData['user'];
+  }
+
+  let {
+    data,
+    isMapModalOpen = $bindable(),
+    selectedMap,
+    groupId,
+    levelChoices,
+    user
+  }: Props = $props();
 
   const { form, errors, constraints, enhance } = superForm(data, {
     dataType: 'json',
@@ -20,37 +33,39 @@
     }
   });
 
-  $: if (selectedMap) {
-    $form.geoguessrId = selectedMap.geoguessrId;
-    $form.id = selectedMap.id;
-    $form.mapGroupId = selectedMap.mapGroupId;
-    $form.name = selectedMap.name;
-    $form.ordering = selectedMap.ordering;
-    $form.description = selectedMap.description;
-    $form.isPublished = selectedMap.isPublished;
-    $form.levels = selectedMap.mapLevels.map((item) => item.levelId);
-    $form.includeFilters = selectedMap.filters
-      .filter((item) => item.isExclude == false)
-      .map((item) => item.tagLike as string);
-    $form.excludeFilters = selectedMap.filters
-      .filter((item) => item.isExclude == true)
-      .map((item) => item.tagLike as string);
-  } else {
-    $form.id = undefined;
-    $form.mapGroupId = groupId;
-    $form.geoguessrId = '';
-    $form.name = '';
-    $form.ordering = 0;
-    $form.description = '';
-    $form.isPublished = false;
-    $form.levels = [];
-    $form.includeFilters = [];
-    $form.excludeFilters = [];
-  }
+  run(() => {
+    if (selectedMap) {
+      $form.geoguessrId = selectedMap.geoguessrId;
+      $form.id = selectedMap.id;
+      $form.mapGroupId = selectedMap.mapGroupId;
+      $form.name = selectedMap.name;
+      $form.ordering = selectedMap.ordering;
+      $form.description = selectedMap.description;
+      $form.isPublished = selectedMap.isPublished;
+      $form.levels = selectedMap.mapLevels.map((item) => item.levelId);
+      $form.includeFilters = selectedMap.filters
+        .filter((item) => item.isExclude == false)
+        .map((item) => item.tagLike as string);
+      $form.excludeFilters = selectedMap.filters
+        .filter((item) => item.isExclude == true)
+        .map((item) => item.tagLike as string);
+    } else {
+      $form.id = undefined;
+      $form.mapGroupId = groupId;
+      $form.geoguessrId = '';
+      $form.name = '';
+      $form.ordering = 0;
+      $form.description = '';
+      $form.isPublished = false;
+      $form.levels = [];
+      $form.includeFilters = [];
+      $form.excludeFilters = [];
+    }
+  });
 
-  let includeFilterInput = '';
+  let includeFilterInput = $state('');
 
-  let excludeFilterInput = '';
+  let excludeFilterInput = $state('');
 
   function handleIncludeUpdate(event: { detail: string[] }) {
     $form.includeFilters = event.detail; // Update include filters in the form

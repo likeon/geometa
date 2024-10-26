@@ -2,7 +2,7 @@
   import { Button } from 'flowbite-svelte';
   import Icon from '@iconify/svelte';
 
-  export let data;
+  let { data } = $props();
 </script>
 
 <svelte:head>

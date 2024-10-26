@@ -2,9 +2,9 @@
   import { Alert, Button, Checkbox, Input, Label, Textarea } from 'flowbite-svelte';
   import { superForm } from 'sveltekit-superforms';
 
-  export let data;
+  let { data } = $props();
   const { metaForm, errors, constraints, message } = superForm(data.metaForm);
-  let leaderboardCheckbox = false;
+  let leaderboardCheckbox = $state(false);
 </script>
 
 <svelte:head>

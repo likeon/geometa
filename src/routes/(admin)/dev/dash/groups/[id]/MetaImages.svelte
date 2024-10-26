@@ -5,13 +5,17 @@
   import type { PageData } from './$types';
   import { applyAction, enhance } from '$app/forms';
 
-  export let metaId: number;
-  export let data: SuperValidated<Infer<MapUploadSchema>>;
-  export let images: PageData['group']['metas'][number]['images'];
   type ImagesType = typeof images;
-  export let updateImages: (images: ImagesType) => void;
+  interface Props {
+    metaId: number;
+    data: SuperValidated<Infer<MapUploadSchema>>;
+    images: PageData['group']['metas'][number]['images'];
+    updateImages: (images: ImagesType) => void;
+  }
 
-  let isDragging = false;
+  let { metaId, data, images = $bindable(), updateImages }: Props = $props();
+
+  let isDragging = $state(false);
 
   const {
     form: imageForm,
@@ -97,18 +101,18 @@
       name="file"
       type="file"
       bind:files={$file}
-      on:change={handleFileUpload} />
+      onchange={handleFileUpload} />
     {#if $imageErrors.file}
       <div class="invalid">{$imageErrors.file}</div>
     {/if}
   </label>
 
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
+  <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
     class="drop-area {isDragging ? 'dragging' : ''}"
-    on:dragover={handleDragOver}
-    on:dragleave={handleDragLeave}
-    on:drop={handleDrop}>
+    ondragover={handleDragOver}
+    ondragleave={handleDragLeave}
+    ondrop={handleDrop}>
     <p>Drag & Drop your image here or click above to browse</p>
   </div>
 </form>
