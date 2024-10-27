@@ -79,12 +79,18 @@
         );
       })
       .sort((a, b) => {
-        // Apply sorting logic based on selectedHeader and sortModifier
-        if (selectedHeader == 'tag') {
+        if (selectedHeader === 'level') {
+          // Primary sort by the count of metaLevels
+          const levelCountDiff = (a.metaLevels.length - b.metaLevels.length) * sortModifier;
+          if (levelCountDiff !== 0) return levelCountDiff;
+
+          // Secondary sort by the first level name if counts are the same
+          const firstLevelA = a.metaLevels[0]?.level.name || '';
+          const firstLevelB = b.metaLevels[0]?.level.name || '';
+          return firstLevelA.localeCompare(firstLevelB) * sortModifier;
+        } else if (selectedHeader === 'tag') {
           return a.tagName.localeCompare(b.tagName) * sortModifier;
-        } else if (selectedHeader == 'level') {
-          return (a.metaLevels.length - b.metaLevels.length) * sortModifier;
-        } else if (selectedHeader == 'name') {
+        } else if (selectedHeader === 'name') {
           return a.name.localeCompare(b.name) * sortModifier;
         }
         return 0;
