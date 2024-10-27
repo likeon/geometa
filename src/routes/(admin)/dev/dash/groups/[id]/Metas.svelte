@@ -72,8 +72,13 @@
                 onclick={() => selectHeader('name')}>
                 Name {selectedHeader === 'name' ? sortArrow : ''}
               </th>
-              <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
-                Locations
+              <th
+                scope="col"
+                class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 cursor-pointer"
+                class:bg-blue-300={selectedHeader === 'locations'}
+                class:hover:bg-green-200={selectedHeader !== 'locations'}
+                onclick={() => selectHeader('locations')}>
+                Locations {selectedHeader === 'locations' ? sortArrow : ''}
               </th>
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 <select

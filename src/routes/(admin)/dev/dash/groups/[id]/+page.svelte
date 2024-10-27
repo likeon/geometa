@@ -88,10 +88,12 @@
           const firstLevelA = a.metaLevels[0]?.level.name || '';
           const firstLevelB = b.metaLevels[0]?.level.name || '';
           return firstLevelA.localeCompare(firstLevelB) * sortModifier;
-        } else if (selectedHeader === 'tag') {
+        } else if (selectedHeader == 'tag') {
           return a.tagName.localeCompare(b.tagName) * sortModifier;
-        } else if (selectedHeader === 'name') {
+        } else if (selectedHeader == 'name') {
           return a.name.localeCompare(b.name) * sortModifier;
+        } else if (selectedHeader == 'locations') {
+          return (Number(a.locationsCount) - Number(b.locationsCount)) * sortModifier;
         }
         return 0;
       })
