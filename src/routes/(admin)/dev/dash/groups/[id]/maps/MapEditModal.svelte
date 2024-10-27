@@ -32,46 +32,40 @@
   });
 
   $effect(() => {
-    if (selectedMap) {
-      $form.geoguessrId = selectedMap.geoguessrId;
-      $form.id = selectedMap.id;
-      $form.mapGroupId = selectedMap.mapGroupId;
-      $form.name = selectedMap.name;
-      $form.ordering = selectedMap.ordering;
-      $form.description = selectedMap.description;
-      $form.isPublished = selectedMap.isPublished;
-      $form.levels = selectedMap.mapLevels.map((item) => item.levelId);
-      $form.includeFilters = selectedMap.filters
-        .filter((item) => item.isExclude == false)
-        .map((item) => item.tagLike as string);
-      $form.excludeFilters = selectedMap.filters
-        .filter((item) => item.isExclude == true)
-        .map((item) => item.tagLike as string);
-    } else {
-      $form.id = undefined;
-      $form.mapGroupId = groupId;
-      $form.geoguessrId = '';
-      $form.name = '';
-      $form.ordering = 0;
-      $form.description = '';
-      $form.isPublished = false;
-      $form.levels = [];
-      $form.includeFilters = [];
-      $form.excludeFilters = [];
+    if (isMapModalOpen) {
+      if (selectedMap) {
+        $form.geoguessrId = selectedMap.geoguessrId;
+        $form.id = selectedMap.id;
+        $form.mapGroupId = selectedMap.mapGroupId;
+        $form.name = selectedMap.name;
+        $form.ordering = selectedMap.ordering;
+        $form.description = selectedMap.description;
+        $form.isPublished = selectedMap.isPublished;
+        $form.levels = selectedMap.mapLevels.map((item) => item.levelId);
+        $form.includeFilters = selectedMap.filters
+          .filter((item) => item.isExclude == false)
+          .map((item) => item.tagLike as string);
+        $form.excludeFilters = selectedMap.filters
+          .filter((item) => item.isExclude == true)
+          .map((item) => item.tagLike as string);
+      } else {
+        $form.id = undefined;
+        $form.mapGroupId = groupId;
+        $form.geoguessrId = '';
+        $form.name = '';
+        $form.ordering = 0;
+        $form.description = '';
+        $form.isPublished = false;
+        $form.levels = [];
+        $form.includeFilters = [];
+        $form.excludeFilters = [];
+      }
     }
   });
 
   let includeFilterInput = $state('');
 
   let excludeFilterInput = $state('');
-
-  function handleIncludeUpdate(event: { detail: string[] }) {
-    $form.includeFilters = event.detail; // Update include filters in the form
-  }
-
-  function handleExcludeUpdate(event: { detail: string[] }) {
-    $form.excludeFilters = event.detail; // Keep track of exclude filters in a separate list
-  }
 </script>
 
 <Modal bind:open={isMapModalOpen}>
@@ -143,8 +137,7 @@
       bind:filterInput={includeFilterInput}
       oppositeFilters={$form.excludeFilters}
       title="Include Filters"
-      placeholder="Type an include filter..."
-      on:updateFilters={handleIncludeUpdate} />
+      placeholder="Type an include filter..." />
 
     <!-- Exclude Filters Section -->
     <FilterManager
@@ -152,8 +145,7 @@
       bind:filterInput={excludeFilterInput}
       oppositeFilters={$form.includeFilters}
       title="Exclude Filters"
-      placeholder="Type an exclude filter..."
-      on:updateFilters={handleExcludeUpdate} />
+      placeholder="Type an exclude filter..." />
 
     <Button type="submit" class="w-full">Save</Button>
   </form>
