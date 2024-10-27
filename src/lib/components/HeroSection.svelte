@@ -1,6 +1,6 @@
 <script lang="ts">
   import background from '$lib/assets/background.jpg?enhanced';
-  import video from '$lib/assets/hero-compressed-2.webm';
+  import video from '$lib/assets/showcase.webm';
   // import GeoIcon from '~icons/wpf/geo-fence'
   import { Button } from 'flowbite-svelte';
 </script>

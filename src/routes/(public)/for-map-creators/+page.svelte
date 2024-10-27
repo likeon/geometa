@@ -1,5 +1,5 @@
 <script lang="ts">
-  import video from '$lib/assets/hero-compressed-2.webm';
+  import video from '$lib/assets/showcase.webm';
   import { Button, Heading } from 'flowbite-svelte';
   import Icon from '@iconify/svelte';
 </script>
