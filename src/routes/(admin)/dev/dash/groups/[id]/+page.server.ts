@@ -75,7 +75,6 @@ type UpsertValue = {
 export const load: PageServerLoad = async ({ params, locals }) => {
   const id = getGroupId(params);
   await ensurePermissions(locals.user?.id, id);
-
   const group = await db.query.mapGroups.findFirst({
     with: {
       metas: {
@@ -139,7 +138,9 @@ export const actions = {
       .delete(metaLevels)
       .where(and(eq(metaLevels.metaId, metaId), not(inArray(metaLevels.levelId, levels))));
     const levelsInsertValues = levels.map((levelId) => ({ levelId: levelId, metaId: metaId }));
-    await db.insert(metaLevels).values(levelsInsertValues).onConflictDoNothing();
+    if (levelsInsertValues.length != 0) {
+      await db.insert(metaLevels).values(levelsInsertValues).onConflictDoNothing();
+    }
   },
   deleteMeta: async ({ request, locals }) => {
     const data = await request.formData();

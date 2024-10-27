@@ -53,20 +53,22 @@
   });
 
   $effect(() => {
-    if (selectedMeta) {
-      $form.id = selectedMeta.id;
-      $form.mapGroupId = selectedMeta.mapGroupId;
-      $form.tagName = selectedMeta.tagName;
-      $form.name = selectedMeta.name;
-      $form.note = selectedMeta.note;
-      $form.levels = selectedMeta.metaLevels.map((item) => item.levelId);
-    } else {
-      $form.id = undefined;
-      $form.mapGroupId = groupId;
-      $form.tagName = '';
-      $form.name = '';
-      $form.note = '';
-      $form.levels = [];
+    if (isMetaModalOpen) {
+      if (selectedMeta) {
+        $form.id = selectedMeta.id;
+        $form.mapGroupId = selectedMeta.mapGroupId;
+        $form.tagName = selectedMeta.tagName;
+        $form.name = selectedMeta.name;
+        $form.note = selectedMeta.note;
+        $form.levels = selectedMeta.metaLevels.map((item) => item.levelId);
+      } else {
+        $form.id = undefined;
+        $form.mapGroupId = groupId;
+        $form.tagName = '';
+        $form.name = '';
+        $form.note = '';
+        $form.levels = [];
+      }
     }
   });
 
