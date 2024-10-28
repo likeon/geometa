@@ -8,3 +8,12 @@ tasks:
   db:shell:
     cmds:
       - turso db shell http://localhost:8080
+
+  db:dump:
+    cmds:
+      - .ci/db/dump.sh
+
+  db:restore:
+    cmds:
+      - .ci/db/drop.sh
+      - turso db shell http://localhost:8080 < .ci/db/dump.sql
