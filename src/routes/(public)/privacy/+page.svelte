@@ -19,9 +19,3 @@
     policy at <a href="http://clicky.com/terms/privacy">http://clicky.com/terms/privacy</a>
   </p>
 </div>
-
-<style lang="postcss">
-  .main-content p {
-    @apply mt-4;
-  }
-</style>
