@@ -75,6 +75,7 @@ export const actions = {
       // do not update those if user isn't an admin
       dataNoId.ordering = undefined;
       dataNoId.isPublished = undefined;
+      dataNoId.autoUpdate = undefined;
     }
 
     let mapId;

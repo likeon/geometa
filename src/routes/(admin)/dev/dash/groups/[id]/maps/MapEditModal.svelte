@@ -41,6 +41,7 @@
         $form.ordering = selectedMap.ordering;
         $form.description = selectedMap.description;
         $form.isPublished = selectedMap.isPublished;
+        $form.autoUpdate = selectedMap.autoUpdate;
         $form.levels = selectedMap.mapLevels.map((item) => item.levelId);
         $form.includeFilters = selectedMap.filters
           .filter((item) => item.isExclude == false)
@@ -56,6 +57,7 @@
         $form.ordering = 0;
         $form.description = '';
         $form.isPublished = false;
+        $form.autoUpdate = false;
         $form.levels = [];
         $form.includeFilters = [];
         $form.excludeFilters = [];
@@ -125,6 +127,9 @@
     {#if user.isSuperadmin}
       <Label>
         <Checkbox bind:checked={$form.isPublished}>List map on homepage</Checkbox>
+      </Label>
+      <Label>
+        <Checkbox bind:checked={$form.autoUpdate}>Auto Update</Checkbox>
       </Label>
     {/if}
     <Label>
