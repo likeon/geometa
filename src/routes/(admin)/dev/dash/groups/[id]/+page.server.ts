@@ -287,19 +287,26 @@ export const actions = {
 async function autoUpdateMaps(mapGroupId: number) {
   const mapsToUpdate = await db
     .select({
-      mapId: mapData.mapId,
+      mapId: maps.id,
       geoguessrId: maps.geoguessrId,
       lastUpdatedPanoids: mapData.lastUpdatedPanoids
     })
-    .from(mapData)
-    .innerJoin(maps, eq(mapData.mapId, maps.id))
-    .where(and(eq(maps.mapGroupId, mapGroupId), eq(maps.autoUpdate, true)));
+    .from(maps)
+    .leftJoin(mapData, eq(mapData.mapId, maps.id))
+    .where(and(eq(maps.autoUpdate, true), eq(maps.mapGroupId, mapGroupId)));
 
   for (const map of mapsToUpdate) {
     const currentLocations = await db
       .select()
       .from(mapLocations)
       .where(eq(mapLocations.mapId, map.mapId));
+
+    // if there is not map data save update map since it was never updated
+    if (map.lastUpdatedPanoids == null) {
+      updateMap(map.mapId, map.geoguessrId, currentLocations);
+      continue;
+    }
+
     // if location count is different map for sure has to be updated
     if (currentLocations.length != map.lastUpdatedPanoids.length) {
       updateMap(map.mapId, map.geoguessrId, currentLocations);
@@ -374,6 +381,7 @@ async function updateMap(
   const apiUrl = `https://www.geoguessr.com/api/v4/user-maps/drafts/${geoguessrId}`;
   const ncfaToken = process.env.NFCA_TOKEN || null;
 
+  // add popup maybe if token is missing later
   if (ncfaToken == null) {
     return;
   }
@@ -384,7 +392,7 @@ async function updateMap(
   };
 
   // GET request to fetch the map draft
-  const response = await fetch(`${apiUrl}user-maps/drafts/${geoguessrId}`, { headers });
+  const response = await fetch(`${apiUrl}`, { headers });
   if (!response.ok) {
     console.error(`Failed to fetch the map draft: ${response.status}`);
   }
