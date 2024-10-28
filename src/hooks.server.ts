@@ -34,7 +34,7 @@ export const handle: Handle = async ({ event, resolve }) => {
   }
 
   if (redirectToLogin) {
-    throw redirect(307, '/login/');
+    throw redirect(307, '/login');
   }
 
   return resolve(event);
