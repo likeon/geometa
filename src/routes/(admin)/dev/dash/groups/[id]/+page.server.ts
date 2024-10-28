@@ -28,6 +28,7 @@ import { getGroupId } from './utils';
 import { uploadFile } from '$lib/s3';
 import { dev } from '$app/environment';
 import { syncUserScriptData } from '$lib/user-script';
+import { env } from '$env/dynamic/private';
 
 const insertMetasSchema = createInsertSchema(metas)
   .extend({ levels: z.array(z.number()) })
@@ -347,7 +348,7 @@ async function autoUpdateMaps(mapGroupId: number) {
 
 async function updateMap(
   mapId: number,
-  geoguessrId: String,
+  geoguessrId: string,
   locations: {
     tagName: string;
     metaId: number;
@@ -379,7 +380,7 @@ async function updateMap(
   });
 
   const apiUrl = `https://www.geoguessr.com/api/v4/user-maps/drafts/${geoguessrId}`;
-  const ncfaToken = process.env.NFCA_TOKEN || null;
+  const ncfaToken = env.NFCA_TOKEN || null;
 
   // add popup maybe if token is missing later
   if (ncfaToken == null) {
