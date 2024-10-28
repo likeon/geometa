@@ -285,7 +285,7 @@ export const actions = {
 
       return {
         status: 200,
-        body: { updateCount }
+        updateCount
       };
     } catch (err) {
       const errorMessage = (err as Error).message || 'An error occurred';
@@ -441,7 +441,13 @@ async function updateMap(
   // assign empty string if its null(shouldnt be when we force it to be not null later so should change that when we do that)
   const currentPanoids = locationsToUpload.map((loc) => loc.panoId || '');
   await db
-    .update(mapData)
-    .set({ lastUpdatedPanoids: currentPanoids })
-    .where(eq(mapData.mapId, mapId));
+    .insert(mapData)
+    .values({
+      mapId: mapId,
+      lastUpdatedPanoids: currentPanoids
+    })
+    .onConflictDoUpdate({
+      target: mapData.mapId,
+      set: { lastUpdatedPanoids: currentPanoids }
+    });
 }
