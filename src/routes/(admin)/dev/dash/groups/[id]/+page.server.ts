@@ -296,7 +296,7 @@ export const actions = {
 };
 
 async function autoUpdateMaps(mapGroupId: number) {
-  const mapsToUpdate = await db
+  const mapsToUpdateData = await db
     .select({
       mapId: maps.id,
       geoguessrId: maps.geoguessrId,
@@ -306,8 +306,14 @@ async function autoUpdateMaps(mapGroupId: number) {
     .leftJoin(mapData, eq(mapData.mapId, maps.id))
     .where(and(eq(maps.autoUpdate, true), eq(maps.mapGroupId, mapGroupId)));
 
-  let updateCount = 0;
+  // not sure why db query is returning lastUpdatedPanoids as single string
+  const mapsToUpdate = mapsToUpdateData.map((map) => ({
+    mapId: map.mapId,
+    geoguessrId: map.geoguessrId,
+    lastUpdatedPanoids: map.lastUpdatedPanoids ? map.lastUpdatedPanoids.toString().split(',') : []
+  }));
 
+  let updateCount = 0;
   for (const map of mapsToUpdate) {
     const currentLocations = await db
       .select()
@@ -394,6 +400,7 @@ async function updateMap(
       stateCode: null
     };
   });
+
   const apiUrl = `https://www.geoguessr.com/api/v4/user-maps/drafts/${geoguessrId}`;
   const ncfaToken = env.NFCA_TOKEN || null;
 
