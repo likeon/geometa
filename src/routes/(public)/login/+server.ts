@@ -5,6 +5,10 @@ import type { RequestEvent } from '@sveltejs/kit';
 import { discord } from '$lib/auth';
 
 export async function GET(event: RequestEvent): Promise<Response> {
+  if (event.locals.user) {
+    return redirect(302, '/dev/dash');
+  }
+
   const state = generateState();
   const url = await discord.createAuthorizationURL(state, { scopes: ['identify'] });
 
