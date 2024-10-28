@@ -383,6 +383,7 @@ async function updateMap(
 
   // add popup maybe if token is missing later
   if (ncfaToken == null) {
+    console.error('NFCA_TOKEN is missing for auto map updates');
     return;
   }
 
