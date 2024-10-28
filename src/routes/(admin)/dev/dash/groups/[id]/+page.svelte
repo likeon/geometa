@@ -179,6 +179,14 @@
     {selectMeta}
     on:criteriaChange={handleCriteriaChange}
     levelNames={levelChoices.map((levelChoice) => levelChoice.name)} />
+  {#if data.group.metas.length === 0}
+    <div class="justify-center w-full flex mt-2">
+      <p class="text-2xl">
+        Upload locations using <a target="_blank" href="https://map-making.app/">map-making.app</a> json
+        to prepopulate the metas.
+      </p>
+    </div>
+  {/if}
 </div>
 
 <MetaEditModal

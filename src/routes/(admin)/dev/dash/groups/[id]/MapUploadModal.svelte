@@ -28,7 +28,8 @@
     enctype="multipart/form-data"
     use:enhance>
     <label>
-      Upload map json: <input
+      Map json from <a target="_blank" href="https://map-making.app/">map-making.app</a>:
+      <input
         bind:files={$file}
         accept="application/json"
         name="file"
@@ -39,4 +40,17 @@
       {/if}
     </label>
   </form>
+  <p class="text-xl"></p>
+  <div class="text-green-900">
+    <p>
+      Each location <strong>must</strong> have exactly one tag in
+      <span class="whitespace-nowrap font-semibold">[Country Name]-[Your Meta Name]</span> format!
+    </p>
+    <p>Examples:</p>
+    <ol class="list-disc ml-5">
+      <li>Czechia-Bollard</li>
+      <li>Portugal-LicensePlate</li>
+      <li>Singapore-StreetSign</li>
+    </ol>
+  </div>
 </Modal>

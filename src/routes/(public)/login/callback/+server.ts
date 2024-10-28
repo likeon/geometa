@@ -3,7 +3,7 @@ import { db } from '$lib/drizzle';
 import type { RequestEvent } from '@sveltejs/kit';
 import { discord, lucia } from '$lib/auth';
 import { eq } from 'drizzle-orm';
-import { users } from '$lib/db/schema';
+import { mapGroupPermissions, mapGroups, users } from '$lib/db/schema';
 
 interface DiscordUser {
   id: string;
@@ -41,6 +41,13 @@ export async function GET(event: RequestEvent) {
         .where(eq(users.id, discordUser.id));
     } else {
       await db.insert(users).values({ id: discordUser.id, username: discordUser.username });
+      const mapGroup = await db
+        .insert(mapGroups)
+        .values({ name: 'Default map group' })
+        .returning({ id: mapGroups.id });
+      await db
+        .insert(mapGroupPermissions)
+        .values({ mapGroupId: mapGroup[0].id, userId: discordUser.id });
     }
     const session = await lucia.createSession(discordUser.id, {});
     const sessionCookie = lucia.createSessionCookie(session.id);
