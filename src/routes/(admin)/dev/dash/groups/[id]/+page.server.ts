@@ -4,10 +4,13 @@ import { and, asc, eq, not, notInArray, sql } from 'drizzle-orm';
 import {
   levels,
   mapGroupLocations,
+  mapLocations,
   mapGroups,
   metaImages,
   metaLevels,
-  metas
+  metas,
+  maps,
+  mapData
 } from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
 import { createInsertSchema } from 'drizzle-zod';
@@ -272,5 +275,155 @@ export const actions = {
     }
 
     await syncUserScriptData(groupId, event.platform.env.geometa_kv);
+
+    // only run if it's map group 1
+    const TRAUSI_GROUP_ID = 1;
+    if (groupId == TRAUSI_GROUP_ID) {
+      autoUpdateMaps(TRAUSI_GROUP_ID);
+    }
   }
 };
+
+async function autoUpdateMaps(mapGroupId: number) {
+  const mapsToUpdate = await db
+    .select({
+      mapId: mapData.mapId,
+      geoguessrId: maps.geoguessrId,
+      lastUpdatedPanoids: mapData.lastUpdatedPanoids
+    })
+    .from(mapData)
+    .innerJoin(maps, eq(mapData.mapId, maps.id))
+    .where(and(eq(maps.mapGroupId, mapGroupId), eq(maps.autoUpdate, true)));
+
+  for (const map of mapsToUpdate) {
+    const currentLocations = await db
+      .select()
+      .from(mapLocations)
+      .where(eq(mapLocations.mapId, map.mapId));
+    // if location count is different map for sure has to be updated
+    if (currentLocations.length != map.lastUpdatedPanoids.length) {
+      updateMap(map.mapId, map.geoguessrId, currentLocations);
+      continue;
+    }
+
+    // if it's not we have to check if any location was changed
+    const countMap1: { [key: string]: number } = {};
+    const countMap2: { [key: string]: number } = {};
+
+    // Count occurrences in the first array
+    for (const location of currentLocations) {
+      if (location.panoId) {
+        countMap1[location.panoId] = (countMap1[location.panoId] || 0) + 1;
+      }
+    }
+
+    // Count occurrences in the second array
+    for (const location of map.lastUpdatedPanoids) {
+      countMap2[location] = (countMap2[location] || 0) + 1;
+    }
+
+    let differences = 0;
+
+    // Compare counts
+    for (const key in countMap1) {
+      if (countMap1[key] !== countMap2[key]) {
+        differences += Math.abs((countMap1[key] || 0) - (countMap2[key] || 0));
+        // If differences exceed 1, update map
+        if (differences > 1) {
+          updateMap(map.mapId, map.geoguessrId, currentLocations);
+          continue;
+        }
+      }
+    }
+  }
+}
+
+async function updateMap(
+  mapId: number,
+  geoguessrId: String,
+  locations: {
+    tagName: string;
+    metaId: number;
+    lat: number;
+    lng: number;
+    heading: number;
+    pitch: number;
+    zoom: number;
+    panoId: string | null;
+    extraPanoId: string | null;
+    extraPanoDate: string;
+    mapId: number;
+    metaName: string;
+    metaNote: string;
+    metaNoteFromPlonkit: boolean;
+  }[]
+) {
+  const locationsToUpload = locations.map((loc) => {
+    return {
+      lat: loc.lat,
+      lng: loc.lng,
+      heading: loc.heading,
+      pitch: loc.pitch,
+      zoom: loc.zoom,
+      panoId: loc.panoId,
+      countryCode: null,
+      stateCode: null
+    };
+  });
+
+  const apiUrl = `https://www.geoguessr.com/api/v4/user-maps/drafts/${geoguessrId}`;
+  const ncfaToken = process.env.NFCA_TOKEN || null;
+
+  if (ncfaToken == null) {
+    return;
+  }
+
+  const headers = {
+    Cookie: `_ncfa=${ncfaToken}`,
+    'Content-Type': 'application/json'
+  };
+
+  // GET request to fetch the map draft
+  const response = await fetch(`${apiUrl}user-maps/drafts/${geoguessrId}`, { headers });
+  if (!response.ok) {
+    console.error(`Failed to fetch the map draft: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const { avatar, description, highlighted, name } = data;
+  const mapDataToUpload = {
+    avatar,
+    description,
+    highlighted,
+    name,
+    customCoordinates: locationsToUpload
+  };
+
+  // PUT request to update the map draft
+  const updateResponse = await fetch(`${apiUrl}`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify(mapDataToUpload)
+  });
+
+  if (!updateResponse.ok) {
+    console.error(`Failed to update the map draft: ${updateResponse.status}`);
+  }
+
+  const publishResponse = await fetch(`${apiUrl}/publish`, {
+    method: 'PUT',
+    headers,
+    body: JSON.stringify({})
+  });
+
+  if (!publishResponse.ok) {
+    console.error(`Failed to publish the map: ${publishResponse.status}`);
+  }
+
+  // assign empty string if its null(shouldnt be when we force it to be not null later so should change that when we do that)
+  const currentPanoids = locationsToUpload.map((loc) => loc.panoId || '');
+  await db
+    .update(mapData)
+    .set({ lastUpdatedPanoids: currentPanoids })
+    .where(eq(mapData.mapId, mapId));
+}
