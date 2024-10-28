@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `map_data_unique` ON `map_data` (`map_id`);

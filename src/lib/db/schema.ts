@@ -274,16 +274,22 @@ export const mapGroupPermissions = sqliteTable(
   })
 );
 
-export const mapData = sqliteTable('map_data', {
-  id: integer('id').primaryKey(),
-  mapId: integer('map_id')
-    .notNull()
-    .references(() => maps.id, { onDelete: 'cascade' }),
-  lastUpdatedPanoids: text('last_updated_panoids')
-    .notNull()
-    .$type<string[]>()
-    .default(sql`'[]'`)
-});
+export const mapData = sqliteTable(
+  'map_data',
+  {
+    id: integer('id').primaryKey(),
+    mapId: integer('map_id')
+      .notNull()
+      .references(() => maps.id, { onDelete: 'cascade' }),
+    lastUpdatedPanoids: text('last_updated_panoids')
+      .notNull()
+      .$type<string[]>()
+      .default(sql`'[]'`)
+  },
+  (t) => ({
+    mapDataUnique: uniqueIndex('map_data_unique').on(t.mapId)
+  })
+);
 
 export const mapDataRelations = relations(mapData, ({ one }) => ({
   map: one(maps, { fields: [mapData.mapId], references: [maps.id] })
