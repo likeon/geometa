@@ -275,12 +275,16 @@ export const actions = {
       error(500, 'platform unavailable');
     }
 
-    await syncUserScriptData(groupId, event.platform.env.geometa_kv);
-
-    // only run if it's map group 1
-    const TRAUSI_GROUP_ID = 1;
-    if (groupId == TRAUSI_GROUP_ID) {
-      autoUpdateMaps(TRAUSI_GROUP_ID);
+    try {
+      await syncUserScriptData(groupId, event.platform.env.geometa_kv);
+      const TRAUSI_GROUP_ID = 1;
+      if (groupId == TRAUSI_GROUP_ID) {
+        await autoUpdateMaps(TRAUSI_GROUP_ID);
+      }
+    } catch (err) {
+      const errorMessage = (err as Error).message || 'An error occurred';
+      const errorStatus = (err as { status?: number }).status || 500;
+      throw error(errorStatus, errorMessage);
     }
   }
 };
@@ -304,13 +308,13 @@ async function autoUpdateMaps(mapGroupId: number) {
 
     // if there is not map data save update map since it was never updated
     if (map.lastUpdatedPanoids == null) {
-      updateMap(map.mapId, map.geoguessrId, currentLocations);
+      await updateMap(map.mapId, map.geoguessrId, currentLocations);
       continue;
     }
 
     // if location count is different map for sure has to be updated
     if (currentLocations.length != map.lastUpdatedPanoids.length) {
-      updateMap(map.mapId, map.geoguessrId, currentLocations);
+      await updateMap(map.mapId, map.geoguessrId, currentLocations);
       continue;
     }
 
@@ -338,7 +342,7 @@ async function autoUpdateMaps(mapGroupId: number) {
         differences += Math.abs((countMap1[key] || 0) - (countMap2[key] || 0));
         // If differences exceed 1, update map
         if (differences > 1) {
-          updateMap(map.mapId, map.geoguessrId, currentLocations);
+          await updateMap(map.mapId, map.geoguessrId, currentLocations);
           continue;
         }
       }
@@ -378,14 +382,12 @@ async function updateMap(
       stateCode: null
     };
   });
-
   const apiUrl = `https://www.geoguessr.com/api/v4/user-maps/drafts/${geoguessrId}`;
   const ncfaToken = env.NFCA_TOKEN || null;
 
   // add popup maybe if token is missing later
   if (ncfaToken == null) {
-    console.error('NFCA_TOKEN is missing for auto map updates');
-    return;
+    throw new Error('NFCA_TOKEN IS MISSING');
   }
 
   const headers = {
@@ -395,9 +397,7 @@ async function updateMap(
 
   // GET request to fetch the map draft
   const response = await fetch(`${apiUrl}`, { headers });
-  if (!response.ok) {
-    console.error(`Failed to fetch the map draft: ${response.status}`);
-  }
+  if (!response.ok) throw new Error('Failed to fetch the map draft');
 
   const data = await response.json();
   const { avatar, description, highlighted, name } = data;
@@ -416,9 +416,7 @@ async function updateMap(
     body: JSON.stringify(mapDataToUpload)
   });
 
-  if (!updateResponse.ok) {
-    console.error(`Failed to update the map draft: ${updateResponse.status}`);
-  }
+  if (!updateResponse.ok) throw error(updateResponse.status, 'Failed to update the map draft');
 
   const publishResponse = await fetch(`${apiUrl}/publish`, {
     method: 'PUT',
@@ -426,9 +424,7 @@ async function updateMap(
     body: JSON.stringify({})
   });
 
-  if (!publishResponse.ok) {
-    console.error(`Failed to publish the map: ${publishResponse.status}`);
-  }
+  if (!publishResponse.ok) throw error(publishResponse.status, 'Failed to publish the map');
 
   // assign empty string if its null(shouldnt be when we force it to be not null later so should change that when we do that)
   const currentPanoids = locationsToUpload.map((loc) => loc.panoId || '');

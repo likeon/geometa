@@ -147,8 +147,20 @@
         use:enhance={() => {
           return async ({ result }) => {
             // `result` is an `ActionResult` object
-            await applyAction(result);
-            toast.push('Updated');
+            if (result.type === 'success') {
+              applyAction(result);
+              toast.push('Updated');
+            } else if (result.type === 'failure') {
+              const errorMessage = result.data?.message || 'Something went wrong';
+              toast.push(errorMessage, {
+                theme: { '--toastBackground': 'red', '--toastColor': 'white' }
+              });
+            } else if (result.type === 'error') {
+              const errorMessage = result.error.message || 'An error occurred';
+              toast.push(errorMessage, {
+                theme: { '--toastBackground': 'red', '--toastColor': 'white' }
+              });
+            }
           };
         }}>
         <GradientButton color="pinkToOrange" class="ml-3" type="submit"
