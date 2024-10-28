@@ -334,34 +334,12 @@ async function autoUpdateMaps(mapGroupId: number) {
       continue;
     }
 
-    // if it's not we have to check if any location was changed
-    const countMap1: { [key: string]: number } = {};
-    const countMap2: { [key: string]: number } = {};
-
-    // Count occurrences in the first array
-    for (const location of currentLocations) {
-      if (location.panoId) {
-        countMap1[location.panoId] = (countMap1[location.panoId] || 0) + 1;
-      }
-    }
-
-    // Count occurrences in the second array
-    for (const location of map.lastUpdatedPanoids) {
-      countMap2[location] = (countMap2[location] || 0) + 1;
-    }
-
-    let differences = 0;
-
-    // Compare counts
-    for (const key in countMap1) {
-      if (countMap1[key] !== countMap2[key]) {
-        differences += Math.abs((countMap1[key] || 0) - (countMap2[key] || 0));
-        // If differences exceed 1, update map
-        if (differences > 1) {
-          await updateMap(map.mapId, map.geoguessrId, currentLocations);
-          updateCount++;
-          continue;
-        }
+    const lastUpdatedPanoidsSet = new Set(map.lastUpdatedPanoids);
+    for (const loc of currentLocations) {
+      if (!lastUpdatedPanoidsSet.has(loc.panoId!)) {
+        await updateMap(map.mapId, map.geoguessrId, currentLocations);
+        updateCount++;
+        break;
       }
     }
   }
@@ -404,7 +382,6 @@ async function updateMap(
   const apiUrl = `https://www.geoguessr.com/api/v4/user-maps/drafts/${geoguessrId}`;
   const ncfaToken = env.NFCA_TOKEN || null;
 
-  // add popup maybe if token is missing later
   if (ncfaToken == null) {
     throw new Error('NFCA_TOKEN IS MISSING');
   }
