@@ -278,9 +278,15 @@ export const actions = {
     try {
       await syncUserScriptData(groupId, event.platform.env.geometa_kv);
       const TRAUSI_GROUP_ID = 1;
+      let updateCount = 0;
       if (groupId == TRAUSI_GROUP_ID) {
-        await autoUpdateMaps(TRAUSI_GROUP_ID);
+        updateCount = await autoUpdateMaps(TRAUSI_GROUP_ID);
       }
+
+      return {
+        status: 200,
+        body: { updateCount }
+      };
     } catch (err) {
       const errorMessage = (err as Error).message || 'An error occurred';
       const errorStatus = (err as { status?: number }).status || 500;
@@ -300,6 +306,8 @@ async function autoUpdateMaps(mapGroupId: number) {
     .leftJoin(mapData, eq(mapData.mapId, maps.id))
     .where(and(eq(maps.autoUpdate, true), eq(maps.mapGroupId, mapGroupId)));
 
+  let updateCount = 0;
+
   for (const map of mapsToUpdate) {
     const currentLocations = await db
       .select()
@@ -309,12 +317,14 @@ async function autoUpdateMaps(mapGroupId: number) {
     // if there is not map data save update map since it was never updated
     if (map.lastUpdatedPanoids == null) {
       await updateMap(map.mapId, map.geoguessrId, currentLocations);
+      updateCount++;
       continue;
     }
 
     // if location count is different map for sure has to be updated
     if (currentLocations.length != map.lastUpdatedPanoids.length) {
       await updateMap(map.mapId, map.geoguessrId, currentLocations);
+      updateCount++;
       continue;
     }
 
@@ -343,11 +353,13 @@ async function autoUpdateMaps(mapGroupId: number) {
         // If differences exceed 1, update map
         if (differences > 1) {
           await updateMap(map.mapId, map.geoguessrId, currentLocations);
+          updateCount++;
           continue;
         }
       }
     }
   }
+  return updateCount;
 }
 
 async function updateMap(

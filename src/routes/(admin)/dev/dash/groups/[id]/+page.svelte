@@ -149,7 +149,12 @@
             // `result` is an `ActionResult` object
             if (result.type === 'success') {
               applyAction(result);
-              toast.push('Updated');
+              if (data.group.id == 1) {
+                const updateCount = result.data?.updateCount || 0;
+                toast.push(`Updated ${updateCount} map(s)`);
+              } else {
+                toast.push('Updated');
+              }
             } else if (result.type === 'failure') {
               const errorMessage = result.data?.message || 'Something went wrong';
               toast.push(errorMessage, {
