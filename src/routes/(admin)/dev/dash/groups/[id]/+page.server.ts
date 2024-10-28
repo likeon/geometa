@@ -447,7 +447,7 @@ async function updateMap(
       lastUpdatedPanoids: currentPanoids
     })
     .onConflictDoUpdate({
-      target: mapData.mapId,
+      target: [mapData.mapId],
       set: { lastUpdatedPanoids: currentPanoids }
     });
 }
