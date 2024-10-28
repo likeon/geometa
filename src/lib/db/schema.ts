@@ -58,7 +58,8 @@ export const maps = sqliteTable(
     geoguessrId: text('geoguessr_id').notNull(),
     description: text('description'),
     isPublished: integer('is_published', { mode: 'boolean' }).notNull().default(false),
-    ordering: integer('ordering').notNull().default(0)
+    ordering: integer('ordering').notNull().default(0),
+    autoUpdate: integer('auto_update', { mode: 'boolean' }).notNull().default(false)
   },
   (t) => ({
     nameUnique: uniqueIndex('maps_name_unique').on(t.name),
@@ -272,3 +273,18 @@ export const mapGroupPermissions = sqliteTable(
     )
   })
 );
+
+export const mapData = sqliteTable('map_data', {
+  id: integer('id').primaryKey(),
+  mapId: integer('map_id')
+    .notNull()
+    .references(() => maps.id, { onDelete: 'cascade' }),
+  lastUpdatedPanoids: text('last_updated_panoids')
+    .notNull()
+    .$type<string[]>()
+    .default(sql`'[]'`)
+});
+
+export const mapDataRelations = relations(mapData, ({ one }) => ({
+  map: one(maps, { fields: [mapData.mapId], references: [maps.id] })
+}));

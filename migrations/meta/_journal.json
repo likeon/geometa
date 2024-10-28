@@ -204,6 +204,13 @@
       "when": 1729869399936,
       "tag": "0028_slippery_mauler",
       "breakpoints": true
+    },
+    {
+      "idx": 29,
+      "version": "6",
+      "when": 1730104266920,
+      "tag": "0029_amusing_enchantress",
+      "breakpoints": true
     }
   ]
 }
