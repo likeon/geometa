@@ -2,21 +2,14 @@
   import '../../app.css';
   import NavBar from '$lib/components/NavBar.svelte';
   import { dev } from '$app/environment';
-  /**
-   * @typedef {Object} Props
-   * @property {import('svelte').Snippet} [children]
-   */
+  import Footer from '$lib/components/Footer.svelte';
 
-  /** @type {Props} */
   let { children } = $props();
 </script>
 
 <svelte:head>
   {#if !dev}
-    <script
-      defer
-      src="https://cloud.umami.is/script.js"
-      data-website-id="3cb09286-f8f9-43c8-85ee-8df2b972c113"></script>
+    <script async data-id="101468249" src="//static.getclicky.com/js"></script>
   {/if}
 </svelte:head>
 
@@ -25,4 +18,5 @@
   <main>
     {@render children?.()}
   </main>
+  <Footer />
 </div>
