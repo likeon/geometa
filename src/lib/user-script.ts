@@ -1,12 +1,7 @@
 import { db } from '$lib/drizzle';
 import { mapLocations, maps } from '$lib/db/schema';
 import { asc, eq, sql } from 'drizzle-orm';
-import {
-  cloudflareKvBulkPut,
-  cutToTwoDecimals,
-  getCountryFromTagName,
-  isDeepEqual
-} from '$lib/utils';
+import { cloudflareKvBulkPut, getCountryFromTagName, isDeepEqual } from '$lib/utils';
 import type { KVNamespace } from '@cloudflare/workers-types';
 
 type UserScriptDataItem = {
@@ -21,11 +16,10 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
   const dbValues = await db
     .select({
       geoguessrId: maps.geoguessrId,
-      lat: mapLocations.lat,
-      lng: mapLocations.lng,
+      panoId: mapLocations.panoId,
       tagName: mapLocations.tagName,
       metaName: mapLocations.metaName,
-      metaNote: mapLocations.metaNote,
+      metaNoteHtml: mapLocations.metaNoteHtml,
       images: sql<
         string | null
       >`(select GROUP_CONCAT(mi.image_url) from meta_images mi where mi.meta_id = ${mapLocations.metaId})`
@@ -47,7 +41,7 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
 
   const kvData = [];
   for (const item of dbValues) {
-    const key = `${item.geoguessrId}:${cutToTwoDecimals(item.lat)}:${cutToTwoDecimals(item.lng)}`;
+    const key = `${item.geoguessrId}:${item.panoId}`;
     const countryName = getCountryFromTagName(item.tagName);
     const plonkitCountryUrl = `https://www.plonkit.net/${countryName.toLowerCase().replace(' ', '-')}`;
 
@@ -63,7 +57,7 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
     const value = {
       country: getCountryFromTagName(item.tagName),
       metaName: item.metaName,
-      note: item.metaNote,
+      note: item.metaNoteHtml,
       plonkitCountryUrl: plonkitCountryUrl,
       images: images
     };

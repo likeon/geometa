@@ -225,6 +225,13 @@
       "when": 1730398842724,
       "tag": "0031_certain_marvel_zombies",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "6",
+      "when": 1730399860288,
+      "tag": "0032_sturdy_skullbuster",
+      "breakpoints": true
     }
   ]
 }

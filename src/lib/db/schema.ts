@@ -217,6 +217,7 @@ export const mapLocations = sqliteView('map_locations_view', {
   extraPanoDate: text('extra_pano_date').notNull(),
   tagName: text('tag_name').notNull(),
   metaNote: text('meta_note').notNull(),
+  metaNoteHtml: text('meta_note_html').notNull(),
   metaNoteFromPlonkit: integer('meta_note_from_plonkit', { mode: 'boolean' }).notNull(),
   metaId: integer('meta_id').notNull()
 }).as(sql`
@@ -233,6 +234,7 @@ export const mapLocations = sqliteView('map_locations_view', {
     lmv.extra_pano_date,
     lmv.extra_tag AS tag_name,
     lmv.meta_note,
+    lmv.meta_note_html,
     lmv.meta_note_from_plonkit
   FROM
     ${locationMetas} lmv
