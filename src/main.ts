@@ -1,11 +1,12 @@
 import App from "./App.svelte";
-import {getMapInfo, waitForElement} from "./lib/utils";
+import { getMapInfo, waitForElement } from "./lib/utils";
 
 import { unsafeWindow } from "$";
 import { mount } from "svelte";
 
 function changelog() {
   return [
+    { "0.68": "Use panoId as unique location identifier, allow html in note" },
     { "0.67": "Updated to Svelte 5" },
     { "0.66": "Made note movable" },
     { "0.65": "Check map ids via API" },
@@ -40,6 +41,7 @@ type GGEvent = {
       location: {
         lat: number;
         lng: number;
+        panoId: string;
       };
     }[];
   };
@@ -50,6 +52,7 @@ GeoGuessrEventFramework.init().then(() => {
     await getMapInfo(event.detail.map.id, true);
   });
   GeoGuessrEventFramework.events.addEventListener("round_end", async (event: GGEvent) => {
+    console.log(event.detail);
     const mapInfo = await getMapInfo(event.detail.map.id, false);
     if (!mapInfo.mapFound) return;
     waitForElement('div[data-qa="result-view-top"]').then((container) => {
@@ -58,13 +61,12 @@ GeoGuessrEventFramework.init().then(() => {
       container.appendChild(element);
       const lastRound = event.detail.rounds[event.detail.rounds.length - 1];
       mount(App, {
-                target: element,
-                props: {
-                  lat: lastRound.location.lat,
-                  lng: lastRound.location.lng,
-                  mapId: event.detail.map.id,
-                },
-              });
+        target: element,
+        props: {
+          panoId: lastRound.location.panoId,
+          mapId: event.detail.map.id,
+        },
+      });
     });
   });
 });

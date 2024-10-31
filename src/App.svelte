@@ -6,12 +6,11 @@
   import {cutToTwoDecimals, localStorageGetInt} from "./lib/utils";
 
   interface Props {
-    lat: number;
-    lng: number;
+    panoId: string;
     mapId: string;
   }
 
-  let {lat, lng, mapId}: Props = $props();
+  let {panoId, mapId}: Props = $props();
 
   type GeoInfo = {
     country: string,
@@ -77,9 +76,7 @@
   };
 
   onMount(() => {
-    const cutLat = cutToTwoDecimals(lat);
-    const cutLng = cutToTwoDecimals(lng);
-    const url = `https://learnablemeta.com/location-info?coordinates=${cutLat}:${cutLng}&mapId=${mapId}`;
+    const url = `https://learnablemeta.com/location-info?panoId=${panoId}&mapId=${mapId}`;
 
     GM_xmlhttpRequest({
       method: 'GET',
@@ -152,7 +149,7 @@
       <strong>{geoInfo.country}</strong>
     </p>
     <p>Meta type: <strong>{geoInfo.metaName}</strong></p>
-    <p>Note: {geoInfo.note}</p>
+    <div class="geometa-note"><p>Note:</p> {@html geoInfo.note}</div>
     <p class="plonkit-note">Check out <a href={geoInfo.plonkitCountryUrl} target="_blank">
       plonkit.net/{geoInfo.country.toLocaleLowerCase()}</a> for more clues.</p>
     {#if geoInfo.images && geoInfo.images.length}
@@ -262,5 +259,19 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+  }
+
+  :global(.geometa-note p) {
+    display: inline;
+  }
+
+  :global(.geometa-note ul li) {
+    list-style-type: disc;
+    margin-left: 1rem;
+  }
+
+  :global(.geometa-note ol li) {
+    list-style-type: decimal;
+    margin-left: 1rem;
   }
 </style>
