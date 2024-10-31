@@ -4,6 +4,7 @@
   import { type SuperValidated, type Infer, fileProxy } from 'sveltekit-superforms';
   import { superForm } from 'sveltekit-superforms';
   import type { MapUploadSchema } from './+page.server';
+  import { createEventDispatcher } from 'svelte';
 
   interface Props {
     isUploadModalOpen: boolean;
@@ -11,13 +12,25 @@
   }
 
   let { isUploadModalOpen = $bindable(), data }: Props = $props();
+  const dispatch = createEventDispatcher();
+  const { form, errors, enhance, submit, reset } = superForm(data, {
+    onResult({ result }) {
+      if (result.type == 'success') {
+        dispatch('success');
+        isUploadModalOpen = false;
+      }
 
-  const { form, errors, enhance, submit } = superForm(data, {
-    onResult() {
-      window.location.reload();
+      if (result.type == 'failure') {
+      }
     }
   });
   const file = fileProxy(form, 'file');
+
+  $effect(() => {
+    if (isUploadModalOpen) {
+      reset();
+    }
+  });
 </script>
 
 <Modal bind:open={isUploadModalOpen}>

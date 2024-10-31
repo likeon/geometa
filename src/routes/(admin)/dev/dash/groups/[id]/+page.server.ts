@@ -54,7 +54,7 @@ const mapJsonSchema = z.object({
       heading: z.number(),
       pitch: z.number(),
       zoom: z.number(),
-      panoId: z.string().optional().or(z.null()),
+      panoId: z.string(),
       extra: z.object({
         tags: z.string().array().length(1),
         panoId: z.string().optional(),
@@ -70,7 +70,7 @@ type UpsertValue = {
   heading: number;
   pitch: number;
   zoom: number;
-  panoId: string | null;
+  panoId: string;
   extraTag: string;
   extraPanoId: string | null;
   extraPanoDate: string | null | undefined;
@@ -170,9 +170,24 @@ export const actions = {
 
     const jsonData = await extractJsonData(form.data.file);
     const validationResult = mapJsonSchema.safeParse(jsonData);
+    let errorString = '';
 
     if (!validationResult.success) {
-      return setError(form, 'file', "JSON doesn't match the expected format");
+      for (const issue of validationResult.error.issues) {
+        if (issue.code == 'invalid_type' && issue.path.includes('panoId')) {
+          errorString = 'At least one of the locations is missing panoId.';
+          break;
+        }
+
+        if (issue.code == 'too_small' && issue.path.includes('tags')) {
+          errorString = 'At least one of the locations is missing tag.';
+          break;
+        }
+
+        errorString = "JSON doesn't match the expected format";
+        break;
+      }
+      return setError(form, 'file', errorString);
     }
 
     const upsertValues: UpsertValue[] = [];
@@ -185,7 +200,7 @@ export const actions = {
         heading: location.heading,
         pitch: location.pitch,
         zoom: location.zoom,
-        panoId: location.panoId || null,
+        panoId: location.panoId,
         extraTag: location.extra.tags[0],
         extraPanoId: location.extra.panoId || null,
         extraPanoDate: location.extra.panoDate

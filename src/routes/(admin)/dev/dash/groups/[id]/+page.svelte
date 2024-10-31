@@ -20,6 +20,10 @@
   let selectedHeader = $state('tag');
   let sortModifier = $state(1);
 
+  function handleModalSuccess() {
+    toast.push('Successfully uploaded locations!');
+  }
+
   function handleCriteriaChange(event: { detail: { type: string; value: string } }) {
     const { type, value } = event.detail;
 
@@ -198,6 +202,6 @@
   imageUploadForm={data.imageUploadForm}
   {updateMeta} />
 
-<MapUploadModal bind:isUploadModalOpen data={data.mapUploadForm} />
+<MapUploadModal bind:isUploadModalOpen data={data.mapUploadForm} on:success={handleModalSuccess} />
 
 <SvelteToast />
