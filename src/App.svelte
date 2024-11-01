@@ -1,10 +1,10 @@
 <script lang="ts">
   import {onMount} from 'svelte';
-  import {GM_xmlhttpRequest, unsafeWindow} from '$';
+  import {GM_xmlhttpRequest} from '$';
   import Spinner from "./lib/Spinner.svelte";
   import CountryFlag from "./lib/CountryFlag.svelte";
-  import {localStorageGetInt} from "./lib/utils";
-  import { onMouseDown, onMouseMove, onMouseUp } from './lib/position';
+  import {onMouseDown, onMouseMove, onMouseUp, setContainerPosition} from './lib/dragging';
+  import {saveContainerDimensions, setContainerDimensions} from "./lib/resizing";
 
   interface Props {
     panoId: string;
@@ -26,8 +26,6 @@
 
   let container: HTMLDivElement;
   let header: HTMLDivElement;
-  let containerWidth: number = localStorageGetInt('geometa:containerWidth') || 500;
-  let containerHeight: number = localStorageGetInt('geometa:containerHeight') || 400;
 
   onMount(() => {
     const url = `https://learnablemeta.com/location-info?panoId=${panoId}&mapId=${mapId}`;
@@ -54,22 +52,15 @@
       }
     });
 
-    container.style.width = `${containerWidth}px`;
-    container.style.height = `${containerHeight}px`;
-    container.style.left = localStorage.getItem('geometa:containerStyleLeft') ?? container.style.left;
-    container.style.top = localStorage.getItem('geometa:containerStyleTop') ?? container.style.top;
+    setContainerPosition(container)
+    setContainerDimensions(container);
 
     const resizeObserver = new ResizeObserver(entries => {
       for (let entry of entries) {
-        containerWidth = entry.contentRect.width;
-        containerHeight = entry.contentRect.height;
-        if (containerWidth !== 0 && containerHeight !== 0) {
-          unsafeWindow.localStorage.setItem('geometa:containerWidth', Math.floor(containerWidth).toString());
-          unsafeWindow.localStorage.setItem('geometa:containerHeight', Math.floor(containerHeight).toString());
-        }
+        saveContainerDimensions(entry);
       }
     });
-    resizeObserver.observe(container!);
+    resizeObserver.observe(container);
 
     header.addEventListener('mousedown', (event) => onMouseDown(event, container));
     document.addEventListener('mousemove', (event) => onMouseMove(event, container));
