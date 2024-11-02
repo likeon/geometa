@@ -1,4 +1,4 @@
-import { GM_xmlhttpRequest, unsafeWindow } from "$";
+import { GM_xmlhttpRequest, unsafeWindow } from '$';
 
 export function waitForElement(selector: string): Promise<Element> {
   return new Promise((resolve) => {
@@ -11,7 +11,7 @@ export function waitForElement(selector: string): Promise<Element> {
     // If not, set up a MutationObserver to watch for it
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
-        if (mutation.type === "childList") {
+        if (mutation.type === 'childList') {
           const element = document.querySelector(selector);
           if (element) {
             observer.disconnect();
@@ -25,7 +25,7 @@ export function waitForElement(selector: string): Promise<Element> {
     // Start observing the document body for DOM changes
     observer.observe(document.body, {
       childList: true,
-      subtree: true,
+      subtree: true
     });
   });
 }
@@ -33,7 +33,7 @@ export function waitForElement(selector: string): Promise<Element> {
 export function cutToTwoDecimals(num: number): string {
   const fixed = num.toFixed(2);
   // Remove trailing zeros after the decimal point
-  return fixed.replace(/\.?0+$/, "");
+  return fixed.replace(/\.?0+$/, '');
 }
 
 export function localStorageGetInt(name: string) {
@@ -58,7 +58,7 @@ type MapInfoResponse = {
 async function fetchMapInfo(url: string): Promise<MapInfoResponse> {
   return new Promise((resolve, reject) => {
     GM_xmlhttpRequest({
-      method: "GET",
+      method: 'GET',
       url: url,
       onload: (response) => {
         if (response.status === 200 || response.status === 404) {
@@ -66,21 +66,21 @@ async function fetchMapInfo(url: string): Promise<MapInfoResponse> {
             const mapInfo = JSON.parse(response.responseText) as MapInfoResponse;
             resolve(mapInfo);
           } catch (e) {
-            reject("Failed to parse response");
+            reject('Failed to parse response');
           }
         } else {
           reject(`HTTP error! status: ${response.status}`);
         }
       },
       onerror: () => {
-        reject("An error occurred while fetching data");
-      },
+        reject('An error occurred while fetching data');
+      }
     });
   });
 }
 
 export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
-  const localStorageKey = `geometa:map-info:${geoguessrId}`
+  const localStorageKey = `geometa:map-info:${geoguessrId}`;
   if (!forceUpdate) {
     const savedMapInfo = unsafeWindow.localStorage.getItem(localStorageKey);
     if (savedMapInfo) {

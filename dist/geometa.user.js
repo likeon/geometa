@@ -16,7 +16,7 @@
 // @run-at       document-start
 // ==/UserScript==
 
-(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(` .loadership_ZOJAQ.svelte-1fzfwt6{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-1fzfwt6 div:where(.svelte-1fzfwt6){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-1fzfwt6-loadership_ZOJAQ_scale 1.2s infinite,svelte-1fzfwt6-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-1fzfwt6 div:where(.svelte-1fzfwt6):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div:where(.svelte-1fzfwt6):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div:where(.svelte-1fzfwt6):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div:where(.svelte-1fzfwt6):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-1fzfwt6 div:where(.svelte-1fzfwt6):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-1fzfwt6 div:where(.svelte-1fzfwt6):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-1fzfwt6 div:where(.svelte-1fzfwt6):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-1fzfwt6 div:where(.svelte-1fzfwt6):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-1fzfwt6 div:where(.svelte-1fzfwt6):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div:where(.svelte-1fzfwt6):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-1fzfwt6 div:where(.svelte-1fzfwt6):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-1fzfwt6 div:where(.svelte-1fzfwt6):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-1fzfwt6-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.geometa-container.svelte-tqrxyf{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);resize:both;overflow:auto}.plonkit-note.svelte-tqrxyf{color:#d3d3d3;font-size:small}a.svelte-tqrxyf{color:#188bd2}a.svelte-tqrxyf:hover{text-decoration:underline}.skill-icons--discord.svelte-tqrxyf{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-tqrxyf{display:inline-block;width:1.2rem;height:1.2rem;margin-left:5px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--discord.svelte-tqrxyf,.flat-color-icons--globe.svelte-tqrxyf{display:inline-block;vertical-align:middle}.flex.svelte-tqrxyf{display:flex;align-items:center}.icons.svelte-tqrxyf a:where(.svelte-tqrxyf) span:where(.svelte-tqrxyf){align-items:center;justify-content:center}hr.svelte-tqrxyf{border:0;border-top:1px solid white;width:100%}.image-wrapper.svelte-tqrxyf{width:100%;display:flex;justify-content:center;align-items:center}.responsive-image.svelte-tqrxyf{max-width:100%;height:auto;display:block}.header.svelte-tqrxyf{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center}.geometa-note p{display:inline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem} `);
+(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const i=document.createElement("style");i.textContent=e,document.head.append(i)})(` .loadership_ZOJAQ.svelte-i1jlc0{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-i1jlc0-loadership_ZOJAQ_scale 1.2s infinite,svelte-i1jlc0-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-i1jlc0-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-i1jlc0-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.carousel.svelte-v4s3fx{width:100%;position:relative}.controls.svelte-v4s3fx{position:absolute;top:50%;left:0;right:0;width:100%;display:flex;justify-content:space-between;transform:translateY(-50%);pointer-events:none}.prev.svelte-v4s3fx,.next.svelte-v4s3fx{background-color:#00000080;color:#fff;border:none;font-size:2em;padding:.2em .5em;cursor:pointer;pointer-events:all}.indicators.svelte-v4s3fx{position:absolute;bottom:15px;left:0;right:0;width:100%;display:flex;justify-content:center}.indicator.svelte-v4s3fx{width:12px;height:12px;background-color:#ffffff80;margin:0 4px;border-radius:50%;cursor:pointer;border:none}.active.svelte-v4s3fx{background-color:#fff}.image-wrapper.svelte-v4s3fx{width:100%;display:flex;justify-content:center;align-items:center}.responsive-image.svelte-v4s3fx{max-width:100%;height:auto;display:block}.geometa-container.svelte-5pqpxg{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);resize:both;overflow:auto}.plonkit-note.svelte-5pqpxg{color:#d3d3d3;font-size:small}a.svelte-5pqpxg{color:#188bd2}a.svelte-5pqpxg:hover{text-decoration:underline}.skill-icons--discord.svelte-5pqpxg{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-5pqpxg{display:inline-block;width:1.2rem;height:1.2rem;margin-left:5px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--discord.svelte-5pqpxg,.flat-color-icons--globe.svelte-5pqpxg{display:inline-block;vertical-align:middle}.flex.svelte-5pqpxg{display:flex;align-items:center}.icons.svelte-5pqpxg a:where(.svelte-5pqpxg) span:where(.svelte-5pqpxg){align-items:center;justify-content:center}hr.svelte-5pqpxg{border:0;border-top:1px solid white;width:100%}.header.svelte-5pqpxg{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center}.geometa-note p{display:inline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem} `);
 
 (function () {
   'use strict';
@@ -24,6 +24,13 @@
   const PUBLIC_VERSION = "5";
   if (typeof window !== "undefined")
     (window.__svelte || (window.__svelte = { v: /* @__PURE__ */ new Set() })).v.add(PUBLIC_VERSION);
+  const EACH_ITEM_REACTIVE = 1;
+  const EACH_INDEX_REACTIVE = 1 << 1;
+  const EACH_IS_CONTROLLED = 1 << 2;
+  const EACH_IS_ANIMATED = 1 << 3;
+  const EACH_ITEM_IMMUTABLE = 1 << 4;
+  const PROPS_IS_IMMUTABLE = 1;
+  const PROPS_IS_RUNES = 1 << 1;
   const TEMPLATE_FRAGMENT = 1;
   const TEMPLATE_USE_IMPORT_NODE = 1 << 1;
   const UNINITIALIZED = Symbol();
@@ -36,6 +43,9 @@
   var object_prototype = Object.prototype;
   var array_prototype = Array.prototype;
   var get_prototype_of = Object.getPrototypeOf;
+  function run(fn) {
+    return fn();
+  }
   function run_all(arr) {
     for (var i = 0; i < arr.length; i++) {
       arr[i]();
@@ -56,12 +66,19 @@
   const DESTROYED = 1 << 13;
   const EFFECT_RAN = 1 << 14;
   const EFFECT_TRANSPARENT = 1 << 15;
+  const LEGACY_DERIVED_PROP = 1 << 16;
   const HEAD_EFFECT = 1 << 18;
   const EFFECT_HAS_DERIVED = 1 << 19;
   const STATE_SYMBOL = Symbol("$state");
   const LOADING_ATTR_SYMBOL = Symbol("");
   function equals(value) {
     return value === this.v;
+  }
+  function safe_not_equal(a, b) {
+    return a != a ? b == b : a !== b || a !== null && typeof a === "object" || typeof a === "function";
+  }
+  function safe_equals(value) {
+    return !safe_not_equal(value, this.v);
   }
   function effect_in_teardown(rune) {
     {
@@ -81,6 +98,11 @@
   function effect_update_depth_exceeded() {
     {
       throw new Error("effect_update_depth_exceeded");
+    }
+  }
+  function props_invalid_value(key) {
+    {
+      throw new Error("props_invalid_value");
     }
   }
   function state_descriptors_fixed() {
@@ -115,6 +137,21 @@
   }
   function state(v) {
     return /* @__PURE__ */ push_derived_source(source(v));
+  }
+  // @__NO_SIDE_EFFECTS__
+  function mutable_source(initial_value, immutable = false) {
+    var _a;
+    const s = source(initial_value);
+    if (!immutable) {
+      s.equals = safe_equals;
+    }
+    if (component_context !== null && component_context.l !== null) {
+      ((_a = component_context.l).s ?? (_a.s = [])).push(s);
+    }
+    return s;
+  }
+  function mutable_state(v, immutable = false) {
+    return /* @__PURE__ */ push_derived_source(/* @__PURE__ */ mutable_source(v, immutable));
   }
   // @__NO_SIDE_EFFECTS__
   function push_derived_source(source2) {
@@ -182,10 +219,48 @@
       }
     }
   }
-  function destroy_derived_children(derived) {
-    var children = derived.children;
+  // @__NO_SIDE_EFFECTS__
+  function derived(fn) {
+    var flags = DERIVED | DIRTY;
+    if (active_effect === null) {
+      flags |= UNOWNED;
+    } else {
+      active_effect.f |= EFFECT_HAS_DERIVED;
+    }
+    const signal = {
+      children: null,
+      ctx: component_context,
+      deps: null,
+      equals,
+      f: flags,
+      fn,
+      reactions: null,
+      v: (
+        /** @type {V} */
+        null
+      ),
+      version: 0,
+      parent: active_effect
+    };
+    if (active_reaction !== null && (active_reaction.f & DERIVED) !== 0) {
+      var derived2 = (
+        /** @type {Derived} */
+        active_reaction
+      );
+      (derived2.children ?? (derived2.children = [])).push(signal);
+    }
+    return signal;
+  }
+  // @__NO_SIDE_EFFECTS__
+  function derived_safe_equal(fn) {
+    const signal = /* @__PURE__ */ derived(fn);
+    signal.equals = safe_equals;
+    return signal;
+  }
+  function destroy_derived_children(derived2) {
+    var children = derived2.children;
     if (children !== null) {
-      derived.children = null;
+      derived2.children = null;
       for (var i = 0; i < children.length; i += 1) {
         var child2 = children[i];
         if ((child2.f & DERIVED) !== 0) {
@@ -202,27 +277,27 @@
       }
     }
   }
-  function execute_derived(derived) {
+  function execute_derived(derived2) {
     var value;
     var prev_active_effect = active_effect;
-    set_active_effect(derived.parent);
+    set_active_effect(derived2.parent);
     {
       try {
-        destroy_derived_children(derived);
-        value = update_reaction(derived);
+        destroy_derived_children(derived2);
+        value = update_reaction(derived2);
       } finally {
         set_active_effect(prev_active_effect);
       }
     }
     return value;
   }
-  function update_derived(derived) {
-    var value = execute_derived(derived);
-    var status = (skip_reaction || (derived.f & UNOWNED) !== 0) && derived.deps !== null ? MAYBE_DIRTY : CLEAN;
-    set_signal_status(derived, status);
-    if (!derived.equals(value)) {
-      derived.v = value;
-      derived.version = increment_version();
+  function update_derived(derived2) {
+    var value = execute_derived(derived2);
+    var status = (skip_reaction || (derived2.f & UNOWNED) !== 0) && derived2.deps !== null ? MAYBE_DIRTY : CLEAN;
+    set_signal_status(derived2, status);
+    if (!derived2.equals(value)) {
+      derived2.v = value;
+      derived2.version = increment_version();
     }
   }
   function destroy_derived(signal) {
@@ -293,11 +368,11 @@
         push_effect(effect2, parent_effect);
       }
       if (active_reaction !== null && (active_reaction.f & DERIVED) !== 0) {
-        var derived = (
+        var derived2 = (
           /** @type {Derived} */
           active_reaction
         );
-        (derived.children ?? (derived.children = [])).push(effect2);
+        (derived2.children ?? (derived2.children = [])).push(effect2);
       }
     }
     return effect2;
@@ -319,6 +394,10 @@
       var signal = effect(fn);
       return signal;
     }
+  }
+  function user_pre_effect(fn) {
+    validate_effect();
+    return render_effect(fn);
   }
   function effect_root(fn) {
     const effect2 = create_effect(ROOT_EFFECT, fn, true);
@@ -369,19 +448,19 @@
     var effect2 = signal.first;
     signal.first = signal.last = null;
     while (effect2 !== null) {
-      var next = effect2.next;
+      var next2 = effect2.next;
       destroy_effect(effect2, remove_dom);
-      effect2 = next;
+      effect2 = next2;
     }
   }
   function destroy_block_effect_children(signal) {
     var effect2 = signal.first;
     while (effect2 !== null) {
-      var next = effect2.next;
+      var next2 = effect2.next;
       if ((effect2.f & BRANCH_EFFECT) === 0) {
         destroy_effect(effect2);
       }
-      effect2 = next;
+      effect2 = next2;
     }
   }
   function destroy_effect(effect2, remove_dom = true) {
@@ -390,12 +469,12 @@
       var node = effect2.nodes_start;
       var end = effect2.nodes_end;
       while (node !== null) {
-        var next = node === end ? null : (
+        var next2 = node === end ? null : (
           /** @type {TemplateNode} */
           /* @__PURE__ */ get_next_sibling(node)
         );
         node.remove();
-        node = next;
+        node = next2;
       }
       removed = true;
     }
@@ -418,13 +497,13 @@
   }
   function unlink_effect(effect2) {
     var parent = effect2.parent;
-    var prev = effect2.prev;
-    var next = effect2.next;
-    if (prev !== null) prev.next = next;
-    if (next !== null) next.prev = prev;
+    var prev2 = effect2.prev;
+    var next2 = effect2.next;
+    if (prev2 !== null) prev2.next = next2;
+    if (next2 !== null) next2.prev = prev2;
     if (parent !== null) {
-      if (parent.first === effect2) parent.first = next;
-      if (parent.last === effect2) parent.last = prev;
+      if (parent.first === effect2) parent.first = next2;
+      if (parent.last === effect2) parent.last = prev2;
     }
   }
   function pause_effect(effect2, callback) {
@@ -651,13 +730,13 @@
   function remove_reaction(signal, dependency) {
     let reactions = dependency.reactions;
     if (reactions !== null) {
-      var index = reactions.indexOf(signal);
-      if (index !== -1) {
+      var index2 = reactions.indexOf(signal);
+      if (index2 !== -1) {
         var new_length = reactions.length - 1;
         if (new_length === 0) {
           reactions = dependency.reactions = null;
         } else {
-          reactions[index] = reactions[new_length];
+          reactions[index2] = reactions[new_length];
           reactions.pop();
         }
       }
@@ -870,20 +949,20 @@
       }
     } else if (is_derived && /** @type {Derived} */
     signal.deps === null) {
-      var derived = (
+      var derived2 = (
         /** @type {Derived} */
         signal
       );
-      var parent = derived.parent;
-      if (parent !== null && !((_a = parent.deriveds) == null ? void 0 : _a.includes(derived))) {
-        (parent.deriveds ?? (parent.deriveds = [])).push(derived);
+      var parent = derived2.parent;
+      if (parent !== null && !((_a = parent.deriveds) == null ? void 0 : _a.includes(derived2))) {
+        (parent.deriveds ?? (parent.deriveds = [])).push(derived2);
       }
     }
     if (is_derived) {
-      derived = /** @type {Derived} */
+      derived2 = /** @type {Derived} */
       signal;
-      if (check_dirtiness(derived)) {
-        update_derived(derived);
+      if (check_dirtiness(derived2)) {
+        update_derived(derived2);
       }
     }
     return signal.v;
@@ -948,7 +1027,50 @@
       {}
     );
   }
-  function proxy(value, parent = null, prev) {
+  function deep_read_state(value) {
+    if (typeof value !== "object" || !value || value instanceof EventTarget) {
+      return;
+    }
+    if (STATE_SYMBOL in value) {
+      deep_read(value);
+    } else if (!Array.isArray(value)) {
+      for (let key in value) {
+        const prop2 = value[key];
+        if (typeof prop2 === "object" && prop2 && STATE_SYMBOL in prop2) {
+          deep_read(prop2);
+        }
+      }
+    }
+  }
+  function deep_read(value, visited = /* @__PURE__ */ new Set()) {
+    if (typeof value === "object" && value !== null && // We don't want to traverse DOM elements
+    !(value instanceof EventTarget) && !visited.has(value)) {
+      visited.add(value);
+      if (value instanceof Date) {
+        value.getTime();
+      }
+      for (let key in value) {
+        try {
+          deep_read(value[key], visited);
+        } catch (e) {
+        }
+      }
+      const proto = get_prototype_of(value);
+      if (proto !== Object.prototype && proto !== Array.prototype && proto !== Map.prototype && proto !== Set.prototype && proto !== Date.prototype) {
+        const descriptors = get_descriptors(proto);
+        for (let key in descriptors) {
+          const get2 = descriptors[key].get;
+          if (get2) {
+            try {
+              get2.call(value);
+            } catch (e) {
+            }
+          }
+        }
+      }
+    }
+  }
+  function proxy(value, parent = null, prev2) {
     if (typeof value !== "object" || value === null || STATE_SYMBOL in value) {
       return value;
     }
@@ -970,32 +1092,32 @@
       /** @type {any} */
       value,
       {
-        defineProperty(_, prop, descriptor) {
+        defineProperty(_, prop2, descriptor) {
           if (!("value" in descriptor) || descriptor.configurable === false || descriptor.enumerable === false || descriptor.writable === false) {
             state_descriptors_fixed();
           }
-          var s = sources.get(prop);
+          var s = sources.get(prop2);
           if (s === void 0) {
             s = source(descriptor.value);
-            sources.set(prop, s);
+            sources.set(prop2, s);
           } else {
             set(s, proxy(descriptor.value, metadata));
           }
           return true;
         },
-        deleteProperty(target, prop) {
-          var s = sources.get(prop);
+        deleteProperty(target, prop2) {
+          var s = sources.get(prop2);
           if (s === void 0) {
-            if (prop in target) {
-              sources.set(prop, source(UNINITIALIZED));
+            if (prop2 in target) {
+              sources.set(prop2, source(UNINITIALIZED));
             }
           } else {
-            if (is_proxied_array && typeof prop === "string") {
+            if (is_proxied_array && typeof prop2 === "string") {
               var ls = (
                 /** @type {Source<number>} */
                 sources.get("length")
               );
-              var n = Number(prop);
+              var n = Number(prop2);
               if (Number.isInteger(n) && n < ls.v) {
                 set(ls, n);
               }
@@ -1005,30 +1127,30 @@
           }
           return true;
         },
-        get(target, prop, receiver) {
+        get(target, prop2, receiver) {
           var _a;
-          if (prop === STATE_SYMBOL) {
+          if (prop2 === STATE_SYMBOL) {
             return value;
           }
-          var s = sources.get(prop);
-          var exists = prop in target;
-          if (s === void 0 && (!exists || ((_a = get_descriptor(target, prop)) == null ? void 0 : _a.writable))) {
-            s = source(proxy(exists ? target[prop] : UNINITIALIZED, metadata));
-            sources.set(prop, s);
+          var s = sources.get(prop2);
+          var exists = prop2 in target;
+          if (s === void 0 && (!exists || ((_a = get_descriptor(target, prop2)) == null ? void 0 : _a.writable))) {
+            s = source(proxy(exists ? target[prop2] : UNINITIALIZED, metadata));
+            sources.set(prop2, s);
           }
           if (s !== void 0) {
             var v = get(s);
             return v === UNINITIALIZED ? void 0 : v;
           }
-          return Reflect.get(target, prop, receiver);
+          return Reflect.get(target, prop2, receiver);
         },
-        getOwnPropertyDescriptor(target, prop) {
-          var descriptor = Reflect.getOwnPropertyDescriptor(target, prop);
+        getOwnPropertyDescriptor(target, prop2) {
+          var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
           if (descriptor && "value" in descriptor) {
-            var s = sources.get(prop);
+            var s = sources.get(prop2);
             if (s) descriptor.value = get(s);
           } else if (descriptor === void 0) {
-            var source2 = sources.get(prop);
+            var source2 = sources.get(prop2);
             var value2 = source2 == null ? void 0 : source2.v;
             if (source2 !== void 0 && value2 !== UNINITIALIZED) {
               return {
@@ -1041,17 +1163,17 @@
           }
           return descriptor;
         },
-        has(target, prop) {
+        has(target, prop2) {
           var _a;
-          if (prop === STATE_SYMBOL) {
+          if (prop2 === STATE_SYMBOL) {
             return true;
           }
-          var s = sources.get(prop);
-          var has = s !== void 0 && s.v !== UNINITIALIZED || Reflect.has(target, prop);
-          if (s !== void 0 || active_effect !== null && (!has || ((_a = get_descriptor(target, prop)) == null ? void 0 : _a.writable))) {
+          var s = sources.get(prop2);
+          var has = s !== void 0 && s.v !== UNINITIALIZED || Reflect.has(target, prop2);
+          if (s !== void 0 || active_effect !== null && (!has || ((_a = get_descriptor(target, prop2)) == null ? void 0 : _a.writable))) {
             if (s === void 0) {
-              s = source(has ? proxy(target[prop], metadata) : UNINITIALIZED);
-              sources.set(prop, s);
+              s = source(has ? proxy(target[prop2], metadata) : UNINITIALIZED);
+              sources.set(prop2, s);
             }
             var value2 = get(s);
             if (value2 === UNINITIALIZED) {
@@ -1060,11 +1182,11 @@
           }
           return has;
         },
-        set(target, prop, value2, receiver) {
+        set(target, prop2, value2, receiver) {
           var _a;
-          var s = sources.get(prop);
-          var has = prop in target;
-          if (is_proxied_array && prop === "length") {
+          var s = sources.get(prop2);
+          var has = prop2 in target;
+          if (is_proxied_array && prop2 === "length") {
             for (var i = value2; i < /** @type {Source<number>} */
             s.v; i += 1) {
               var other_s = sources.get(i + "");
@@ -1077,26 +1199,26 @@
             }
           }
           if (s === void 0) {
-            if (!has || ((_a = get_descriptor(target, prop)) == null ? void 0 : _a.writable)) {
+            if (!has || ((_a = get_descriptor(target, prop2)) == null ? void 0 : _a.writable)) {
               s = source(void 0);
               set(s, proxy(value2, metadata));
-              sources.set(prop, s);
+              sources.set(prop2, s);
             }
           } else {
             has = s.v !== UNINITIALIZED;
             set(s, proxy(value2, metadata));
           }
-          var descriptor = Reflect.getOwnPropertyDescriptor(target, prop);
+          var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
           if (descriptor == null ? void 0 : descriptor.set) {
             descriptor.set.call(receiver, value2);
           }
           if (!has) {
-            if (is_proxied_array && typeof prop === "string") {
+            if (is_proxied_array && typeof prop2 === "string") {
               var ls = (
                 /** @type {Source<number>} */
                 sources.get("length")
               );
-              var n = Number(prop);
+              var n = Number(prop2);
               if (Number.isInteger(n) && n >= ls.v) {
                 set(ls, n + 1);
               }
@@ -1185,6 +1307,10 @@
       return next_sibling;
     }
   }
+  function clear_text_content(node) {
+    node.textContent = "";
+  }
+  let hydrating = false;
   const all_registered_events = /* @__PURE__ */ new Set();
   const root_event_handles = /* @__PURE__ */ new Set();
   function delegate(events) {
@@ -1461,6 +1587,314 @@
       }
     }, flags);
   }
+  let current_each_item = null;
+  function index(_, i) {
+    return i;
+  }
+  function pause_effects(state2, items, controlled_anchor, items_map) {
+    var transitions = [];
+    var length = items.length;
+    for (var i = 0; i < length; i++) {
+      pause_children(items[i].e, transitions, true);
+    }
+    var is_controlled = length > 0 && transitions.length === 0 && controlled_anchor !== null;
+    if (is_controlled) {
+      var parent_node = (
+        /** @type {Element} */
+        /** @type {Element} */
+        controlled_anchor.parentNode
+      );
+      clear_text_content(parent_node);
+      parent_node.append(
+        /** @type {Element} */
+        controlled_anchor
+      );
+      items_map.clear();
+      link(state2, items[0].prev, items[length - 1].next);
+    }
+    run_out_transitions(transitions, () => {
+      for (var i2 = 0; i2 < length; i2++) {
+        var item = items[i2];
+        if (!is_controlled) {
+          items_map.delete(item.k);
+          link(state2, item.prev, item.next);
+        }
+        destroy_effect(item.e, !is_controlled);
+      }
+    });
+  }
+  function each(node, flags, get_collection, get_key, render_fn, fallback_fn = null) {
+    var anchor = node;
+    var state2 = { flags, items: /* @__PURE__ */ new Map(), first: null };
+    var is_controlled = (flags & EACH_IS_CONTROLLED) !== 0;
+    if (is_controlled) {
+      var parent_node = (
+        /** @type {Element} */
+        node
+      );
+      anchor = parent_node.appendChild(create_text());
+    }
+    var fallback = null;
+    var was_empty = false;
+    block(() => {
+      var collection = get_collection();
+      var array = is_array(collection) ? collection : collection == null ? [] : array_from(collection);
+      var length = array.length;
+      if (was_empty && length === 0) {
+        return;
+      }
+      was_empty = length === 0;
+      {
+        reconcile(array, state2, anchor, render_fn, flags, get_key);
+      }
+      if (fallback_fn !== null) {
+        if (length === 0) {
+          if (fallback) {
+            resume_effect(fallback);
+          } else {
+            fallback = branch(() => fallback_fn(anchor));
+          }
+        } else if (fallback !== null) {
+          pause_effect(fallback, () => {
+            fallback = null;
+          });
+        }
+      }
+      get_collection();
+    });
+  }
+  function reconcile(array, state2, anchor, render_fn, flags, get_key) {
+    var _a, _b, _c, _d;
+    var is_animated = (flags & EACH_IS_ANIMATED) !== 0;
+    var should_update = (flags & (EACH_ITEM_REACTIVE | EACH_INDEX_REACTIVE)) !== 0;
+    var length = array.length;
+    var items = state2.items;
+    var first = state2.first;
+    var current = first;
+    var seen;
+    var prev2 = null;
+    var to_animate;
+    var matched = [];
+    var stashed = [];
+    var value;
+    var key;
+    var item;
+    var i;
+    if (is_animated) {
+      for (i = 0; i < length; i += 1) {
+        value = array[i];
+        key = get_key(value, i);
+        item = items.get(key);
+        if (item !== void 0) {
+          (_a = item.a) == null ? void 0 : _a.measure();
+          (to_animate ?? (to_animate = /* @__PURE__ */ new Set())).add(item);
+        }
+      }
+    }
+    for (i = 0; i < length; i += 1) {
+      value = array[i];
+      key = get_key(value, i);
+      item = items.get(key);
+      if (item === void 0) {
+        var child_anchor = current ? (
+          /** @type {TemplateNode} */
+          current.e.nodes_start
+        ) : anchor;
+        prev2 = create_item(
+          child_anchor,
+          state2,
+          prev2,
+          prev2 === null ? state2.first : prev2.next,
+          value,
+          key,
+          i,
+          render_fn,
+          flags
+        );
+        items.set(key, prev2);
+        matched = [];
+        stashed = [];
+        current = prev2.next;
+        continue;
+      }
+      if (should_update) {
+        update_item(item, value, i, flags);
+      }
+      if ((item.e.f & INERT) !== 0) {
+        resume_effect(item.e);
+        if (is_animated) {
+          (_b = item.a) == null ? void 0 : _b.unfix();
+          (to_animate ?? (to_animate = /* @__PURE__ */ new Set())).delete(item);
+        }
+      }
+      if (item !== current) {
+        if (seen !== void 0 && seen.has(item)) {
+          if (matched.length < stashed.length) {
+            var start = stashed[0];
+            var j;
+            prev2 = start.prev;
+            var a = matched[0];
+            var b = matched[matched.length - 1];
+            for (j = 0; j < matched.length; j += 1) {
+              move(matched[j], start, anchor);
+            }
+            for (j = 0; j < stashed.length; j += 1) {
+              seen.delete(stashed[j]);
+            }
+            link(state2, a.prev, b.next);
+            link(state2, prev2, a);
+            link(state2, b, start);
+            current = start;
+            prev2 = b;
+            i -= 1;
+            matched = [];
+            stashed = [];
+          } else {
+            seen.delete(item);
+            move(item, current, anchor);
+            link(state2, item.prev, item.next);
+            link(state2, item, prev2 === null ? state2.first : prev2.next);
+            link(state2, prev2, item);
+            prev2 = item;
+          }
+          continue;
+        }
+        matched = [];
+        stashed = [];
+        while (current !== null && current.k !== key) {
+          if ((current.e.f & INERT) === 0) {
+            (seen ?? (seen = /* @__PURE__ */ new Set())).add(current);
+          }
+          stashed.push(current);
+          current = current.next;
+        }
+        if (current === null) {
+          continue;
+        }
+        item = current;
+      }
+      matched.push(item);
+      prev2 = item;
+      current = item.next;
+    }
+    if (current !== null || seen !== void 0) {
+      var to_destroy = seen === void 0 ? [] : array_from(seen);
+      while (current !== null) {
+        if ((current.e.f & INERT) === 0) {
+          to_destroy.push(current);
+        }
+        current = current.next;
+      }
+      var destroy_length = to_destroy.length;
+      if (destroy_length > 0) {
+        var controlled_anchor = (flags & EACH_IS_CONTROLLED) !== 0 && length === 0 ? anchor : null;
+        if (is_animated) {
+          for (i = 0; i < destroy_length; i += 1) {
+            (_c = to_destroy[i].a) == null ? void 0 : _c.measure();
+          }
+          for (i = 0; i < destroy_length; i += 1) {
+            (_d = to_destroy[i].a) == null ? void 0 : _d.fix();
+          }
+        }
+        pause_effects(state2, to_destroy, controlled_anchor, items);
+      }
+    }
+    if (is_animated) {
+      queue_micro_task(() => {
+        var _a2;
+        if (to_animate === void 0) return;
+        for (item of to_animate) {
+          (_a2 = item.a) == null ? void 0 : _a2.apply();
+        }
+      });
+    }
+    active_effect.first = state2.first && state2.first.e;
+    active_effect.last = prev2 && prev2.e;
+  }
+  function update_item(item, value, index2, type) {
+    if ((type & EACH_ITEM_REACTIVE) !== 0) {
+      internal_set(item.v, value);
+    }
+    if ((type & EACH_INDEX_REACTIVE) !== 0) {
+      internal_set(
+        /** @type {Value<number>} */
+        item.i,
+        index2
+      );
+    } else {
+      item.i = index2;
+    }
+  }
+  function create_item(anchor, state2, prev2, next2, value, key, index2, render_fn, flags) {
+    var previous_each_item = current_each_item;
+    try {
+      var reactive = (flags & EACH_ITEM_REACTIVE) !== 0;
+      var mutable = (flags & EACH_ITEM_IMMUTABLE) === 0;
+      var v = reactive ? mutable ? /* @__PURE__ */ mutable_source(value) : source(value) : value;
+      var i = (flags & EACH_INDEX_REACTIVE) === 0 ? index2 : source(index2);
+      var item = {
+        i,
+        v,
+        k: key,
+        a: null,
+        // @ts-expect-error
+        e: null,
+        prev: prev2,
+        next: next2
+      };
+      current_each_item = item;
+      item.e = branch(() => render_fn(anchor, v, i), hydrating);
+      item.e.prev = prev2 && prev2.e;
+      item.e.next = next2 && next2.e;
+      if (prev2 === null) {
+        state2.first = item;
+      } else {
+        prev2.next = item;
+        prev2.e.next = item.e;
+      }
+      if (next2 !== null) {
+        next2.prev = item;
+        next2.e.prev = item.e;
+      }
+      return item;
+    } finally {
+      current_each_item = previous_each_item;
+    }
+  }
+  function move(item, next2, anchor) {
+    var end = item.next ? (
+      /** @type {TemplateNode} */
+      item.next.e.nodes_start
+    ) : anchor;
+    var dest = next2 ? (
+      /** @type {TemplateNode} */
+      next2.e.nodes_start
+    ) : anchor;
+    var node = (
+      /** @type {TemplateNode} */
+      item.e.nodes_start
+    );
+    while (node !== end) {
+      var next_node = (
+        /** @type {TemplateNode} */
+        /* @__PURE__ */ get_next_sibling(node)
+      );
+      dest.before(node);
+      node = next_node;
+    }
+  }
+  function link(state2, prev2, next2) {
+    if (prev2 === null) {
+      state2.first = next2;
+    } else {
+      prev2.next = next2;
+      prev2.e.next = next2 && next2.e;
+    }
+    if (next2 !== null) {
+      next2.prev = prev2;
+      next2.e.prev = prev2 && prev2.e;
+    }
+  }
   function html(node, get_value, svg, mathml, skip_warning) {
     var anchor = node;
     var value = "";
@@ -1525,6 +1959,21 @@
     }
     return setters;
   }
+  function set_class(dom, value) {
+    var prev_class_name = dom.__className;
+    var next_class_name = to_class(value);
+    if (prev_class_name !== next_class_name || hydrating) {
+      if (value == null) {
+        dom.removeAttribute("class");
+      } else {
+        dom.className = next_class_name;
+      }
+      dom.__className = next_class_name;
+    }
+  }
+  function to_class(value) {
+    return value == null ? "" : value;
+  }
   function is_bound_this(bound_value, element_or_component) {
     return bound_value === element_or_component || (bound_value == null ? void 0 : bound_value[STATE_SYMBOL]) === element_or_component;
   }
@@ -1554,6 +2003,63 @@
     });
     return element_or_component;
   }
+  function init(immutable = false) {
+    const context = (
+      /** @type {ComponentContextLegacy} */
+      component_context
+    );
+    const callbacks = context.l.u;
+    if (!callbacks) return;
+    let props = () => deep_read_state(context.s);
+    if (immutable) {
+      let version = 0;
+      let prev2 = (
+        /** @type {Record<string, any>} */
+        {}
+      );
+      const d = /* @__PURE__ */ derived(() => {
+        let changed = false;
+        const props2 = context.s;
+        for (const key in props2) {
+          if (props2[key] !== prev2[key]) {
+            prev2[key] = props2[key];
+            changed = true;
+          }
+        }
+        if (changed) version++;
+        return version;
+      });
+      props = () => get(d);
+    }
+    if (callbacks.b.length) {
+      user_pre_effect(() => {
+        observe_all(context, props);
+        run_all(callbacks.b);
+      });
+    }
+    user_effect(() => {
+      const fns = untrack(() => callbacks.m.map(run));
+      return () => {
+        for (const fn of fns) {
+          if (typeof fn === "function") {
+            fn();
+          }
+        }
+      };
+    });
+    if (callbacks.a.length) {
+      user_effect(() => {
+        observe_all(context, props);
+        run_all(callbacks.a);
+      });
+    }
+  }
+  function observe_all(context, props) {
+    if (context.l.s) {
+      for (const signal of context.l.s) get(signal);
+    }
+    props();
+  }
   function onMount(fn) {
     if (component_context === null) {
       lifecycle_outside_component();
@@ -1577,215 +2083,295 @@
     );
     return l.u ?? (l.u = { a: [], b: [], m: [] });
   }
+  let is_store_binding = false;
+  function capture_store_binding(fn) {
+    var previous_is_store_binding = is_store_binding;
+    try {
+      is_store_binding = false;
+      return [fn(), is_store_binding];
+    } finally {
+      is_store_binding = previous_is_store_binding;
+    }
+  }
+  function with_parent_branch(fn) {
+    var effect2 = active_effect;
+    var previous_effect = active_effect;
+    while (effect2 !== null && (effect2.f & (BRANCH_EFFECT | ROOT_EFFECT)) === 0) {
+      effect2 = effect2.parent;
+    }
+    try {
+      set_active_effect(effect2);
+      return fn();
+    } finally {
+      set_active_effect(previous_effect);
+    }
+  }
+  function prop(props, key, flags, fallback) {
+    var _a;
+    var immutable = (flags & PROPS_IS_IMMUTABLE) !== 0;
+    var runes = (flags & PROPS_IS_RUNES) !== 0;
+    var is_store_sub = false;
+    var prop_value;
+    {
+      [prop_value, is_store_sub] = capture_store_binding(() => (
+        /** @type {V} */
+        props[key]
+      ));
+    }
+    var setter = (_a = get_descriptor(props, key)) == null ? void 0 : _a.set;
+    var fallback_value = (
+      /** @type {V} */
+      fallback
+    );
+    var fallback_dirty = true;
+    var get_fallback = () => {
+      if (fallback_dirty) {
+        fallback_dirty = false;
+        {
+          fallback_value = untrack(
+            /** @type {() => V} */
+            fallback
+          );
+        }
+      }
+      return fallback_value;
+    };
+    if (prop_value === void 0 && fallback !== void 0) {
+      if (setter && runes) {
+        props_invalid_value();
+      }
+      prop_value = get_fallback();
+      if (setter) setter(prop_value);
+    }
+    var getter;
+    {
+      var derived_getter = with_parent_branch(
+        () => (immutable ? derived : derived_safe_equal)(() => (
+          /** @type {V} */
+          props[key]
+        ))
+      );
+      derived_getter.f |= LEGACY_DERIVED_PROP;
+      getter = () => {
+        var value = get(derived_getter);
+        if (value !== void 0) fallback_value = /** @type {V} */
+        void 0;
+        return value === void 0 ? fallback_value : value;
+      };
+    }
+    {
+      return getter;
+    }
+  }
   var _GM_xmlhttpRequest = /* @__PURE__ */ (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
   var _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != "undefined" ? unsafeWindow : void 0)();
-  var root$1 = /* @__PURE__ */ template(`<div class="loadership_ZOJAQ svelte-1fzfwt6"><div class="svelte-1fzfwt6"></div> <div class="svelte-1fzfwt6"></div> <div class="svelte-1fzfwt6"></div> <div class="svelte-1fzfwt6"></div> <div class="svelte-1fzfwt6"></div> <div class="svelte-1fzfwt6"></div> <div class="svelte-1fzfwt6"></div> <div class="svelte-1fzfwt6"></div> <div class="svelte-1fzfwt6"></div> <div class="svelte-1fzfwt6"></div> <div class="svelte-1fzfwt6"></div> <div class="svelte-1fzfwt6"></div></div>`);
+  var root$2 = /* @__PURE__ */ template(`<div class="loadership_ZOJAQ svelte-i1jlc0"><div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div></div>`);
   function Spinner($$anchor) {
-    var div = root$1();
+    var div = root$2();
     append($$anchor, div);
   }
   var root_1$1 = /* @__PURE__ */ template(`<img class="fi svelte-7lhsry">`);
   function CountryFlag($$anchor, $$props) {
     const countryCodes = {
-      "Afghanistan": "af",
-      "Albania": "al",
-      "Algeria": "dz",
-      "Andorra": "ad",
-      "Angola": "ao",
+      Afghanistan: "af",
+      Albania: "al",
+      Algeria: "dz",
+      Andorra: "ad",
+      Angola: "ao",
       "Antigua and Barbuda": "ag",
-      "Argentina": "ar",
-      "Armenia": "am",
-      "Australia": "au",
-      "Austria": "at",
-      "Azerbaijan": "az",
-      "Bahamas": "bs",
-      "Bahrain": "bh",
-      "Bangladesh": "bd",
-      "Barbados": "bb",
-      "Belarus": "by",
-      "Belgium": "be",
-      "Belize": "bz",
-      "Benin": "bj",
-      "Bhutan": "bt",
-      "Bolivia": "bo",
+      Argentina: "ar",
+      Armenia: "am",
+      Australia: "au",
+      Austria: "at",
+      Azerbaijan: "az",
+      Bahamas: "bs",
+      Bahrain: "bh",
+      Bangladesh: "bd",
+      Barbados: "bb",
+      Belarus: "by",
+      Belgium: "be",
+      Belize: "bz",
+      Benin: "bj",
+      Bhutan: "bt",
+      Bolivia: "bo",
       "Bosnia and Herzegovina": "ba",
-      "Botswana": "bw",
-      "Brazil": "br",
-      "Brunei": "bn",
-      "Bulgaria": "bg",
+      Botswana: "bw",
+      Brazil: "br",
+      Brunei: "bn",
+      Bulgaria: "bg",
       "Burkina Faso": "bf",
-      "Burundi": "bi",
+      Burundi: "bi",
       "Cabo Verde": "cv",
-      "Cambodia": "kh",
-      "Cameroon": "cm",
-      "Canada": "ca",
+      Cambodia: "kh",
+      Cameroon: "cm",
+      Canada: "ca",
       "Central African Republic": "cf",
-      "Chad": "td",
-      "Chile": "cl",
-      "China": "cn",
-      "Colombia": "co",
-      "Comoros": "km",
-      "Congo": "cg",
+      Chad: "td",
+      Chile: "cl",
+      China: "cn",
+      Colombia: "co",
+      Comoros: "km",
+      Congo: "cg",
       "Costa Rica": "cr",
-      "Croatia": "hr",
-      "Cuba": "cu",
-      "Curacao": "cw",
-      "Cyprus": "cy",
-      "Czechia": "cz",
+      Croatia: "hr",
+      Cuba: "cu",
+      Curacao: "cw",
+      Cyprus: "cy",
+      Czechia: "cz",
       "Christmas Island": "cx",
       "Democratic Republic of the Congo": "cd",
-      "Denmark": "dk",
-      "Djibouti": "dj",
-      "Dominica": "dm",
+      Denmark: "dk",
+      Djibouti: "dj",
+      Dominica: "dm",
       "Dominican Republic": "do",
-      "Ecuador": "ec",
-      "Egypt": "eg",
+      Ecuador: "ec",
+      Egypt: "eg",
       "El Salvador": "sv",
       "Equatorial Guinea": "gq",
-      "Eritrea": "er",
-      "Estonia": "ee",
-      "Eswatini": "sz",
-      "Ethiopia": "et",
-      "Fiji": "fj",
-      "Finland": "fi",
-      "France": "fr",
-      "Gabon": "ga",
-      "Gambia": "gm",
-      "Georgia": "ge",
-      "Germany": "de",
-      "Ghana": "gh",
-      "Greece": "gr",
-      "Grenada": "gd",
-      "Guatemala": "gt",
-      "Guinea": "gn",
+      Eritrea: "er",
+      Estonia: "ee",
+      Eswatini: "sz",
+      Ethiopia: "et",
+      Fiji: "fj",
+      Finland: "fi",
+      France: "fr",
+      Gabon: "ga",
+      Gambia: "gm",
+      Georgia: "ge",
+      Germany: "de",
+      Ghana: "gh",
+      Greece: "gr",
+      Grenada: "gd",
+      Guatemala: "gt",
+      Guinea: "gn",
       "Guinea-Bissau": "gw",
-      "Guyana": "gy",
-      "Haiti": "ht",
-      "Honduras": "hn",
-      "Hungary": "hu",
-      "Iceland": "is",
-      "India": "in",
-      "Indonesia": "id",
-      "Iran": "ir",
-      "Iraq": "iq",
-      "Ireland": "ie",
-      "Israel": "il",
-      "Italy": "it",
-      "Jamaica": "jm",
-      "Japan": "jp",
-      "Jordan": "jo",
-      "Kazakhstan": "kz",
-      "Kenya": "ke",
-      "Kiribati": "ki",
-      "Kuwait": "kw",
-      "Kyrgyzstan": "kg",
-      "Laos": "la",
-      "Latvia": "lv",
-      "Lebanon": "lb",
-      "Lesotho": "ls",
-      "Liberia": "lr",
-      "Libya": "ly",
-      "Liechtenstein": "li",
-      "Lithuania": "lt",
-      "Luxembourg": "lu",
-      "Madagascar": "mg",
-      "Malawi": "mw",
-      "Malaysia": "my",
-      "Maldives": "mv",
-      "Mali": "ml",
-      "Malta": "mt",
+      Guyana: "gy",
+      Haiti: "ht",
+      Honduras: "hn",
+      Hungary: "hu",
+      Iceland: "is",
+      India: "in",
+      Indonesia: "id",
+      Iran: "ir",
+      Iraq: "iq",
+      Ireland: "ie",
+      Israel: "il",
+      Italy: "it",
+      Jamaica: "jm",
+      Japan: "jp",
+      Jordan: "jo",
+      Kazakhstan: "kz",
+      Kenya: "ke",
+      Kiribati: "ki",
+      Kuwait: "kw",
+      Kyrgyzstan: "kg",
+      Laos: "la",
+      Latvia: "lv",
+      Lebanon: "lb",
+      Lesotho: "ls",
+      Liberia: "lr",
+      Libya: "ly",
+      Liechtenstein: "li",
+      Lithuania: "lt",
+      Luxembourg: "lu",
+      Madagascar: "mg",
+      Malawi: "mw",
+      Malaysia: "my",
+      Maldives: "mv",
+      Mali: "ml",
+      Malta: "mt",
       "Marshall Islands": "mh",
-      "Mauritania": "mr",
-      "Mauritius": "mu",
-      "Mexico": "mx",
-      "Micronesia": "fm",
-      "Moldova": "md",
-      "Monaco": "mc",
-      "Mongolia": "mn",
-      "Montenegro": "me",
-      "Morocco": "ma",
-      "Mozambique": "mz",
-      "Myanmar": "mm",
-      "Namibia": "na",
-      "Nauru": "nr",
-      "Nepal": "np",
-      "Netherlands": "nl",
+      Mauritania: "mr",
+      Mauritius: "mu",
+      Mexico: "mx",
+      Micronesia: "fm",
+      Moldova: "md",
+      Monaco: "mc",
+      Mongolia: "mn",
+      Montenegro: "me",
+      Morocco: "ma",
+      Mozambique: "mz",
+      Myanmar: "mm",
+      Namibia: "na",
+      Nauru: "nr",
+      Nepal: "np",
+      Netherlands: "nl",
       "New Zealand": "nz",
-      "Nicaragua": "ni",
-      "Niger": "ne",
-      "Nigeria": "ng",
+      Nicaragua: "ni",
+      Niger: "ne",
+      Nigeria: "ng",
       "North Korea": "kp",
       "North Macedonia": "mk",
-      "Norway": "no",
-      "Oman": "om",
-      "Pakistan": "pk",
-      "Palau": "pw",
+      Norway: "no",
+      Oman: "om",
+      Pakistan: "pk",
+      Palau: "pw",
       "Palestine State": "ps",
-      "Panama": "pa",
+      Panama: "pa",
       "Papua New Guinea": "pg",
-      "Paraguay": "py",
-      "Peru": "pe",
-      "Philippines": "ph",
-      "Poland": "pl",
-      "Portugal": "pt",
+      Paraguay: "py",
+      Peru: "pe",
+      Philippines: "ph",
+      Poland: "pl",
+      Portugal: "pt",
       "Puerto Rico": "pr",
-      "Qatar": "qa",
-      "Romania": "ro",
-      "Russia": "ru",
-      "Rwanda": "rw",
+      Qatar: "qa",
+      Romania: "ro",
+      Russia: "ru",
+      Rwanda: "rw",
       "Saint Kitts and Nevis": "kn",
       "Saint Lucia": "lc",
       "Saint Vincent and the Grenadines": "vc",
-      "Samoa": "ws",
+      Samoa: "ws",
       "San Marino": "sm",
       "Sao Tome and Principe": "st",
       "Saudi Arabia": "sa",
-      "Senegal": "sn",
-      "Serbia": "rs",
-      "Seychelles": "sc",
+      Senegal: "sn",
+      Serbia: "rs",
+      Seychelles: "sc",
       "Sierra Leone": "sl",
-      "Singapore": "sg",
-      "Slovakia": "sk",
-      "Slovenia": "si",
+      Singapore: "sg",
+      Slovakia: "sk",
+      Slovenia: "si",
       "Solomon Islands": "sb",
-      "Somalia": "so",
+      Somalia: "so",
       "South Africa": "za",
       "South Korea": "kr",
       "South Sudan": "ss",
-      "Spain": "es",
+      Spain: "es",
       "Sri Lanka": "lk",
-      "Sudan": "sd",
-      "Suriname": "sr",
-      "Sweden": "se",
-      "Switzerland": "ch",
-      "Syria": "sy",
-      "Taiwan": "tw",
-      "Tajikistan": "tj",
-      "Tanzania": "tz",
-      "Thailand": "th",
+      Sudan: "sd",
+      Suriname: "sr",
+      Sweden: "se",
+      Switzerland: "ch",
+      Syria: "sy",
+      Taiwan: "tw",
+      Tajikistan: "tj",
+      Tanzania: "tz",
+      Thailand: "th",
       "Timor-Leste": "tl",
-      "Togo": "tg",
-      "Tonga": "to",
+      Togo: "tg",
+      Tonga: "to",
       "Trinidad and Tobago": "tt",
-      "Tunisia": "tn",
-      "Turkey": "tr",
-      "Turkmenistan": "tm",
-      "Tuvalu": "tv",
-      "Uganda": "ug",
-      "Ukraine": "ua",
+      Tunisia: "tn",
+      Turkey: "tr",
+      Turkmenistan: "tm",
+      Tuvalu: "tv",
+      Uganda: "ug",
+      Ukraine: "ua",
       "United Arab Emirates": "ae",
       "United Kingdom": "gb",
       "United States of America": "us",
       "United States": "us",
-      "Uruguay": "uy",
-      "Uzbekistan": "uz",
-      "Vanuatu": "vu",
+      Uruguay: "uy",
+      Uzbekistan: "uz",
+      Vanuatu: "vu",
       "Vatican City": "va",
-      "Venezuela": "ve",
-      "Vietnam": "vn",
-      "Yemen": "ye",
-      "Zambia": "zm",
-      "Zimbabwe": "zw"
+      Venezuela: "ve",
+      Vietnam: "vn",
+      Yemen: "ye",
+      Zambia: "zm",
+      Zimbabwe: "zw"
     };
     const countryCode = countryCodes[$$props.countryName];
     var fragment = comment();
@@ -1798,6 +2384,43 @@
     });
     append($$anchor, fragment);
   }
+  const leftKey = "geometa:containerStyleLeft";
+  const topKey = "geometa:containerStyleTop";
+  let isDragging = false;
+  let dragOffset = { x: 0, y: 0 };
+  function setContainerPosition(container) {
+    container.style.left = localStorage.getItem(leftKey) ?? container.style.left;
+    container.style.top = localStorage.getItem(topKey) ?? container.style.top;
+  }
+  const onMouseDown = (event, container) => {
+    isDragging = true;
+    dragOffset = {
+      x: event.clientX - container.getBoundingClientRect().left,
+      y: event.clientY - container.getBoundingClientRect().top
+    };
+    event.preventDefault();
+  };
+  const onMouseMove = (event, container) => {
+    if (isDragging) {
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+      const containerWidth = container.offsetWidth;
+      const containerHeight = container.offsetHeight;
+      let newLeft = event.clientX - dragOffset.x;
+      let newTop = event.clientY - dragOffset.y;
+      if (newLeft < 0) newLeft = 0;
+      if (newLeft + containerWidth > windowWidth) newLeft = windowWidth - containerWidth;
+      if (newTop < 0) newTop = 0;
+      if (newTop + containerHeight > windowHeight) newTop = windowHeight - containerHeight;
+      container.style.left = `${newLeft}px`;
+      container.style.top = `${newTop}px`;
+    }
+  };
+  const onMouseUp = (container) => {
+    isDragging = false;
+    _unsafeWindow.localStorage.setItem(leftKey, container.style.left);
+    _unsafeWindow.localStorage.setItem(topKey, container.style.top);
+  };
   function waitForElement(selector) {
     return new Promise((resolve) => {
       const existingElement = document.querySelector(selector);
@@ -1870,48 +2493,88 @@
     _unsafeWindow.localStorage.setItem(localStorageKey, JSON.stringify(mapInfo));
     return mapInfo;
   }
+  const widthKey = "geometa:containerWidth";
+  const heightKey = "geometa:containerHeight";
+  function setContainerDimensions(container) {
+    const containerWidth = localStorageGetInt(widthKey) || 500;
+    const containerHeight = localStorageGetInt(heightKey) || 400;
+    container.style.width = `${containerWidth}px`;
+    container.style.height = `${containerHeight}px`;
+  }
+  function saveContainerDimensions(entry) {
+    const containerWidth = entry.contentRect.width;
+    const containerHeight = entry.contentRect.height;
+    if (containerWidth !== 0 && containerHeight !== 0) {
+      _unsafeWindow.localStorage.setItem(widthKey, Math.floor(containerWidth).toString());
+      _unsafeWindow.localStorage.setItem(heightKey, Math.floor(containerHeight).toString());
+    }
+  }
+  function prev(__1, currentIndex, images) {
+    set(currentIndex, (get(currentIndex) - 1 + images().length) % images().length);
+  }
+  function next(__2, currentIndex, images) {
+    set(currentIndex, (get(currentIndex) + 1) % images().length);
+  }
+  var root_3$1 = /* @__PURE__ */ template(`<div class="image-wrapper svelte-v4s3fx"><img class="responsive-image svelte-v4s3fx"></div>`);
+  var root_5 = /* @__PURE__ */ template(`<button></button>`);
+  var root_4$1 = /* @__PURE__ */ template(`<div class="controls svelte-v4s3fx"><button class="prev svelte-v4s3fx">&#10094;</button> <button class="next svelte-v4s3fx">&#10095;</button></div> <div class="indicators svelte-v4s3fx"></div>`, 1);
+  var root$1 = /* @__PURE__ */ template(`<div class="carousel svelte-v4s3fx"><!> <!></div>`);
+  function Carousel($$anchor, $$props) {
+    push($$props, false);
+    let images = prop($$props, "images", 24, () => []);
+    let currentIndex = mutable_state(0);
+    init();
+    var div = root$1();
+    var node = child(div);
+    if_block(node, () => images().length, ($$anchor2) => {
+      var fragment = comment();
+      var node_1 = first_child(fragment);
+      each(node_1, 1, images, index, ($$anchor3, image, index2) => {
+        var fragment_1 = comment();
+        var node_2 = first_child(fragment_1);
+        if_block(node_2, () => index2 === get(currentIndex), ($$anchor4) => {
+          var div_1 = root_3$1();
+          var img = child(div_1);
+          set_attribute(img, "alt", `Image ${index2 + 1}`);
+          template_effect(() => set_attribute(img, "src", get(image)));
+          append($$anchor4, div_1);
+        });
+        append($$anchor3, fragment_1);
+      });
+      append($$anchor2, fragment);
+    });
+    var node_3 = sibling(node, 2);
+    if_block(node_3, () => images().length > 1, ($$anchor2) => {
+      var fragment_2 = root_4$1();
+      var div_2 = first_child(fragment_2);
+      var button = child(div_2);
+      button.__click = [prev, currentIndex, images];
+      var button_1 = sibling(button, 2);
+      button_1.__click = [next, currentIndex, images];
+      var div_3 = sibling(div_2, 2);
+      each(div_3, 5, images, index, ($$anchor3, _, index2) => {
+        var button_2 = root_5();
+        set_attribute(button_2, "aria-label", `Switch to image ${index2 + 1}`);
+        button_2.__click = () => set(currentIndex, index2);
+        template_effect(() => set_class(button_2, `indicator ${(index2 === get(currentIndex) ? "active" : "") ?? ""} svelte-v4s3fx`));
+        append($$anchor3, button_2);
+      });
+      append($$anchor2, fragment_2);
+    });
+    append($$anchor, div);
+    pop();
+  }
+  delegate(["click"]);
   var root_1 = /* @__PURE__ */ template(`<p> </p>`);
-  var root_4 = /* @__PURE__ */ template(`<hr class="svelte-tqrxyf"> <div class="image-wrapper svelte-tqrxyf"><img class="responsive-image svelte-tqrxyf"></div>`, 1);
-  var root_3 = /* @__PURE__ */ template(`<p>Country: <!> <strong> </strong></p> <p>Meta type: <strong> </strong></p> <div class="geometa-note"><p>Note:</p> <!></div> <p class="plonkit-note svelte-tqrxyf">Check out <a target="_blank" class="svelte-tqrxyf"> </a> for more clues.</p> <!>`, 1);
-  var root = /* @__PURE__ */ template(`<div class="geometa-container svelte-tqrxyf"><div class="flex header svelte-tqrxyf"><h2>Learnable Meta</h2> <div class="icons svelte-tqrxyf"><a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-tqrxyf"><span class="flat-color-icons--globe svelte-tqrxyf"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-tqrxyf"><span class="skill-icons--discord svelte-tqrxyf"></span></a></div></div> <!></div>`);
+  var root_4 = /* @__PURE__ */ template(`<hr class="svelte-5pqpxg"> <!>`, 1);
+  var root_3 = /* @__PURE__ */ template(`<p>Country: <!> <strong> </strong></p> <p>Meta type: <strong> </strong></p> <div class="geometa-note"><p>Note:</p> <!></div> <p class="plonkit-note svelte-5pqpxg">Check out <a target="_blank" class="svelte-5pqpxg"> </a> for more clues.</p> <!>`, 1);
+  var root = /* @__PURE__ */ template(`<div class="geometa-container svelte-5pqpxg"><div class="flex header svelte-5pqpxg"><h2>Learnable Meta</h2> <div class="icons svelte-5pqpxg"><a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-5pqpxg"><span class="flat-color-icons--globe svelte-5pqpxg"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-5pqpxg"><span class="skill-icons--discord svelte-5pqpxg"></span></a></div></div> <!></div>`);
   function App($$anchor, $$props) {
     push($$props, true);
     let geoInfo = state(null);
     let error = state(null);
     let container;
-    let containerWidth = localStorageGetInt("geometa:containerWidth") || 500;
-    let containerHeight = localStorageGetInt("geometa:containerHeight") || 400;
-    let isDragging = false;
-    let dragOffset = { x: 0, y: 0 };
-    const onMouseDown = (event) => {
-      isDragging = true;
-      dragOffset = {
-        x: event.clientX - container.getBoundingClientRect().left,
-        y: event.clientY - container.getBoundingClientRect().top
-      };
-      event.preventDefault();
-    };
-    const onMouseMove = (event) => {
-      if (isDragging) {
-        const windowWidth = window.innerWidth;
-        const windowHeight = window.innerHeight;
-        const containerWidth2 = container.offsetWidth;
-        const containerHeight2 = container.offsetHeight;
-        let newLeft = event.clientX - dragOffset.x;
-        let newTop = event.clientY - dragOffset.y;
-        if (newLeft < 0) newLeft = 0;
-        if (newLeft + containerWidth2 > windowWidth) newLeft = windowWidth - containerWidth2;
-        if (newTop < 0) newTop = 0;
-        if (newTop + containerHeight2 > windowHeight) newTop = windowHeight - containerHeight2;
-        container.style.left = `${newLeft}px`;
-        container.style.top = `${newTop}px`;
-      }
-    };
-    const onMouseUp = () => {
-      isDragging = false;
-      _unsafeWindow.localStorage.setItem("geometa:containerStyleLeft", container.style.left);
-      _unsafeWindow.localStorage.setItem("geometa:containerStyleTop", container.style.top);
-    };
+    let header;
     onMount(() => {
       const url = `https://learnablemeta.com/location-info?panoId=${$$props.panoId}&mapId=${$$props.mapId}`;
       _GM_xmlhttpRequest({
@@ -1935,33 +2598,28 @@
           console.error("Error:", e);
         }
       });
-      container.style.width = `${containerWidth}px`;
-      container.style.height = `${containerHeight}px`;
-      container.style.left = localStorage.getItem("geometa:containerStyleLeft") ?? container.style.left;
-      container.style.top = localStorage.getItem("geometa:containerStyleTop") ?? container.style.top;
+      setContainerPosition(container);
+      setContainerDimensions(container);
       const resizeObserver = new ResizeObserver((entries) => {
         for (let entry of entries) {
-          containerWidth = entry.contentRect.width;
-          containerHeight = entry.contentRect.height;
-          if (containerWidth !== 0 && containerHeight !== 0) {
-            _unsafeWindow.localStorage.setItem("geometa:containerWidth", Math.floor(containerWidth).toString());
-            _unsafeWindow.localStorage.setItem("geometa:containerHeight", Math.floor(containerHeight).toString());
-          }
+          saveContainerDimensions(entry);
         }
       });
       resizeObserver.observe(container);
-      window.addEventListener("mousemove", onMouseMove);
-      window.addEventListener("mouseup", onMouseUp);
+      header.addEventListener("mousedown", (event) => onMouseDown(event, container));
+      document.addEventListener("mousemove", (event) => onMouseMove(event, container));
+      document.addEventListener("mouseup", () => onMouseUp(container));
       return () => {
         resizeObserver.disconnect();
-        window.removeEventListener("mousemove", onMouseMove);
-        window.removeEventListener("mouseup", onMouseUp);
+        header.removeEventListener("mousedown", (event) => onMouseDown(event, container));
+        document.removeEventListener("mousemove", (event) => onMouseMove(event, container));
+        document.removeEventListener("mouseup", () => onMouseUp(container));
       };
     });
     var div = root();
     bind_this(div, ($$value) => container = $$value, () => container);
     var div_1 = child(div);
-    div_1.__mousedown = onMouseDown;
+    bind_this(div_1, ($$value) => header = $$value, () => header);
     var node = sibling(div_1, 2);
     if_block(
       node,
@@ -2002,11 +2660,11 @@
             var node_4 = sibling(p_3, 2);
             if_block(node_4, () => get(geoInfo).images && get(geoInfo).images.length, ($$anchor4) => {
               var fragment_2 = root_4();
-              var div_3 = sibling(first_child(fragment_2), 2);
-              var img = child(div_3);
-              template_effect(() => {
-                set_attribute(img, "src", get(geoInfo).images[0]);
-                set_attribute(img, "alt", get(geoInfo).metaName);
+              var node_5 = sibling(first_child(fragment_2), 2);
+              Carousel(node_5, {
+                get images() {
+                  return get(geoInfo).images;
+                }
               });
               append($$anchor4, fragment_2);
             });
@@ -2028,9 +2686,9 @@
     append($$anchor, div);
     pop();
   }
-  delegate(["mousedown"]);
   function changelog() {
     return [
+      { "0.69": "Display multiple images with carousel" },
       { "0.68": "Use panoId as unique location identifier, allow html in note" },
       { "0.67": "Updated to Svelte 5" },
       { "0.66": "Made note movable" },

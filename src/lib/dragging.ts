@@ -1,7 +1,7 @@
-import { unsafeWindow } from "$";
+import { unsafeWindow } from '$';
 
-const leftKey = "geometa:containerStyleLeft";
-const topKey = "geometa:containerStyleTop";
+const leftKey = 'geometa:containerStyleLeft';
+const topKey = 'geometa:containerStyleTop';
 
 export let isDragging = false;
 export let dragOffset = { x: 0, y: 0 };
@@ -15,7 +15,7 @@ export const onMouseDown = (event: MouseEvent, container: HTMLDivElement) => {
   isDragging = true;
   dragOffset = {
     x: event.clientX - container.getBoundingClientRect().left,
-    y: event.clientY - container.getBoundingClientRect().top,
+    y: event.clientY - container.getBoundingClientRect().top
   };
   event.preventDefault();
 };

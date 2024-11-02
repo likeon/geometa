@@ -1,8 +1,8 @@
-import { localStorageGetInt } from "./utils";
-import { unsafeWindow } from "$";
+import { localStorageGetInt } from './utils';
+import { unsafeWindow } from '$';
 
-const widthKey = "geometa:containerWidth";
-const heightKey = "geometa:containerHeight";
+const widthKey = 'geometa:containerWidth';
+const heightKey = 'geometa:containerHeight';
 
 export function setContainerDimensions(container: HTMLDivElement) {
   const containerWidth: number = localStorageGetInt(widthKey) || 500;

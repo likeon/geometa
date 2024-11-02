@@ -1,24 +1,25 @@
 <script lang="ts">
-  import {onMount} from 'svelte';
-  import {GM_xmlhttpRequest} from '$';
-  import Spinner from "./lib/Spinner.svelte";
-  import CountryFlag from "./lib/CountryFlag.svelte";
-  import {onMouseDown, onMouseMove, onMouseUp, setContainerPosition} from './lib/dragging';
-  import {saveContainerDimensions, setContainerDimensions} from "./lib/resizing";
+  import { onMount } from 'svelte';
+  import { GM_xmlhttpRequest } from '$';
+  import Spinner from './lib/Spinner.svelte';
+  import CountryFlag from './lib/CountryFlag.svelte';
+  import { onMouseDown, onMouseMove, onMouseUp, setContainerPosition } from './lib/dragging';
+  import { saveContainerDimensions, setContainerDimensions } from './lib/resizing';
+  import Carousel from './lib/Carousel.svelte';
 
   interface Props {
     panoId: string;
     mapId: string;
   }
 
-  let {panoId, mapId}: Props = $props();
+  let { panoId, mapId }: Props = $props();
 
   type GeoInfo = {
-    country: string,
-    metaName: string,
-    note: string,
-    plonkitCountryUrl: string,
-    images?: string[],
+    country: string;
+    metaName: string;
+    note: string;
+    plonkitCountryUrl: string;
+    images?: string[];
   };
 
   let geoInfo: GeoInfo | null = $state(null);
@@ -52,10 +53,10 @@
       }
     });
 
-    setContainerPosition(container)
+    setContainerPosition(container);
     setContainerDimensions(container);
 
-    const resizeObserver = new ResizeObserver(entries => {
+    const resizeObserver = new ResizeObserver((entries) => {
       for (let entry of entries) {
         saveContainerDimensions(entry);
       }
@@ -91,25 +92,28 @@
   {#if error}
     <p>Error: {error}</p>
   {:else if geoInfo}
-    <p>Country:
-      <CountryFlag countryName={geoInfo.country}/>
+    <p>
+      Country:
+      <CountryFlag countryName={geoInfo.country} />
       <strong>{geoInfo.country}</strong>
     </p>
     <p>Meta type: <strong>{geoInfo.metaName}</strong></p>
-    <div class="geometa-note"><p>Note:</p> {@html geoInfo.note}</div>
-    <p class="plonkit-note">Check out <a href={geoInfo.plonkitCountryUrl} target="_blank">
-      plonkit.net/{geoInfo.country.toLocaleLowerCase()}</a> for more clues.</p>
+    <div class="geometa-note">
+      <p>Note:</p>
+      {@html geoInfo.note}
+    </div>
+    <p class="plonkit-note">
+      Check out <a href={geoInfo.plonkitCountryUrl} target="_blank">
+        plonkit.net/{geoInfo.country.toLocaleLowerCase()}</a> for more clues.
+    </p>
     {#if geoInfo.images && geoInfo.images.length}
-      <hr>
-      <div class="image-wrapper">
-        <img src={geoInfo.images[0]} alt={geoInfo.metaName} class="responsive-image">
-      </div>
+      <hr />
+      <Carousel images={geoInfo.images} />
     {/if}
   {:else}
-    <Spinner/>
+    <Spinner />
   {/if}
 </div>
-
 
 <style>
   .geometa-container {
@@ -132,7 +136,7 @@
   }
 
   .plonkit-note {
-    color: #D3D3D3;
+    color: #d3d3d3;
     font-size: small;
   }
 
@@ -184,19 +188,6 @@
     border: 0;
     border-top: 1px solid white;
     width: 100%;
-  }
-
-  .image-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .responsive-image {
-    max-width: 100%;
-    height: auto;
-    display: block;
   }
 
   .header {
