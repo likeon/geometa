@@ -54,12 +54,11 @@
     }
   }
 
-  function handleFileUpload(event: Event) {
+  function handleFileUpload() {
     imageSubmit();
   }
 </script>
 
-<p>Currently the UserScript only shows one image</p>
 <div class="grid grid-cols-2 gap-4">
   {#each images as image (image.id)}
     <div class="relative group">
