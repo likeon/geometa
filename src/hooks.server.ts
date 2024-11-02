@@ -19,7 +19,7 @@ export const handle: Handle = async ({ event, resolve }) => {
         // session cookie is valid, but needs a refresh
         const sessionCookie = lucia.createSessionCookie(session.id);
         event.cookies.set(sessionCookie.name, sessionCookie.value, {
-          path: '.',
+          path: '/',
           ...sessionCookie.attributes
         });
       }
@@ -29,7 +29,7 @@ export const handle: Handle = async ({ event, resolve }) => {
       console.log('Session is invalid');
       const sessionCookie = lucia.createBlankSessionCookie();
       event.cookies.set(sessionCookie.name, sessionCookie.value, {
-        path: '.',
+        path: '/',
         ...sessionCookie.attributes
       });
     }
