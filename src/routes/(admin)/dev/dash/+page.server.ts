@@ -3,6 +3,8 @@ import { mapGroupPermissions, mapGroups } from '$lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 
+export const prerender = false;
+
 export const load = async ({ locals }) => {
   if (!locals.user?.id) {
     error(403, 'Permission denied');
