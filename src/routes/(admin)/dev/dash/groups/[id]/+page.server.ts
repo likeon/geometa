@@ -183,7 +183,6 @@ export const actions = {
     if (!form.valid) {
       return fail(400, withFiles({ form }));
     }
-
     const jsonData = await extractJsonData(form.data.file);
     const validationResult = mapJsonSchema.safeParse(jsonData);
     let errorString = '';
@@ -225,42 +224,54 @@ export const actions = {
     });
 
     // upsert data
-    const upsertResult = await db
-      .insert(mapGroupLocations)
-      .values(upsertValues)
-      .onConflictDoUpdate({
-        target: [mapGroupLocations.mapGroupId, mapGroupLocations.lat, mapGroupLocations.lng],
-        set: {
-          heading: sql`excluded.heading`,
-          pitch: sql`excluded.pitch`,
-          zoom: sql`excluded.zoom`,
-          panoId: sql`excluded.pano_id`,
-          extraTag: sql`excluded.extra_tag`,
-          extraPanoId: sql`excluded.extra_pano_id`,
-          extraPanoDate: sql`excluded.extra_pano_date`
-        }
-      })
-      .returning({ id: mapGroupLocations.id });
+    const BATCH_SIZE = 1000;
+    let upsertResult: { id: number }[] = [];
 
-    // delete rows that weren't updated
-    await db.delete(mapGroupLocations).where(
-      and(
-        eq(mapGroupLocations.mapGroupId, groupId),
-        notInArray(
-          mapGroupLocations.id,
-          upsertResult.map((item) => item.id)
+    await db.transaction(async (trx) => {
+      // Step 1: Batched upsert operation
+      for (let i = 0; i < upsertValues.length; i += BATCH_SIZE) {
+        const batch = upsertValues.slice(i, i + BATCH_SIZE);
+
+        const batchResult = await trx
+          .insert(mapGroupLocations)
+          .values(batch)
+          .onConflictDoUpdate({
+            target: [mapGroupLocations.mapGroupId, mapGroupLocations.lat, mapGroupLocations.lng],
+            set: {
+              heading: sql`excluded.heading`,
+              pitch: sql`excluded.pitch`,
+              zoom: sql`excluded.zoom`,
+              panoId: sql`excluded.pano_id`,
+              extraTag: sql`excluded.extra_tag`,
+              extraPanoId: sql`excluded.extra_pano_id`,
+              extraPanoDate: sql`excluded.extra_pano_date`
+            }
+          })
+          .returning({ id: mapGroupLocations.id });
+
+        upsertResult = upsertResult.concat(batchResult);
+      }
+
+      // Step 2: Delete any records that weren't upserted
+      await trx.delete(mapGroupLocations).where(
+        and(
+          eq(mapGroupLocations.mapGroupId, groupId),
+          notInArray(
+            mapGroupLocations.id,
+            upsertResult.map((item) => item.id)
+          )
         )
-      )
-    );
+      );
 
-    // upsert tag names into metas
-    const metaInsertValues = Array.from(usedTags).map((tagName) => ({
-      mapGroupId: groupId,
-      tagName: tagName,
-      name: '',
-      note: ''
-    }));
-    await db.insert(metas).values(metaInsertValues).onConflictDoNothing();
+      // Step 3: Insert tags into metas table
+      const metaInsertValues = Array.from(usedTags).map((tagName) => ({
+        mapGroupId: groupId,
+        tagName: tagName,
+        name: '',
+        note: ''
+      }));
+      await trx.insert(metas).values(metaInsertValues).onConflictDoNothing();
+    });
   },
   uploadMetaImages: async ({ request, locals }) => {
     const form = await superValidate(request, zod(imageUploadSchema));
