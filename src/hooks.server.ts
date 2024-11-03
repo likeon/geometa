@@ -2,11 +2,6 @@ import { type Handle, redirect } from '@sveltejs/kit';
 import { lucia } from '$lib/auth';
 
 export const handle: Handle = async ({ event, resolve }) => {
-  const isPrerendering = !!event.platform;
-  if (isPrerendering) {
-    return resolve(event);
-  }
-
   const isAdminUrl = event.url.pathname.startsWith('/dev/dash');
   let redirectToLogin = isAdminUrl;
 

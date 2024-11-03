@@ -25,6 +25,9 @@ const config = {
     }),
     alias: {
       $routes: 'src/routes'
+    },
+    prerender: {
+      crawl: false
     }
   }
 };
