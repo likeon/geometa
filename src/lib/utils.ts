@@ -3,7 +3,6 @@ import { db } from '$lib/drizzle';
 import { and, eq } from 'drizzle-orm';
 import { mapGroupPermissions } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
-import { promises as fs } from 'fs';
 
 export function generateRandomString(length: number): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

@@ -32,7 +32,7 @@
 
   <div class="flex flex-wrap items-center">
     <div class="flex-grow flex items-center justify-end">
-      <Button on:click={addMap}>Add map</Button>
+      <Button onclick={addMap}>Add map</Button>
     </div>
   </div>
 

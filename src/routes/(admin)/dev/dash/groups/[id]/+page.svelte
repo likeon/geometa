@@ -151,10 +151,10 @@
       <Input type="text" placeholder="Search..." autocomplete="off" bind:value={searchText} />
     </div>
     <div class="flex-grow flex items-center justify-end">
-      <GradientButton color="cyanToBlue" class="ml-3" on:click={uploadLocations}
+      <GradientButton color="cyanToBlue" class="ml-3" onclick={uploadLocations}
         >Upload locations
       </GradientButton>
-      <Button class="ml-3" on:click={addMeta}>Add meta</Button>
+      <Button class="ml-3" onclick={addMeta}>Add meta</Button>
       <form
         method="post"
         action="?/prepareUserScriptData"
@@ -186,11 +186,11 @@
           >Sync UserScript
         </GradientButton>
       </form>
-      <a href="/" on:click|preventDefault>
+      <button>
         <Icon icon="pepicons-pop:dots-y" width="1rem" height="1rem" style="color: black" />
-      </a>
+      </button>
       <Dropdown>
-        <DropdownItem on:click={submitPopulateNotesHtmlForm}>Populate notes html</DropdownItem>
+        <DropdownItem click={submitPopulateNotesHtmlForm}>Populate notes html</DropdownItem>
       </Dropdown>
       <form
         bind:this={populateNotesHtmlForm}

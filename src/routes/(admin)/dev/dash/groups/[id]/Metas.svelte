@@ -2,7 +2,6 @@
   import Icon from '@iconify/svelte';
   import type { PageData } from './$types';
   import { createEventDispatcher } from 'svelte';
-  import { map } from 'zod';
   interface Props {
     filteredMetas: PageData['group']['metas'];
     selectMeta: any;
