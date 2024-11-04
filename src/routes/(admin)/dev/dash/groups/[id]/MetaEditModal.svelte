@@ -1,15 +1,5 @@
 <script lang="ts">
-  import {
-    Alert,
-    Button,
-    Input,
-    Label,
-    Modal,
-    MultiSelect,
-    TabItem,
-    Tabs,
-    Textarea
-  } from 'flowbite-svelte';
+  import { Alert, Button, Input, Label, Modal, MultiSelect, TabItem, Tabs } from 'flowbite-svelte';
   import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
   import type { InsertMetasSchema, MapUploadSchema } from './+page.server';
   import type { PageData } from './$types';
@@ -27,8 +17,7 @@
     metaForm,
     levelChoices,
     groupId,
-    imageUploadForm,
-    updateMeta
+    imageUploadForm
   }: {
     isMetaModalOpen: boolean;
     selectedMeta: PageData['group']['metas'][number] | null;
@@ -36,19 +25,7 @@
     levelChoices: { value: number; name: string }[];
     groupId: number;
     imageUploadForm: SuperValidated<Infer<MapUploadSchema>>;
-    updateMeta: (meta: PageData['group']['metas'][number]) => void;
   } = $props();
-
-  let images = $derived(selectedMeta?.images);
-
-  function updateImages(images: PageData['group']['metas'][number]['images']) {
-    if (selectedMeta?.images != undefined) {
-      selectedMeta.images = images;
-    }
-    if (selectedMeta) {
-      updateMeta(selectedMeta);
-    }
-  }
 
   const { form, errors, constraints, enhance } = superForm(metaForm, {
     dataType: 'json',
@@ -130,11 +107,7 @@
     </TabItem>
     {#if selectedMeta?.id}
       <TabItem title="Images">
-        <MetaImages
-          data={imageUploadForm}
-          metaId={selectedMeta.id}
-          images={images || []}
-          {updateImages} />
+        <MetaImages data={imageUploadForm} {selectedMeta} />
       </TabItem>
       <form action="?/deleteMeta" method="post" onsubmit={confirmDelete}>
         <div class="items-center flex h-full">

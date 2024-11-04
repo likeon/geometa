@@ -4,17 +4,16 @@
   import type { MapUploadSchema } from './+page.server';
   import type { PageData } from './$types';
   import { applyAction, enhance } from '$app/forms';
+  import { invalidateAll } from '$app/navigation';
 
-  type ImagesType = typeof images;
   interface Props {
-    metaId: number;
     data: SuperValidated<Infer<MapUploadSchema>>;
-    images: PageData['group']['metas'][number]['images'];
-    updateImages: (images: ImagesType) => void;
+    selectedMeta: PageData['group']['metas'][number];
   }
 
-  let { metaId, data, images = $bindable(), updateImages }: Props = $props();
+  let { data, selectedMeta }: Props = $props();
 
+  let images = $derived(selectedMeta.images);
   let isDragging = $state(false);
 
   const {
@@ -25,8 +24,6 @@
   } = superForm(data, {
     async onUpdated({ form }) {
       if (form.valid) {
-        images = [...images, form.message];
-        updateImages(images);
       }
     }
   });
@@ -67,10 +64,7 @@
         action="?/deleteMetaImage"
         use:enhance={() => {
           return async ({ result }) => {
-            if ('data' in result) {
-              images = images.filter((image) => image.id !== result.data?.imageId);
-              updateImages(images);
-            }
+            invalidateAll();
             await applyAction(result);
           };
         }}>
@@ -91,7 +85,7 @@
   action="?/uploadMetaImages"
   enctype="multipart/form-data"
   use:imageEnhance>
-  <Input type="hidden" name="metaId" value={metaId} />
+  <Input type="hidden" name="metaId" value={selectedMeta.id} />
 
   <label>
     Upload an image:

@@ -1,15 +1,21 @@
 <script lang="ts">
   import Icon from '@iconify/svelte';
   import type { PageData } from './$types';
-  import { createEventDispatcher } from 'svelte';
   interface Props {
     metas: PageData['group']['metas'];
     searchText: string;
-    selectMeta: any;
     levelNames: any;
+    selectedMetaId: number;
+    isMetaModalOpen: boolean;
   }
 
-  let { metas, selectMeta, levelNames, searchText }: Props = $props();
+  let {
+    metas,
+    levelNames,
+    searchText,
+    selectedMetaId = $bindable(),
+    isMetaModalOpen = $bindable()
+  }: Props = $props();
   let noteFilter = $state('all');
   let imageFilter = $state('all');
   let levelFilter = $state('all');
@@ -160,7 +166,10 @@
               <tr
                 class="cursor-pointer hover:bg-green-200"
                 role="link"
-                onclick={() => selectMeta(meta)}>
+                onclick={() => {
+                  isMetaModalOpen = true;
+                  selectedMetaId = meta.id;
+                }}>
                 <td>{meta.tagName}</td>
                 <td>{meta.name}</td>
                 <td>

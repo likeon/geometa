@@ -15,20 +15,18 @@
   let isMetaModalOpen = $state(false);
   let isUploadModalOpen = $state(false);
   let searchText = $state('');
-
+  let metas = $derived(data.group.metas);
+  let selectedMetaId = $state(-1);
+  let selectedMeta = $derived.by(() => {
+    const meta = metas.find((meta) => meta.id == selectedMetaId);
+    return meta != undefined ? meta : null;
+  });
   function handleModalSuccess() {
     toast.push('Successfully uploaded locations!');
   }
 
-  let selectedMeta: (typeof data.group.metas)[number] | null = $state(null);
-
   function addMeta() {
-    selectedMeta = null;
-    isMetaModalOpen = true;
-  }
-
-  function selectMeta(meta: MetaType) {
-    selectedMeta = meta;
+    selectedMetaId = -1;
     isMetaModalOpen = true;
   }
 
@@ -36,12 +34,6 @@
     value: item.id,
     name: item.name
   }));
-
-  function updateMeta(updatedMeta: MetaType) {
-    data.group.metas = data.group.metas.map((meta) =>
-      meta.id == updatedMeta.id ? updatedMeta : meta
-    );
-  }
 
   function uploadLocations() {
     isUploadModalOpen = true;
@@ -123,9 +115,10 @@
     </div>
   </div>
   <Metas
-    metas={data.group.metas}
+    {metas}
     {searchText}
-    {selectMeta}
+    bind:isMetaModalOpen
+    bind:selectedMetaId
     levelNames={levelChoices.map((levelChoice) => levelChoice.name)} />
   {#if data.group.metas.length === 0}
     <div class="justify-center w-full flex mt-2">
@@ -143,8 +136,7 @@
   {levelChoices}
   groupId={data.group.id}
   {selectedMeta}
-  imageUploadForm={data.imageUploadForm}
-  {updateMeta} />
+  imageUploadForm={data.imageUploadForm} />
 
 <MapUploadModal bind:isUploadModalOpen data={data.mapUploadForm} on:success={handleModalSuccess} />
 
