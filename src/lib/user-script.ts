@@ -1,6 +1,6 @@
 import { db } from '$lib/drizzle';
-import { mapLocations, maps } from '$lib/db/schema';
-import { asc, eq, sql } from 'drizzle-orm';
+import { mapLocations, maps, metas } from '$lib/db/schema';
+import { asc, eq, sql, inArray } from 'drizzle-orm';
 import { cloudflareKvBulkPut, getCountryFromTagName, isDeepEqual } from '$lib/utils';
 import type { KVNamespace } from '@cloudflare/workers-types';
 
@@ -12,22 +12,75 @@ type UserScriptDataItem = {
   images: string[];
 };
 
+type MetaWithLocation = {
+  metaId: number;
+  locations: number;
+};
+
+function groupMetas(items: MetaWithLocation[]): number[][] {
+  const result: number[][] = [];
+  let currentGroup: MetaWithLocation[] = [];
+  let currentLocationsSum = 0;
+
+  for (const item of items) {
+    // If the item has locations > 1000, put it in its own group
+    if (item.locations > 1000) {
+      result.push([item.metaId]);
+      continue;
+    }
+
+    // If adding the item would exceed 1000 locations, start a new group
+    if (currentLocationsSum + item.locations > 1000) {
+      result.push(currentGroup.map((metaItem) => metaItem.metaId));
+      currentGroup = [];
+      currentLocationsSum = 0;
+    }
+
+    // Add the item to the current group
+    currentGroup.push(item);
+    currentLocationsSum += item.locations;
+  }
+
+  // Add the last group if it's not empty
+  if (currentGroup.length > 0) {
+    result.push(currentGroup.map((metaItem) => metaItem.metaId));
+  }
+
+  return result;
+}
+
 export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespace) {
-  const dbValues = await db
+  const metasWithLocationsCount = await db
     .select({
-      geoguessrId: maps.geoguessrId,
-      panoId: mapLocations.panoId,
-      tagName: mapLocations.tagName,
-      metaName: mapLocations.metaName,
-      metaNoteHtml: mapLocations.metaNoteHtml,
-      images: sql<
-        string | null
-      >`(select GROUP_CONCAT(mi.image_url) from meta_images mi where mi.meta_id = ${mapLocations.metaId})`
+      metaId: metas.id,
+      locations: sql<number>`(select COUNT(*) from location_metas_view lmv where lmv.meta_id = ${metas.id})`
     })
-    .from(mapLocations)
-    .innerJoin(maps, eq(mapLocations.mapId, maps.id))
-    .where(eq(maps.mapGroupId, groupId))
-    .orderBy(asc(maps.id));
+    .from(metas)
+    .where(eq(metas.mapGroupId, groupId));
+  const metasGroupped = groupMetas(metasWithLocationsCount);
+  const dbValues = (
+    await Promise.all(
+      metasGroupped.map((metaIds) =>
+        db
+          .select({
+            geoguessrId: maps.geoguessrId,
+            panoId: mapLocations.panoId,
+            tagName: mapLocations.tagName,
+            metaName: mapLocations.metaName,
+            metaNoteHtml: mapLocations.metaNoteHtml,
+            images: sql<string | null>`
+            (SELECT GROUP_CONCAT(mi.image_url)
+             FROM meta_images mi
+             WHERE mi.meta_id = ${mapLocations.metaId})
+          `
+          })
+          .from(mapLocations)
+          .innerJoin(maps, eq(mapLocations.mapId, maps.id))
+          .where(inArray(mapLocations.metaId, metaIds))
+          .orderBy(asc(maps.id))
+      )
+    )
+  ).flat();
 
   const kvCacheKey = `cache:userscript:${groupId}`;
   const cachedKvJson = await kvNamespace.get(kvCacheKey);
