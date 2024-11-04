@@ -23,8 +23,8 @@ function groupMetas(items: MetaWithLocation[]): number[][] {
   let currentLocationsSum = 0;
 
   for (const item of items) {
-    // If the item has locations > 1000, put it in its own group
-    if (item.locations > 1000) {
+    // If the item has locations >= 1000, put it in its own group
+    if (item.locations >= 1000) {
       result.push([item.metaId]);
       continue;
     }
@@ -53,34 +53,36 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
   const metasWithLocationsCount = await db
     .select({
       metaId: metas.id,
-      locations: sql<number>`(select COUNT(*) from location_metas_view lmv where lmv.meta_id = ${metas.id})`
+      locations: sql<number>`(select COUNT(*) from location_metas_view lmv where lmv.meta_id = "metas"."id")`
     })
     .from(metas)
     .where(eq(metas.mapGroupId, groupId));
   const metasGroupped = groupMetas(metasWithLocationsCount);
-  const dbValues = (
-    await Promise.all(
-      metasGroupped.map((metaIds) =>
-        db
-          .select({
-            geoguessrId: maps.geoguessrId,
-            panoId: mapLocations.panoId,
-            tagName: mapLocations.tagName,
-            metaName: mapLocations.metaName,
-            metaNoteHtml: mapLocations.metaNoteHtml,
-            images: sql<string | null>`
-            (SELECT GROUP_CONCAT(mi.image_url)
-             FROM meta_images mi
-             WHERE mi.meta_id = ${mapLocations.metaId})
-          `
-          })
-          .from(mapLocations)
-          .innerJoin(maps, eq(mapLocations.mapId, maps.id))
-          .where(inArray(mapLocations.metaId, metaIds))
-          .orderBy(asc(maps.id))
-      )
-    )
-  ).flat();
+
+  const dbPromises = [];
+  for (const metaIds of metasGroupped) {
+    dbPromises.push(
+      db
+        .select({
+          geoguessrId: maps.geoguessrId,
+          panoId: mapLocations.panoId,
+          tagName: mapLocations.tagName,
+          metaName: mapLocations.metaName,
+          metaNoteHtml: mapLocations.metaNoteHtml,
+          images: sql<string | null>`
+          (SELECT GROUP_CONCAT(mi.image_url)
+           FROM meta_images mi
+           WHERE mi.meta_id = ${mapLocations.metaId})
+        `
+        })
+        .from(mapLocations)
+        .innerJoin(maps, eq(mapLocations.mapId, maps.id))
+        .where(inArray(mapLocations.metaId, metaIds))
+        .orderBy(asc(maps.id))
+    );
+  }
+  const dbValuesArray = await Promise.all(dbPromises);
+  const dbValues = dbValuesArray.flat();
 
   const kvCacheKey = `cache:userscript:${groupId}`;
   const cachedKvJson = await kvNamespace.get(kvCacheKey);
