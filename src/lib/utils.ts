@@ -69,7 +69,7 @@ export async function cloudflareKvBulkPut(data: any[]) {
     'Content-Type': 'application/json'
   };
 
-  const chunks = chunkArray(data, 10000);
+  const chunks = chunkArray(data, 1000);
 
   await Promise.all(
     chunks.map(async (chunk) => {
