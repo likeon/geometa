@@ -15,94 +15,10 @@
   let isMetaModalOpen = $state(false);
   let isUploadModalOpen = $state(false);
   let searchText = $state('');
-  let selectedNoteFilter = $state('all');
-  let selectedImageFilter = $state('all');
-  let selectedLevelFilter = $state('all');
-  let selectedHeader = $state('tag');
-  let sortModifier = $state(1);
 
   function handleModalSuccess() {
     toast.push('Successfully uploaded locations!');
   }
-
-  function handleCriteriaChange(event: { detail: { type: string; value: string } }) {
-    const { type, value } = event.detail;
-
-    // Handle filters (note or image)
-    if (type == 'note') {
-      selectedNoteFilter = value;
-    } else if (type == 'image') {
-      selectedImageFilter = value;
-    }
-
-    // Handle level changes
-
-    if (type == 'level') {
-      selectedLevelFilter = value;
-    }
-
-    // Handle header changes
-    if (type == 'header') {
-      if (selectedHeader == value) {
-        sortModifier *= -1;
-      } else {
-        sortModifier = 1;
-        selectedHeader = value;
-      }
-    }
-  }
-
-  let filteredMetas = $derived(
-    data.group.metas
-      .filter((item) => {
-        // Apply text filter
-        const matchesSearchText =
-          item.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          item.tagName.toLowerCase().includes(searchText.toLowerCase());
-
-        // Apply note filter ('all', 'missing', 'has')
-        const matchesNoteCondition =
-          selectedNoteFilter == 'all' ||
-          (selectedNoteFilter == 'hasNote' && item.note != '') ||
-          (selectedNoteFilter == 'missingNote' && item.note == '');
-
-        // Apply image filter ('all', 'missing', 'has')
-        const matchesImageCondition =
-          selectedImageFilter == 'all' ||
-          (selectedImageFilter == 'hasImage' && item.images.length != 0) ||
-          (selectedImageFilter == 'missingImage' && !item.images.length);
-
-        const matchesLevelCondition =
-          selectedLevelFilter == 'all' ||
-          item.metaLevels.some((metaLevel) => metaLevel.level.name == selectedLevelFilter);
-
-        return (
-          matchesSearchText &&
-          matchesNoteCondition &&
-          matchesImageCondition &&
-          matchesLevelCondition
-        );
-      })
-      .sort((a, b) => {
-        if (selectedHeader === 'level') {
-          // Primary sort by the count of metaLevels
-          const levelCountDiff = (a.metaLevels.length - b.metaLevels.length) * sortModifier;
-          if (levelCountDiff !== 0) return levelCountDiff;
-
-          // Secondary sort by the first level name if counts are the same
-          const firstLevelA = a.metaLevels[0]?.level.name || '';
-          const firstLevelB = b.metaLevels[0]?.level.name || '';
-          return firstLevelA.localeCompare(firstLevelB) * sortModifier;
-        } else if (selectedHeader == 'tag') {
-          return a.tagName.localeCompare(b.tagName) * sortModifier;
-        } else if (selectedHeader == 'name') {
-          return a.name.localeCompare(b.name) * sortModifier;
-        } else if (selectedHeader == 'locations') {
-          return (Number(a.locationsCount) - Number(b.locationsCount)) * sortModifier;
-        }
-        return 0;
-      })
-  );
 
   let selectedMeta: (typeof data.group.metas)[number] | null = $state(null);
 
@@ -207,9 +123,9 @@
     </div>
   </div>
   <Metas
-    {filteredMetas}
+    metas={data.group.metas}
+    {searchText}
     {selectMeta}
-    on:criteriaChange={handleCriteriaChange}
     levelNames={levelChoices.map((levelChoice) => levelChoice.name)} />
   {#if data.group.metas.length === 0}
     <div class="justify-center w-full flex mt-2">

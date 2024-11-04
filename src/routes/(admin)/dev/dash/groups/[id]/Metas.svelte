@@ -3,41 +3,79 @@
   import type { PageData } from './$types';
   import { createEventDispatcher } from 'svelte';
   interface Props {
-    filteredMetas: PageData['group']['metas'];
+    metas: PageData['group']['metas'];
+    searchText: string;
     selectMeta: any;
     levelNames: any;
   }
 
-  let { filteredMetas, selectMeta, levelNames }: Props = $props();
-
+  let { metas, selectMeta, levelNames, searchText }: Props = $props();
   let noteFilter = $state('all');
   let imageFilter = $state('all');
   let levelFilter = $state('all');
-  const dispatch = createEventDispatcher();
-
-  function handleNoteFilterChange() {
-    dispatch('criteriaChange', { type: 'note', value: noteFilter });
-  }
-
-  function handleImageFilterChange() {
-    dispatch('criteriaChange', { type: 'image', value: imageFilter });
-  }
-
-  function handleLevelFilterChange() {
-    dispatch('criteriaChange', { type: 'level', value: levelFilter });
-  }
-
   let selectedHeader = $state('tag');
+  let sortModifier = $state(1);
+  let sortArrow = $state('▼');
+
+  let filteredMetas = $derived(
+    metas
+      .filter((item) => {
+        // Apply text filter
+        const matchesSearchText =
+          item.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          item.tagName.toLowerCase().includes(searchText.toLowerCase());
+
+        // Apply note filter ('all', 'missing', 'has')
+        const matchesNoteCondition =
+          noteFilter == 'all' ||
+          (noteFilter == 'hasNote' && item.note != '') ||
+          (noteFilter == 'missingNote' && item.note == '');
+
+        // Apply image filter ('all', 'missing', 'has')
+        const matchesImageCondition =
+          imageFilter == 'all' ||
+          (imageFilter == 'hasImage' && item.images.length != 0) ||
+          (imageFilter == 'missingImage' && !item.images.length);
+
+        const matchesLevelCondition =
+          levelFilter == 'all' ||
+          item.metaLevels.some((metaLevel) => metaLevel.level.name == levelFilter);
+
+        return (
+          matchesSearchText &&
+          matchesNoteCondition &&
+          matchesImageCondition &&
+          matchesLevelCondition
+        );
+      })
+      .sort((a, b) => {
+        if (selectedHeader === 'level') {
+          // Primary sort by the count of metaLevels
+          const levelCountDiff = (a.metaLevels.length - b.metaLevels.length) * sortModifier;
+          if (levelCountDiff !== 0) return levelCountDiff;
+
+          // Secondary sort by the first level name if counts are the same
+          const firstLevelA = a.metaLevels[0]?.level.name || '';
+          const firstLevelB = b.metaLevels[0]?.level.name || '';
+          return firstLevelA.localeCompare(firstLevelB) * sortModifier;
+        } else if (selectedHeader == 'tag') {
+          return a.tagName.localeCompare(b.tagName) * sortModifier;
+        } else if (selectedHeader == 'name') {
+          return a.name.localeCompare(b.name) * sortModifier;
+        } else if (selectedHeader == 'locations') {
+          return (Number(a.locationsCount) - Number(b.locationsCount)) * sortModifier;
+        }
+        return 0;
+      })
+  );
 
   function selectHeader(header: string) {
-    dispatch('criteriaChange', { type: 'header', value: header });
     if (selectedHeader == header) {
       sortArrow = sortArrow == '▼' ? '▲' : '▼';
+      sortModifier *= -1;
     }
     selectedHeader = header;
   }
-
-  let sortArrow = $state('▼');
 </script>
 
 <div class="mt-3 flow-root">
@@ -82,8 +120,7 @@
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 <select
                   class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500 custom-select"
-                  bind:value={noteFilter}
-                  onchange={handleNoteFilterChange}>
+                  bind:value={noteFilter}>
                   <option value="all">Any Note</option>
                   <option value="hasNote">Has Note</option>
                   <option value="missingNote">Missing Note</option>
@@ -93,8 +130,7 @@
               <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">
                 <select
                   class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500 custom-select"
-                  bind:value={imageFilter}
-                  onchange={handleImageFilterChange}>
+                  bind:value={imageFilter}>
                   <option value="all">Any Image</option>
                   <option value="hasImage">Has Image</option>
                   <option value="missingImage">Missing Image</option>
@@ -109,7 +145,6 @@
                 <select
                   class="border-gray-300 rounded focus:ring-2 focus:ring-primary-500 custom-select"
                   bind:value={levelFilter}
-                  onchange={handleLevelFilterChange}
                   onclick={(event) => event.stopPropagation()}>
                   <option value="all">All Levels</option>
                   {#each levelNames as levelName}
