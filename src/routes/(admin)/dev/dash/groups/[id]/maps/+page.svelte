@@ -3,21 +3,46 @@
   import MapEditModal from './MapEditModal.svelte';
   import DashNavBar from '$lib/components/DashNavBar.svelte';
   import Icon from '@iconify/svelte';
+  import SortFilterTable from '$lib/components/SortFilterTable.svelte';
   let { data } = $props();
+  let columns = [
+    { key: 'name', label: 'Name', width: '30%', sortable: true, searchable: true },
+    {
+      key: 'mapLevels',
+      label: 'Levels',
+      width: '30%',
+      display: (a: any) => a.map((item: { level: { name: any } }) => item.level.name).join(', '),
+      sortable: false,
+      searchable: true
+    },
+    { key: 'locationsCount', label: 'Locations count', sortable: true, searchable: false },
+    {
+      key: 'link',
+      label: 'Geoguessr Link',
+      sortable: false,
+      searchable: false,
+      display: (item: any) => `https://www.geoguessr.com/maps/${item.geoguessrId}`
+    },
+    {
+      key: 'link',
+      label: 'Download Link',
+      sortable: false,
+      searchable: false,
+      display: (item: any) => `/dev/dash/groups/${data.group.id}/maps/${item.id}/download`
+    }
+  ];
 
-  type MapType = (typeof data.group.maps)[number];
   let isMapModalOpen = $state(false);
-  let selectedMap: (typeof data.group.maps)[number] | null = $state(null);
-
+  let searchText = $state('');
+  let selectedMapId = $state(-1);
   let maps = $derived(data.group.maps);
+  let selectedMap = $derived.by(() => {
+    const map = maps.find((map) => map.id == selectedMapId);
+    return map != undefined ? map : null;
+  });
 
   function addMap() {
-    selectedMap = null;
-    isMapModalOpen = true;
-  }
-
-  function selectMap(map: MapType) {
-    selectedMap = map;
+    selectedMapId = -1;
     isMapModalOpen = true;
   }
 
@@ -36,7 +61,7 @@
     </div>
   </div>
 
-  <div class="mt-3 flow-root">
+  <!-- <div class="mt-3 flow-root">
     <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
       <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
         <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
@@ -85,7 +110,14 @@
         </div>
       </div>
     </div>
-  </div>
+  </div> -->
+
+  <SortFilterTable
+    data={maps}
+    {searchText}
+    {columns}
+    bind:isModalOpen={isMapModalOpen}
+    bind:selectedRowId={selectedMapId} />
 </div>
 
 <MapEditModal
@@ -95,13 +127,3 @@
   groupId={data.group.id}
   {selectedMap}
   user={data.user} />
-
-<style lang="postcss">
-  td {
-    @apply pl-3;
-  }
-
-  th {
-    @apply pl-3;
-  }
-</style>

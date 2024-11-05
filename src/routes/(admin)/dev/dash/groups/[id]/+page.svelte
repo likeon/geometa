@@ -3,15 +3,84 @@
   import { applyAction, enhance } from '$app/forms';
   import { SvelteToast } from '@zerodevx/svelte-toast';
   import { toast } from '@zerodevx/svelte-toast';
-  import Metas from './Metas.svelte';
   import MapUploadModal from './MapUploadModal.svelte';
   import MetaEditModal from './MetaEditModal.svelte';
   import DashNavBar from '$lib/components/DashNavBar.svelte';
   import Icon from '@iconify/svelte';
+  import SortFilterTable from '$lib/components/SortFilterTable.svelte';
 
   let { data } = $props();
 
-  type MetaType = (typeof data.group.metas)[number];
+  const levelChoices = data.levelList.map((item) => ({
+    value: item.id,
+    name: item.name
+  }));
+
+  let columns = [
+    {
+      key: 'tagName',
+      label: 'Tag name',
+      searchable: true,
+      sortable: true,
+      width: '25%'
+    },
+    {
+      key: 'name',
+      label: 'Name',
+      width: '25%',
+      searchable: true,
+      sortable: true
+    },
+    {
+      key: 'locationsCount',
+      label: 'Locations',
+      searchable: false,
+      sortable: true
+    },
+    {
+      key: 'note',
+      label: 'Note',
+      display: (item: String) => item != '',
+      searchable: false,
+      filterable: true,
+      type: 'select',
+      options: ['Any note', 'Has note', 'Missing note'],
+      filterLogic: (filter: string, item: any) =>
+        filter == 'Any note' || (filter === 'Has note' ? !!item.note : !item.note)
+    },
+    {
+      key: 'images',
+      label: 'Image',
+      display: (item: []) => item.length != 0,
+      searchable: false,
+      filterable: true,
+      type: 'select',
+      options: ['Any image', 'Has image', 'Missing image'],
+      filterLogic: (filter: string, item: any) => {
+        return (
+          filter == 'Any image' ||
+          (filter == 'Has image' && item.images.length > 0) ||
+          (filter == 'Missing image' && item.images.length == 0)
+        );
+      }
+    },
+    {
+      key: 'metaLevels',
+      label: 'Level',
+      display: (item: any) =>
+        item.map((metaLevel: { level: { name: any } }) => metaLevel.level.name).join(', '),
+      searchable: false,
+      filterable: true,
+      type: 'select',
+      options: ['All Levels', ...levelChoices.map((levelChoice) => levelChoice.name)], // Add "All Levels" option
+      filterLogic: (filter: string, item: any) =>
+        filter === 'All Levels' ||
+        item.metaLevels.some(
+          (metaLevel: { level: { name: string } }) => metaLevel.level.name === filter
+        )
+    }
+  ];
+
   let isMetaModalOpen = $state(false);
   let isUploadModalOpen = $state(false);
   let searchText = $state('');
@@ -29,11 +98,6 @@
     selectedMetaId = -1;
     isMetaModalOpen = true;
   }
-
-  const levelChoices = data.levelList.map((item) => ({
-    value: item.id,
-    name: item.name
-  }));
 
   function uploadLocations() {
     isUploadModalOpen = true;
@@ -114,12 +178,12 @@
       </form>
     </div>
   </div>
-  <Metas
-    {metas}
+  <SortFilterTable
+    data={metas}
     {searchText}
-    bind:isMetaModalOpen
-    bind:selectedMetaId
-    levelNames={levelChoices.map((levelChoice) => levelChoice.name)} />
+    {columns}
+    bind:isModalOpen={isMetaModalOpen}
+    bind:selectedRowId={selectedMetaId} />
   {#if data.group.metas.length === 0}
     <div class="justify-center w-full flex mt-2">
       <p class="text-2xl">
