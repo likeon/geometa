@@ -223,45 +223,17 @@ export const actions = {
       usedTags.add(location.extra.tags[0]);
     });
 
-    // upsert data
-    const BATCH_SIZE = 1000;
-    let upsertResult: { id: number }[] = [];
-
     await db.transaction(async (trx) => {
-      // Step 1: Batched upsert operation
+      // Step 1: delete all locations from map group
+      await trx.delete(mapGroupLocations).where(and(eq(mapGroupLocations.mapGroupId, groupId)));
+
+      //  Step 2: Batched insert operation
+      const BATCH_SIZE = 1000;
       for (let i = 0; i < upsertValues.length; i += BATCH_SIZE) {
         const batch = upsertValues.slice(i, i + BATCH_SIZE);
 
-        const batchResult = await trx
-          .insert(mapGroupLocations)
-          .values(batch)
-          .onConflictDoUpdate({
-            target: [mapGroupLocations.mapGroupId, mapGroupLocations.lat, mapGroupLocations.lng],
-            set: {
-              heading: sql`excluded.heading`,
-              pitch: sql`excluded.pitch`,
-              zoom: sql`excluded.zoom`,
-              panoId: sql`excluded.pano_id`,
-              extraTag: sql`excluded.extra_tag`,
-              extraPanoId: sql`excluded.extra_pano_id`,
-              extraPanoDate: sql`excluded.extra_pano_date`
-            }
-          })
-          .returning({ id: mapGroupLocations.id });
-
-        upsertResult = upsertResult.concat(batchResult);
+        await trx.insert(mapGroupLocations).values(batch);
       }
-
-      // Step 2: Delete any records that weren't upserted
-      await trx.delete(mapGroupLocations).where(
-        and(
-          eq(mapGroupLocations.mapGroupId, groupId),
-          notInArray(
-            mapGroupLocations.id,
-            upsertResult.map((item) => item.id)
-          )
-        )
-      );
 
       // Step 3: Insert tags into metas table
       const metaInsertValues = Array.from(usedTags).map((tagName) => ({
