@@ -142,11 +142,13 @@
                 toast.push('Updated');
               }
             } else if (result.type === 'failure') {
+              console.log(result.data);
               const errorMessage = result.data?.message || 'Something went wrong';
               toast.push(errorMessage, {
                 theme: { '--toastBackground': 'red', '--toastColor': 'white' }
               });
             } else if (result.type === 'error') {
+              console.log(result.error);
               const errorMessage = result.error.message || 'An error occurred';
               toast.push(errorMessage, {
                 theme: { '--toastBackground': 'red', '--toastColor': 'white' }
