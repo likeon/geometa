@@ -1,7 +1,7 @@
 import { CLOUDFLARE_BEARER, CLOUDFLARE_KV_NAMESPACE_ID } from '$env/static/private';
 import { db } from '$lib/drizzle';
 import { and, eq } from 'drizzle-orm';
-import { mapGroupPermissions } from '$lib/db/schema';
+import { mapGroupPermissions, users } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
 
 export function generateRandomString(length: number): string {
@@ -90,11 +90,17 @@ export async function ensurePermissions(userId: string | undefined, groupId: num
   if (!userId || !groupId) {
     error(403, 'Permission denied');
   }
-  const permission = await db.query.mapGroupPermissions.findFirst({
-    where: and(eq(mapGroupPermissions.userId, userId), eq(mapGroupPermissions.mapGroupId, groupId))
-  });
+  const [permission, superadminUser] = await Promise.all([
+    db.query.mapGroupPermissions.findFirst({
+      where: and(
+        eq(mapGroupPermissions.userId, userId),
+        eq(mapGroupPermissions.mapGroupId, groupId)
+      )
+    }),
+    db.query.users.findFirst({ where: and(eq(users.id, userId), eq(users.isSuperadmin, true)) })
+  ]);
 
-  if (!permission) {
+  if (!(permission || superadminUser)) {
     error(403, 'Permission denied');
   }
 }
