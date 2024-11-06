@@ -73,28 +73,21 @@ export async function cloudflareKvBulkPut(data: any[]) {
     'Content-Type': 'application/json'
   };
 
-  const chunks = chunkArray(data, 1000); // Split the data into chunks of 1000
+  const chunks = chunkArray(data, 1000);
 
-  for (let i = 0; i < chunks.length; i++) {
-    const chunk = chunks[i];
+  await Promise.all(
+    chunks.map(async (chunk) => {
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: headers,
+        body: JSON.stringify(chunk)
+      });
 
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: headers,
-      body: JSON.stringify(chunk)
-    });
-
-    // Log the status and response for debugging
-    console.log(`Response status for batch ${i + 1}: ${response.status}`);
-    console.log(`Response body for batch ${i + 1}: ${await response.text()}`);
-
-    if (!response.ok) {
-      throw new Error(`Request failed with status ${response.status}`);
-    }
-
-    // Introduce a delay before the next batch request (e.g., 500ms)
-    await delay(500);
-  }
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
+    })
+  );
 }
 
 export async function ensurePermissions(userId: string | undefined, groupId: number | undefined) {
