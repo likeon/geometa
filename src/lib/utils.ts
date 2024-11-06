@@ -79,8 +79,8 @@ export async function cloudflareKvBulkPut(data: any[]) {
         body: JSON.stringify(chunk)
       });
 
-      if (response.status !== 200) {
-        throw new Error(`Request failed with status code ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
       }
     })
   );

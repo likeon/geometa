@@ -124,6 +124,9 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
   }
   if (kvData) {
     await cloudflareKvBulkPut(kvData);
-    await kvNamespace.put(kvCacheKey, JSON.stringify(Array.from(cachedKvData.entries())));
+    // skip cache for big russia map for a test
+    if (groupId != 12) {
+      await kvNamespace.put(kvCacheKey, JSON.stringify(Array.from(cachedKvData.entries())));
+    }
   }
 }
