@@ -54,7 +54,7 @@
         <span
           ><strong class="font-semibold text-gray-900">Adjust your map.</strong>
           First, you need to tag your locations in the map-making app. Only one tag per location in
-          <span class="italic">[Country Name]-[Any tag name]</span> format.</span>
+          <span class="italic">CountryName-Any tag name</span> format.</span>
       </div>
     </li>
     <li class="flex gap-x-3">
