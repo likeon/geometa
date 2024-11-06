@@ -59,9 +59,15 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
     .where(eq(metas.mapGroupId, groupId));
   const metasGroupped = groupMetas(metasWithLocationsCount);
 
-  const dbPromises = [];
-  for (const metaIds of metasGroupped) {
-    dbPromises.push(
+  const dbValues = [];
+
+  const BATCH_SIZE = 10;
+  for (let i = 0; i < metasGroupped.length; i += BATCH_SIZE) {
+    // Create a batch of `metaIds` groups
+    const batch = metasGroupped.slice(i, i + BATCH_SIZE);
+
+    // Map each group of `metaIds` to a database promise
+    const batchPromises = batch.map((metaIds) =>
       db
         .select({
           geoguessrId: maps.geoguessrId,
@@ -70,19 +76,23 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
           metaName: mapLocations.metaName,
           metaNoteHtml: mapLocations.metaNoteHtml,
           images: sql<string | null>`
-          (SELECT GROUP_CONCAT(mi.image_url)
-           FROM meta_images mi
-           WHERE mi.meta_id = ${mapLocations.metaId})
-        `
+        (SELECT GROUP_CONCAT(mi.image_url)
+         FROM meta_images mi
+         WHERE mi.meta_id = ${mapLocations.metaId})
+       `
         })
         .from(mapLocations)
         .innerJoin(maps, eq(mapLocations.mapId, maps.id))
         .where(inArray(mapLocations.metaId, metaIds))
         .orderBy(asc(maps.id))
     );
+
+    // Execute the current batch in parallel
+    const batchResults = await Promise.all(batchPromises);
+
+    // Flatten and add results from this batch to dbValues
+    dbValues.push(...batchResults.flat());
   }
-  const dbValuesArray = await Promise.all(dbPromises);
-  const dbValues = dbValuesArray.flat();
 
   const kvCacheKey = `cache:userscript:${groupId}`;
   const cachedKvJson = await kvNamespace.get(kvCacheKey);
