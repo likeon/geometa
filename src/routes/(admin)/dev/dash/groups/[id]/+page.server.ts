@@ -1,6 +1,6 @@
 import { db } from '$lib/drizzle';
 import type { PageServerLoad } from './$types';
-import { and, asc, eq, not, notInArray, sql } from 'drizzle-orm';
+import { and, asc, eq, not, sql } from 'drizzle-orm';
 import {
   levels,
   mapGroupLocations,
@@ -264,7 +264,7 @@ export const actions = {
     const meta = await db.query.metas.findFirst({ where: eq(metas.id, form.data.metaId) });
     await ensurePermissions(locals.user?.id, meta?.mapGroupId);
 
-    const imageName = `${generateRandomString(36)}.${getFileExtension(form.data.file)}`;
+    const imageName = `${meta!.mapGroupId}/${generateRandomString(36)}.${getFileExtension(form.data.file)}`;
     await uploadFile(form.data.file, imageName);
 
     const url = `https://static${dev ? '-dev' : ''}.learnablemeta.com/${imageName}`;
