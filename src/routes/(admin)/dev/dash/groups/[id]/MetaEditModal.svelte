@@ -27,30 +27,55 @@
     imageUploadForm: SuperValidated<Infer<MapUploadSchema>>;
   } = $props();
 
-  const { form, errors, constraints, enhance } = superForm(metaForm, {
+  const { form, errors, constraints, enhance, isTainted } = superForm(metaForm, {
     dataType: 'json',
     onResult() {
       isMetaModalOpen = false;
     }
   });
 
+  type MetaFormDataType = Infer<InsertMetasSchema>;
+  let savedForm: MetaFormDataType | null = null;
+
+  function fillForm(meta: PageData['group']['metas'][number] | null) {
+    if (savedForm) {
+      $form = savedForm;
+      return;
+    }
+    if (meta) {
+      form.update(
+        ($form) => {
+          $form.id = meta.id;
+          $form.mapGroupId = meta.mapGroupId;
+          $form.tagName = meta.tagName;
+          $form.name = meta.name;
+          $form.note = meta.note;
+          $form.levels = meta.metaLevels.map((item) => item.levelId);
+          return $form;
+        },
+        { taint: false }
+      );
+    } else {
+      form.update(
+        ($form) => {
+          $form.id = undefined;
+          $form.mapGroupId = groupId;
+          $form.tagName = '';
+          $form.name = '';
+          $form.note = '';
+          $form.levels = [];
+          return $form;
+        },
+        { taint: false }
+      );
+    }
+  }
+
   $effect(() => {
     if (isMetaModalOpen) {
-      if (selectedMeta) {
-        $form.id = selectedMeta.id;
-        $form.mapGroupId = selectedMeta.mapGroupId;
-        $form.tagName = selectedMeta.tagName;
-        $form.name = selectedMeta.name;
-        $form.note = selectedMeta.note;
-        $form.levels = selectedMeta.metaLevels.map((item) => item.levelId);
-      } else {
-        $form.id = undefined;
-        $form.mapGroupId = groupId;
-        $form.tagName = '';
-        $form.name = '';
-        $form.note = '';
-        $form.levels = [];
-      }
+      fillForm(selectedMeta);
+    } else {
+      savedForm = null;
     }
   });
 
@@ -63,7 +88,7 @@
 
 <Modal bind:open={isMetaModalOpen}>
   <Tabs contentClass="p-4 mt-4" tabStyle="underline">
-    <TabItem open title="Info">
+    <TabItem open title="Info" on:click={() => fillForm(selectedMeta)}>
       <form action="?/updateMeta" class="flex flex-col space-y-6" method="post" use:enhance>
         <Input type="hidden" name="id" bind:value={$form.id} />
         <Input type="hidden" name="mapGroupId" bind:value={$form.mapGroupId} />
@@ -106,7 +131,13 @@
       </form>
     </TabItem>
     {#if selectedMeta?.id}
-      <TabItem title="Images">
+      <TabItem
+        title="Images"
+        on:click={() => {
+          if (isTainted()) {
+            savedForm = $form;
+          }
+        }}>
         <MetaImages data={imageUploadForm} {selectedMeta} />
       </TabItem>
       <form action="?/deleteMeta" method="post" onsubmit={confirmDelete}>
