@@ -74,9 +74,8 @@ export async function cloudflareKvBulkPut(data: any[]) {
   };
 
   const chunks = chunkArray(data, 1000);
-
-  await Promise.all(
-    chunks.map(async (chunk) => {
+  for (const chunk of chunks) {
+    try {
       const response = await fetch(url, {
         method: 'PUT',
         headers: headers,
@@ -86,8 +85,10 @@ export async function cloudflareKvBulkPut(data: any[]) {
       if (!response.ok) {
         throw new Error(`Request failed with status ${response.status}`);
       }
-    })
-  );
+    } catch (error) {
+      throw new Error(`There was an error: ${error}`);
+    }
+  }
 }
 
 export async function ensurePermissions(userId: string | undefined, groupId: number | undefined) {

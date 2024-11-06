@@ -125,6 +125,9 @@ export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespa
   }
   if (kvData) {
     await cloudflareKvBulkPut(kvData);
-    await kvNamespace.put(kvCacheKey, JSON.stringify(Array.from(cachedKvData.entries())));
+    // add saving to localdatabase and then remove this
+    if (groupId != 12) {
+      await kvNamespace.put(kvCacheKey, JSON.stringify(Array.from(cachedKvData.entries())));
+    }
   }
 }

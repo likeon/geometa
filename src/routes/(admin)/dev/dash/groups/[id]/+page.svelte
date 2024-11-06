@@ -144,9 +144,11 @@
               if (data.group.id == 1) {
                 const updateCount = result.data?.updateCount || 0;
                 toast.push(`Updated ${updateCount} map(s)`);
-              } else {
-                toast.push('Updated');
               }
+
+              toast.push('Updated', {
+                duration: 10000
+              });
             } else if (result.type === 'failure') {
               console.log(result.data);
               const errorMessage = result.data?.message || 'Something went wrong';
