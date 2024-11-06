@@ -62,6 +62,7 @@ function delay(ms: number) {
 }
 
 export async function cloudflareKvBulkPut(data: any[]) {
+  console.log('In KvBultPut function');
   const url = `https://api.cloudflare.com/client/v4/accounts/a38064a092904c941dedaf866ea6977e/storage/kv/namespaces/${CLOUDFLARE_KV_NAMESPACE_ID}/bulk`;
 
   if (!CLOUDFLARE_KV_NAMESPACE_ID || !CLOUDFLARE_BEARER) {
@@ -72,7 +73,7 @@ export async function cloudflareKvBulkPut(data: any[]) {
     Authorization: `Bearer ${CLOUDFLARE_BEARER}`,
     'Content-Type': 'application/json'
   };
-
+  let count = 0;
   const chunks = chunkArray(data, 1000);
   for (const chunk of chunks) {
     try {
@@ -83,9 +84,16 @@ export async function cloudflareKvBulkPut(data: any[]) {
       });
 
       if (!response.ok) {
+        console.log('here1');
+        console.log(response.status);
         throw new Error(`Request failed with status ${response.status}`);
       }
+
+      console.log('request was good ' + count);
+      count++;
     } catch (error) {
+      console.log('here2');
+      console.log(error);
       throw new Error(`There was an error: ${error}`);
     }
   }
