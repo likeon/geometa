@@ -6,6 +6,7 @@ import { mount } from 'svelte';
 
 function changelog() {
   return [
+    { '0.70': 'Fixed carousel controls jumping and colored the note links' },
     { '0.69': 'Display multiple images with carousel' },
     { '0.68': 'Use panoId as unique location identifier, allow html in note' },
     { '0.67': 'Updated to Svelte 5' },

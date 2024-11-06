@@ -47,15 +47,26 @@
     position: relative;
   }
 
-  .controls {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
+  .image-wrapper {
     width: 100%;
     display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .responsive-image {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .controls {
+    position: absolute;
+    top: 20px; /* Small offset from the top */
+    left: 0;
+    right: 0;
+    display: flex;
     justify-content: space-between;
-    transform: translateY(-50%);
     pointer-events: none;
   }
 
@@ -75,7 +86,6 @@
     bottom: 15px;
     left: 0;
     right: 0;
-    width: 100%;
     display: flex;
     justify-content: center;
   }
@@ -92,18 +102,5 @@
 
   .active {
     background-color: white;
-  }
-
-  .image-wrapper {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .responsive-image {
-    max-width: 100%;
-    height: auto;
-    display: block;
   }
 </style>

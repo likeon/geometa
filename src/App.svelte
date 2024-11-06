@@ -203,6 +203,14 @@
     display: inline;
   }
 
+  :global(.geometa-note a) {
+    color: #188bd2;
+  }
+
+  :global(.geometa-note a:hover) {
+    text-decoration: underline;
+  }
+
   :global(.geometa-note ul li) {
     list-style-type: disc;
     margin-left: 1rem;
