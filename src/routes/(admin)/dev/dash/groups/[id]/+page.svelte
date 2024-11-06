@@ -90,9 +90,15 @@
     const meta = metas.find((meta) => meta.id == selectedMetaId);
     return meta != undefined ? meta : null;
   });
-  function handleModalSuccess() {
-    toast.push('Successfully uploaded locations!');
-  }
+  let numberOfLocationsUploaded = $state(0);
+
+  $effect(() => {
+    if (numberOfLocationsUploaded != 0) {
+      toast.push(`Successfully uploaded ${numberOfLocationsUploaded} locations!`, {
+        duration: 5000
+      });
+    }
+  });
 
   function addMeta() {
     selectedMetaId = -1;
@@ -204,6 +210,6 @@
   {selectedMeta}
   imageUploadForm={data.imageUploadForm} />
 
-<MapUploadModal bind:isUploadModalOpen data={data.mapUploadForm} on:success={handleModalSuccess} />
+<MapUploadModal bind:isUploadModalOpen bind:numberOfLocationsUploaded data={data.mapUploadForm} />
 
 <SvelteToast />

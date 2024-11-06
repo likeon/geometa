@@ -8,15 +8,19 @@
 
   interface Props {
     isUploadModalOpen: boolean;
+    numberOfLocationsUploaded: number;
     data: SuperValidated<Infer<MapUploadSchema>>;
   }
 
-  let { isUploadModalOpen = $bindable(), data }: Props = $props();
-  const dispatch = createEventDispatcher();
+  let {
+    isUploadModalOpen = $bindable(),
+    numberOfLocationsUploaded = $bindable(),
+    data
+  }: Props = $props();
   const { form, errors, enhance, submit, reset } = superForm(data, {
     onResult({ result }) {
       if (result.type == 'success') {
-        dispatch('success');
+        numberOfLocationsUploaded = result.data?.numberOfLocations || 0;
         isUploadModalOpen = false;
       }
 
@@ -57,7 +61,7 @@
   <div class="text-green-900">
     <p>
       Each location <strong>must</strong> have exactly one tag in
-      <span class="whitespace-nowrap font-semibold">CountryName-Your Meta Name</span> format!
+      <span class="whitespace-nowrap font-semibold">CountryName-Your Meta Name]</span> format!
     </p>
     <p>Examples:</p>
     <ol class="list-disc ml-5">
