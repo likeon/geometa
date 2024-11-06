@@ -34,6 +34,7 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
+import rehypeExternalLinks from 'rehype-external-links';
 
 const insertMetasSchema = createInsertSchema(metas)
   .extend({ levels: z.array(z.number()) })
@@ -133,6 +134,7 @@ export const actions = {
         .use(remarkParse)
         .use(remarkRehype)
         .use(rehypeSanitize)
+        .use(rehypeExternalLinks, { target: '_blank' })
         .use(rehypeStringify)
         .process(dataNoId.note)
     );
@@ -328,6 +330,7 @@ export const actions = {
         .use(remarkParse)
         .use(remarkRehype)
         .use(rehypeSanitize)
+        .use(rehypeExternalLinks, { target: '_blank' })
         .use(rehypeStringify)
         .process(meta.note);
       await db

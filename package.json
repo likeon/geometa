@@ -65,6 +65,7 @@
     "drizzle-orm": "^0.33.0",
     "drizzle-zod": "^0.5.1",
     "lucia": "^3.2.0",
+    "rehype-external-links": "^3.0.0",
     "rehype-sanitize": "^6.0.0",
     "zod": "^3.23.8"
   }
