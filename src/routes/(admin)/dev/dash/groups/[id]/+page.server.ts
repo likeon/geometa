@@ -199,6 +199,11 @@ export const actions = {
           break;
         }
 
+        if (issue.code == 'too_big' && issue.path.includes('tags')) {
+          errorString = 'At least one of the locations has more than one tag.';
+          break;
+        }
+
         errorString = "JSON doesn't match the expected format";
         break;
       }
@@ -244,6 +249,11 @@ export const actions = {
       }));
       await trx.insert(metas).values(metaInsertValues).onConflictDoNothing();
     });
+
+    return {
+      status: 200,
+      numberOfLocations: upsertValues.length
+    };
   },
   uploadMetaImages: async ({ request, locals }) => {
     const form = await superValidate(request, zod(imageUploadSchema));
