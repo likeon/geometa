@@ -57,6 +57,10 @@ export function chunkArray<T>(array: T[], chunkSize: number): T[][] {
   return chunks;
 }
 
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function cloudflareKvBulkPut(data: any[]) {
   const url = `https://api.cloudflare.com/client/v4/accounts/a38064a092904c941dedaf866ea6977e/storage/kv/namespaces/${CLOUDFLARE_KV_NAMESPACE_ID}/bulk`;
 
@@ -69,21 +73,28 @@ export async function cloudflareKvBulkPut(data: any[]) {
     'Content-Type': 'application/json'
   };
 
-  const chunks = chunkArray(data, 1000);
+  const chunks = chunkArray(data, 1000); // Split the data into chunks of 1000
 
-  await Promise.all(
-    chunks.map(async (chunk) => {
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: headers,
-        body: JSON.stringify(chunk)
-      });
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i];
 
-      if (!response.ok) {
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-    })
-  );
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers: headers,
+      body: JSON.stringify(chunk)
+    });
+
+    // Log the status and response for debugging
+    console.log(`Response status for batch ${i + 1}: ${response.status}`);
+    console.log(`Response body for batch ${i + 1}: ${await response.text()}`);
+
+    if (!response.ok) {
+      throw new Error(`Request failed with status ${response.status}`);
+    }
+
+    // Introduce a delay before the next batch request (e.g., 500ms)
+    await delay(500);
+  }
 }
 
 export async function ensurePermissions(userId: string | undefined, groupId: number | undefined) {
