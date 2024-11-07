@@ -1,6 +1,6 @@
 import { db } from '$lib/drizzle';
 import type { PageServerLoad } from './$types';
-import { and, asc, eq, not, sql } from 'drizzle-orm';
+import { and, asc, eq, isNull, lt, not, notInArray, or, sql } from 'drizzle-orm';
 import {
   levels,
   mapGroupLocations,
@@ -80,6 +80,8 @@ type UpsertValue = {
   extraTag: string;
   extraPanoId: string | null;
   extraPanoDate: string | null | undefined;
+  updatedAt: number;
+  modifiedAt: number;
 };
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -212,6 +214,8 @@ export const actions = {
       return setError(form, 'file', errorString);
     }
 
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+
     const upsertValues: UpsertValue[] = [];
     const usedTags = new Set<string>();
     validationResult.data.customCoordinates.forEach((location) => {
@@ -225,29 +229,60 @@ export const actions = {
         panoId: location.panoId,
         extraTag: location.extra.tags[0],
         extraPanoId: location.extra.panoId || null,
-        extraPanoDate: location.extra.panoDate
+        extraPanoDate: location.extra.panoDate,
+        updatedAt: currentTimestamp,
+        modifiedAt: currentTimestamp // default value - not being set on conflict
       });
       usedTags.add(location.extra.tags[0]);
     });
 
-    await db.transaction(async (trx) => {
-      // Step 1: delete all locations from map group
-      await trx.delete(mapGroupLocations).where(and(eq(mapGroupLocations.mapGroupId, groupId)));
+    // upsert data
+    const BATCH_SIZE = 1000;
 
-      //  Step 2: Batched insert operation
-      const BATCH_SIZE = 1000;
+    await db.transaction(async (trx) => {
+      // Step 1: Batched upsert operation
       for (let i = 0; i < upsertValues.length; i += BATCH_SIZE) {
         const batch = upsertValues.slice(i, i + BATCH_SIZE);
 
-        await trx.insert(mapGroupLocations).values(batch);
+        await trx
+          .insert(mapGroupLocations)
+          .values(batch)
+          .onConflictDoUpdate({
+            target: [mapGroupLocations.mapGroupId, mapGroupLocations.panoId],
+            set: {
+              heading: sql`excluded.heading`,
+              pitch: sql`excluded.pitch`,
+              zoom: sql`excluded.zoom`,
+              panoId: sql`excluded.pano_id`,
+              extraTag: sql`excluded.extra_tag`,
+              extraPanoId: sql`excluded.extra_pano_id`,
+              extraPanoDate: sql`excluded.extra_pano_date`,
+              updatedAt: sql`excluded.updated_at`
+            }
+          })
+          .returning({ id: mapGroupLocations.id });
       }
+
+      // Step 2: Delete any records that weren't upserted
+      await trx
+        .delete(mapGroupLocations)
+        .where(
+          and(
+            eq(mapGroupLocations.mapGroupId, groupId),
+            or(
+              isNull(mapGroupLocations.updatedAt),
+              lt(mapGroupLocations.updatedAt, currentTimestamp)
+            )
+          )
+        );
 
       // Step 3: Insert tags into metas table
       const metaInsertValues = Array.from(usedTags).map((tagName) => ({
         mapGroupId: groupId,
         tagName: tagName,
         name: '',
-        note: ''
+        note: '',
+        modifiedAt: currentTimestamp
       }));
       await trx.insert(metas).values(metaInsertValues).onConflictDoNothing();
     });

@@ -246,6 +246,27 @@
       "when": 1730966082641,
       "tag": "0034_gorgeous_banshee",
       "breakpoints": true
+    },
+    {
+      "idx": 35,
+      "version": "6",
+      "when": 1730978543353,
+      "tag": "0035_black_sugar_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "6",
+      "when": 1730979549871,
+      "tag": "0036_lumpy_wrecking_crew",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "6",
+      "when": 1730979703079,
+      "tag": "0037_sudden_blink",
+      "breakpoints": true
     }
   ]
 }

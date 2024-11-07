@@ -37,10 +37,12 @@ export const mapGroupLocations = sqliteTable(
     panoId: text('pano_id'),
     extraTag: text('extra_tag').notNull(),
     extraPanoId: text('extra_pano_id'),
-    extraPanoDate: text('extra_pano_date')
+    extraPanoDate: text('extra_pano_date'),
+    updatedAt: integer('updated_at'),
+    modifiedAt: integer('modified_at')
   },
   (t) => ({
-    mapLocationUnique: uniqueIndex('map_group_locations_unique').on(t.mapGroupId, t.lat, t.lng)
+    mapLocationUnique: uniqueIndex('map_group_locations_unique').on(t.mapGroupId, t.panoId)
   })
 );
 export const mapGroupLocationsRelations = relations(mapGroupLocations, ({ one }) => ({
@@ -142,7 +144,8 @@ export const metas = sqliteTable(
     note: text('note').notNull(),
     noteHtml: text('note_html').notNull().default(''),
     noteFromPlonkit: integer('note_from_plonkit', { mode: 'boolean' }).notNull().default(false),
-    hasImage: integer('has_image', { mode: 'boolean' }).notNull().default(false)
+    hasImage: integer('has_image', { mode: 'boolean' }).notNull().default(false),
+    modifiedAt: integer('modified_at')
   },
   (t) => ({
     metaUnique: uniqueIndex('metas_unique').on(t.mapGroupId, t.tagName)
