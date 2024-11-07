@@ -9,12 +9,14 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
 
-const insertMapsSchema = createInsertSchema(maps).extend({
-  includeFilters: z.array(z.string()),
-  excludeFilters: z.array(z.string()),
-  levels: z.array(z.number()),
-  ordering: z.coerce.number()
-});
+const insertMapsSchema = createInsertSchema(maps)
+  .extend({
+    includeFilters: z.array(z.string()),
+    excludeFilters: z.array(z.string()),
+    levels: z.array(z.number()),
+    ordering: z.coerce.number()
+  })
+  .omit({ authors: true });
 export type InsertMapsSchema = typeof insertMapsSchema;
 
 export const load = async ({ locals, params }) => {
