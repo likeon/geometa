@@ -140,12 +140,13 @@ export const actions = {
         .use(rehypeStringify)
         .process(dataNoId.note)
     );
+    const currentTimestamp = Math.floor(Date.now() / 1000);
     let metaId;
 
     if (id === undefined) {
       const insertResult = await db
         .insert(metas)
-        .values({ ...form.data, noteHtml: noteHtml })
+        .values({ ...form.data, noteHtml: noteHtml, modifiedAt: currentTimestamp })
         .returning({ insertedId: metas.id });
       metaId = insertResult[0].insertedId;
     } else {
@@ -153,7 +154,7 @@ export const actions = {
       await ensurePermissions(locals.user?.id, savedData?.mapGroupId);
       await db
         .update(metas)
-        .set({ ...dataNoId, noteHtml: noteHtml })
+        .set({ ...dataNoId, noteHtml: noteHtml, modifiedAt: currentTimestamp })
         .where(eq(metas.id, id));
       metaId = id;
     }
