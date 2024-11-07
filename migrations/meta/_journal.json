@@ -232,6 +232,13 @@
       "when": 1730399860288,
       "tag": "0032_sturdy_skullbuster",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "6",
+      "when": 1730965450353,
+      "tag": "0033_peaceful_thundra",
+      "breakpoints": true
     }
   ]
 }

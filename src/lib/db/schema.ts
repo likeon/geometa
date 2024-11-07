@@ -58,6 +58,7 @@ export const maps = sqliteTable(
     geoguessrId: text('geoguessr_id').notNull(),
     description: text('description'),
     isPublished: integer('is_published', { mode: 'boolean' }).notNull().default(false),
+    isCommunity: integer('is_community', { mode: 'boolean' }).notNull().default(false),
     ordering: integer('ordering').notNull().default(0),
     autoUpdate: integer('auto_update', { mode: 'boolean' }).notNull().default(false)
   },

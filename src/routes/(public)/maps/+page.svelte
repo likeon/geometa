@@ -1,6 +1,7 @@
 <script>
-  import { Button } from 'flowbite-svelte';
+  import { Button, TabItem, Tabs } from 'flowbite-svelte';
   import background from '$lib/assets/background.jpg';
+
   let { data } = $props();
 </script>
 
@@ -30,29 +31,64 @@
     <div class="flow-root pb-24 sm:pb-32">
       <div class="-mt-80">
         <div class="container">
-          <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            {#each data.mapsToPublish as map}
-              <div
-                class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10">
-                <div>
-                  <h3 class="text-xl font-semibold leading-7 text-green-600">{map.name}</h3>
-                  <div class="mt-4 flex items-baseline gap-x-2">
-                    <span class="text-xl font-bold tracking-tight text-gray-900"
-                      >{map.locationsCount}+ locations</span>
+          <Tabs
+            tabStyle="full"
+            defaultClass="flex rounded-lg divide-x rtl:divide-x-reverse divide-gray-200 shadow dark:divide-gray-700"
+            contentClass="mt-5">
+            <TabItem class="w-full" open>
+              <span slot="title">Official</span>
+
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                {#each data.mapsToPublish as map}
+                  <div
+                    class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10">
+                    <div>
+                      <h3 class="text-xl font-semibold leading-7 text-green-600">{map.name}</h3>
+                      <div class="mt-4 flex items-baseline gap-x-2">
+                        <span class="text-xl font-bold tracking-tight text-gray-900"
+                          >{map.locationsCount}+ locations</span>
+                      </div>
+                      <p class="mt-6 text-base leading-7 text-gray-600">
+                        {map.description}
+                      </p>
+                    </div>
+                    <Button
+                      class="mt-7"
+                      href={'https://www.geoguessr.com/maps/' + map.geoguessrId}
+                      target="_blank"
+                      >Play
+                    </Button>
                   </div>
-                  <p class="mt-6 text-base leading-7 text-gray-600">
-                    {map.description}
-                  </p>
-                </div>
-                <Button
-                  class="mt-7"
-                  href={'https://www.geoguessr.com/maps/' + map.geoguessrId}
-                  target="_blank"
-                  >Play
-                </Button>
+                {/each}
               </div>
-            {/each}
-          </div>
+            </TabItem>
+            <TabItem class="w-full">
+              <span slot="title">Community</span>
+              <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                {#each data.communityMaps as map}
+                  <div
+                    class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10">
+                    <div>
+                      <h3 class="text-xl font-semibold leading-7 text-green-600">{map.name}</h3>
+                      <div class="mt-4 flex items-baseline gap-x-2">
+                        <span class="text-xl font-bold tracking-tight text-gray-900"
+                          >{map.locationsCount}+ locations</span>
+                      </div>
+                      <p class="mt-6 text-base leading-7 text-gray-600">
+                        {map.description}
+                      </p>
+                    </div>
+                    <Button
+                      class="mt-7"
+                      href={'https://www.geoguessr.com/maps/' + map.geoguessrId}
+                      target="_blank"
+                      >Play
+                    </Button>
+                  </div>
+                {/each}
+              </div>
+            </TabItem>
+          </Tabs>
         </div>
       </div>
     </div>
