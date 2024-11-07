@@ -5,7 +5,7 @@ import { maps } from '$lib/db/schema';
 export const load = async () => {
   // only filter maps from our map group for now(id: 1)
 
-  const mapsToPublish = await db.query.maps.findMany({
+  const mapsToPublishPromise = db.query.maps.findMany({
     extras: {
       locationsCount:
         sql`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`.as(
@@ -15,7 +15,7 @@ export const load = async () => {
     where: and(eq(maps.isPublished, true), eq(maps.mapGroupId, 1)),
     orderBy: [desc(maps.ordering), asc(maps.id)]
   });
-  const communityMaps = await db.query.maps.findMany({
+  const communityMapsPromise = db.query.maps.findMany({
     extras: {
       locationsCount:
         sql`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`.as(
@@ -32,5 +32,9 @@ export const load = async () => {
       asc(maps.id)
     ]
   });
+  const [mapsToPublish, communityMaps] = await Promise.all([
+    mapsToPublishPromise,
+    communityMapsPromise
+  ]);
   return { mapsToPublish, communityMaps };
 };
