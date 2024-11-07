@@ -59,6 +59,7 @@ export const maps = sqliteTable(
     description: text('description'),
     isPublished: integer('is_published', { mode: 'boolean' }).notNull().default(false),
     isCommunity: integer('is_community', { mode: 'boolean' }).notNull().default(false),
+    authors: text('authors').default(''),
     ordering: integer('ordering').notNull().default(0),
     autoUpdate: integer('auto_update', { mode: 'boolean' }).notNull().default(false)
   },

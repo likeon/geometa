@@ -239,6 +239,13 @@
       "when": 1730965450353,
       "tag": "0033_peaceful_thundra",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "6",
+      "when": 1730966082641,
+      "tag": "0034_gorgeous_banshee",
+      "breakpoints": true
     }
   ]
 }
