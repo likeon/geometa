@@ -1,133 +1,76 @@
 import { db } from '$lib/drizzle';
-import { mapLocations, maps, metas } from '$lib/db/schema';
-import { asc, eq, sql, inArray } from 'drizzle-orm';
-import { cloudflareKvBulkPut, getCountryFromTagName, isDeepEqual } from '$lib/utils';
-import type { KVNamespace } from '@cloudflare/workers-types';
+import { mapGroups, mapLocations, maps } from '$lib/db/schema';
+import { and, asc, eq, gt, sql } from 'drizzle-orm';
+import { cloudflareKvBulkPut, getCountryFromTagName } from '$lib/utils';
 
-type UserScriptDataItem = {
-  country: string;
-  metaName: string;
-  note: string;
-  plonkitCountryUrl: string;
-  images: string[];
-};
-
-type MetaWithLocation = {
-  metaId: number;
-  locations: number;
-};
-
-function groupMetas(items: MetaWithLocation[]): number[][] {
-  const result: number[][] = [];
-  let currentGroup: MetaWithLocation[] = [];
-  let currentLocationsSum = 0;
-
-  for (const item of items) {
-    // If the item has locations >= 1000, put it in its own group
-    if (item.locations >= 1000) {
-      result.push([item.metaId]);
-      continue;
-    }
-
-    // If adding the item would exceed 1000 locations, start a new group
-    if (currentLocationsSum + item.locations > 1000) {
-      result.push(currentGroup.map((metaItem) => metaItem.metaId));
-      currentGroup = [];
-      currentLocationsSum = 0;
-    }
-
-    // Add the item to the current group
-    currentGroup.push(item);
-    currentLocationsSum += item.locations;
+export async function syncUserScriptData(groupId: number) {
+  const currentTimestamp = Math.floor(Date.now() / 1000);
+  const group = await db.query.mapGroups.findFirst({ where: eq(mapGroups.id, groupId) });
+  if (!group) {
+    throw new Error(`Invalid group id`);
   }
 
-  // Add the last group if it's not empty
-  if (currentGroup.length > 0) {
-    result.push(currentGroup.map((metaItem) => metaItem.metaId));
-  }
+  let offset = 0;
+  const iterateOver = 10000;
+  while (true) {
+    const conditions = [eq(maps.mapGroupId, groupId)];
 
-  return result;
-}
-
-export async function syncUserScriptData(groupId: number, kvNamespace: KVNamespace) {
-  const metasWithLocationsCount = await db
-    .select({
-      metaId: metas.id,
-      locations: sql<number>`(select COUNT(*) from location_metas_view lmv where lmv.meta_id = "metas"."id")`
-    })
-    .from(metas)
-    .where(eq(metas.mapGroupId, groupId));
-  const metasGroupped = groupMetas(metasWithLocationsCount);
-
-  const dbPromises = [];
-  for (const metaIds of metasGroupped) {
-    dbPromises.push(
-      db
-        .select({
-          geoguessrId: maps.geoguessrId,
-          panoId: mapLocations.panoId,
-          tagName: mapLocations.tagName,
-          metaName: mapLocations.metaName,
-          metaNoteHtml: mapLocations.metaNoteHtml,
-          images: sql<string | null>`
+    if (group.syncedAt != null) {
+      conditions.push(gt(mapLocations.maxModifiedAt, group.syncedAt));
+    }
+    const dbValues = await db
+      .select({
+        geoguessrId: maps.geoguessrId,
+        panoId: mapLocations.panoId,
+        tagName: mapLocations.tagName,
+        metaName: mapLocations.metaName,
+        metaNoteHtml: mapLocations.metaNoteHtml,
+        images: sql<string | null>`
           (SELECT GROUP_CONCAT(mi.image_url)
            FROM meta_images mi
            WHERE mi.meta_id = ${mapLocations.metaId})
         `
-        })
-        .from(mapLocations)
-        .innerJoin(maps, eq(mapLocations.mapId, maps.id))
-        .where(inArray(mapLocations.metaId, metaIds))
-        .orderBy(asc(maps.id))
-    );
-  }
+      })
+      .from(mapLocations)
+      .innerJoin(maps, eq(mapLocations.mapId, maps.id))
+      .where(and(...conditions))
+      .orderBy(asc(maps.id), asc(mapLocations.metaId))
+      .limit(iterateOver)
+      .offset(offset);
+    const kvData = [];
+    for (const item of dbValues) {
+      const key = `${item.geoguessrId}:${item.panoId}`;
+      const countryName = getCountryFromTagName(item.tagName);
+      const plonkitCountryUrl = `https://www.plonkit.net/${countryName.toLowerCase().replace(' ', '-')}`;
 
-  const dbValuesArray = await Promise.all(dbPromises);
-  const dbValues = dbValuesArray.flat();
+      let images: string[];
+      if (item.images) {
+        images = item.images
+          .split(',')
+          .map((url) => `https://learnablemeta.com/cdn-cgi/image/format=avif,quality=80/${url}`);
+      } else {
+        images = [];
+      }
 
-  const kvCacheKey = `cache:userscript:${groupId}`;
-  const cachedKvJson = await kvNamespace.get(kvCacheKey);
-
-  let cachedKvData: Map<string, UserScriptDataItem>;
-  if (cachedKvJson) {
-    cachedKvData = new Map(JSON.parse(cachedKvJson));
-  } else {
-    cachedKvData = new Map();
-  }
-
-  const kvData = [];
-  for (const item of dbValues) {
-    const key = `${item.geoguessrId}:${item.panoId}`;
-    const countryName = getCountryFromTagName(item.tagName);
-    const plonkitCountryUrl = `https://www.plonkit.net/${countryName.toLowerCase().replace(' ', '-')}`;
-
-    let images: string[];
-    if (item.images) {
-      images = item.images
-        .split(',')
-        .map((url) => `https://learnablemeta.com/cdn-cgi/image/format=avif,quality=80/${url}`);
-    } else {
-      images = [];
-    }
-
-    const value = {
-      country: getCountryFromTagName(item.tagName),
-      metaName: item.metaName,
-      note: item.metaNoteHtml,
-      plonkitCountryUrl: plonkitCountryUrl,
-      images: images
-    };
-    const cachedValue = cachedKvData.get(key);
-    if (!isDeepEqual(value, cachedValue)) {
-      cachedKvData.set(key, value);
+      const value = {
+        country: getCountryFromTagName(item.tagName),
+        metaName: item.metaName,
+        note: item.metaNoteHtml,
+        plonkitCountryUrl: plonkitCountryUrl,
+        images: images
+      };
       kvData.push({ key: key, value: JSON.stringify(value), base64: false });
     }
-  }
-  if (kvData) {
-    await cloudflareKvBulkPut(kvData);
-    // add saving to localdatabase and then remove this
-    if (groupId != 12) {
-      await kvNamespace.put(kvCacheKey, JSON.stringify(Array.from(cachedKvData.entries())));
+
+    if (kvData) {
+      await cloudflareKvBulkPut(kvData);
+    }
+    console.debug(kvData.length);
+    if (kvData.length < iterateOver) {
+      break;
+    } else {
+      offset = offset + iterateOver;
     }
   }
+  await db.update(mapGroups).set({ syncedAt: currentTimestamp }).where(eq(mapGroups.id, groupId));
 }

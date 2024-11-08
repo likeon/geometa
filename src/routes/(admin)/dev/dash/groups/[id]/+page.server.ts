@@ -333,12 +333,8 @@ export const actions = {
     const groupId = getGroupId(event.params);
     await ensurePermissions(event.locals.user?.id, groupId);
 
-    if (event.platform === undefined) {
-      error(500, 'platform unavailable');
-    }
-
     try {
-      await syncUserScriptData(groupId, event.platform.env.geometa_kv);
+      await syncUserScriptData(groupId);
       const TRAUSI_GROUP_ID = 1;
       let updateCount = 0;
       if (groupId == TRAUSI_GROUP_ID) {

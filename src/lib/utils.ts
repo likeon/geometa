@@ -74,7 +74,7 @@ export async function cloudflareKvBulkPut(data: any[]) {
     'Content-Type': 'application/json'
   };
   let count = 0;
-  const chunks = chunkArray(data, 1000);
+  const chunks = chunkArray(data, 10000);
   for (const chunk of chunks) {
     try {
       const response = await fetch(url, {

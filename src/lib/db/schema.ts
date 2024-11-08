@@ -12,7 +12,8 @@ export const metaSuggestions = sqliteTable('meta_suggestions', {
 
 export const mapGroups = sqliteTable('map_groups', {
   id: integer('id').primaryKey(),
-  name: text('name').notNull()
+  name: text('name').notNull(),
+  syncedAt: integer('synced_at')
 });
 
 export const mapGroupsRelations = relations(mapGroups, ({ many }) => ({
@@ -39,7 +40,7 @@ export const mapGroupLocations = sqliteTable(
     extraPanoId: text('extra_pano_id'),
     extraPanoDate: text('extra_pano_date'),
     updatedAt: integer('updated_at'),
-    modifiedAt: integer('modified_at')
+    modifiedAt: integer('modified_at').default(1730419200).notNull()
   },
   (t) => ({
     mapLocationUnique: uniqueIndex('map_group_locations_unique').on(t.mapGroupId, t.panoId)
@@ -145,7 +146,7 @@ export const metas = sqliteTable(
     noteHtml: text('note_html').notNull().default(''),
     noteFromPlonkit: integer('note_from_plonkit', { mode: 'boolean' }).notNull().default(false),
     hasImage: integer('has_image', { mode: 'boolean' }).notNull().default(false),
-    modifiedAt: integer('modified_at')
+    modifiedAt: integer('modified_at').default(1730419200).notNull()
   },
   (t) => ({
     metaUnique: uniqueIndex('metas_unique').on(t.mapGroupId, t.tagName)
@@ -224,7 +225,8 @@ export const mapLocations = sqliteView('map_locations_view', {
   metaNote: text('meta_note').notNull(),
   metaNoteHtml: text('meta_note_html').notNull(),
   metaNoteFromPlonkit: integer('meta_note_from_plonkit', { mode: 'boolean' }).notNull(),
-  metaId: integer('meta_id').notNull()
+  metaId: integer('meta_id').notNull(),
+  maxModifiedAt: integer('max_modified_at').notNull()
 }).as(sql`
   SELECT
     m.id          AS map_id,
