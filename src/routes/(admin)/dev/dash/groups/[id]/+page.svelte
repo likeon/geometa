@@ -110,7 +110,6 @@
   }
 
   function submitPopulateNotesHtmlForm() {
-    alert(1);
     if (populateNotesHtmlForm) {
       populateNotesHtmlForm.submit();
     }
