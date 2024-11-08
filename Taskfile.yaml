@@ -10,6 +10,17 @@ tasks:
       - turso db shell http://localhost:8080
 
   db:dump:
+    dotenv: ['.env']
+    cmds:
+      - .ci/db/dump.sh
+
+  db:dump:preview:
+    dotenv: ['.env.preview.local']
+    cmds:
+      - .ci/db/dump.sh
+
+  db:dump:prod:
+    dotenv: ['.env.prod.local']
     cmds:
       - .ci/db/dump.sh
 
