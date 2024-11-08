@@ -39,7 +39,7 @@
               <span slot="title">Official</span>
 
               <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                {#each data.mapsToPublish as map}
+                {#each data.officialMaps as map}
                   <div
                     class="flex flex-col justify-between rounded-3xl bg-white p-8 shadow-xl ring-1 ring-gray-900/10 sm:p-10">
                     <div>
