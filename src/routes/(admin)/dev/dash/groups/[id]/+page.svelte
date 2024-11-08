@@ -110,6 +110,7 @@
   }
 
   function submitPopulateNotesHtmlForm() {
+    alert(1);
     if (populateNotesHtmlForm) {
       populateNotesHtmlForm.submit();
     }
@@ -172,7 +173,7 @@
         <Icon icon="pepicons-pop:dots-y" width="1rem" height="1rem" style="color: black" />
       </button>
       <Dropdown>
-        <DropdownItem click={submitPopulateNotesHtmlForm}>Populate notes html</DropdownItem>
+        <DropdownItem onclick={submitPopulateNotesHtmlForm}>Populate notes html</DropdownItem>
       </Dropdown>
       <form
         bind:this={populateNotesHtmlForm}
