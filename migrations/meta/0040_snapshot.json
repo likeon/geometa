@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "acec0bf6-a529-44c2-8ce9-7658cdbef7b1",
-  "prevId": "e8994233-3434-423e-a252-7914c90c0b7a",
+  "id": "7aa0abf3-73a6-47dc-b4a4-ab8906ba707c",
+  "prevId": "acec0bf6-a529-44c2-8ce9-7658cdbef7b1",
   "tables": {
     "levels": {
       "name": "levels",
@@ -485,6 +485,14 @@
           "notNull": true,
           "autoincrement": false,
           "default": false
+        },
+        "modified_at": {
+          "name": "modified_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1730419200
         }
       },
       "indexes": {

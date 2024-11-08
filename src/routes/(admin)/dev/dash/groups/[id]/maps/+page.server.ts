@@ -84,11 +84,14 @@ export const actions = {
     if (id === undefined) {
       const insertResult = await db
         .insert(maps)
-        .values(dataNoId)
+        .values({ ...dataNoId, modifiedAt: Math.floor(Date.now() / 1000) })
         .returning({ insertedId: maps.id });
       mapId = insertResult[0].insertedId;
     } else {
-      await db.update(maps).set(dataNoId).where(eq(maps.id, id));
+      await db
+        .update(maps)
+        .set({ ...dataNoId, modifiedAt: Math.floor(Date.now() / 1000) })
+        .where(eq(maps.id, id));
       mapId = id;
     }
 

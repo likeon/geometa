@@ -64,7 +64,8 @@ export const maps = sqliteTable(
     isCommunity: integer('is_community', { mode: 'boolean' }).notNull().default(false),
     authors: text('authors').default(''),
     ordering: integer('ordering').notNull().default(0),
-    autoUpdate: integer('auto_update', { mode: 'boolean' }).notNull().default(false)
+    autoUpdate: integer('auto_update', { mode: 'boolean' }).notNull().default(false),
+    modifiedAt: integer('modified_at').default(1730419200).notNull()
   },
   (t) => ({
     nameUnique: uniqueIndex('maps_name_unique').on(t.name),
