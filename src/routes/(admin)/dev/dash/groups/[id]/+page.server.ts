@@ -1,6 +1,6 @@
 import { db } from '$lib/drizzle';
 import type { PageServerLoad } from './$types';
-import { and, asc, eq, isNull, lt, not, notInArray, or, sql } from 'drizzle-orm';
+import { and, asc, eq, isNull, lt, not, or, sql } from 'drizzle-orm';
 import {
   levels,
   mapGroupLocations,
@@ -332,7 +332,6 @@ export const actions = {
   prepareUserScriptData: async (event) => {
     const groupId = getGroupId(event.params);
     await ensurePermissions(event.locals.user?.id, groupId);
-
     try {
       await syncUserScriptData(groupId);
       const TRAUSI_GROUP_ID = 1;

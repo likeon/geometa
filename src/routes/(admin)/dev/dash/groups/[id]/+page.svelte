@@ -8,6 +8,7 @@
   import DashNavBar from '$lib/components/DashNavBar.svelte';
   import Icon from '@iconify/svelte';
   import SortFilterTable from '$lib/components/SortFilterTable.svelte';
+  import LoadingSmall from '$lib/components/LoadingSmall.svelte';
 
   let { data } = $props();
 
@@ -116,6 +117,7 @@
   }
 
   let populateNotesHtmlForm: HTMLFormElement;
+  let syncingUserScript = $state(false);
 </script>
 
 <svelte:head>
@@ -137,8 +139,9 @@
         method="post"
         action="?/prepareUserScriptData"
         use:enhance={() => {
+          syncingUserScript = true;
           return async ({ result }) => {
-            // `result` is an `ActionResult` object
+            syncingUserScript = false;
             if (result.type === 'success') {
               applyAction(result);
               if (data.group.id == 1) {
@@ -164,8 +167,14 @@
             }
           };
         }}>
-        <GradientButton color="pinkToOrange" class="ml-3" type="submit"
-          >Sync UserScript
+        <GradientButton color="pinkToOrange" class="ml-3" type="submit">
+          {#if syncingUserScript}
+            <div class="h-6 w-[7rem] flex items-center justify-center">
+              <LoadingSmall />
+            </div>
+          {:else}
+            Sync UserScript
+          {/if}
         </GradientButton>
       </form>
       <button>
@@ -215,3 +224,69 @@
 <MapUploadModal bind:isUploadModalOpen bind:numberOfLocationsUploaded data={data.mapUploadForm} />
 
 <SvelteToast />
+
+<style lang="postcss">
+  .loadership_PLFNR {
+    display: flex;
+    position: relative;
+    width: 29px;
+    height: 7px;
+  }
+
+  .loadership_PLFNR div {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ffffff;
+    top: 0px;
+    animation-timing-function: cubic-bezier(0, 1, 1, 0);
+  }
+
+  .loadership_PLFNR div:nth-child(1) {
+    left: 0px;
+    animation: loadership_PLFNR_scale_up 0.6s infinite;
+  }
+
+  .loadership_PLFNR div:nth-child(2) {
+    left: 0px;
+    animation: loadership_PLFNR_translate 0.6s infinite;
+  }
+
+  .loadership_PLFNR div:nth-child(3) {
+    left: 11px;
+    animation: loadership_PLFNR_translate 0.6s infinite;
+  }
+
+  .loadership_PLFNR div:nth-child(4) {
+    left: 22px;
+    animation: loadership_PLFNR_scale_down 0.6s infinite;
+  }
+
+  @keyframes loadership_PLFNR_scale_up {
+    0% {
+      transform: scale(0);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes loadership_PLFNR_scale_down {
+    0% {
+      transform: scale(1);
+    }
+    100% {
+      transform: scale(0);
+    }
+  }
+
+  @keyframes loadership_PLFNR_translate {
+    0% {
+      transform: translate(0, 0);
+    }
+    100% {
+      transform: translate(11px, 0);
+    }
+  }
+</style>
