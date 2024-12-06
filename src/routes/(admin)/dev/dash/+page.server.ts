@@ -1,9 +1,38 @@
 import { db } from '$lib/drizzle';
-import { mapGroupLocations, mapGroupPermissions, mapGroups, users } from '$lib/db/schema';
-import { desc, eq, sql } from 'drizzle-orm';
-import { error } from '@sveltejs/kit';
+import {
+  mapGroupLocations,
+  mapGroupPermissions,
+  mapGroups,
+  metaImages,
+  metaLevels,
+  metas,
+  users
+} from '$lib/db/schema';
+import { and, desc, eq, isNull, lt, not, or, sql } from 'drizzle-orm';
+import { error, fail, redirect } from '@sveltejs/kit';
+import { createInsertSchema } from 'drizzle-zod';
+import { message, setError, superValidate, withFiles } from 'sveltekit-superforms';
+import { zod } from 'sveltekit-superforms/adapters';
+import {
+  ensurePermissions,
+  extractJsonData,
+  generateRandomString,
+  getFileExtension
+} from '$lib/utils';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeExternalLinks from 'rehype-external-links';
+import rehypeStringify from 'rehype-stringify';
+import { inArray } from 'drizzle-orm/sql/expressions/conditions';
+import { getGroupId } from '$routes/(admin)/dev/dash/groups/[id]/utils';
+import { uploadFile } from '$lib/s3';
+import { dev } from '$app/environment';
+import { syncUserScriptData } from '$lib/user-script';
 
 export const prerender = false;
+const insertMapGroupSchema = createInsertSchema(mapGroups).pick({ name: true });
 
 export const load = async ({ locals }) => {
   if (!locals.user?.id) {
@@ -37,5 +66,26 @@ export const load = async ({ locals }) => {
   } else {
     allGroups = null;
   }
-  return { userGroups, allGroups };
+
+  const mapGroupForm = await superValidate(zod(insertMapGroupSchema));
+  return { userGroups, allGroups, mapGroupForm };
+};
+
+export const actions = {
+  createGroup: async ({ request, locals }) => {
+    const form = await superValidate(request, zod(insertMapGroupSchema));
+
+    if (!form.valid) {
+      return fail(400, { form });
+    }
+
+    const insertedData = await db
+      .insert(mapGroups)
+      .values(form.data)
+      .returning({ insertedId: mapGroups.id });
+    await db
+      .insert(mapGroupPermissions)
+      .values({ mapGroupId: insertedData[0].insertedId, userId: locals.user!.id });
+    throw redirect(303, `/dev/dash/groups/${insertedData[0].insertedId}`);
+  }
 };
