@@ -16,7 +16,7 @@ const insertMapsSchema = createInsertSchema(maps)
     levels: z.array(z.number()),
     ordering: z.coerce.number()
   })
-  .omit({ authors: true });
+  .omit({ modifiedAt: true });
 export type InsertMapsSchema = typeof insertMapsSchema;
 
 export const load = async ({ locals, params }) => {
@@ -77,6 +77,8 @@ export const actions = {
       // do not update those if user isn't an admin
       dataNoId.ordering = undefined;
       dataNoId.isPublished = undefined;
+      dataNoId.isCommunity = undefined;
+      dataNoId.authors = undefined;
       dataNoId.autoUpdate = undefined;
     }
 

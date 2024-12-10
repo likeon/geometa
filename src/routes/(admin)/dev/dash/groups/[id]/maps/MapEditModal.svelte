@@ -41,6 +41,8 @@
         $form.ordering = selectedMap.ordering;
         $form.description = selectedMap.description;
         $form.isPublished = selectedMap.isPublished;
+        $form.isCommunity = selectedMap.isCommunity;
+        $form.authors = selectedMap.authors;
         $form.autoUpdate = selectedMap.autoUpdate;
         $form.levels = selectedMap.mapLevels.map((item) => item.levelId);
         $form.includeFilters = selectedMap.filters
@@ -57,6 +59,8 @@
         $form.ordering = 0;
         $form.description = '';
         $form.isPublished = false;
+        $form.isCommunity = false;
+        $form.authors = '';
         $form.autoUpdate = false;
         $form.levels = [];
         $form.includeFilters = [];
@@ -127,6 +131,21 @@
     {#if user.isSuperadmin}
       <Label>
         <Checkbox bind:checked={$form.isPublished}>List map on homepage</Checkbox>
+      </Label>
+      <Label>
+        <Checkbox bind:checked={$form.isCommunity}>Community map</Checkbox>
+      </Label>
+      <Label class="space-y-2">
+        <span>Authors</span>
+        <Input
+          type="text"
+          name="authors"
+          aria-invalid={$errors.authors ? 'true' : undefined}
+          bind:value={$form.authors}
+          {...$constraints.authors} />
+        {#if $errors.authors}
+          <Alert color="red">{$errors.authors}</Alert>
+        {/if}
       </Label>
       <Label>
         <Checkbox bind:checked={$form.autoUpdate}>Auto Update</Checkbox>
