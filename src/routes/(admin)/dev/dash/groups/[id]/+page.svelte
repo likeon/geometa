@@ -182,6 +182,9 @@
       </button>
       <Dropdown>
         <DropdownItem onclick={submitPopulateNotesHtmlForm}>Populate notes html</DropdownItem>
+        <DropdownItem
+          onclick={() => (window.location.href = `/dev/dash/groups/${data.group.id}/download`)}
+          >Download full map json</DropdownItem>
       </Dropdown>
       <form
         bind:this={populateNotesHtmlForm}
