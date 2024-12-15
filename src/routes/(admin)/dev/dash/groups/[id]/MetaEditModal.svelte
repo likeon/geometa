@@ -84,6 +84,12 @@
       event.preventDefault();
     }
   };
+
+  const confirmCopy = (event: { preventDefault: () => void }) => {
+    if (!confirm('Are you sure you want to copy this meta?')) {
+      event.preventDefault();
+    }
+  };
 </script>
 
 <Modal bind:open={isMetaModalOpen}>
@@ -148,6 +154,16 @@
           </button>
         </div>
       </form>
+      {#if groupId !== 1}
+        <form action="?/copyToOfficials" method="post" onsubmit={confirmCopy}>
+          <div class="items-center flex h-full">
+            <input type="hidden" name="id" value={selectedMeta.id} />
+            <button type="submit">
+              <Icon icon="solar:copy-bold" width="1rem" height="1rem" color="gray" />
+            </button>
+          </div>
+        </form>
+      {/if}
     {/if}
   </Tabs>
 </Modal>

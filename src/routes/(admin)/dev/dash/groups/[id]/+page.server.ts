@@ -10,7 +10,8 @@ import {
   metaLevels,
   metas,
   maps,
-  mapData
+  mapData,
+  users
 } from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
 import { createInsertSchema } from 'drizzle-zod';
@@ -180,6 +181,71 @@ export const actions = {
 
     await db.delete(metas).where(eq(metas.id, metaId));
   },
+  copyToOfficials: async ({ request, locals }) => {
+    const data = await request.formData();
+    const metaId = parseInt((data.get('id') as string) || '', 10);
+
+    if (isNaN(metaId)) {
+      error(400, 'Invalid ID');
+    }
+
+    const meta = await db.query.metas.findFirst({ where: eq(metas.id, metaId) });
+
+    if (!meta) {
+      error(400, 'No meta found for this id');
+    }
+
+    await ensurePermissions(locals.user!.id, meta.mapGroupId);
+    const user = await db.query.users.findFirst({
+      where: and(eq(users.id, locals.user!.id), eq(users.isSuperadmin, true))
+    });
+    if (!user) {
+      error(403, 'Permission denied');
+    }
+
+    const { id, mapGroupId, ...cleanedMeta } = meta;
+    void id;
+    const insertResult = await db
+      .insert(metas)
+      .values({
+        ...cleanedMeta,
+        mapGroupId: 1
+      })
+      .onConflictDoNothing()
+      .returning({ insertedId: metas.id });
+
+    if (!insertResult) {
+      return;
+    }
+
+    const sourceLocations = await db
+      .select({
+        lat: mapGroupLocations.lat,
+        lng: mapGroupLocations.lng,
+        heading: mapGroupLocations.heading,
+        pitch: mapGroupLocations.pitch,
+        zoom: mapGroupLocations.zoom,
+        panoId: mapGroupLocations.panoId,
+        extraTag: mapGroupLocations.extraTag,
+        extraPanoId: mapGroupLocations.extraPanoId,
+        extraPanoDate: mapGroupLocations.extraPanoDate
+      })
+      .from(mapGroupLocations)
+      .where(
+        and(
+          eq(mapGroupLocations.mapGroupId, mapGroupId),
+          eq(mapGroupLocations.extraTag, meta!.tagName)
+        )
+      );
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const insertLocations = sourceLocations.map((location) => ({
+      ...location,
+      mapGroupId: 1,
+      updatedAt: currentTimestamp,
+      modifiedAt: currentTimestamp
+    }));
+    await db.insert(mapGroupLocations).values(insertLocations);
+  },
   uploadMapJson: async ({ request, params, locals }) => {
     const groupId = getGroupId(params);
     await ensurePermissions(locals.user?.id, groupId);
@@ -251,14 +317,30 @@ export const actions = {
           .onConflictDoUpdate({
             target: [mapGroupLocations.mapGroupId, mapGroupLocations.panoId],
             set: {
-              heading: sql`excluded.heading`,
-              pitch: sql`excluded.pitch`,
-              zoom: sql`excluded.zoom`,
-              panoId: sql`excluded.pano_id`,
-              extraTag: sql`excluded.extra_tag`,
-              extraPanoId: sql`excluded.extra_pano_id`,
-              extraPanoDate: sql`excluded.extra_pano_date`,
-              updatedAt: sql`excluded.updated_at`
+              heading: sql`excluded
+              .
+              heading`,
+              pitch: sql`excluded
+              .
+              pitch`,
+              zoom: sql`excluded
+              .
+              zoom`,
+              panoId: sql`excluded
+              .
+              pano_id`,
+              extraTag: sql`excluded
+              .
+              extra_tag`,
+              extraPanoId: sql`excluded
+              .
+              extra_pano_id`,
+              extraPanoDate: sql`excluded
+              .
+              extra_pano_date`,
+              updatedAt: sql`excluded
+              .
+              updated_at`
             }
           })
           .returning({ id: mapGroupLocations.id });
