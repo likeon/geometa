@@ -17,7 +17,8 @@
     metaForm,
     levelChoices,
     groupId,
-    imageUploadForm
+    imageUploadForm,
+    user
   }: {
     isMetaModalOpen: boolean;
     selectedMeta: PageData['group']['metas'][number] | null;
@@ -25,6 +26,7 @@
     levelChoices: { value: number; name: string }[];
     groupId: number;
     imageUploadForm: SuperValidated<Infer<MapUploadSchema>>;
+    user: PageData['user'];
   } = $props();
 
   const { form, errors, constraints, enhance, isTainted } = superForm(metaForm, {
@@ -154,7 +156,7 @@
           </button>
         </div>
       </form>
-      {#if groupId !== 1}
+      {#if groupId !== 1 && user?.isSuperadmin}
         <form action="?/copyToOfficials" method="post" onsubmit={confirmCopy}>
           <div class="items-center flex h-full">
             <input type="hidden" name="id" value={selectedMeta.id} />

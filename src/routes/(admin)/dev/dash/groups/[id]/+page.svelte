@@ -222,7 +222,8 @@
   {levelChoices}
   groupId={data.group.id}
   {selectedMeta}
-  imageUploadForm={data.imageUploadForm} />
+  imageUploadForm={data.imageUploadForm}
+  user={data.user} />
 
 <MapUploadModal bind:isUploadModalOpen bind:numberOfLocationsUploaded data={data.mapUploadForm} />
 

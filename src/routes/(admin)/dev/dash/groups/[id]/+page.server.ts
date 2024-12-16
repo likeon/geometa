@@ -108,6 +108,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     error(404, 'No group');
   }
   const levelList = await db.query.levels.findMany({ where: eq(levels.mapGroupId, group?.id) });
+  const user = await db.query.users.findFirst({ where: eq(users.id, locals.user!.id) });
 
   const metaForm = await superValidate(zod(insertMetasSchema));
   const mapUploadForm = await superValidate(zod(mapUploadSchema));
@@ -118,7 +119,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     metaForm,
     levelList,
     mapUploadForm,
-    imageUploadForm
+    imageUploadForm,
+    user
   };
 };
 
