@@ -92,3 +92,40 @@ export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
   unsafeWindow.localStorage.setItem(localStorageKey, JSON.stringify(mapInfo));
   return mapInfo;
 }
+
+
+export const getChallengeId = () => {
+  const regexp = /.*\/live-challenge\/(.*)/
+  const matches = location.pathname.match(regexp)
+  if (matches && matches.length > 1) {
+    return matches[1];
+  }
+  return null;
+}
+
+export async function getChallengeInfo(id) {
+  const url = `https://game-server.geoguessr.com/api/live-challenge/${id}`
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include"
+  });
+  const data = await response.json();
+  const mapId = data.options.mapSlug;
+  const currentRound = data.currentRoundNumber - 1
+  const rounds = data.rounds
+  const panorama = rounds[currentRound].question.panoramaQuestionPayload.panorama
+  const panoIdHex = panorama.panoId
+  const panoId = decodePanoId(panoIdHex)
+  return { mapId, panoId }
+}
+
+export function decodePanoId(encoded) {
+  const len = Math.floor(encoded.length / 2)
+  let panoId = []
+  for (let i = 0; i < len; i++) {
+    const code = parseInt(encoded.slice(i * 2, i * 2 + 2), 16)
+    const char = String.fromCharCode(code)
+    panoId = [...panoId, char]
+  }
+  return panoId.join("")
+}

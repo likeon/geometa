@@ -1,11 +1,12 @@
 import App from './App.svelte';
-import { getMapInfo, waitForElement } from './lib/utils';
+import { getChallengeId, getChallengeInfo, getMapInfo, waitForElement } from './lib/utils';
 
 import { unsafeWindow } from '$';
 import { mount } from 'svelte';
 
 function changelog() {
   return [
+    { '0.71': 'Added beta support for live challenges' },
     { '0.70': 'Fixed carousel controls jumping and colored the note links' },
     { '0.69': 'Display multiple images with carousel' },
     { '0.68': 'Use panoId as unique location identifier, allow html in note' },
@@ -49,12 +50,13 @@ type GGEvent = {
   };
 };
 
+
+// Single player
 GeoGuessrEventFramework.init().then(() => {
   GeoGuessrEventFramework.events.addEventListener('game_start', async (event: GGEvent) => {
     await getMapInfo(event.detail.map.id, true);
   });
   GeoGuessrEventFramework.events.addEventListener('round_end', async (event: GGEvent) => {
-    console.log(event.detail);
     const mapInfo = await getMapInfo(event.detail.map.id, false);
     if (!mapInfo.mapFound) return;
     waitForElement('div[data-qa="result-view-top"]').then((container) => {
@@ -72,3 +74,40 @@ GeoGuessrEventFramework.init().then(() => {
     });
   });
 });
+
+
+// Live Challenge
+
+let pinChanged = false;
+new MutationObserver(async (mutations) => {
+  const pinClass = ".result-map_roundPin__3ieXw";
+  if (!document.querySelector(pinClass)) {
+    pinChanged = false;
+    return;
+  }
+  if (pinChanged) {
+    return;
+  }
+  pinChanged = true;
+  const challengeId = getChallengeId();
+  if (challengeId) {
+    const { mapId, panoId } = await getChallengeInfo(challengeId);
+    const mapInfo = await getMapInfo(mapId, false);
+    if (!mapInfo.mapFound) return;
+    waitForElement('div.game_container__5bsqO').then((container) => {
+      const element = document.createElement('div');
+      element.id = 'geometa-summary';
+      container.appendChild(element);
+      mount(App, {
+        target: element,
+        props: {
+          panoId,
+          mapId
+        }
+      });
+    });
+  }
+}).observe(document.body, { subtree: true, childList: true });
+
+
+
