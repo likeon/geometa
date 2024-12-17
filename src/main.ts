@@ -51,44 +51,39 @@ type GGEvent = {
 };
 
 GeoGuessrEventFramework.init().then(() => {
-let pinChanged = false;
-   // Listen for pin changes
-   const pinClass = 'div[data-qa="result-view-top"]';
-   const observerTarget = document.body;
-   
-new MutationObserver(async (mutations) => {
-  const pinClass = ".result-map_roundPin__3ieXw";
-  if(!document.querySelector(pinClass)){
+  let pinChanged = false;
+  const pinClass = 'div[data-qa="result-view-top"]';
+  const observerTarget = document.body;
+
+  new MutationObserver(async (mutations) => {
+    const pinClass = ".result-map_roundPin__3ieXw";
+    if (!document.querySelector(pinClass)) {
       pinChanged = false;
       return;
-  }
-  if (pinChanged) {
-    return;
-  }
-  pinChanged = true;
-  const challengeId = getChallengeId();
-  if (challengeId) {
-    const {mapId, panoId } = await getChallengeInfo(challengeId);
-    const mapInfo = await getMapInfo(mapId, false);
-  if (!mapInfo.mapFound) return;
-  waitForElement('div.game_container__5bsqO').then((container) => {
-    const element = document.createElement('div');
-    element.id = 'geometa-summary';
-    container.appendChild(element);
-    mount(App, {
-      target: element,
-      props: {
-        panoId,
-        mapId
-      }
-    });
-  });
-
-  }
-
-  
-  
-}).observe(document.body, { subtree: true, childList: true });
+    }
+    if (pinChanged) {
+      return;
+    }
+    pinChanged = true;
+    const challengeId = getChallengeId();
+    if (challengeId) {
+      const { mapId, panoId } = await getChallengeInfo(challengeId);
+      const mapInfo = await getMapInfo(mapId, false);
+      if (!mapInfo.mapFound) return;
+      waitForElement('div.game_container__5bsqO').then((container) => {
+        const element = document.createElement('div');
+        element.id = 'geometa-summary';
+        container.appendChild(element);
+        mount(App, {
+          target: element,
+          props: {
+            panoId,
+            mapId
+          }
+        });
+      });
+    }
+  }).observe(document.body, { subtree: true, childList: true });
 
 
 
@@ -119,17 +114,17 @@ new MutationObserver(async (mutations) => {
 const getChallengeId = () => {
   const regexp = /.*\/live-challenge\/(.*)/
   const matches = location.pathname.match(regexp)
-  if(matches && matches.length > 1){
-      return matches[1];
+  if (matches && matches.length > 1) {
+    return matches[1];
   }
   return null;
 }
 
-async function getChallengeInfo(id){
+async function getChallengeInfo(id) {
   const url = `https://game-server.geoguessr.com/api/live-challenge/${id}`
-  const response = await fetch(url,{
-      method: "GET",
-      credentials: "include"
+  const response = await fetch(url, {
+    method: "GET",
+    credentials: "include"
   });
   const data = await response.json();
   const mapId = data.options.mapSlug;
@@ -138,16 +133,16 @@ async function getChallengeInfo(id){
   const panorama = rounds[currentRound].question.panoramaQuestionPayload.panorama
   const panoIdHex = panorama.panoId
   const panoId = decodePanoId(panoIdHex)
-  return {mapId, panoId}
+  return { mapId, panoId }
 }
 
 function decodePanoId(encoded) {
   const len = Math.floor(encoded.length / 2)
   let panoId = []
   for (let i = 0; i < len; i++) {
-      const code = parseInt(encoded.slice(i * 2, i * 2 + 2), 16)
-      const char = String.fromCharCode(code)
-      panoId = [...panoId, char]
+    const code = parseInt(encoded.slice(i * 2, i * 2 + 2), 16)
+    const char = String.fromCharCode(code)
+    panoId = [...panoId, char]
   }
   return panoId.join("")
 }
