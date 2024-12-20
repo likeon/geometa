@@ -75,7 +75,8 @@ export const maps = sqliteTable(
 export const mapsRelations = relations(maps, ({ one, many }) => ({
   mapGroup: one(mapGroups, { fields: [maps.mapGroupId], references: [mapGroups.id] }),
   mapLevels: many(mapLevels),
-  filters: many(mapFilters)
+  filters: many(mapFilters),
+  mapRegions: many(mapRegions)
 }));
 
 export const levels = sqliteTable(
@@ -203,12 +204,10 @@ export const locationMetas = sqliteView('location_metas_view', {
   extraPanoId: text('extra_pano_id'),
   extraPanoDate: text('extra_pano_date').notNull()
 }).as(sql`
-  SELECT
-    mgl.*,
-    m.*
-  FROM
-    ${mapGroupLocations} mgl
-      JOIN ${metas} m ON m.tag_name = mgl.extra_tag AND m.map_group_id = mgl.map_group_id
+  SELECT mgl.*,
+         m.*
+  FROM ${mapGroupLocations} mgl
+         JOIN ${metas} m ON m.tag_name = mgl.extra_tag AND m.map_group_id = mgl.map_group_id
 `);
 
 export const mapLocations = sqliteView('map_locations_view', {
@@ -229,26 +228,24 @@ export const mapLocations = sqliteView('map_locations_view', {
   metaId: integer('meta_id').notNull(),
   maxModifiedAt: integer('max_modified_at').notNull()
 }).as(sql`
-  SELECT
-    m.id          AS map_id,
-    lmv.lat,
-    lmv.lng,
-    lmv.heading,
-    lmv.pitch,
-    lmv.zoom,
-    lmv.pano_id,
-    lmv.meta_name,
-    lmv.extra_pano_id,
-    lmv.extra_pano_date,
-    lmv.extra_tag AS tag_name,
-    lmv.meta_note,
-    lmv.meta_note_html,
-    lmv.meta_note_from_plonkit
-  FROM
-    ${locationMetas} lmv
-      JOIN ${metaLevels} ml ON ml.meta_id = lmv.meta_id
-      JOIN ${levels} l ON l.id = ml.level_id
-      JOIN ${maps} m ON m.map_group_id = lmv.map_group_id AND (m.level_id = l.id OR m.level_id IS NULL)
+  SELECT m.id          AS map_id,
+         lmv.lat,
+         lmv.lng,
+         lmv.heading,
+         lmv.pitch,
+         lmv.zoom,
+         lmv.pano_id,
+         lmv.meta_name,
+         lmv.extra_pano_id,
+         lmv.extra_pano_date,
+         lmv.extra_tag AS tag_name,
+         lmv.meta_note,
+         lmv.meta_note_html,
+         lmv.meta_note_from_plonkit
+  FROM ${locationMetas} lmv
+         JOIN ${metaLevels} ml ON ml.meta_id = lmv.meta_id
+         JOIN ${levels} l ON l.id = ml.level_id
+         JOIN ${maps} m ON m.map_group_id = lmv.map_group_id AND (m.level_id = l.id OR m.level_id IS NULL)
 `);
 
 export const users = sqliteTable('user', {
@@ -304,4 +301,35 @@ export const mapData = sqliteTable(
 
 export const mapDataRelations = relations(mapData, ({ one }) => ({
   map: one(maps, { fields: [mapData.mapId], references: [maps.id] })
+}));
+
+export const regions = sqliteTable('regions', {
+  id: integer('id').primaryKey(),
+  name: text('name').notNull(),
+  ordering: integer('ordering').notNull().default(0)
+});
+
+export const regionsRelations = relations(regions, ({ many }) => ({
+  mapRegions: many(mapRegions)
+}));
+
+export const mapRegions = sqliteTable(
+  'map_regions',
+  {
+    id: integer('id').primaryKey(),
+    mapId: integer('map_id')
+      .notNull()
+      .references(() => maps.id, { onDelete: 'cascade' }),
+    regionId: integer('region_id')
+      .notNull()
+      .references(() => regions.id, { onDelete: 'cascade' })
+  },
+  (t) => ({
+    mapRegionUnique: uniqueIndex('map_region_unique').on(t.mapId, t.regionId)
+  })
+);
+
+export const mapRegionsRelations = relations(mapRegions, ({ one }) => ({
+  map: one(maps, { fields: [mapRegions.mapId], references: [maps.id] }),
+  region: one(regions, { fields: [mapRegions.regionId], references: [regions.id] })
 }));

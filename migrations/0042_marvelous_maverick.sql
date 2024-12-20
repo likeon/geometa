@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `map_region_unique` ON `map_regions` (`map_id`,`region_id`);

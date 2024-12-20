@@ -1,7 +1,16 @@
 import { db } from '$lib/drizzle';
 import { getGroupId } from '../utils';
-import { and, eq, not, sql } from 'drizzle-orm';
-import { mapGroups, maps, levels, mapLevels, mapFilters, users } from '$lib/db/schema';
+import { and, asc, eq, not, sql } from 'drizzle-orm';
+import {
+  mapGroups,
+  maps,
+  levels,
+  mapLevels,
+  mapFilters,
+  users,
+  regions,
+  mapRegions
+} from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
 import { createInsertSchema } from 'drizzle-zod';
 import { superValidate } from 'sveltekit-superforms';
@@ -14,6 +23,7 @@ const insertMapsSchema = createInsertSchema(maps)
     includeFilters: z.array(z.string()),
     excludeFilters: z.array(z.string()),
     levels: z.array(z.number()),
+    regions: z.array(z.number()),
     ordering: z.coerce.number()
   })
   .omit({ modifiedAt: true });
@@ -33,6 +43,7 @@ export const load = async ({ locals, params }) => {
         },
         with: {
           mapLevels: { with: { level: true } },
+          mapRegions: { with: { region: true } },
           filters: true
         }
       }
@@ -45,6 +56,7 @@ export const load = async ({ locals, params }) => {
   }
 
   const levelList = await db.query.levels.findMany({ where: eq(levels.mapGroupId, group.id) });
+  const regionList = await db.query.regions.findMany({ orderBy: [asc(regions.ordering)] });
   const mapForm = await superValidate(zod(insertMapsSchema));
 
   const user = await db.query.users.findFirst({ where: eq(users.id, locals.user!.id) });
@@ -52,7 +64,7 @@ export const load = async ({ locals, params }) => {
     error(500);
   }
 
-  return { group, levelList, mapForm, user };
+  return { group, levelList, regionList, mapForm, user };
 };
 
 export const actions = {
@@ -62,7 +74,7 @@ export const actions = {
       return fail(400, { form });
     }
 
-    const { id, levels, includeFilters, excludeFilters, ...dataNoId } = form.data;
+    const { id, levels, regions, includeFilters, excludeFilters, ...dataNoId } = form.data;
     const combinedFilters = [
       ...includeFilters.map((filter) => ({ name: filter, isExclude: false })),
       ...excludeFilters.map((filter) => ({ name: filter, isExclude: true }))
@@ -126,5 +138,14 @@ export const actions = {
     if (filtersInsertValues.length != 0) {
       await db.insert(mapFilters).values(filtersInsertValues).onConflictDoNothing();
     }
+
+    console.debug(regions);
+    await db
+      .insert(mapRegions)
+      .values(regions.map((regionId) => ({ mapId: mapId, regionId: regionId })))
+      .onConflictDoNothing();
+    await db
+      .delete(mapRegions)
+      .where(and(eq(mapRegions.mapId, mapId), not(inArray(mapRegions.regionId, regions))));
   }
 };

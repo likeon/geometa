@@ -50,6 +50,10 @@
     value: item.id,
     name: item.name
   }));
+  const regionChoices = data.regionList.map((item) => ({
+    value: item.id,
+    name: item.name
+  }));
 </script>
 
 <div>
@@ -124,6 +128,7 @@
   bind:isMapModalOpen
   data={data.mapForm}
   {levelChoices}
+  {regionChoices}
   groupId={data.group.id}
   {selectedMap}
   user={data.user} />

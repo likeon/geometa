@@ -12,6 +12,7 @@
     selectedMap: PageData['group']['maps'][number] | null;
     groupId: number;
     levelChoices: { value: number; name: string }[];
+    regionChoices: { value: number; name: string }[];
     user: PageData['user'];
   }
 
@@ -21,6 +22,7 @@
     selectedMap,
     groupId,
     levelChoices,
+    regionChoices,
     user
   }: Props = $props();
 
@@ -45,6 +47,7 @@
         $form.authors = selectedMap.authors;
         $form.autoUpdate = selectedMap.autoUpdate;
         $form.levels = selectedMap.mapLevels.map((item) => item.levelId);
+        $form.regions = selectedMap.mapRegions.map((item) => item.regionId);
         $form.includeFilters = selectedMap.filters
           .filter((item) => item.isExclude == false)
           .map((item) => item.tagLike as string);
@@ -63,6 +66,7 @@
         $form.authors = '';
         $form.autoUpdate = false;
         $form.levels = [];
+        $form.regions = [];
         $form.includeFilters = [];
         $form.excludeFilters = [];
       }
@@ -170,6 +174,11 @@
       oppositeFilters={$form.includeFilters}
       title="Exclude Filters"
       placeholder="Type an exclude filter..." />
+
+    <Label>
+      <span>Regions</span>
+      <MultiSelect items={regionChoices} bind:value={$form.regions} size="lg" />
+    </Label>
 
     <Button type="submit" class="w-full">Save</Button>
   </form>
