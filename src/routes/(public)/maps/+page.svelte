@@ -1,5 +1,5 @@
 <script>
-  import { TabItem, Tabs } from 'flowbite-svelte';
+  import { Accordion, AccordionItem, TabItem, Tabs } from 'flowbite-svelte';
   import background from '$lib/assets/background.jpg';
   import MapCard from '$routes/(public)/maps/MapCard.svelte';
 
@@ -47,11 +47,18 @@
             </TabItem>
             <TabItem class="w-full">
               <span slot="title">Community</span>
-              <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                {#each data.communityMaps as map}
-                  <MapCard {map} withAuthors={true} />
+              <Accordion class="bg-white rounded-xl">
+                {#each data.communityMaps as item}
+                  <AccordionItem>
+                    <span slot="header">{item.region.name}</span>
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                      {#each item.maps as map (map.id)}
+                        <MapCard {map} withAuthors={true} />
+                      {/each}
+                    </div>
+                  </AccordionItem>
                 {/each}
-              </div>
+              </Accordion>
             </TabItem>
           </Tabs>
         </div>

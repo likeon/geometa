@@ -1,6 +1,6 @@
 import { db } from '$lib/drizzle';
-import { and, asc, desc, eq, sql } from 'drizzle-orm';
-import { maps } from '$lib/db/schema';
+import { and, asc, desc, eq, getTableColumns, sql } from 'drizzle-orm';
+import { mapRegions, maps, regions } from '$lib/db/schema';
 
 const officialCacheKey = 'query:maps:official';
 const communityCacheKey = 'query:maps:community';
@@ -32,27 +32,46 @@ export const load = async (event) => {
     where: and(eq(maps.isPublished, true), eq(maps.mapGroupId, 1)),
     orderBy: [desc(maps.ordering), asc(maps.id)]
   });
-  const communityMapsPromise = db.query.maps.findMany({
-    extras: {
+  const regionsPromise = db.select().from(regions).orderBy(asc(regions.ordering));
+  const regionsCommunityMapsPromise = db
+    .select({
+      ...getTableColumns(mapRegions),
+      ...getTableColumns(maps),
       locationsCount:
-        sql`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`.as(
+        sql<number>`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`.as(
           'locations_count'
         )
-    },
-    where: and(eq(maps.isPublished, true), eq(maps.isCommunity, true)),
-    orderBy: [
+    })
+    .from(mapRegions)
+    .innerJoin(maps, eq(maps.id, mapRegions.mapId))
+    .where(and(eq(maps.isPublished, true), eq(maps.isCommunity, true)))
+    .orderBy(
       desc(
         sql`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`.as(
           'locations_count'
         )
-      ),
-      asc(maps.id)
-    ]
-  });
-  const [officialMaps, communityMaps] = await Promise.all([
+      )
+    );
+  const [officialMaps, regionsList, regionsCommunityMaps] = await Promise.all([
     officialMapsPromise,
-    communityMapsPromise
+    regionsPromise,
+    regionsCommunityMapsPromise
   ]);
+  const mapsByRegionId = regionsCommunityMaps.reduce(
+    (acc: { [key: number]: typeof regionsCommunityMaps }, item) => {
+      if (!acc[item.regionId]) {
+        acc[item.regionId] = [];
+      }
+      acc[item.regionId].push(item);
+      return acc;
+    },
+    {}
+  );
+  const communityMaps = regionsList.map((region) => ({
+    region: region,
+    maps: mapsByRegionId[region.id]
+  }));
+
   if (event.platform) {
     await Promise.all([
       event.platform.env.geometa_kv.put(officialCacheKey, JSON.stringify(officialMaps), {
