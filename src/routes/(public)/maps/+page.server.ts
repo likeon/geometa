@@ -4,7 +4,7 @@ import { mapRegions, maps, regions } from '$lib/db/schema';
 
 const officialCacheKey = 'query:maps:official';
 const communityCacheKey = 'query:maps:community';
-const contentCacheEnabled = false;
+const contentCacheEnabled = true;
 
 export const load = async (event) => {
   if (event.platform && contentCacheEnabled) {

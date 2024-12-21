@@ -1,7 +1,7 @@
-<script>
+<script lang="ts">
   import { Accordion, AccordionItem, TabItem, Tabs } from 'flowbite-svelte';
   import background from '$lib/assets/background.jpg';
-  import MapCard from '$routes/(public)/maps/MapCard.svelte';
+  import MapCard from './MapCard.svelte';
 
   let { data } = $props();
 </script>
@@ -50,7 +50,7 @@
               <Accordion class="bg-white rounded-xl">
                 {#each data.communityMaps as item}
                   <AccordionItem>
-                    <span slot="header">{item.region.name}</span>
+                    <span slot="header">{item.region.name} — {item.maps?.length || 0} maps</span>
                     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
                       {#each item.maps as map (map.id)}
                         <MapCard {map} withAuthors={true} />
