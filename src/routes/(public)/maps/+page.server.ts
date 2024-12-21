@@ -4,9 +4,10 @@ import { mapRegions, maps, regions } from '$lib/db/schema';
 
 const officialCacheKey = 'query:maps:official';
 const communityCacheKey = 'query:maps:community';
+const contentCacheEnabled = false;
 
 export const load = async (event) => {
-  if (event.platform) {
+  if (event.platform && contentCacheEnabled) {
     const officialMapsCachePromise = event.platform.env.geometa_kv.get(officialCacheKey);
     const communityMapsCachePromise = event.platform.env.geometa_kv.get(communityCacheKey);
     const [officialMapsCache, communityMapsCache] = await Promise.all([
@@ -72,7 +73,7 @@ export const load = async (event) => {
     maps: mapsByRegionId[region.id]
   }));
 
-  if (event.platform) {
+  if (event.platform && contentCacheEnabled) {
     await Promise.all([
       event.platform.env.geometa_kv.put(officialCacheKey, JSON.stringify(officialMaps), {
         expirationTtl: 3600
