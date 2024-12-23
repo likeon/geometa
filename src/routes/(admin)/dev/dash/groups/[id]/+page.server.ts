@@ -371,11 +371,7 @@ export const actions = {
       }));
       await trx.insert(metas).values(metaInsertValues).onConflictDoNothing();
     });
-
-    return {
-      status: 200,
-      numberOfLocations: upsertValues.length
-    };
+    return message(form, { numberOfLocations: upsertValues.length });
   },
   uploadMetaImages: async ({ request, locals }) => {
     const form = await superValidate(request, zod(imageUploadSchema));

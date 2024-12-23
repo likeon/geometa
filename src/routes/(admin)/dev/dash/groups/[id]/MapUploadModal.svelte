@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Modal } from 'flowbite-svelte';
-
+  import { invalidate } from '$app/navigation';
   import { type SuperValidated, type Infer, fileProxy } from 'sveltekit-superforms';
   import { superForm } from 'sveltekit-superforms';
   import type { MapUploadSchema } from './+page.server';
@@ -24,7 +24,7 @@
     },
     onResult({ result }) {
       if (result.type == 'success') {
-        numberOfLocationsUploaded = result.data?.numberOfLocations || 0;
+        numberOfLocationsUploaded = result.data?.form.message.numberOfLocations || 0;
         isUploadModalOpen = false;
       }
 
