@@ -70,7 +70,7 @@
     enctype="multipart/form-data"
     use:enhance>
     <label>
-      Map json from <a target="_blank" href="https://map-making.app/">map-making.app</a>:
+      Upload Map json from <a target="_blank" href="https://map-making.app/">map-making.app</a>:
       <input
         bind:files={$file}
         accept="application/json"
@@ -84,6 +84,17 @@
   </form>
   <p class="text-xl"></p>
   <div class="text-green-900">
+    <p>
+      You can also paste locations from your clipboard(ctrl+v) after copying them from map-making
+      app(by using copy button there).
+    </p>
+    <br />
+    <p>
+      WARNING: All the locations will be replaced by the locations you are uploading(metas and
+      descriptions will stay). We gonna add way to add locations without replacing current ones
+      soon.
+    </p>
+    <br />
     <p>
       Each location <strong>must</strong> have exactly one tag in
       <span class="whitespace-nowrap font-semibold">CountryName-Your Meta Name</span> format!
