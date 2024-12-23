@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Modal } from 'flowbite-svelte';
+  import { Checkbox, Label, Modal } from 'flowbite-svelte';
   import { type SuperValidated, type Infer, fileProxy } from 'sveltekit-superforms';
   import { superForm } from 'sveltekit-superforms';
   import type { MapUploadSchema } from './+page.server';
@@ -16,7 +16,11 @@
     data
   }: Props = $props();
   const { form, errors, enhance, submit, reset } = superForm(data, {
-    onSubmit({ formData }) {
+    onSubmit({ formData, cancel }) {
+      if (!$form.partialUpload && !confirmFullUpload()) {
+        cancel();
+        isUploadModalOpen = false;
+      }
       if (pastedFile != null) {
         formData.set('file', pastedFile);
       }
@@ -54,14 +58,18 @@
           type: 'application/json'
         });
         pastedFile = jsonFile;
-        const numberOfLocs = jsonData.customCoordinates.length;
-        if (confirm(`Are you sure you want to upload ${numberOfLocs} locations from clipboard?`)) {
-          await submit();
-        }
+        submit();
+        pastedFile = null;
       } catch (error) {
         alert('Pasted data is not valid JSON.');
       }
     }
+  }
+
+  function confirmFullUpload() {
+    return confirm(
+      'You are about to replace all locations in your map group with new locations (metas and description will stay). Are you sure?'
+    );
   }
 </script>
 
@@ -72,7 +80,12 @@
     action="?/uploadMapJson"
     enctype="multipart/form-data"
     use:enhance>
-    <label>
+    <Label>
+      <Checkbox name="partialUpload" bind:checked={$form.partialUpload}
+        >Keep old locations(will only add/update locations and not remove any already added
+        locations)</Checkbox>
+    </Label>
+    <Label>
       Upload Map json from <a target="_blank" href="https://map-making.app/">map-making.app</a>:
       <input
         bind:files={$file}
@@ -80,10 +93,11 @@
         name="file"
         type="file"
         onchange={() => submit()} />
+
       {#if $errors.file}
         <div class="invalid">{$errors.file}</div>
       {/if}
-    </label>
+    </Label>
   </form>
   <p class="text-xl"></p>
   <div class="text-green-900">
@@ -92,11 +106,6 @@
       app(by using copy button there).
     </p>
     <br />
-    <p>
-      WARNING: All the locations will be replaced by the locations you are uploading(metas and
-      descriptions will stay). We gonna add way to add locations without replacing current ones
-      soon.
-    </p>
     <br />
     <p>
       Each location <strong>must</strong> have exactly one tag in

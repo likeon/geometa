@@ -43,7 +43,8 @@ const insertMetasSchema = createInsertSchema(metas)
 export type InsertMetasSchema = typeof insertMetasSchema;
 
 const mapUploadSchema = z.object({
-  file: z.instanceof(File, { message: 'Please upload a file.' })
+  file: z.instanceof(File, { message: 'Please upload a file.' }),
+  partialUpload: z.boolean().default(true)
 });
 export type MapUploadSchema = typeof mapUploadSchema;
 
@@ -307,7 +308,6 @@ export const actions = {
 
     // upsert data
     const BATCH_SIZE = 1000;
-
     await db.transaction(async (trx) => {
       // Step 1: Batched upsert operation
       for (let i = 0; i < upsertValues.length; i += BATCH_SIZE) {
@@ -349,17 +349,20 @@ export const actions = {
       }
 
       // Step 2: Delete any records that weren't upserted
-      await trx
-        .delete(mapGroupLocations)
-        .where(
-          and(
-            eq(mapGroupLocations.mapGroupId, groupId),
-            or(
-              isNull(mapGroupLocations.updatedAt),
-              lt(mapGroupLocations.updatedAt, currentTimestamp)
+
+      if (!form.data.partialUpload) {
+        await trx
+          .delete(mapGroupLocations)
+          .where(
+            and(
+              eq(mapGroupLocations.mapGroupId, groupId),
+              or(
+                isNull(mapGroupLocations.updatedAt),
+                lt(mapGroupLocations.updatedAt, currentTimestamp)
+              )
             )
-          )
-        );
+          );
+      }
 
       // Step 3: Insert tags into metas table
       const metaInsertValues = Array.from(usedTags).map((tagName) => ({
