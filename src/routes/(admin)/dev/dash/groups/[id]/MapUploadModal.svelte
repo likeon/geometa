@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Modal } from 'flowbite-svelte';
-  import { invalidate } from '$app/navigation';
   import { type SuperValidated, type Infer, fileProxy } from 'sveltekit-superforms';
   import { superForm } from 'sveltekit-superforms';
   import type { MapUploadSchema } from './+page.server';
