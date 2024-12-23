@@ -54,7 +54,10 @@
           type: 'application/json'
         });
         pastedFile = jsonFile;
-        await submit();
+        const numberOfLocs = jsonData.customCoordinates.length;
+        if (confirm(`Are you sure you want to upload ${numberOfLocs} locations from clipboard?`)) {
+          await submit();
+        }
       } catch (error) {
         alert('Pasted data is not valid JSON.');
       }
