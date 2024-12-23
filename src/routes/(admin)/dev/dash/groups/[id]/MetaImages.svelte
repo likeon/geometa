@@ -1,13 +1,13 @@
 <script lang="ts">
   import { Button, Input } from 'flowbite-svelte';
   import { fileProxy, type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
-  import type { MapUploadSchema } from './+page.server';
+  import type { ImageUploadSchema } from './+page.server';
   import type { PageData } from './$types';
   import { applyAction, enhance } from '$app/forms';
   import { invalidateAll } from '$app/navigation';
 
   interface Props {
-    data: SuperValidated<Infer<MapUploadSchema>>;
+    data: SuperValidated<Infer<ImageUploadSchema>>;
     selectedMeta: PageData['group']['metas'][number];
   }
 

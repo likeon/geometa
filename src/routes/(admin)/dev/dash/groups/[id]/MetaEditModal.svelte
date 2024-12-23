@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Alert, Button, Input, Label, Modal, MultiSelect, TabItem, Tabs } from 'flowbite-svelte';
   import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
-  import type { InsertMetasSchema, MapUploadSchema } from './+page.server';
+  import type { ImageUploadSchema, InsertMetasSchema } from './+page.server';
   import type { PageData } from './$types';
   import MetaImages from '$routes/(admin)/dev/dash/groups/[id]/MetaImages.svelte';
   import Icon from '@iconify/svelte';
@@ -25,7 +25,7 @@
     metaForm: SuperValidated<Infer<InsertMetasSchema>>;
     levelChoices: { value: number; name: string }[];
     groupId: number;
-    imageUploadForm: SuperValidated<Infer<MapUploadSchema>>;
+    imageUploadForm: SuperValidated<Infer<ImageUploadSchema>>;
     user: PageData['user'];
   } = $props();
 
