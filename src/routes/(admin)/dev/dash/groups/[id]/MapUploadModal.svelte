@@ -61,7 +61,7 @@
   <div class="text-green-900">
     <p>
       Each location <strong>must</strong> have exactly one tag in
-      <span class="whitespace-nowrap font-semibold">CountryName-Your Meta Name]</span> format!
+      <span class="whitespace-nowrap font-semibold">CountryName-Your Meta Name</span> format!
     </p>
     <p>Examples:</p>
     <ol class="list-disc ml-5">
