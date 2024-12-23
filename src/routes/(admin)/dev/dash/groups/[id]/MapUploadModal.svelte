@@ -4,20 +4,24 @@
   import { type SuperValidated, type Infer, fileProxy } from 'sveltekit-superforms';
   import { superForm } from 'sveltekit-superforms';
   import type { MapUploadSchema } from './+page.server';
-  import { createEventDispatcher } from 'svelte';
 
   interface Props {
     isUploadModalOpen: boolean;
     numberOfLocationsUploaded: number;
     data: SuperValidated<Infer<MapUploadSchema>>;
   }
-
+  let pastedFile: null | File = null;
   let {
     isUploadModalOpen = $bindable(),
     numberOfLocationsUploaded = $bindable(),
     data
   }: Props = $props();
   const { form, errors, enhance, submit, reset } = superForm(data, {
+    onSubmit({ formData }) {
+      if (pastedFile != null) {
+        formData.set('file', pastedFile);
+      }
+    },
     onResult({ result }) {
       if (result.type == 'success') {
         numberOfLocationsUploaded = result.data?.numberOfLocations || 0;
@@ -32,9 +36,31 @@
 
   $effect(() => {
     if (isUploadModalOpen) {
+      document.addEventListener('paste', handlePaste);
       reset();
+      pastedFile = null;
+    } else {
+      document.removeEventListener('paste', handlePaste);
     }
   });
+
+  async function handlePaste(event: ClipboardEvent) {
+    const clipboardData =
+      event.clipboardData?.getData('application/json') ||
+      event.clipboardData?.getData('text/plain');
+    if (clipboardData) {
+      try {
+        const jsonData = JSON.parse(clipboardData);
+        const jsonFile = new File([JSON.stringify(jsonData)], 'pasted-data.json', {
+          type: 'application/json'
+        });
+        pastedFile = jsonFile;
+        await submit();
+      } catch (error) {
+        alert('Pasted data is not valid JSON.');
+      }
+    }
+  }
 </script>
 
 <Modal bind:open={isUploadModalOpen}>
