@@ -11,7 +11,8 @@ import {
   metas,
   maps,
   mapData,
-  users
+  users,
+  mapGroupPermissions
 } from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
 import { createInsertSchema } from 'drizzle-zod';
@@ -54,6 +55,13 @@ const imageUploadSchema = z.object({
 });
 export type ImageUploadSchema = typeof imageUploadSchema;
 
+const copyMetaSchema = z.object({
+  metaId: z.number(),
+  mapGroupIdToCopy: z.number()
+});
+
+export type CopyMetaSchema = typeof copyMetaSchema;
+
 const mapJsonSchema = z.object({
   customCoordinates: z
     .object({
@@ -87,6 +95,9 @@ type UpsertValue = {
 };
 
 export const load: PageServerLoad = async ({ params, locals }) => {
+  if (!locals.user?.id) {
+    error(403, 'Permission denied');
+  }
   const id = getGroupId(params);
   await ensurePermissions(locals.user?.id, id);
   const group = await db.query.mapGroups.findFirst({
@@ -114,6 +125,16 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   const metaForm = await superValidate(zod(insertMetasSchema));
   const mapUploadForm = await superValidate(zod(mapUploadSchema));
   const imageUploadForm = await superValidate(zod(imageUploadSchema));
+  const copyForm = await superValidate(zod(copyMetaSchema));
+
+  const userGroups = await db
+    .select({
+      map_group_id: mapGroups.id,
+      map_group_name: mapGroups.name
+    })
+    .from(mapGroups)
+    .innerJoin(mapGroupPermissions, eq(mapGroupPermissions.mapGroupId, mapGroups.id))
+    .where(eq(mapGroupPermissions.userId, locals.user.id));
 
   return {
     group,
@@ -121,7 +142,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     levelList,
     mapUploadForm,
     imageUploadForm,
-    user
+    user,
+    userGroups,
+    copyForm
   };
 };
 
@@ -184,41 +207,46 @@ export const actions = {
 
     await db.delete(metas).where(eq(metas.id, metaId));
   },
-  copyToOfficials: async ({ request, locals }) => {
-    const data = await request.formData();
-    const metaId = parseInt((data.get('id') as string) || '', 10);
-
-    if (isNaN(metaId)) {
-      error(400, 'Invalid ID');
+  copyMetaTo: async ({ request, locals }) => {
+    const form = await superValidate(request, zod(copyMetaSchema));
+    if (!form.valid) {
+      return fail(400, { form });
     }
-
+    const { metaId, mapGroupIdToCopy } = form.data;
     const meta = await db.query.metas.findFirst({ where: eq(metas.id, metaId) });
-
     if (!meta) {
       error(400, 'No meta found for this id');
     }
-
     await ensurePermissions(locals.user!.id, meta.mapGroupId);
-    const user = await db.query.users.findFirst({
-      where: and(eq(users.id, locals.user!.id), eq(users.isSuperadmin, true))
-    });
-    if (!user) {
-      error(403, 'Permission denied');
-    }
-
+    await ensurePermissions(locals.user!.id, mapGroupIdToCopy);
     const { id, mapGroupId, ...cleanedMeta } = meta;
     void id;
     const insertResult = await db
       .insert(metas)
       .values({
         ...cleanedMeta,
-        mapGroupId: 1
+        mapGroupId: mapGroupIdToCopy
       })
       .onConflictDoNothing()
       .returning({ insertedId: metas.id });
 
-    if (!insertResult) {
+    if (insertResult.length == 0) {
       return;
+    }
+    // copy images
+    const sourceImages = await db
+      .select({
+        image_url: metaImages.image_url
+      })
+      .from(metaImages)
+      .where(eq(metaImages.metaId, metaId));
+
+    const sourceImagesInsert = sourceImages.map((sourceImage) => ({
+      image_url: sourceImage.image_url,
+      metaId: insertResult[0].insertedId
+    }));
+    if (sourceImagesInsert.length != 0) {
+      await db.insert(metaImages).values(sourceImagesInsert).onConflictDoNothing();
     }
 
     const sourceLocations = await db
@@ -243,11 +271,13 @@ export const actions = {
     const currentTimestamp = Math.floor(Date.now() / 1000);
     const insertLocations = sourceLocations.map((location) => ({
       ...location,
-      mapGroupId: 1,
+      mapGroupId: mapGroupIdToCopy,
       updatedAt: currentTimestamp,
       modifiedAt: currentTimestamp
     }));
-    await db.insert(mapGroupLocations).values(insertLocations);
+    if (insertLocations.length != 0) {
+      await db.insert(mapGroupLocations).values(insertLocations).onConflictDoNothing();
+    }
   },
   uploadMapJson: async ({ request, params, locals }) => {
     const groupId = getGroupId(params);

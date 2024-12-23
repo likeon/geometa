@@ -17,6 +17,13 @@
     name: item.name
   }));
 
+  const groupChoices = data.userGroups
+    .filter((group) => group.map_group_id !== data.group.id)
+    .map((group) => ({
+      value: group.map_group_id,
+      name: group.map_group_name
+    }));
+
   let columns = [
     {
       key: 'tagName',
@@ -219,7 +226,9 @@
 <MetaEditModal
   bind:isMetaModalOpen
   metaForm={data.metaForm}
+  copyForm={data.copyForm}
   {levelChoices}
+  mapGroupChoices={groupChoices}
   groupId={data.group.id}
   {selectedMeta}
   imageUploadForm={data.imageUploadForm}

@@ -1,7 +1,17 @@
 <script lang="ts">
-  import { Alert, Button, Input, Label, Modal, MultiSelect, TabItem, Tabs } from 'flowbite-svelte';
+  import {
+    Alert,
+    Button,
+    Input,
+    Label,
+    Modal,
+    MultiSelect,
+    Select,
+    TabItem,
+    Tabs
+  } from 'flowbite-svelte';
   import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
-  import type { ImageUploadSchema, InsertMetasSchema } from './+page.server';
+  import type { CopyMetaSchema, ImageUploadSchema, InsertMetasSchema } from './+page.server';
   import type { PageData } from './$types';
   import MetaImages from '$routes/(admin)/dev/dash/groups/[id]/MetaImages.svelte';
   import Icon from '@iconify/svelte';
@@ -18,7 +28,9 @@
     levelChoices,
     groupId,
     imageUploadForm,
-    user
+    user,
+    mapGroupChoices,
+    copyForm
   }: {
     isMetaModalOpen: boolean;
     selectedMeta: PageData['group']['metas'][number] | null;
@@ -27,10 +39,24 @@
     groupId: number;
     imageUploadForm: SuperValidated<Infer<ImageUploadSchema>>;
     user: PageData['user'];
+    mapGroupChoices: { value: number; name: string }[];
+    copyForm: SuperValidated<Infer<CopyMetaSchema>>;
   } = $props();
 
-  const { form, errors, constraints, enhance, isTainted } = superForm(metaForm, {
+  const {
+    form: formMeta,
+    errors: errorsMeta,
+    constraints: constraintsMeta,
+    enhance: enhanceMeta,
+    isTainted: isTaintedMeta
+  } = superForm(metaForm, {
     dataType: 'json',
+    onResult() {
+      isMetaModalOpen = false;
+    }
+  });
+
+  const { form: formCopy, enhance: enhanceCopy } = superForm(copyForm, {
     onResult() {
       isMetaModalOpen = false;
     }
@@ -41,32 +67,33 @@
 
   function fillForm(meta: PageData['group']['metas'][number] | null) {
     if (savedForm) {
-      $form = savedForm;
+      $formMeta = savedForm;
       return;
     }
     if (meta) {
-      form.update(
-        ($form) => {
-          $form.id = meta.id;
-          $form.mapGroupId = meta.mapGroupId;
-          $form.tagName = meta.tagName;
-          $form.name = meta.name;
-          $form.note = meta.note;
-          $form.levels = meta.metaLevels.map((item) => item.levelId);
-          return $form;
+      $formCopy.metaId = meta.id;
+      formMeta.update(
+        ($formMeta) => {
+          $formMeta.id = meta.id;
+          $formMeta.mapGroupId = meta.mapGroupId;
+          $formMeta.tagName = meta.tagName;
+          $formMeta.name = meta.name;
+          $formMeta.note = meta.note;
+          $formMeta.levels = meta.metaLevels.map((item) => item.levelId);
+          return $formMeta;
         },
         { taint: false }
       );
     } else {
-      form.update(
-        ($form) => {
-          $form.id = undefined;
-          $form.mapGroupId = groupId;
-          $form.tagName = '';
-          $form.name = '';
-          $form.note = '';
-          $form.levels = [];
-          return $form;
+      formMeta.update(
+        ($formMeta) => {
+          $formMeta.id = undefined;
+          $formMeta.mapGroupId = groupId;
+          $formMeta.tagName = '';
+          $formMeta.name = '';
+          $formMeta.note = '';
+          $formMeta.levels = [];
+          return $formMeta;
         },
         { taint: false }
       );
@@ -97,19 +124,19 @@
 <Modal bind:open={isMetaModalOpen}>
   <Tabs contentClass="p-4 mt-4" tabStyle="underline">
     <TabItem open title="Info" on:click={() => fillForm(selectedMeta)}>
-      <form action="?/updateMeta" class="flex flex-col space-y-6" method="post" use:enhance>
-        <Input type="hidden" name="id" bind:value={$form.id} />
-        <Input type="hidden" name="mapGroupId" bind:value={$form.mapGroupId} />
+      <form action="?/updateMeta" class="flex flex-col space-y-6" method="post" use:enhanceMeta>
+        <Input type="hidden" name="id" bind:value={$formMeta.id} />
+        <Input type="hidden" name="mapGroupId" bind:value={$formMeta.mapGroupId} />
         <Label class="space-y-2">
           <span>Tag name</span>
           <Input
             type="text"
             name="tagName"
-            aria-invalid={$errors.tagName ? 'true' : undefined}
-            bind:value={$form.tagName}
-            {...$constraints.tagName} />
-          {#if $errors.tagName}
-            <Alert color="red">{$errors.tagName}</Alert>
+            aria-invalid={$errorsMeta.tagName ? 'true' : undefined}
+            bind:value={$formMeta.tagName}
+            {...$constraintsMeta.tagName} />
+          {#if $errorsMeta.tagName}
+            <Alert color="red">{$errorsMeta.tagName}</Alert>
           {/if}
         </Label>
         <Label class="space-y-2">
@@ -117,23 +144,23 @@
           <Input
             type="text"
             name="name"
-            aria-invalid={$errors.name ? 'true' : undefined}
-            bind:value={$form.name}
-            {...$constraints.name} />
-          {#if $errors.name}
-            <Alert color="red">{$errors.name}</Alert>
+            aria-invalid={$errorsMeta.name ? 'true' : undefined}
+            bind:value={$formMeta.name}
+            {...$constraintsMeta.name} />
+          {#if $errorsMeta.name}
+            <Alert color="red">{$errorsMeta.name}</Alert>
           {/if}
         </Label>
         <Label class="space-y-2">
           <span>Note</span>
-          <MarkdownEditor {carta} mode="tabs" theme="test" bind:value={$form.note} />
-          {#if $errors.note}
-            <Alert color="red">{$errors.note}</Alert>
+          <MarkdownEditor {carta} mode="tabs" theme="test" bind:value={$formMeta.note} />
+          {#if $errorsMeta.note}
+            <Alert color="red">{$errorsMeta.note}</Alert>
           {/if}
         </Label>
         <Label>
           <span>Levels</span>
-          <MultiSelect items={levelChoices} bind:value={$form.levels} size="lg" />
+          <MultiSelect items={levelChoices} bind:value={$formMeta.levels} size="lg" />
         </Label>
         <Button type="submit" class="w-full">Save</Button>
       </form>
@@ -142,11 +169,36 @@
       <TabItem
         title="Images"
         on:click={() => {
-          if (isTainted()) {
-            savedForm = $form;
+          if (isTaintedMeta()) {
+            savedForm = $formMeta;
           }
         }}>
         <MetaImages data={imageUploadForm} {selectedMeta} />
+      </TabItem>
+      <TabItem
+        title="Copy"
+        on:click={() => {
+          if (isTaintedMeta()) {
+            savedForm = $formMeta;
+          }
+        }}>
+        <form action="?/copyMetaTo" method="post" onsubmit={confirmCopy} use:enhanceCopy>
+          <div class="flex items-center gap-4">
+            <Input type="hidden" name="metaId" bind:value={$formCopy.metaId} />
+            <Label class="flex-1">
+              <span class="block mb-2 text-sm font-medium">Copy this meta to:</span>
+              <Select
+                name="mapGroupIdToCopy"
+                items={mapGroupChoices}
+                size="lg"
+                class="w-full"
+                bind:value={$formCopy.mapGroupIdToCopy} />
+            </Label>
+            <button type="submit" class="p-2">
+              <Icon icon="solar:copy-bold" width="1rem" height="1rem" color="gray" />
+            </button>
+          </div>
+        </form>
       </TabItem>
       <form action="?/deleteMeta" method="post" onsubmit={confirmDelete}>
         <div class="items-center flex h-full">
@@ -156,16 +208,6 @@
           </button>
         </div>
       </form>
-      {#if groupId !== 1 && user?.isSuperadmin}
-        <form action="?/copyToOfficials" method="post" onsubmit={confirmCopy}>
-          <div class="items-center flex h-full">
-            <input type="hidden" name="id" value={selectedMeta.id} />
-            <button type="submit">
-              <Icon icon="solar:copy-bold" width="1rem" height="1rem" color="gray" />
-            </button>
-          </div>
-        </form>
-      {/if}
     {/if}
   </Tabs>
 </Modal>
