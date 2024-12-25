@@ -6,6 +6,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { ensurePermissions } from '$lib/utils';
+import { number } from 'zod';
 
 export const prerender = false;
 const insertMapGroupSchema = createInsertSchema(mapGroups).pick({ name: true });
@@ -17,10 +18,16 @@ export const load = async ({ locals }) => {
   }
 
   const userGroups = await db
-    .select()
+    .select({
+      groupId: mapGroups.id,
+      groupName: mapGroups.name, // Example column, adjust as needed
+      locationCount: sql<number>`COUNT(${mapGroupLocations.id})`.mapWith(Number)
+    })
     .from(mapGroups)
     .innerJoin(mapGroupPermissions, eq(mapGroupPermissions.mapGroupId, mapGroups.id))
-    .where(eq(mapGroupPermissions.userId, locals.user.id));
+    .innerJoin(mapGroupLocations, eq(mapGroupLocations.mapGroupId, mapGroups.id))
+    .where(eq(mapGroupPermissions.userId, locals.user.id))
+    .groupBy(mapGroups.id);
 
   const user = await db.query.users.findFirst({ where: eq(users.id, locals.user.id) });
   let allGroups;

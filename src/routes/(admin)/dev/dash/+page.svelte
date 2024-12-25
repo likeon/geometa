@@ -11,9 +11,10 @@
   <div class="flex">
     <div class="w-2/3">
       <ul class="list-disc">
-        {#each data.userGroups as group (group.map_groups.id)}
+        {#each data.userGroups as group (group.groupId)}
           <li>
-            <a href="/dev/dash/groups/{group.map_groups.id}">{group.map_groups.name}</a>
+            <a href="/dev/dash/groups/{group.groupId}"
+              >{group.groupName} ({group.locationCount} locations)</a>
           </li>
         {/each}
       </ul>
