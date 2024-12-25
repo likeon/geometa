@@ -424,6 +424,10 @@ export const actions = {
       .insert(metaImages)
       .values({ metaId: form.data.metaId, image_url: url })
       .returning({ id: metaImages.id, metaId: metaImages.metaId, image_url: metaImages.image_url });
+    await db
+      .update(metas)
+      .set({ modifiedAt: Math.floor(Date.now() / 1000) })
+      .where(eq(metas.id, form.data.metaId));
     return message(form, result[0]);
   },
   deleteMetaImage: async ({ request, locals }) => {
@@ -440,6 +444,10 @@ export const actions = {
     await ensurePermissions(locals.user?.id, savedImage[0]?.metas.mapGroupId);
 
     await db.delete(metaImages).where(eq(metaImages.id, imageId));
+    await db
+      .update(metas)
+      .set({ modifiedAt: Math.floor(Date.now() / 1000) })
+      .where(eq(metas.id, savedImage[0].metas.id));
     return { success: true, imageId: imageId };
   },
   prepareUserScriptData: async (event) => {
