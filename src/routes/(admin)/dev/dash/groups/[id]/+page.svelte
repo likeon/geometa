@@ -18,10 +18,10 @@
   }));
 
   const groupChoices = data.userGroups
-    .filter((group) => group.map_group_id !== data.group.id)
+    .filter((group) => group.id !== data.group.id)
     .map((group) => ({
-      value: group.map_group_id,
-      name: group.map_group_name
+      value: group.id,
+      name: group.name
     }));
 
   let columns = [

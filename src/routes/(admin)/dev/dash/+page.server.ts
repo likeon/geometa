@@ -19,8 +19,8 @@ export const load = async ({ locals }) => {
 
   const userGroups = await db
     .select({
-      groupId: mapGroups.id,
-      groupName: mapGroups.name, // Example column, adjust as needed
+      id: mapGroups.id,
+      name: mapGroups.name,
       locationCount: sql<number>`COUNT(${mapGroupLocations.id})`.mapWith(Number)
     })
     .from(mapGroups)

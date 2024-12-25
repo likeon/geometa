@@ -129,8 +129,8 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
   const userGroups = await db
     .select({
-      map_group_id: mapGroups.id,
-      map_group_name: mapGroups.name
+      id: mapGroups.id,
+      name: mapGroups.name
     })
     .from(mapGroups)
     .innerJoin(mapGroupPermissions, eq(mapGroupPermissions.mapGroupId, mapGroups.id))
