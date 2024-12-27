@@ -3,6 +3,9 @@ import postgres from 'postgres';
 import { DATABASE_SSL, DATABASE_URL } from '$env/static/private';
 import * as schema from '$lib/db/schema';
 
-const client = postgres(process.env.db || DATABASE_URL, { ssl: DATABASE_SSL === 'true' });
+const client = postgres(process.env.db || DATABASE_URL, {
+  ssl: DATABASE_SSL === 'true',
+  prepare: false
+});
 
 export const db = drizzle(client, { schema });
