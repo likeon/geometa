@@ -24,94 +24,10 @@
       "breakpoints": true
     },
     {
-      "idx": 43,
-      "version": "6",
-      "when": 1735393873016,
-      "tag": "0043_classy_santa_claus",
-      "breakpoints": true
-    },
-    {
-      "idx": 44,
-      "version": "6",
-      "when": 1736324535607,
-      "tag": "0044_left_salo",
-      "breakpoints": true
-    },
-    {
-      "idx": 45,
-      "version": "6",
-      "when": 1736337349555,
-      "tag": "0045_many_joystick",
-      "breakpoints": true
-    },
-    {
-      "idx": 46,
-      "version": "6",
-      "when": 1736357069351,
-      "tag": "0046_loose_zuras",
-      "breakpoints": true
-    },
-    {
-      "idx": 47,
-      "version": "6",
-      "when": 1736513495530,
-      "tag": "0047_known_marvex",
-      "breakpoints": true
-    },
-    {
-      "idx": 48,
-      "version": "6",
-      "when": 1736681133666,
-      "tag": "0048_tiresome_zaran",
-      "breakpoints": true
-    },
-    {
-      "idx": 49,
-      "version": "6",
-      "when": 1736781303540,
-      "tag": "0049_confused_grim_reaper",
-      "breakpoints": true
-    },
-    {
-      "idx": 50,
-      "version": "6",
-      "when": 1737024846738,
-      "tag": "0050_bizarre_shadowcat",
-      "breakpoints": true
-    },
-    {
-      "idx": 51,
-      "version": "6",
-      "when": 1737039849904,
-      "tag": "0051_nasty_winter_soldier",
-      "breakpoints": true
-    },
-    {
-      "idx": 52,
-      "version": "6",
-      "when": 1737050556324,
-      "tag": "0052_sour_sister_grimm",
-      "breakpoints": true
-    },
-    {
-      "idx": 53,
-      "version": "6",
-      "when": 1737386760560,
-      "tag": "0053_fair_luke_cage",
-      "breakpoints": true
-    },
-    {
-      "idx": 54,
-      "version": "6",
-      "when": 1741096599248,
-      "tag": "0054_tough_deathstrike",
-      "breakpoints": true
-    },
-    {
-      "idx": 55,
-      "version": "6",
-      "when": 1741342622408,
-      "tag": "0055_closed_blackheart",
+      "idx": 3,
+      "version": "7",
+      "when": 1735319190803,
+      "tag": "0003_brainy_queen_noir",
       "breakpoints": true
     }
   ]
