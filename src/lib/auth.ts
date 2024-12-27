@@ -1,13 +1,13 @@
 import { Lucia } from 'lucia';
 import { dev } from '$app/environment';
 import { DISCORD_APPLICATION_ID, DISCORD_SECRET_ID } from '$env/static/private';
-import { DrizzleSQLiteAdapter } from '@lucia-auth/adapter-drizzle';
+import { DrizzlePostgreSQLAdapter } from '@lucia-auth/adapter-drizzle';
 import { db } from '$lib/drizzle';
 import { sessions, users } from '$lib/db/schema';
 import { Discord } from 'arctic';
 import { LOGIN_RETURN_URL } from '$env/static/private';
 
-const adapter = new DrizzleSQLiteAdapter(db, sessions, users);
+const adapter = new DrizzlePostgreSQLAdapter(db, sessions, users);
 
 export const lucia = new Lucia(adapter, {
   sessionCookie: {

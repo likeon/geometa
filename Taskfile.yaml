@@ -28,3 +28,7 @@ tasks:
     cmds:
       - .ci/db/drop.sh
       - turso db shell http://localhost:8080 < .ci/db/dump.sql
+
+  psql:
+    cmds:
+      - psql -h localhost -U postgres geometa

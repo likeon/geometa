@@ -12,6 +12,7 @@ declare global {
     interface Platform {
       env: {
         geometa_kv: KVNamespace;
+        db: Hyperdrive;
       };
     }
   }

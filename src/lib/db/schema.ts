@@ -1,7 +1,16 @@
-import { text, integer, sqliteTable, uniqueIndex, real, sqliteView } from 'drizzle-orm/sqlite-core';
+import {
+  text,
+  integer,
+  pgTable,
+  uniqueIndex,
+  real,
+  pgView,
+  boolean,
+  timestamp
+} from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 
-export const metaSuggestions = sqliteTable('meta_suggestions', {
+export const metaSuggestions = pgTable('meta_suggestions', {
   id: integer('id').primaryKey(),
   secret: text('secret').notNull(),
   url: text('url').notNull(),
@@ -10,7 +19,7 @@ export const metaSuggestions = sqliteTable('meta_suggestions', {
   status: text('status').default('new')
 });
 
-export const mapGroups = sqliteTable('map_groups', {
+export const mapGroups = pgTable('map_groups', {
   id: integer('id').primaryKey(),
   name: text('name').notNull(),
   syncedAt: integer('synced_at')
@@ -24,7 +33,7 @@ export const mapGroupsRelations = relations(mapGroups, ({ many }) => ({
   permissions: many(mapGroupPermissions)
 }));
 
-export const mapGroupLocations = sqliteTable(
+export const mapGroupLocations = pgTable(
   'map_group_locations',
   {
     id: integer('id').primaryKey(),
@@ -51,7 +60,7 @@ export const mapGroupLocationsRelations = relations(mapGroupLocations, ({ one })
   mapGroup: one(mapGroups, { fields: [mapGroupLocations.mapGroupId], references: [mapGroups.id] })
 }));
 
-export const maps = sqliteTable(
+export const maps = pgTable(
   'maps',
   {
     id: integer('id').primaryKey(),
@@ -61,11 +70,11 @@ export const maps = sqliteTable(
     name: text('name').notNull(),
     geoguessrId: text('geoguessr_id').notNull(),
     description: text('description'),
-    isPublished: integer('is_published', { mode: 'boolean' }).notNull().default(false),
-    isCommunity: integer('is_community', { mode: 'boolean' }).notNull().default(false),
+    isPublished: boolean('is_published').notNull().default(false),
+    isCommunity: boolean('is_community').notNull().default(false),
     authors: text('authors').default(''),
     ordering: integer('ordering').notNull().default(0),
-    autoUpdate: integer('auto_update', { mode: 'boolean' }).notNull().default(false),
+    autoUpdate: boolean('auto_update').notNull().default(false),
     footer: text('footer').notNull().default(''),
     footerHtml: text('footer_html').notNull().default(''),
     modifiedAt: integer('modified_at').default(1730419200).notNull(),
@@ -85,7 +94,7 @@ export const mapsRelations = relations(maps, ({ one, many }) => ({
   mapRegions: many(mapRegions)
 }));
 
-export const levels = sqliteTable(
+export const levels = pgTable(
   'levels',
   {
     id: integer('id').primaryKey(),
@@ -103,7 +112,7 @@ export const levelsRelations = relations(levels, ({ one, many }) => ({
   metaLevels: many(maps)
 }));
 
-export const mapLevels = sqliteTable(
+export const mapLevels = pgTable(
   'map_levels',
   {
     id: integer('id').primaryKey(),
@@ -123,7 +132,7 @@ export const mapLevelRelations = relations(mapLevels, ({ one }) => ({
   level: one(levels, { fields: [mapLevels.levelId], references: [levels.id] })
 }));
 
-export const mapFilters = sqliteTable(
+export const mapFilters = pgTable(
   'map_filters',
   {
     id: integer('id').primaryKey(),
@@ -131,7 +140,7 @@ export const mapFilters = sqliteTable(
       .notNull()
       .references(() => maps.id, { onDelete: 'cascade' }),
     tagLike: text('tag_like'),
-    isExclude: integer('is_exclude', { mode: 'boolean' }).notNull().default(false)
+    isExclude: boolean('is_exclude').notNull().default(false)
   },
   (t) => ({
     mapFilterUnique: uniqueIndex('map_filters_unique').on(t.mapId, t.tagLike)
@@ -141,7 +150,7 @@ export const mapFiltersRelations = relations(mapFilters, ({ one }) => ({
   map: one(maps, { fields: [mapFilters.mapId], references: [maps.id] })
 }));
 
-export const metas = sqliteTable(
+export const metas = pgTable(
   'metas',
   {
     id: integer('id').primaryKey(),
@@ -154,8 +163,8 @@ export const metas = sqliteTable(
     noteHtml: text('note_html').notNull().default(''),
     footer: text('footer').notNull().default(''),
     footerHtml: text('footer_html').notNull().default(''),
-    noteFromPlonkit: integer('note_from_plonkit', { mode: 'boolean' }).notNull().default(false),
-    hasImage: integer('has_image', { mode: 'boolean' }).notNull().default(false),
+    noteFromPlonkit: boolean('note_from_plonkit').notNull().default(false),
+    hasImage: boolean('has_image').notNull().default(false),
     modifiedAt: integer('modified_at').default(1730419200).notNull()
   },
   (t) => ({
@@ -168,7 +177,7 @@ export const metasRelations = relations(metas, ({ one, many }) => ({
   images: many(metaImages)
 }));
 
-export const metaLevels = sqliteTable(
+export const metaLevels = pgTable(
   'meta_levels',
   {
     id: integer('id').primaryKey(),
@@ -188,7 +197,7 @@ export const metaLevelRelations = relations(metaLevels, ({ one }) => ({
   level: one(levels, { fields: [metaLevels.levelId], references: [levels.id] })
 }));
 
-export const metaImages = sqliteTable(
+export const metaImages = pgTable(
   'meta_images',
   {
     id: integer('id').primaryKey(),
@@ -205,7 +214,7 @@ export const metaImagesRelations = relations(metaImages, ({ one }) => ({
   meta: one(metas, { fields: [metaImages.metaId], references: [metas.id] })
 }));
 
-export const locationMetas = sqliteView('location_metas_view', {
+export const locationMetas = pgView('location_metas_view', {
   mapGroupId: integer('map_group_id').notNull(),
   metaId: integer('meta_id').notNull(),
   lat: real('lat').notNull(),
@@ -219,7 +228,7 @@ export const locationMetas = sqliteView('location_metas_view', {
   extraPanoDate: text('extra_pano_date').notNull()
 }).existing();
 
-export const mapLocations = sqliteView('map_locations_view', {
+export const mapLocations = pgView('map_locations_view', {
   mapId: integer('map_id').notNull(),
   lat: real('lat').notNull(),
   lng: real('lng').notNull(),
@@ -233,30 +242,33 @@ export const mapLocations = sqliteView('map_locations_view', {
   tagName: text('tag_name').notNull(),
   metaNote: text('meta_note').notNull(),
   metaNoteHtml: text('meta_note_html').notNull(),
-  metaNoteFromPlonkit: integer('meta_note_from_plonkit', { mode: 'boolean' }).notNull(),
+  metaNoteFromPlonkit: boolean('meta_note_from_plonkit').notNull().default(false),
   metaId: integer('meta_id').notNull(),
   maxModifiedAt: integer('max_modified_at').notNull()
 }).existing();
 
-export const users = sqliteTable('user', {
+export const users = pgTable('user', {
   id: text('id').notNull().primaryKey(),
   username: text('username').notNull(),
-  isTrusted: integer('is_trusted', { mode: 'boolean' }).notNull().default(false),
-  isSuperadmin: integer('is_superadmin', { mode: 'boolean' }).notNull().default(false)
+  isTrusted: boolean('is_trusted').notNull().default(false),
+  isSuperadmin: boolean('is_superadmin').notNull().default(false)
 });
 export const usersRelations = relations(users, ({ many }) => ({
   permissions: many(mapGroupPermissions)
 }));
 
-export const sessions = sqliteTable('session', {
+export const sessions = pgTable('session', {
   id: text('id').primaryKey(),
   userId: text('user_id')
     .notNull()
     .references(() => users.id),
-  expiresAt: integer('expires_at').notNull()
+  expiresAt: timestamp('expires_at', {
+    withTimezone: true,
+    mode: 'date'
+  }).notNull()
 });
 
-export const mapGroupPermissions = sqliteTable(
+export const mapGroupPermissions = pgTable(
   'map_group_permissions',
   {
     id: integer('id').primaryKey(),
@@ -282,7 +294,7 @@ export const mapGroupPermissionsRelations = relations(mapGroupPermissions, ({ on
   user: one(users, { fields: [mapGroupPermissions.userId], references: [users.id] })
 }));
 
-export const mapData = sqliteTable(
+export const mapData = pgTable(
   'map_data',
   {
     id: integer('id').primaryKey(),
@@ -303,7 +315,7 @@ export const mapDataRelations = relations(mapData, ({ one }) => ({
   map: one(maps, { fields: [mapData.mapId], references: [maps.id] })
 }));
 
-export const regions = sqliteTable('regions', {
+export const regions = pgTable('regions', {
   id: integer('id').primaryKey(),
   name: text('name').notNull(),
   ordering: integer('ordering').notNull().default(0)
@@ -313,7 +325,7 @@ export const regionsRelations = relations(regions, ({ many }) => ({
   mapRegions: many(mapRegions)
 }));
 
-export const mapRegions = sqliteTable(
+export const mapRegions = pgTable(
   'map_regions',
   {
     id: integer('id').primaryKey(),
@@ -334,7 +346,7 @@ export const mapRegionsRelations = relations(mapRegions, ({ one }) => ({
   region: one(regions, { fields: [mapRegions.regionId], references: [regions.id] })
 }));
 
-export const mapMetas = sqliteView('map_metas_view', {
+export const mapMetas = pgView('map_metas_view', {
   mapId: integer('map_id').notNull(),
   mapName: text('map_name').notNull(),
   mapFooterHtml: text('map_footer_html').notNull(),
@@ -344,5 +356,5 @@ export const mapMetas = sqliteView('map_metas_view', {
   metaNoteHtml: text('meta_note_html').notNull(),
   metaImageUrls: text('meta_image_urls'),
   metaFooterHtml: text('meta_footer_html').notNull(),
-  metaNoteFromPlonkit: integer('meta_note_from_plonkit', { mode: 'boolean' }).notNull()
+  metaNoteFromPlonkit: boolean('meta_note_from_plonkit').notNull()
 }).existing();

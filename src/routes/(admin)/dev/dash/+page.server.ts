@@ -37,10 +37,12 @@ export const load = async ({ locals }) => {
         id: mapGroups.id,
         name: mapGroups.name,
         authors: sql<string | null>`
-          (SELECT GROUP_CONCAT(u.username)
-           FROM map_group_permissions mgp
-           JOIN user u ON u.id = mgp.user_id
-           WHERE mgp.map_group_id = "map_groups"."id")`,
+          (
+            SELECT string_agg(u.username, ', ')
+            FROM map_group_permissions mgp
+            JOIN "user" u ON u.id = mgp.user_id
+            WHERE mgp.map_group_id = map_groups.id
+          )`,
         locationCount: sql<number>`count(${mapGroupLocations.id})`.mapWith(Number)
       })
       .from(mapGroups)
