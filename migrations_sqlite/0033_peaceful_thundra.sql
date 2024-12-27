@@ -1,1 +1,0 @@
-ALTER TABLE `maps` ADD `is_community` integer DEFAULT false NOT NULL;

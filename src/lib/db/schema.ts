@@ -80,7 +80,7 @@ export const maps = pgTable(
     footerHtml: text('footer_html').notNull().default(''),
     modifiedAt: integer('modified_at').default(1730419200).notNull(),
     difficulty: integer('difficulty').notNull().default(0),
-    isVerified: integer('is_verified', { mode: 'boolean' }).notNull().default(false),
+    isVerified: boolean('is_verified').notNull().default(false),
     numberOfGamesPlayed: integer('number_of_games_played'),
     numberOfGamesPlayedDiminished: integer('number_of_games_played_diminished')
   },

@@ -1,5 +1,5 @@
 {
-  "id": "68398613-d738-4da9-8d9d-d7fe319d9ea6",
+  "id": "8684950b-c8c1-45fd-8411-4414c80a87f5",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -10,7 +10,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -62,7 +62,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.map_data": {
       "name": "map_data",
@@ -70,7 +73,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -117,7 +120,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.map_filters": {
       "name": "map_filters",
@@ -125,7 +131,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -184,7 +190,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.map_group_locations": {
       "name": "map_group_locations",
@@ -192,7 +201,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -305,7 +314,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.map_group_permissions": {
       "name": "map_group_permissions",
@@ -313,7 +325,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -374,7 +386,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.map_groups": {
       "name": "map_groups",
@@ -382,7 +397,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -402,7 +417,10 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.map_levels": {
       "name": "map_levels",
@@ -410,7 +428,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -471,7 +489,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.map_regions": {
       "name": "map_regions",
@@ -479,7 +500,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -540,7 +561,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.maps": {
       "name": "maps",
@@ -548,7 +572,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -611,30 +635,55 @@
           "notNull": true,
           "default": false
         },
+        "footer": {
+          "name": "footer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "footer_html": {
+          "name": "footer_html",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
         "modified_at": {
           "name": "modified_at",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "default": 1730419200
+        },
+        "difficulty": {
+          "name": "difficulty",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "is_verified": {
+          "name": "is_verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "number_of_games_played": {
+          "name": "number_of_games_played",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "number_of_games_played_diminished": {
+          "name": "number_of_games_played_diminished",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
-        "maps_name_unique": {
-          "name": "maps_name_unique",
-          "columns": [
-            {
-              "expression": "name",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "maps_geoguessr_id_unique": {
           "name": "maps_geoguessr_id_unique",
           "columns": [
@@ -663,7 +712,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.meta_images": {
       "name": "meta_images",
@@ -671,7 +723,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -688,7 +740,29 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "meta_image_unique": {
+          "name": "meta_image_unique",
+          "columns": [
+            {
+              "expression": "meta_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "image_url",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "meta_images_meta_id_metas_id_fk": {
           "name": "meta_images_meta_id_metas_id_fk",
@@ -701,7 +775,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.meta_levels": {
       "name": "meta_levels",
@@ -709,7 +786,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -770,7 +847,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.meta_suggestions": {
       "name": "meta_suggestions",
@@ -778,7 +858,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -817,7 +897,10 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.metas": {
       "name": "metas",
@@ -825,7 +908,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -855,6 +938,20 @@
         },
         "note_html": {
           "name": "note_html",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "footer": {
+          "name": "footer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "footer_html": {
+          "name": "footer_html",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -917,7 +1014,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.regions": {
       "name": "regions",
@@ -925,7 +1025,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "integer",
+          "type": "serial",
           "primaryKey": true,
           "notNull": true
         },
@@ -946,7 +1046,10 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.session": {
       "name": "session",
@@ -966,7 +1069,7 @@
         },
         "expires_at": {
           "name": "expires_at",
-          "type": "integer",
+          "type": "timestamp with time zone",
           "primaryKey": false,
           "notNull": true
         }
@@ -984,7 +1087,10 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     },
     "public.user": {
       "name": "user",
@@ -1002,8 +1108,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "is_active": {
-          "name": "is_active",
+        "is_trusted": {
+          "name": "is_trusted",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -1020,12 +1126,266 @@
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
     }
   },
   "enums": {},
   "schemas": {},
   "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {
+    "public.location_metas_view": {
+      "columns": {
+        "map_group_id": {
+          "name": "map_group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_id": {
+          "name": "meta_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lat": {
+          "name": "lat",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lng": {
+          "name": "lng",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "heading": {
+          "name": "heading",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pitch": {
+          "name": "pitch",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "zoom": {
+          "name": "zoom",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pano_id": {
+          "name": "pano_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "extra_tag": {
+          "name": "extra_tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "extra_pano_id": {
+          "name": "extra_pano_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "extra_pano_date": {
+          "name": "extra_pano_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "name": "location_metas_view",
+      "schema": "public",
+      "isExisting": true,
+      "materialized": false
+    },
+    "public.map_locations_view": {
+      "columns": {
+        "map_id": {
+          "name": "map_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lat": {
+          "name": "lat",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "lng": {
+          "name": "lng",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "heading": {
+          "name": "heading",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pitch": {
+          "name": "pitch",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "zoom": {
+          "name": "zoom",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "pano_id": {
+          "name": "pano_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "meta_name": {
+          "name": "meta_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "extra_pano_id": {
+          "name": "extra_pano_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "extra_pano_date": {
+          "name": "extra_pano_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tag_name": {
+          "name": "tag_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_note": {
+          "name": "meta_note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_note_html": {
+          "name": "meta_note_html",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_note_from_plonkit": {
+          "name": "meta_note_from_plonkit",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "meta_id": {
+          "name": "meta_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "max_modified_at": {
+          "name": "max_modified_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "name": "map_locations_view",
+      "schema": "public",
+      "isExisting": true,
+      "materialized": false
+    },
+    "public.map_metas_view": {
+      "columns": {
+        "map_id": {
+          "name": "map_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "map_name": {
+          "name": "map_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "map_footer_html": {
+          "name": "map_footer_html",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "geoguessr_id": {
+          "name": "geoguessr_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_name": {
+          "name": "meta_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_tag": {
+          "name": "meta_tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_note_html": {
+          "name": "meta_note_html",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_image_urls": {
+          "name": "meta_image_urls",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "meta_footer_html": {
+          "name": "meta_footer_html",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_note_from_plonkit": {
+          "name": "meta_note_from_plonkit",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "name": "map_metas_view",
+      "schema": "public",
+      "isExisting": true,
+      "materialized": false
+    }
+  },
   "_meta": {
     "columns": {},
     "schemas": {},

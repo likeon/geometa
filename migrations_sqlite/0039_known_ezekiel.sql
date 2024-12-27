@@ -1,1 +1,0 @@
-ALTER TABLE `map_groups` ADD `synced_at` integer;

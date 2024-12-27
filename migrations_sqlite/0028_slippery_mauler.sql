@@ -1,1 +1,0 @@
-ALTER TABLE `maps` ADD `ordering` integer DEFAULT 0 NOT NULL;

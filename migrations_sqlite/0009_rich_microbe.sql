@@ -1,9 +1,0 @@
-DROP VIEW IF EXISTS map_locations_view;--> statement-breakpoint
-
-CREATE VIEW map_locations_view AS
-select m.id as map_id, lmv.lat, lmv.lng, lmv.heading, lmv.pitch, lmv.zoom, lmv.pano_id, lmv.meta_name, lmv.extra_pano_id, lmv.extra_pano_date, lmv.extra_tag as tag_name, lmv.meta_note, lmv.meta_note_from_plonkit
-from location_metas_view lmv
-join meta_levels ml on ml.meta_id = lmv.meta_id
-join levels l on l.id = ml.level_id
-join maps m on m.map_group_id = lmv.map_group_id and (m.level_id = l.id or m.level_id is null);
--- Custom SQL migration file, put you code below! --
