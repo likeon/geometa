@@ -43,12 +43,14 @@
 
 <style>
   .carousel {
-    width: 100%;
     position: relative;
+    overflow: hidden;
+    margin: 0 auto;
   }
 
   .image-wrapper {
     width: 100%;
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -56,8 +58,9 @@
 
   .responsive-image {
     max-width: 100%;
-    height: auto;
+    height: 100%;
     display: block;
+    object-fit: contain;
   }
 
   .controls {
@@ -78,7 +81,6 @@
     font-size: 2em;
     padding: 0.2em 0.5em;
     cursor: pointer;
-    pointer-events: all; /* Enables clicks on the buttons */
   }
 
   .indicators {
