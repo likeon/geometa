@@ -251,7 +251,7 @@ export const mapLocations = sqliteView('map_locations_view', {
 export const users = sqliteTable('user', {
   id: text('id').notNull().primaryKey(),
   username: text('username').notNull(),
-  isActive: integer('is_active', { mode: 'boolean' }).notNull().default(false),
+  isTrusted: integer('is_trusted', { mode: 'boolean' }).notNull().default(false),
   isSuperadmin: integer('is_superadmin', { mode: 'boolean' }).notNull().default(false)
 });
 

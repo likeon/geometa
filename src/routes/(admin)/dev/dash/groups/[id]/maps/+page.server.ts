@@ -88,10 +88,12 @@ export const actions = {
       // @ts-ignore
       // do not update those if user isn't an admin
       dataNoId.ordering = undefined;
-      dataNoId.isPublished = undefined;
-      dataNoId.isCommunity = undefined;
-      dataNoId.authors = undefined;
       dataNoId.autoUpdate = undefined;
+      dataNoId.isCommunity = !!user!.isTrusted;
+    }
+    if (!user!.isSuperadmin && !user!.isTrusted) {
+      dataNoId.isPublished = undefined;
+      dataNoId.authors = undefined;
     }
 
     let mapId;

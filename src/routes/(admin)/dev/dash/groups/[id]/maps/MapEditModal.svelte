@@ -132,15 +132,12 @@
         <Alert color="red">{$errors.description}</Alert>
       {/if}
     </Label>
-    {#if user.isSuperadmin}
+    {#if user.isSuperadmin || user.isTrusted}
       <Label>
-        <Checkbox bind:checked={$form.isPublished}>List map on homepage</Checkbox>
-      </Label>
-      <Label>
-        <Checkbox bind:checked={$form.isCommunity}>Community map</Checkbox>
+        <Checkbox bind:checked={$form.isPublished}>Publish</Checkbox>
       </Label>
       <Label class="space-y-2">
-        <span>Authors</span>
+        <span>Author(s)</span>
         <Input
           type="text"
           name="authors"
@@ -150,6 +147,11 @@
         {#if $errors.authors}
           <Alert color="red">{$errors.authors}</Alert>
         {/if}
+      </Label>
+    {/if}
+    {#if user.isSuperadmin}
+      <Label>
+        <Checkbox bind:checked={$form.isCommunity}>Community map</Checkbox>
       </Label>
       <Label>
         <Checkbox bind:checked={$form.autoUpdate}>Auto Update</Checkbox>
