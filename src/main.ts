@@ -6,6 +6,7 @@ import { mount } from 'svelte';
 
 function changelog() {
   return [
+    { '0.72': 'Adjusted images to fit vertically to the container to avoid scrolling and added magnifying glass effect on mouse hover' },
     { '0.71': 'Added beta support for live challenges' },
     { '0.70': 'Fixed carousel controls jumping and colored the note links' },
     { '0.69': 'Display multiple images with carousel' },
