@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.72
+// @version      0.73
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
 // @downloadURL  https://github.com/likeon/geometa/raw/main/dist/geometa.user.js
 // @updateURL    https://github.com/likeon/geometa/raw/main/dist/geometa.user.js
 // @match        *://*.geoguessr.com/*
-// @require      https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/dbbeb296542ad6c171767e43638c1ecf7adc3bc1/geoguessr-event-framework.js
+// @require      https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/b0c7492f4f346d4acb594a2015d592616a665096/geoguessr-event-framework.js
 // @connect      learnablemeta.com
 // @grant        GM_addStyle
 // @grant        GM_xmlhttpRequest
@@ -2804,6 +2804,7 @@
   }
   function changelog() {
     return [
+      { "0.73": "Fixed live challenge support and updated framework to newest version" },
       { "0.72": "Adjusted images to fit vertically to the container to avoid scrolling and added magnifying glass effect on mouse hover" },
       { "0.71": "Added beta support for live challenges" },
       { "0.70": "Fixed carousel controls jumping and colored the note links" },
@@ -2849,35 +2850,50 @@
       });
     });
   });
-  let pinChanged = false;
-  new MutationObserver(async (mutations) => {
-    const pinClass = ".result-map_roundPin__3ieXw";
-    if (!document.querySelector(pinClass)) {
-      pinChanged = false;
-      return;
-    }
-    if (pinChanged) {
-      return;
-    }
-    pinChanged = true;
-    const challengeId = getChallengeId();
-    if (challengeId) {
-      const { mapId, panoId } = await getChallengeInfo(challengeId);
-      const mapInfo = await getMapInfo(mapId, false);
-      if (!mapInfo.mapFound) return;
-      waitForElement("div.game_container__5bsqO").then((container) => {
-        const element = document.createElement("div");
-        element.id = "geometa-summary";
-        container.appendChild(element);
-        mount(App, {
-          target: element,
-          props: {
-            panoId,
-            mapId
-          }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
+      initLiveChallengeObserver();
+    });
+  } else {
+    initLiveChallengeObserver();
+  }
+  function initLiveChallengeObserver() {
+    console.log("LearnableMeta live challenge support enabled");
+    let pinChanged = false;
+    const observer = new MutationObserver(async (mutations) => {
+      const pinClass = ".result-map_roundPin__3ieXw";
+      if (!document.querySelector(pinClass)) {
+        pinChanged = false;
+        return;
+      }
+      if (pinChanged) {
+        return;
+      }
+      pinChanged = true;
+      const challengeId = getChallengeId();
+      if (challengeId) {
+        const { mapId, panoId } = await getChallengeInfo(challengeId);
+        const mapInfo = await getMapInfo(mapId, false);
+        if (!mapInfo.mapFound) return;
+        waitForElement("div.game_container__5bsqO").then((container) => {
+          const element = document.createElement("div");
+          element.id = "geometa-summary";
+          container.appendChild(element);
+          mount(App, {
+            target: element,
+            props: {
+              panoId,
+              mapId
+            }
+          });
         });
-      });
+      }
+    });
+    if (document.body) {
+      observer.observe(document.body, { subtree: true, childList: true });
+    } else {
+      console.error("document.body is not available.");
     }
-  }).observe(document.body, { subtree: true, childList: true });
+  }
 
 })();

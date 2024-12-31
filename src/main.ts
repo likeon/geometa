@@ -6,6 +6,7 @@ import { mount } from 'svelte';
 
 function changelog() {
   return [
+    { '0.73': 'Fixed live challenge support and updated framework to newest version' },
     { '0.72': 'Adjusted images to fit vertically to the container to avoid scrolling and added magnifying glass effect on mouse hover' },
     { '0.71': 'Added beta support for live challenges' },
     { '0.70': 'Fixed carousel controls jumping and colored the note links' },
@@ -79,36 +80,51 @@ GeoGuessrEventFramework.init().then(() => {
 
 // Live Challenge
 
-let pinChanged = false;
-new MutationObserver(async (mutations) => {
-  const pinClass = ".result-map_roundPin__3ieXw";
-  if (!document.querySelector(pinClass)) {
-    pinChanged = false;
-    return;
-  }
-  if (pinChanged) {
-    return;
-  }
-  pinChanged = true;
-  const challengeId = getChallengeId();
-  if (challengeId) {
-    const { mapId, panoId } = await getChallengeInfo(challengeId);
-    const mapInfo = await getMapInfo(mapId, false);
-    if (!mapInfo.mapFound) return;
-    waitForElement('div.game_container__5bsqO').then((container) => {
-      const element = document.createElement('div');
-      element.id = 'geometa-summary';
-      container.appendChild(element);
-      mount(App, {
-        target: element,
-        props: {
-          panoId,
-          mapId
-        }
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initLiveChallengeObserver();
+  });
+} else {
+  initLiveChallengeObserver();
+}
+
+function initLiveChallengeObserver() {
+  console.log("LearnableMeta live challenge support enabled")
+  let pinChanged = false;
+  const observer = new MutationObserver(async (mutations) => {
+    const pinClass = ".result-map_roundPin__3ieXw";
+    if (!document.querySelector(pinClass)) {
+      pinChanged = false;
+      return;
+    }
+    if (pinChanged) {
+      return;
+    }
+    pinChanged = true;
+    const challengeId = getChallengeId();
+    if (challengeId) {
+      const { mapId, panoId } = await getChallengeInfo(challengeId);
+      const mapInfo = await getMapInfo(mapId, false);
+      if (!mapInfo.mapFound) return;
+      waitForElement('div.game_container__5bsqO').then((container) => {
+        const element = document.createElement('div');
+        element.id = 'geometa-summary';
+        container.appendChild(element);
+        mount(App, {
+          target: element,
+          props: {
+            panoId,
+            mapId
+          }
+        });
       });
-    });
+    }
+  });
+
+  if (document.body) {
+    observer.observe(document.body, { subtree: true, childList: true });
+  } else {
+    console.error("document.body is not available.");
   }
-}).observe(document.body, { subtree: true, childList: true });
-
-
+}
 
