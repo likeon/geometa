@@ -6,9 +6,19 @@ const topKey = 'geometa:containerStyleTop';
 export let isDragging = false;
 export let dragOffset = { x: 0, y: 0 };
 
+function getSavedPosition(key: string) {
+  const value = localStorage.getItem(key);
+  if (value && value.startsWith('-')) {
+    // do not consider negative values as valid option
+    // somehow people manage to drag the window out of the screen
+    return null;
+  }
+  return value
+}
+
 export function setContainerPosition(container: HTMLDivElement) {
-  container.style.left = localStorage.getItem(leftKey) ?? container.style.left;
-  container.style.top = localStorage.getItem(topKey) ?? container.style.top;
+  container.style.left = getSavedPosition(leftKey) ?? container.style.left;
+  container.style.top = getSavedPosition(topKey) ?? container.style.top;
 }
 
 export const onMouseDown = (event: MouseEvent, container: HTMLDivElement) => {

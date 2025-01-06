@@ -6,6 +6,7 @@ import { mount } from 'svelte';
 
 function changelog() {
   return [
+    { '0.74': 'Fixed window appearance when for some reason a negative position value is saved' },
     { '0.73': 'Fixed live challenge support and updated framework to newest version' },
     { '0.72': 'Adjusted images to fit vertically to the container to avoid scrolling and added magnifying glass effect on mouse hover' },
     { '0.71': 'Added beta support for live challenges' },
