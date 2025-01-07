@@ -63,7 +63,6 @@ export const load = async ({ locals, params }) => {
   if (!user) {
     error(500);
   }
-
   return { group, levelList, regionList, mapForm, user };
 };
 
@@ -142,10 +141,13 @@ export const actions = {
     }
 
     console.debug(regions);
-    await db
-      .insert(mapRegions)
-      .values(regions.map((regionId) => ({ mapId: mapId, regionId: regionId })))
-      .onConflictDoNothing();
+    if (regions.length != 0) {
+      await db
+        .insert(mapRegions)
+        .values(regions.map((regionId) => ({ mapId: mapId, regionId: regionId })))
+        .onConflictDoNothing();
+    }
+
     await db
       .delete(mapRegions)
       .where(and(eq(mapRegions.mapId, mapId), not(inArray(mapRegions.regionId, regions))));
