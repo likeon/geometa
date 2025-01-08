@@ -1,0 +1,938 @@
+{
+  "id": "b5b6c6d8-3a58-4034-9f6e-14fb41449828",
+  "prevId": "92614310-077e-4bd5-be35-1ee72531b2b1",
+  "version": "6",
+  "dialect": "sqlite",
+  "tables": {
+    "levels": {
+      "name": "levels",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "map_group_id": {
+          "name": "map_group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "levels_unique": {
+          "name": "levels_unique",
+          "columns": ["name", "map_group_id"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "levels_map_group_id_map_groups_id_fk": {
+          "name": "levels_map_group_id_map_groups_id_fk",
+          "tableFrom": "levels",
+          "columnsFrom": ["map_group_id"],
+          "tableTo": "map_groups",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "map_data": {
+      "name": "map_data",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "map_id": {
+          "name": "map_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "last_updated_panoids": {
+          "name": "last_updated_panoids",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "'[]'"
+        }
+      },
+      "indexes": {
+        "map_data_unique": {
+          "name": "map_data_unique",
+          "columns": ["map_id"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "map_data_map_id_maps_id_fk": {
+          "name": "map_data_map_id_maps_id_fk",
+          "tableFrom": "map_data",
+          "columnsFrom": ["map_id"],
+          "tableTo": "maps",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "map_filters": {
+      "name": "map_filters",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "map_id": {
+          "name": "map_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tag_like": {
+          "name": "tag_like",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_exclude": {
+          "name": "is_exclude",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        }
+      },
+      "indexes": {
+        "map_filters_unique": {
+          "name": "map_filters_unique",
+          "columns": ["map_id", "tag_like"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "map_filters_map_id_maps_id_fk": {
+          "name": "map_filters_map_id_maps_id_fk",
+          "tableFrom": "map_filters",
+          "columnsFrom": ["map_id"],
+          "tableTo": "maps",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "map_group_locations": {
+      "name": "map_group_locations",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "map_group_id": {
+          "name": "map_group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "lat": {
+          "name": "lat",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "lng": {
+          "name": "lng",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "heading": {
+          "name": "heading",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "pitch": {
+          "name": "pitch",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "zoom": {
+          "name": "zoom",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "pano_id": {
+          "name": "pano_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "extra_tag": {
+          "name": "extra_tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "extra_pano_id": {
+          "name": "extra_pano_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "extra_pano_date": {
+          "name": "extra_pano_date",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "modified_at": {
+          "name": "modified_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1730419200
+        }
+      },
+      "indexes": {
+        "map_group_locations_unique": {
+          "name": "map_group_locations_unique",
+          "columns": ["map_group_id", "pano_id"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "map_group_locations_map_group_id_map_groups_id_fk": {
+          "name": "map_group_locations_map_group_id_map_groups_id_fk",
+          "tableFrom": "map_group_locations",
+          "columnsFrom": ["map_group_id"],
+          "tableTo": "map_groups",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "map_group_permissions": {
+      "name": "map_group_permissions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "map_group_id": {
+          "name": "map_group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "map_group_permissions_unique": {
+          "name": "map_group_permissions_unique",
+          "columns": ["map_group_id", "user_id"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "map_group_permissions_map_group_id_map_groups_id_fk": {
+          "name": "map_group_permissions_map_group_id_map_groups_id_fk",
+          "tableFrom": "map_group_permissions",
+          "columnsFrom": ["map_group_id"],
+          "tableTo": "map_groups",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "map_group_permissions_user_id_user_id_fk": {
+          "name": "map_group_permissions_user_id_user_id_fk",
+          "tableFrom": "map_group_permissions",
+          "columnsFrom": ["user_id"],
+          "tableTo": "user",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "map_groups": {
+      "name": "map_groups",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "synced_at": {
+          "name": "synced_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "map_levels": {
+      "name": "map_levels",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "map_id": {
+          "name": "map_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "level_id": {
+          "name": "level_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "map_levels_unique": {
+          "name": "map_levels_unique",
+          "columns": ["map_id", "level_id"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "map_levels_map_id_maps_id_fk": {
+          "name": "map_levels_map_id_maps_id_fk",
+          "tableFrom": "map_levels",
+          "columnsFrom": ["map_id"],
+          "tableTo": "maps",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "map_levels_level_id_levels_id_fk": {
+          "name": "map_levels_level_id_levels_id_fk",
+          "tableFrom": "map_levels",
+          "columnsFrom": ["level_id"],
+          "tableTo": "levels",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "map_regions": {
+      "name": "map_regions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "map_id": {
+          "name": "map_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "region_id": {
+          "name": "region_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "map_region_unique": {
+          "name": "map_region_unique",
+          "columns": ["map_id", "region_id"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "map_regions_map_id_maps_id_fk": {
+          "name": "map_regions_map_id_maps_id_fk",
+          "tableFrom": "map_regions",
+          "columnsFrom": ["map_id"],
+          "tableTo": "maps",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "map_regions_region_id_regions_id_fk": {
+          "name": "map_regions_region_id_regions_id_fk",
+          "tableFrom": "map_regions",
+          "columnsFrom": ["region_id"],
+          "tableTo": "regions",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "maps": {
+      "name": "maps",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "map_group_id": {
+          "name": "map_group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "geoguessr_id": {
+          "name": "geoguessr_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "is_published": {
+          "name": "is_published",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "is_community": {
+          "name": "is_community",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "authors": {
+          "name": "authors",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "ordering": {
+          "name": "ordering",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "auto_update": {
+          "name": "auto_update",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "modified_at": {
+          "name": "modified_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1730419200
+        }
+      },
+      "indexes": {
+        "maps_name_unique": {
+          "name": "maps_name_unique",
+          "columns": ["name"],
+          "isUnique": true
+        },
+        "maps_geoguessr_id_unique": {
+          "name": "maps_geoguessr_id_unique",
+          "columns": ["geoguessr_id"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "maps_map_group_id_map_groups_id_fk": {
+          "name": "maps_map_group_id_map_groups_id_fk",
+          "tableFrom": "maps",
+          "columnsFrom": ["map_group_id"],
+          "tableTo": "map_groups",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "meta_images": {
+      "name": "meta_images",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "meta_id": {
+          "name": "meta_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "image_url": {
+          "name": "image_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "meta_images_meta_id_metas_id_fk": {
+          "name": "meta_images_meta_id_metas_id_fk",
+          "tableFrom": "meta_images",
+          "columnsFrom": ["meta_id"],
+          "tableTo": "metas",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "meta_levels": {
+      "name": "meta_levels",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "meta_id": {
+          "name": "meta_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "level_id": {
+          "name": "level_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "meta_levels_unique": {
+          "name": "meta_levels_unique",
+          "columns": ["meta_id", "level_id"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "meta_levels_meta_id_metas_id_fk": {
+          "name": "meta_levels_meta_id_metas_id_fk",
+          "tableFrom": "meta_levels",
+          "columnsFrom": ["meta_id"],
+          "tableTo": "metas",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        },
+        "meta_levels_level_id_levels_id_fk": {
+          "name": "meta_levels_level_id_levels_id_fk",
+          "tableFrom": "meta_levels",
+          "columnsFrom": ["level_id"],
+          "tableTo": "levels",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "meta_suggestions": {
+      "name": "meta_suggestions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "secret": {
+          "name": "secret",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "url": {
+          "name": "url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "author_nickname": {
+          "name": "author_nickname",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "status": {
+          "name": "status",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "'new'"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "metas": {
+      "name": "metas",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "map_group_id": {
+          "name": "map_group_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "tag_name": {
+          "name": "tag_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "note": {
+          "name": "note",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "note_html": {
+          "name": "note_html",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "''"
+        },
+        "note_from_plonkit": {
+          "name": "note_from_plonkit",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "has_image": {
+          "name": "has_image",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "modified_at": {
+          "name": "modified_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 1730419200
+        }
+      },
+      "indexes": {
+        "metas_unique": {
+          "name": "metas_unique",
+          "columns": ["map_group_id", "tag_name"],
+          "isUnique": true
+        }
+      },
+      "foreignKeys": {
+        "metas_map_group_id_map_groups_id_fk": {
+          "name": "metas_map_group_id_map_groups_id_fk",
+          "tableFrom": "metas",
+          "columnsFrom": ["map_group_id"],
+          "tableTo": "map_groups",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "cascade"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "regions": {
+      "name": "regions",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "name": {
+          "name": "name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "ordering": {
+          "name": "ordering",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "session": {
+      "name": "session",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "expires_at": {
+          "name": "expires_at",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "session_user_id_user_id_fk": {
+          "name": "session_user_id_user_id_fk",
+          "tableFrom": "session",
+          "columnsFrom": ["user_id"],
+          "tableTo": "user",
+          "columnsTo": ["id"],
+          "onUpdate": "no action",
+          "onDelete": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "user": {
+      "name": "user",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "username": {
+          "name": "username",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "is_trusted": {
+          "name": "is_trusted",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        },
+        "is_superadmin": {
+          "name": "is_superadmin",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": false
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    }
+  },
+  "enums": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  },
+  "internal": {
+    "indexes": {}
+  }
+}

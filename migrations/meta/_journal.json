@@ -309,6 +309,13 @@
       "when": 1735393873016,
       "tag": "0043_classy_santa_claus",
       "breakpoints": true
+    },
+    {
+      "idx": 44,
+      "version": "6",
+      "when": 1736324535607,
+      "tag": "0044_left_salo",
+      "breakpoints": true
     }
   ]
 }
