@@ -64,11 +64,14 @@ async function fetchMapInfo(url: string): Promise<MapInfoResponse> {
         if (response.status === 200 || response.status === 404) {
           try {
             const mapInfo = JSON.parse(response.responseText) as MapInfoResponse;
+            logInfo('fetched map info', mapInfo)
             resolve(mapInfo);
           } catch (e) {
+            logInfo('failed to parse map info response', e)
             reject('Failed to parse response');
           }
         } else {
+          logInfo('failed to fetch map info', response)
           reject(`HTTP error! status: ${response.status}`);
         }
       },
@@ -84,7 +87,9 @@ export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
   if (!forceUpdate) {
     const savedMapInfo = unsafeWindow.localStorage.getItem(localStorageKey);
     if (savedMapInfo) {
-      return JSON.parse(savedMapInfo) as MapInfoResponse;
+      const mapInfo = JSON.parse(savedMapInfo) as MapInfoResponse
+      logInfo('using saved map info', mapInfo)
+      return mapInfo;
     }
   }
   const url = `https://learnablemeta.com/api/map-info/${geoguessrId}`;
@@ -128,4 +133,8 @@ export function decodePanoId(encoded) {
     panoId = [...panoId, char]
   }
   return panoId.join("")
+}
+
+export function logInfo(name: string, data?: any) {
+  console.log(`ALM: ${name}`, data)
 }

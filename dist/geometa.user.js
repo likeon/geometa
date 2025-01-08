@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.74
+// @version      0.75
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
@@ -2515,11 +2515,14 @@
           if (response.status === 200 || response.status === 404) {
             try {
               const mapInfo = JSON.parse(response.responseText);
+              logInfo("fetched map info", mapInfo);
               resolve(mapInfo);
             } catch (e) {
+              logInfo("failed to parse map info response", e);
               reject("Failed to parse response");
             }
           } else {
+            logInfo("failed to fetch map info", response);
             reject(`HTTP error! status: ${response.status}`);
           }
         },
@@ -2534,7 +2537,9 @@
     if (!forceUpdate) {
       const savedMapInfo = _unsafeWindow.localStorage.getItem(localStorageKey);
       if (savedMapInfo) {
-        return JSON.parse(savedMapInfo);
+        const mapInfo2 = JSON.parse(savedMapInfo);
+        logInfo("using saved map info", mapInfo2);
+        return mapInfo2;
       }
     }
     const url = `https://learnablemeta.com/api/map-info/${geoguessrId}`;
@@ -2574,6 +2579,9 @@
       panoId = [...panoId, char];
     }
     return panoId.join("");
+  }
+  function logInfo(name, data) {
+    console.log(`ALM: ${name}`, data);
   }
   const widthKey = "geometa:containerWidth";
   const heightKey = "geometa:containerHeight";
@@ -2811,6 +2819,7 @@
   }
   function changelog() {
     return [
+      { "0.75": "Added basic logging to help with debugging issues" },
       { "0.74": "Fixed window appearance when for some reason a negative position value is saved" },
       { "0.73": "Fixed live challenge support and updated framework to newest version" },
       { "0.72": "Adjusted images to fit vertically to the container to avoid scrolling and added magnifying glass effect on mouse hover" },
@@ -2842,12 +2851,18 @@
     });
     GeoGuessrEventFramework.events.addEventListener("round_end", async (event2) => {
       const mapInfo = await getMapInfo(event2.detail.map.id, false);
-      if (!mapInfo.mapFound) return;
+      if (!mapInfo.mapFound) {
+        logInfo("not supported map - skip");
+        return;
+      }
+      logInfo("waiting for the result view to render");
       waitForElement('div[data-qa="result-view-top"]').then((container) => {
+        logInfo("the result view is rendered");
         const element = document.createElement("div");
         element.id = "geometa-summary";
         container.appendChild(element);
         const lastRound = event2.detail.rounds[event2.detail.rounds.length - 1];
+        logInfo("adding app window");
         mount(App, {
           target: element,
           props: {
@@ -2866,7 +2881,7 @@
     initLiveChallengeObserver();
   }
   function initLiveChallengeObserver() {
-    console.log("LearnableMeta live challenge support enabled");
+    logInfo("live challenge support enabled");
     let pinChanged = false;
     const observer = new MutationObserver(async (mutations) => {
       const pinClass = ".result-map_roundPin__3ieXw";

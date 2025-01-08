@@ -1,11 +1,12 @@
 import App from './App.svelte';
-import { getChallengeId, getChallengeInfo, getMapInfo, waitForElement } from './lib/utils';
+import { getChallengeId, getChallengeInfo, getMapInfo, logInfo, waitForElement } from './lib/utils';
 
 import { unsafeWindow } from '$';
 import { mount } from 'svelte';
 
 function changelog() {
   return [
+    { '0.75': 'Added basic logging to help with debugging issues' },
     { '0.74': 'Fixed window appearance when for some reason a negative position value is saved' },
     { '0.73': 'Fixed live challenge support and updated framework to newest version' },
     { '0.72': 'Adjusted images to fit vertically to the container to avoid scrolling and added magnifying glass effect on mouse hover' },
@@ -61,12 +62,18 @@ GeoGuessrEventFramework.init().then(() => {
   });
   GeoGuessrEventFramework.events.addEventListener('round_end', async (event: GGEvent) => {
     const mapInfo = await getMapInfo(event.detail.map.id, false);
-    if (!mapInfo.mapFound) return;
+    if (!mapInfo.mapFound) {
+      logInfo('not supported map - skip')
+      return
+    }
+    logInfo('waiting for the result view to render')
     waitForElement('div[data-qa="result-view-top"]').then((container) => {
+      logInfo('the result view is rendered')
       const element = document.createElement('div');
       element.id = 'geometa-summary';
       container.appendChild(element);
       const lastRound = event.detail.rounds[event.detail.rounds.length - 1];
+      logInfo('adding app window')
       mount(App, {
         target: element,
         props: {
@@ -90,7 +97,7 @@ if (document.readyState === 'loading') {
 }
 
 function initLiveChallengeObserver() {
-  console.log("LearnableMeta live challenge support enabled")
+  logInfo('live challenge support enabled')
   let pinChanged = false;
   const observer = new MutationObserver(async (mutations) => {
     const pinClass = ".result-map_roundPin__3ieXw";
