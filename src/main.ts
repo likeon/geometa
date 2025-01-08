@@ -6,6 +6,7 @@ import { mount } from 'svelte';
 
 function changelog() {
   return [
+    { '0.76': 'Redesign note and added meta list link' },
     { '0.75': 'Added basic logging to help with debugging issues' },
     { '0.74': 'Fixed window appearance when for some reason a negative position value is saved' },
     { '0.73': 'Fixed live challenge support and updated framework to newest version' },
