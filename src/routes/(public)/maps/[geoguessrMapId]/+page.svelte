@@ -11,7 +11,7 @@
   };
 
   const metaList: Meta[] = data.mapMetaList;
-  const selectedMeta = writable<Meta | null>(null);
+  const selectedMeta = writable<Meta>(metaList[0]);
 
   let rightPanelRef: HTMLDivElement;
 
