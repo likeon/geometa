@@ -54,7 +54,7 @@
         {#if $selectedMeta}
           <div>
             <h3 class="text-2xl font-bold mb-4 text-gray-900 text-center">{$selectedMeta.name}</h3>
-            <div class="mb-6 text-gray-700">
+            <div class="note mb-6 text-gray-700">
               {@html $selectedMeta.noteHtml}
             </div>
             <h4 class="text-lg font-semibold mb-4 text-gray-700">Images:</h4>
@@ -82,3 +82,15 @@
     </div>
   </div>
 </div>
+
+<style>
+  :global(.note ul li) {
+    list-style-type: disc;
+    margin-left: 1rem;
+  }
+
+  :global(.note ol li) {
+    list-style-type: decimal;
+    margin-left: 1rem;
+  }
+</style>
