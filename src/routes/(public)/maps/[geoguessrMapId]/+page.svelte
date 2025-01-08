@@ -5,7 +5,6 @@
   let { data } = $props();
 
   type Meta = {
-    geoguessrId: string;
     name: string;
     noteHtml: string;
     imageUrls: string[];
@@ -20,6 +19,10 @@
     selectedMeta.set(meta);
   }
 </script>
+
+<svelte:head>
+  <title>Meta List - {data.mapName}</title>
+</svelte:head>
 
 <div
   class="relative min-h-screen bg-cover bg-center"

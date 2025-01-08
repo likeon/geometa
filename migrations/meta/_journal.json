@@ -316,6 +316,13 @@
       "when": 1736324535607,
       "tag": "0044_left_salo",
       "breakpoints": true
+    },
+    {
+      "idx": 45,
+      "version": "6",
+      "when": 1736337349555,
+      "tag": "0045_many_joystick",
+      "breakpoints": true
     }
   ]
 }

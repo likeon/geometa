@@ -336,6 +336,7 @@ export const mapRegionsRelations = relations(mapRegions, ({ one }) => ({
 
 export const mapMetas = sqliteView('map_metas_view', {
   mapId: integer('map_id').notNull(),
+  mapName: text('map_name').notNull(),
   geoguessrId: text('geoguessr_id').notNull(),
   metaName: text('meta_name').notNull(),
   metaNoteHtml: text('meta_note_html').notNull(),
