@@ -339,6 +339,7 @@ export const mapMetas = sqliteView('map_metas_view', {
   mapName: text('map_name').notNull(),
   geoguessrId: text('geoguessr_id').notNull(),
   metaName: text('meta_name').notNull(),
+  metaTag: text('meta_tag').notNull(),
   metaNoteHtml: text('meta_note_html').notNull(),
   metaImageUrls: text('meta_image_urls')
 }).existing();

@@ -323,6 +323,13 @@
       "when": 1736337349555,
       "tag": "0045_many_joystick",
       "breakpoints": true
+    },
+    {
+      "idx": 46,
+      "version": "6",
+      "when": 1736357069351,
+      "tag": "0046_loose_zuras",
+      "breakpoints": true
     }
   ]
 }
