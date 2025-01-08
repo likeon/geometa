@@ -80,9 +80,14 @@
       searchable: false,
       filterable: true,
       type: 'select',
-      options: ['All Levels', ...levelChoices.map((levelChoice) => levelChoice.name)], // Add "All Levels" option
+      options: [
+        'All Levels',
+        'Missing Level',
+        ...levelChoices.map((levelChoice) => levelChoice.name)
+      ], // Add "All Levels" option
       filterLogic: (filter: string, item: any) =>
-        filter === 'All Levels' ||
+        filter == 'All Levels' ||
+        (filter == 'Missing Level' && item.metaLevels.length == 0) ||
         item.metaLevels.some(
           (metaLevel: { level: { name: string } }) => metaLevel.level.name === filter
         )
