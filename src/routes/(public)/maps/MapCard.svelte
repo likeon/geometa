@@ -25,7 +25,20 @@
       {map.description}
     </p>
   </div>
-  <Button class="mt-7" href={'https://www.geoguessr.com/maps/' + map.geoguessrId} target="_blank"
-    >Play
-  </Button>
+  <div class="mt-7 flex gap-4">
+    <!-- Play Button -->
+    <Button
+      class="flex-1 bg-green-600 text-white hover:bg-green-700 focus:ring-4 focus:ring-green-300 font-medium rounded-lg px-5 py-3 text-center"
+      href={'https://www.geoguessr.com/maps/' + map.geoguessrId}
+      target="_blank">
+      Play
+    </Button>
+    <!-- Meta List Button -->
+    <Button
+      class="flex-1 bg-blue-600 text-white hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg px-5 py-3 text-center"
+      href={'/maps/' + map.geoguessrId}
+      target="_blank">
+      Meta List
+    </Button>
+  </div>
 </div>
