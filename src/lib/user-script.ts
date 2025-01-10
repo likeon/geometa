@@ -26,10 +26,16 @@ export async function syncUserScriptData(groupId: number) {
         metaName: mapLocations.metaName,
         metaNoteHtml: mapLocations.metaNoteHtml,
         images: sql<string | null>`
-          (SELECT GROUP_CONCAT(mi.image_url)
-           FROM meta_images mi
-           WHERE mi.meta_id = ${mapLocations.metaId})
-        `
+        (
+          SELECT GROUP_CONCAT(sorted.image_url)
+          FROM (
+            SELECT mi.image_url
+            FROM meta_images mi
+            WHERE mi.meta_id = ${mapLocations.metaId}
+            ORDER BY mi.id
+          ) AS sorted
+        )
+      `
       })
       .from(mapLocations)
       .innerJoin(maps, eq(mapLocations.mapId, maps.id))
