@@ -197,8 +197,8 @@
       <Dropdown>
         <DropdownItem onclick={submitPopulateNotesHtmlForm}>Populate notes html</DropdownItem>
         <DropdownItem
-          onclick={() => (window.location.href = `/dev/dash/groups/${data.group.id}/download`)}
-          ><div class="flex">
+          onclick={() => (window.location.href = `/dev/dash/groups/${data.group.id}/download`)}>
+          <div class="flex">
             <Icon icon="material-symbols:globe" width="1rem" height="1rem" style="color: black" />
             <Icon
               icon="material-symbols:download-rounded"
@@ -219,7 +219,9 @@
             Upload metas
           </div>
         </DropdownItem>
-        <DropdownItem onclick={() => (isMetasUploadModalOpen = true)}>
+        <DropdownItem
+          onclick={() =>
+            (window.location.href = `/dev/dash/groups/${data.group.id}/download-metas`)}>
           <div class="flex">
             <Icon icon="mi:document" width="1rem" height="1rem" style="color: black" />
             <Icon

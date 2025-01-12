@@ -16,7 +16,7 @@ import { createInsertSchema } from 'drizzle-zod';
 import { message, setError, superValidate, withFiles } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
-import { inArray, notInArray } from 'drizzle-orm/sql/expressions/conditions';
+import { inArray } from 'drizzle-orm/sql/expressions/conditions';
 import {
   ensurePermissions,
   extractJsonData,
