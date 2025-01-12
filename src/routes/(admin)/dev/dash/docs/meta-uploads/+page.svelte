@@ -1,5 +1,5 @@
 <script>
-  import { Heading, Kbd } from 'flowbite-svelte';
+  import { Alert, Heading, Kbd } from 'flowbite-svelte';
 
   const jsonExample = `
 [
@@ -35,6 +35,11 @@
         provided or set to null in the json we keep already saved values. For example this allows importing
         metas from JSON while the images are managed via UI and use our storage.
       </p>
+      <Alert color="blue">
+        <span class="font-medium">Important!</span>
+        <strong>[]</strong> (empty array) is not equal to <strong>null</strong>! <strong>[]</strong>
+        means that existing associated meta levels/images will be deleted.
+      </Alert>
       <pre class="bg-gray-800 text-gray-200 p-4 rounded shadow-lg max-w-lg mt-3">
         <code>
           {jsonExample}
