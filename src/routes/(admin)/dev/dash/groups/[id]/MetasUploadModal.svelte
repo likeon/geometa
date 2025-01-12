@@ -96,5 +96,6 @@
   <p class="text-xl"></p>
   <div class="text-green-900">
     <p>You can also paste locations from your clipboard (ctrl+V).</p>
+    <p><a href="/dev/dash/docs/meta-uploads" target="_blank">Docs are here.</a></p>
   </div>
 </Modal>

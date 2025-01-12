@@ -98,8 +98,8 @@ const metasUploadContentSchema = z
     tagName: z.string(),
     metaName: z.string(),
     note: z.string(),
-    levels: z.string().array().optional(),
-    images: z.string().array().optional()
+    levels: z.string().array().optional().nullable(),
+    images: z.string().array().optional().nullable()
   })
   .array();
 export type MetasUploadContentSchemaSafeParse = ReturnType<

@@ -37,10 +37,10 @@ export async function uploadMetas(
         noteHtml: noteHtml,
         modifiedAt: currentTimestamp
       });
-      if (sourceItem.levels !== undefined) {
+      if (sourceItem.levels) {
         levelsByTagName.set(sourceItem.tagName, sourceItem.levels);
       }
-      if (sourceItem.images !== undefined) {
+      if (sourceItem.images) {
         imagesByTagName.set(sourceItem.tagName, sourceItem.images);
       }
     }
