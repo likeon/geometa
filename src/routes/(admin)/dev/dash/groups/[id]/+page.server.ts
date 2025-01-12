@@ -1,6 +1,6 @@
 import { db } from '$lib/drizzle';
 import type { PageServerLoad } from './$types';
-import { and, asc, eq, isNull, lt, not, or, sql } from 'drizzle-orm';
+import { and, asc, eq, isNull, lt, not, or, sql, TransactionRollbackError } from 'drizzle-orm';
 import {
   levels,
   mapGroupLocations,
@@ -16,12 +16,13 @@ import { createInsertSchema } from 'drizzle-zod';
 import { message, setError, superValidate, withFiles } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
-import { inArray } from 'drizzle-orm/sql/expressions/conditions';
+import { inArray, notInArray } from 'drizzle-orm/sql/expressions/conditions';
 import {
   ensurePermissions,
   extractJsonData,
   generateRandomString,
-  getFileExtension
+  getFileExtension,
+  markdown2Html
 } from '$lib/utils';
 import { getGroupId } from './utils';
 import { uploadFile } from '$lib/s3';
@@ -34,6 +35,7 @@ import rehypeSanitize from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
 import rehypeExternalLinks from 'rehype-external-links';
 import { autoUpdateMaps } from './geo';
+import { uploadMetas } from '$routes/(admin)/dev/dash/groups/[id]/metasUpload';
 
 const insertMetasSchema = createInsertSchema(metas)
   .extend({ levels: z.array(z.number()) })
@@ -91,6 +93,24 @@ type UpsertValue = {
   modifiedAt: number;
 };
 
+const metasUploadContentSchema = z
+  .object({
+    tagName: z.string(),
+    metaName: z.string(),
+    note: z.string(),
+    levels: z.string().array().optional(),
+    images: z.string().array().optional()
+  })
+  .array();
+export type MetasUploadContentSchemaSafeParse = ReturnType<
+  typeof metasUploadContentSchema.safeParse
+>;
+const metasUploadSchema = z.object({
+  file: z.instanceof(File, { message: 'Please upload a file.' }),
+  partialUpload: z.boolean().default(true)
+});
+export type MetasUploadSchema = typeof metasUploadSchema;
+
 export const load: PageServerLoad = async ({ params, locals }) => {
   if (!locals.user?.id) {
     error(403, 'Permission denied');
@@ -121,6 +141,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
   const metaForm = await superValidate(zod(insertMetasSchema));
   const mapUploadForm = await superValidate(zod(mapUploadSchema));
+  const metasUploadForm = await superValidate(zod(metasUploadSchema));
   const imageUploadForm = await superValidate(zod(imageUploadSchema));
   const copyForm = await superValidate(zod(copyMetaSchema));
 
@@ -138,6 +159,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     metaForm,
     levelList,
     mapUploadForm,
+    metasUploadForm,
     imageUploadForm,
     user,
     userGroups,
@@ -403,6 +425,31 @@ export const actions = {
     });
     return message(form, { numberOfLocations: upsertValues.length });
   },
+  uploadMetas: async ({ request, params, locals }) => {
+    const groupId = getGroupId(params);
+    await ensurePermissions(locals.user!.id, groupId);
+    const form = await superValidate(request, zod(metasUploadSchema));
+
+    if (!form.valid) {
+      return fail(400, withFiles({ form }));
+    }
+    const jsonData = await extractJsonData(form.data.file);
+    const validationResult = metasUploadContentSchema.safeParse(jsonData);
+
+    if (!validationResult.success) {
+      return setError(form, 'file', 'Validation failed');
+    }
+
+    try {
+      await uploadMetas(groupId, validationResult, form.data.partialUpload);
+    } catch (error) {
+      if (error instanceof TransactionRollbackError) {
+        return setError(form, 'file', 'Level not found - precreate all used levels');
+      } else {
+        throw error;
+      }
+    }
+  },
   uploadMetaImages: async ({ request, locals }) => {
     const form = await superValidate(request, zod(imageUploadSchema));
 
@@ -475,17 +522,8 @@ export const actions = {
     const metaEntries = await db.query.metas.findMany({ where: eq(metas.mapGroupId, groupId) });
 
     for (const meta of metaEntries) {
-      const html = await unified()
-        .use(remarkParse)
-        .use(remarkRehype)
-        .use(rehypeSanitize)
-        .use(rehypeExternalLinks, { target: '_blank' })
-        .use(rehypeStringify)
-        .process(meta.note);
-      await db
-        .update(metas)
-        .set({ noteHtml: String(html) })
-        .where(eq(metas.id, meta.id));
+      const html = await markdown2Html(meta.note);
+      await db.update(metas).set({ noteHtml: html }).where(eq(metas.id, meta.id));
     }
   }
 };

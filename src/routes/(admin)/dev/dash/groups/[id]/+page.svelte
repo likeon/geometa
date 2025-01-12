@@ -4,6 +4,7 @@
   import { SvelteToast } from '@zerodevx/svelte-toast';
   import { toast } from '@zerodevx/svelte-toast';
   import MapUploadModal from './MapUploadModal.svelte';
+  import MetasUploadModal from './MetasUploadModal.svelte';
   import MetaEditModal from './MetaEditModal.svelte';
   import DashNavBar from '$lib/components/DashNavBar.svelte';
   import Icon from '@iconify/svelte';
@@ -95,7 +96,8 @@
   ];
 
   let isMetaModalOpen = $state(false);
-  let isUploadModalOpen = $state(false);
+  let isMapUploadModalOpen = $state(false);
+  let isMetasUploadModalOpen = $state(false);
   let searchText = $state('');
   let metas = $derived(data.group.metas);
   let selectedMetaId = $state(-1);
@@ -119,7 +121,7 @@
   }
 
   function uploadLocations() {
-    isUploadModalOpen = true;
+    isMapUploadModalOpen = true;
   }
 
   function submitPopulateNotesHtmlForm() {
@@ -196,7 +198,38 @@
         <DropdownItem onclick={submitPopulateNotesHtmlForm}>Populate notes html</DropdownItem>
         <DropdownItem
           onclick={() => (window.location.href = `/dev/dash/groups/${data.group.id}/download`)}
-          >Download full map json</DropdownItem>
+          ><div class="flex">
+            <Icon icon="material-symbols:globe" width="1rem" height="1rem" style="color: black" />
+            <Icon
+              icon="material-symbols:download-rounded"
+              width="1rem"
+              height="1rem"
+              style="color: black" />
+            Download map json
+          </div>
+        </DropdownItem>
+        <DropdownItem onclick={() => (isMetasUploadModalOpen = true)}>
+          <div class="flex">
+            <Icon icon="mi:document" width="1rem" height="1rem" style="color: black" />
+            <Icon
+              icon="material-symbols:upload-rounded"
+              width="1rem"
+              height="1rem"
+              style="color: black" />
+            Upload metas
+          </div>
+        </DropdownItem>
+        <DropdownItem onclick={() => (isMetasUploadModalOpen = true)}>
+          <div class="flex">
+            <Icon icon="mi:document" width="1rem" height="1rem" style="color: black" />
+            <Icon
+              icon="material-symbols:download-rounded"
+              width="1rem"
+              height="1rem"
+              style="color: black" />
+            Download metas
+          </div>
+        </DropdownItem>
       </Dropdown>
       <form
         bind:this={populateNotesHtmlForm}
@@ -239,7 +272,11 @@
   imageUploadForm={data.imageUploadForm}
   user={data.user} />
 
-<MapUploadModal bind:isUploadModalOpen bind:numberOfLocationsUploaded data={data.mapUploadForm} />
+<MapUploadModal
+  bind:isUploadModalOpen={isMapUploadModalOpen}
+  bind:numberOfLocationsUploaded
+  data={data.mapUploadForm} />
+<MetasUploadModal bind:isUploadModalOpen={isMetasUploadModalOpen} data={data.metasUploadForm} />
 
 <SvelteToast />
 

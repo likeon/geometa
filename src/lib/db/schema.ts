@@ -180,13 +180,19 @@ export const metaLevelRelations = relations(metaLevels, ({ one }) => ({
   level: one(levels, { fields: [metaLevels.levelId], references: [levels.id] })
 }));
 
-export const metaImages = sqliteTable('meta_images', {
-  id: integer('id').primaryKey(),
-  metaId: integer('meta_id')
-    .notNull()
-    .references(() => metas.id, { onDelete: 'cascade' }),
-  image_url: text('image_url').notNull()
-});
+export const metaImages = sqliteTable(
+  'meta_images',
+  {
+    id: integer('id').primaryKey(),
+    metaId: integer('meta_id')
+      .notNull()
+      .references(() => metas.id, { onDelete: 'cascade' }),
+    image_url: text('image_url').notNull()
+  },
+  (t) => ({
+    metaImageUnique: uniqueIndex('meta_image_unique').on(t.metaId, t.image_url)
+  })
+);
 export const metaImagesRelations = relations(metaImages, ({ one }) => ({
   meta: one(metas, { fields: [metaImages.metaId], references: [metas.id] })
 }));

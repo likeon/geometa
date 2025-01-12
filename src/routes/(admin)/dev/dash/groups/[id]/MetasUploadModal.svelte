@@ -2,21 +2,16 @@
   import { Checkbox, Label, Modal } from 'flowbite-svelte';
   import { type SuperValidated, type Infer, fileProxy } from 'sveltekit-superforms';
   import { superForm } from 'sveltekit-superforms';
-  import type { MapUploadSchema } from './+page.server';
+  import type { MetasUploadSchema } from './+page.server';
 
   interface Props {
     isUploadModalOpen: boolean;
-    numberOfLocationsUploaded: number;
-    data: SuperValidated<Infer<MapUploadSchema>>;
+    data: SuperValidated<Infer<MetasUploadSchema>>;
   }
   let pastedFile: null | File = null;
-  let {
-    isUploadModalOpen = $bindable(),
-    numberOfLocationsUploaded = $bindable(),
-    data
-  }: Props = $props();
+  let { isUploadModalOpen = $bindable(), data }: Props = $props();
   const { form, errors, enhance, submit, reset } = superForm(data, {
-    id: 'mapUpload',
+    id: 'metasUpload',
     onSubmit({ formData, cancel }) {
       if (!$form.partialUpload && !confirmFullUpload()) {
         cancel();
@@ -28,7 +23,6 @@
     },
     onResult({ result }) {
       if (result.type == 'success') {
-        numberOfLocationsUploaded = result.data?.form.message.numberOfLocations || 0;
         isUploadModalOpen = false;
       }
 
@@ -61,7 +55,7 @@
         pastedFile = jsonFile;
         submit();
         pastedFile = null;
-      } catch (error) {
+      } catch {
         alert('Pasted data is not valid JSON.');
       }
     }
@@ -69,7 +63,7 @@
 
   function confirmFullUpload() {
     return confirm(
-      'You are about to replace all locations in your map group with new locations (metas and description will stay). Are you sure?'
+      'You are about to replace all metas in your map group with the new metas. Are you sure?'
     );
   }
 </script>
@@ -78,16 +72,15 @@
   <form
     class="flex flex-col space-y-6"
     method="post"
-    action="?/uploadMapJson"
+    action="?/uploadMetas"
     enctype="multipart/form-data"
     use:enhance>
     <Label>
       <Checkbox name="partialUpload" bind:checked={$form.partialUpload}
-        >Keep old locations (will only add/update locations and not remove any already added
-        locations)</Checkbox>
+        >Keep old metas (will only add/update metas and not remove any already existing ones)</Checkbox>
     </Label>
     <Label>
-      Upload Map json from <a target="_blank" href="https://map-making.app/">map-making.app</a>:
+      Upload metas json:
       <input
         bind:files={$file}
         accept="application/json"
@@ -96,27 +89,12 @@
         onchange={() => submit()} />
 
       {#if $errors.file}
-        <div class="invalid">{$errors.file}</div>
+        <div class="text-red-800">{$errors.file}</div>
       {/if}
     </Label>
   </form>
   <p class="text-xl"></p>
   <div class="text-green-900">
-    <p>
-      You can also paste locations from your clipboard (ctrl+V) after copying them from map-making
-      app (by using copy button there).
-    </p>
-    <br />
-    <br />
-    <p>
-      Each location <strong>must</strong> have exactly one tag in
-      <span class="whitespace-nowrap font-semibold">CountryName-Your Meta Name</span> format!
-    </p>
-    <p>Examples:</p>
-    <ol class="list-disc ml-5">
-      <li>Czechia-Bollard</li>
-      <li>Portugal-LicensePlate</li>
-      <li>Singapore-StreetSign</li>
-    </ol>
+    <p>You can also paste locations from your clipboard (ctrl+V).</p>
   </div>
 </Modal>

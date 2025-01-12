@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX `meta_image_unique` ON `meta_images` (`meta_id`,`image_url`);

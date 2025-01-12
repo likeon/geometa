@@ -3,6 +3,12 @@ import { db } from '$lib/drizzle';
 import { and, eq } from 'drizzle-orm';
 import { mapGroupPermissions, users } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeExternalLinks from 'rehype-external-links';
+import rehypeStringify from 'rehype-stringify';
 
 export function generateRandomString(length: number): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -137,4 +143,15 @@ export function isDeepEqual(obj1: any, obj2: any): boolean {
   }
 
   return true;
+}
+
+export async function markdown2Html(markdown: string) {
+  const vfile = await unified()
+    .use(remarkParse)
+    .use(remarkRehype)
+    .use(rehypeSanitize)
+    .use(rehypeExternalLinks, { target: '_blank' })
+    .use(rehypeStringify)
+    .process(markdown);
+  return String(vfile);
 }

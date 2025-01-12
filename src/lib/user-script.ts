@@ -51,9 +51,7 @@ export async function syncUserScriptData(groupId: number) {
 
       let images: string[];
       if (item.images) {
-        images = item.images
-          .split(',')
-          .map((url) => `https://learnablemeta.com/cdn-cgi/image/format=avif,quality=80/${url}`);
+        images = item.images.split(',').map(getImageUrl);
       } else {
         images = [];
       }
@@ -79,4 +77,14 @@ export async function syncUserScriptData(groupId: number) {
     }
   }
   await db.update(mapGroups).set({ syncedAt: currentTimestamp }).where(eq(mapGroups.id, groupId));
+}
+
+function getImageUrl(url: string): string {
+  const geometa_storage_prefix = 'https://static.learnablemeta.com/';
+
+  if (url.startsWith(geometa_storage_prefix)) {
+    return `https://learnablemeta.com/cdn-cgi/image/format=avif,quality=80/${url}`;
+  }
+
+  return url;
 }
