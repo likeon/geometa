@@ -20,6 +20,7 @@
     note: string;
     plonkitCountryUrl: string;
     images?: string[];
+    footer: string;
   };
 
   let geoInfo: GeoInfo | null = $state(null);
@@ -74,6 +75,36 @@
       document.removeEventListener('mouseup', () => onMouseUp(container));
     };
   });
+
+  function confirmNavigation(event: any) {
+    event.preventDefault();
+    currentUrl = event.currentTarget.href;
+    showModal = true;
+  }
+
+  function proceed() {
+    showModal = false;
+    window.open(currentUrl, '_blank');
+  }
+
+  function cancel() {
+    showModal = false; 
+  }
+
+  let showModal = $state(false);
+  let currentUrl = $state('');
+
+
+
+  $effect(() => {
+  if (geoInfo) {
+    const links = document.querySelectorAll('.geometa-footer a, .geometa-note a');
+    links.forEach((link) => {
+      link.removeEventListener('click', confirmNavigation);
+      link.addEventListener('click', confirmNavigation);
+    });
+  }
+});
 </script>
 
 <div class="geometa-container" bind:this={container}>
@@ -103,10 +134,11 @@
     <div class="geometa-note">
       {@html geoInfo.note}
     </div>
-    <p class="plonkit-note">
-      Check out <a href={geoInfo.plonkitCountryUrl} target="_blank">
-        plonkit.net/{geoInfo.country.toLocaleLowerCase()}</a> for more clues.
+    {#if geoInfo.footer} 
+    <p class="geometa-footer">
+      {@html geoInfo.footer}
     </p>
+    {/if}
     {#if geoInfo.images && geoInfo.images.length}
       <hr />
       <Carousel images={geoInfo.images} />
@@ -114,9 +146,31 @@
   {:else}
     <Spinner />
   {/if}
+
+  {#if showModal}
+    <div class="modal-backdrop">
+      <div class="modal">
+        <p>You are about to open this site in a new tab:</p>
+        <p class="modal-url">{currentUrl}</p>
+        <div class="modal-buttons">
+          <button onclick={proceed} class="proceed-btn">Continue</button>
+          <button onclick={cancel} class="cancel-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+  {/if}
 </div>
 
 <style>
+:global(.geometa-footer a) {
+  color: #188bd2; 
+  text-decoration: none;
+}
+
+:global(.geometa-footer a:hover) {
+  text-decoration: underline; 
+}
+
   .geometa-container {
     position: absolute;
     top: 13rem;
@@ -132,15 +186,15 @@
     font-size: 17px;
     width: min(25%, 500px);
 
-    resize: both; /* Enables horizontal and vertical resizing */
-    overflow: auto; /* scroll on overflow */
+    resize: both;
+    overflow: auto;
   }
 
-  .plonkit-note {
+  .geometa-footer {
     color: #d3d3d3;
     font-size: small;
   }
-
+  
   a {
     color: #188bd2;
   }
@@ -184,7 +238,7 @@
   .flat-color-icons--globe,
   .skill-icons--list {
     display: inline-block;
-    vertical-align: middle; /* This helps with alignment */
+    vertical-align: middle;
   }
 
   .flex {
@@ -230,4 +284,82 @@
     list-style-type: decimal;
     margin-left: 1rem;
   }
+
+  
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(30, 30, 30, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: var(--ds-color-purple-100);
+  padding: 15px 25px;
+  border-radius: 8px;
+  text-align: center;
+  width: 90%;
+  max-width: 400px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  color: #d3d3d3;
+}
+
+.modal p {
+  margin: 0 0 10px;
+  font-size: 17px;
+}
+
+.modal-url {
+  font-size: 15px;
+  font-weight: bold;
+  color: #188bd2;
+  word-break: break-word;
+  margin: 10px 0;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.proceed-btn {
+  background: #188bd2;
+  color: white;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.proceed-btn:hover {
+  background: #0056b3;
+}
+
+.cancel-btn {
+  background: transparent;
+  color: #d3d3d3;
+  padding: 8px 16px;
+  border: 1px solid #d3d3d3;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.cancel-btn:hover {
+  background: #d3d3d3;
+  color: var(--ds-color-purple-100);
+}
+
+
 </style>
