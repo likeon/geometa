@@ -8,6 +8,13 @@ import {
   getCountryFromTagName
 } from '$lib/utils';
 
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeStringify from 'rehype-stringify';
+import rehypeExternalLinks from 'rehype-external-links';
+
 export async function syncUserScriptData(groupId: number) {
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const group = await db.query.mapGroups.findFirst({ where: eq(mapGroups.id, groupId) });
@@ -66,9 +73,19 @@ export async function syncUserScriptData(groupId: number) {
       } else if (item.mapFooterHtml && item.mapFooterHtml.trim() !== '') {
         footer = item.mapFooterHtml;
       } else {
-        footer = checkIfValidCountry(countryName)
-          ? `Check out ${plonkitCountryUrl} for more clues.`
-          : '';
+        if (checkIfValidCountry(countryName)) {
+          footer = String(
+            await unified()
+              .use(remarkParse)
+              .use(remarkRehype)
+              .use(rehypeSanitize)
+              .use(rehypeExternalLinks, { target: '_blank' })
+              .use(rehypeStringify)
+              .process(`Check out ${plonkitCountryUrl} for more clues.`)
+          );
+        } else {
+          footer = '';
+        }
       }
 
       let images: string[];
