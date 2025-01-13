@@ -19,7 +19,8 @@
   // Component default theme
   import 'carta-md/default.css';
 
-  const carta = new Carta();
+  const cartaMeta = new Carta();
+  const cartaFooter = new Carta();
 
   let {
     isMetaModalOpen = $bindable(),
@@ -155,14 +156,18 @@
         </Label>
         <Label class="space-y-2">
           <span>Note</span>
-          <MarkdownEditor {carta} mode="tabs" theme="test" bind:value={$formMeta.note} />
+          <MarkdownEditor carta={cartaMeta} mode="tabs" theme="test" bind:value={$formMeta.note} />
           {#if $errorsMeta.note}
             <Alert color="red">{$errorsMeta.note}</Alert>
           {/if}
         </Label>
         <Label class="space-y-2">
           <span>Footer</span>
-          <MarkdownEditor {carta} mode="tabs" theme="test" bind:value={$formMeta.footer} />
+          <MarkdownEditor
+            carta={cartaFooter}
+            mode="tabs"
+            theme="test"
+            bind:value={$formMeta.footer} />
           {#if $errorsMeta.footer}
             <Alert color="red">{$errorsMeta.footer}</Alert>
           {/if}
