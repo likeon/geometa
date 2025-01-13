@@ -83,7 +83,6 @@ export async function syncUserScriptData(groupId: number) {
         metaName: item.metaName,
         note: item.metaNoteHtml,
         plonkitCountryUrl,
-        footer,
         images: images
       };
 
