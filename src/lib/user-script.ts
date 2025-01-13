@@ -83,7 +83,8 @@ export async function syncUserScriptData(groupId: number) {
         metaName: item.metaName,
         note: item.metaNoteHtml,
         plonkitCountryUrl,
-        images: images
+        images: images,
+        footer
       };
 
       kvData.push({ key: key, value: JSON.stringify(value), base64: false });
