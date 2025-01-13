@@ -79,7 +79,7 @@ export async function syncUserScriptData(groupId: number) {
       }
 
       const value = {
-        countryName,
+        countryName: countryName,
         metaName: item.metaName,
         note: item.metaNoteHtml,
         plonkitCountryUrl,
