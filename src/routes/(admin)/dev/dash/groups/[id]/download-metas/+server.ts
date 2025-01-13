@@ -22,6 +22,7 @@ export async function GET(event) {
     tagName: meta.tagName,
     metaName: meta.name,
     note: meta.note,
+    footer: meta.footer,
     levels: meta.metaLevels.map((metaLevel) => metaLevel.level.name),
     images: meta.images.map((image) => image.image_url)
   }));

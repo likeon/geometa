@@ -20,6 +20,8 @@ export async function uploadMetas(
       note: string;
       noteHtml: string;
       modifiedAt: number;
+      footer?: string;
+      footerHtml?: string;
     }[] = [];
     const levelsByTagName: Map<string, string[]> = new Map();
     const imagesByTagName: Map<string, string[]> = new Map();
@@ -27,22 +29,24 @@ export async function uploadMetas(
     const levelIdByName: Map<string, number> = new Map(
       levelsData.map((level) => [level.name, level.id])
     );
+
     for (const sourceItem of validationResult.data!) {
       const noteHtml = await markdown2Html(sourceItem.note);
-      metasInsertData.push({
+      const metaData = {
         mapGroupId: groupId,
         tagName: sourceItem.tagName,
         name: sourceItem.metaName,
         note: sourceItem.note,
         noteHtml: noteHtml,
         modifiedAt: currentTimestamp
-      });
-      if (sourceItem.levels) {
-        levelsByTagName.set(sourceItem.tagName, sourceItem.levels);
+      };
+
+      if (sourceItem.footer) {
+        const footerHtml = await markdown2Html(sourceItem.footer);
+        Object.assign(metaData, { footer: sourceItem.footer, footerHtml: footerHtml });
       }
-      if (sourceItem.images) {
-        imagesByTagName.set(sourceItem.tagName, sourceItem.images);
-      }
+
+      metasInsertData.push(metaData);
     }
     const metasInsertResult = await tx
       .insert(metas)
@@ -50,18 +54,12 @@ export async function uploadMetas(
       .onConflictDoUpdate({
         target: [metas.mapGroupId, metas.tagName],
         set: {
-          name: sql`excluded
-          .
-          name`,
-          note: sql`excluded
-          .
-          note`,
-          noteHtml: sql`excluded
-          .
-          note_html`,
-          modifiedAt: sql`excluded
-          .
-          modified_at`
+          name: sql`excluded.name`,
+          note: sql`excluded.note`,
+          noteHtml: sql`excluded.note_html`,
+          modifiedAt: sql`excluded.modified_at`,
+          footer: sql`excluded.footer`,
+          footerHtml: sql`excluded.footer_html`
         }
       })
       .returning({ id: metas.id, tagName: metas.tagName });

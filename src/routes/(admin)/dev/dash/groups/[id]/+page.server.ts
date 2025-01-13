@@ -98,6 +98,7 @@ const metasUploadContentSchema = z
     tagName: z.string(),
     metaName: z.string(),
     note: z.string(),
+    footer: z.string().optional().nullable(),
     levels: z.string().array().optional().nullable(),
     images: z.string().array().optional().nullable()
   })

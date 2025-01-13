@@ -7,6 +7,7 @@
     "tagName": "testTag1",
     "metaName": "test name1",
     "note": "bla",
+    "footer": "blablabla",
     "levels": ["levelName"],
     "images": [
       "https://example.com/i.jpg"
@@ -31,9 +32,10 @@
       <p>Upload metas in JSON format. Excel coming soon™.</p>
       <Heading tag="h2">Format</Heading>
       <p>
-        <Kbd class="p-1">levels</Kbd> and <Kbd class="p-1">images</Kbd> keys are optional - when not
-        provided or set to null in the json we keep already saved values. For example this allows importing
-        metas from JSON while the images are managed via UI and use our storage.
+        <Kbd class="p-1">footer</Kbd>, <Kbd class="p-1">levels</Kbd> and <Kbd class="p-1"
+          >images</Kbd> keys are optional - when not provided or set to null in the json we keep already
+        saved values. For example this allows importing metas from JSON while the images are managed
+        via UI and use our storage.
       </p>
       <Alert color="blue">
         <span class="font-medium">Important!</span>
