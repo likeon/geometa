@@ -79,6 +79,7 @@
           $formMeta.tagName = meta.tagName;
           $formMeta.name = meta.name;
           $formMeta.note = meta.note;
+          $formMeta.footer = meta.footer;
           $formMeta.levels = meta.metaLevels.map((item) => item.levelId);
           return $formMeta;
         },
@@ -92,6 +93,7 @@
           $formMeta.tagName = '';
           $formMeta.name = '';
           $formMeta.note = '';
+          $formMeta.footer = '';
           $formMeta.levels = [];
           return $formMeta;
         },
@@ -156,6 +158,13 @@
           <MarkdownEditor {carta} mode="tabs" theme="test" bind:value={$formMeta.note} />
           {#if $errorsMeta.note}
             <Alert color="red">{$errorsMeta.note}</Alert>
+          {/if}
+        </Label>
+        <Label class="space-y-2">
+          <span>Footer</span>
+          <MarkdownEditor {carta} mode="tabs" theme="test" bind:value={$formMeta.footer} />
+          {#if $errorsMeta.footer}
+            <Alert color="red">{$errorsMeta.footer}</Alert>
           {/if}
         </Label>
         <Label>

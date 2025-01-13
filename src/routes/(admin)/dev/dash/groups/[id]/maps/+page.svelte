@@ -65,57 +65,6 @@
     </div>
   </div>
 
-  <!-- <div class="mt-3 flow-root">
-    <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
-      <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
-          <table class="w-full table-fixed border-spacing-y-3 border-separate">
-            <thead class="bg-green-100">
-              <tr class="m-10">
-                <th
-                  scope="col"
-                  class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
-                  >Name</th>
-                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >Levels</th>
-                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                  >Locations count</th>
-                <th scope="col" class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
-                ></th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-gray-400">
-              {#each maps as map (map.id)}
-                <tr
-                  class="cursor-pointer hover:bg-green-200"
-                  role="link"
-                  onclick={() => selectMap(map)}>
-                  <td class="flex items-center space-x-2">
-                    {map.name}
-                    <a
-                      onclick={(event) => event.stopPropagation()}
-                      href={`https://www.geoguessr.com/maps/${map.geoguessrId}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      class="text-blue-500 hover:text-blue-700">
-                      <Icon icon="mdi:link" class="ml-1 w-5 h-5 inline" />
-                    </a>
-                  </td>
-                  <td>{map.mapLevels.map((item) => item.level.name).join(', ')}</td>
-                  <td>{map.locationsCount}</td>
-                  <td onclick={(event) => event.stopPropagation()}
-                    ><a href={`/dev/dash/groups/${data.group.id}/maps/${map.id}/download`}
-                      >Download</a
-                    ></td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div> -->
-
   <SortFilterTable
     data={maps}
     {searchText}

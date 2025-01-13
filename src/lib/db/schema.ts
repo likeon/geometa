@@ -65,6 +65,8 @@ export const maps = sqliteTable(
     authors: text('authors').default(''),
     ordering: integer('ordering').notNull().default(0),
     autoUpdate: integer('auto_update', { mode: 'boolean' }).notNull().default(false),
+    footer: text('footer').notNull().default(''),
+    footerHtml: text('footer_html').notNull().default(''),
     modifiedAt: integer('modified_at').default(1730419200).notNull()
   },
   (t) => ({
@@ -146,6 +148,8 @@ export const metas = sqliteTable(
     name: text('name').notNull(),
     note: text('note').notNull(),
     noteHtml: text('note_html').notNull().default(''),
+    footer: text('footer').notNull().default(''),
+    footerHtml: text('footer_html').notNull().default(''),
     noteFromPlonkit: integer('note_from_plonkit', { mode: 'boolean' }).notNull().default(false),
     hasImage: integer('has_image', { mode: 'boolean' }).notNull().default(false),
     modifiedAt: integer('modified_at').default(1730419200).notNull()

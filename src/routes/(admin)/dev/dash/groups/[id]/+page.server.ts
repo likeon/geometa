@@ -39,7 +39,7 @@ import { uploadMetas } from '$routes/(admin)/dev/dash/groups/[id]/metasUpload';
 
 const insertMetasSchema = createInsertSchema(metas)
   .extend({ levels: z.array(z.number()) })
-  .omit({ noteFromPlonkit: true, hasImage: true, noteHtml: true });
+  .omit({ noteFromPlonkit: true, hasImage: true, noteHtml: true, footerHtml: true });
 export type InsertMetasSchema = typeof insertMetasSchema;
 
 const mapUploadSchema = z.object({
@@ -186,13 +186,22 @@ export const actions = {
         .use(rehypeStringify)
         .process(dataNoId.note)
     );
+    const footerHtml = String(
+      await unified()
+        .use(remarkParse)
+        .use(remarkRehype)
+        .use(rehypeSanitize)
+        .use(rehypeExternalLinks, { target: '_blank' })
+        .use(rehypeStringify)
+        .process(dataNoId.footer)
+    );
     const currentTimestamp = Math.floor(Date.now() / 1000);
     let metaId;
 
     if (id === undefined) {
       const insertResult = await db
         .insert(metas)
-        .values({ ...form.data, noteHtml: noteHtml, modifiedAt: currentTimestamp })
+        .values({ ...form.data, noteHtml, footerHtml: footerHtml, modifiedAt: currentTimestamp })
         .returning({ insertedId: metas.id });
       metaId = insertResult[0].insertedId;
     } else {
@@ -200,7 +209,7 @@ export const actions = {
       await ensurePermissions(locals.user?.id, savedData?.mapGroupId);
       await db
         .update(metas)
-        .set({ ...dataNoId, noteHtml: noteHtml, modifiedAt: currentTimestamp })
+        .set({ ...dataNoId, noteHtml, footerHtml, modifiedAt: currentTimestamp })
         .where(eq(metas.id, id));
       metaId = id;
     }

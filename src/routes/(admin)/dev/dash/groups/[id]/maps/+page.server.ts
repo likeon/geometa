@@ -17,6 +17,12 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
+import { unified } from 'unified';
+import remarkParse from 'remark-parse';
+import remarkRehype from 'remark-rehype';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeStringify from 'rehype-stringify';
+import rehypeExternalLinks from 'rehype-external-links';
 
 const insertMapsSchema = createInsertSchema(maps)
   .extend({
@@ -24,9 +30,10 @@ const insertMapsSchema = createInsertSchema(maps)
     excludeFilters: z.array(z.string()),
     levels: z.array(z.number()),
     regions: z.array(z.number()),
-    ordering: z.coerce.number()
+    ordering: z.coerce.number(),
+    footerNote: z.string()
   })
-  .omit({ modifiedAt: true });
+  .omit({ modifiedAt: true, footerHtml: true });
 export type InsertMapsSchema = typeof insertMapsSchema;
 
 export const load = async ({ locals, params }) => {
@@ -95,17 +102,27 @@ export const actions = {
       dataNoId.authors = undefined;
     }
 
+    const footerHtml = String(
+      await unified()
+        .use(remarkParse)
+        .use(remarkRehype)
+        .use(rehypeSanitize)
+        .use(rehypeExternalLinks, { target: '_blank' })
+        .use(rehypeStringify)
+        .process(dataNoId.footer)
+    );
+
     let mapId;
     if (id === undefined) {
       const insertResult = await db
         .insert(maps)
-        .values({ ...dataNoId, modifiedAt: Math.floor(Date.now() / 1000) })
+        .values({ ...dataNoId, modifiedAt: Math.floor(Date.now() / 1000), footerHtml })
         .returning({ insertedId: maps.id });
       mapId = insertResult[0].insertedId;
     } else {
       await db
         .update(maps)
-        .set({ ...dataNoId, modifiedAt: Math.floor(Date.now() / 1000) })
+        .set({ ...dataNoId, modifiedAt: Math.floor(Date.now() / 1000), footerHtml })
         .where(eq(maps.id, id));
       mapId = id;
     }

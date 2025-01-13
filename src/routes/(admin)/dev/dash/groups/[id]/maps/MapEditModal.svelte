@@ -5,6 +5,7 @@
   import { Alert, Button, Input, Label, Modal, MultiSelect, Textarea } from 'flowbite-svelte';
   import Checkbox from 'flowbite-svelte/Checkbox.svelte';
   import FilterManager from './FilterManager.svelte';
+  import { Carta, MarkdownEditor } from 'carta-md';
 
   interface Props {
     data: SuperValidated<Infer<InsertMapsSchema>>;
@@ -33,6 +34,8 @@
     }
   });
 
+  const carta = new Carta();
+
   $effect(() => {
     if (isMapModalOpen) {
       if (selectedMap) {
@@ -40,6 +43,7 @@
         $form.id = selectedMap.id;
         $form.mapGroupId = selectedMap.mapGroupId;
         $form.name = selectedMap.name;
+        $form.footer = selectedMap.footer;
         $form.ordering = selectedMap.ordering;
         $form.description = selectedMap.description;
         $form.isPublished = selectedMap.isPublished;
@@ -59,6 +63,7 @@
         $form.mapGroupId = groupId;
         $form.geoguessrId = '';
         $form.name = '';
+        $form.footer = '';
         $form.ordering = 0;
         $form.description = '';
         $form.isPublished = false;
@@ -132,6 +137,11 @@
         <Alert color="red">{$errors.description}</Alert>
       {/if}
     </Label>
+    <Label class="space-y-2">
+      <span>Footer</span>
+      <MarkdownEditor {carta} mode="tabs" theme="test" bind:value={$form.footer} />
+    </Label>
+
     {#if user.isSuperadmin || user.isTrusted}
       <Label>
         <Checkbox bind:checked={$form.isPublished}>Publish</Checkbox>
@@ -185,3 +195,32 @@
     <Button type="submit" class="w-full">Save</Button>
   </form>
 </Modal>
+
+<style lang="postcss">
+  :global(.carta-font-code) {
+    font-family: '...', monospace;
+    font-size: 1.1rem;
+    caret-color: black;
+  }
+
+  :global(textarea.carta-font-code, div.carta-font-code) {
+    line-height: 1.2rem;
+    font-size: 0.9rem;
+  }
+
+  :global(.carta-active) {
+    @apply mx-3;
+  }
+
+  :global(.carta-container) {
+    @apply border-2;
+  }
+
+  :global(.markdown-body ul) {
+    @apply list-disc ml-5;
+  }
+
+  :global(.markdown-body ol) {
+    @apply list-decimal ml-5;
+  }
+</style>
