@@ -6,6 +6,7 @@ import { mount } from 'svelte';
 
 function changelog() {
   return [
+    {'0.77' : "Added custom footer to the note and clicking on link warning"},
     { '0.76': 'Redesign note and added meta list link' },
     { '0.75': 'Added basic logging to help with debugging issues' },
     { '0.74': 'Fixed window appearance when for some reason a negative position value is saved' },
