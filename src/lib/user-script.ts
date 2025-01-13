@@ -81,7 +81,7 @@ export async function syncUserScriptData(groupId: number) {
               .use(rehypeSanitize)
               .use(rehypeExternalLinks, { target: '_blank' })
               .use(rehypeStringify)
-              .process(`Check out ${plonkitCountryUrl} for more clues.`)
+              .process(`Check out [${plonkitCountryUrl}](${plonkitCountryUrl}) for more clues.`)
           );
         } else {
           footer = '';
