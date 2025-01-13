@@ -2,86 +2,51 @@ import { db } from '$lib/drizzle';
 import { and, asc, desc, eq, getTableColumns, sql } from 'drizzle-orm';
 import { mapRegions, maps, regions } from '$lib/db/schema';
 
-const officialCacheKey = 'query:maps:official';
-const communityCacheKey = 'query:maps:community';
-const contentCacheEnabled = true;
+const mapCacheKey = 'query:maps:allmaps';
+const regionsKey = 'query:maps:regions';
+const contentCacheEnabled = false;
 
 export const load = async (event) => {
   if (event.platform && contentCacheEnabled) {
-    const officialMapsCachePromise = event.platform.env.geometa_kv.get(officialCacheKey);
-    const communityMapsCachePromise = event.platform.env.geometa_kv.get(communityCacheKey);
-    const [officialMapsCache, communityMapsCache] = await Promise.all([
-      officialMapsCachePromise,
-      communityMapsCachePromise
-    ]);
+    const allMapsPromise = event.platform.env.geometa_kv.get(mapCacheKey);
+    const regionsPromise = event.platform.env.geometa_kv.get(regionsKey);
+    const [allMapsCache, regionsListCache] = await Promise.all([allMapsPromise, regionsPromise]);
 
-    if (officialMapsCache && communityMapsCache) {
+    if (allMapsCache && regionsListCache) {
       return {
-        officialMaps: JSON.parse(officialMapsCache),
-        communityMaps: JSON.parse(communityMapsCache)
+        allMaps: JSON.parse(allMapsCache),
+        regionsList: JSON.parse(regionsListCache)
       };
     }
   }
-
-  const officialMapsPromise = db.query.maps.findMany({
+  const regionsList = await db.select().from(regions).orderBy(asc(regions.ordering));
+  const allMaps = await db.query.maps.findMany({
     extras: {
-      locationsCount:
-        sql`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`.as(
-          'locations_count'
-        )
+      locationsCount: sql<number>`(
+        SELECT COUNT(*)
+        FROM map_locations_view ml
+        WHERE ml.map_id = "maps"."id"
+      )`.as('locations_count'),
+      regions: sql<string>`(
+        SELECT GROUP_CONCAT(r.name, ', ')
+        FROM map_regions mr
+        JOIN regions r ON r.id = mr.region_id
+        WHERE mr.map_id = "maps"."id"
+      )`.as('region_names')
     },
-    where: and(eq(maps.isPublished, true), eq(maps.mapGroupId, 1)),
-    orderBy: [desc(maps.ordering), asc(maps.id)]
+    where: eq(maps.isPublished, true),
+    orderBy: desc(maps.ordering)
   });
-  const regionsPromise = db.select().from(regions).orderBy(asc(regions.ordering));
-  const regionsCommunityMapsPromise = db
-    .select({
-      ...getTableColumns(mapRegions),
-      ...getTableColumns(maps),
-      locationsCount:
-        sql<number>`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`.as(
-          'locations_count'
-        )
-    })
-    .from(mapRegions)
-    .innerJoin(maps, eq(maps.id, mapRegions.mapId))
-    .where(and(eq(maps.isPublished, true), eq(maps.isCommunity, true)))
-    .orderBy(
-      desc(
-        sql`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`.as(
-          'locations_count'
-        )
-      )
-    );
-  const [officialMaps, regionsList, regionsCommunityMaps] = await Promise.all([
-    officialMapsPromise,
-    regionsPromise,
-    regionsCommunityMapsPromise
-  ]);
-  const mapsByRegionId = regionsCommunityMaps.reduce(
-    (acc: { [key: number]: typeof regionsCommunityMaps }, item) => {
-      if (!acc[item.regionId]) {
-        acc[item.regionId] = [];
-      }
-      acc[item.regionId].push(item);
-      return acc;
-    },
-    {}
-  );
-  const communityMaps = regionsList.map((region) => ({
-    region: region,
-    maps: mapsByRegionId[region.id]
-  }));
 
   if (event.platform && contentCacheEnabled) {
     await Promise.all([
-      event.platform.env.geometa_kv.put(officialCacheKey, JSON.stringify(officialMaps), {
+      event.platform.env.geometa_kv.put(mapCacheKey, JSON.stringify(allMaps), {
         expirationTtl: 3600
       }),
-      event.platform.env.geometa_kv.put(communityCacheKey, JSON.stringify(communityMaps), {
+      event.platform.env.geometa_kv.put(regionsKey, JSON.stringify(regionsKey), {
         expirationTtl: 3600
       })
     ]);
   }
-  return { officialMaps, communityMaps };
+  return { allMaps, regionsList };
 };
