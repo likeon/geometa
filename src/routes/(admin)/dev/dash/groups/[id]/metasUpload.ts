@@ -41,12 +41,19 @@ export async function uploadMetas(
         modifiedAt: currentTimestamp
       };
 
+      metasInsertData.push(metaData);
+
+      if (sourceItem.levels) {
+        levelsByTagName.set(sourceItem.tagName, sourceItem.levels);
+      }
+      if (sourceItem.images) {
+        imagesByTagName.set(sourceItem.tagName, sourceItem.images);
+      }
+
       if (sourceItem.footer) {
         const footerHtml = await markdown2Html(sourceItem.footer);
         Object.assign(metaData, { footer: sourceItem.footer, footerHtml: footerHtml });
       }
-
-      metasInsertData.push(metaData);
     }
     const metasInsertResult = await tx
       .insert(metas)
