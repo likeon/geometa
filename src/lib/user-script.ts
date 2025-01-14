@@ -23,7 +23,7 @@ export async function syncUserScriptData(groupId: number) {
   }
 
   let offset = 0;
-  const iterateOver = 10000;
+  const iterateOver = 7500;
   while (true) {
     const conditions = [eq(maps.mapGroupId, groupId)];
 
