@@ -177,6 +177,29 @@ export function generatePlonkitLink(countryName: string) {
   return `https://www.plonkit.net/${countryUrl}`;
 }
 
+export async function generateFooter(countryName: string, creditPlonkit: boolean): Promise<string> {
+  const plonkitCountryUrl = generatePlonkitLink(countryName);
+
+  if (checkIfValidCountry(countryName)) {
+    if (creditPlonkit) {
+      return await markdown2Html(
+        `Description and images taken from: [${plonkitCountryUrl}](${plonkitCountryUrl}).`
+      );
+    }
+    return await markdown2Html(
+      `Check out [${plonkitCountryUrl}](${plonkitCountryUrl}) for more clues.`
+    );
+  }
+
+  if (creditPlonkit) {
+    return await markdown2Html(
+      `Description and images taken from: [https://www.plonkit.net/](https://www.plonkit.net/).`
+    );
+  }
+
+  return '';
+}
+
 export const countryNames = [
   'Afghanistan',
   'Albania',

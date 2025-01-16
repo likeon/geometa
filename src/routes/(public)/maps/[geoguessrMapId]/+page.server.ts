@@ -2,7 +2,7 @@ import { db } from '$lib/drizzle';
 import { eq } from 'drizzle-orm';
 import { mapMetas } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
-import { checkIfValidCountry, getCountryFromTagName } from '$lib/utils.js';
+import { checkIfValidCountry, generateFooter, getCountryFromTagName } from '$lib/utils.js';
 
 export const load = async ({ params }) => {
   const geoguessrMapId = params.geoguessrMapId;
@@ -23,29 +23,27 @@ export const load = async ({ params }) => {
   const isSingleCountry = uniqueCountries.size === 1;
 
   // Don't display country tag for maps where all the metas is from the same country
-  const mapMetaList = rawMapMetaList
-    .map((meta, index) => ({
-      name: isSingleCountry ? meta.metaName : `${countries[index]} - ${meta.metaName}`,
-      noteHtml: meta.metaNoteHtml,
-      imageUrls: meta.metaImageUrls ? meta.metaImageUrls.split(',').map((url) => url.trim()) : [],
-      footer: getFooter(meta)
-    }))
-    .sort((a, b) => a.name.localeCompare(b.name));
+  const mapMetaList = await Promise.all(
+    rawMapMetaList.map(async (meta, index) => {
+      let footer: string = meta.metaFooterHtml.trim() || meta.mapFooterHtml.trim();
+
+      if (!footer) {
+        footer = await generateFooter(countries[index], meta.metaNoteFromPlonkit);
+      }
+
+      return {
+        name: isSingleCountry ? meta.metaName : `${countries[index]} - ${meta.metaName}`,
+        noteHtml: meta.metaNoteHtml,
+        imageUrls: meta.metaImageUrls ? meta.metaImageUrls.split(',').map((url) => url.trim()) : [],
+        footer
+      };
+    })
+  );
+
+  mapMetaList.sort((a, b) => a.name.localeCompare(b.name));
 
   return {
     mapMetaList,
     mapName
   };
 };
-
-function getFooter(meta: any) {
-  const country = getCountryFromTagName(meta.metaTag);
-  if (meta.metaFooterHtml.trim() != '') {
-    return meta.metaFooterHtml;
-  } else if (meta.mapFooterHtml.trim() != '') return meta.mapFooterHtml;
-  else if (checkIfValidCountry(getCountryFromTagName(country))) {
-    return `Check out <a href="https://www.plonkit.net/${country}" rel="nofollow" target="_blank">https://www.plonkit.net/${country}</a> for more hints.`;
-  } else {
-    return '';
-  }
-}

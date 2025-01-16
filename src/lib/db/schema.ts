@@ -353,5 +353,6 @@ export const mapMetas = sqliteView('map_metas_view', {
   metaTag: text('meta_tag').notNull(),
   metaNoteHtml: text('meta_note_html').notNull(),
   metaImageUrls: text('meta_image_urls'),
-  metaFooterHtml: text('meta_footer_html').notNull()
+  metaFooterHtml: text('meta_footer_html').notNull(),
+  metaNoteFromPlonkit: integer('meta_note_from_plonkit', { mode: 'boolean' }).notNull()
 }).existing();

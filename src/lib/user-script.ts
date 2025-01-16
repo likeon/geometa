@@ -2,18 +2,12 @@ import { db } from '$lib/drizzle';
 import { mapGroups, mapLocations, maps, metas } from '$lib/db/schema';
 import { and, asc, eq, gt, sql } from 'drizzle-orm';
 import {
-  checkIfValidCountry,
   cloudflareKvBulkPut,
+  generateFooter,
   generatePlonkitLink,
-  getCountryFromTagName
+  getCountryFromTagName,
+  markdown2Html
 } from '$lib/utils';
-
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkRehype from 'remark-rehype';
-import rehypeSanitize from 'rehype-sanitize';
-import rehypeStringify from 'rehype-stringify';
-import rehypeExternalLinks from 'rehype-external-links';
 
 export async function syncUserScriptData(groupId: number) {
   const currentTimestamp = Math.floor(Date.now() / 1000);
@@ -40,6 +34,7 @@ export async function syncUserScriptData(groupId: number) {
         metaNoteHtml: mapLocations.metaNoteHtml,
         metaFooterHtml: metas.footerHtml,
         mapFooterHtml: maps.footerHtml,
+        metaNoteFromPlonkit: metas.noteFromPlonkit,
         images: sql<string | null>`
       (
         SELECT GROUP_CONCAT(sorted.image_url)
@@ -53,8 +48,8 @@ export async function syncUserScriptData(groupId: number) {
       `
       })
       .from(mapLocations)
-      .innerJoin(maps, eq(mapLocations.mapId, maps.id)) // Join with maps table
-      .innerJoin(metas, eq(mapLocations.metaId, metas.id)) // Join with metas table
+      .innerJoin(maps, eq(mapLocations.mapId, maps.id))
+      .innerJoin(metas, eq(mapLocations.metaId, metas.id))
       .where(and(...conditions))
       .orderBy(asc(maps.id), asc(mapLocations.metaId))
       .limit(iterateOver)
@@ -67,27 +62,11 @@ export async function syncUserScriptData(groupId: number) {
       const countryName = getCountryFromTagName(item.tagName);
       const plonkitCountryUrl = generatePlonkitLink(countryName);
 
-      let footer;
-      if (item.metaFooterHtml && item.metaFooterHtml.trim() !== '') {
-        footer = item.metaFooterHtml;
-      } else if (item.mapFooterHtml && item.mapFooterHtml.trim() !== '') {
-        footer = item.mapFooterHtml;
-      } else {
-        if (checkIfValidCountry(countryName)) {
-          footer = String(
-            await unified()
-              .use(remarkParse)
-              .use(remarkRehype)
-              .use(rehypeSanitize)
-              .use(rehypeExternalLinks, { target: '_blank' })
-              .use(rehypeStringify)
-              .process(`Check out [${plonkitCountryUrl}](${plonkitCountryUrl}) for more clues.`)
-          );
-        } else {
-          footer = '';
-        }
-      }
+      let footer: string = item.metaFooterHtml.trim() || item.mapFooterHtml.trim();
 
+      if (!footer) {
+        footer = await generateFooter(countryName, item.metaNoteFromPlonkit);
+      }
       let images: string[];
       if (item.images) {
         images = item.images.split(',').map(getImageUrl);

@@ -2,6 +2,7 @@
   import {
     Alert,
     Button,
+    Checkbox,
     Input,
     Label,
     Modal,
@@ -82,6 +83,7 @@
           $formMeta.note = meta.note;
           $formMeta.footer = meta.footer;
           $formMeta.levels = meta.metaLevels.map((item) => item.levelId);
+          $formMeta.noteFromPlonkit = meta.noteFromPlonkit;
           return $formMeta;
         },
         { taint: false }
@@ -96,6 +98,7 @@
           $formMeta.note = '';
           $formMeta.footer = '';
           $formMeta.levels = [];
+          $formMeta.noteFromPlonkit = false;
           return $formMeta;
         },
         { taint: false }
@@ -162,16 +165,23 @@
           {/if}
         </Label>
         <Label class="space-y-2">
-          <span>Footer</span>
-          <MarkdownEditor
-            carta={cartaFooter}
-            mode="tabs"
-            theme="test"
-            bind:value={$formMeta.footer} />
-          {#if $errorsMeta.footer}
-            <Alert color="red">{$errorsMeta.footer}</Alert>
-          {/if}
+          <Label>
+            <Checkbox bind:checked={$formMeta.noteFromPlonkit}>Note from plonkit</Checkbox>
+          </Label>
         </Label>
+        {#if !$formMeta.noteFromPlonkit}
+          <Label class="space-y-2">
+            <span>Footer</span>
+            <MarkdownEditor
+              carta={cartaFooter}
+              mode="tabs"
+              theme="test"
+              bind:value={$formMeta.footer} />
+            {#if $errorsMeta.footer}
+              <Alert color="red">{$errorsMeta.footer}</Alert>
+            {/if}
+          </Label>
+        {/if}
         <Label>
           <span>Levels</span>
           <MultiSelect items={levelChoices} bind:value={$formMeta.levels} size="lg" />

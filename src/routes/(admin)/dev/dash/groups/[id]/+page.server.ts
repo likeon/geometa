@@ -39,7 +39,7 @@ import { uploadMetas } from '$routes/(admin)/dev/dash/groups/[id]/metasUpload';
 
 const insertMetasSchema = createInsertSchema(metas)
   .extend({ levels: z.array(z.number()) })
-  .omit({ noteFromPlonkit: true, hasImage: true, noteHtml: true, footerHtml: true });
+  .omit({ hasImage: true, noteHtml: true, footerHtml: true });
 export type InsertMetasSchema = typeof insertMetasSchema;
 
 const mapUploadSchema = z.object({
