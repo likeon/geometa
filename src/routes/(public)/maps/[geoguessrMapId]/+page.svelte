@@ -8,6 +8,7 @@
     name: string;
     noteHtml: string;
     imageUrls: string[];
+    footer: string;
   };
 
   const metaList: Meta[] = data.mapMetaList;
@@ -54,9 +55,17 @@
         {#if $selectedMeta}
           <div>
             <h3 class="text-2xl font-bold mb-4 text-gray-900 text-center">{$selectedMeta.name}</h3>
-            <div class="note mb-6 text-gray-700">
+            <div class="note mb-1 text-gray-700">
               {@html $selectedMeta.noteHtml}
             </div>
+            {#if $selectedMeta.footer !== ''}
+              <div
+                class="text-sm text-gray-500 break-words"
+                style="overflow-wrap: break-word; word-wrap: break-word; word-break: break-word;">
+                {@html $selectedMeta.footer}
+              </div>
+            {/if}
+
             <h4 class="text-lg font-semibold mb-4 text-gray-700">Images:</h4>
             {#if $selectedMeta.imageUrls.length > 0}
               <div

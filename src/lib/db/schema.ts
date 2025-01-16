@@ -347,9 +347,11 @@ export const mapRegionsRelations = relations(mapRegions, ({ one }) => ({
 export const mapMetas = sqliteView('map_metas_view', {
   mapId: integer('map_id').notNull(),
   mapName: text('map_name').notNull(),
+  mapFooterHtml: text('map_footer_html').notNull(),
   geoguessrId: text('geoguessr_id').notNull(),
   metaName: text('meta_name').notNull(),
   metaTag: text('meta_tag').notNull(),
   metaNoteHtml: text('meta_note_html').notNull(),
-  metaImageUrls: text('meta_image_urls')
+  metaImageUrls: text('meta_image_urls'),
+  metaFooterHtml: text('meta_footer_html').notNull()
 }).existing();

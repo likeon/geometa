@@ -2,7 +2,7 @@ import { db } from '$lib/drizzle';
 import { eq } from 'drizzle-orm';
 import { mapMetas } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
-import { getCountryFromTagName } from '$lib/utils.js';
+import { checkIfValidCountry, getCountryFromTagName } from '$lib/utils.js';
 
 export const load = async ({ params }) => {
   const geoguessrMapId = params.geoguessrMapId;
@@ -27,7 +27,8 @@ export const load = async ({ params }) => {
     .map((meta, index) => ({
       name: isSingleCountry ? meta.metaName : `${countries[index]} - ${meta.metaName}`,
       noteHtml: meta.metaNoteHtml,
-      imageUrls: meta.metaImageUrls ? meta.metaImageUrls.split(',').map((url) => url.trim()) : []
+      imageUrls: meta.metaImageUrls ? meta.metaImageUrls.split(',').map((url) => url.trim()) : [],
+      footer: getFooter(meta)
     }))
     .sort((a, b) => a.name.localeCompare(b.name));
 
@@ -36,3 +37,15 @@ export const load = async ({ params }) => {
     mapName
   };
 };
+
+function getFooter(meta: any) {
+  const country = getCountryFromTagName(meta.metaTag);
+  if (meta.metaFooterHtml.trim() != '') {
+    return meta.metaFooterHtml;
+  } else if (meta.mapFooterHtml.trim() != '') return meta.mapFooterHtml;
+  else if (checkIfValidCountry(getCountryFromTagName(country))) {
+    return `Check out <a href="https://www.plonkit.net/${country}" rel="nofollow" target="_blank">https://www.plonkit.net/${country}</a> for more hints.`;
+  } else {
+    return '';
+  }
+}
