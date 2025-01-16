@@ -67,7 +67,9 @@ export const maps = sqliteTable(
     autoUpdate: integer('auto_update', { mode: 'boolean' }).notNull().default(false),
     footer: text('footer').notNull().default(''),
     footerHtml: text('footer_html').notNull().default(''),
-    modifiedAt: integer('modified_at').default(1730419200).notNull()
+    modifiedAt: integer('modified_at').default(1730419200).notNull(),
+    difficulty: integer('difficulty').notNull().default(0),
+    isVerified: integer('is_verified', { mode: 'boolean' }).notNull().default(false)
   },
   (t) => ({
     nameUnique: uniqueIndex('maps_name_unique').on(t.name),

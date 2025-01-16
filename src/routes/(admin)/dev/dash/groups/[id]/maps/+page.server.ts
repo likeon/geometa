@@ -17,12 +17,7 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkRehype from 'remark-rehype';
-import rehypeSanitize from 'rehype-sanitize';
-import rehypeStringify from 'rehype-stringify';
-import rehypeExternalLinks from 'rehype-external-links';
+import { markdown2Html } from '$lib/utils';
 
 const insertMapsSchema = createInsertSchema(maps)
   .extend({
@@ -85,7 +80,6 @@ export const actions = {
       ...includeFilters.map((filter) => ({ name: filter, isExclude: false })),
       ...excludeFilters.map((filter) => ({ name: filter, isExclude: true }))
     ];
-
     const user = await db.query.users.findFirst({ where: eq(users.id, locals.user!.id) });
     if (!user) {
       error(500);
@@ -96,21 +90,14 @@ export const actions = {
       dataNoId.ordering = undefined;
       dataNoId.autoUpdate = undefined;
       dataNoId.isCommunity = !!user!.isTrusted;
+      dataNoId.isVerified = undefined;
     }
     if (!user!.isSuperadmin && !user!.isTrusted) {
       dataNoId.isPublished = undefined;
       dataNoId.authors = undefined;
     }
 
-    const footerHtml = String(
-      await unified()
-        .use(remarkParse)
-        .use(remarkRehype)
-        .use(rehypeSanitize)
-        .use(rehypeExternalLinks, { target: '_blank' })
-        .use(rehypeStringify)
-        .process(dataNoId.footer)
-    );
+    const footerHtml = await markdown2Html(dataNoId.footer || '');
 
     let mapId;
     if (id === undefined) {

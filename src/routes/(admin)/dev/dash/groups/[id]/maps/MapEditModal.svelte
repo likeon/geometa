@@ -2,7 +2,16 @@
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import type { InsertMapsSchema } from './+page.server';
   import type { PageData } from './$types';
-  import { Alert, Button, Input, Label, Modal, MultiSelect, Textarea } from 'flowbite-svelte';
+  import {
+    Alert,
+    Button,
+    Input,
+    Label,
+    Modal,
+    MultiSelect,
+    Radio,
+    Textarea
+  } from 'flowbite-svelte';
   import Checkbox from 'flowbite-svelte/Checkbox.svelte';
   import FilterManager from './FilterManager.svelte';
   import { Carta, MarkdownEditor } from 'carta-md';
@@ -52,6 +61,8 @@
         $form.autoUpdate = selectedMap.autoUpdate;
         $form.levels = selectedMap.mapLevels.map((item) => item.levelId);
         $form.regions = selectedMap.mapRegions.map((item) => item.regionId);
+        $form.difficulty = selectedMap.difficulty;
+        $form.isVerified = selectedMap.isVerified;
         $form.includeFilters = selectedMap.filters
           .filter((item) => item.isExclude == false)
           .map((item) => item.tagLike as string);
@@ -74,6 +85,8 @@
         $form.regions = [];
         $form.includeFilters = [];
         $form.excludeFilters = [];
+        $form.difficulty = 0;
+        $form.isVerified = false;
       }
     }
   });
@@ -166,6 +179,9 @@
       <Label>
         <Checkbox bind:checked={$form.autoUpdate}>Auto Update</Checkbox>
       </Label>
+      <Label>
+        <Checkbox bind:checked={$form.isVerified}>Verified</Checkbox>
+      </Label>
     {/if}
     <Label>
       <span>Levels</span>
@@ -191,7 +207,27 @@
       <span>Regions</span>
       <MultiSelect items={regionChoices} bind:value={$form.regions} size="lg" />
     </Label>
-
+    <Label>
+      <span>Difficulty</span>
+      <ul
+        class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600">
+        <li class="w-full">
+          <Radio name="hor-list" value={1} bind:group={$form.difficulty} class="p-3">
+            Beginner
+          </Radio>
+        </li>
+        <li class="w-full">
+          <Radio name="hor-list" value={2} bind:group={$form.difficulty} class="p-3">
+            Intermediate
+          </Radio>
+        </li>
+        <li class="w-full">
+          <Radio name="hor-list" value={3} bind:group={$form.difficulty} class="p-3">
+            Advanced
+          </Radio>
+        </li>
+      </ul>
+    </Label>
     <Button type="submit" class="w-full">Save</Button>
   </form>
 </Modal>

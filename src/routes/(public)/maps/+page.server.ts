@@ -32,10 +32,15 @@ export const load = async (event) => {
         FROM map_regions mr
         JOIN regions r ON r.id = mr.region_id
         WHERE mr.map_id = "maps"."id"
-      )`.as('region_names')
+      )`.as('region_names'),
+      metasCount: sql<string>`(
+        SELECT COUNT(*)
+        FROM map_metas_view mp
+        WHERE mp.map_id = "maps"."id"
+      )`.as('meta_count')
     },
     where: eq(maps.isPublished, true),
-    orderBy: desc(maps.ordering)
+    orderBy: [sql`CASE WHEN "maps"."is_verified" THEN 1 ELSE 0 END DESC`, desc(maps.ordering)]
   });
 
   if (event.platform && contentCacheEnabled) {
