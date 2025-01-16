@@ -7,19 +7,6 @@
   }: {
     map: PageData['allMaps'];
   } = $props();
-
-  const difficultyDetails = {
-    1: { text: 'Beginner', color: 'green', icon: 'carbon:skill-level-basic', tooltip: '' },
-    2: {
-      text: 'Intermediate',
-      color: 'yellow',
-      icon: 'carbon:skill-level-intermediate',
-      tooltip: ''
-    },
-    3: { text: 'Advanced', color: 'red', icon: 'carbon:skill-level-advanced', tooltip: '' }
-  };
-
-  const badge = difficultyDetails[map.difficulty];
 </script>
 
 <div
@@ -33,10 +20,22 @@
         </div>
       {/if}
       <div class="ml-auto">
-        {#if map.difficulty != 0}
-          <Badge color={badge.color} size="sm">
-            <Icon icon={badge.icon} class="inline-block mr-1" />
-            {badge.text}
+        {#if map.difficulty == 1}
+          <Badge color="green" size="sm">
+            <Icon icon="carbon:skill-level-basic" class="inline-block mr-1" />
+            Beginner
+          </Badge>
+        {/if}
+        {#if map.difficulty == 2}
+          <Badge color="yellow" size="sm">
+            <Icon icon="carbon:skill-level-intermediate" class="inline-block mr-1" />
+            Intermediate
+          </Badge>
+        {/if}
+        {#if map.difficulty == 3}
+          <Badge color="red" size="sm">
+            <Icon icon="carbon:skill-level-advanced" class="inline-block mr-1" />
+            Advanced
           </Badge>
         {/if}
         <Badge color="pink" size="sm">
