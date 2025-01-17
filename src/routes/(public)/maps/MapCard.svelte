@@ -15,7 +15,7 @@
     <div class="flex flex-row pb-2">
       {#if map.isVerified}
         <div>
-          <Badge class="bg-amber-500 text-white">
+          <Badge class="bg-yellow-200 text-yellow-800">
             <Icon icon="ri:star-line" class="inline-block  mr-1" /> Verified</Badge>
         </div>
       {/if}
@@ -38,12 +38,12 @@
             Advanced
           </Badge>
         {/if}
-        <Badge color="pink" size="sm">
+        <Badge class="bg-pink-50 text-pink-500" size="sm">
           <Icon icon="gravity-ui:map-pin" class="inline-block  mr-1" />
           {map.locationsCount}
         </Badge>
         <Tooltip>Number of locations in the map.</Tooltip>
-        <Badge color="indigo" size="sm">
+        <Badge class="bg-indigo-50 text-indigo-500" size="sm">
           <Icon icon="cil:list" class="inline-block  mr-1" />
           {map.metasCount}</Badge>
         <Tooltip>Number of metas in the map.</Tooltip>

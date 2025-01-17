@@ -33,7 +33,7 @@ export const load = async (event) => {
         JOIN regions r ON r.id = mr.region_id
         WHERE mr.map_id = "maps"."id"
       )`.as('region_names'),
-      metasCount: sql<string>`(
+      metasCount: sql<number>`(
         SELECT COUNT(*)
         FROM map_metas_view mp
         WHERE mp.map_id = "maps"."id"
