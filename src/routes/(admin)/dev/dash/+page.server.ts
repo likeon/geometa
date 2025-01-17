@@ -25,7 +25,7 @@ export const load = async ({ locals }) => {
     })
     .from(mapGroups)
     .innerJoin(mapGroupPermissions, eq(mapGroupPermissions.mapGroupId, mapGroups.id))
-    .innerJoin(mapGroupLocations, eq(mapGroupLocations.mapGroupId, mapGroups.id))
+    .leftJoin(mapGroupLocations, eq(mapGroupLocations.mapGroupId, mapGroups.id))
     .where(eq(mapGroupPermissions.userId, locals.user.id))
     .groupBy(mapGroups.id);
 
