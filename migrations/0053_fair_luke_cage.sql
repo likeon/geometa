@@ -1,0 +1,1 @@
+DROP INDEX IF EXISTS `maps_name_unique`;

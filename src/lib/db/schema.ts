@@ -72,7 +72,6 @@ export const maps = sqliteTable(
     isVerified: integer('is_verified', { mode: 'boolean' }).notNull().default(false)
   },
   (t) => ({
-    nameUnique: uniqueIndex('maps_name_unique').on(t.name),
     geoguessrIdUnique: uniqueIndex('maps_geoguessr_id_unique').on(t.geoguessrId)
   })
 );
