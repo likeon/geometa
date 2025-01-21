@@ -53,7 +53,7 @@
       </div>
 
       <div class="lg:w-3/4 p-4 overflow-y-auto h-full" bind:this={rightPanelRef}>
-        <div class="flex w-full items-center">
+        <div class="flex w-full items-center mb-3">
           <h1 class="text-xl">Meta List - {data.mapName}</h1>
           <div class="ml-3">
             <Button
