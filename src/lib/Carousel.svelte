@@ -85,10 +85,14 @@
   {/if}
 
   {#if images.length > 1}
-    <div class="controls">
-      <button class="prev" onclick={prev}>&#10094;</button>
-      <button class="next" onclick={next}>&#10095;</button>
-    </div>
+  <div class="controls">
+    <button class="click-area prev-area" onclick={prev} type="button" aria-label="Previous image">
+      <span class="prev">&#10094;</span>
+    </button>
+    <button class="click-area next-area" onclick={next} type="button" aria-label="Next image">
+      <span class="next">&#10095;</span>
+    </button>
+  </div>
 
     <div class="indicators">
       {#each images as _, index}
@@ -133,47 +137,66 @@
     box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
   }
 
-  .controls {
-    position: absolute;
-    top: 20px;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: space-between;
-    pointer-events: none;
-  }
+  .click-area {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1.4em; 
+  cursor: pointer;
+}
 
-  .prev,
-  .next {
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    font-size: 2em;
-    padding: 0.2em 0.5em;
-    cursor: pointer;
-    pointer-events: auto;
-  }
+.prev-area {
+  left: 0;
+}
 
-  .indicators {
-    position: absolute;
-    bottom: 15px;
-    left: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-  }
+.next-area {
+  right: 0;
+}
 
-  .indicator {
-    width: 12px;
-    height: 12px;
-    background-color: rgba(255, 255, 255, 0.5);
-    margin: 0 4px;
-    border-radius: 50%;
-    cursor: pointer;
-    border: none;
-  }
+.prev,
+.next {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  border: none;
+  font-size: 1.2em;
+  padding: 0.2em;
+  cursor: pointer;
+  pointer-events: auto;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
 
-  .indicator.active {
-    background-color: white;
-  }
+.prev {
+  left: 0px; /* Visible button position inside the clickable area */
+}
+
+.next {
+  right: 0px; /* Visible button position inside the clickable area */
+}
+.indicators {
+  position: absolute;
+  bottom: 15px;
+  left: 50%; /* Center the indicators container horizontally */
+  transform: translateX(-50%); /* Adjust for the container's width */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px; /* Space between indicator buttons */
+}
+
+.indicator {
+  width: 12px;
+  height: 12px;
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 50%;
+  cursor: pointer;
+  border: none;
+  padding: 0; /* Remove unnecessary padding */
+  flex-shrink: 0; /* Prevent the indicator from shrinking */
+}
+
+.indicator.active {
+  background-color: white;
+}
 </style>
