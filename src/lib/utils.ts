@@ -138,3 +138,9 @@ export function decodePanoId(encoded) {
 export function logInfo(name: string, data?: any) {
   console.log(`ALM: ${name}`, data)
 }
+
+
+export function extractMapIdFromUrl(url) {
+  const match = url.match(/\/maps\/(.+)/);
+  return match ? match[1] : null;
+}
