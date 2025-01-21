@@ -1,5 +1,5 @@
 import App from './App.svelte';
-import { getChallengeId, getChallengeInfo, getMapInfo, logInfo, waitForElement } from './lib/utils';
+import { getChallengeId, getChallengeInfo, getMapInfo, logInfo, waitForElement, extractMapIdFromUrl } from './lib/utils';
 
 import { unsafeWindow } from '$';
 import { mount } from 'svelte';
@@ -91,12 +91,25 @@ GeoGuessrEventFramework.init().then(() => {
 // Live Challenge
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    initLiveChallengeObserver();
+  document.addEventListener('DOMContentLoaded', async () => {
+    await setupLearnableMetaFeatures();
   });
 } else {
-  initLiveChallengeObserver();
+  await setupLearnableMetaFeatures();
 }
+
+async function setupLearnableMetaFeatures() {
+  initLiveChallengeObserver();
+  let lastUrl = '';
+  setInterval(() => {
+      if (window.location.href !== lastUrl) {
+        lastUrl = window.location.href;
+          addLearnableMetaMapPanel();
+      }
+  }, 500); 
+} 
+
+
 
 function initLiveChallengeObserver() {
   logInfo('live challenge support enabled')
@@ -136,5 +149,56 @@ function initLiveChallengeObserver() {
   } else {
     console.error("document.body is not available.");
   }
+}
+
+
+async function addLearnableMetaMapPanel() {
+  const mapId = extractMapIdFromUrl(window.location.href);
+  if (!mapId) {
+      return;
+  }
+  const mapInfo = await getMapInfo(mapId, true);
+  if (!mapInfo?.mapFound) {
+      return;
+  } 
+  const mapAvatarContainer = document.querySelector('.map-block_mapImageContainer__j0z_h') as HTMLElement;
+  if ( mapAvatarContainer  ) {
+      const learnableMetaContainer = document.createElement('div');
+      learnableMetaContainer.style.padding = '10px';
+      learnableMetaContainer.style.backgroundColor = '#1a1a2e';
+      learnableMetaContainer.style.color = '#fff';
+      learnableMetaContainer.style.borderRadius = '10px';
+      learnableMetaContainer.style.textAlign = 'center';
+
+      const metaText = document.createElement('p');
+      metaText.textContent = 'LearnableMeta Enabled';
+      metaText.style.fontSize = '14px';
+      metaText.style.margin = '0';
+      metaText.style.fontWeight = 'bold';
+  
+      const metaButton = document.createElement('button');
+      metaButton.textContent = 'View Meta List';
+      metaButton.style.marginTop = '8px';
+      metaButton.style.padding = '6px 12px';
+      metaButton.style.fontSize = '12px';
+      metaButton.style.color = '#fff';
+      metaButton.style.backgroundColor = '#4CAF50';
+      metaButton.style.border = 'none';
+      metaButton.style.borderRadius = '4px';
+      metaButton.style.cursor = 'pointer';
+
+      // Add button click behavior
+      metaButton.addEventListener('click', () => {
+          const mapId = window.location.pathname.split('/maps/')[1]; // Extract map ID from URL
+          window.open(`https://learnablemeta.com/maps/${mapId}`, '_blank'); // Open the meta list in a new tab
+      });
+
+      // Append the text and button to the LearnableMeta container
+      learnableMetaContainer.appendChild(metaText);
+      learnableMetaContainer.appendChild(metaButton);
+
+      // Append the LearnableMeta container to the rectangle container
+      mapAvatarContainer.replaceWith(learnableMetaContainer);
+}
 }
 
