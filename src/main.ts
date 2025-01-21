@@ -164,21 +164,29 @@ async function addLearnableMetaMapPanel() {
   const mapAvatarContainer = document.querySelector('.map-block_mapImageContainer__j0z_h') as HTMLElement;
   if ( mapAvatarContainer  ) {
       const learnableMetaContainer = document.createElement('div');
-      learnableMetaContainer.style.padding = '10px';
-      learnableMetaContainer.style.backgroundColor = '#1a1a2e';
+      learnableMetaContainer.style.backgroundColor = '#252541';
       learnableMetaContainer.style.color = '#fff';
-      learnableMetaContainer.style.borderRadius = '10px';
       learnableMetaContainer.style.textAlign = 'center';
+      learnableMetaContainer.style.zIndex = '999999';
+      learnableMetaContainer.style.position = 'absolute';
+      learnableMetaContainer.style.bottom = '-1px';
+      learnableMetaContainer.style.left = '0';
+      learnableMetaContainer.style.textAlign = 'center';
+      learnableMetaContainer.style.width = '220px';
+      learnableMetaContainer.style.height = '50%';
+      learnableMetaContainer.style.boxSizing = 'border-box';
+      learnableMetaContainer.style.borderRadius = "0 0 110px 110px";
+      learnableMetaContainer.style.clipPath = 'inset(40% 0 0 0)';
 
       const metaText = document.createElement('p');
       metaText.textContent = 'LearnableMeta Enabled';
       metaText.style.fontSize = '14px';
-      metaText.style.margin = '0';
+      metaText.style.marginTop = '48px';
       metaText.style.fontWeight = 'bold';
   
       const metaButton = document.createElement('button');
-      metaButton.textContent = 'View Meta List';
-      metaButton.style.marginTop = '8px';
+      metaButton.textContent = 'Meta List';
+      metaButton.style.marginTop = '6px';
       metaButton.style.padding = '6px 12px';
       metaButton.style.fontSize = '12px';
       metaButton.style.color = '#fff';
@@ -186,6 +194,7 @@ async function addLearnableMetaMapPanel() {
       metaButton.style.border = 'none';
       metaButton.style.borderRadius = '4px';
       metaButton.style.cursor = 'pointer';
+
 
       // Add button click behavior
       metaButton.addEventListener('click', () => {
@@ -198,7 +207,8 @@ async function addLearnableMetaMapPanel() {
       learnableMetaContainer.appendChild(metaButton);
 
       // Append the LearnableMeta container to the rectangle container
-      mapAvatarContainer.replaceWith(learnableMetaContainer);
+      mapAvatarContainer.appendChild(learnableMetaContainer);
+     
 }
 }
 
