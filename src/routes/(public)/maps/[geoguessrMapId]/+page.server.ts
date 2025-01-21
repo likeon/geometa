@@ -1,8 +1,8 @@
 import { db } from '$lib/drizzle';
 import { eq } from 'drizzle-orm';
-import { mapMetas } from '$lib/db/schema';
+import { mapMetas, maps } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
-import { checkIfValidCountry, generateFooter, getCountryFromTagName } from '$lib/utils.js';
+import { generateFooter, getCountryFromTagName } from '$lib/utils.js';
 
 export const load = async ({ params }) => {
   const geoguessrMapId = params.geoguessrMapId;
@@ -17,6 +17,7 @@ export const load = async ({ params }) => {
   }
 
   const mapName = rawMapMetaList[0].mapName;
+  const map = await db.query.maps.findFirst({ where: eq(maps.geoguessrId, geoguessrMapId) });
 
   const countries = rawMapMetaList.map((meta) => getCountryFromTagName(meta.metaTag));
   const uniqueCountries = new Set(countries);
@@ -44,6 +45,7 @@ export const load = async ({ params }) => {
 
   return {
     mapMetaList,
-    mapName
+    mapName,
+    map
   };
 };

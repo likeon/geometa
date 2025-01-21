@@ -1,6 +1,7 @@
 <script lang="ts">
   import { writable } from 'svelte/store';
   import background from '$lib/assets/background.jpg';
+  import { Button } from 'flowbite-svelte';
 
   let { data } = $props();
 
@@ -52,6 +53,17 @@
       </div>
 
       <div class="lg:w-3/4 p-4 overflow-y-auto h-full" bind:this={rightPanelRef}>
+        <div class="flex w-full items-center">
+          <h1 class="text-xl">Meta List - {data.mapName}</h1>
+          <div class="ml-3">
+            <Button
+              size="sm"
+              target="_blank"
+              href={`https://www.geoguessr.com/maps/${data.map?.geoguessrId}`}
+              >Play
+            </Button>
+          </div>
+        </div>
         {#if $selectedMeta}
           <div>
             <h3 class="text-2xl font-bold mb-4 text-gray-900 text-center">{$selectedMeta.name}</h3>
