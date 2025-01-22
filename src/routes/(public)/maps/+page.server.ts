@@ -48,7 +48,7 @@ export const load = async (event) => {
       event.platform.env.geometa_kv.put(mapCacheKey, JSON.stringify(allMaps), {
         expirationTtl: 3600
       }),
-      event.platform.env.geometa_kv.put(regionsKey, JSON.stringify(regionsKey), {
+      event.platform.env.geometa_kv.put(regionsKey, JSON.stringify(regionsList), {
         expirationTtl: 3600
       })
     ]);
