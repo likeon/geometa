@@ -53,6 +53,7 @@ export function localStorageGetInt(name: string) {
 
 type MapInfoResponse = {
   mapFound: boolean;
+  userscriptVersion: string;
 };
 
 async function fetchMapInfo(url: string): Promise<MapInfoResponse> {
@@ -83,9 +84,9 @@ async function fetchMapInfo(url: string): Promise<MapInfoResponse> {
 }
 
 export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
-  const localStorageKey = `geometa:map-info:${geoguessrId}`;
+  const localStorageMapInfoKey = `geometa:map-info:${geoguessrId}`;
   if (!forceUpdate) {
-    const savedMapInfo = unsafeWindow.localStorage.getItem(localStorageKey);
+    const savedMapInfo = unsafeWindow.localStorage.getItem(localStorageMapInfoKey);
     if (savedMapInfo) {
       const mapInfo = JSON.parse(savedMapInfo) as MapInfoResponse
       logInfo('using saved map info', mapInfo)
@@ -94,10 +95,23 @@ export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
   }
   const url = `https://learnablemeta.com/api/map-info/${geoguessrId}`;
   const mapInfo = await fetchMapInfo(url);
-  unsafeWindow.localStorage.setItem(localStorageKey, JSON.stringify(mapInfo));
+  unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(mapInfo));
+  unsafeWindow.localStorage.setItem("geometa:latest-version", mapInfo.userscriptVersion);
   return mapInfo;
 }
 
+
+export function getLatestVersionInfo() {
+  return unsafeWindow.localStorage.getItem("geometa:latest-version");
+}
+
+export function markHelpMessageAsRead() {
+  unsafeWindow.localStorage.setItem("geometa:help-message-read", "true");
+}
+
+export function wasHelpMessageRead(): boolean {
+  return unsafeWindow.localStorage.getItem("geometa:help-message-read") == "true";
+}
 
 export const getChallengeId = () => {
   const regexp = /.*\/live-challenge\/(.*)/
