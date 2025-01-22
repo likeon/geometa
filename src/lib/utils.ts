@@ -126,7 +126,7 @@ export const getChallengeId = () => {
   return null;
 }
 
-export async function getChallengeInfo(id) {
+export async function getChallengeInfo(id: string) {
   const url = `https://game-server.geoguessr.com/api/live-challenge/${id}`
   const response = await fetch(url, {
     method: "GET",
@@ -142,9 +142,9 @@ export async function getChallengeInfo(id) {
   return { mapId, panoId }
 }
 
-export function decodePanoId(encoded) {
+export function decodePanoId(encoded: string) {
   const len = Math.floor(encoded.length / 2)
-  let panoId = []
+  let panoId: string[] = []
   for (let i = 0; i < len; i++) {
     const code = parseInt(encoded.slice(i * 2, i * 2 + 2), 16)
     const char = String.fromCharCode(code)
@@ -158,7 +158,7 @@ export function logInfo(name: string, data?: any) {
 }
 
 
-export function extractMapIdFromUrl(url) {
+export function extractMapIdFromUrl(url: string) {
   const match = url.match(/\/maps\/(.+)/);
   return match ? match[1] : null;
 }
