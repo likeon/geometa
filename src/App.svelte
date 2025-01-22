@@ -6,7 +6,7 @@
   import { onMouseDown, onMouseMove, onMouseUp, setContainerPosition } from './lib/dragging';
   import { saveContainerDimensions, setContainerDimensions } from './lib/resizing';
   import Carousel from './lib/Carousel.svelte';
-  import { checkIfOutdated, getLatestVersionInfo, markHelpMessageAsRead, wasHelpMessageRead } from './lib/utils';
+  import { checkIfOutdated, markHelpMessageAsRead, wasHelpMessageRead } from './lib/utils';
 
   interface Props {
     panoId: string;
@@ -95,9 +95,7 @@
   let showModal = $state(false);
   let currentUrl = $state('');
   let showHelpPopup = $state(false);
-  let helpClass = $state("question-mark-icon")
-  const latestVersion = getLatestVersionInfo();
-
+  let helpClass = $state("question-mark-icon");
 
 function shouldBlink() {
   return !wasHelpMessageRead() || checkIfOutdated();
