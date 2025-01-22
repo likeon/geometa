@@ -1,12 +1,20 @@
 import App from './App.svelte';
-import { getChallengeId, getChallengeInfo, getMapInfo, logInfo, waitForElement, extractMapIdFromUrl } from './lib/utils';
+import MapLabel from './lib/MapLabel.svelte';
+import {
+  getChallengeId,
+  getChallengeInfo,
+  getMapInfo,
+  logInfo,
+  waitForElement,
+  extractMapIdFromUrl
+} from './lib/utils';
 
 import { unsafeWindow } from '$';
 import { mount } from 'svelte';
 
 function changelog() {
   return [
-    {'0.77' : "Added custom footer to the note and clicking on link warning"},
+    { '0.77': 'Added custom footer to the note and clicking on link warning' },
     { '0.76': 'Redesign note and added meta list link' },
     { '0.75': 'Added basic logging to help with debugging issues' },
     { '0.74': 'Fixed window appearance when for some reason a negative position value is saved' },
@@ -65,17 +73,17 @@ GeoGuessrEventFramework.init().then(() => {
   GeoGuessrEventFramework.events.addEventListener('round_end', async (event: GGEvent) => {
     const mapInfo = await getMapInfo(event.detail.map.id, false);
     if (!mapInfo.mapFound) {
-      logInfo('not supported map - skip')
-      return
+      logInfo('not supported map - skip');
+      return;
     }
-    logInfo('waiting for the result view to render')
+    logInfo('waiting for the result view to render');
     waitForElement('div[data-qa="result-view-top"]').then((container) => {
-      logInfo('the result view is rendered')
+      logInfo('the result view is rendered');
       const element = document.createElement('div');
       element.id = 'geometa-summary';
       container.appendChild(element);
       const lastRound = event.detail.rounds[event.detail.rounds.length - 1];
-      logInfo('adding app window')
+      logInfo('adding app window');
       mount(App, {
         target: element,
         props: {
@@ -102,20 +110,19 @@ async function setupLearnableMetaFeatures() {
   initLiveChallengeObserver();
   let lastUrl = '';
   setInterval(() => {
-      if (window.location.href !== lastUrl) {
-        lastUrl = window.location.href;
-          addLearnableMetaMapPanel();
-      }
-  }, 500); 
-} 
-
+    if (window.location.href !== lastUrl) {
+      lastUrl = window.location.href;
+      addLearnableMetaMapPanel();
+    }
+  }, 500);
+}
 
 
 function initLiveChallengeObserver() {
-  logInfo('live challenge support enabled')
+  logInfo('live challenge support enabled');
   let pinChanged = false;
   const observer = new MutationObserver(async (mutations) => {
-    const pinClass = ".result-map_roundPin__3ieXw";
+    const pinClass = '.result-map_roundPin__3ieXw';
     if (!document.querySelector(pinClass)) {
       pinChanged = false;
       return;
@@ -147,7 +154,7 @@ function initLiveChallengeObserver() {
   if (document.body) {
     observer.observe(document.body, { subtree: true, childList: true });
   } else {
-    console.error("document.body is not available.");
+    console.error('document.body is not available.');
   }
 }
 
@@ -155,60 +162,20 @@ function initLiveChallengeObserver() {
 async function addLearnableMetaMapPanel() {
   const mapId = extractMapIdFromUrl(window.location.href);
   if (!mapId) {
-      return;
+    return;
   }
   const mapInfo = await getMapInfo(mapId, true);
   if (!mapInfo?.mapFound) {
-      return;
-  } 
+    return;
+  }
   const mapAvatarContainer = document.querySelector('.map-block_mapImageContainer__j0z_h') as HTMLElement;
-  if ( mapAvatarContainer  ) {
-      const learnableMetaContainer = document.createElement('div');
-      learnableMetaContainer.style.backgroundColor = '#252541';
-      learnableMetaContainer.style.color = '#fff';
-      learnableMetaContainer.style.textAlign = 'center';
-      learnableMetaContainer.style.zIndex = '999999';
-      learnableMetaContainer.style.position = 'absolute';
-      learnableMetaContainer.style.bottom = '-1px';
-      learnableMetaContainer.style.left = '0';
-      learnableMetaContainer.style.textAlign = 'center';
-      learnableMetaContainer.style.width = '220px';
-      learnableMetaContainer.style.height = '50%';
-      learnableMetaContainer.style.boxSizing = 'border-box';
-      learnableMetaContainer.style.borderRadius = "0 0 110px 110px";
-      learnableMetaContainer.style.clipPath = 'inset(40% 0 0 0)';
+  if (mapAvatarContainer) {
+    const element = document.createElement('div');
+    mapAvatarContainer.appendChild(element);
+    mount(MapLabel, {
+      target: element
+    });
 
-      const metaText = document.createElement('p');
-      metaText.textContent = 'LearnableMeta Enabled';
-      metaText.style.fontSize = '14px';
-      metaText.style.marginTop = '48px';
-      metaText.style.fontWeight = 'bold';
-  
-      const metaButton = document.createElement('button');
-      metaButton.textContent = 'Meta List';
-      metaButton.style.marginTop = '6px';
-      metaButton.style.padding = '6px 12px';
-      metaButton.style.fontSize = '12px';
-      metaButton.style.color = '#fff';
-      metaButton.style.backgroundColor = '#4CAF50';
-      metaButton.style.border = 'none';
-      metaButton.style.borderRadius = '4px';
-      metaButton.style.cursor = 'pointer';
-
-
-      // Add button click behavior
-      metaButton.addEventListener('click', () => {
-          const mapId = window.location.pathname.split('/maps/')[1]; // Extract map ID from URL
-          window.open(`https://learnablemeta.com/maps/${mapId}`, '_blank'); // Open the meta list in a new tab
-      });
-
-      // Append the text and button to the LearnableMeta container
-      learnableMetaContainer.appendChild(metaText);
-      learnableMetaContainer.appendChild(metaButton);
-
-      // Append the LearnableMeta container to the rectangle container
-      mapAvatarContainer.appendChild(learnableMetaContainer);
-     
-}
+  }
 }
 
