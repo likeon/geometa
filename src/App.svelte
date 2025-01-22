@@ -6,7 +6,7 @@
   import { onMouseDown, onMouseMove, onMouseUp, setContainerPosition } from './lib/dragging';
   import { saveContainerDimensions, setContainerDimensions } from './lib/resizing';
   import Carousel from './lib/Carousel.svelte';
-  import { checkIfOutdated, markHelpMessageAsRead, wasHelpMessageRead } from './lib/utils';
+  import { checkIfOutdated, getLatestVersionInfo, markHelpMessageAsRead, wasHelpMessageRead } from './lib/utils';
 
   interface Props {
     panoId: string;
@@ -89,45 +89,41 @@
   }
 
   function cancel() {
-    showModal = false; 
+    showModal = false;
   }
 
   let showModal = $state(false);
   let currentUrl = $state('');
   let showHelpPopup = $state(false);
-  let helpClass = $state("question-mark-icon");
+  let helpClass = $state('question-mark-icon');
 
-function shouldBlink() {
-  return !wasHelpMessageRead() || checkIfOutdated();
-}
-
-function updateHelpClass() {
-  helpClass = shouldBlink() ? "question-mark-icon blink" : "question-mark-icon";
-}
-
-function togglePopup() {
-  showHelpPopup = !showHelpPopup;
-  if (showHelpPopup) {
-    markHelpMessageAsRead();
-    updateHelpClass();
+  function shouldBlink() {
+    return !wasHelpMessageRead() || checkIfOutdated();
   }
-}
 
-updateHelpClass();
+  function updateHelpClass() {
+    helpClass = shouldBlink() ? 'question-mark-icon blink' : 'question-mark-icon';
+  }
+
+  function togglePopup() {
+    showHelpPopup = !showHelpPopup;
+    if (showHelpPopup) {
+      markHelpMessageAsRead();
+      updateHelpClass();
+    }
+  }
+
+  updateHelpClass();
 
   $effect(() => {
-  if (geoInfo) {
-    const links = document.querySelectorAll('.geometa-footer a, .geometa-note a');
-    links.forEach((link) => {
-      link.removeEventListener('click', confirmNavigation);
-      link.addEventListener('click', confirmNavigation);
-    });
-  }
-
-  
-  
- 
-});
+    if (geoInfo) {
+      const links = document.querySelectorAll('.geometa-footer a, .geometa-note a');
+      links.forEach((link) => {
+        link.removeEventListener('click', confirmNavigation);
+        link.addEventListener('click', confirmNavigation);
+      });
+    }
+  });
 
 </script>
 
@@ -148,8 +144,8 @@ updateHelpClass();
       <button onclick={togglePopup} aria-label="More information" style="background: none; border: none; padding: 0;">
         <span class={helpClass}></span>
       </button>
-      
-      
+
+
     </div>
   </div>
   {#if error}
@@ -162,10 +158,10 @@ updateHelpClass();
     <div class="geometa-note">
       {@html geoInfo.note}
     </div>
-    {#if geoInfo.footer} 
-    <p class="geometa-footer">
-      {@html geoInfo.footer}
-    </p>
+    {#if geoInfo.footer}
+      <p class="geometa-footer">
+        {@html geoInfo.footer}
+      </p>
     {/if}
     {#if geoInfo.images && geoInfo.images.length}
       <hr />
@@ -187,37 +183,48 @@ updateHelpClass();
       </div>
     </div>
   {/if}
- 
+
   {#if showHelpPopup}
-  <div class="modal-backdrop">
-    <div class="modal">
-      <div class="help-message">
-        <p>Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p>
-        <ul>
-          <li><strong>Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere on your screen.</li>
-          <li><strong>Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li>
-          <li><strong>View Map metalist:</strong> Click the list icon to see all the metas included in the map you are currently playing.</li>
-          <li><strong>Join the Community:</strong> Click the Discord icon to share feedback, suggest improvements, or just say hi!</li>
-          <li>
-            <strong>Outdated Script:</strong> The question mark icon will blink if the script is outdated.
-          </li>
-        </ul>
+    <div class="modal-backdrop">
+      <div class="modal">
+        <div class="help-message">
+          {#if checkIfOutdated()}
+            <p class="outdated"><strong>Your script version is out of date - please install the latest
+              version ({getLatestVersionInfo()})!
+            </strong></p>
+          {/if}
+          <p>Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p>
+          <ul>
+            <li><strong>Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere on your
+              screen.
+            </li>
+            <li><strong>Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li>
+            <li><strong>View Map metalist:</strong> Click the list icon to see all the metas included in the map you
+              are currently playing.
+            </li>
+            <li><strong>Join the Community:</strong> Click the Discord icon to share feedback, suggest improvements, or
+              just say hi!
+            </li>
+            <li>
+              <strong>Outdated Script:</strong> The question mark icon will blink if the script is outdated.
+            </li>
+          </ul>
+        </div>
+        <button class="close-btn" onclick={togglePopup}>Close</button>
       </div>
-      <button class="close-btn" onclick={togglePopup}>Close</button>
     </div>
-  </div>
-{/if}
+  {/if}
 </div>
 
 <style>
-:global(.geometa-footer a) {
-  color: #188bd2; 
-  text-decoration: none;
-}
+  :global(.geometa-footer a) {
+    color: #188bd2;
+    text-decoration: none;
+  }
 
-:global(.geometa-footer a:hover) {
-  text-decoration: underline; 
-}
+  :global(.geometa-footer a:hover) {
+    text-decoration: underline;
+  }
 
   .geometa-container {
     position: absolute;
@@ -242,7 +249,7 @@ updateHelpClass();
     color: #d3d3d3;
     font-size: small;
   }
-  
+
   a {
     color: #188bd2;
   }
@@ -272,28 +279,28 @@ updateHelpClass();
   }
 
   .skill-icons--list {
-  display: inline-block;
-  width: 1.2rem;
-  height: 1.2rem;
-  margin-left: 2px;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E");
-}
+    display: inline-block;
+    width: 1.2rem;
+    height: 1.2rem;
+    margin-left: 2px;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E");
+  }
 
-.question-mark-icon {
-  display: inline-block;
-  width: 1.2rem;
-  height: 1.2rem;
-  margin-left: 2px;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");
-  cursor: pointer; /* Makes it clear that the icon is clickable */
-}
+  .question-mark-icon {
+    display: inline-block;
+    width: 1.2rem;
+    height: 1.2rem;
+    margin-left: 2px;
+    background-repeat: no-repeat;
+    background-size: 100% 100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");
+    cursor: pointer; /* Makes it clear that the icon is clickable */
+  }
 
 
-.icons {
+  .icons {
     display: inline-block;
     vertical-align: middle;
   }
@@ -342,116 +349,121 @@ updateHelpClass();
     margin-left: 1rem;
   }
 
-  
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(30, 30, 30, 0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
 
-.modal {
-  background: var(--ds-color-purple-100);
-  padding: 15px 25px;
-  border-radius: 8px;
-  text-align: center;
-  width: 90%;
-  max-width: 600px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  color: #d3d3d3;
-}
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(30, 30, 30, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
 
-.modal p {
-  margin: 0 0 10px;
-  font-size: 17px;
-}
+  .modal {
+    background: var(--ds-color-purple-100);
+    padding: 15px 25px;
+    border-radius: 8px;
+    text-align: center;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    color: #d3d3d3;
+  }
 
-.modal-url {
-  font-size: 15px;
-  font-weight: bold;
-  color: #188bd2;
-  word-break: break-word;
-  margin: 10px 0;
-}
+  .modal p {
+    margin: 0 0 10px;
+    font-size: 17px;
+  }
 
-.modal-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  margin-top: 20px;
-}
+  .modal-url {
+    font-size: 15px;
+    font-weight: bold;
+    color: #188bd2;
+    word-break: break-word;
+    margin: 10px 0;
+  }
 
-.proceed-btn {
-  background: #188bd2;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 15px;
-  transition: background-color 0.2s ease-in-out;
-}
+  .modal-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+  }
 
-.proceed-btn:hover {
-  background: #0056b3;
-}
+  .proceed-btn {
+    background: #188bd2;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.2s ease-in-out;
+  }
 
-.close-btn {
-  background: transparent;
-  color: #d3d3d3;
-  padding: 8px 16px;
-  border: 1px solid #d3d3d3;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 15px;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-}
+  .proceed-btn:hover {
+    background: #0056b3;
+  }
 
-.close-btn:hover {
-  background: #d3d3d3;
-  color: var(--ds-color-purple-100);
-}
+  .close-btn {
+    background: transparent;
+    color: #d3d3d3;
+    padding: 8px 16px;
+    border: 1px solid #d3d3d3;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+  }
 
-  
+  .close-btn:hover {
+    background: #d3d3d3;
+    color: var(--ds-color-purple-100);
+  }
+
+
   button {
-    cursor: pointer; 
+    cursor: pointer;
     background: none;
     border: none;
     padding: 0;
   }
 
   .blink {
-  animation: blink-animation 1s infinite; 
+    animation: blink-animation 1s infinite;
   }
+
   .help-message {
-  padding: 12px;
-  font-size: 16px;
-  line-height: 1.5;
-  text-align: left;
+    padding: 12px;
+    font-size: 16px;
+    line-height: 1.5;
+    text-align: left;
 
-  strong {
-  color: #007bff; /* Slightly darker or brighter blue */
-  font-weight: bold;
-}
-}
+    strong {
+      color: #007bff; /* Slightly darker or brighter blue */
+      font-weight: bold;
+    }
+  }
 
 
-@keyframes blink-animation {
-  0% {
-    filter: brightness(1);
+  @keyframes blink-animation {
+    0% {
+      filter: brightness(1);
+    }
+    50% {
+      filter: brightness(2);
+      background-color: #004779; /* Optional to give a red flash */
+    }
+    100% {
+      filter: brightness(1);
+    }
   }
-  50% {
-    filter: brightness(2);
-    background-color: purple; /* Optional to give a red flash */
+
+  .outdated strong {
+    color: red !important;
   }
-  100% {
-    filter: brightness(1);
-  }
-}
 </style>
