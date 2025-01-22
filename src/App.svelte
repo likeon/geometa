@@ -6,6 +6,7 @@
   import { onMouseDown, onMouseMove, onMouseUp, setContainerPosition } from './lib/dragging';
   import { saveContainerDimensions, setContainerDimensions } from './lib/resizing';
   import Carousel from './lib/Carousel.svelte';
+  import { getLatestVersionInfo, markHelpMessageAsRead, wasHelpMessageRead } from './lib/utils';
 
   interface Props {
     panoId: string;
@@ -22,6 +23,8 @@
     images?: string[];
     footer: string;
   };
+
+  let currentVersion = "0.77";
 
   let geoInfo: GeoInfo | null = $state(null);
   let error: string | null = $state(null);
@@ -93,8 +96,28 @@
 
   let showModal = $state(false);
   let currentUrl = $state('');
+  let showHelpPopup = $state(false);
+  let helpClass = $state("question-mark-icon")
+  const latestVersion = getLatestVersionInfo();
 
 
+function shouldBlink() {
+  return !wasHelpMessageRead() || (latestVersion && latestVersion !== currentVersion);
+}
+
+function updateHelpClass() {
+  helpClass = shouldBlink() ? "question-mark-icon blink" : "question-mark-icon";
+}
+
+function togglePopup() {
+  showHelpPopup = !showHelpPopup;
+  if (showHelpPopup) {
+    markHelpMessageAsRead();
+    updateHelpClass();
+  }
+}
+
+updateHelpClass();
 
   $effect(() => {
   if (geoInfo) {
@@ -104,7 +127,12 @@
       link.addEventListener('click', confirmNavigation);
     });
   }
+
+  
+  
+ 
 });
+
 </script>
 
 <div class="geometa-container" bind:this={container}>
@@ -121,6 +149,10 @@
       <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord">
         <span class="skill-icons--discord"></span>
       </a>
+      <button onclick={togglePopup} aria-label="More information" style="background: none; border: none; padding: 0;">
+        <span class={helpClass}></span>
+      </button>
+      
       
     </div>
   </div>
@@ -154,11 +186,31 @@
         <p class="modal-url">{currentUrl}</p>
         <div class="modal-buttons">
           <button onclick={proceed} class="proceed-btn">Continue</button>
-          <button onclick={cancel} class="cancel-btn">Cancel</button>
+          <button onclick={cancel} class="close-btn">Cancel</button>
         </div>
       </div>
     </div>
   {/if}
+ 
+  {#if showHelpPopup}
+  <div class="modal-backdrop">
+    <div class="modal">
+      <div class="help-message">
+        <p>Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p>
+        <ul>
+          <li><strong>Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere on your screen.</li>
+          <li><strong>Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li>
+          <li><strong>View Map metalist:</strong> Click the list icon to see all the metas included in the map you are currently playing.</li>
+          <li><strong>Join the Community:</strong> Click the Discord icon to share feedback, suggest improvements, or just say hi!</li>
+          <li>
+            <strong>Outdated Script:</strong> The question mark icon will blink if the script is outdated.
+          </li>
+        </ul>
+      </div>
+      <button class="close-btn" onclick={togglePopup}>Close</button>
+    </div>
+  </div>
+{/if}
 </div>
 
 <style>
@@ -217,7 +269,7 @@
     display: inline-block;
     width: 1.2rem;
     height: 1.2rem;
-    margin-left: 5px;
+    margin-left: 2px;
     background-repeat: no-repeat;
     background-size: 100% 100%;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E");
@@ -233,10 +285,19 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E");
 }
 
+.question-mark-icon {
+  display: inline-block;
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-left: 2px;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");
+  cursor: pointer; /* Makes it clear that the icon is clickable */
+}
 
-  .skill-icons--discord,
-  .flat-color-icons--globe,
-  .skill-icons--list {
+
+.icons {
     display: inline-block;
     vertical-align: middle;
   }
@@ -305,7 +366,7 @@
   border-radius: 8px;
   text-align: center;
   width: 90%;
-  max-width: 400px;
+  max-width: 600px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   color: #d3d3d3;
 }
@@ -345,7 +406,7 @@
   background: #0056b3;
 }
 
-.cancel-btn {
+.close-btn {
   background: transparent;
   color: #d3d3d3;
   padding: 8px 16px;
@@ -356,10 +417,45 @@
   transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
-.cancel-btn:hover {
+.close-btn:hover {
   background: #d3d3d3;
   color: var(--ds-color-purple-100);
 }
 
+  
+  button {
+    cursor: pointer; 
+    background: none;
+    border: none;
+    padding: 0;
+  }
 
+  .blink {
+  animation: blink-animation 1s infinite; 
+  }
+  .help-message {
+  padding: 12px;
+  font-size: 16px;
+  line-height: 1.5;
+  text-align: left;
+
+  strong {
+  color: #007bff; /* Slightly darker or brighter blue */
+  font-weight: bold;
+}
+}
+
+
+@keyframes blink-animation {
+  0% {
+    filter: brightness(1);
+  }
+  50% {
+    filter: brightness(2);
+    background-color: purple; /* Optional to give a red flash */
+  }
+  100% {
+    filter: brightness(1);
+  }
+}
 </style>
