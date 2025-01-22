@@ -1,10 +1,10 @@
 import { db } from '$lib/drizzle';
-import { and, asc, desc, eq, getTableColumns, sql } from 'drizzle-orm';
-import { mapRegions, maps, regions } from '$lib/db/schema';
+import { asc, desc, eq, sql } from 'drizzle-orm';
+import { maps, regions } from '$lib/db/schema';
 
 const mapCacheKey = 'query:maps:allmaps';
 const regionsKey = 'query:maps:regions';
-const contentCacheEnabled = false;
+const contentCacheEnabled = true;
 
 export const load = async (event) => {
   if (event.platform && contentCacheEnabled) {
