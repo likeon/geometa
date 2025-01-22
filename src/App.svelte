@@ -6,7 +6,7 @@
   import { onMouseDown, onMouseMove, onMouseUp, setContainerPosition } from './lib/dragging';
   import { saveContainerDimensions, setContainerDimensions } from './lib/resizing';
   import Carousel from './lib/Carousel.svelte';
-  import { getLatestVersionInfo, markHelpMessageAsRead, wasHelpMessageRead } from './lib/utils';
+  import { checkIfOutdated, getLatestVersionInfo, markHelpMessageAsRead, wasHelpMessageRead } from './lib/utils';
 
   interface Props {
     panoId: string;
@@ -23,8 +23,6 @@
     images?: string[];
     footer: string;
   };
-
-  let currentVersion = "0.77";
 
   let geoInfo: GeoInfo | null = $state(null);
   let error: string | null = $state(null);
@@ -102,7 +100,7 @@
 
 
 function shouldBlink() {
-  return !wasHelpMessageRead() || (latestVersion && latestVersion !== currentVersion);
+  return !wasHelpMessageRead() || checkIfOutdated();
 }
 
 function updateHelpClass() {

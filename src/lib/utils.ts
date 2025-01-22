@@ -1,4 +1,4 @@
-import { GM_xmlhttpRequest, unsafeWindow } from '$';
+import { GM_xmlhttpRequest, unsafeWindow, GM_info } from '$';
 
 export function waitForElement(selector: string): Promise<Element> {
   return new Promise((resolve) => {
@@ -103,6 +103,10 @@ export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
 
 export function getLatestVersionInfo() {
   return unsafeWindow.localStorage.getItem("geometa:latest-version");
+}
+
+export function checkIfOutdated() {
+  return GM_info.script.version != getLatestVersionInfo();
 }
 
 export function markHelpMessageAsRead() {
