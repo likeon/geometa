@@ -62,11 +62,18 @@ export async function syncUserScriptData(groupId: number) {
       const countryName = getCountryFromTagName(item.tagName);
       const plonkitCountryUrl = generatePlonkitLink(countryName);
 
-      let footer: string = item.metaFooterHtml.trim() || item.mapFooterHtml.trim();
+      let footer: string;
 
-      if (!footer) {
+      if (item.metaNoteFromPlonkit) {
         footer = await generateFooter(countryName, item.metaNoteFromPlonkit);
+      } else {
+        footer = item.metaFooterHtml.trim() || item.mapFooterHtml.trim();
+
+        if (!footer) {
+          footer = await generateFooter(countryName, item.metaNoteFromPlonkit);
+        }
       }
+
       let images: string[];
       if (item.images) {
         images = item.images.split(',').map(getImageUrl);
