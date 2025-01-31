@@ -13,11 +13,11 @@ import {
 } from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
 import { createInsertSchema } from 'drizzle-zod';
-import { superValidate } from 'sveltekit-superforms';
+import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
-import { markdown2Html } from '$lib/utils';
+import { geoguessrGetMapInfo, markdown2Html } from '$lib/utils';
 
 const insertMapsSchema = createInsertSchema(maps)
   .extend({
@@ -80,9 +80,29 @@ export const actions = {
       ...includeFilters.map((filter) => ({ name: filter, isExclude: false })),
       ...excludeFilters.map((filter) => ({ name: filter, isExclude: true }))
     ];
+
     const user = await db.query.users.findFirst({ where: eq(users.id, locals.user!.id) });
     if (!user) {
       error(500);
+    }
+
+    let geoguessrIdChanged: boolean;
+    if (id) {
+      const savedData = await db.query.maps.findFirst({ where: eq(maps.id, id) });
+      geoguessrIdChanged = savedData?.geoguessrId !== dataNoId.geoguessrId;
+    } else {
+      geoguessrIdChanged = true;
+    }
+
+    if (geoguessrIdChanged && !user!.isSuperadmin) {
+      const mapInfo = await geoguessrGetMapInfo(dataNoId.geoguessrId);
+      if (mapInfo && mapInfo.numberOfGamesPlayed > 10000) {
+        return setError(
+          form,
+          'geoguessrId',
+          'This is a popular map which requires additional verification - ask for it in #map-making Discord channel'
+        );
+      }
     }
     if (!user!.isSuperadmin) {
       // @ts-ignore
@@ -143,7 +163,6 @@ export const actions = {
       await db.insert(mapFilters).values(filtersInsertValues).onConflictDoNothing();
     }
 
-    console.debug(regions);
     if (regions.length != 0) {
       await db
         .insert(mapRegions)

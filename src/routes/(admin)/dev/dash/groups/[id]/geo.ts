@@ -1,8 +1,8 @@
-import { env } from '$env/dynamic/private';
 import { error } from '@sveltejs/kit';
 import { db } from '$lib/drizzle';
 import { mapData, mapLocations, maps } from '$lib/db/schema';
 import { and, eq } from 'drizzle-orm';
+import { geoguessrAPIFetch } from '$lib/utils';
 
 export async function geo(
   mapId: number,
@@ -38,19 +38,9 @@ export async function geo(
   });
 
   const apiUrl = `https://www.geoguessr.com/api/v4/user-maps/drafts/${geoguessrId}`;
-  const ncfaToken = env.NFCA_TOKEN || null;
-
-  if (ncfaToken == null) {
-    throw new Error('NFCA_TOKEN IS MISSING');
-  }
-
-  const headers = {
-    Cookie: `_ncfa=${ncfaToken}`,
-    'Content-Type': 'application/json'
-  };
 
   // GET request to fetch the map draft
-  const response = await fetch(`${apiUrl}`, { headers });
+  const response = await geoguessrAPIFetch(apiUrl);
   if (!response.ok) throw new Error('Failed to fetch the map draft');
 
   const data = await response.json();
@@ -64,17 +54,15 @@ export async function geo(
   };
 
   // PUT request to update the map draft
-  const updateResponse = await fetch(`${apiUrl}`, {
+  const updateResponse = await geoguessrAPIFetch(apiUrl, {
     method: 'PUT',
-    headers,
     body: JSON.stringify(mapDataToUpload)
   });
 
   if (!updateResponse.ok) throw error(updateResponse.status, 'Failed to update the map draft');
 
-  const publishResponse = await fetch(`${apiUrl}/publish`, {
+  const publishResponse = await geoguessrAPIFetch(`${apiUrl}/publish`, {
     method: 'PUT',
-    headers,
     body: JSON.stringify({})
   });
 

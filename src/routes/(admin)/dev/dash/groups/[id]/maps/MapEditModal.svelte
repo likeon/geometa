@@ -39,8 +39,10 @@
 
   const { form, errors, constraints, enhance } = superForm(data, {
     dataType: 'json',
-    onResult() {
-      isMapModalOpen = false;
+    onResult({ result }) {
+      if (result.type === 'success') {
+        isMapModalOpen = false;
+      }
     }
   });
 
@@ -133,12 +135,12 @@
     <Label>
       <TooltipName
         name="Geoguessr ID"
-        tooltipText="To find the Map ID, open the GeoGuessr map page and check the URL. 
+        tooltipText="To find the Map ID, open the GeoGuessr map page and check the URL.
   The ID is the long string of letters and numbers after /maps/.
 
-  Example:  
+  Example:
   https://www.geoguessr.com/maps/66fd7c30b34ca9145ec96a6a
-  
+
   → The Map ID is 66fd7c30b34ca9145ec96a6a" />
       <Input
         type="text"
@@ -211,7 +213,7 @@
       <TooltipName
         name="Include Tags"
         tooltipText="Use this to include only specific metas based on their tag name. For example, to include only tags starting with 'Czechia-', enter 'Czechia-%'.
-    
+
     Remember to save after you are done adding/removing filters.
     ">
       </TooltipName>
@@ -224,7 +226,7 @@
       <TooltipName
         name="Exclude Tags"
         tooltipText="Use this to exclude specific metas based on their tag name. For example, to exclude tags starting with 'Czechia-', enter 'Czechia-%'.
-    
+
     Remember to save after you are done adding/removing filters.
     ">
       </TooltipName>
