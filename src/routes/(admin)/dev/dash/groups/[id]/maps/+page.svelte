@@ -29,6 +29,13 @@
       sortable: false,
       searchable: false,
       display: (item: any) => `/dev/dash/groups/${data.group.id}/maps/${item.id}/download`
+    },
+    {
+      key: 'link',
+      label: 'Metas Link',
+      sortable: false,
+      searchable: false,
+      display: (item: any) => `/maps/${item.geoguessrId}`
     }
   ];
 
