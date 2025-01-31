@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.78
+// @version      0.79
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
@@ -2941,6 +2941,7 @@
   delegate(["click"]);
   function changelog() {
     return [
+      { "0.79": "Fixed ALM meta list panel when switching to non-ALM map" },
       { "0.78": "Added info window with version check" },
       { "0.77": "Added custom footer to the note and clicking on link warning" },
       { "0.76": "Redesign note and added meta list link" },
@@ -3059,12 +3060,17 @@
       return;
     }
     const mapInfo = await getMapInfo(mapId, true);
-    if (!(mapInfo == null ? void 0 : mapInfo.mapFound)) {
-      return;
-    }
     const mapAvatarContainer = document.querySelector(".map-block_mapImageContainer__j0z_h");
     if (mapAvatarContainer) {
+      const existingLabel = mapAvatarContainer.querySelector(".map-label");
+      if (existingLabel) {
+        existingLabel.remove();
+      }
+      if (!(mapInfo == null ? void 0 : mapInfo.mapFound)) {
+        return;
+      }
       const element = document.createElement("div");
+      element.classList.add("map-label");
       mapAvatarContainer.appendChild(element);
       mount(MapLabel, {
         target: element

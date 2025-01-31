@@ -14,6 +14,7 @@ import { mount } from 'svelte';
 
 function changelog() {
   return [
+    { '0.79': 'Fixed ALM meta list panel when switching to non-ALM map' },
     { '0.78': 'Added info window with version check' },
     { '0.77': 'Added custom footer to the note and clicking on link warning' },
     { '0.76': 'Redesign note and added meta list link' },
@@ -161,17 +162,26 @@ function initLiveChallengeObserver() {
 
 
 async function addLearnableMetaMapPanel() {
+  
   const mapId = extractMapIdFromUrl(window.location.href);
   if (!mapId) {
     return;
   }
   const mapInfo = await getMapInfo(mapId, true);
-  if (!mapInfo?.mapFound) {
-    return;
-  }
   const mapAvatarContainer = document.querySelector('.map-block_mapImageContainer__j0z_h') as HTMLElement;
   if (mapAvatarContainer) {
+    const existingLabel = mapAvatarContainer.querySelector('.map-label');
+    if (existingLabel) {
+      existingLabel.remove();
+    }
+    if (!mapInfo?.mapFound) {
+    return;
+    }
+    
+
+
     const element = document.createElement('div');
+    element.classList.add('map-label');
     mapAvatarContainer.appendChild(element);
     mount(MapLabel, {
       target: element
