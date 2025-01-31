@@ -19,6 +19,7 @@
   import { Carta, MarkdownEditor } from 'carta-md';
   // Component default theme
   import 'carta-md/default.css';
+  import TooltipName from '$lib/components/TooltipName.svelte';
 
   const cartaMeta = new Carta();
   const cartaFooter = new Carta();
@@ -128,13 +129,16 @@
 </script>
 
 <Modal bind:open={isMetaModalOpen}>
-  <Tabs contentClass="p-4 mt-4" tabStyle="underline">
+  <Tabs contentClass="!pt-0 !mt-0" tabStyle="underline">
     <TabItem open title="Info" on:click={() => fillForm(selectedMeta)}>
-      <form action="?/updateMeta" class="flex flex-col space-y-6" method="post" use:enhanceMeta>
+      <form action="?/updateMeta" class="flex flex-col space-y-2" method="post" use:enhanceMeta>
         <Input type="hidden" name="id" bind:value={$formMeta.id} />
         <Input type="hidden" name="mapGroupId" bind:value={$formMeta.mapGroupId} />
-        <Label class="space-y-2">
-          <span>Tag name</span>
+        <Label>
+          <TooltipName
+            name="Tag"
+            tooltipText="This meta will be displayed for locations that have this specific tag name.">
+          </TooltipName>
           <Input
             type="text"
             name="tagName"
@@ -145,8 +149,16 @@
             <Alert color="red">{$errorsMeta.tagName}</Alert>
           {/if}
         </Label>
-        <Label class="space-y-2">
-          <span>Name</span>
+        <Label>
+          <TooltipName
+            name="Name"
+            tooltipText="This name will be displayed on the top of the note in the format: Country - Name.
+          
+          For example if Tag is 'Czechia-ArrowTypedDirectionSigns' and name is 'Arrow Signs' it will be displayed:
+
+          Czechia - Arrow Signs
+          ">
+          </TooltipName>
           <Input
             type="text"
             name="name"
@@ -157,21 +169,33 @@
             <Alert color="red">{$errorsMeta.name}</Alert>
           {/if}
         </Label>
-        <Label class="space-y-2">
-          <span>Note</span>
+        <Label>
+          <TooltipName
+            name="Note"
+            tooltipText="This note is displayed in the meta info and uses a Markdown-style text editor. 
+          Click 'Preview' to see how it will look.">
+          </TooltipName>
           <MarkdownEditor carta={cartaMeta} mode="tabs" theme="test" bind:value={$formMeta.note} />
           {#if $errorsMeta.note}
             <Alert color="red">{$errorsMeta.note}</Alert>
           {/if}
         </Label>
-        <Label class="space-y-2">
+        <Label>
           <Label>
-            <Checkbox bind:checked={$formMeta.noteFromPlonkit}>Note from plonkit</Checkbox>
+            <Checkbox bind:checked={$formMeta.noteFromPlonkit}
+              ><TooltipName
+                name="Note from plonkit"
+                tooltipText="Check this box to automatically credit PlonkIt if you used descriptions or images from their site."
+                iconColor="red">
+              </TooltipName></Checkbox>
           </Label>
         </Label>
         {#if !$formMeta.noteFromPlonkit}
-          <Label class="space-y-2">
-            <span>Footer</span>
+          <Label>
+            <TooltipName
+              name="Footer"
+              tooltipText="This footer will appear below the meta note. If a footer is set for the map, this meta footer will still take priority and be displayed instead.">
+            </TooltipName>
             <MarkdownEditor
               carta={cartaFooter}
               mode="tabs"
@@ -183,7 +207,10 @@
           </Label>
         {/if}
         <Label>
-          <span>Levels</span>
+          <TooltipName
+            name="Levels"
+            tooltipText="You can assign levels to this meta, allowing you to later filter and include only metas with specific levels when adding a map.">
+          </TooltipName>
           <MultiSelect items={levelChoices} bind:value={$formMeta.levels} size="lg" />
         </Label>
         <Button type="submit" class="w-full">Save</Button>

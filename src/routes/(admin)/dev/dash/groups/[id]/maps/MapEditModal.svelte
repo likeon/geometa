@@ -170,7 +170,7 @@
         name="Footer"
         tooltipText="This footer will appear below the meta note. However, if a footer is already set for the meta itself or if the meta is marked as Plonkit, that footer will take priority and be displayed instead.">
       </TooltipName>
-      <MarkdownEditor {carta} mode="tabs" bind:value={$form.footer} />
+      <MarkdownEditor {carta} mode="tabs" theme="test" bind:value={$form.footer} />
     </Label>
 
     <Label>
