@@ -10,7 +10,7 @@
 </script>
 
 <div
-  class="flex flex-col justify-between rounded-3xl bg-white p-6 shadow-xl ring-1 ring-gray-900/10">
+  class="flex flex-col justify-between rounded-3xl bg-white p-6 shadow-xl ring-1 ring-gray-900/10 break-words">
   <div>
     <div class="flex flex-row pb-2">
       {#if map.isVerified}
