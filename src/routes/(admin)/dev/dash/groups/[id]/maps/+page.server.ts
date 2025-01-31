@@ -94,7 +94,6 @@ export const actions = {
     }
     if (!user!.isSuperadmin && !user!.isTrusted) {
       dataNoId.isPublished = undefined;
-      dataNoId.authors = undefined;
     }
 
     const footerHtml = await markdown2Html(dataNoId.footer || '');

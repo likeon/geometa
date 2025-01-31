@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { Label } from 'flowbite-svelte';
+  import Icon from '@iconify/svelte';
+  import { Badge, Input, Label } from 'flowbite-svelte';
 
   // Dispatch event to update parent filter list
   const addFilter = () => {
@@ -11,49 +12,50 @@
         );
       } else {
         filters = [...filters, trimmedFilter];
-        filterInput = ''; // Clear input after adding
-        dispatch('updateFilters', filters); // Emit event to update parent
+        filterInput = '';
       }
     }
   };
 
   const removeFilter = (filter: string) => {
     filters = filters.filter((f) => f !== filter);
-    dispatch('updateFilters', filters);
   };
 
-  // Event dispatcher to notify parent
-  import { createEventDispatcher } from 'svelte';
   interface Props {
-    filters?: string[];
-    filterInput?: string;
-    title?: string;
-    placeholder?: string;
-    oppositeFilters?: string[];
+    filters: string[];
+    filterInput: string;
+    oppositeFilters: string[];
   }
 
-  let {
-    filters = $bindable([]),
-    filterInput = $bindable(''),
-    title = 'Filters',
-    placeholder = 'Type a filter...',
-    oppositeFilters = []
-  }: Props = $props();
-  const dispatch = createEventDispatcher();
+  let { filters = $bindable(), filterInput = $bindable(), oppositeFilters }: Props = $props();
 </script>
 
 <Label>
-  <span>{title}</span>
-  <input type="text" bind:value={filterInput} {placeholder} />
-  <button type="button" onclick={addFilter}>+</button>
+  <div class="flex items-center space-x-2">
+    <Input
+      type="text"
+      name="filters"
+      bind:value={filterInput}
+      class="w-[300px] text-sm px-2 py-1" />
+    <button
+      type="button"
+      onclick={addFilter}
+      class="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600">
+      +
+    </button>
+  </div>
 
-  <div class="mt-2">
+  <div class="mt-2 flex flex-wrap justify-start gap-2">
     {#each filters as filter}
-      <span class="tag">
+      <Badge class="flex items-center gap-1 p-1">
         {filter}
-        <button type="button" onclick={() => removeFilter(filter)}
-          ><span style="color: red;">X</span></button>
-      </span>
+        <button
+          type="button"
+          class="p-0.5 rounded-full hover:bg-gray-200"
+          onclick={() => removeFilter(filter)}>
+          <Icon icon="material-symbols:delete" class="w-4 h-4" color="red" />
+        </button>
+      </Badge>
     {/each}
   </div>
 </Label>

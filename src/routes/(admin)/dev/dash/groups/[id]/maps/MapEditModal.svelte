@@ -15,6 +15,7 @@
   import Checkbox from 'flowbite-svelte/Checkbox.svelte';
   import FilterManager from './FilterManager.svelte';
   import { Carta, MarkdownEditor } from 'carta-md';
+  import TooltipName from '$lib/components/TooltipName.svelte';
 
   interface Props {
     data: SuperValidated<Infer<InsertMapsSchema>>;
@@ -97,11 +98,14 @@
 </script>
 
 <Modal bind:open={isMapModalOpen}>
-  <form action="?/updateMap" class="flex flex-col space-y-6" method="post" use:enhance>
+  <form action="?/updateMap" class="flex flex-col gap-2" method="post" use:enhance>
     <Input type="hidden" name="id" bind:value={$form.id} />
     <Input type="hidden" name="mapGroupId" bind:value={$form.mapGroupId} />
-    <Label class="space-y-2">
-      <span>Name</span>
+    <Label>
+      <TooltipName
+        name="Name"
+        tooltipText="The name that will appear on the map list page if your map is published by the admin team.">
+      </TooltipName>
       <Input
         type="text"
         name="name"
@@ -113,7 +117,7 @@
       {/if}
     </Label>
     {#if user.isSuperadmin}
-      <Label class="space-y-2">
+      <Label>
         <span>Ordering</span>
         <Input
           type="number"
@@ -126,8 +130,16 @@
         {/if}
       </Label>
     {/if}
-    <Label class="space-y-2">
-      <span>Geoguessr Id</span>
+    <Label>
+      <TooltipName
+        name="Geoguessr ID"
+        tooltipText="To find the Map ID, open the GeoGuessr map page and check the URL. 
+  The ID is the long string of letters and numbers after /maps/.
+
+  Example:  
+  https://www.geoguessr.com/maps/66fd7c30b34ca9145ec96a6a
+  
+  → The Map ID is 66fd7c30b34ca9145ec96a6a" />
       <Input
         type="text"
         name="geoguessrId"
@@ -138,8 +150,11 @@
         <Alert color="red">{$errors.geoguessrId}</Alert>
       {/if}
     </Label>
-    <Label class="space-y-2">
-      <span>Description</span>
+    <Label>
+      <TooltipName
+        name="Description"
+        tooltipText="Description of the map that will appear on the map list page if your map is published by the admin team.">
+      </TooltipName>
       <Textarea
         rows="6"
         name="description"
@@ -150,65 +165,86 @@
         <Alert color="red">{$errors.description}</Alert>
       {/if}
     </Label>
-    <Label class="space-y-2">
-      <span>Footer</span>
-      <MarkdownEditor {carta} mode="tabs" theme="test" bind:value={$form.footer} />
+    <Label>
+      <TooltipName
+        name="Footer"
+        tooltipText="This footer will appear below the meta note. However, if a footer is already set for the meta itself or if the meta is marked as Plonkit, that footer will take priority and be displayed instead.">
+      </TooltipName>
+      <MarkdownEditor {carta} mode="tabs" bind:value={$form.footer} />
     </Label>
 
+    <Label>
+      <TooltipName
+        name="Author(s)"
+        tooltipText="Author(s) of the map that will appear on the map list page if your map is published by the admin team.">
+      </TooltipName>
+      <Input
+        type="text"
+        name="authors"
+        aria-invalid={$errors.authors ? 'true' : undefined}
+        bind:value={$form.authors}
+        {...$constraints.authors} />
+      {#if $errors.authors}
+        <Alert color="red">{$errors.authors}</Alert>
+      {/if}
+    </Label>
     {#if user.isSuperadmin || user.isTrusted}
       <Label>
-        <Checkbox bind:checked={$form.isPublished}>Publish</Checkbox>
-      </Label>
-      <Label class="space-y-2">
-        <span>Author(s)</span>
-        <Input
-          type="text"
-          name="authors"
-          aria-invalid={$errors.authors ? 'true' : undefined}
-          bind:value={$form.authors}
-          {...$constraints.authors} />
-        {#if $errors.authors}
-          <Alert color="red">{$errors.authors}</Alert>
-        {/if}
+        <div class="flex flex-row space-x-2">
+          <Checkbox bind:checked={$form.isPublished}>Publish</Checkbox>
+          {#if user.isSuperadmin}
+            <Checkbox bind:checked={$form.isVerified}>Verified</Checkbox>
+            <Checkbox bind:checked={$form.autoUpdate}>Auto Update</Checkbox>
+          {/if}
+        </div>
       </Label>
     {/if}
-    {#if user.isSuperadmin}
-      <Label>
-        <Checkbox bind:checked={$form.isCommunity}>Community map</Checkbox>
-      </Label>
-      <Label>
-        <Checkbox bind:checked={$form.autoUpdate}>Auto Update</Checkbox>
-      </Label>
-      <Label>
-        <Checkbox bind:checked={$form.isVerified}>Verified</Checkbox>
-      </Label>
-    {/if}
+
     <Label>
-      <span>Levels</span>
+      <TooltipName
+        name="Levels"
+        tooltipText="Use this to include only metas that belong to specific levels you have assigned to them.">
+      </TooltipName>
       <MultiSelect items={levelChoices} bind:value={$form.levels} size="lg" />
     </Label>
-    <!-- Include Filters Section -->
-    <FilterManager
-      bind:filters={$form.includeFilters}
-      bind:filterInput={includeFilterInput}
-      oppositeFilters={$form.excludeFilters}
-      title="Include Filters"
-      placeholder="Type an include filter..." />
-
-    <!-- Exclude Filters Section -->
-    <FilterManager
-      bind:filters={$form.excludeFilters}
-      bind:filterInput={excludeFilterInput}
-      oppositeFilters={$form.includeFilters}
-      title="Exclude Filters"
-      placeholder="Type an exclude filter..." />
-
     <Label>
-      <span>Regions</span>
+      <TooltipName
+        name="Include Tags"
+        tooltipText="Use this to include only specific metas based on their tag name. For example, to include only tags starting with 'Czechia-', enter 'Czechia-%'.
+    
+    Remember to save after you are done adding/removing filters.
+    ">
+      </TooltipName>
+      <FilterManager
+        bind:filters={$form.includeFilters}
+        bind:filterInput={includeFilterInput}
+        oppositeFilters={$form.excludeFilters} />
+    </Label>
+    <Label>
+      <TooltipName
+        name="Exclude Tags"
+        tooltipText="Use this to exclude specific metas based on their tag name. For example, to exclude tags starting with 'Czechia-', enter 'Czechia-%'.
+    
+    Remember to save after you are done adding/removing filters.
+    ">
+      </TooltipName>
+      <FilterManager
+        bind:filters={$form.excludeFilters}
+        bind:filterInput={excludeFilterInput}
+        oppositeFilters={$form.includeFilters} />
+    </Label>
+    <Label>
+      <TooltipName
+        name="Regions"
+        tooltipText="Select the regions where your map will appear if it is published by the admin team.">
+      </TooltipName>
       <MultiSelect items={regionChoices} bind:value={$form.regions} size="lg" />
     </Label>
     <Label>
-      <span>Difficulty</span>
+      <TooltipName
+        name="Difficulty"
+        tooltipText="Select the difficulty level that will be displayed on your map if it is published by the admin team.">
+      </TooltipName>
       <ul
         class="items-center w-full rounded-lg border border-gray-200 sm:flex dark:bg-gray-800 dark:border-gray-600 divide-x rtl:divide-x-reverse divide-gray-200 dark:divide-gray-600">
         <li class="w-full">
@@ -244,12 +280,18 @@
     font-size: 0.9rem;
   }
 
-  :global(.carta-active) {
-    @apply mx-3;
+  :global(.carta-font-code, .carta-renderer) {
+    @apply border-2;
   }
 
-  :global(.carta-container) {
-    @apply border-2;
+  :global(.carta-toolbar-left) {
+    @apply flex gap-2;
+  }
+
+  :global(.carta-active) {
+    font-weight: bold;
+    color: green;
+    border-bottom: 1px solid green;
   }
 
   :global(.markdown-body ul) {
