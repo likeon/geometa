@@ -25,7 +25,7 @@
     },
     {
       key: 'link',
-      label: 'Download Link',
+      label: 'Download JSON',
       sortable: false,
       searchable: false,
       display: (item: any) => `/dev/dash/groups/${data.group.id}/maps/${item.id}/download`

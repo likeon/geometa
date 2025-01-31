@@ -209,7 +209,7 @@
               width="1rem"
               height="1rem"
               style="color: black" />
-            Download map json
+            Download map group JSON
           </div>
         </DropdownItem>
         <DropdownItem onclick={() => (isMetasUploadModalOpen = true)}>
