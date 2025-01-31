@@ -5,3 +5,40 @@
 a {
   @apply text-blue-600 hover:underline;
 }
+
+.carta-font-code {
+  font-family: '...', monospace;
+  font-size: 1.1rem;
+  caret-color: black;
+}
+
+textarea.carta-font-code,
+div.carta-font-code {
+  line-height: 1.2rem;
+  font-size: 0.9rem;
+}
+
+.carta-container {
+  border-width: 2px;
+}
+
+.carta-renderer.markdown-body ul {
+  list-style-type: disc;
+  margin-left: 1.25rem;
+}
+
+.carta-renderer.markdown-body ol {
+  list-style-type: decimal;
+  margin-left: 1.25rem;
+}
+
+.carta-toolbar-left {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.carta-active {
+  font-weight: bold;
+  color: green;
+  border-bottom: 1px solid green;
+}

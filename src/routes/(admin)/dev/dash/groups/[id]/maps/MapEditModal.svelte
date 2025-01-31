@@ -267,38 +267,3 @@
     <Button type="submit" class="w-full">Save</Button>
   </form>
 </Modal>
-
-<style lang="postcss">
-  :global(.carta-font-code) {
-    font-family: '...', monospace;
-    font-size: 1.1rem;
-    caret-color: black;
-  }
-
-  :global(textarea.carta-font-code, div.carta-font-code) {
-    line-height: 1.2rem;
-    font-size: 0.9rem;
-  }
-
-  :global(.carta-font-code, .carta-renderer) {
-    @apply border-2;
-  }
-
-  :global(.carta-toolbar-left) {
-    @apply flex gap-2;
-  }
-
-  :global(.carta-active) {
-    font-weight: bold;
-    color: green;
-    border-bottom: 1px solid green;
-  }
-
-  :global(.markdown-body ul) {
-    @apply list-disc ml-5;
-  }
-
-  :global(.markdown-body ol) {
-    @apply list-decimal ml-5;
-  }
-</style>
