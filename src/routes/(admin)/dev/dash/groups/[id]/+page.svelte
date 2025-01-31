@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Dropdown, DropdownItem, GradientButton, Input } from 'flowbite-svelte';
+  import { Button, Dropdown, DropdownItem, GradientButton, Input, Tooltip } from 'flowbite-svelte';
   import { applyAction, enhance } from '$app/forms';
   import { SvelteToast } from '@zerodevx/svelte-toast';
   import { toast } from '@zerodevx/svelte-toast';
@@ -190,6 +190,10 @@
             Sync UserScript
           {/if}
         </GradientButton>
+        <Tooltip>
+          Update your changes after editing or adding metas/maps to make them visible to users of
+          the LearnableMeta script.
+        </Tooltip>
       </form>
       <button>
         <Icon icon="pepicons-pop:dots-y" width="1rem" height="1rem" style="color: black" />
