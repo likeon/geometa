@@ -1,0 +1,18 @@
+name: Sync maps games played
+
+on:
+  schedule:
+    # every 3 hours
+    - cron: '0 */3 * * *'
+
+jobs:
+  post-request:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Make a POST request
+        run: |
+          curl --fail -X POST \
+            -H "Authorization: Bearer ${{ secrets.CRONJOBS_API_TOKEN }}" \
+            -H "Content-Type: application/json" \
+            https://learnablemeta.com/api/cronjobs/sync-maps-games-played

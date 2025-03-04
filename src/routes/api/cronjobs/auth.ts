@@ -6,7 +6,7 @@ export function checkAuth(request: Request): void {
   // yes, aauth.. because cloudflare doesn't pass authorization header to us for whatever reason
   const authHeader = request.headers.get('aauthorization');
   if (!authHeader) {
-    throw error(403, 'No Authorization header provided.');
+    throw error(401, 'No Authorization header provided.');
   }
 
   const token = authHeader.replace('Bearer ', '').trim();

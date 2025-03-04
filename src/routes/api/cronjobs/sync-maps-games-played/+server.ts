@@ -5,7 +5,7 @@ import { json } from '@sveltejs/kit';
 import { checkAuth } from '$routes/api/cronjobs/auth';
 import { geoguessrGetMapInfo } from '$lib/utils';
 
-export async function GET({ request }) {
+export async function POST({ request }) {
   checkAuth(request);
   const mapIds = await db
     .select({ geoguessrId: maps.geoguessrId })
