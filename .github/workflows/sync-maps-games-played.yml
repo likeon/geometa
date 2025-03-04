@@ -14,7 +14,7 @@ jobs:
       - name: Make a POST request
         run: |
           curl --fail -X POST \
-            -H "Authorization: Bearer $CRONJOBS_API_TOKEN" \
+            -H "AAuthorization: Bearer $CRONJOBS_API_TOKEN" \
             -H "Content-Type: application/json" \
             https://learnablemeta.com/api/cronjobs/sync-maps-games-played
         env:
