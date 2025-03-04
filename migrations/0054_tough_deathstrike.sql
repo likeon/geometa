@@ -1,0 +1,1 @@
+ALTER TABLE `maps` ADD `number_of_games_played` integer;
