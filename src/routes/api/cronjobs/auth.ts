@@ -3,7 +3,8 @@ import { error } from '@sveltejs/kit';
 import { env } from '$env/dynamic/private';
 
 export function checkAuth(request: Request): void {
-  const authHeader = request.headers.get('authorization');
+  // yes, aauth.. because cloudflare doesn't pass authorization header to us for whatever reason
+  const authHeader = request.headers.get('aauthorization');
   if (!authHeader) {
     throw error(403, 'No Authorization header provided.');
   }
