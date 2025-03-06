@@ -2,8 +2,8 @@ name: Sync maps games played
 
 on:
   schedule:
-    # every 3 hours
-    - cron: '0 */3 * * *'
+    # every day
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
