@@ -386,6 +386,13 @@
       "when": 1741096599248,
       "tag": "0054_tough_deathstrike",
       "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "6",
+      "when": 1741342622408,
+      "tag": "0055_closed_blackheart",
+      "breakpoints": true
     }
   ]
 }

@@ -40,7 +40,11 @@ export const load = async (event) => {
       )`.as('meta_count')
     },
     where: eq(maps.isPublished, true),
-    orderBy: [sql`CASE WHEN "maps"."is_verified" THEN 1 ELSE 0 END DESC`, desc(maps.ordering)]
+    orderBy: [
+      sql`"maps"."is_verified" DESC`,
+      desc(maps.ordering),
+      sql`coalesce(maps.number_of_games_played_diminished, 0) + abs(random()) % 21 DESC`
+    ]
   });
 
   if (event.platform && contentCacheEnabled) {

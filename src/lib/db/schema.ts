@@ -70,7 +70,8 @@ export const maps = sqliteTable(
     modifiedAt: integer('modified_at').default(1730419200).notNull(),
     difficulty: integer('difficulty').notNull().default(0),
     isVerified: integer('is_verified', { mode: 'boolean' }).notNull().default(false),
-    numberOfGamesPlayed: integer('number_of_games_played')
+    numberOfGamesPlayed: integer('number_of_games_played'),
+    numberOfGamesPlayedDiminished: integer('number_of_games_played_diminished')
   },
   (t) => ({
     geoguessrIdUnique: uniqueIndex('maps_geoguessr_id_unique').on(t.geoguessrId)
