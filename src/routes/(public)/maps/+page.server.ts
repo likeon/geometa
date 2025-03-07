@@ -43,7 +43,7 @@ export const load = async (event) => {
     orderBy: [
       sql`"maps"."is_verified" DESC`,
       desc(maps.ordering),
-      sql`coalesce(maps.number_of_games_played_diminished, 0) + abs(random()) % 21 DESC`
+      sql`coalesce(maps.number_of_games_played_diminished, 0) + abs(random()) % 41 DESC`
     ]
   });
 
