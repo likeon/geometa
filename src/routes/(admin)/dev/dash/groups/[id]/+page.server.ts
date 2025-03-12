@@ -117,28 +117,33 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     error(403, 'Permission denied');
   }
   const id = getGroupId(params);
-  await ensurePermissions(locals.user?.id, id);
-  const group = await db.query.mapGroups.findFirst({
-    with: {
-      metas: {
-        orderBy: [asc(metas.id)],
-        with: { metaLevels: { with: { level: true } }, images: true },
-        extras: {
-          locationsCount:
-            sql`(select count(*) from location_metas_view lm where lm.meta_id = ${metas.id})`.as(
-              'locations_count'
-            )
-        }
-      }
-    },
-    where: eq(mapGroups.id, id)
-  });
+  await ensurePermissions(locals.user!.id, id);
+  const [group, user] = await Promise.all([
+    db.query.mapGroups.findFirst({
+      with: {
+        metas: {
+          orderBy: [asc(metas.id)],
+          with: { metaLevels: { with: { level: true } }, images: true },
+          extras: {
+            locationsCount: sql`(
+            select count(*)
+            from location_metas_view lm
+            where lm.meta_id = ${metas.id})`.as('locations_count')
+          }
+        },
+        levels: true
+      },
+      where: eq(mapGroups.id, id)
+    }),
+    db.query.users.findFirst({
+      where: eq(users.id, locals.user!.id),
+      with: { permissions: { with: { mapGroup: true } } }
+    })
+  ]);
 
   if (!group) {
     error(404, 'No group');
   }
-  const levelList = await db.query.levels.findMany({ where: eq(levels.mapGroupId, group?.id) });
-  const user = await db.query.users.findFirst({ where: eq(users.id, locals.user!.id) });
 
   const metaForm = await superValidate(zod(insertMetasSchema));
   const mapUploadForm = await superValidate(zod(mapUploadSchema));
@@ -146,24 +151,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   const imageUploadForm = await superValidate(zod(imageUploadSchema));
   const copyForm = await superValidate(zod(copyMetaSchema));
 
-  const userGroups = await db
-    .select({
-      id: mapGroups.id,
-      name: mapGroups.name
-    })
-    .from(mapGroups)
-    .innerJoin(mapGroupPermissions, eq(mapGroupPermissions.mapGroupId, mapGroups.id))
-    .where(eq(mapGroupPermissions.userId, locals.user.id));
-
   return {
     group,
     metaForm,
-    levelList,
     mapUploadForm,
     metasUploadForm,
     imageUploadForm,
     user,
-    userGroups,
     copyForm
   };
 };

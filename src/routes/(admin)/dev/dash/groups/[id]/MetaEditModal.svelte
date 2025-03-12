@@ -31,7 +31,6 @@
     levelChoices,
     groupId,
     imageUploadForm,
-    user,
     mapGroupChoices,
     copyForm
   }: {
@@ -41,7 +40,6 @@
     levelChoices: { value: number; name: string }[];
     groupId: number;
     imageUploadForm: SuperValidated<Infer<ImageUploadSchema>>;
-    user: PageData['user'];
     mapGroupChoices: { value: number; name: string }[];
     copyForm: SuperValidated<Infer<CopyMetaSchema>>;
   } = $props();
@@ -153,7 +151,7 @@
           <TooltipName
             name="Name"
             tooltipText="This name will be displayed on the top of the note in the format: Country - Name.
-          
+
           For example if Tag is 'Czechia-ArrowTypedDirectionSigns' and name is 'Arrow Signs' it will be displayed:
 
           Czechia - Arrow Signs
@@ -172,7 +170,7 @@
         <Label>
           <TooltipName
             name="Note"
-            tooltipText="This note is displayed in the meta info and uses a Markdown-style text editor. 
+            tooltipText="This note is displayed in the meta info and uses a Markdown-style text editor.
           Click 'Preview' to see how it will look.">
           </TooltipName>
           <MarkdownEditor carta={cartaMeta} mode="tabs" theme="test" bind:value={$formMeta.note} />

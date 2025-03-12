@@ -20,7 +20,8 @@ export const mapGroupsRelations = relations(mapGroups, ({ many }) => ({
   metas: many(metas),
   maps: many(maps),
   locations: many(mapGroupLocations),
-  levels: many(levels)
+  levels: many(levels),
+  permissions: many(mapGroupPermissions)
 }));
 
 export const mapGroupLocations = sqliteTable(
@@ -216,12 +217,7 @@ export const locationMetas = sqliteView('location_metas_view', {
   extraTag: text('extra_tag').notNull(),
   extraPanoId: text('extra_pano_id'),
   extraPanoDate: text('extra_pano_date').notNull()
-}).as(sql`
-  SELECT mgl.*,
-         m.*
-  FROM ${mapGroupLocations} mgl
-         JOIN ${metas} m ON m.tag_name = mgl.extra_tag AND m.map_group_id = mgl.map_group_id
-`);
+}).existing();
 
 export const mapLocations = sqliteView('map_locations_view', {
   mapId: integer('map_id').notNull(),
@@ -240,26 +236,7 @@ export const mapLocations = sqliteView('map_locations_view', {
   metaNoteFromPlonkit: integer('meta_note_from_plonkit', { mode: 'boolean' }).notNull(),
   metaId: integer('meta_id').notNull(),
   maxModifiedAt: integer('max_modified_at').notNull()
-}).as(sql`
-  SELECT m.id          AS map_id,
-         lmv.lat,
-         lmv.lng,
-         lmv.heading,
-         lmv.pitch,
-         lmv.zoom,
-         lmv.pano_id,
-         lmv.meta_name,
-         lmv.extra_pano_id,
-         lmv.extra_pano_date,
-         lmv.extra_tag AS tag_name,
-         lmv.meta_note,
-         lmv.meta_note_html,
-         lmv.meta_note_from_plonkit
-  FROM ${locationMetas} lmv
-         JOIN ${metaLevels} ml ON ml.meta_id = lmv.meta_id
-         JOIN ${levels} l ON l.id = ml.level_id
-         JOIN ${maps} m ON m.map_group_id = lmv.map_group_id AND (m.level_id = l.id OR m.level_id IS NULL)
-`);
+}).existing();
 
 export const users = sqliteTable('user', {
   id: text('id').notNull().primaryKey(),
@@ -267,6 +244,9 @@ export const users = sqliteTable('user', {
   isTrusted: integer('is_trusted', { mode: 'boolean' }).notNull().default(false),
   isSuperadmin: integer('is_superadmin', { mode: 'boolean' }).notNull().default(false)
 });
+export const usersRelations = relations(users, ({ many }) => ({
+  permissions: many(mapGroupPermissions)
+}));
 
 export const sessions = sqliteTable('session', {
   id: text('id').primaryKey(),
@@ -294,6 +274,13 @@ export const mapGroupPermissions = sqliteTable(
     )
   })
 );
+export const mapGroupPermissionsRelations = relations(mapGroupPermissions, ({ one }) => ({
+  mapGroup: one(mapGroups, {
+    fields: [mapGroupPermissions.mapGroupId],
+    references: [mapGroups.id]
+  }),
+  user: one(users, { fields: [mapGroupPermissions.userId], references: [users.id] })
+}));
 
 export const mapData = sqliteTable(
   'map_data',

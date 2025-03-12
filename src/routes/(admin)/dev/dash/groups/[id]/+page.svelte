@@ -13,16 +13,16 @@
 
   let { data } = $props();
 
-  const levelChoices = data.levelList.map((item) => ({
+  const levelChoices = data.group.levels.map((item) => ({
     value: item.id,
     name: item.name
   }));
 
-  const groupChoices = data.userGroups
-    .filter((group) => group.id !== data.group.id)
-    .map((group) => ({
-      value: group.id,
-      name: group.name
+  const groupChoices = data
+    .user!.permissions.filter((permission) => permission.mapGroup.id !== data.group.id)
+    .map((permission) => ({
+      value: permission.mapGroup.id,
+      name: permission.mapGroup.name
     }));
 
   let columns = [
@@ -275,8 +275,7 @@
   mapGroupChoices={groupChoices}
   groupId={data.group.id}
   {selectedMeta}
-  imageUploadForm={data.imageUploadForm}
-  user={data.user} />
+  imageUploadForm={data.imageUploadForm} />
 
 <MapUploadModal
   bind:isUploadModalOpen={isMapUploadModalOpen}
