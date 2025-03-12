@@ -12,6 +12,7 @@
   import LoadingSmall from '$lib/components/LoadingSmall.svelte';
 
   let { data } = $props();
+  type Meta = (typeof data.group.metas)[number];
 
   const levelChoices = data.group.levels.map((item) => ({
     value: item.id,
@@ -54,7 +55,7 @@
       filterable: true,
       type: 'select',
       options: ['Any note', 'Has note', 'Missing note'],
-      filterLogic: (filter: string, item: any) =>
+      filterLogic: (filter: string, item: Meta) =>
         filter == 'Any note' || (filter === 'Has note' ? !!item.note : !item.note)
     },
     {
@@ -65,7 +66,7 @@
       filterable: true,
       type: 'select',
       options: ['Any image', 'Has image', 'Missing image'],
-      filterLogic: (filter: string, item: any) => {
+      filterLogic: (filter: string, item: Meta) => {
         return (
           filter == 'Any image' ||
           (filter == 'Has image' && item.images.length > 0) ||
@@ -76,8 +77,8 @@
     {
       key: 'metaLevels',
       label: 'Level',
-      display: (item: any) =>
-        item.map((metaLevel: { level: { name: any } }) => metaLevel.level.name).join(', '),
+      display: (item: (typeof data.group.metas)[number]['metaLevels']) =>
+        item.map((metaLevel) => metaLevel.level.name).join(', '),
       searchable: false,
       filterable: true,
       type: 'select',
@@ -86,12 +87,10 @@
         'Missing Level',
         ...levelChoices.map((levelChoice) => levelChoice.name)
       ], // Add "All Levels" option
-      filterLogic: (filter: string, item: any) =>
+      filterLogic: (filter: string, item: Meta) =>
         filter == 'All Levels' ||
         (filter == 'Missing Level' && item.metaLevels.length == 0) ||
-        item.metaLevels.some(
-          (metaLevel: { level: { name: string } }) => metaLevel.level.name === filter
-        )
+        item.metaLevels.some((metaLevel) => metaLevel.level.name === filter)
     }
   ];
 
