@@ -49,7 +49,7 @@
     {
       key: 'note',
       label: 'Note',
-      display: (item: String) => item != '',
+      display: (item: string) => item != '',
       searchable: false,
       filterable: true,
       type: 'select',
@@ -124,13 +124,6 @@
     isMapUploadModalOpen = true;
   }
 
-  function submitPopulateNotesHtmlForm() {
-    if (populateNotesHtmlForm) {
-      populateNotesHtmlForm.submit();
-    }
-  }
-
-  let populateNotesHtmlForm: HTMLFormElement;
   let syncingUserScript = $state(false);
 </script>
 
@@ -199,7 +192,6 @@
         <Icon icon="pepicons-pop:dots-y" width="1rem" height="1rem" style="color: black" />
       </button>
       <Dropdown>
-        <DropdownItem onclick={submitPopulateNotesHtmlForm}>Populate notes html</DropdownItem>
         <DropdownItem
           onclick={() => (window.location.href = `/dev/dash/groups/${data.group.id}/download`)}>
           <div class="flex">
@@ -237,18 +229,6 @@
           </div>
         </DropdownItem>
       </Dropdown>
-      <form
-        bind:this={populateNotesHtmlForm}
-        method="post"
-        action="?/populateNotesHtml"
-        use:enhance={() => {
-          return async ({ result }) => {
-            await applyAction(result);
-            toast.push('Updated');
-          };
-        }}>
-        <input type="hidden" name="groupId" value={data.group.id} />
-      </form>
     </div>
   </div>
   <SortFilterTable
