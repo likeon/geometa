@@ -1,10 +1,11 @@
 import { error } from '@sveltejs/kit';
-import { db } from '$lib/drizzle';
 import { mapData, mapLocations, maps } from '$lib/db/schema';
 import { and, eq } from 'drizzle-orm';
 import { geoguessrAPIFetch } from '$lib/utils';
+import type { DB } from '$lib/drizzle';
 
 export async function geo(
+  db: DB,
   mapId: number,
   geoguessrId: string,
   locations: {
@@ -82,7 +83,7 @@ export async function geo(
     });
 }
 
-export async function autoUpdateMaps(mapGroupId: number) {
+export async function autoUpdateMaps(db: DB, mapGroupId: number) {
   const mapsToUpdateData = await db
     .select({
       mapId: maps.id,
@@ -109,14 +110,14 @@ export async function autoUpdateMaps(mapGroupId: number) {
 
     // if there is not map data save update map since it was never updated
     if (map.lastUpdatedPanoids == null) {
-      await geo(map.mapId, map.geoguessrId, currentLocations);
+      await geo(db, map.mapId, map.geoguessrId, currentLocations);
       updateCount++;
       continue;
     }
 
     // if location count is different map for sure has to be updated
     if (currentLocations.length != map.lastUpdatedPanoids.length) {
-      await geo(map.mapId, map.geoguessrId, currentLocations);
+      await geo(db, map.mapId, map.geoguessrId, currentLocations);
       updateCount++;
       continue;
     }
@@ -124,7 +125,7 @@ export async function autoUpdateMaps(mapGroupId: number) {
     const lastUpdatedPanoidsSet = new Set(map.lastUpdatedPanoids);
     for (const loc of currentLocations) {
       if (!lastUpdatedPanoidsSet.has(loc.panoId!)) {
-        await geo(map.mapId, map.geoguessrId, currentLocations);
+        await geo(db, map.mapId, map.geoguessrId, currentLocations);
         updateCount++;
         break;
       }

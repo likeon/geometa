@@ -1,4 +1,4 @@
-import { db } from '$lib/drizzle';
+import { type DB } from '$lib/drizzle';
 import { mapGroups, mapLocations, maps, metas } from '$lib/db/schema';
 import { and, asc, eq, gt, sql } from 'drizzle-orm';
 import {
@@ -9,7 +9,7 @@ import {
   markdown2Html
 } from '$lib/utils';
 
-export async function syncUserScriptData(groupId: number) {
+export async function syncUserScriptData(db: DB, groupId: number) {
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const group = await db.query.mapGroups.findFirst({ where: eq(mapGroups.id, groupId) });
   if (!group) {
@@ -37,13 +37,9 @@ export async function syncUserScriptData(groupId: number) {
         metaNoteFromPlonkit: metas.noteFromPlonkit,
         images: sql<string | null>`
       (
-        SELECT GROUP_CONCAT(sorted.image_url)
-        FROM (
-          SELECT mi.image_url
-          FROM meta_images mi
-          WHERE mi.meta_id = ${mapLocations.metaId}
-          ORDER BY mi.id
-        ) AS sorted
+        SELECT STRING_AGG(mi.image_url, ',' ORDER BY mi.id)
+        FROM meta_images mi
+        WHERE mi.meta_id = ${mapLocations.metaId}
       )
       `
       })

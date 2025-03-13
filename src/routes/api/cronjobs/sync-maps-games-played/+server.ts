@@ -1,13 +1,12 @@
-import { db } from '$lib/drizzle';
 import { maps } from '$lib/db/schema';
 import { eq, SQL, sql } from 'drizzle-orm';
 import { json } from '@sveltejs/kit';
 import { checkAuth } from '$routes/api/cronjobs/auth';
 import { geoguessrGetMapInfo } from '$lib/utils';
 
-export async function POST({ request }) {
+export async function POST({ request, locals }) {
   checkAuth(request);
-  const mapIds = await db
+  const mapIds = await locals.db
     .select({ geoguessrId: maps.geoguessrId })
     .from(maps)
     .where(eq(maps.isPublished, true));
@@ -42,7 +41,7 @@ export async function POST({ request }) {
   sqlChunks.push(sql`END WHERE geoguessr_id IN ${mapsUsageData.map((item) => item.geoguessrId)}`);
 
   const finalSql: SQL = sql.join(sqlChunks, sql.raw(' '));
-  await db.run(finalSql);
+  await locals.db.execute(finalSql);
 
   return json(['success']);
 }

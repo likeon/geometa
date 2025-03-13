@@ -1,7 +1,6 @@
 import { OAuth2RequestError } from 'arctic';
-import { db } from '$lib/drizzle';
 import type { RequestEvent } from '@sveltejs/kit';
-import { discord, lucia } from '$lib/auth';
+import { discord } from '$lib/auth';
 import { eq } from 'drizzle-orm';
 import { mapGroupPermissions, mapGroups, users } from '$lib/db/schema';
 
@@ -14,6 +13,7 @@ export async function GET(event: RequestEvent) {
   const code = event.url.searchParams.get('code');
   const state = event.url.searchParams.get('state');
   const storedState = event.cookies.get('discord_oauth_state') ?? null;
+  const db = event.locals.db;
 
   if (!code || !state || !storedState || state !== storedState) {
     return new Response(null, { status: 400 });
@@ -49,8 +49,8 @@ export async function GET(event: RequestEvent) {
         .insert(mapGroupPermissions)
         .values({ mapGroupId: mapGroup[0].id, userId: discordUser.id });
     }
-    const session = await lucia.createSession(discordUser.id, {});
-    const sessionCookie = lucia.createSessionCookie(session.id);
+    const session = await event.locals.lucia.createSession(discordUser.id, {});
+    const sessionCookie = event.locals.lucia.createSessionCookie(session.id);
     event.cookies.set(sessionCookie.name, sessionCookie.value, {
       path: '.',
       ...sessionCookie.attributes

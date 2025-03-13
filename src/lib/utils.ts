@@ -1,5 +1,5 @@
 import { CLOUDFLARE_BEARER, CLOUDFLARE_KV_NAMESPACE_ID } from '$env/static/private';
-import { db } from '$lib/drizzle';
+import { type DB } from '$lib/drizzle';
 import { and, eq } from 'drizzle-orm';
 import { mapGroupPermissions, users } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
@@ -106,7 +106,11 @@ export async function cloudflareKvBulkPut(data: any[]) {
   }
 }
 
-export async function ensurePermissions(userId: string | undefined, groupId: number | undefined) {
+export async function ensurePermissions(
+  db: DB,
+  userId: string | undefined,
+  groupId: number | undefined
+) {
   if (!userId || !groupId) {
     error(403, 'Permission denied');
   }
@@ -157,7 +161,7 @@ export async function markdown2Html(markdown: string) {
   return String(vfile);
 }
 
-export function checkIfValidCountry(countryName: string): Boolean {
+export function checkIfValidCountry(countryName: string): boolean {
   return countryNames.some(
     (country) => country.toLocaleLowerCase().trim() == countryName.toLocaleLowerCase()
   );

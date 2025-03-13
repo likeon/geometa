@@ -1,4 +1,3 @@
-import { db } from '$lib/drizzle';
 import { mapGroupLocations, mapGroupPermissions, mapGroups, users } from '$lib/db/schema';
 import { desc, eq, sql } from 'drizzle-orm';
 import { error, fail, redirect } from '@sveltejs/kit';
@@ -6,7 +5,6 @@ import { createInsertSchema } from 'drizzle-zod';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { ensurePermissions } from '$lib/utils';
-import { number } from 'zod';
 
 export const prerender = false;
 const insertMapGroupSchema = createInsertSchema(mapGroups).pick({ name: true });
@@ -17,7 +15,7 @@ export const load = async ({ locals }) => {
     error(403, 'Permission denied');
   }
 
-  const userGroups = await db
+  const userGroups = await locals.db
     .select({
       id: mapGroups.id,
       name: mapGroups.name,
@@ -29,10 +27,10 @@ export const load = async ({ locals }) => {
     .where(eq(mapGroupPermissions.userId, locals.user.id))
     .groupBy(mapGroups.id);
 
-  const user = await db.query.users.findFirst({ where: eq(users.id, locals.user.id) });
+  const user = await locals.db.query.users.findFirst({ where: eq(users.id, locals.user.id) });
   let allGroups;
   if (user?.isSuperadmin) {
-    allGroups = await db
+    allGroups = await locals.db
       .select({
         id: mapGroups.id,
         name: mapGroups.name,
@@ -65,11 +63,11 @@ export const actions = {
       return fail(400, { form });
     }
 
-    const insertedData = await db
+    const insertedData = await locals.db
       .insert(mapGroups)
       .values(form.data)
       .returning({ insertedId: mapGroups.id });
-    await db
+    await locals.db
       .insert(mapGroupPermissions)
       .values({ mapGroupId: insertedData[0].insertedId, userId: locals.user!.id });
     throw redirect(303, `/dev/dash/groups/${insertedData[0].insertedId}`);
@@ -81,7 +79,10 @@ export const actions = {
       return fail(400, { form });
     }
 
-    await ensurePermissions(locals.user!.id, form.data.id);
-    await db.update(mapGroups).set({ name: form.data.name }).where(eq(mapGroups.id, form.data.id!));
+    await ensurePermissions(locals.db, locals.user!.id, form.data.id);
+    await locals.db
+      .update(mapGroups)
+      .set({ name: form.data.name })
+      .where(eq(mapGroups.id, form.data.id!));
   }
 };

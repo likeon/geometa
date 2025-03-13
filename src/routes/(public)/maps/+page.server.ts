@@ -1,4 +1,3 @@
-import { db } from '$lib/drizzle';
 import { asc, desc, eq, sql } from 'drizzle-orm';
 import { maps, regions } from '$lib/db/schema';
 
@@ -19,8 +18,8 @@ export const load = async (event) => {
       };
     }
   }
-  const regionsList = await db.select().from(regions).orderBy(asc(regions.ordering));
-  const allMaps = await db.query.maps.findMany({
+  const regionsList = await event.locals.db.select().from(regions).orderBy(asc(regions.ordering));
+  const allMaps = await event.locals.db.query.maps.findMany({
     extras: {
       locationsCount: sql<number>`(
         SELECT COUNT(*)

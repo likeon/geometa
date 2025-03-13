@@ -1,4 +1,3 @@
-import { db } from '$lib/drizzle';
 import type { PageServerLoad } from './$types';
 import { asc, eq } from 'drizzle-orm';
 import { levels, mapGroups } from '$lib/db/schema';
@@ -11,10 +10,10 @@ import { zod } from 'sveltekit-superforms/adapters';
 const insertLevelsSchema = createInsertSchema(levels);
 export type InsertLevelsSchema = typeof insertLevelsSchema;
 
-export const load: PageServerLoad = async ({ params }) => {
+export const load: PageServerLoad = async ({ params, locals }) => {
   const id = getGroupId(params);
 
-  const group = await db.query.mapGroups.findFirst({
+  const group = await locals.db.query.mapGroups.findFirst({
     with: {
       levels: {
         orderBy: [asc(levels.name)]
@@ -35,7 +34,7 @@ export const load: PageServerLoad = async ({ params }) => {
 };
 
 export const actions = {
-  updateLevel: async ({ request }) => {
+  updateLevel: async ({ request, locals }) => {
     const form = await superValidate(request, zod(insertLevelsSchema));
     if (!form.valid) {
       return fail(400, { form });
@@ -44,9 +43,9 @@ export const actions = {
     const { id, ...dataNoId } = form.data;
 
     if (id == undefined) {
-      await db.insert(levels).values(dataNoId).onConflictDoNothing();
+      await locals.db.insert(levels).values(dataNoId).onConflictDoNothing();
     } else {
-      await db.update(levels).set(dataNoId).where(eq(levels.id, id));
+      await locals.db.update(levels).set(dataNoId).where(eq(levels.id, id));
     }
   }
 };

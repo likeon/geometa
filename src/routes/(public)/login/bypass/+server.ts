@@ -1,5 +1,4 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import { lucia } from '$lib/auth';
 import { ALLOW_LOGIN_BYPASS } from '$env/static/private';
 
 export async function GET(event: RequestEvent) {
@@ -7,8 +6,8 @@ export async function GET(event: RequestEvent) {
   if (!userId || ALLOW_LOGIN_BYPASS !== 'true') {
     return new Response(null, { status: 400 });
   }
-  const session = await lucia.createSession(userId, {});
-  const sessionCookie = lucia.createSessionCookie(session.id);
+  const session = await event.locals.lucia.createSession(userId, {});
+  const sessionCookie = event.locals.lucia.createSessionCookie(session.id);
   event.cookies.set(sessionCookie.name, sessionCookie.value, {
     path: '.',
     ...sessionCookie.attributes

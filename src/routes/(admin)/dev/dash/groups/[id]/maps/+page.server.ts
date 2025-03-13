@@ -1,4 +1,3 @@
-import { db } from '$lib/drizzle';
 import { getGroupId } from '../utils';
 import { and, asc, eq, not, sql } from 'drizzle-orm';
 import {
@@ -33,7 +32,7 @@ export type InsertMapsSchema = typeof insertMapsSchema;
 
 export const load = async ({ locals, params }) => {
   const groupId = getGroupId(params);
-
+  const db = locals.db;
   const group = await db.query.mapGroups.findFirst({
     with: {
       maps: {
@@ -81,6 +80,7 @@ export const actions = {
       ...excludeFilters.map((filter) => ({ name: filter, isExclude: true }))
     ];
 
+    const db = locals.db;
     const user = await db.query.users.findFirst({ where: eq(users.id, locals.user!.id) });
     if (!user) {
       error(500);

@@ -1,4 +1,4 @@
-import { db } from '$lib/drizzle';
+import { type DB } from '$lib/drizzle';
 import { levels, metaImages, metaLevels, metas } from '$lib/db/schema';
 import { and, eq, sql } from 'drizzle-orm';
 import { markdown2Html } from '$lib/utils';
@@ -6,6 +6,7 @@ import { inArray, notInArray } from 'drizzle-orm/sql/expressions/conditions';
 import type { MetasUploadContentSchemaSafeParse } from '$routes/(admin)/dev/dash/groups/[id]/+page.server';
 
 export async function uploadMetas(
+  db: DB,
   groupId: number,
   validationResult: MetasUploadContentSchemaSafeParse,
   partialUpload: boolean

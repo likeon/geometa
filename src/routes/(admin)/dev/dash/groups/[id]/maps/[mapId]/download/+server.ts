@@ -1,4 +1,3 @@
-import { db } from '$lib/drizzle';
 import { and, eq } from 'drizzle-orm';
 import { maps, mapLocations } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
@@ -23,6 +22,7 @@ export async function GET(event) {
   const params = event.params;
   const rawGroupId = params.id;
   const rawMapId = params.mapId;
+  const db = event.locals.db;
 
   if (!rawGroupId || !rawMapId) {
     error(404, 'Invalid url');

@@ -1,4 +1,3 @@
-import { db } from '$lib/drizzle';
 import { eq } from 'drizzle-orm';
 import { mapGroupLocations, mapGroups } from '$lib/db/schema';
 import { ensurePermissions } from '$lib/utils';
@@ -6,11 +5,13 @@ import { getGroupId } from '../utils';
 
 export async function GET(event) {
   const groupId = getGroupId(event.params);
-  await ensurePermissions(event.locals.user?.id, groupId);
+  await ensurePermissions(event.locals.db, event.locals.user?.id, groupId);
 
-  const group = await db.query.mapGroups.findFirst({ where: eq(mapGroups.id, groupId) });
+  const group = await event.locals.db.query.mapGroups.findFirst({
+    where: eq(mapGroups.id, groupId)
+  });
 
-  const locations = await db
+  const locations = await event.locals.db
     .select()
     .from(mapGroupLocations)
     .where(eq(mapGroupLocations.mapGroupId, groupId));

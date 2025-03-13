@@ -1,7 +1,13 @@
 import { type Handle, redirect } from '@sveltejs/kit';
-import { lucia } from '$lib/auth';
+import { initializeLucia } from '$lib/auth';
+import { getDb } from '$lib/drizzle';
 
 export const handle: Handle = async ({ event, resolve }) => {
+  const db = getDb(event.platform!.env);
+  const lucia = initializeLucia(db);
+  event.locals.db = db;
+  event.locals.lucia = lucia;
+
   const isAdminUrl = event.url.pathname.startsWith('/dev/dash');
   let redirectToLogin = isAdminUrl;
 

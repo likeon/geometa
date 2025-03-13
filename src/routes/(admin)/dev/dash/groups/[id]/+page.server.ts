@@ -1,16 +1,6 @@
-import { db } from '$lib/drizzle';
 import type { PageServerLoad } from './$types';
 import { and, asc, eq, isNull, lt, not, or, sql, TransactionRollbackError } from 'drizzle-orm';
-import {
-  levels,
-  mapGroupLocations,
-  mapGroupPermissions,
-  mapGroups,
-  metaImages,
-  metaLevels,
-  metas,
-  users
-} from '$lib/db/schema';
+import { mapGroupLocations, mapGroups, metaImages, metaLevels, metas, users } from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
 import { createInsertSchema } from 'drizzle-zod';
 import { message, setError, superValidate, withFiles } from 'sveltekit-superforms';
@@ -117,9 +107,9 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     error(403, 'Permission denied');
   }
   const id = getGroupId(params);
-  await ensurePermissions(locals.user!.id, id);
+  await ensurePermissions(locals.db, locals.user!.id, id);
   const [group, user] = await Promise.all([
-    db.query.mapGroups.findFirst({
+    locals.db.query.mapGroups.findFirst({
       with: {
         metas: {
           orderBy: [asc(metas.id)],
@@ -135,7 +125,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       },
       where: eq(mapGroups.id, id)
     }),
-    db.query.users.findFirst({
+    locals.db.query.users.findFirst({
       where: eq(users.id, locals.user!.id),
       with: { permissions: { with: { mapGroup: true } } }
     })
@@ -169,7 +159,7 @@ export const actions = {
     if (!form.valid) {
       return fail(400, { form });
     }
-    await ensurePermissions(locals.user?.id, form.data.mapGroupId);
+    await ensurePermissions(locals.db, locals.user?.id, form.data.mapGroupId);
 
     const { id, levels, ...dataNoId } = form.data;
     const noteHtml = String(
@@ -194,27 +184,27 @@ export const actions = {
     let metaId;
 
     if (id === undefined) {
-      const insertResult = await db
+      const insertResult = await locals.db
         .insert(metas)
         .values({ ...form.data, noteHtml, footerHtml: footerHtml, modifiedAt: currentTimestamp })
         .returning({ insertedId: metas.id });
       metaId = insertResult[0].insertedId;
     } else {
-      const savedData = await db.query.metas.findFirst({ where: eq(metas.id, id) });
-      await ensurePermissions(locals.user?.id, savedData?.mapGroupId);
-      await db
+      const savedData = await locals.db.query.metas.findFirst({ where: eq(metas.id, id) });
+      await ensurePermissions(locals.db, locals.user?.id, savedData?.mapGroupId);
+      await locals.db
         .update(metas)
         .set({ ...dataNoId, noteHtml, footerHtml, modifiedAt: currentTimestamp })
         .where(eq(metas.id, id));
       metaId = id;
     }
 
-    await db
+    await locals.db
       .delete(metaLevels)
       .where(and(eq(metaLevels.metaId, metaId), not(inArray(metaLevels.levelId, levels))));
     const levelsInsertValues = levels.map((levelId) => ({ levelId: levelId, metaId: metaId }));
     if (levelsInsertValues.length != 0) {
-      await db.insert(metaLevels).values(levelsInsertValues).onConflictDoNothing();
+      await locals.db.insert(metaLevels).values(levelsInsertValues).onConflictDoNothing();
     }
   },
   deleteMeta: async ({ request, locals }) => {
@@ -225,10 +215,10 @@ export const actions = {
       error(400, 'Invalid ID');
     }
 
-    const meta = await db.query.metas.findFirst({ where: eq(metas.id, metaId) });
-    await ensurePermissions(locals.user?.id, meta?.mapGroupId);
+    const meta = await locals.db.query.metas.findFirst({ where: eq(metas.id, metaId) });
+    await ensurePermissions(locals.db, locals.user?.id, meta?.mapGroupId);
 
-    await db.delete(metas).where(eq(metas.id, metaId));
+    await locals.db.delete(metas).where(eq(metas.id, metaId));
   },
   copyMetaTo: async ({ request, locals }) => {
     const form = await superValidate(request, zod(copyMetaSchema));
@@ -236,15 +226,15 @@ export const actions = {
       return fail(400, { form });
     }
     const { metaId, mapGroupIdToCopy } = form.data;
-    const meta = await db.query.metas.findFirst({ where: eq(metas.id, metaId) });
+    const meta = await locals.db.query.metas.findFirst({ where: eq(metas.id, metaId) });
     if (!meta) {
       error(400, 'No meta found for this id');
     }
-    await ensurePermissions(locals.user!.id, meta.mapGroupId);
-    await ensurePermissions(locals.user!.id, mapGroupIdToCopy);
+    await ensurePermissions(locals.db, locals.user!.id, meta.mapGroupId);
+    await ensurePermissions(locals.db, locals.user!.id, mapGroupIdToCopy);
     const { id, mapGroupId, ...cleanedMeta } = meta;
     void id;
-    const insertResult = await db
+    const insertResult = await locals.db
       .insert(metas)
       .values({
         ...cleanedMeta,
@@ -257,7 +247,7 @@ export const actions = {
       return;
     }
     // copy images
-    const sourceImages = await db
+    const sourceImages = await locals.db
       .select({
         image_url: metaImages.image_url
       })
@@ -269,10 +259,10 @@ export const actions = {
       metaId: insertResult[0].insertedId
     }));
     if (sourceImagesInsert.length != 0) {
-      await db.insert(metaImages).values(sourceImagesInsert).onConflictDoNothing();
+      await locals.db.insert(metaImages).values(sourceImagesInsert).onConflictDoNothing();
     }
 
-    const sourceLocations = await db
+    const sourceLocations = await locals.db
       .select({
         lat: mapGroupLocations.lat,
         lng: mapGroupLocations.lng,
@@ -299,12 +289,12 @@ export const actions = {
       modifiedAt: currentTimestamp
     }));
     if (insertLocations.length != 0) {
-      await db.insert(mapGroupLocations).values(insertLocations).onConflictDoNothing();
+      await locals.db.insert(mapGroupLocations).values(insertLocations).onConflictDoNothing();
     }
   },
   uploadMapJson: async ({ request, params, locals }) => {
     const groupId = getGroupId(params);
-    await ensurePermissions(locals.user?.id, groupId);
+    await ensurePermissions(locals.db, locals.user?.id, groupId);
     const form = await superValidate(request, zod(mapUploadSchema));
 
     if (!form.valid) {
@@ -361,7 +351,7 @@ export const actions = {
 
     // upsert data
     const BATCH_SIZE = 1000;
-    await db.transaction(async (trx) => {
+    await locals.db.transaction(async (trx) => {
       // Step 1: Batched upsert operation
       for (let i = 0; i < upsertValues.length; i += BATCH_SIZE) {
         const batch = upsertValues.slice(i, i + BATCH_SIZE);
@@ -431,7 +421,7 @@ export const actions = {
   },
   uploadMetas: async ({ request, params, locals }) => {
     const groupId = getGroupId(params);
-    await ensurePermissions(locals.user!.id, groupId);
+    await ensurePermissions(locals.db, locals.user!.id, groupId);
     const form = await superValidate(request, zod(metasUploadSchema));
 
     if (!form.valid) {
@@ -445,7 +435,7 @@ export const actions = {
     }
 
     try {
-      await uploadMetas(groupId, validationResult, form.data.partialUpload);
+      await uploadMetas(locals.db, groupId, validationResult, form.data.partialUpload);
     } catch (error) {
       if (error instanceof TransactionRollbackError) {
         return setError(form, 'file', 'Level not found - precreate all used levels');
@@ -460,19 +450,19 @@ export const actions = {
     if (!form.valid) {
       return fail(400, withFiles({ form }));
     }
-    const meta = await db.query.metas.findFirst({ where: eq(metas.id, form.data.metaId) });
-    await ensurePermissions(locals.user?.id, meta?.mapGroupId);
+    const meta = await locals.db.query.metas.findFirst({ where: eq(metas.id, form.data.metaId) });
+    await ensurePermissions(locals.db, locals.user?.id, meta?.mapGroupId);
 
     const imageName = `${meta!.mapGroupId}/${generateRandomString(36)}.${getFileExtension(form.data.file)}`;
     await uploadFile(form.data.file, imageName);
 
     const url = `https://static${dev ? '-dev' : ''}.learnablemeta.com/${imageName}`;
 
-    const result = await db
+    const result = await locals.db
       .insert(metaImages)
       .values({ metaId: form.data.metaId, image_url: url })
       .returning({ id: metaImages.id, metaId: metaImages.metaId, image_url: metaImages.image_url });
-    await db
+    await locals.db
       .update(metas)
       .set({ modifiedAt: Math.floor(Date.now() / 1000) })
       .where(eq(metas.id, form.data.metaId));
@@ -484,15 +474,15 @@ export const actions = {
     if (isNaN(imageId)) {
       error(400, 'Invalid ID');
     }
-    const savedImage = await db
+    const savedImage = await locals.db
       .select()
       .from(metaImages)
       .innerJoin(metas, eq(metas.id, metaImages.metaId))
       .where(eq(metaImages.id, imageId));
-    await ensurePermissions(locals.user?.id, savedImage[0]?.metas.mapGroupId);
+    await ensurePermissions(locals.db, locals.user?.id, savedImage[0]?.metas.mapGroupId);
 
-    await db.delete(metaImages).where(eq(metaImages.id, imageId));
-    await db
+    await locals.db.delete(metaImages).where(eq(metaImages.id, imageId));
+    await locals.db
       .update(metas)
       .set({ modifiedAt: Math.floor(Date.now() / 1000) })
       .where(eq(metas.id, savedImage[0].metas.id));
@@ -500,13 +490,13 @@ export const actions = {
   },
   prepareUserScriptData: async (event) => {
     const groupId = getGroupId(event.params);
-    await ensurePermissions(event.locals.user?.id, groupId);
+    await ensurePermissions(event.locals.db, event.locals.user?.id, groupId);
     try {
-      await syncUserScriptData(groupId);
+      await syncUserScriptData(event.locals.db, groupId);
       const TRAUSI_GROUP_ID = 1;
       let updateCount = 0;
       if (groupId == TRAUSI_GROUP_ID) {
-        updateCount = await autoUpdateMaps(TRAUSI_GROUP_ID);
+        updateCount = await autoUpdateMaps(event.locals.db, TRAUSI_GROUP_ID);
       }
 
       return {
@@ -521,13 +511,15 @@ export const actions = {
   },
   populateNotesHtml: async (event) => {
     const groupId = getGroupId(event.params);
-    await ensurePermissions(event.locals.user?.id, groupId);
+    await ensurePermissions(event.locals.db, event.locals.user?.id, groupId);
 
-    const metaEntries = await db.query.metas.findMany({ where: eq(metas.mapGroupId, groupId) });
+    const metaEntries = await event.locals.db.query.metas.findMany({
+      where: eq(metas.mapGroupId, groupId)
+    });
 
     for (const meta of metaEntries) {
       const html = await markdown2Html(meta.note);
-      await db.update(metas).set({ noteHtml: html }).where(eq(metas.id, meta.id));
+      await event.locals.db.update(metas).set({ noteHtml: html }).where(eq(metas.id, meta.id));
     }
   }
 };
