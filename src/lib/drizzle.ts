@@ -6,6 +6,6 @@ import { env } from '$env/dynamic/private';
 
 export function getDb(platform_env: App.Platform['env']) {
   const client = postgres(platform_env.db?.connectionString || DATABASE_URL);
-  return drizzle(client, { schema, logger: env.DRIZZLE_LOGGING === 'true' || false });
+  return drizzle(client, { schema, logger: false });
 }
 export type DB = ReturnType<typeof getDb>;
