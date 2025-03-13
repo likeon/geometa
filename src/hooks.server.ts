@@ -3,6 +3,10 @@ import { initializeLucia } from '$lib/auth';
 import { getDb } from '$lib/drizzle';
 
 export const handle: Handle = async ({ event, resolve }) => {
+  if (event.url.pathname.startsWith('/prerender') || event.platform?.env === undefined) {
+    return resolve(event);
+  }
+
   const db = getDb(event.platform!.env);
   const lucia = initializeLucia(db);
   event.locals.db = db;
