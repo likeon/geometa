@@ -24,6 +24,10 @@
 
   type Column = LinkColumn | RegularColumn;
 
+  function isLinkColumn(col: Column): col is LinkColumn {
+    return col.key === 'link';
+  }
+
   interface Props {
     data: Array<any>;
     columns: Column[];
@@ -147,8 +151,7 @@
           }}>
           {#each columns as column}
             <td>
-              <!-- column.display check is pointless because type requires it, but typescript can't figure out the type correctly  -->
-              {#if column.key === 'link' && column.display}
+              {#if isLinkColumn(column)}
                 <a
                   onclick={(event) => event.stopPropagation()}
                   href={column.display(row)}
