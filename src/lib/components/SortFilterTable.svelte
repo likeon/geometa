@@ -1,18 +1,28 @@
 <script lang="ts">
   import Icon from '@iconify/svelte';
 
-  interface Column {
-    key: string;
+  interface BaseColumn {
     label: string;
     width?: string;
-    display?: any;
     searchable: boolean;
     sortable?: boolean;
     filterable?: boolean;
     type?: string;
     options?: string[];
-    filterLogic?: any;
+    filterLogic?: (filter: string, item: any) => boolean;
   }
+
+  interface LinkColumn extends BaseColumn {
+    key: 'link';
+    display: (item: any) => string; // required
+  }
+
+  interface RegularColumn extends BaseColumn {
+    key: Exclude<string, 'link'>;
+    display?: (item: any) => any;
+  }
+
+  type Column = LinkColumn | RegularColumn;
 
   interface Props {
     data: Array<any>;
@@ -109,13 +119,13 @@
             scope="col"
             class="table-header py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
             class:hover:bg-green-200={column.sortable}
-            class:bg-blue-300={selectedColumn == column.key}
+            class:bg-blue-300={selectedColumn === column.key}
             class:cursor-pointer={column.sortable}
             onclick={() => column.sortable && handleSort(column.key)}>
             {#if !column.filterable}
-              {column.label} {selectedColumn == column.key ? sortArrow : ''}
+              {column.label} {selectedColumn === column.key ? sortArrow : ''}
             {/if}
-            {#if column.filterable && column.type == 'select'}
+            {#if column.filterable && column.type === 'select'}
               <select class="custom-select" bind:value={filters[column.key]}>
                 {#each column.options ?? [] as option}
                   <option value={option}>{option}</option>
@@ -137,7 +147,8 @@
           }}>
           {#each columns as column}
             <td>
-              {#if column.key == 'link'}
+              <!-- column.display check is pointless because type requires it, but typescript can't figure out the type correctly  -->
+              {#if column.key === 'link' && column.display}
                 <a
                   onclick={(event) => event.stopPropagation()}
                   href={column.display(row)}
@@ -147,14 +158,13 @@
                   <Icon icon="mdi:link" class="ml-1 w-5 h-5 inline" />
                 </a>
               {:else if column.display}
-                {#if typeof column.display(row[column.key]) === 'boolean'}
-                  {#if column.display(row[column.key])}
+                {@const displayValue = column.display(row[column.key])}
+                {#if typeof displayValue === 'boolean'}
+                  {#if displayValue}
                     <Icon icon="ei:check" class="w-5 h-5" color="green" /> <!-- Display the icon -->
-                  {:else}
-                    <!-- Display nothing if the function returns false -->
                   {/if}
                 {:else}
-                  {column.display(row[column.key])}
+                  {displayValue}
                   <!-- Display the value returned by the function if not boolean -->
                 {/if}
               {:else}
@@ -185,6 +195,7 @@
     box-sizing: border-box;
     padding: 10px 16px;
   }
+
   .custom-select {
     width: 110px;
     font-size: 12px;
