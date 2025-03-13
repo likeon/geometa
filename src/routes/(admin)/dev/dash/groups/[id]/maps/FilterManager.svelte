@@ -40,7 +40,7 @@
     <button
       type="button"
       onclick={addFilter}
-      class="bg-green-500 text-white px-3 py-1 rounded-lg hover:bg-green-600">
+      class="bg-primary-700 text-white px-3 py-1 rounded-lg hover:bg-primary-800">
       +
     </button>
   </div>

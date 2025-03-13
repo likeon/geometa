@@ -184,7 +184,7 @@
               ><TooltipName
                 name="Note from plonkit"
                 tooltipText="Check this box to automatically credit PlonkIt if you used descriptions or images from their site."
-                iconColor="red">
+                iconColor="#ff819d">
               </TooltipName></Checkbox>
           </Label>
         </Label>

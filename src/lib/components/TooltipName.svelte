@@ -3,7 +3,7 @@
   import { Tooltip } from 'flowbite-svelte';
   export let name = 'Label';
   export let tooltipText = 'Tooltip description.';
-  export let iconColor = 'green';
+  export let iconColor = '#bebebe';
 </script>
 
 <div class="mb-1">
