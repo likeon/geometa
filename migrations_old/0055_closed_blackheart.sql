@@ -1,1 +1,0 @@
-ALTER TABLE `maps` ADD `number_of_games_played_diminished` integer;

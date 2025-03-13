@@ -1,1 +1,0 @@
-ALTER TABLE `user` RENAME COLUMN `is_active` TO `is_trusted`;

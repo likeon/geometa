@@ -32,3 +32,10 @@ tasks:
   psql:
     cmds:
       - psql -h localhost -U postgres geometa
+
+  db:make-backup:
+    cmds:
+      - psql -h localhost -U postgres postgres -f .ci/db/make-backup.sql
+  db:reset:
+    cmds:
+      - psql -h localhost -U postgres postgres -f .ci/db/reset.sql

@@ -1,6 +1,6 @@
 {
-  "id": "c841a465-ab05-4f12-942e-f15e8a018fd8",
-  "prevId": "e76f8ef3-924b-4cce-acc6-e9aff25ccdc9",
+  "id": "30bc7e9d-dc49-4562-b0d0-b6ed17586af4",
+  "prevId": "8684950b-c8c1-45fd-8411-4414c80a87f5",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -45,20 +45,20 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "levels_map_group_id_map_groups_id_fk": {
           "name": "levels_map_group_id_map_groups_id_fk",
           "tableFrom": "levels",
-          "tableTo": "map_groups",
           "columnsFrom": ["map_group_id"],
+          "tableTo": "map_groups",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -103,20 +103,20 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "map_data_map_id_maps_id_fk": {
           "name": "map_data_map_id_maps_id_fk",
           "tableFrom": "map_data",
-          "tableTo": "maps",
           "columnsFrom": ["map_id"],
+          "tableTo": "maps",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -173,20 +173,20 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "map_filters_map_id_maps_id_fk": {
           "name": "map_filters_map_id_maps_id_fk",
           "tableFrom": "map_filters",
-          "tableTo": "maps",
           "columnsFrom": ["map_id"],
+          "tableTo": "maps",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -297,20 +297,20 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "map_group_locations_map_group_id_map_groups_id_fk": {
           "name": "map_group_locations_map_group_id_map_groups_id_fk",
           "tableFrom": "map_group_locations",
-          "tableTo": "map_groups",
           "columnsFrom": ["map_group_id"],
+          "tableTo": "map_groups",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -360,29 +360,29 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "map_group_permissions_map_group_id_map_groups_id_fk": {
           "name": "map_group_permissions_map_group_id_map_groups_id_fk",
           "tableFrom": "map_group_permissions",
-          "tableTo": "map_groups",
           "columnsFrom": ["map_group_id"],
+          "tableTo": "map_groups",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "map_group_permissions_user_id_user_id_fk": {
           "name": "map_group_permissions_user_id_user_id_fk",
           "tableFrom": "map_group_permissions",
-          "tableTo": "user",
           "columnsFrom": ["user_id"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -463,29 +463,29 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "map_levels_map_id_maps_id_fk": {
           "name": "map_levels_map_id_maps_id_fk",
           "tableFrom": "map_levels",
-          "tableTo": "maps",
           "columnsFrom": ["map_id"],
+          "tableTo": "maps",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "map_levels_level_id_levels_id_fk": {
           "name": "map_levels_level_id_levels_id_fk",
           "tableFrom": "map_levels",
-          "tableTo": "levels",
           "columnsFrom": ["level_id"],
+          "tableTo": "levels",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -535,29 +535,29 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "map_regions_map_id_maps_id_fk": {
           "name": "map_regions_map_id_maps_id_fk",
           "tableFrom": "map_regions",
-          "tableTo": "maps",
           "columnsFrom": ["map_id"],
+          "tableTo": "maps",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "map_regions_region_id_regions_id_fk": {
           "name": "map_regions_region_id_regions_id_fk",
           "tableFrom": "map_regions",
-          "tableTo": "regions",
           "columnsFrom": ["region_id"],
+          "tableTo": "regions",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -635,30 +635,55 @@
           "notNull": true,
           "default": false
         },
+        "footer": {
+          "name": "footer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "footer_html": {
+          "name": "footer_html",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
         "modified_at": {
           "name": "modified_at",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
           "default": 1730419200
+        },
+        "difficulty": {
+          "name": "difficulty",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "is_verified": {
+          "name": "is_verified",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "number_of_games_played": {
+          "name": "number_of_games_played",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "number_of_games_played_diminished": {
+          "name": "number_of_games_played_diminished",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
         }
       },
       "indexes": {
-        "maps_name_unique": {
-          "name": "maps_name_unique",
-          "columns": [
-            {
-              "expression": "name",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "maps_geoguessr_id_unique": {
           "name": "maps_geoguessr_id_unique",
           "columns": [
@@ -670,20 +695,20 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "maps_map_group_id_map_groups_id_fk": {
           "name": "maps_map_group_id_map_groups_id_fk",
           "tableFrom": "maps",
-          "tableTo": "map_groups",
           "columnsFrom": ["map_group_id"],
+          "tableTo": "map_groups",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -715,16 +740,38 @@
           "notNull": true
         }
       },
-      "indexes": {},
+      "indexes": {
+        "meta_image_unique": {
+          "name": "meta_image_unique",
+          "columns": [
+            {
+              "expression": "meta_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "image_url",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "with": {},
+          "method": "btree",
+          "concurrently": false
+        }
+      },
       "foreignKeys": {
         "meta_images_meta_id_metas_id_fk": {
           "name": "meta_images_meta_id_metas_id_fk",
           "tableFrom": "meta_images",
-          "tableTo": "metas",
           "columnsFrom": ["meta_id"],
+          "tableTo": "metas",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -774,29 +821,29 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "meta_levels_meta_id_metas_id_fk": {
           "name": "meta_levels_meta_id_metas_id_fk",
           "tableFrom": "meta_levels",
-          "tableTo": "metas",
           "columnsFrom": ["meta_id"],
+          "tableTo": "metas",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         },
         "meta_levels_level_id_levels_id_fk": {
           "name": "meta_levels_level_id_levels_id_fk",
           "tableFrom": "meta_levels",
-          "tableTo": "levels",
           "columnsFrom": ["level_id"],
+          "tableTo": "levels",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -896,6 +943,20 @@
           "notNull": true,
           "default": "''"
         },
+        "footer": {
+          "name": "footer",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "footer_html": {
+          "name": "footer_html",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
         "note_from_plonkit": {
           "name": "note_from_plonkit",
           "type": "boolean",
@@ -936,20 +997,20 @@
             }
           ],
           "isUnique": true,
-          "concurrently": false,
+          "with": {},
           "method": "btree",
-          "with": {}
+          "concurrently": false
         }
       },
       "foreignKeys": {
         "metas_map_group_id_map_groups_id_fk": {
           "name": "metas_map_group_id_map_groups_id_fk",
           "tableFrom": "metas",
-          "tableTo": "map_groups",
           "columnsFrom": ["map_group_id"],
+          "tableTo": "map_groups",
           "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "cascade"
         }
       },
       "compositePrimaryKeys": {},
@@ -1018,11 +1079,11 @@
         "session_user_id_user_id_fk": {
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
-          "tableTo": "user",
           "columnsFrom": ["user_id"],
+          "tableTo": "user",
           "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
+          "onUpdate": "no action",
+          "onDelete": "no action"
         }
       },
       "compositePrimaryKeys": {},
@@ -1047,8 +1108,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "is_active": {
-          "name": "is_active",
+        "is_trusted": {
+          "name": "is_trusted",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
@@ -1073,11 +1134,10 @@
   },
   "enums": {},
   "schemas": {},
-  "sequences": {},
-  "roles": {},
-  "policies": {},
   "views": {
     "public.location_metas_view": {
+      "name": "location_metas_view",
+      "schema": "public",
       "columns": {
         "map_group_id": {
           "name": "map_group_id",
@@ -1146,13 +1206,12 @@
           "notNull": true
         }
       },
-      "definition": "\n  select mgl.*,\n         m.id                                     as meta_id,\n         m.tag_name                               as meta_tag_name,\n         m.name                                   as meta_name,\n         m.note                                   as meta_note,\n         m.note_html                              as meta_note_html,\n         m.note_from_plonkit                      as meta_note_from_plonkit,\n         m.has_image                              as meta_has_image,\n         greatest(mgl.modified_at, m.modified_at) as max_modified_at\n  from \"map_group_locations\" mgl\n         join \"metas\" m ON m.tag_name = mgl.extra_tag and m.map_group_id = mgl.map_group_id\n",
-      "name": "location_metas_view",
-      "schema": "public",
-      "isExisting": false,
-      "materialized": false
+      "materialized": false,
+      "isExisting": true
     },
     "public.map_locations_view": {
+      "name": "map_locations_view",
+      "schema": "public",
       "columns": {
         "map_id": {
           "name": "map_id",
@@ -1252,13 +1311,81 @@
           "notNull": true
         }
       },
-      "definition": "\n  SELECT m.id                                         AS map_id,\n         lmv.lat,\n         lmv.lng,\n         lmv.heading,\n         lmv.pitch,\n         lmv.zoom,\n         lmv.pano_id,\n         lmv.meta_name,\n         lmv.extra_pano_id,\n         lmv.extra_pano_date,\n         lmv.extra_tag                                AS tag_name,\n         lmv.meta_note,\n         lmv.meta_note_html,\n         lmv.meta_note_from_plonkit,\n         lmv.meta_id,\n         greatest(lmv.max_modified_at, m.modified_at) as max_modified_at\n  FROM \"location_metas_view\" lmv\n         JOIN \"maps\" m ON m.map_group_id = lmv.map_group_id\n    AND (\n                             EXISTS (SELECT 1\n                                     FROM map_levels\n                                            JOIN meta_levels ON meta_levels.level_id = map_levels.level_id\n                                       AND meta_levels.meta_id = lmv.meta_id\n                                     WHERE map_levels.map_id = m.id)\n                               OR NOT EXISTS (SELECT 1\n                                              FROM map_levels\n                                              WHERE map_levels.map_id = m.id)\n                             )\n    AND (\n                             EXISTS (SELECT 1\n                                     FROM map_filters mf\n                                     WHERE mf.map_id = m.id\n                                       AND mf.is_exclude = FALSE\n                                       AND lmv.extra_tag ILIKE mf.tag_like)\n                               OR NOT EXISTS (SELECT 1\n                                              FROM map_filters mf\n                                              WHERE mf.map_id = m.id\n                                                AND mf.is_exclude = FALSE)\n                             )\n    AND (\n                             NOT EXISTS (SELECT 1\n                                         FROM map_filters mf\n                                         WHERE mf.map_id = m.id\n                                           AND mf.is_exclude = TRUE\n                                           AND lmv.extra_tag ILIKE mf.tag_like)\n                             )\n",
-      "name": "map_locations_view",
+      "materialized": false,
+      "isExisting": true
+    },
+    "public.map_metas_view": {
+      "name": "map_metas_view",
       "schema": "public",
-      "isExisting": false,
-      "materialized": false
+      "columns": {
+        "map_id": {
+          "name": "map_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "map_name": {
+          "name": "map_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "map_footer_html": {
+          "name": "map_footer_html",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "geoguessr_id": {
+          "name": "geoguessr_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_name": {
+          "name": "meta_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_tag": {
+          "name": "meta_tag",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_note_html": {
+          "name": "meta_note_html",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_image_urls": {
+          "name": "meta_image_urls",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "meta_footer_html": {
+          "name": "meta_footer_html",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "meta_note_from_plonkit": {
+          "name": "meta_note_from_plonkit",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "materialized": false,
+      "isExisting": true
     }
   },
+  "sequences": {},
+  "roles": {},
+  "policies": {},
   "_meta": {
     "columns": {},
     "schemas": {},

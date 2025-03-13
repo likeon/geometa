@@ -4,7 +4,7 @@ import { maps, regions } from '$lib/db/schema';
 
 const mapCacheKey = 'query:maps:allmaps';
 const regionsKey = 'query:maps:regions';
-const contentCacheEnabled = true;
+const contentCacheEnabled = false;
 
 export const load = async (event) => {
   if (event.platform && contentCacheEnabled) {
@@ -28,10 +28,10 @@ export const load = async (event) => {
         WHERE ml.map_id = "maps"."id"
       )`.as('locations_count'),
       regions: sql<string>`(
-        SELECT GROUP_CONCAT(r.name, ', ')
+        SELECT STRING_AGG(r.name, ', ' ORDER BY r.name)
         FROM map_regions mr
         JOIN regions r ON r.id = mr.region_id
-        WHERE mr.map_id = "maps"."id"
+        WHERE mr.map_id = maps.id
       )`.as('region_names'),
       metasCount: sql<number>`(
         SELECT COUNT(*)
@@ -43,7 +43,7 @@ export const load = async (event) => {
     orderBy: [
       sql`"maps"."is_verified" DESC`,
       desc(maps.ordering),
-      sql`coalesce(maps.number_of_games_played_diminished, 0) + abs(random()) % 41 DESC`
+      sql`COALESCE(maps.number_of_games_played_diminished, 0) + FLOOR(RANDOM() * 41) DESC`
     ]
   });
 
