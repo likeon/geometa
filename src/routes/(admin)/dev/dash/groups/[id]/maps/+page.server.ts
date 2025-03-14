@@ -27,7 +27,12 @@ const insertMapsSchema = createInsertSchema(maps)
     ordering: z.coerce.number(),
     footerNote: z.string()
   })
-  .omit({ modifiedAt: true, footerHtml: true });
+  .omit({
+    modifiedAt: true,
+    footerHtml: true,
+    numberOfGamesPlayed: true,
+    numberOfGamesPlayedDiminished: true
+  });
 export type InsertMapsSchema = typeof insertMapsSchema;
 
 export const load = async ({ locals, params }) => {

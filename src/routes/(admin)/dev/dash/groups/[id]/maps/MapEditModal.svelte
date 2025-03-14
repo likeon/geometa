@@ -48,6 +48,27 @@
 
   const carta = new Carta();
 
+  function nullifyForm() {
+    $form.id = undefined;
+    $form.mapGroupId = groupId;
+    $form.geoguessrId = '';
+    $form.name = '';
+    $form.footer = '';
+    $form.ordering = 0;
+    $form.description = '';
+    $form.isPublished = false;
+    $form.isCommunity = false;
+    $form.authors = '';
+    $form.autoUpdate = false;
+    $form.levels = [];
+    $form.regions = [];
+    $form.includeFilters = [];
+    $form.excludeFilters = [];
+    $form.difficulty = 0;
+    $form.isVerified = false;
+  }
+  nullifyForm();
+
   $effect(() => {
     if (isMapModalOpen) {
       if (selectedMap) {
@@ -73,23 +94,7 @@
           .filter((item) => item.isExclude == true)
           .map((item) => item.tagLike as string);
       } else {
-        $form.id = undefined;
-        $form.mapGroupId = groupId;
-        $form.geoguessrId = '';
-        $form.name = '';
-        $form.footer = '';
-        $form.ordering = 0;
-        $form.description = '';
-        $form.isPublished = false;
-        $form.isCommunity = false;
-        $form.authors = '';
-        $form.autoUpdate = false;
-        $form.levels = [];
-        $form.regions = [];
-        $form.includeFilters = [];
-        $form.excludeFilters = [];
-        $form.difficulty = 0;
-        $form.isVerified = false;
+        nullifyForm();
       }
     }
   });
@@ -158,7 +163,7 @@
         tooltipText="Description of the map that will appear on the map list page if your map is published by the admin team.">
       </TooltipName>
       <Textarea
-        rows="6"
+        rows={6}
         name="description"
         aria-invalid={$errors.description ? 'true' : undefined}
         bind:value={$form.description}

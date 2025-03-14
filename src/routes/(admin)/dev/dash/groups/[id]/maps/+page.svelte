@@ -78,7 +78,6 @@
     bind:isModalOpen={isMapModalOpen}
     bind:selectedRowId={selectedMapId} />
 </div>
-{@debug data}
 <MapEditModal
   bind:isMapModalOpen
   data={data.mapForm}

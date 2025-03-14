@@ -66,6 +66,24 @@
   type MetaFormDataType = Infer<InsertMetasSchema>;
   let savedForm: MetaFormDataType | null = null;
 
+  function nullifyForm() {
+    formMeta.update(
+      ($formMeta) => {
+        $formMeta.id = undefined;
+        $formMeta.mapGroupId = groupId;
+        $formMeta.tagName = '';
+        $formMeta.name = '';
+        $formMeta.note = '';
+        $formMeta.footer = '';
+        $formMeta.levels = [];
+        $formMeta.noteFromPlonkit = false;
+        return $formMeta;
+      },
+      { taint: false }
+    );
+  }
+  nullifyForm();
+
   function fillForm(meta: PageData['group']['metas'][number] | null) {
     if (savedForm) {
       $formMeta = savedForm;
@@ -88,20 +106,7 @@
         { taint: false }
       );
     } else {
-      formMeta.update(
-        ($formMeta) => {
-          $formMeta.id = undefined;
-          $formMeta.mapGroupId = groupId;
-          $formMeta.tagName = '';
-          $formMeta.name = '';
-          $formMeta.note = '';
-          $formMeta.footer = '';
-          $formMeta.levels = [];
-          $formMeta.noteFromPlonkit = false;
-          return $formMeta;
-        },
-        { taint: false }
-      );
+      nullifyForm();
     }
   }
 
@@ -180,12 +185,13 @@
         </Label>
         <Label>
           <Label>
-            <Checkbox bind:checked={$formMeta.noteFromPlonkit}
-              ><TooltipName
+            <Checkbox bind:checked={$formMeta.noteFromPlonkit}>
+              <TooltipName
                 name="Note from plonkit"
                 tooltipText="Check this box to automatically credit PlonkIt if you used descriptions or images from their site."
                 iconColor="#ff819d">
-              </TooltipName></Checkbox>
+              </TooltipName>
+            </Checkbox>
           </Label>
         </Label>
         {#if !$formMeta.noteFromPlonkit}
