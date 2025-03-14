@@ -69,6 +69,9 @@ export async function GET(event: RequestEvent) {
     }
     // Log the error for debugging purposes
     console.error(e);
+    if (e instanceof Error) {
+      console.error('Stack Trace:', e.stack);
+    }
     return new Response(null, { status: 500 });
   }
 }
