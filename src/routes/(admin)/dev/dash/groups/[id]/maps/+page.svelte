@@ -2,7 +2,6 @@
   import { Button } from 'flowbite-svelte';
   import MapEditModal from './MapEditModal.svelte';
   import DashNavBar from '$lib/components/DashNavBar.svelte';
-  import Icon from '@iconify/svelte';
   import SortFilterTable from '$lib/components/SortFilterTable.svelte';
   let { data } = $props();
   let columns = [
@@ -79,7 +78,7 @@
     bind:isModalOpen={isMapModalOpen}
     bind:selectedRowId={selectedMapId} />
 </div>
-
+{@debug data}
 <MapEditModal
   bind:isMapModalOpen
   data={data.mapForm}

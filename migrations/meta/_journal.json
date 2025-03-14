@@ -57,6 +57,13 @@
       "when": 1741914665017,
       "tag": "0007_petite_darkhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1741946571290,
+      "tag": "0008_productive_wolf_cub",
+      "breakpoints": true
     }
   ]
 }

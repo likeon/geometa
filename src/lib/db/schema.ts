@@ -8,12 +8,12 @@ import {
   pgView,
   boolean,
   timestamp,
-  serial
+  bigserial
 } from 'drizzle-orm/pg-core';
 import { relations, sql } from 'drizzle-orm';
 
 export const metaSuggestions = pgTable('meta_suggestions', {
-  id: serial('id').primaryKey(),
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
   secret: text('secret').notNull(),
   url: text('url').notNull(),
   description: text('description').notNull(),
@@ -22,7 +22,7 @@ export const metaSuggestions = pgTable('meta_suggestions', {
 });
 
 export const mapGroups = pgTable('map_groups', {
-  id: serial('id').primaryKey(),
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
   name: text('name').notNull(),
   syncedAt: integer('synced_at')
 });
@@ -38,7 +38,7 @@ export const mapGroupsRelations = relations(mapGroups, ({ many }) => ({
 export const mapGroupLocations = pgTable(
   'map_group_locations',
   {
-    id: serial('id').primaryKey(),
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
     mapGroupId: integer('map_group_id')
       .notNull()
       .references(() => mapGroups.id, { onDelete: 'cascade' }),
@@ -66,7 +66,7 @@ export const mapGroupLocationsRelations = relations(mapGroupLocations, ({ one })
 export const maps = pgTable(
   'maps',
   {
-    id: serial('id').primaryKey(),
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
     mapGroupId: integer('map_group_id')
       .notNull()
       .references(() => mapGroups.id, { onDelete: 'cascade' }),
@@ -100,7 +100,7 @@ export const mapsRelations = relations(maps, ({ one, many }) => ({
 export const levels = pgTable(
   'levels',
   {
-    id: serial('id').primaryKey(),
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
     mapGroupId: integer('map_group_id')
       .notNull()
       .references(() => mapGroups.id, { onDelete: 'cascade' }),
@@ -118,7 +118,7 @@ export const levelsRelations = relations(levels, ({ one, many }) => ({
 export const mapLevels = pgTable(
   'map_levels',
   {
-    id: serial('id').primaryKey(),
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
     mapId: integer('map_id')
       .notNull()
       .references(() => maps.id, { onDelete: 'cascade' }),
@@ -138,7 +138,7 @@ export const mapLevelRelations = relations(mapLevels, ({ one }) => ({
 export const mapFilters = pgTable(
   'map_filters',
   {
-    id: serial('id').primaryKey(),
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
     mapId: integer('map_id')
       .notNull()
       .references(() => maps.id, { onDelete: 'cascade' }),
@@ -156,7 +156,7 @@ export const mapFiltersRelations = relations(mapFilters, ({ one }) => ({
 export const metas = pgTable(
   'metas',
   {
-    id: serial('id').primaryKey(),
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
     mapGroupId: integer('map_group_id')
       .notNull()
       .references(() => mapGroups.id, { onDelete: 'cascade' }),
@@ -184,7 +184,7 @@ export const metasRelations = relations(metas, ({ one, many }) => ({
 export const metaLevels = pgTable(
   'meta_levels',
   {
-    id: serial('id').primaryKey(),
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
     metaId: integer('meta_id')
       .notNull()
       .references(() => metas.id, { onDelete: 'cascade' }),
@@ -204,7 +204,7 @@ export const metaLevelRelations = relations(metaLevels, ({ one }) => ({
 export const metaImages = pgTable(
   'meta_images',
   {
-    id: serial('id').primaryKey(),
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
     metaId: integer('meta_id')
       .notNull()
       .references(() => metas.id, { onDelete: 'cascade' }),
@@ -275,7 +275,7 @@ export const sessions = pgTable('session', {
 export const mapGroupPermissions = pgTable(
   'map_group_permissions',
   {
-    id: serial('id').primaryKey(),
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
     mapGroupId: integer('map_group_id')
       .notNull()
       .references(() => mapGroups.id, { onDelete: 'cascade' }),
@@ -301,7 +301,7 @@ export const mapGroupPermissionsRelations = relations(mapGroupPermissions, ({ on
 export const mapData = pgTable(
   'map_data',
   {
-    id: serial('id').primaryKey(),
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
     mapId: integer('map_id')
       .notNull()
       .references(() => maps.id, { onDelete: 'cascade' }),
@@ -320,7 +320,7 @@ export const mapDataRelations = relations(mapData, ({ one }) => ({
 }));
 
 export const regions = pgTable('regions', {
-  id: serial('id').primaryKey(),
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
   name: text('name').notNull(),
   ordering: integer('ordering').notNull().default(0)
 });
@@ -332,7 +332,7 @@ export const regionsRelations = relations(regions, ({ many }) => ({
 export const mapRegions = pgTable(
   'map_regions',
   {
-    id: serial('id').primaryKey(),
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
     mapId: integer('map_id')
       .notNull()
       .references(() => maps.id, { onDelete: 'cascade' }),
