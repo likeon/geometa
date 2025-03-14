@@ -177,7 +177,8 @@ export const metas = pgTable(
 export const metasRelations = relations(metas, ({ one, many }) => ({
   mapGroup: one(mapGroups, { fields: [metas.mapGroupId], references: [mapGroups.id] }),
   metaLevels: many(metaLevels),
-  images: many(metaImages)
+  images: many(metaImages),
+  locationsCount: one(metaLocationsCountView)
 }));
 
 export const metaLevels = pgTable(
@@ -361,3 +362,14 @@ export const mapMetas = pgView('map_metas_view', {
   metaFooterHtml: text('meta_footer_html').notNull(),
   metaNoteFromPlonkit: boolean('meta_note_from_plonkit').notNull()
 }).existing();
+
+// actually a view, but views can't have relationship
+export const metaLocationsCountView = pgTable('meta_locations_count_view', {
+  metaId: integer('meta_id')
+    .notNull()
+    .references(() => metas.id, { onDelete: 'no action' }),
+  total: integer('total').notNull()
+});
+export const metaLocationsCountViewRelations = relations(metaLocationsCountView, ({ one }) => ({
+  meta: one(metas, { fields: [metaLocationsCountView.metaId], references: [metas.id] })
+}));

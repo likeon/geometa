@@ -50,6 +50,13 @@
       "when": 1741910530331,
       "tag": "0006_robust_starhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1741914665017,
+      "tag": "0007_petite_darkhawk",
+      "breakpoints": true
     }
   ]
 }

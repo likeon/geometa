@@ -45,7 +45,8 @@
       key: 'locationsCount',
       label: 'Locations',
       searchable: false,
-      sortable: true
+      sortable: true,
+      display: (item: Meta['locationsCount']) => item?.total || 0
     },
     {
       key: 'note',

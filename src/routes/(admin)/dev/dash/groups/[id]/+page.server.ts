@@ -113,13 +113,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       with: {
         metas: {
           orderBy: [asc(metas.id)],
-          with: { metaLevels: { with: { level: true } }, images: true },
-          extras: {
-            locationsCount: sql`(
-            select count(*)
-            from location_metas_view lm
-            where lm.meta_id = ${metas.id})`.as('locations_count')
-          }
+          with: { metaLevels: { with: { level: true } }, images: true, locationsCount: true }
         },
         levels: true
       },
