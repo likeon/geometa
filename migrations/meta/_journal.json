@@ -36,6 +36,20 @@
       "when": 1741895460700,
       "tag": "0004_wakeful_spyke",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1741908225688,
+      "tag": "0005_narrow_dagger",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1741910530331,
+      "tag": "0006_robust_starhawk",
+      "breakpoints": true
     }
   ]
 }

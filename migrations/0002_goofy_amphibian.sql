@@ -8,6 +8,7 @@ SELECT
     metas.tag_name AS meta_tag,
     metas.note_html AS meta_note_html,
     metas.footer_html AS meta_footer_html,
+    metas.note_from_plonkit AS meta_note_from_plonkit,
     (
         SELECT STRING_AGG(mi.image_url, ',' ORDER BY mi.id)
         FROM meta_images mi

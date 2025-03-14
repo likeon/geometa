@@ -3,6 +3,7 @@ import {
   integer,
   pgTable,
   uniqueIndex,
+  index,
   real,
   pgView,
   boolean,
@@ -53,9 +54,10 @@ export const mapGroupLocations = pgTable(
     updatedAt: integer('updated_at'),
     modifiedAt: integer('modified_at').default(1730419200).notNull()
   },
-  (t) => ({
-    mapLocationUnique: uniqueIndex('map_group_locations_unique').on(t.mapGroupId, t.panoId)
-  })
+  (t) => [
+    uniqueIndex('map_group_locations_unique').on(t.mapGroupId, t.panoId),
+    index('map_group_locations_map_group_tag_idx').on(t.mapGroupId, t.extraTag)
+  ]
 );
 export const mapGroupLocationsRelations = relations(mapGroupLocations, ({ one }) => ({
   mapGroup: one(mapGroups, { fields: [mapGroupLocations.mapGroupId], references: [mapGroups.id] })
