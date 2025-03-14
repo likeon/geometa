@@ -64,6 +64,13 @@
       "when": 1741946571290,
       "tag": "0008_productive_wolf_cub",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1741961322795,
+      "tag": "0009_wealthy_pet_avengers",
+      "breakpoints": true
     }
   ]
 }
