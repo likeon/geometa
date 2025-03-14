@@ -5,37 +5,35 @@ tasks:
     cmds:
       - .ci/tilt-with-cluster.sh
 
-  db:shell:
-    cmds:
-      - turso db shell http://localhost:8080
-
-  db:dump:
-    dotenv: ['.env']
-    cmds:
-      - .ci/db/dump.sh
-
-  db:dump:preview:
-    dotenv: ['.env.preview.local']
-    cmds:
-      - .ci/db/dump.sh
-
-  db:dump:prod:
+  turso:db:dump:prod:
     dotenv: ['.env.prod.local']
     cmds:
       - .ci/db/dump.sh
-
-  db:restore:
-    cmds:
-      - .ci/db/drop.sh
-      - turso db shell http://localhost:8080 < .ci/db/dump.sql
 
   psql:
     cmds:
       - psql -h localhost -U postgres geometa
 
-  db:make-backup:
+  db:dump:
+    vars:
+      ENVIRONMENT: '{{ .ENV | default `local` }}'
     cmds:
-      - psql -h localhost -U postgres postgres -f .ci/db/make-backup.sql
+      - |
+        if [ "{{.ENVIRONMENT}}" = "local" ]; then
+          # local
+          psql -h localhost -U postgres postgres -f .ci/db/make-backup.sql >> /dev/null
+          echo "Local backup done"
+        elif [[ "{{.ENVIRONMENT}}" = "prod" || "{{.ENVIRONMENT}}" = "preview" ]]; then
+          # remote
+          source .env.{{.ENVIRONMENT}}.local
+          pg_dump -d "$DATABASE_URL" -O -x > .ci/db/dump.sql
+          echo "drop database if exists geometa with ( force ); create database geometa;" | psql -h localhost -U postgres postgres
+          psql -h localhost -U postgres geometa -f .ci/db/dump.sql
+        else
+          echo "Unknown environment"
+        fi
+    silent: true
+
   db:reset:
     cmds:
       - psql -h localhost -U postgres postgres -f .ci/db/reset.sql
