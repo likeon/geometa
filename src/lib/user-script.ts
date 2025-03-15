@@ -1,6 +1,6 @@
 import { type DB } from '$lib/drizzle';
 import { mapGroups, mapLocations, maps, metas } from '$lib/db/schema';
-import { and, asc, eq, gt, sql } from 'drizzle-orm';
+import { and, asc, eq, gt, or, type SQL, sql } from 'drizzle-orm';
 import {
   cloudflareKvBulkPut,
   generateFooter,
@@ -22,7 +22,13 @@ export async function syncUserScriptData(db: DB, groupId: number) {
     const conditions = [eq(maps.mapGroupId, groupId)];
 
     if (group.syncedAt != null) {
-      conditions.push(gt(mapLocations.maxModifiedAt, group.syncedAt));
+      conditions.push(
+        or(
+          gt(mapLocations.modifiedAt, group.syncedAt),
+          gt(mapLocations.metaModifiedAt, group.syncedAt),
+          gt(mapLocations.mapModifiedAt, group.syncedAt)
+        ) as SQL
+      );
     }
 
     const dbValues = await db
@@ -36,12 +42,10 @@ export async function syncUserScriptData(db: DB, groupId: number) {
         mapFooterHtml: maps.footerHtml,
         metaNoteFromPlonkit: metas.noteFromPlonkit,
         images: sql<string | null>`
-      (
-        SELECT STRING_AGG(mi.image_url, ',' ORDER BY mi.id)
-        FROM meta_images mi
-        WHERE mi.meta_id = ${mapLocations.metaId}
-      )
-      `
+          (SELECT STRING_AGG(mi.image_url, ',' ORDER BY mi.id)
+           FROM meta_images mi
+           WHERE mi.meta_id = ${mapLocations.metaId})
+        `
       })
       .from(mapLocations)
       .innerJoin(maps, eq(mapLocations.mapId, maps.id))

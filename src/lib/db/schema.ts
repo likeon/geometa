@@ -218,39 +218,6 @@ export const metaImagesRelations = relations(metaImages, ({ one }) => ({
   meta: one(metas, { fields: [metaImages.metaId], references: [metas.id] })
 }));
 
-export const locationMetas = pgView('location_metas_view', {
-  mapGroupId: integer('map_group_id').notNull(),
-  metaId: integer('meta_id').notNull(),
-  lat: real('lat').notNull(),
-  lng: real('lng').notNull(),
-  heading: real('heading').notNull(),
-  pitch: real('pitch').notNull(),
-  zoom: real('zoom').notNull(),
-  panoId: text('pano_id'),
-  extraTag: text('extra_tag').notNull(),
-  extraPanoId: text('extra_pano_id'),
-  extraPanoDate: text('extra_pano_date').notNull()
-}).existing();
-
-export const mapLocations = pgView('map_locations_view', {
-  mapId: integer('map_id').notNull(),
-  lat: real('lat').notNull(),
-  lng: real('lng').notNull(),
-  heading: real('heading').notNull(),
-  pitch: real('pitch').notNull(),
-  zoom: real('zoom').notNull(),
-  panoId: text('pano_id'),
-  metaName: text('meta_name').notNull(),
-  extraPanoId: text('extra_pano_id'),
-  extraPanoDate: text('extra_pano_date').notNull(),
-  tagName: text('tag_name').notNull(),
-  metaNote: text('meta_note').notNull(),
-  metaNoteHtml: text('meta_note_html').notNull(),
-  metaNoteFromPlonkit: boolean('meta_note_from_plonkit').notNull().default(false),
-  metaId: integer('meta_id').notNull(),
-  maxModifiedAt: integer('max_modified_at').notNull()
-}).existing();
-
 export const users = pgTable('user', {
   id: text('id').notNull().primaryKey(),
   username: text('username').notNull(),
@@ -349,6 +316,46 @@ export const mapRegionsRelations = relations(mapRegions, ({ one }) => ({
   map: one(maps, { fields: [mapRegions.mapId], references: [maps.id] }),
   region: one(regions, { fields: [mapRegions.regionId], references: [regions.id] })
 }));
+
+// --------------
+// VIEWS
+// --------------
+export const locationMetas = pgView('location_metas_view', {
+  mapGroupId: integer('map_group_id').notNull(),
+  metaId: integer('meta_id').notNull(),
+  lat: real('lat').notNull(),
+  lng: real('lng').notNull(),
+  heading: real('heading').notNull(),
+  pitch: real('pitch').notNull(),
+  zoom: real('zoom').notNull(),
+  panoId: text('pano_id'),
+  extraTag: text('extra_tag').notNull(),
+  extraPanoId: text('extra_pano_id'),
+  extraPanoDate: text('extra_pano_date').notNull(),
+  modifiedAt: integer('modified_at').notNull(),
+  metaModifiedAt: integer('meta_modified_at').notNull()
+}).existing();
+
+export const mapLocations = pgView('map_locations_view', {
+  mapId: integer('map_id').notNull(),
+  lat: real('lat').notNull(),
+  lng: real('lng').notNull(),
+  heading: real('heading').notNull(),
+  pitch: real('pitch').notNull(),
+  zoom: real('zoom').notNull(),
+  panoId: text('pano_id'),
+  metaName: text('meta_name').notNull(),
+  extraPanoId: text('extra_pano_id'),
+  extraPanoDate: text('extra_pano_date').notNull(),
+  tagName: text('tag_name').notNull(),
+  metaNote: text('meta_note').notNull(),
+  metaNoteHtml: text('meta_note_html').notNull(),
+  metaNoteFromPlonkit: boolean('meta_note_from_plonkit').notNull().default(false),
+  metaId: integer('meta_id').notNull(),
+  modifiedAt: integer('modified_at').notNull(),
+  metaModifiedAt: integer('meta_modified_at').notNull(),
+  mapModifiedAt: integer('map_modified_at').notNull()
+}).existing();
 
 export const mapMetas = pgView('map_metas_view', {
   mapId: integer('map_id').notNull(),
