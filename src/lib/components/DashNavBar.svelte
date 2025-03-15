@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { page } from '$app/state';
+  import { page } from '$app/stores';
   import Icon from '@iconify/svelte';
-  import { Button, Input, Label, Modal, Tooltip } from 'flowbite-svelte'; // Import the page store to get the current route
+  import { Button, Input, Label, Modal } from 'flowbite-svelte'; // Import the page store to get the current route
   import { applyAction, enhance } from '$app/forms';
   import TooltipName from './TooltipName.svelte';
 
@@ -12,7 +12,7 @@
 
   let { groupId, groupName }: Props = $props();
 
-  let activeRoute = $derived(page.url.pathname);
+  let activeRoute = $derived($page.url.pathname);
 
   function isActive(route: string) {
     return activeRoute === route
