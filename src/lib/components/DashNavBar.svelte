@@ -79,6 +79,11 @@
       tooltipText:
         'A list of levels that can be assigned to metas. When adding a map, you can filter and include only metas with specific levels.'
     })}
+
+    {@render navItem({
+      name: 'Settings',
+      slug: 'settings'
+    })}
   </nav>
 </div>
 
