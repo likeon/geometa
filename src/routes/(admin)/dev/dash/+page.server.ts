@@ -35,7 +35,7 @@ export const load = async ({ locals }) => {
           Number
         ),
       gamesPlayed:
-        sql<number>`(SELECT SUM(${maps.numberOfGamesPlayed}) FROM ${maps} WHERE ${maps.mapGroupId} = ${mapGroups.id})`.mapWith(
+        sql<number>`(SELECT COALESCE(SUM(${maps.numberOfGamesPlayed}), 0) FROM ${maps} WHERE ${maps.mapGroupId} = ${mapGroups.id})`.mapWith(
           Number
         )
     })

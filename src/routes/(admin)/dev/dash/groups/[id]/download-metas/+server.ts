@@ -26,7 +26,7 @@ export async function GET(event) {
     levels: meta.metaLevels.map((metaLevel) => metaLevel.level.name),
     images: meta.images.map((image) => image.image_url)
   }));
-  const jsonString = JSON.stringify(result);
+  const jsonString = JSON.stringify(result, null, 4);
 
   const headers = new Headers({
     'Content-Type': 'application/json',

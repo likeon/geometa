@@ -7,41 +7,57 @@
   let mapGroupCreationModalOpen = $state(false);
   const { form, errors, constraints } = superForm(data.mapGroupForm);
   let searchText = $state('');
+
+  export function escapeHTML(input: string): string {
+    const map: { [key: string]: string } = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;',
+      "'": '&#39;',
+      '/': '&#x2F;',
+      '`': '&#x60;',
+      '=': '&#x3D;'
+    };
+
+    return input.replace(/[&<>"'`=/]/g, (char) => map[char]);
+  }
+
   let columns = [
     {
       key: 'name',
       label: 'Name',
-      width: '25%',
+      width: '32%',
       searchable: true,
       sortable: true,
       displayHtml: (item: (typeof data.userGroups)[number]) =>
-        `<a href="/dev/dash/groups/${item.id}">${item.name}</a>`
+        `<a href="/dev/dash/groups/${item.id}">${escapeHTML(item.name.trim() || '<No name>')}</a>`
     },
     {
       key: 'metasCount',
       label: 'Metas',
-      width: '25%',
+      width: '17%',
       searchable: false,
       sortable: true
     },
     {
       key: 'locationCount',
       label: 'Locations',
-      width: '25%',
+      width: '17%',
       searchable: false,
       sortable: true
     },
     {
       key: 'mapsCount',
       label: 'Maps',
-      width: '25%',
+      width: '17%',
       searchable: false,
       sortable: true
     },
     {
       key: 'gamesPlayed',
       label: 'Games played',
-      width: '25%',
+      width: '17%',
       searchable: false,
       sortable: true
     }
