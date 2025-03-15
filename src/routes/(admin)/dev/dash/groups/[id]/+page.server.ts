@@ -70,8 +70,8 @@ const mapJsonSchema = z.object({
       panoId: z.string(),
       extra: z.object({
         tags: z.string().array().length(1),
-        panoId: z.string().optional(),
-        panoDate: z.string().optional().or(z.null())
+        panoId: z.string().optional().nullable(),
+        panoDate: z.string().optional().nullable()
       })
     })
     .array()
