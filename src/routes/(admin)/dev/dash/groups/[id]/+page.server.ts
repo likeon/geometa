@@ -26,7 +26,6 @@ import rehypeStringify from 'rehype-stringify';
 import rehypeExternalLinks from 'rehype-external-links';
 import { autoUpdateMaps } from './geo';
 import { uploadMetas } from '$routes/(admin)/dev/dash/groups/[id]/metasUpload';
-import { boolean } from 'drizzle-orm/pg-core';
 
 const insertMetasSchema = createInsertSchema(metas)
   .pick({
@@ -117,7 +116,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   }
   const id = getGroupId(params);
   await ensurePermissions(locals.db, locals.user!.id, id);
-
   const [group, user] = await Promise.all([
     locals.db.query.mapGroups.findFirst({
       with: {
@@ -127,15 +125,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         },
         levels: true
       },
-      where: eq(mapGroups.id, id),
-      extras: {
-        hasUnsycnedData: sql<boolean>`EXISTS(
-            SELECT 1
-            FROM map_locations_view mlv
-            JOIN maps m ON m.id = mlv.map_id
-            WHERE m.map_group_id = ${mapGroups.id} AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < mlv.max_modified_at)
-          )`.as('has_unsynced_data')
-      }
+      where: eq(mapGroups.id, id)
     }),
     locals.db.query.users.findFirst({
       where: eq(users.id, locals.user!.id),
