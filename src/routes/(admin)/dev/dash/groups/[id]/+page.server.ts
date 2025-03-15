@@ -28,8 +28,16 @@ import { autoUpdateMaps } from './geo';
 import { uploadMetas } from '$routes/(admin)/dev/dash/groups/[id]/metasUpload';
 
 const insertMetasSchema = createInsertSchema(metas)
-  .extend({ levels: z.array(z.number()) })
-  .omit({ hasImage: true, noteHtml: true, footerHtml: true });
+  .pick({
+    id: true,
+    mapGroupId: true,
+    tagName: true,
+    name: true,
+    note: true,
+    noteFromPlonkit: true,
+    footer: true
+  })
+  .extend({ levels: z.array(z.number()) });
 export type InsertMetasSchema = typeof insertMetasSchema;
 
 const mapUploadSchema = z.object({

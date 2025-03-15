@@ -5,11 +5,6 @@ tasks:
     cmds:
       - .ci/tilt-with-cluster.sh
 
-  turso:db:dump:prod:
-    dotenv: ['.env.prod.local']
-    cmds:
-      - .ci/db/dump.sh
-
   psql:
     cmds:
       - psql -h localhost -U postgres geometa
