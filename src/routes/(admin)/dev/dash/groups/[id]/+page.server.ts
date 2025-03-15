@@ -125,7 +125,23 @@ export const load: PageServerLoad = async ({ params, locals }) => {
         },
         levels: true
       },
-      where: eq(mapGroups.id, id)
+      where: eq(mapGroups.id, id),
+      extras: {
+        hasUnsycnedData: sql<boolean>`
+        EXISTS (SELECT 1
+         FROM map_group_locations mgl
+         WHERE mgl.map_group_id = ${mapGroups.id}
+           AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < mgl.modified_at))
+        OR EXISTS(SELECT 1
+         FROM metas m
+         WHERE m.map_group_id = ${mapGroups.id} AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < m.modified_at)
+        OR EXISTS(
+         SELECT 1
+         FROM maps m
+         WHERE m.map_group_id = ${mapGroups.id} AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < m.modified_at)
+        )
+        )`.as('has_unsynced_data')
+      }
     }),
     locals.db.query.users.findFirst({
       where: eq(users.id, locals.user!.id),

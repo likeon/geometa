@@ -56,7 +56,8 @@ export const mapGroupLocations = pgTable(
   },
   (t) => [
     uniqueIndex('map_group_locations_unique').on(t.mapGroupId, t.panoId),
-    index('map_group_locations_map_group_tag_idx').on(t.mapGroupId, t.extraTag)
+    index('map_group_locations_map_group_tag_idx').on(t.mapGroupId, t.extraTag),
+    index('map_group_locations_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt)
   ]
 );
 export const mapGroupLocationsRelations = relations(mapGroupLocations, ({ one }) => ({
@@ -86,9 +87,10 @@ export const maps = pgTable(
     numberOfGamesPlayed: integer('number_of_games_played'),
     numberOfGamesPlayedDiminished: integer('number_of_games_played_diminished')
   },
-  (t) => ({
-    geoguessrIdUnique: uniqueIndex('maps_geoguessr_id_unique').on(t.geoguessrId)
-  })
+  (t) => [
+    uniqueIndex('maps_geoguessr_id_unique').on(t.geoguessrId),
+    index('maps_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt)
+  ]
 );
 export const mapsRelations = relations(maps, ({ one, many }) => ({
   mapGroup: one(mapGroups, { fields: [maps.mapGroupId], references: [mapGroups.id] }),
@@ -170,9 +172,10 @@ export const metas = pgTable(
     hasImage: boolean('has_image').notNull().default(false),
     modifiedAt: integer('modified_at').default(1730419200).notNull()
   },
-  (t) => ({
-    metaUnique: uniqueIndex('metas_unique').on(t.mapGroupId, t.tagName)
-  })
+  (t) => [
+    uniqueIndex('metas_unique').on(t.mapGroupId, t.tagName),
+    index('metas_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt)
+  ]
 );
 export const metasRelations = relations(metas, ({ one, many }) => ({
   mapGroup: one(mapGroups, { fields: [metas.mapGroupId], references: [mapGroups.id] }),

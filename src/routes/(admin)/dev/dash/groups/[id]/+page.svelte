@@ -131,6 +131,16 @@
   <title>{data.group.name} - Metas</title>
 </svelte:head>
 
+{#snippet userScriptSyncButtonContent()}
+  {#if syncingUserScript}
+    <div class="h-6 w-[7rem] flex items-center justify-center">
+      <LoadingSmall />
+    </div>
+  {:else}
+    Sync UserScript
+  {/if}
+{/snippet}
+
 <div>
   <DashNavBar groupId={data.group.id} groupName={data.group.name}></DashNavBar>
   <div class="flex flex-wrap items-center">
@@ -147,7 +157,7 @@
         action="?/prepareUserScriptData"
         use:enhance={() => {
           syncingUserScript = true;
-          return async ({ result }) => {
+          return async ({ result, update }) => {
             syncingUserScript = false;
             if (result.type === 'success') {
               applyAction(result);
@@ -172,17 +182,18 @@
                 theme: { '--toastBackground': 'red', '--toastColor': 'white' }
               });
             }
+            update();
           };
         }}>
-        <GradientButton color="pinkToOrange" class="ml-3" type="submit">
-          {#if syncingUserScript}
-            <div class="h-6 w-[7rem] flex items-center justify-center">
-              <LoadingSmall />
-            </div>
-          {:else}
-            Sync UserScript
-          {/if}
-        </GradientButton>
+        {#if data.group.hasUnsycnedData}
+          <GradientButton color="pinkToOrange" class="ml-3" type="submit">
+            {@render userScriptSyncButtonContent()}
+          </GradientButton>
+        {:else}
+          <Button color="dark" class="ml-3" type="submit">
+            {@render userScriptSyncButtonContent()}
+          </Button>
+        {/if}
         <Tooltip>
           Update your changes after editing or adding metas/maps to make them visible to users of
           the LearnableMeta script.
