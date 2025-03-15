@@ -20,6 +20,7 @@
   interface RegularColumn extends BaseColumn {
     key: Exclude<string, 'link'>;
     display?: (item: any) => any;
+    displayHtml?: (item: any) => string;
   }
 
   type Column = LinkColumn | RegularColumn;
@@ -32,8 +33,8 @@
     data: Array<any>;
     columns: Column[];
     searchText: string;
-    selectedRowId: number;
-    isModalOpen: boolean;
+    selectedRowId?: number;
+    isModalOpen?: boolean;
   }
 
   let {
@@ -170,6 +171,9 @@
                   {displayValue}
                   <!-- Display the value returned by the function if not boolean -->
                 {/if}
+              {:else if column.displayHtml}
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+                {@html column.displayHtml(row)}
               {:else}
                 {row[column.key]}
                 <!-- Directly display the value if column.display does not exist -->

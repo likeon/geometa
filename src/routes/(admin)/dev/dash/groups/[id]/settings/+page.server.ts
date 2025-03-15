@@ -28,7 +28,6 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   if (!group) {
     error(404, 'No group');
   }
-  console.debug(group);
   return {
     group
   };
