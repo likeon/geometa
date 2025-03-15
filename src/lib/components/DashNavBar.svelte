@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import Icon from '@iconify/svelte';
-  import { Button, Input, Label, Modal } from 'flowbite-svelte'; // Import the page store to get the current route
+  import { Button, Input, Label, Modal, Tooltip } from 'flowbite-svelte'; // Import the page store to get the current route
   import { applyAction, enhance } from '$app/forms';
   import TooltipName from './TooltipName.svelte';
 
@@ -12,7 +12,7 @@
 
   let { groupId, groupName }: Props = $props();
 
-  let activeRoute = $derived($page.url.pathname);
+  let activeRoute = $derived(page.url.pathname);
 
   function isActive(route: string) {
     return activeRoute === route
@@ -22,6 +22,27 @@
 
   let groupRenameModalOpen = $state(false);
 </script>
+
+{#snippet navItem({
+  name,
+  slug,
+  tooltipText
+}: {
+  name: string;
+  slug?: string;
+  tooltipText?: string;
+})}
+  {@const url = `/dev/dash/groups/${groupId}` + (slug ? `/${slug}` : '')}
+  <a href={url} class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium {isActive(url)}">
+    {#if tooltipText}
+      <TooltipName {name} {tooltipText}></TooltipName>
+    {:else}
+      <div class="mb-1">
+        <span class="inline-flex items-center">{name}</span>
+      </div>
+    {/if}
+  </a>
+{/snippet}
 
 <div class="border-b border-gray-200 mb-4">
   <span class="text-sm font-semibold text-gray-600 flex group">
@@ -34,42 +55,30 @@
         height="14" /></button>
   </span>
   <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-    <a
-      href={`/dev/dash/groups/${groupId}`}
-      class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium {isActive(
-        `/dev/dash/groups/${groupId}`
-      )}">
-      <TooltipName
-        name="Metas"
-        tooltipText="A list of metas showing their tags, name, location count, assigned levels, and whether they include a note or an image.
+    {@render navItem({
+      name: 'Metas',
+      tooltipText:
+        'A list of metas showing their tags, name, location count, assigned levels, and whether they include a note or an image.\n' +
+        '\n' +
+        'You can add metas manually or by uploading a map-making JSON file, which will automatically populate tags. Then, you just need to add names, notes, and images.\n' +
+        '\n' +
+        "For advanced users, you can upload a JSON file containing metas by clicking the three dots and selecting 'Upload Metas'."
+    })}
 
-You can add metas manually or by uploading a map-making JSON file, which will automatically populate tags. Then, you just need to add names, notes, and images.
+    {@render navItem({
+      name: 'Maps',
+      slug: 'maps',
+      tooltipText:
+        'A list of your maps where you want to enable the learnable script.\n' +
+        'After adding a map, make sure to press the Sync button in the Metas tab to apply the changes.'
+    })}
 
-For advanced users, you can upload a JSON file containing metas by clicking the three dots and selecting 'Upload Metas'.">
-      </TooltipName>
-    </a>
-    <a
-      href={`/dev/dash/groups/${groupId}/maps`}
-      class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium {isActive(
-        `/dev/dash/groups/${groupId}/maps`
-      )}">
-      <TooltipName
-        name="Maps"
-        tooltipText="A list of your maps where you want to enable the learnable script.
-After adding a map, make sure to press the Sync button in the Metas tab to apply the changes.
-       ">
-      </TooltipName>
-    </a>
-    <a
-      href={`/dev/dash/groups/${groupId}/levels`}
-      class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium {isActive(
-        `/dev/dash/groups/${groupId}/levels`
-      )}">
-      <TooltipName
-        name="Levels"
-        tooltipText="A list of levels that can be assigned to metas. When adding a map, you can filter and include only metas with specific levels.">
-      </TooltipName>
-    </a>
+    {@render navItem({
+      name: 'Levels',
+      slug: 'levels',
+      tooltipText:
+        'A list of levels that can be assigned to metas. When adding a map, you can filter and include only metas with specific levels.'
+    })}
   </nav>
 </div>
 
