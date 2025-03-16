@@ -52,7 +52,7 @@
     <h3 class="text-xl font-semibold leading-7 text-green-600">{map.name}</h3>
     <p>by <strong>{map.authors}</strong></p>
 
-    <p class="mt-6 text-base leading-7 text-gray-600">
+    <p class="mt-6 text-base text-gray-600 whitespace-pre-line leading-snug map-description">
       {map.description}
     </p>
   </div>
