@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { TabItem, Tabs } from 'flowbite-svelte';
   import MapCard from './MapCard.svelte';
+  import { Input } from '$lib/components/ui/input';
 
   let { data } = $props();
   let activeRegion = $state('');
@@ -13,6 +13,8 @@
           map.authors?.toLocaleLowerCase().includes(searchText.toLocaleLowerCase()))
     )
   );
+
+  const regionButtonClass = 'px-4 py-1 rounded-lg border focus:outline-none hover:bg-gray-200';
 </script>
 
 <svelte:head>
@@ -24,14 +26,14 @@
     <!-- Scrollable Buttons -->
     <div class="flex overflow-x-auto space-x-2 lg:space-x-2 scroll-container">
       <button
-        class="px-4 py-2 rounded-lg border focus:outline-none hover:bg-gray-200"
+        class={regionButtonClass}
         class:selected={activeRegion === ''}
         onclick={() => (activeRegion = '')}>
         All
       </button>
-      {#each data.regionsList as region}
+      {#each data.regionsList as region (region.id)}
         <button
-          class="px-4 py-2 rounded-lg border focus:outline-none hover:bg-gray-200"
+          class={regionButtonClass}
           class:selected={activeRegion === region.name}
           onclick={() => (activeRegion = region.name)}>
           {region.name}
@@ -41,11 +43,7 @@
 
     <!-- Search Box -->
     <div class="mt-4 lg:mt-0 lg:ml-6 w-full lg:w-auto">
-      <input
-        type="text"
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring focus:ring-blue-300"
-        placeholder="Search maps"
-        bind:value={searchText} />
+      <Input type="email" placeholder="Search maps" bind:value={searchText} class="max-w-xs" />
     </div>
   </div>
   <div>
@@ -57,9 +55,9 @@
   </div>
 </div>
 
-<style>
+<style lang="postcss">
   .selected {
-    background-color: #2563eb; /* Tailwind's blue-600 */
+    @apply bg-primary;
     color: white;
     font-weight: bold;
   }
@@ -72,6 +70,7 @@
   ::-webkit-scrollbar {
     height: 6px;
   }
+
   ::-webkit-scrollbar-thumb {
     background-color: #cbd5e1; /* Tailwind slate-300 */
     border-radius: 3px;

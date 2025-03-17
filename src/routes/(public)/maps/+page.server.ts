@@ -1,9 +1,16 @@
-import { asc, desc, eq, sql } from 'drizzle-orm';
+import { asc, desc, eq, type InferSelectModel, sql } from 'drizzle-orm';
 import { maps, regions } from '$lib/db/schema';
 
 const mapCacheKey = 'query:maps:allmaps';
 const regionsKey = 'query:maps:regions';
 const contentCacheEnabled = true;
+
+type Region = InferSelectModel<typeof regions>;
+type Map = InferSelectModel<typeof maps> & {
+  locationsCount: number;
+  regions: string;
+  metasCount: number;
+};
 
 export const load = async (event) => {
   if (event.platform && contentCacheEnabled) {
@@ -13,8 +20,8 @@ export const load = async (event) => {
 
     if (allMapsCache && regionsListCache) {
       return {
-        allMaps: JSON.parse(allMapsCache),
-        regionsList: JSON.parse(regionsListCache)
+        allMaps: JSON.parse(allMapsCache) as Map[],
+        regionsList: JSON.parse(regionsListCache) as Region[]
       };
     }
   }
