@@ -37,7 +37,7 @@
 <div id="content" class="mx-auto max-w-3xl mt-10 container">
   <p class="w-full flex justify-center"></p>
   <Heading tag="h2">Learnable Meta for Map Creators</Heading>
-  <p class="text-base font-semibold leading-7 text-green-500">
+  <p class="text-base font-semibold leading-7 text-green-700">
     Enhance your map with our UserScript in 2 easy steps
   </p>
   <p class="mt-3">

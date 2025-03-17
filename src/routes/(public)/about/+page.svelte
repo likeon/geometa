@@ -11,7 +11,7 @@
 <div id="content" class="container bg-white px-6 py-10 lg:px-8">
   <div class="mx-auto max-w-3xl text-base leading-7 text-gray-700">
     <div class="main-content">
-      <p class="text-base font-semibold leading-7 text-green-500">Introducing</p>
+      <p class="text-base font-semibold leading-7 text-green-700">Introducing</p>
       <Heading tag="h1">A Learnable Meta World maps</Heading>
       <p>
         When someone wants to improve at GeoGuessr, they often try to memorize lists of bollards,
