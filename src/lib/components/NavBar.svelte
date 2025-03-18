@@ -1,12 +1,12 @@
 <script>
   import { Navbar, NavBrand, NavHamburger, NavLi, NavUl } from 'flowbite-svelte';
   import logo from '$lib/assets/logo.png?enhanced';
-  import { page } from '$app/stores';
+  import { page } from '$app/state';
   import Icon from '@iconify/svelte';
 
   let { admin } = $props();
 
-  let activeUrl = $derived($page.url.pathname);
+  let activeUrl = $derived(page.url.pathname);
 </script>
 
 <Navbar class="px-2 sm:px-4 py-0 w-full bg-gradient-to-r from-green-100 to-sky-100">
