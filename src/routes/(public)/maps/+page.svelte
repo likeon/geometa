@@ -14,7 +14,8 @@
     )
   );
 
-  const regionButtonClass = 'px-4 py-1 rounded-lg border focus:outline-none hover:bg-gray-200';
+  const regionButtonClass =
+    'px-4 py-1 rounded-lg border focus:outline-none hover:bg-gray-200 dark:hover:bg-gray-900';
 </script>
 
 <svelte:head>
@@ -22,7 +23,7 @@
 </svelte:head>
 
 <div class="container">
-  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between py-2 bg-white">
+  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between py-2">
     <!-- Scrollable Buttons -->
     <div class="flex overflow-x-auto space-x-2 lg:space-x-2 scroll-container">
       <button

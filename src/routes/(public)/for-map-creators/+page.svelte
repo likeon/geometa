@@ -10,10 +10,10 @@
 </svelte:head>
 
 <div
-  class="bg-gradient-to-r from-emerald-200 via-rose-200 to-blue-200 relative isolate overflow-hidden">
+  class="bg-gradient-to-r from-emerald-200 via-rose-200 to-blue-200 dark:from-gray-800 dark:via-gray-900 dark:to-black relative isolate overflow-hidden">
   <div class="items-center mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-10">
     <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
-      <h1 class="mt-10 text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+      <h1 class="mt-10 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
         Want this on <span class="text-nowrap">your map</span>?
       </h1>
       <div class="mt-10 flex items-center gap-x-6">
@@ -48,12 +48,12 @@
   <p class="mt-3">
     We built a platform that easily allows you to share helpful insights with the users of your map.
   </p>
-  <ul role="list" class="mt-8 max-w-xl space-y-4 text-gray-600">
+  <ul role="list" class="mt-8 max-w-xl space-y-4 text-gray-600 dark:text-gray-400">
     <li>
       <div class="flex gap-x-3">
         <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
         <span
-          ><strong class="font-semibold text-gray-900">Adjust your map.</strong>
+          ><strong class="font-semibold text-gray-900 dark:text-gray-100">Adjust your map.</strong>
           First, you need to tag your locations in the map-making app. Only one tag per location in
           <span class="italic">CountryName-Any tag name</span> format.</span>
       </div>
@@ -61,7 +61,7 @@
     <li class="flex gap-x-3">
       <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
       <span
-        ><strong class="font-semibold text-gray-900"
+        ><strong class="font-semibold text-gray-900 dark:text-gray-100"
           >Upload map JSON and enter tag descriptions.</strong>
         Upload the map into our platform and fill-out the notes for each tag. What you entered is going
         to be shown to the users after a guess on location that uses this tag.

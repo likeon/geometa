@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Badge, type ColorVariant, Tooltip } from 'flowbite-svelte';
+  import { Badge, Tooltip } from 'flowbite-svelte';
   import { Button } from '$lib/components/ui/button';
   import * as Card from '$lib/components/ui/card';
   import Icon from '@iconify/svelte';
@@ -14,14 +14,26 @@
   const difficulties: Record<
     number,
     {
-      color: ColorVariant;
+      class: string;
       icon: string;
       label: string;
     }
   > = {
-    1: { color: 'green', icon: 'carbon:skill-level-basic', label: 'Beginner' },
-    2: { color: 'yellow', icon: 'carbon:skill-level-intermediate', label: 'Intermediate' },
-    3: { color: 'red', icon: 'carbon:skill-level-advanced', label: 'Advanced' }
+    1: {
+      class: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
+      icon: 'carbon:skill-level-basic',
+      label: 'Beginner'
+    },
+    2: {
+      class: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+      icon: 'carbon:skill-level-intermediate',
+      label: 'Intermediate'
+    },
+    3: {
+      class: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+      icon: 'carbon:skill-level-advanced',
+      label: 'Advanced'
+    }
   };
 </script>
 
@@ -30,7 +42,7 @@
     <div class="flex flex-row pb-2">
       {#if map.isVerified}
         <div>
-          <Badge class="bg-yellow-200 text-yellow-800">
+          <Badge class="bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200">
             <Icon icon="ri:star-line" class="inline-block  mr-1" />
             Verified
           </Badge>
@@ -38,17 +50,17 @@
       {/if}
       <div class="ml-auto">
         {#if map.difficulty in difficulties}
-          <Badge color={difficulties[map.difficulty].color} size="sm">
+          <Badge class={difficulties[map.difficulty].class}>
             <Icon icon={difficulties[map.difficulty].icon} class="inline-block mr-1" />
             {difficulties[map.difficulty].label}
           </Badge>
         {/if}
-        <Badge class="bg-pink-50 text-pink-500" size="sm">
+        <Badge class="bg-pink-50 text-pink-500 dark:bg-pink-900 dark:text-pink-50">
           <Icon icon="gravity-ui:map-pin" class="inline-block  mr-1" />
           {map.locationsCount}
         </Badge>
         <Tooltip>Number of locations in the map.</Tooltip>
-        <Badge class="bg-indigo-50 text-indigo-500" size="sm">
+        <Badge class="bg-indigo-50 text-indigo-500 dark:bg-indigo-900 dark:text-indigo-50">
           <Icon icon="cil:list" class="inline-block  mr-1" />
           {map.metasCount}</Badge>
         <Tooltip>Number of metas in the map.</Tooltip>
@@ -58,7 +70,8 @@
     <Card.Description>by <strong>{map.authors}</strong></Card.Description>
   </Card.Header>
   <Card.Content class="pt-0 flex flex-col h-full">
-    <p class="mt-6 text-base text-gray-600 whitespace-pre-line leading-snug break-words flex-grow">
+    <p
+      class="mt-6 text-base text-gray-600 dark:text-gray-300 whitespace-pre-line leading-snug break-words flex-grow">
       {map.description}
     </p>
     <div class="mt-7 flex gap-4">

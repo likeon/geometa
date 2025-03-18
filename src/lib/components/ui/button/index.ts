@@ -9,7 +9,7 @@ const buttonVariants = tv({
       default: 'bg-primary text-primary-foreground hover:bg-primary/90 shadow dark:text-white',
       destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm',
       outline:
-        'border-input bg-background hover:bg-accent hover:text-accent-foreground border shadow-sm',
+        'border-input bg-background hover:bg-accent hover:text-accent-foreground border shadow-sm dark:text-zinc-200',
       secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/80 shadow-sm',
       ghost: 'hover:bg-accent hover:text-accent-foreground',
       link: 'text-primary underline-offset-4 hover:underline'
