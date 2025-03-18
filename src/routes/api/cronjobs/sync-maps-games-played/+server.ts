@@ -27,7 +27,7 @@ export async function POST({ request, locals }) {
   // number_of_games_played
   for (const mapDataItem of mapsUsageData) {
     sqlChunks.push(
-      sql`WHEN geoguessr_id = ${mapDataItem.geoguessrId} THEN ${mapDataItem.numberOfGamesPlayed}`
+      sql`WHEN geoguessr_id = ${mapDataItem.geoguessrId} THEN ${mapDataItem.numberOfGamesPlayed}::bigint`
     );
   }
 
@@ -35,7 +35,7 @@ export async function POST({ request, locals }) {
   sqlChunks.push(sql`END, number_of_games_played_diminished = CASE`);
   for (const mapDataItem of mapsUsageData) {
     sqlChunks.push(
-      sql`WHEN geoguessr_id = ${mapDataItem.geoguessrId} THEN ${mapDataItem.numberOfGamesPlayedDiminished}`
+      sql`WHEN geoguessr_id = ${mapDataItem.geoguessrId} THEN ${mapDataItem.numberOfGamesPlayedDiminished}::bigint`
     );
   }
   sqlChunks.push(sql`END WHERE geoguessr_id IN ${mapsUsageData.map((item) => item.geoguessrId)}`);
