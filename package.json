@@ -61,7 +61,6 @@
   "type": "module",
   "dependencies": {
     "@lucia-auth/adapter-drizzle": "^1.1.0",
-    "@upstash/redis": "^1.34.5",
     "active-table": "^1.1.5",
     "arctic": "^1.9.2",
     "aws4fetch": "^1.0.20",
