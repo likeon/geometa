@@ -86,14 +86,16 @@
       <Button onclick={() => (mapGroupCreationModalOpen = true)}>Create group</Button>
     </div>
   </div>
-  <SortFilterTable
-    data={data.userGroups}
-    {searchText}
-    {columns}
-    isModalOpen={false}
-    selectedRowId={undefined} />
+  <div class="mb-5">
+    <SortFilterTable
+      data={data.userGroups}
+      {searchText}
+      {columns}
+      isModalOpen={false}
+      selectedRowId={undefined} />
+  </div>
   {#if data.allGroups}
-    <div class="mt-5">
+    <div>
       <hr />
       <ul class="">
         {#each data.allGroups as group (group.id)}

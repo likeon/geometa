@@ -1,16 +1,26 @@
-<script lang="ts">
-  import '../../app.css';
+<script>
+  import '../app.css';
   import NavBar from '$lib/components/NavBar.svelte';
+  import { dev } from '$app/environment';
+  import Footer from '$lib/components/Footer.svelte';
+  import { page } from '$app/state';
   import { env } from '$env/dynamic/public';
 
   let { children } = $props();
+  let admin = $derived(page.url.pathname.startsWith('/dev/dash'));
   const underMaintenance = env.PUBLIC_DASHBOARD_MAINTENANCE === 'true';
 </script>
 
+<svelte:head>
+  {#if !dev && !admin}
+    <script async data-id="101468249" src="//static.getclicky.com/js"></script>
+  {/if}
+</svelte:head>
+
 <div class="app">
-  <NavBar admin={true} />
+  <NavBar />
   <main>
-    {#if underMaintenance}
+    {#if underMaintenance && admin}
       <div class="bg-white px-6 py-24 sm:py-32 lg:px-8">
         <div class="mx-auto max-w-2xl text-center">
           <h2 class="text-5xl font-semibold tracking-tight text-gray-900 sm:text-7xl">
@@ -25,4 +35,5 @@
       {@render children?.()}
     {/if}
   </main>
+  <Footer />
 </div>
