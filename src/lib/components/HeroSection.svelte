@@ -1,8 +1,8 @@
 <script lang="ts">
   import background from '$lib/assets/background.jpg?enhanced';
   import video from '$lib/assets/showcase.webm';
+  import { Button } from '$lib/components/ui/button';
   // import GeoIcon from '~icons/wpf/geo-fence'
-  import { Button } from 'flowbite-svelte';
 </script>
 
 <div class="bg-cover bg-center bg-no-repeat relative isolate overflow-hidden min-h-screen">
@@ -14,7 +14,8 @@
   <div class="items-center mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-40">
     <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
       <!--      <GeoIcon style="color: dodgerblue" width="2rem" height="2rem"/>-->
-      <h1 class="mt-10 text-4xl font-bold tracking-tight text-white sm:text-6xl shadow-2xl">
+      <h1
+        class="mt-10 text-4xl font-bold tracking-tight text-white dark:text-zinc-300 sm:text-6xl shadow-2xl">
         New way to learn <span class="whitespace-nowrap">Geo Guessing</span>
       </h1>
       <div class="mt-10 flex items-center gap-x-6">

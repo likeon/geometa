@@ -8,8 +8,8 @@
   <title>How To</title>
 </svelte:head>
 
-<div id="content" class="container bg-white px-6 py-10 lg:px-8">
-  <div class="mx-auto max-w-3xl text-base leading-7 text-gray-700">
+<div id="content" class="container px-6 py-10 lg:px-8">
+  <div class="mx-auto max-w-3xl text-base leading-7">
     <div class="main-content">
       <p class="text-base font-semibold leading-7 text-green-700">Introducing</p>
       <Heading tag="h1">A Learnable Meta World maps</Heading>
@@ -45,12 +45,13 @@
         about it, don't worry—it's easy to set up.
       </p>
       <Heading tag="h4" class="mt-4 mb-[-20px]">Here's how to do it</Heading>
-      <ul role="list" class="mt-8 max-w-xl space-y-4 text-gray-600">
+      <ul role="list" class="mt-8 max-w-xl space-y-4 text-gray-600 dark:text-white">
         <li>
           <div class="flex gap-x-3">
             <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
             <span
-              ><strong class="font-semibold text-gray-900">Install the Browser Extension.</strong>
+              ><strong class="font-semibold text-gray-900 dark:text-gray-200"
+                >Install the Browser Extension.</strong>
               First, you need to install a userscript manager extension for your browser. Tampermonkey
               is available for
               <a
@@ -61,7 +62,7 @@
                 >Firefox</a
               >.</span>
           </div>
-          <p class="text-gray-600 ml-9 italic">
+          <p class="text-gray-600 dark:text-gray-400 ml-9 italic">
             * - Chrome: <a
               href="https://www.tampermonkey.net/faq.php?locale=en#Q209"
               target="_blank">Enable developer mode</a> in extensions to ensure Tampermonkey works properly
@@ -70,7 +71,8 @@
         <li class="flex gap-x-3">
           <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
           <span
-            ><strong class="font-semibold text-gray-900">Install the Userscript.</strong>
+            ><strong class="font-semibold text-gray-900 dark:text-gray-200"
+              >Install the Userscript.</strong>
             Once you have the extension installed, you can install the userscript by clicking
             <a
               href="https://github.com/likeon/geometa/raw/main/dist/geometa.user.js"
@@ -89,7 +91,8 @@
         <li class="flex gap-x-3">
           <Icon icon="icon-park-solid:check-one" class="h-6 w-6 flex-shrink-0" color="green" />
           <span
-            ><strong class="font-semibold text-gray-900">Play one of our maps.</strong>
+            ><strong class="font-semibold text-gray-900 dark:text-gray-200"
+              >Play one of our maps.</strong>
             Guess a location on
             <a href="/maps">our maps</a>. On the results screen, a note will be displayed showing
             the meta that was in the round, in case you missed it.</span>

@@ -6,6 +6,7 @@
   import { page } from '$app/state';
   import { env } from '$env/dynamic/public';
   import { building } from '$app/environment';
+  import { ModeWatcher } from 'mode-watcher';
 
   let { children } = $props();
   let admin = $derived(page.url.pathname.startsWith('/dev/dash'));
@@ -18,6 +19,7 @@
   {/if}
 </svelte:head>
 
+<ModeWatcher />
 <div class="app">
   <NavBar />
   <main>

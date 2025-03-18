@@ -1,7 +1,8 @@
 <script lang="ts">
   import video from '$lib/assets/showcase.webm';
-  import { Button, GradientButton, Heading } from 'flowbite-svelte';
+  import { GradientButton, Heading } from 'flowbite-svelte';
   import Icon from '@iconify/svelte';
+  import { Button } from '$lib/components/ui/button';
 </script>
 
 <svelte:head>
