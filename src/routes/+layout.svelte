@@ -5,10 +5,11 @@
   import Footer from '$lib/components/Footer.svelte';
   import { page } from '$app/state';
   import { env } from '$env/dynamic/public';
+  import { building } from '$app/environment';
 
   let { children } = $props();
   let admin = $derived(page.url.pathname.startsWith('/dev/dash'));
-  const underMaintenance = env.PUBLIC_DASHBOARD_MAINTENANCE === 'true';
+  const underMaintenance = !building && env.PUBLIC_DASHBOARD_MAINTENANCE === 'true';
 </script>
 
 <svelte:head>
