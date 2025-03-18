@@ -1,9 +1,10 @@
 import { type Handle, redirect } from '@sveltejs/kit';
 import { initializeLucia } from '$lib/auth';
 import { getDb } from '$lib/drizzle';
+import { building } from '$app/environment';
 
 export const handle: Handle = async ({ event, resolve }) => {
-  if (event.url.pathname.startsWith('/prerender') || event.platform?.env === undefined) {
+  if (building) {
     return resolve(event);
   }
 
