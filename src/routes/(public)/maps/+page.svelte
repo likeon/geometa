@@ -43,7 +43,7 @@
 
     <!-- Search Box -->
     <div class="mt-4 lg:mt-0 lg:ml-6 w-full lg:w-auto">
-      <Input type="email" placeholder="Search maps" bind:value={searchText} class="max-w-xs" />
+      <Input placeholder="Search maps" bind:value={searchText} class="max-w-xs" />
     </div>
   </div>
   <div>
