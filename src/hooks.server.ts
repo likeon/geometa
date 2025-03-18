@@ -1,13 +1,8 @@
 import { type Handle, redirect } from '@sveltejs/kit';
 import { initializeLucia } from '$lib/auth';
 import { getDb } from '$lib/drizzle';
-import { building } from '$app/environment';
 
 export const handle: Handle = async ({ event, resolve }) => {
-  if (building) {
-    return resolve(event);
-  }
-
   const db = getDb(event.platform!.env);
   const lucia = initializeLucia(db);
   event.locals.db = db;
