@@ -1,0 +1,16 @@
+name: Rebuild prod
+
+on:
+  schedule:
+    # every hour
+    - cron: '0 * * * *'
+  workflow_dispatch:
+
+jobs:
+  post-request:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Make a POST request
+        run: |
+          curl -X POST "https://api.cloudflare.com/client/v4/pages/webhooks/deploy_hooks/fa319630-10d2-4ab1-913a-d1158fd84857"
