@@ -206,19 +206,19 @@
     padding: 10px 16px;
   }
 
-  /*.custom-select {*/
-  /*  width: 110px;*/
-  /*  font-size: 12px;*/
-  /*  padding: 4px;*/
-  /*  display: inline-block;*/
-  /*  margin-right: 10px;*/
-  /*  border: 1px solid #d1d5db;*/
-  /*  border-radius: 0.25rem;*/
-  /*}*/
+  .custom-select {
+    width: 110px;
+    font-size: 12px;
+    padding: 4px;
+    display: inline-block;
+    margin-right: 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+  }
 
-  /*.custom-select:focus {*/
-  /*  outline: none;*/
-  /*  ring: 2px;*/
-  /*  ring-color: #3b82f6;*/
-  /*}*/
+  .custom-select:focus {
+    outline: none;
+    ring: 2px;
+    ring-color: #3b82f6;
+  }
 </style>
