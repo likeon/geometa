@@ -17,7 +17,7 @@
   function isActive(route: string) {
     return activeRoute === route
       ? 'border-green-500 text-green-600'
-      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700';
+      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:hover:border-gray-700 hover:text-gray-300';
   }
 
   let groupRenameModalOpen = $state(false);
@@ -33,7 +33,11 @@
   tooltipText?: string;
 })}
   {@const url = `/dev/dash/groups/${groupId}` + (slug ? `/${slug}` : '')}
-  <a href={url} class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium {isActive(url)}">
+  <a
+    href={url}
+    class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium dark:text-gray-300 {isActive(
+      url
+    )}">
     {#if tooltipText}
       <TooltipName {name} {tooltipText}></TooltipName>
     {:else}
@@ -45,8 +49,8 @@
 {/snippet}
 
 <div class="border-b border-gray-200 mb-4">
-  <span class="text-sm font-semibold text-gray-600 flex group">
-    Group: {groupName}
+  <span class="text-sm font-semibold text-gray-600 dark:text-gray-400 flex group">
+    Group: {groupName || '<No name>'}
     <button onclick={() => (groupRenameModalOpen = true)} class=" items-center h-full"
       ><Icon
         icon="ic:baseline-edit"

@@ -6,7 +6,7 @@
   <title>Privacy Policy</title>
 </svelte:head>
 
-<div id="content" class="container bg-white px-6 py-10 lg:px-8">
+<div id="content" class="container px-6 py-10 lg:px-8">
   <Heading customSize="text-2xl" tag="h2">Map Creator portal</Heading>
   <p>
     When you sign in with Discord, we collect your Discord username and user ID to authenticate you

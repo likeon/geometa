@@ -200,11 +200,7 @@
               name="Footer"
               tooltipText="This footer will appear below the meta note. If a footer is set for the map, this meta footer will still take priority and be displayed instead.">
             </TooltipName>
-            <MarkdownEditor
-              carta={cartaFooter}
-              mode="tabs"
-              theme="test"
-              bind:value={$formMeta.footer} />
+            <MarkdownEditor carta={cartaFooter} mode="tabs" bind:value={$formMeta.footer} />
             {#if $errorsMeta.footer}
               <Alert color="red">{$errorsMeta.footer}</Alert>
             {/if}

@@ -110,21 +110,24 @@
   }
 </script>
 
-<div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg mt-3">
+<div
+  class="overflow-hidden shadow ring-1 ring-black dark:ring-white ring-opacity-5 sm:rounded-lg mt-3">
   <table class="w-full table-fixed border-spacing-y-3 border-separate">
     <colgroup>
       {#each columns as column}
         <col style="width: {column.width || 'auto'}" />
       {/each}
     </colgroup>
-    <thead class="bg-green-100">
+    <thead class="bg-green-100 dark:bg-green-900">
       <tr>
         {#each columns as column}
           <th
             scope="col"
-            class="table-header py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6"
+            class="table-header py-3.5 pl-4 pr-3 text-left text-sm font-semibold sm:pl-6"
             class:hover:bg-green-200={column.sortable}
+            class:dark:hover:bg-green-800={column.sortable}
             class:bg-blue-300={selectedColumn === column.key}
+            class:dark:bg-green-800={selectedColumn === column.key}
             class:cursor-pointer={column.sortable}
             onclick={() => column.sortable && handleSort(column.key)}>
             {#if !column.filterable}
@@ -144,7 +147,7 @@
     <tbody>
       {#each filteredData as row (row.id)}
         <tr
-          class="cursor-pointer hover:bg-green-200"
+          class="cursor-pointer hover:bg-green-200 dark:hover:bg-green-800"
           role="link"
           onclick={() => {
             selectedRowId = row.id;
@@ -157,7 +160,6 @@
                   onclick={(event) => event.stopPropagation()}
                   href={column.display(row)}
                   target="_blank"
-                  rel="noopener noreferrer"
                   class="text-blue-500 hover:text-blue-700">
                   <Icon icon="mdi:link" class="ml-1 w-5 h-5 inline" />
                 </a>
@@ -165,7 +167,8 @@
                 {@const displayValue = column.display(row[column.key])}
                 {#if typeof displayValue === 'boolean'}
                   {#if displayValue}
-                    <Icon icon="ei:check" class="w-5 h-5" color="green" /> <!-- Display the icon -->
+                    <Icon icon="ei:check" class="w-5 h-5 text-green-700 dark:text-green-300" />
+                    <!-- Display the icon -->
                   {/if}
                 {:else}
                   {displayValue}
@@ -196,26 +199,26 @@
   }
 
   .table-header {
-    @apply py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900;
+    @apply py-3.5 pl-4 pr-3 text-left text-sm font-semibold;
     height: 55px;
     line-height: 25px;
     box-sizing: border-box;
     padding: 10px 16px;
   }
 
-  .custom-select {
-    width: 110px;
-    font-size: 12px;
-    padding: 4px;
-    display: inline-block;
-    margin-right: 10px;
-    border: 1px solid #d1d5db;
-    border-radius: 0.25rem;
-  }
+  /*.custom-select {*/
+  /*  width: 110px;*/
+  /*  font-size: 12px;*/
+  /*  padding: 4px;*/
+  /*  display: inline-block;*/
+  /*  margin-right: 10px;*/
+  /*  border: 1px solid #d1d5db;*/
+  /*  border-radius: 0.25rem;*/
+  /*}*/
 
-  .custom-select:focus {
-    outline: none;
-    ring: 2px;
-    ring-color: #3b82f6;
-  }
+  /*.custom-select:focus {*/
+  /*  outline: none;*/
+  /*  ring: 2px;*/
+  /*  ring-color: #3b82f6;*/
+  /*}*/
 </style>

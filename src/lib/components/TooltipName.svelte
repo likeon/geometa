@@ -3,13 +3,14 @@
   import { Tooltip } from 'flowbite-svelte';
   export let name = 'Label';
   export let tooltipText = 'Tooltip description.';
-  export let iconColor = '#bebebe';
 </script>
 
 <div class="mb-1">
   <span class="inline-flex items-center">
     {name}
-    <Icon icon="akar-icons:question-fill" class="w-4 h-4 ml-1 align-middle" color={iconColor} />
+    <Icon
+      icon="akar-icons:question-fill"
+      class="w-4 h-4 ml-1 align-middle text-gray-300 dark:text-gray-700" />
     <Tooltip placement="right-end">
       <span class="whitespace-pre-line">
         {tooltipText}

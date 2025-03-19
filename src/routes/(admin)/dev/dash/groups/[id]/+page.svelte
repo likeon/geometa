@@ -128,7 +128,7 @@
 </script>
 
 <svelte:head>
-  <title>{data.group.name} - Metas</title>
+  <title>{data.group.name || '<No name>'} - Metas</title>
 </svelte:head>
 
 {#snippet userScriptSyncButtonContent()}
