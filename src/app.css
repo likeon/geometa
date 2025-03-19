@@ -43,6 +43,11 @@ div.carta-font-code {
   border-bottom: 1px solid green;
 }
 
+html.dark .shiki,
+html.dark .shiki span {
+  color: white !important;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

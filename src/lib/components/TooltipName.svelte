@@ -1,16 +1,17 @@
-<script>
+<script lang="ts">
   import Icon from '@iconify/svelte';
   import { Tooltip } from 'flowbite-svelte';
-  export let name = 'Label';
-  export let tooltipText = 'Tooltip description.';
+  let {
+    name,
+    tooltipText,
+    colorClass = 'text-gray-300 dark:text-gray-700'
+  }: { name: string; tooltipText: string; colorClass?: string } = $props();
 </script>
 
 <div class="mb-1">
   <span class="inline-flex items-center">
     {name}
-    <Icon
-      icon="akar-icons:question-fill"
-      class="w-4 h-4 ml-1 align-middle text-gray-300 dark:text-gray-700" />
+    <Icon icon="akar-icons:question-fill" class="w-4 h-4 ml-1 align-middle {colorClass}" />
     <Tooltip placement="right-end">
       <span class="whitespace-pre-line">
         {tooltipText}
