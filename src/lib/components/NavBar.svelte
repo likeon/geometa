@@ -23,7 +23,7 @@
       >LearnableMeta</span>
   </NavBrand>
   <NavHamburger />
-  <NavUl {activeUrl} {activeClass} {nonActiveClass}>
+  <NavUl {activeUrl} {activeClass} {nonActiveClass} slideParams={{ delay: 0, duration: 100 }}>
     <NavLi href="/">Home</NavLi>
     <NavLi href="/about">How To</NavLi>
     <NavLi href="/maps">Maps</NavLi>
