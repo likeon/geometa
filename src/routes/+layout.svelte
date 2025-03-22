@@ -19,9 +19,7 @@
   {/if}
 </svelte:head>
 
-{#if dev}
-  <ModeWatcher />
-{/if}
+<ModeWatcher track={false} defaultMode="light" />
 <div class="app">
   <NavBar />
   <main>

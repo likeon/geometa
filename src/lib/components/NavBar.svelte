@@ -4,7 +4,6 @@
   import { page } from '$app/state';
   import Icon from '@iconify/svelte';
   import { toggleMode } from 'mode-watcher';
-  import { dev } from '$app/environment';
 
   let activeUrl = $derived(page.url.pathname);
   let admin = $derived(activeUrl.startsWith('/dev/dash'));
@@ -36,11 +35,9 @@
     </NavLi>
     <div class="md:space-x-2 hidden md:flex">
       <div class="md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15"></div>
-      {#if dev}
-        <button onclick={toggleMode} class="text-gray-600 hover:text-gray-900 dark:text-zinc-200">
-          <Icon icon="ix:light-dark" class="w-5 h-5 flex-shrink-0" />
-        </button>
-      {/if}
+      <button onclick={toggleMode} class="text-gray-600 hover:text-gray-900 dark:text-zinc-200">
+        <Icon icon="ix:light-dark" class="w-5 h-5 flex-shrink-0" />
+      </button>
       <a
         href="/dev/dash"
         title="Creator dashboard"
