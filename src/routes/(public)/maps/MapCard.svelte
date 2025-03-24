@@ -20,17 +20,17 @@
     }
   > = {
     1: {
-      class: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-100',
+      class: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300/70',
       icon: 'carbon:skill-level-basic',
       label: 'Beginner'
     },
     2: {
-      class: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
+      class: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-500/70',
       icon: 'carbon:skill-level-intermediate',
       label: 'Intermediate'
     },
     3: {
-      class: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+      class: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300/70',
       icon: 'carbon:skill-level-advanced',
       label: 'Advanced'
     }
@@ -42,7 +42,8 @@
     <div class="flex flex-row pb-2">
       {#if map.isVerified}
         <div>
-          <Badge class="bg-yellow-200 text-yellow-800 dark:bg-yellow-700 dark:text-yellow-200">
+          <Badge
+            class="bg-yellow-200 text-yellow-800 dark:bg-yellow-700/50 dark:text-yellow-200/80">
             <Icon icon="ri:star-line" class="inline-block  mr-1" />
             Verified
           </Badge>
@@ -55,12 +56,12 @@
             {difficulties[map.difficulty].label}
           </Badge>
         {/if}
-        <Badge class="bg-pink-50 text-pink-500 dark:bg-pink-900 dark:text-pink-50">
+        <Badge class="bg-pink-50 text-pink-500 dark:bg-pink-900/50 dark:text-pink-300/70">
           <Icon icon="gravity-ui:map-pin" class="inline-block  mr-1" />
           {map.locationsCount}
         </Badge>
         <Tooltip>Number of locations in the map.</Tooltip>
-        <Badge class="bg-indigo-50 text-indigo-500 dark:bg-indigo-900 dark:text-indigo-50">
+        <Badge class="bg-indigo-50 text-indigo-500 dark:bg-indigo-900/50 dark:text-indigo-300">
           <Icon icon="cil:list" class="inline-block  mr-1" />
           {map.metasCount}</Badge>
         <Tooltip>Number of metas in the map.</Tooltip>

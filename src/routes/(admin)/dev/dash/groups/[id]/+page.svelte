@@ -200,29 +200,41 @@
         </Tooltip>
       </form>
       <button>
-        <Icon icon="pepicons-pop:dots-y" width="1rem" height="1rem" style="color: black" />
+        <Icon
+          icon="pepicons-pop:dots-y"
+          width="1rem"
+          height="1rem"
+          class="text-gray-800 dark:text-gray-300" />
       </button>
       <Dropdown>
         <DropdownItem
           onclick={() => (window.location.href = `/dev/dash/groups/${data.group.id}/download`)}>
           <div class="flex">
-            <Icon icon="material-symbols:globe" width="1rem" height="1rem" style="color: black" />
+            <Icon
+              icon="material-symbols:globe"
+              width="1rem"
+              height="1rem"
+              class="text-gray-800 dark:text-gray-300" />
             <Icon
               icon="material-symbols:download-rounded"
               width="1rem"
               height="1rem"
-              style="color: black" />
+              class="text-gray-800 dark:text-gray-300" />
             Download map group JSON
           </div>
         </DropdownItem>
         <DropdownItem onclick={() => (isMetasUploadModalOpen = true)}>
           <div class="flex">
-            <Icon icon="mi:document" width="1rem" height="1rem" style="color: black" />
+            <Icon
+              icon="mi:document"
+              width="1rem"
+              height="1rem"
+              class="text-gray-800 dark:text-gray-300" />
             <Icon
               icon="material-symbols:upload-rounded"
               width="1rem"
               height="1rem"
-              style="color: black" />
+              class="text-gray-800 dark:text-gray-300" />
             Upload metas
           </div>
         </DropdownItem>
@@ -230,12 +242,16 @@
           onclick={() =>
             (window.location.href = `/dev/dash/groups/${data.group.id}/download-metas`)}>
           <div class="flex">
-            <Icon icon="mi:document" width="1rem" height="1rem" style="color: black" />
+            <Icon
+              icon="mi:document"
+              width="1rem"
+              height="1rem"
+              class="text-gray-800 dark:text-gray-300" />
             <Icon
               icon="material-symbols:download-rounded"
               width="1rem"
               height="1rem"
-              style="color: black" />
+              class="text-gray-800 dark:text-gray-300" />
             Download metas
           </div>
         </DropdownItem>
