@@ -3,7 +3,7 @@
   import { GM_xmlhttpRequest } from '$';
   import Spinner from './lib/Spinner.svelte';
   import CountryFlag from './lib/CountryFlag.svelte';
-  import { onMouseDown, onMouseMove, onMouseUp, setContainerPosition } from './lib/dragging';
+  import { onPointerDown, onPointerMove, onPointerUp, setContainerPosition } from './lib/dragging';
   import { saveContainerDimensions, setContainerDimensions } from './lib/resizing';
   import Carousel from './lib/Carousel.svelte';
   import { checkIfOutdated, getLatestVersionInfo, markHelpMessageAsRead, wasHelpMessageRead } from './lib/utils';
@@ -65,15 +65,15 @@
     });
     resizeObserver.observe(container);
 
-    header.addEventListener('mousedown', (event) => onMouseDown(event, container));
-    document.addEventListener('mousemove', (event) => onMouseMove(event, container));
-    document.addEventListener('mouseup', () => onMouseUp(container));
+    header.addEventListener('pointerdown', (event) => onPointerDown(event, container));
+    document.addEventListener('pointermove', (event) => onPointerMove(event, container));
+    document.addEventListener('pointerup', (event) => onPointerUp(event, container));
 
     return () => {
       resizeObserver.disconnect();
-      header.removeEventListener('mousedown', (event) => onMouseDown(event, container));
-      document.removeEventListener('mousemove', (event) => onMouseMove(event, container));
-      document.removeEventListener('mouseup', () => onMouseUp(container));
+      header.removeEventListener('pointerdown', (event) => onPointerDown(event, container));
+      document.removeEventListener('pointermove', (event) => onPointerMove(event, container));
+      document.removeEventListener('pointerup', (event) => onPointerUp(event, container));
     };
   });
 
@@ -328,6 +328,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    touch-action: none;    /* Prevent scroll / other gestures */
+    user-select: none;     /* Prevent text selection while dragging */
   }
 
 
