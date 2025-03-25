@@ -1,9 +1,23 @@
-<script>
-  import { Navbar, NavBrand, NavHamburger, NavLi, NavUl } from 'flowbite-svelte';
+<script lang="ts">
+  import {
+    Dropdown,
+    DropdownItem,
+    Navbar,
+    NavBrand,
+    NavHamburger,
+    NavLi,
+    NavUl
+  } from 'flowbite-svelte';
   import logo from '$lib/assets/logo.png?enhanced';
   import { page } from '$app/state';
   import Icon from '@iconify/svelte';
-  import { toggleMode } from 'mode-watcher';
+  import { setMode } from 'mode-watcher';
+
+  let modeWatcherDropdownOpen = $state(false);
+  function setModeAndCloseDropdown(mode: Mode) {
+    setMode(mode);
+    modeWatcherDropdownOpen = false;
+  }
 
   let activeUrl = $derived(page.url.pathname);
   let admin = $derived(activeUrl.startsWith('/dev/dash'));
@@ -35,14 +49,22 @@
     </NavLi>
     <div class="md:space-x-2 hidden md:flex">
       <div class="md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15"></div>
-      <button onclick={toggleMode} class="text-gray-600 hover:text-gray-900 dark:text-zinc-200">
-        <Icon icon="ix:light-dark" class="w-5 h-5 flex-shrink-0" />
-      </button>
+      <button
+        ><Icon
+          icon="ix:light-dark"
+          class="w-5 h-5 flex-shrink-0 text-gray-700 dark:text-zinc-400" /></button>
+      <Dropdown bind:open={modeWatcherDropdownOpen}>
+        <DropdownItem onclick={() => setModeAndCloseDropdown('light')}>Light</DropdownItem>
+        <DropdownItem onclick={() => setModeAndCloseDropdown('dark')}>Dark</DropdownItem>
+        <DropdownItem onclick={() => setModeAndCloseDropdown('system')}>System</DropdownItem>
+      </Dropdown>
       <a
         href="/dev/dash"
         title="Creator dashboard"
-        class="hidden md:flex items-center justify-center w-5 h-5 rounded-full bg-gray-700 text-white hover:bg-gray-900 transition">
-        <Icon icon="fa-solid:tools" color="white" class="w-3 h-3 flex-shrink-0" />
+        class="hidden md:flex items-center justify-center">
+        <Icon
+          icon="fa-solid:tools"
+          class="w-4 h-4 flex-shrink-0 text-gray-700 dark:text-zinc-400" />
       </a>
     </div>
   </NavUl>
