@@ -25,7 +25,8 @@ const insertMapsSchema = createInsertSchema(maps)
     levels: z.array(z.number()),
     regions: z.array(z.number()),
     ordering: z.coerce.number(),
-    footerNote: z.string()
+    footerNote: z.string(),
+    footer: z.string().optional().default('')
   })
   .omit({
     modifiedAt: true,
@@ -64,6 +65,7 @@ export const load = async ({ locals, params }) => {
   const levelList = await db.query.levels.findMany({ where: eq(levels.mapGroupId, group.id) });
   const regionList = await db.query.regions.findMany({ orderBy: [asc(regions.ordering)] });
   const mapForm = await superValidate(zod(insertMapsSchema));
+  console.debug(insertMapsSchema.shape);
 
   const user = await db.query.users.findFirst({ where: eq(users.id, locals.user!.id) });
   if (!user) {

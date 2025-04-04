@@ -34,10 +34,9 @@ const insertMetasSchema = createInsertSchema(metas)
     tagName: true,
     name: true,
     note: true,
-    noteFromPlonkit: true,
-    footer: true
+    noteFromPlonkit: true
   })
-  .extend({ levels: z.array(z.number()) });
+  .extend({ levels: z.array(z.number()), footer: z.string().optional().default('') });
 export type InsertMetasSchema = typeof insertMetasSchema;
 
 const mapUploadSchema = z.object({

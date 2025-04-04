@@ -195,22 +195,22 @@
             </Checkbox>
           </Label>
         </Label>
-        <!--{#if !$formMeta.noteFromPlonkit}-->
-        <!--  <Label>-->
-        <!--    <TooltipName-->
-        <!--      name="Footer"-->
-        <!--      tooltipText="This footer will appear below the meta note. If a footer is set for the map, this meta footer will still take priority and be displayed instead.">-->
-        <!--    </TooltipName>-->
-        <!--    <MarkdownEditor-->
-        <!--      carta={cartaFooter}-->
-        <!--      mode="tabs"-->
-        <!--      theme="test"-->
-        <!--      bind:value={$formMeta.footer} />-->
-        <!--    {#if $errorsMeta.footer}-->
-        <!--      <Alert color="red">{$errorsMeta.footer}</Alert>-->
-        <!--    {/if}-->
-        <!--  </Label>-->
-        <!--{/if}-->
+        {#if !$formMeta.noteFromPlonkit}
+          <Label>
+            <TooltipName
+              name="Footer"
+              tooltipText="This footer will appear below the meta note. If a footer is set for the map, this meta footer will still take priority and be displayed instead.">
+            </TooltipName>
+            <MarkdownEditor
+              carta={cartaFooter}
+              mode="tabs"
+              theme="test"
+              bind:value={$formMeta.footer} />
+            {#if $errorsMeta.footer}
+              <Alert color="red">{$errorsMeta.footer}</Alert>
+            {/if}
+          </Label>
+        {/if}
         <Label>
           <TooltipName
             name="Levels"

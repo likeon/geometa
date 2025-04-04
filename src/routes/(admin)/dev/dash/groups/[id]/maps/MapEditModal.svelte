@@ -219,8 +219,8 @@
         name="Include Tags"
         tooltipText="Use this to include only specific metas based on their tag name. For example, to include only tags starting with 'Czechia-', enter 'Czechia-%'.
 
-    Remember to save after you are done adding/removing filters.
-    ">
+        Remember to save after you are done adding/removing filters.
+        ">
       </TooltipName>
       <FilterManager
         bind:filters={$form.includeFilters}
@@ -232,8 +232,8 @@
         name="Exclude Tags"
         tooltipText="Use this to exclude specific metas based on their tag name. For example, to exclude tags starting with 'Czechia-', enter 'Czechia-%'.
 
-    Remember to save after you are done adding/removing filters.
-    ">
+        Remember to save after you are done adding/removing filters.
+        ">
       </TooltipName>
       <FilterManager
         bind:filters={$form.excludeFilters}
