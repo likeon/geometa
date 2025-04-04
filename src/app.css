@@ -48,6 +48,10 @@ html.dark .shiki span {
   color: white !important;
 }
 
+html.dark .carta-wrapper {
+  @apply border-gray-500 border-2;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;

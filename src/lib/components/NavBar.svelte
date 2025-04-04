@@ -49,10 +49,8 @@
     </NavLi>
     <div class="md:space-x-2 hidden md:flex">
       <div class="md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15"></div>
-      <button
-        ><Icon
-          icon="ix:light-dark"
-          class="w-5 h-5 flex-shrink-0 text-gray-700 dark:text-zinc-400" /></button>
+      <button class="text-gray-700 hover:text-black dark:text-zinc-400 dark:hover:text-white"
+        ><Icon icon="ix:light-dark" class="w-5 h-5 flex-shrink-0 " /></button>
       <Dropdown bind:open={modeWatcherDropdownOpen}>
         <DropdownItem onclick={() => setModeAndCloseDropdown('light')}>Light</DropdownItem>
         <DropdownItem onclick={() => setModeAndCloseDropdown('dark')}>Dark</DropdownItem>
@@ -61,10 +59,8 @@
       <a
         href="/dev/dash"
         title="Creator dashboard"
-        class="hidden md:flex items-center justify-center">
-        <Icon
-          icon="fa-solid:tools"
-          class="w-4 h-4 flex-shrink-0 text-gray-700 dark:text-zinc-400" />
+        class="hidden md:flex items-center justify-center text-gray-700 hover:text-black dark:text-zinc-400 dark:hover:text-white">
+        <Icon icon="fa-solid:tools" class="w-4 h-4 flex-shrink-0" />
       </a>
     </div>
   </NavUl>

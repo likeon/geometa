@@ -111,7 +111,7 @@
 </script>
 
 <div
-  class="overflow-hidden shadow ring-1 ring-black dark:ring-white ring-opacity-5 sm:rounded-lg mt-3">
+  class="overflow-hidden shadow ring-1 ring-black dark:ring-gray-700 ring-opacity-5 sm:rounded-lg mt-3">
   <table class="w-full table-fixed border-spacing-y-3 border-separate">
     <colgroup>
       {#each columns as column}
@@ -212,7 +212,7 @@
     padding: 4px;
     display: inline-block;
     margin-right: 10px;
-    border: 1px solid #d1d5db;
+    border: 1px solid #a8a8a8;
     border-radius: 0.25rem;
   }
 
