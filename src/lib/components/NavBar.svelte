@@ -14,7 +14,7 @@
   import { setMode } from 'mode-watcher';
 
   let modeWatcherDropdownOpen = $state(false);
-  function setModeAndCloseDropdown(mode: Mode) {
+  function setModeAndCloseDropdown(mode: Parameters<typeof setMode>[0]) {
     setMode(mode);
     modeWatcherDropdownOpen = false;
   }
