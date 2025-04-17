@@ -2,6 +2,7 @@
   import { writable } from 'svelte/store';
   import background from '$lib/assets/background.jpg';
   import { Button } from '$lib/components/ui/button';
+  import { fade } from 'svelte/transition';
 
   let { data } = $props();
 
@@ -33,7 +34,7 @@
   <div class="items-center mx-auto max-w-8xl px-3 py-2 h-screen">
     {#await dataPromise}
       <div
-        class="mx-auto flex justify-center items-center bg-white dark:bg-black shadow-lg rounded-lg w-full max-w-[1500px] lg:h-[calc(100vh-90px)] h-[calc(100vh-80px)]">
+        class="mx-auto flex justify-center items-center bg-background shadow-lg rounded-lg w-full max-w-[1500px] lg:h-[calc(100vh-90px)] h-[calc(100vh-80px)]">
         <p>Loading map details...</p>
       </div>
     {:then [resolvedMap, resolvedMetaList]}
@@ -42,6 +43,7 @@
       {@const _ = selectedMeta.set(initialMeta)}
 
       <div
+        in:fade
         class="mx-auto flex flex-col lg:flex-row bg-white dark:bg-black shadow-lg rounded-lg overflow-hidden w-full max-w-[1500px] lg:h-[calc(100vh-90px)] h-[calc(100vh-80px)]">
         <div
           class="lg:w-1/4 p-4 border-b lg:border-b-0 lg:border-r border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-900 rounded-t-lg lg:rounded-l-lg overflow-y-auto h-[130px] lg:h-full">

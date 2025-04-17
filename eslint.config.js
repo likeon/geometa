@@ -40,7 +40,8 @@ export default [
           varsIgnorePattern: '^_',
           caughtErrorsIgnorePattern: '^_'
         }
-      ]
+      ],
+      'svelte/no-at-html-tags': 'off' // Disable XSS warning for {@html}
     }
   }
 ];
