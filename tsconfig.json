@@ -10,7 +10,15 @@
     "sourceMap": true,
     "strict": true,
     "moduleResolution": "bundler",
-    "types": ["unplugin-icons/types/svelte", "node"]
+    "types": ["unplugin-icons/types/svelte", "node"],
+    "plugins": [
+      {
+        "name": "typescript-svelte-plugin",
+        // the following options can be set additionally; they are optional; their default values are listed here
+        "enabled": true, // enables this plugin
+        "assumeIsSvelteProject": true // if true, skip detection and always assume it's a Svelte project
+      }
+    ]
   }
   // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
   // except $lib which is handled by https://kit.svelte.dev/docs/configuration#files

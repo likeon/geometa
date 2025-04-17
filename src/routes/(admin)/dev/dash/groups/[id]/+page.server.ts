@@ -368,73 +368,89 @@ export const actions = {
 
     // upsert data
     const BATCH_SIZE = 1000;
-    await locals.db.transaction(async (trx) => {
-      // Step 1: Batched upsert operation
-      for (let i = 0; i < upsertValues.length; i += BATCH_SIZE) {
-        const batch = upsertValues.slice(i, i + BATCH_SIZE);
+    try {
+      await locals.db.transaction(async (trx) => {
+        // Step 1: Batched upsert operation
+        for (let i = 0; i < upsertValues.length; i += BATCH_SIZE) {
+          const batch = upsertValues.slice(i, i + BATCH_SIZE);
 
-        await trx
-          .insert(mapGroupLocations)
-          .values(batch)
-          .onConflictDoUpdate({
-            target: [mapGroupLocations.mapGroupId, mapGroupLocations.panoId],
-            set: {
-              heading: sql`excluded
-              .
-              heading`,
-              pitch: sql`excluded
-              .
-              pitch`,
-              zoom: sql`excluded
-              .
-              zoom`,
-              panoId: sql`excluded
-              .
-              pano_id`,
-              extraTag: sql`excluded
-              .
-              extra_tag`,
-              extraPanoId: sql`excluded
-              .
-              extra_pano_id`,
-              extraPanoDate: sql`excluded
-              .
-              extra_pano_date`,
-              updatedAt: sql`excluded
-              .
-              updated_at`
-            }
-          })
-          .returning({ id: mapGroupLocations.id });
-      }
+          await trx
+            .insert(mapGroupLocations)
+            .values(batch)
+            .onConflictDoUpdate({
+              target: [mapGroupLocations.mapGroupId, mapGroupLocations.panoId],
+              set: {
+                heading: sql`excluded
+                .
+                heading`,
+                pitch: sql`excluded
+                .
+                pitch`,
+                zoom: sql`excluded
+                .
+                zoom`,
+                panoId: sql`excluded
+                .
+                pano_id`,
+                extraTag: sql`excluded
+                .
+                extra_tag`,
+                extraPanoId: sql`excluded
+                .
+                extra_pano_id`,
+                extraPanoDate: sql`excluded
+                .
+                extra_pano_date`,
+                updatedAt: sql`excluded
+                .
+                updated_at`
+              }
+            })
+            .returning({ id: mapGroupLocations.id });
+        }
 
-      // Step 2: Delete any records that weren't upserted
+        // Step 2: Delete any records that weren't upserted
 
-      if (!form.data.partialUpload) {
-        await trx
-          .delete(mapGroupLocations)
-          .where(
-            and(
-              eq(mapGroupLocations.mapGroupId, groupId),
-              or(
-                isNull(mapGroupLocations.updatedAt),
-                lt(mapGroupLocations.updatedAt, currentTimestamp)
+        if (!form.data.partialUpload) {
+          await trx
+            .delete(mapGroupLocations)
+            .where(
+              and(
+                eq(mapGroupLocations.mapGroupId, groupId),
+                or(
+                  isNull(mapGroupLocations.updatedAt),
+                  lt(mapGroupLocations.updatedAt, currentTimestamp)
+                )
               )
-            )
-          );
-      }
+            );
+        }
 
-      // Step 3: Insert tags into metas table
-      const metaInsertValues = Array.from(usedTags).map((tagName) => ({
-        mapGroupId: groupId,
-        tagName: tagName,
-        name: '',
-        note: '',
-        modifiedAt: currentTimestamp
-      }));
-      await trx.insert(metas).values(metaInsertValues).onConflictDoNothing();
-    });
-    return message(form, { numberOfLocations: upsertValues.length });
+        // Step 3: Insert tags into metas table
+        const metaInsertValues = Array.from(usedTags).map((tagName) => ({
+          mapGroupId: groupId,
+          tagName: tagName,
+          name: '',
+          note: '',
+          modifiedAt: currentTimestamp
+        }));
+        await trx.insert(metas).values(metaInsertValues).onConflictDoNothing();
+      });
+      return message(form, { numberOfLocations: upsertValues.length });
+    } catch (error) {
+      console.error('Error in uploadMapJson:', error);
+      if (
+        error instanceof Error &&
+        error.message.includes('ON CONFLICT DO UPDATE command cannot affect row a second time')
+      ) {
+        return setError(
+          form,
+          'file',
+          'The uploaded file contains duplicate panoId values. Please remove duplicates and try again.'
+        );
+      }
+      // Let other errors crash
+      throw error;
+    }
   },
   uploadMetas: async ({ request, params, locals }) => {
     const groupId = getGroupId(params);
