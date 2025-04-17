@@ -319,29 +319,13 @@ export const actions = {
     }
     const jsonData = await extractJsonData(form.data.file);
     const validationResult = mapJsonSchema.safeParse(jsonData);
-    let errorString = '';
 
     if (!validationResult.success) {
-      for (const issue of validationResult.error.issues) {
-        if (issue.code == 'invalid_type' && issue.path.includes('panoId')) {
-          errorString = 'At least one of the locations is missing panoId.';
-          break;
-        }
-
-        if (issue.code == 'too_small' && issue.path.includes('tags')) {
-          errorString = 'At least one of the locations is missing tag.';
-          break;
-        }
-
-        if (issue.code == 'too_big' && issue.path.includes('tags')) {
-          errorString = 'At least one of the locations has more than one tag.';
-          break;
-        }
-
-        errorString = "JSON doesn't match the expected format";
-        break;
-      }
-      return setError(form, 'file', errorString);
+      console.debug(validationResult.error.issues);
+      const processedErrors = validationResult.error.issues.map(
+        (issue) => `${issue.path.join(' > ')}: ${issue.message}`
+      );
+      return setError(form, 'file', processedErrors);
     }
 
     const currentTimestamp = Math.floor(Date.now() / 1000);

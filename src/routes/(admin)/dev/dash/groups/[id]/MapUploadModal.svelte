@@ -31,9 +31,6 @@
         numberOfLocationsUploaded = result.data?.form.message.numberOfLocations || 0;
         isUploadModalOpen = false;
       }
-
-      if (result.type == 'failure') {
-      }
     }
   });
   const file = fileProxy(form, 'file');
@@ -61,7 +58,7 @@
         pastedFile = jsonFile;
         submit();
         pastedFile = null;
-      } catch (error) {
+      } catch {
         alert('Pasted data is not valid JSON.');
       }
     }
@@ -96,12 +93,20 @@
         onchange={() => submit()} />
 
       {#if $errors.file}
-        <div class="invalid">{$errors.file}</div>
+        <div class="text-red-500 leading-5">
+          {#if Array.isArray($errors.file)}
+            {#each $errors.file as error}
+              <p>{error}</p>
+            {/each}
+          {:else}
+            <p>{$errors.file}</p>
+          {/if}
+        </div>
       {/if}
     </Label>
   </form>
   <p class="text-xl"></p>
-  <div class="text-green-900">
+  <div class="text-green-900 dark:text-white">
     <p>
       You can also paste locations from your clipboard (ctrl+V) after copying them from map-making
       app (by using copy button there).
