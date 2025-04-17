@@ -10,7 +10,7 @@ import {
   timestamp,
   bigserial
 } from 'drizzle-orm/pg-core';
-import { relations, sql } from 'drizzle-orm';
+import { relations, sql, type InferModelFromColumns } from 'drizzle-orm';
 
 export const metaSuggestions = pgTable('meta_suggestions', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
@@ -372,6 +372,11 @@ export const mapMetas = pgView('map_metas_view', {
   metaFooterHtml: text('meta_footer_html').notNull(),
   metaNoteFromPlonkit: boolean('meta_note_from_plonkit').notNull()
 }).existing();
+export type MapMetas = InferModelFromColumns<
+  typeof mapMetas._.selectedFields,
+  'select',
+  { dbColumnNames: false }
+>;
 
 // actually a view, but views can't have relationship
 export const metaLocationsCountView = pgTable('meta_locations_count_view', {

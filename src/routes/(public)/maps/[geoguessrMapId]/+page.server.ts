@@ -1,28 +1,14 @@
 import { eq } from 'drizzle-orm';
-import { mapMetas, maps } from '$lib/db/schema';
+import { mapMetas, maps, type MapMetas } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
 import { generateFooter, getCountryFromTagName } from '$lib/utils.js';
+import type { DB } from '$lib/drizzle.js';
 
-export const load = async ({ params, locals }) => {
-  const geoguessrMapId = params.geoguessrMapId;
-  const rawMapMetaList = await locals.db
-    .select()
-    .from(mapMetas)
-    .where(eq(mapMetas.geoguessrId, geoguessrMapId))
-    .orderBy(mapMetas.metaTag);
-
-  if (rawMapMetaList.length == 0) {
-    throw error(404, 'Map not found');
-  }
-
-  const mapName = rawMapMetaList[0].mapName;
-  const map = await locals.db.query.maps.findFirst({ where: eq(maps.geoguessrId, geoguessrMapId) });
-
+async function processMapMetaList(db: DB, rawMapMetaList: MapMetas[]) {
   const countries = rawMapMetaList.map((meta) => getCountryFromTagName(meta.metaTag));
   const uniqueCountries = new Set(countries);
   const isSingleCountry = uniqueCountries.size === 1;
 
-  // Don't display country tag for maps where all the metas is from the same country
   const mapMetaList = await Promise.all(
     rawMapMetaList.map(async (meta, index) => {
       let footer: string = meta.metaFooterHtml.trim() || meta.mapFooterHtml.trim();
@@ -41,10 +27,32 @@ export const load = async ({ params, locals }) => {
   );
 
   mapMetaList.sort((a, b) => a.name.localeCompare(b.name));
+  return mapMetaList;
+}
+
+export const load = async ({ params, locals }) => {
+  const geoguessrMapId = params.geoguessrMapId;
+
+  const rawMapMetaList = await locals.db
+    .select()
+    .from(mapMetas)
+    .where(eq(mapMetas.geoguessrId, geoguessrMapId))
+    .orderBy(mapMetas.metaTag);
+
+  if (rawMapMetaList.length == 0) {
+    throw error(404, 'Map not found');
+  }
+
+  const mapName = rawMapMetaList[0].mapName;
+
+  const mapPromise = locals.db.query.maps.findFirst({
+    where: eq(maps.geoguessrId, geoguessrMapId)
+  });
+  const mapMetaListPromise = processMapMetaList(locals.db, rawMapMetaList);
 
   return {
-    mapMetaList,
     mapName,
-    map
+    map: mapPromise,
+    mapMetaList: mapMetaListPromise
   };
 };
