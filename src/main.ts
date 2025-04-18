@@ -5,6 +5,7 @@ import { initMapLabel } from './lib/mapLabel';
 
 function changelog() {
   return [
+    { '0.80': 'Adjusted window dragging to work on mobile. Improved selection mechanism of elements with dynamic class names. Removed special handling of challenges.' },
     { '0.79': 'Fixed ALM meta list panel when switching to non-ALM map' },
     { '0.78': 'Added info window with version check' },
     { '0.77': 'Added custom footer to the note and clicking on link warning' },
