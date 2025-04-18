@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.79
+// @version      0.80
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
@@ -17,24 +17,125 @@
 // @run-at       document-start
 // ==/UserScript==
 
-(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(` .loadership_ZOJAQ.svelte-i1jlc0{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-i1jlc0-loadership_ZOJAQ_scale 1.2s infinite,svelte-i1jlc0-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-i1jlc0-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-i1jlc0-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.carousel.svelte-fofh7f{position:relative;overflow:hidden;margin:0 auto}.image-wrapper.svelte-fofh7f{width:100%;height:100%;display:flex;justify-content:center;align-items:center;cursor:zoom-in}.responsive-image.svelte-fofh7f{max-width:100%;height:100%;display:block;object-fit:contain}.lens.svelte-fofh7f{position:absolute;pointer-events:none;border:2px solid #aaa;border-radius:50%;box-shadow:0 0 8px #00000080}.click-area.svelte-fofh7f{position:absolute;top:0;bottom:0;width:1.4em;cursor:pointer}.prev-area.svelte-fofh7f{left:0}.next-area.svelte-fofh7f{right:0}.prev.svelte-fofh7f,.next.svelte-fofh7f{background-color:#00000080;color:#fff;border:none;font-size:1.2em;padding:.2em;cursor:pointer;pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%)}.prev.svelte-fofh7f{left:0}.next.svelte-fofh7f{right:0}.indicators.svelte-fofh7f{position:absolute;bottom:15px;left:50%;transform:translate(-50%);display:flex;justify-content:center;align-items:center;gap:8px}.indicator.svelte-fofh7f{width:12px;height:12px;background-color:#ffffff80;border-radius:50%;cursor:pointer;border:none;padding:0;flex-shrink:0}.indicator.active.svelte-fofh7f{background-color:#fff}.geometa-footer a{color:#188bd2;text-decoration:none}.geometa-footer a:hover{text-decoration:underline}.geometa-container.svelte-1sex68o{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);resize:both;overflow:auto}.geometa-footer.svelte-1sex68o{color:#d3d3d3;font-size:small}a.svelte-1sex68o{color:#188bd2}a.svelte-1sex68o:hover{text-decoration:underline}.skill-icons--discord.svelte-1sex68o{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-1sex68o{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--list.svelte-1sex68o{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E")}.question-mark-icon.svelte-1sex68o{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");cursor:pointer}.icons.svelte-1sex68o{display:inline-block;vertical-align:middle}.flex.svelte-1sex68o{display:flex;align-items:center}.icons.svelte-1sex68o a:where(.svelte-1sex68o) span:where(.svelte-1sex68o){align-items:center;justify-content:center}hr.svelte-1sex68o{border:0;border-top:1px solid white;width:100%}.header.svelte-1sex68o{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center}.geometa-note a{color:#188bd2}.geometa-note a:hover{text-decoration:underline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem}.modal-backdrop.svelte-1sex68o{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#1e1e1ecc;display:flex;justify-content:center;align-items:center;z-index:1000}.modal.svelte-1sex68o{background:var(--ds-color-purple-100);padding:15px 25px;border-radius:8px;text-align:center;width:90%;max-width:600px;box-shadow:0 4px 6px #0003;color:#d3d3d3}.modal.svelte-1sex68o p:where(.svelte-1sex68o){margin:0 0 10px;font-size:17px}.modal-url.svelte-1sex68o{font-size:15px;font-weight:700;color:#188bd2;word-break:break-word;margin:10px 0}.modal-buttons.svelte-1sex68o{display:flex;justify-content:center;gap:15px;margin-top:20px}.proceed-btn.svelte-1sex68o{background:#188bd2;color:#fff;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out}.proceed-btn.svelte-1sex68o:hover{background:#0056b3}.close-btn.svelte-1sex68o{background:transparent;color:#d3d3d3;padding:8px 16px;border:1px solid #d3d3d3;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out,color .2s ease-in-out}.close-btn.svelte-1sex68o:hover{background:#d3d3d3;color:var(--ds-color-purple-100)}button.svelte-1sex68o{cursor:pointer;background:none;border:none;padding:0}.blink.svelte-1sex68o{animation:svelte-1sex68o-blink-animation 1s infinite}.help-message.svelte-1sex68o{padding:12px;font-size:16px;line-height:1.5;text-align:left}.help-message.svelte-1sex68o strong:where(.svelte-1sex68o){color:#007bff;font-weight:700}@keyframes svelte-1sex68o-blink-animation{0%{filter:brightness(1)}50%{filter:brightness(2);background-color:#004779}to{filter:brightness(1)}}.outdated.svelte-1sex68o strong:where(.svelte-1sex68o){color:red!important}.container.svelte-1vpn2bs{background-color:#252541;color:#fff;text-align:center;z-index:999999;position:absolute;bottom:-1px;left:0;width:220px;height:50%;box-sizing:border-box;border-radius:0 0 110px 110px;clip-path:inset(40% 0 0 0)}p.svelte-1vpn2bs{font-size:14px;margin-top:48px;font-weight:700}button.svelte-1vpn2bs{margin-top:6px;padding:6px 12px;font-size:12px;color:#fff;background-color:#4caf50;border:none;border-radius:4px;cursor:pointer} `);
+(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(` .loadership_ZOJAQ.svelte-i1jlc0{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-i1jlc0-loadership_ZOJAQ_scale 1.2s infinite,svelte-i1jlc0-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-i1jlc0-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-i1jlc0-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.carousel.svelte-fofh7f{position:relative;overflow:hidden;margin:0 auto}.image-wrapper.svelte-fofh7f{width:100%;height:100%;display:flex;justify-content:center;align-items:center;cursor:zoom-in}.responsive-image.svelte-fofh7f{max-width:100%;height:100%;display:block;object-fit:contain}.lens.svelte-fofh7f{position:absolute;pointer-events:none;border:2px solid #aaa;border-radius:50%;box-shadow:0 0 8px #00000080}.click-area.svelte-fofh7f{position:absolute;top:0;bottom:0;width:1.4em;cursor:pointer}.prev-area.svelte-fofh7f{left:0}.next-area.svelte-fofh7f{right:0}.prev.svelte-fofh7f,.next.svelte-fofh7f{background-color:#00000080;color:#fff;border:none;font-size:1.2em;padding:.2em;cursor:pointer;pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%)}.prev.svelte-fofh7f{left:0}.next.svelte-fofh7f{right:0}.indicators.svelte-fofh7f{position:absolute;bottom:15px;left:50%;transform:translate(-50%);display:flex;justify-content:center;align-items:center;gap:8px}.indicator.svelte-fofh7f{width:12px;height:12px;background-color:#ffffff80;border-radius:50%;cursor:pointer;border:none;padding:0;flex-shrink:0}.indicator.active.svelte-fofh7f{background-color:#fff}.geometa-footer a{color:#188bd2;text-decoration:none}.geometa-footer a:hover{text-decoration:underline}.geometa-container.svelte-46slld{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);resize:both;overflow:auto}.geometa-footer.svelte-46slld{color:#d3d3d3;font-size:small}a.svelte-46slld{color:#188bd2}a.svelte-46slld:hover{text-decoration:underline}.skill-icons--discord.svelte-46slld{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-46slld{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--list.svelte-46slld{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E")}.question-mark-icon.svelte-46slld{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");cursor:pointer}.icons.svelte-46slld{display:inline-block;vertical-align:middle}.flex.svelte-46slld{display:flex;align-items:center}.icons.svelte-46slld a:where(.svelte-46slld) span:where(.svelte-46slld){align-items:center;justify-content:center}hr.svelte-46slld{border:0;border-top:1px solid white;width:100%}.header.svelte-46slld{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center;touch-action:none;-webkit-user-select:none;user-select:none}.geometa-note a{color:#188bd2}.geometa-note a:hover{text-decoration:underline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem}.modal-backdrop.svelte-46slld{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#1e1e1ecc;display:flex;justify-content:center;align-items:center;z-index:1000}.modal.svelte-46slld{background:var(--ds-color-purple-100);padding:15px 25px;border-radius:8px;text-align:center;width:90%;max-width:600px;box-shadow:0 4px 6px #0003;color:#d3d3d3}.modal.svelte-46slld p:where(.svelte-46slld){margin:0 0 10px;font-size:17px}.modal-url.svelte-46slld{font-size:15px;font-weight:700;color:#188bd2;word-break:break-word;margin:10px 0}.modal-buttons.svelte-46slld{display:flex;justify-content:center;gap:15px;margin-top:20px}.proceed-btn.svelte-46slld{background:#188bd2;color:#fff;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out}.proceed-btn.svelte-46slld:hover{background:#0056b3}.close-btn.svelte-46slld{background:transparent;color:#d3d3d3;padding:8px 16px;border:1px solid #d3d3d3;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out,color .2s ease-in-out}.close-btn.svelte-46slld:hover{background:#d3d3d3;color:var(--ds-color-purple-100)}button.svelte-46slld{cursor:pointer;background:none;border:none;padding:0}.blink.svelte-46slld{animation:svelte-46slld-blink-animation 1s infinite}.help-message.svelte-46slld{padding:12px;font-size:16px;line-height:1.5;text-align:left}.help-message.svelte-46slld strong:where(.svelte-46slld){color:#007bff;font-weight:700}@keyframes svelte-46slld-blink-animation{0%{filter:brightness(1)}50%{filter:brightness(2);background-color:#004779}to{filter:brightness(1)}}.outdated.svelte-46slld strong:where(.svelte-46slld){color:red!important}.geometa-map-label-container.svelte-coney7{background-color:#252541;color:#fff;text-align:center;z-index:999999;position:absolute;bottom:-1px;left:0;width:220px;height:50%;box-sizing:border-box;border-radius:0 0 110px 110px;clip-path:inset(40% 0 0 0)}p.svelte-coney7{font-size:14px;margin-top:48px;font-weight:700}button.svelte-coney7{margin-top:6px;padding:6px 12px;font-size:12px;color:#fff;background-color:#4caf50;border:none;border-radius:4px;cursor:pointer} `);
 
 (async function () {
   'use strict';
 
-  const PUBLIC_VERSION = "5";
-  if (typeof window !== "undefined")
-    (window.__svelte || (window.__svelte = { v: /* @__PURE__ */ new Set() })).v.add(PUBLIC_VERSION);
-  const EACH_ITEM_REACTIVE = 1;
-  const EACH_INDEX_REACTIVE = 1 << 1;
-  const EACH_IS_CONTROLLED = 1 << 2;
-  const EACH_IS_ANIMATED = 1 << 3;
-  const EACH_ITEM_IMMUTABLE = 1 << 4;
-  const PROPS_IS_IMMUTABLE = 1;
-  const PROPS_IS_RUNES = 1 << 1;
-  const TEMPLATE_FRAGMENT = 1;
-  const TEMPLATE_USE_IMPORT_NODE = 1 << 1;
-  const UNINITIALIZED = Symbol();
+  var _GM_info = /* @__PURE__ */ (() => typeof GM_info != "undefined" ? GM_info : void 0)();
+  var _GM_xmlhttpRequest = /* @__PURE__ */ (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
+  var _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != "undefined" ? unsafeWindow : void 0)();
+  function waitForElement(selector) {
+    return new Promise((resolve) => {
+      try {
+        const existingElement = document.querySelector(selector);
+        if (existingElement) {
+          resolve(existingElement);
+          return;
+        }
+      } catch {
+      }
+      const observer = new MutationObserver(() => {
+        try {
+          const element = document.querySelector(selector);
+          if (element) {
+            observer.disconnect();
+            removeUrlChangeListener();
+            resolve(element);
+            return;
+          }
+        } catch {
+        }
+      });
+      const handleUrlChange = () => {
+        observer.disconnect();
+        removeUrlChangeListener();
+        resolve(null);
+      };
+      const removeUrlChangeListener = () => {
+        window.removeEventListener("urlchange", handleUrlChange);
+      };
+      window.addEventListener("urlchange", handleUrlChange);
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["class"]
+      });
+    });
+  }
+  function localStorageGetInt(name) {
+    const savedValue = _unsafeWindow.localStorage.getItem(name);
+    if (!savedValue) {
+      return null;
+    }
+    const savedInt = parseInt(savedValue, 10);
+    if (isNaN(savedInt)) {
+      return null;
+    }
+    return savedInt;
+  }
+  async function fetchMapInfo(url) {
+    return new Promise((resolve, reject) => {
+      _GM_xmlhttpRequest({
+        method: "GET",
+        url,
+        onload: (response) => {
+          if (response.status === 200 || response.status === 404) {
+            try {
+              const mapInfo = JSON.parse(response.responseText);
+              logInfo("fetched map info", mapInfo);
+              resolve(mapInfo);
+            } catch (e) {
+              logInfo("failed to parse map info response", e);
+              reject("Failed to parse response");
+            }
+          } else {
+            logInfo("failed to fetch map info", response);
+            reject(`HTTP error! status: ${response.status}`);
+          }
+        },
+        onerror: () => {
+          reject("An error occurred while fetching data");
+        }
+      });
+    });
+  }
+  async function getMapInfo(geoguessrId, forceUpdate) {
+    const localStorageMapInfoKey = `geometa:map-info:${geoguessrId}`;
+    if (!forceUpdate) {
+      const savedMapInfo = _unsafeWindow.localStorage.getItem(localStorageMapInfoKey);
+      if (savedMapInfo) {
+        const mapInfo2 = JSON.parse(savedMapInfo);
+        logInfo("using saved map info", mapInfo2);
+        return mapInfo2;
+      }
+    }
+    const url = `https://learnablemeta.com/api/map-info/${geoguessrId}`;
+    const mapInfo = await fetchMapInfo(url);
+    _unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(mapInfo));
+    _unsafeWindow.localStorage.setItem("geometa:latest-version", mapInfo.userscriptVersion);
+    return mapInfo;
+  }
+  function getLatestVersionInfo() {
+    return _unsafeWindow.localStorage.getItem("geometa:latest-version");
+  }
+  function checkIfOutdated() {
+    return _GM_info.script.version != getLatestVersionInfo();
+  }
+  function markHelpMessageAsRead() {
+    _unsafeWindow.localStorage.setItem("geometa:help-message-read", "true");
+  }
+  function wasHelpMessageRead() {
+    return _unsafeWindow.localStorage.getItem("geometa:help-message-read") == "true";
+  }
+  function logInfo(name, data) {
+    console.log(`ALM: ${name}`, data);
+  }
+  function extractMapIdFromUrl(url) {
+    const match = url.match(/\/maps\/(.+)/);
+    return match ? match[1] : null;
+  }
   const DEV = false;
   var is_array = Array.isArray;
   var array_from = Array.from;
@@ -219,6 +320,257 @@
         }
       }
     }
+  }
+  const EACH_ITEM_REACTIVE = 1;
+  const EACH_INDEX_REACTIVE = 1 << 1;
+  const EACH_IS_CONTROLLED = 1 << 2;
+  const EACH_IS_ANIMATED = 1 << 3;
+  const EACH_ITEM_IMMUTABLE = 1 << 4;
+  const PROPS_IS_IMMUTABLE = 1;
+  const PROPS_IS_RUNES = 1 << 1;
+  const TEMPLATE_FRAGMENT = 1;
+  const TEMPLATE_USE_IMPORT_NODE = 1 << 1;
+  const UNINITIALIZED = Symbol();
+  let hydrating = false;
+  function proxy(value, parent = null, prev2) {
+    if (typeof value !== "object" || value === null || STATE_SYMBOL in value) {
+      return value;
+    }
+    const prototype = get_prototype_of(value);
+    if (prototype !== object_prototype && prototype !== array_prototype) {
+      return value;
+    }
+    var sources = /* @__PURE__ */ new Map();
+    var is_proxied_array = is_array(value);
+    var version = source(0);
+    if (is_proxied_array) {
+      sources.set("length", source(
+        /** @type {any[]} */
+        value.length
+      ));
+    }
+    var metadata;
+    return new Proxy(
+      /** @type {any} */
+      value,
+      {
+        defineProperty(_, prop2, descriptor) {
+          if (!("value" in descriptor) || descriptor.configurable === false || descriptor.enumerable === false || descriptor.writable === false) {
+            state_descriptors_fixed();
+          }
+          var s = sources.get(prop2);
+          if (s === void 0) {
+            s = source(descriptor.value);
+            sources.set(prop2, s);
+          } else {
+            set(s, proxy(descriptor.value, metadata));
+          }
+          return true;
+        },
+        deleteProperty(target, prop2) {
+          var s = sources.get(prop2);
+          if (s === void 0) {
+            if (prop2 in target) {
+              sources.set(prop2, source(UNINITIALIZED));
+            }
+          } else {
+            if (is_proxied_array && typeof prop2 === "string") {
+              var ls = (
+                /** @type {Source<number>} */
+                sources.get("length")
+              );
+              var n = Number(prop2);
+              if (Number.isInteger(n) && n < ls.v) {
+                set(ls, n);
+              }
+            }
+            set(s, UNINITIALIZED);
+            update_version(version);
+          }
+          return true;
+        },
+        get(target, prop2, receiver) {
+          var _a;
+          if (prop2 === STATE_SYMBOL) {
+            return value;
+          }
+          var s = sources.get(prop2);
+          var exists = prop2 in target;
+          if (s === void 0 && (!exists || ((_a = get_descriptor(target, prop2)) == null ? void 0 : _a.writable))) {
+            s = source(proxy(exists ? target[prop2] : UNINITIALIZED, metadata));
+            sources.set(prop2, s);
+          }
+          if (s !== void 0) {
+            var v = get(s);
+            return v === UNINITIALIZED ? void 0 : v;
+          }
+          return Reflect.get(target, prop2, receiver);
+        },
+        getOwnPropertyDescriptor(target, prop2) {
+          var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
+          if (descriptor && "value" in descriptor) {
+            var s = sources.get(prop2);
+            if (s) descriptor.value = get(s);
+          } else if (descriptor === void 0) {
+            var source2 = sources.get(prop2);
+            var value2 = source2 == null ? void 0 : source2.v;
+            if (source2 !== void 0 && value2 !== UNINITIALIZED) {
+              return {
+                enumerable: true,
+                configurable: true,
+                value: value2,
+                writable: true
+              };
+            }
+          }
+          return descriptor;
+        },
+        has(target, prop2) {
+          var _a;
+          if (prop2 === STATE_SYMBOL) {
+            return true;
+          }
+          var s = sources.get(prop2);
+          var has = s !== void 0 && s.v !== UNINITIALIZED || Reflect.has(target, prop2);
+          if (s !== void 0 || active_effect !== null && (!has || ((_a = get_descriptor(target, prop2)) == null ? void 0 : _a.writable))) {
+            if (s === void 0) {
+              s = source(has ? proxy(target[prop2], metadata) : UNINITIALIZED);
+              sources.set(prop2, s);
+            }
+            var value2 = get(s);
+            if (value2 === UNINITIALIZED) {
+              return false;
+            }
+          }
+          return has;
+        },
+        set(target, prop2, value2, receiver) {
+          var _a;
+          var s = sources.get(prop2);
+          var has = prop2 in target;
+          if (is_proxied_array && prop2 === "length") {
+            for (var i = value2; i < /** @type {Source<number>} */
+            s.v; i += 1) {
+              var other_s = sources.get(i + "");
+              if (other_s !== void 0) {
+                set(other_s, UNINITIALIZED);
+              } else if (i in target) {
+                other_s = source(UNINITIALIZED);
+                sources.set(i + "", other_s);
+              }
+            }
+          }
+          if (s === void 0) {
+            if (!has || ((_a = get_descriptor(target, prop2)) == null ? void 0 : _a.writable)) {
+              s = source(void 0);
+              set(s, proxy(value2, metadata));
+              sources.set(prop2, s);
+            }
+          } else {
+            has = s.v !== UNINITIALIZED;
+            set(s, proxy(value2, metadata));
+          }
+          var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
+          if (descriptor == null ? void 0 : descriptor.set) {
+            descriptor.set.call(receiver, value2);
+          }
+          if (!has) {
+            if (is_proxied_array && typeof prop2 === "string") {
+              var ls = (
+                /** @type {Source<number>} */
+                sources.get("length")
+              );
+              var n = Number(prop2);
+              if (Number.isInteger(n) && n >= ls.v) {
+                set(ls, n + 1);
+              }
+            }
+            update_version(version);
+          }
+          return true;
+        },
+        ownKeys(target) {
+          get(version);
+          var own_keys = Reflect.ownKeys(target).filter((key2) => {
+            var source3 = sources.get(key2);
+            return source3 === void 0 || source3.v !== UNINITIALIZED;
+          });
+          for (var [key, source2] of sources) {
+            if (source2.v !== UNINITIALIZED && !(key in target)) {
+              own_keys.push(key);
+            }
+          }
+          return own_keys;
+        },
+        setPrototypeOf() {
+          state_prototype_fixed();
+        }
+      }
+    );
+  }
+  function update_version(signal, d = 1) {
+    set(signal, signal.v + d);
+  }
+  var $window;
+  var first_child_getter;
+  var next_sibling_getter;
+  function init_operations() {
+    if ($window !== void 0) {
+      return;
+    }
+    $window = window;
+    var element_prototype = Element.prototype;
+    var node_prototype = Node.prototype;
+    first_child_getter = get_descriptor(node_prototype, "firstChild").get;
+    next_sibling_getter = get_descriptor(node_prototype, "nextSibling").get;
+    element_prototype.__click = void 0;
+    element_prototype.__className = "";
+    element_prototype.__attributes = null;
+    element_prototype.__styles = null;
+    element_prototype.__e = void 0;
+    Text.prototype.__t = void 0;
+  }
+  function create_text(value = "") {
+    return document.createTextNode(value);
+  }
+  // @__NO_SIDE_EFFECTS__
+  function get_first_child(node) {
+    return first_child_getter.call(node);
+  }
+  // @__NO_SIDE_EFFECTS__
+  function get_next_sibling(node) {
+    return next_sibling_getter.call(node);
+  }
+  function child(node, is_text) {
+    {
+      return /* @__PURE__ */ get_first_child(node);
+    }
+  }
+  function first_child(fragment, is_text) {
+    {
+      var first = (
+        /** @type {DocumentFragment} */
+        /* @__PURE__ */ get_first_child(
+          /** @type {Node} */
+          fragment
+        )
+      );
+      if (first instanceof Comment && first.data === "") return /* @__PURE__ */ get_next_sibling(first);
+      return first;
+    }
+  }
+  function sibling(node, count = 1, is_text = false) {
+    let next_sibling = node;
+    while (count--) {
+      next_sibling = /** @type {TemplateNode} */
+      /* @__PURE__ */ get_next_sibling(next_sibling);
+    }
+    {
+      return next_sibling;
+    }
+  }
+  function clear_text_content(node) {
+    node.textContent = "";
   }
   // @__NO_SIDE_EFFECTS__
   function derived(fn) {
@@ -1077,247 +1429,6 @@
       }
     }
   }
-  function proxy(value, parent = null, prev2) {
-    if (typeof value !== "object" || value === null || STATE_SYMBOL in value) {
-      return value;
-    }
-    const prototype = get_prototype_of(value);
-    if (prototype !== object_prototype && prototype !== array_prototype) {
-      return value;
-    }
-    var sources = /* @__PURE__ */ new Map();
-    var is_proxied_array = is_array(value);
-    var version = source(0);
-    if (is_proxied_array) {
-      sources.set("length", source(
-        /** @type {any[]} */
-        value.length
-      ));
-    }
-    var metadata;
-    return new Proxy(
-      /** @type {any} */
-      value,
-      {
-        defineProperty(_, prop2, descriptor) {
-          if (!("value" in descriptor) || descriptor.configurable === false || descriptor.enumerable === false || descriptor.writable === false) {
-            state_descriptors_fixed();
-          }
-          var s = sources.get(prop2);
-          if (s === void 0) {
-            s = source(descriptor.value);
-            sources.set(prop2, s);
-          } else {
-            set(s, proxy(descriptor.value, metadata));
-          }
-          return true;
-        },
-        deleteProperty(target, prop2) {
-          var s = sources.get(prop2);
-          if (s === void 0) {
-            if (prop2 in target) {
-              sources.set(prop2, source(UNINITIALIZED));
-            }
-          } else {
-            if (is_proxied_array && typeof prop2 === "string") {
-              var ls = (
-                /** @type {Source<number>} */
-                sources.get("length")
-              );
-              var n = Number(prop2);
-              if (Number.isInteger(n) && n < ls.v) {
-                set(ls, n);
-              }
-            }
-            set(s, UNINITIALIZED);
-            update_version(version);
-          }
-          return true;
-        },
-        get(target, prop2, receiver) {
-          var _a;
-          if (prop2 === STATE_SYMBOL) {
-            return value;
-          }
-          var s = sources.get(prop2);
-          var exists = prop2 in target;
-          if (s === void 0 && (!exists || ((_a = get_descriptor(target, prop2)) == null ? void 0 : _a.writable))) {
-            s = source(proxy(exists ? target[prop2] : UNINITIALIZED, metadata));
-            sources.set(prop2, s);
-          }
-          if (s !== void 0) {
-            var v = get(s);
-            return v === UNINITIALIZED ? void 0 : v;
-          }
-          return Reflect.get(target, prop2, receiver);
-        },
-        getOwnPropertyDescriptor(target, prop2) {
-          var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
-          if (descriptor && "value" in descriptor) {
-            var s = sources.get(prop2);
-            if (s) descriptor.value = get(s);
-          } else if (descriptor === void 0) {
-            var source2 = sources.get(prop2);
-            var value2 = source2 == null ? void 0 : source2.v;
-            if (source2 !== void 0 && value2 !== UNINITIALIZED) {
-              return {
-                enumerable: true,
-                configurable: true,
-                value: value2,
-                writable: true
-              };
-            }
-          }
-          return descriptor;
-        },
-        has(target, prop2) {
-          var _a;
-          if (prop2 === STATE_SYMBOL) {
-            return true;
-          }
-          var s = sources.get(prop2);
-          var has = s !== void 0 && s.v !== UNINITIALIZED || Reflect.has(target, prop2);
-          if (s !== void 0 || active_effect !== null && (!has || ((_a = get_descriptor(target, prop2)) == null ? void 0 : _a.writable))) {
-            if (s === void 0) {
-              s = source(has ? proxy(target[prop2], metadata) : UNINITIALIZED);
-              sources.set(prop2, s);
-            }
-            var value2 = get(s);
-            if (value2 === UNINITIALIZED) {
-              return false;
-            }
-          }
-          return has;
-        },
-        set(target, prop2, value2, receiver) {
-          var _a;
-          var s = sources.get(prop2);
-          var has = prop2 in target;
-          if (is_proxied_array && prop2 === "length") {
-            for (var i = value2; i < /** @type {Source<number>} */
-            s.v; i += 1) {
-              var other_s = sources.get(i + "");
-              if (other_s !== void 0) {
-                set(other_s, UNINITIALIZED);
-              } else if (i in target) {
-                other_s = source(UNINITIALIZED);
-                sources.set(i + "", other_s);
-              }
-            }
-          }
-          if (s === void 0) {
-            if (!has || ((_a = get_descriptor(target, prop2)) == null ? void 0 : _a.writable)) {
-              s = source(void 0);
-              set(s, proxy(value2, metadata));
-              sources.set(prop2, s);
-            }
-          } else {
-            has = s.v !== UNINITIALIZED;
-            set(s, proxy(value2, metadata));
-          }
-          var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
-          if (descriptor == null ? void 0 : descriptor.set) {
-            descriptor.set.call(receiver, value2);
-          }
-          if (!has) {
-            if (is_proxied_array && typeof prop2 === "string") {
-              var ls = (
-                /** @type {Source<number>} */
-                sources.get("length")
-              );
-              var n = Number(prop2);
-              if (Number.isInteger(n) && n >= ls.v) {
-                set(ls, n + 1);
-              }
-            }
-            update_version(version);
-          }
-          return true;
-        },
-        ownKeys(target) {
-          get(version);
-          var own_keys = Reflect.ownKeys(target).filter((key2) => {
-            var source3 = sources.get(key2);
-            return source3 === void 0 || source3.v !== UNINITIALIZED;
-          });
-          for (var [key, source2] of sources) {
-            if (source2.v !== UNINITIALIZED && !(key in target)) {
-              own_keys.push(key);
-            }
-          }
-          return own_keys;
-        },
-        setPrototypeOf() {
-          state_prototype_fixed();
-        }
-      }
-    );
-  }
-  function update_version(signal, d = 1) {
-    set(signal, signal.v + d);
-  }
-  var $window;
-  var first_child_getter;
-  var next_sibling_getter;
-  function init_operations() {
-    if ($window !== void 0) {
-      return;
-    }
-    $window = window;
-    var element_prototype = Element.prototype;
-    var node_prototype = Node.prototype;
-    first_child_getter = get_descriptor(node_prototype, "firstChild").get;
-    next_sibling_getter = get_descriptor(node_prototype, "nextSibling").get;
-    element_prototype.__click = void 0;
-    element_prototype.__className = "";
-    element_prototype.__attributes = null;
-    element_prototype.__styles = null;
-    element_prototype.__e = void 0;
-    Text.prototype.__t = void 0;
-  }
-  function create_text(value = "") {
-    return document.createTextNode(value);
-  }
-  // @__NO_SIDE_EFFECTS__
-  function get_first_child(node) {
-    return first_child_getter.call(node);
-  }
-  // @__NO_SIDE_EFFECTS__
-  function get_next_sibling(node) {
-    return next_sibling_getter.call(node);
-  }
-  function child(node, is_text) {
-    {
-      return /* @__PURE__ */ get_first_child(node);
-    }
-  }
-  function first_child(fragment, is_text) {
-    {
-      var first = (
-        /** @type {DocumentFragment} */
-        /* @__PURE__ */ get_first_child(
-          /** @type {Node} */
-          fragment
-        )
-      );
-      if (first instanceof Comment && first.data === "") return /* @__PURE__ */ get_next_sibling(first);
-      return first;
-    }
-  }
-  function sibling(node, count = 1, is_text = false) {
-    let next_sibling = node;
-    while (count--) {
-      next_sibling = /** @type {TemplateNode} */
-      /* @__PURE__ */ get_next_sibling(next_sibling);
-    }
-    {
-      return next_sibling;
-    }
-  }
-  function clear_text_content(node) {
-    node.textContent = "";
-  }
-  let hydrating = false;
   const all_registered_events = /* @__PURE__ */ new Set();
   const root_event_handles = /* @__PURE__ */ new Set();
   function create_event(event_name, dom, handler, options) {
@@ -2103,29 +2214,6 @@
     }
     props();
   }
-  function onMount(fn) {
-    if (component_context === null) {
-      lifecycle_outside_component();
-    }
-    if (component_context.l !== null) {
-      init_update_callbacks(component_context).m.push(fn);
-    } else {
-      user_effect(() => {
-        const cleanup = untrack(fn);
-        if (typeof cleanup === "function") return (
-          /** @type {() => void} */
-          cleanup
-        );
-      });
-    }
-  }
-  function init_update_callbacks(context) {
-    var l = (
-      /** @type {ComponentContextLegacy} */
-      context.l
-    );
-    return l.u ?? (l.u = { a: [], b: [], m: [] });
-  }
   let is_store_binding = false;
   function capture_store_binding(fn) {
     var previous_is_store_binding = is_store_binding;
@@ -2206,9 +2294,32 @@
       return getter;
     }
   }
-  var _GM_info = /* @__PURE__ */ (() => typeof GM_info != "undefined" ? GM_info : void 0)();
-  var _GM_xmlhttpRequest = /* @__PURE__ */ (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
-  var _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != "undefined" ? unsafeWindow : void 0)();
+  function onMount(fn) {
+    if (component_context === null) {
+      lifecycle_outside_component();
+    }
+    if (component_context.l !== null) {
+      init_update_callbacks(component_context).m.push(fn);
+    } else {
+      user_effect(() => {
+        const cleanup = untrack(fn);
+        if (typeof cleanup === "function") return (
+          /** @type {() => void} */
+          cleanup
+        );
+      });
+    }
+  }
+  function init_update_callbacks(context) {
+    var l = (
+      /** @type {ComponentContextLegacy} */
+      context.l
+    );
+    return l.u ?? (l.u = { a: [], b: [], m: [] });
+  }
+  const PUBLIC_VERSION = "5";
+  if (typeof window !== "undefined")
+    (window.__svelte || (window.__svelte = { v: /* @__PURE__ */ new Set() })).v.add(PUBLIC_VERSION);
   var root$3 = /* @__PURE__ */ template(`<div class="loadership_ZOJAQ svelte-i1jlc0"><div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div></div>`);
   function Spinner($$anchor) {
     var div = root$3();
@@ -2443,15 +2554,20 @@
     container.style.left = getSavedPosition(leftKey) ?? container.style.left;
     container.style.top = getSavedPosition(topKey) ?? container.style.top;
   }
-  const onMouseDown = (event2, container) => {
+  const onPointerDown = (event2, container) => {
+    const target = event2.target;
+    if (target.closest("a") || target.closest("button")) {
+      return;
+    }
     isDragging = true;
+    container.setPointerCapture(event2.pointerId);
     dragOffset = {
       x: event2.clientX - container.getBoundingClientRect().left,
       y: event2.clientY - container.getBoundingClientRect().top
     };
     event2.preventDefault();
   };
-  const onMouseMove = (event2, container) => {
+  const onPointerMove = (event2, container) => {
     if (isDragging) {
       const windowWidth = window.innerWidth;
       const windowHeight = window.innerHeight;
@@ -2460,148 +2576,25 @@
       let newLeft = event2.clientX - dragOffset.x;
       let newTop = event2.clientY - dragOffset.y;
       if (newLeft < 0) newLeft = 0;
-      if (newLeft + containerWidth > windowWidth) newLeft = windowWidth - containerWidth;
+      if (newLeft + containerWidth > windowWidth) {
+        newLeft = windowWidth - containerWidth;
+      }
       if (newTop < 0) newTop = 0;
-      if (newTop + containerHeight > windowHeight) newTop = windowHeight - containerHeight;
+      if (newTop + containerHeight > windowHeight) {
+        newTop = windowHeight - containerHeight;
+      }
       container.style.left = `${newLeft}px`;
       container.style.top = `${newTop}px`;
     }
   };
-  const onMouseUp = (container) => {
+  const onPointerUp = (event2, container) => {
     isDragging = false;
+    if (container && container.hasPointerCapture(event2.pointerId)) {
+      container.releasePointerCapture(event2.pointerId);
+    }
     _unsafeWindow.localStorage.setItem(leftKey, container.style.left);
     _unsafeWindow.localStorage.setItem(topKey, container.style.top);
   };
-  function waitForElement(selector) {
-    return new Promise((resolve) => {
-      const existingElement = document.querySelector(selector);
-      if (existingElement) {
-        resolve(existingElement);
-        return;
-      }
-      const observer = new MutationObserver((mutations) => {
-        for (const mutation of mutations) {
-          if (mutation.type === "childList") {
-            const element = document.querySelector(selector);
-            if (element) {
-              observer.disconnect();
-              resolve(element);
-              return;
-            }
-          }
-        }
-      });
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-    });
-  }
-  function localStorageGetInt(name) {
-    const savedValue = _unsafeWindow.localStorage.getItem(name);
-    if (!savedValue) {
-      return null;
-    }
-    const savedInt = parseInt(savedValue, 10);
-    if (isNaN(savedInt)) {
-      return null;
-    }
-    return savedInt;
-  }
-  async function fetchMapInfo(url) {
-    return new Promise((resolve, reject) => {
-      _GM_xmlhttpRequest({
-        method: "GET",
-        url,
-        onload: (response) => {
-          if (response.status === 200 || response.status === 404) {
-            try {
-              const mapInfo = JSON.parse(response.responseText);
-              logInfo("fetched map info", mapInfo);
-              resolve(mapInfo);
-            } catch (e) {
-              logInfo("failed to parse map info response", e);
-              reject("Failed to parse response");
-            }
-          } else {
-            logInfo("failed to fetch map info", response);
-            reject(`HTTP error! status: ${response.status}`);
-          }
-        },
-        onerror: () => {
-          reject("An error occurred while fetching data");
-        }
-      });
-    });
-  }
-  async function getMapInfo(geoguessrId, forceUpdate) {
-    const localStorageMapInfoKey = `geometa:map-info:${geoguessrId}`;
-    if (!forceUpdate) {
-      const savedMapInfo = _unsafeWindow.localStorage.getItem(localStorageMapInfoKey);
-      if (savedMapInfo) {
-        const mapInfo2 = JSON.parse(savedMapInfo);
-        logInfo("using saved map info", mapInfo2);
-        return mapInfo2;
-      }
-    }
-    const url = `https://learnablemeta.com/api/map-info/${geoguessrId}`;
-    const mapInfo = await fetchMapInfo(url);
-    _unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(mapInfo));
-    _unsafeWindow.localStorage.setItem("geometa:latest-version", mapInfo.userscriptVersion);
-    return mapInfo;
-  }
-  function getLatestVersionInfo() {
-    return _unsafeWindow.localStorage.getItem("geometa:latest-version");
-  }
-  function checkIfOutdated() {
-    return _GM_info.script.version != getLatestVersionInfo();
-  }
-  function markHelpMessageAsRead() {
-    _unsafeWindow.localStorage.setItem("geometa:help-message-read", "true");
-  }
-  function wasHelpMessageRead() {
-    return _unsafeWindow.localStorage.getItem("geometa:help-message-read") == "true";
-  }
-  const getChallengeId = () => {
-    const regexp = /.*\/live-challenge\/(.*)/;
-    const matches = location.pathname.match(regexp);
-    if (matches && matches.length > 1) {
-      return matches[1];
-    }
-    return null;
-  };
-  async function getChallengeInfo(id) {
-    const url = `https://game-server.geoguessr.com/api/live-challenge/${id}`;
-    const response = await fetch(url, {
-      method: "GET",
-      credentials: "include"
-    });
-    const data = await response.json();
-    const mapId = data.options.mapSlug;
-    const currentRound = data.currentRoundNumber - 1;
-    const rounds = data.rounds;
-    const panorama = rounds[currentRound].question.panoramaQuestionPayload.panorama;
-    const panoIdHex = panorama.panoId;
-    const panoId = decodePanoId(panoIdHex);
-    return { mapId, panoId };
-  }
-  function decodePanoId(encoded) {
-    const len = Math.floor(encoded.length / 2);
-    let panoId = [];
-    for (let i = 0; i < len; i++) {
-      const code = parseInt(encoded.slice(i * 2, i * 2 + 2), 16);
-      const char = String.fromCharCode(code);
-      panoId = [...panoId, char];
-    }
-    return panoId.join("");
-  }
-  function logInfo(name, data) {
-    console.log(`ALM: ${name}`, data);
-  }
-  function extractMapIdFromUrl(url) {
-    const match = url.match(/\/maps\/(.+)/);
-    return match ? match[1] : null;
-  }
   const widthKey = "geometa:containerWidth";
   const heightKey = "geometa:containerHeight";
   function setContainerDimensions(container) {
@@ -2729,17 +2722,17 @@
       updateHelpClass();
     }
   }
-  var root_1 = /* @__PURE__ */ template(`<p class="svelte-1sex68o"> </p>`);
-  var root_4 = /* @__PURE__ */ template(`<p class="geometa-footer svelte-1sex68o"><!></p>`);
-  var root_5 = /* @__PURE__ */ template(`<hr class="svelte-1sex68o"> <!>`, 1);
-  var root_3 = /* @__PURE__ */ template(`<p class="svelte-1sex68o"><!> <strong class="svelte-1sex68o"> </strong> </p> <div class="geometa-note svelte-1sex68o"><!></div> <!> <!>`, 1);
-  var root_7 = /* @__PURE__ */ template(`<div class="modal-backdrop svelte-1sex68o"><div class="modal svelte-1sex68o"><p class="svelte-1sex68o">You are about to open this site in a new tab:</p> <p class="modal-url svelte-1sex68o"> </p> <div class="modal-buttons svelte-1sex68o"><button class="proceed-btn svelte-1sex68o">Continue</button> <button class="close-btn svelte-1sex68o">Cancel</button></div></div></div>`);
-  var root_9 = /* @__PURE__ */ template(`<p class="outdated svelte-1sex68o"><strong class="svelte-1sex68o"> </strong></p>`);
-  var root_8 = /* @__PURE__ */ template(`<div class="modal-backdrop svelte-1sex68o"><div class="modal svelte-1sex68o"><div class="help-message svelte-1sex68o"><!> <p class="svelte-1sex68o">Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p> <ul class="svelte-1sex68o"><li class="svelte-1sex68o"><strong class="svelte-1sex68o">Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere on your
-              screen.</li> <li class="svelte-1sex68o"><strong class="svelte-1sex68o">Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li> <li class="svelte-1sex68o"><strong class="svelte-1sex68o">View Map metalist:</strong> Click the list icon to see all the metas included in the map you
-              are currently playing.</li> <li class="svelte-1sex68o"><strong class="svelte-1sex68o">Join the Community:</strong> Click the Discord icon to share feedback, suggest improvements, or
-              just say hi!</li> <li class="svelte-1sex68o"><strong class="svelte-1sex68o">Outdated Script:</strong> The question mark icon will blink if the script is outdated.</li></ul></div> <button class="close-btn svelte-1sex68o">Close</button></div></div>`);
-  var root$1 = /* @__PURE__ */ template(`<div class="geometa-container svelte-1sex68o"><div class="flex header svelte-1sex68o"><h2 class="svelte-1sex68o">Learnable Meta</h2> <div class="icons svelte-1sex68o"><a target="_blank" aria-label="List of map metas" class="svelte-1sex68o"><span class="skill-icons--list svelte-1sex68o"></span></a> <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-1sex68o"><span class="flat-color-icons--globe svelte-1sex68o"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-1sex68o"><span class="skill-icons--discord svelte-1sex68o"></span></a> <button aria-label="More information" style="background: none; border: none; padding: 0;" class="svelte-1sex68o"><span></span></button></div></div> <!> <!> <!></div>`);
+  var root_1 = /* @__PURE__ */ template(`<p class="svelte-46slld"> </p>`);
+  var root_4 = /* @__PURE__ */ template(`<p class="geometa-footer svelte-46slld"><!></p>`);
+  var root_5 = /* @__PURE__ */ template(`<hr class="svelte-46slld"> <!>`, 1);
+  var root_3 = /* @__PURE__ */ template(`<p class="svelte-46slld"><!> <strong class="svelte-46slld"> </strong> </p> <div class="geometa-note svelte-46slld"><!></div> <!> <!>`, 1);
+  var root_7 = /* @__PURE__ */ template(`<div class="modal-backdrop svelte-46slld"><div class="modal svelte-46slld"><p class="svelte-46slld">You are about to open this site in a new tab:</p> <p class="modal-url svelte-46slld"> </p> <div class="modal-buttons svelte-46slld"><button class="proceed-btn svelte-46slld">Continue</button> <button class="close-btn svelte-46slld">Cancel</button></div></div></div>`);
+  var root_9 = /* @__PURE__ */ template(`<p class="outdated svelte-46slld"><strong class="svelte-46slld"> </strong></p>`);
+  var root_8 = /* @__PURE__ */ template(`<div class="modal-backdrop svelte-46slld"><div class="modal svelte-46slld"><div class="help-message svelte-46slld"><!> <p class="svelte-46slld">Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p> <ul class="svelte-46slld"><li class="svelte-46slld"><strong class="svelte-46slld">Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere on your
+              screen.</li> <li class="svelte-46slld"><strong class="svelte-46slld">Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li> <li class="svelte-46slld"><strong class="svelte-46slld">View Map metalist:</strong> Click the list icon to see all the metas included in the map you
+              are currently playing.</li> <li class="svelte-46slld"><strong class="svelte-46slld">Join the Community:</strong> Click the Discord icon to share feedback, suggest improvements, or
+              just say hi!</li> <li class="svelte-46slld"><strong class="svelte-46slld">Outdated Script:</strong> The question mark icon will blink if the script is outdated.</li></ul></div> <button class="close-btn svelte-46slld">Close</button></div></div>`);
+  var root$1 = /* @__PURE__ */ template(`<div class="geometa-container svelte-46slld"><div class="flex header svelte-46slld"><h2 class="svelte-46slld">Learnable Meta</h2> <div class="icons svelte-46slld"><a target="_blank" aria-label="List of map metas" class="svelte-46slld"><span class="skill-icons--list svelte-46slld"></span></a> <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-46slld"><span class="flat-color-icons--globe svelte-46slld"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-46slld"><span class="skill-icons--discord svelte-46slld"></span></a> <button aria-label="More information" style="background: none; border: none; padding: 0;" class="svelte-46slld"><span></span></button></div></div> <!> <!> <!></div>`);
   function App($$anchor, $$props) {
     push($$props, true);
     let geoInfo = state(null);
@@ -2777,14 +2770,14 @@
         }
       });
       resizeObserver.observe(container);
-      header.addEventListener("mousedown", (event2) => onMouseDown(event2, container));
-      document.addEventListener("mousemove", (event2) => onMouseMove(event2, container));
-      document.addEventListener("mouseup", () => onMouseUp(container));
+      header.addEventListener("pointerdown", (event2) => onPointerDown(event2, container));
+      document.addEventListener("pointermove", (event2) => onPointerMove(event2, container));
+      document.addEventListener("pointerup", (event2) => onPointerUp(event2, container));
       return () => {
         resizeObserver.disconnect();
-        header.removeEventListener("mousedown", (event2) => onMouseDown(event2, container));
-        document.removeEventListener("mousemove", (event2) => onMouseMove(event2, container));
-        document.removeEventListener("mouseup", () => onMouseUp(container));
+        header.removeEventListener("pointerdown", (event2) => onPointerDown(event2, container));
+        document.removeEventListener("pointermove", (event2) => onPointerMove(event2, container));
+        document.removeEventListener("pointerup", (event2) => onPointerUp(event2, container));
       };
     });
     function confirmNavigation(event2) {
@@ -2918,29 +2911,104 @@
     });
     template_effect(() => {
       set_attribute(a, "href", "https://learnablemeta.com/maps/" + $$props.mapId);
-      set_class(span, `${get(helpClass) ?? ""} svelte-1sex68o`);
+      set_class(span, `${get(helpClass) ?? ""} svelte-46slld`);
     });
     append($$anchor, div);
     pop();
   }
   delegate(["click"]);
-  function navigate() {
-    const mapId = window.location.pathname.split("/maps/")[1];
-    window.open(`https://learnablemeta.com/maps/${mapId}`, "_blank");
+  const GeoGuessrEventFramework = _unsafeWindow.GeoGuessrEventFramework;
+  function initSinglePlayer() {
+    GeoGuessrEventFramework.init().then(() => {
+      GeoGuessrEventFramework.events.addEventListener("game_start", async (event2) => {
+        await getMapInfo(event2.detail.map.id, true);
+      });
+      GeoGuessrEventFramework.events.addEventListener("round_end", async (event2) => {
+        const mapInfo = await getMapInfo(event2.detail.map.id, false);
+        if (!mapInfo.mapFound) {
+          logInfo("not supported map - skip");
+          return;
+        }
+        logInfo("waiting for the result view to render");
+        waitForElement('div[data-qa="result-view-top"]').then((container) => {
+          if (!container) {
+            return;
+          }
+          logInfo("the result view is rendered");
+          const element = document.createElement("div");
+          element.id = "geometa-summary";
+          container.appendChild(element);
+          const lastRound = event2.detail.rounds[event2.detail.rounds.length - 1];
+          logInfo("adding app window");
+          mount(App, {
+            target: element,
+            props: {
+              panoId: lastRound.location.panoId,
+              mapId: event2.detail.map.id
+            }
+          });
+        });
+      });
+    });
   }
-  var root = /* @__PURE__ */ template(`<div class="container svelte-1vpn2bs"><p class="svelte-1vpn2bs">LearnableMeta Enabled</p> <button class="svelte-1vpn2bs">Meta List</button></div>`);
+  function initURLChangeEvent() {
+    overrideHistoryMethod("pushState");
+    overrideHistoryMethod("replaceState");
+    window.addEventListener("popstate", () => {
+      window.dispatchEvent(new Event("urlchange"));
+    });
+  }
+  function overrideHistoryMethod(method) {
+    const original = history[method];
+    history[method] = function(state2, title, url) {
+      const result = original.call(this, state2, title, url);
+      window.dispatchEvent(new Event("urlchange"));
+      return result;
+    };
+  }
+  var root = /* @__PURE__ */ template(`<div class="geometa-map-label-container svelte-coney7"><p class="svelte-coney7">LearnableMeta Enabled</p> <a target="_blank"><button class="svelte-coney7">Meta List</button></a></div>`);
   function MapLabel($$anchor, $$props) {
-    push($$props, false);
-    init();
     var div = root();
-    var button = sibling(child(div), 2);
-    button.__click = [navigate];
+    var a = sibling(child(div), 2);
+    template_effect(() => set_attribute(a, "href", `https://learnablemeta.com/maps/${$$props.mapId}`));
     append($$anchor, div);
-    pop();
   }
-  delegate(["click"]);
+  function initMapLabel() {
+    addMapLabel();
+    window.addEventListener("urlchange", () => {
+      addMapLabel();
+    });
+  }
+  async function addMapLabel() {
+    const mapId = extractMapIdFromUrl(window.location.href);
+    if (!mapId) {
+      return;
+    }
+    const mapAvatarContainer = await waitForElement("[class*=map-block_mapImageContainer]");
+    if (!mapAvatarContainer) {
+      return;
+    }
+    const existingLabel = mapAvatarContainer.querySelector(".map-label");
+    if (existingLabel) {
+      existingLabel.remove();
+    }
+    const mapInfo = await getMapInfo(mapId, true);
+    if (!(mapInfo == null ? void 0 : mapInfo.mapFound)) {
+      return;
+    }
+    const element = document.createElement("div");
+    element.classList.add("map-label");
+    mapAvatarContainer.appendChild(element);
+    mount(MapLabel, {
+      target: element,
+      props: {
+        mapId
+      }
+    });
+  }
   function changelog() {
     return [
+      { "0.80": "Adjusted window dragging to work on mobile. Improved selection mechanism of elements with dynamic class names. Removed special handling of challenges." },
       { "0.79": "Fixed ALM meta list panel when switching to non-ALM map" },
       { "0.78": "Added info window with version check" },
       { "0.77": "Added custom footer to the note and clicking on link warning" },
@@ -2970,112 +3038,15 @@
   if (_unsafeWindow.notAValidVariable) {
     console.log(changelog());
   }
-  const GeoGuessrEventFramework = _unsafeWindow.GeoGuessrEventFramework;
-  GeoGuessrEventFramework.init().then(() => {
-    GeoGuessrEventFramework.events.addEventListener("game_start", async (event2) => {
-      await getMapInfo(event2.detail.map.id, true);
-    });
-    GeoGuessrEventFramework.events.addEventListener("round_end", async (event2) => {
-      const mapInfo = await getMapInfo(event2.detail.map.id, false);
-      if (!mapInfo.mapFound) {
-        logInfo("not supported map - skip");
-        return;
-      }
-      logInfo("waiting for the result view to render");
-      waitForElement('div[data-qa="result-view-top"]').then((container) => {
-        logInfo("the result view is rendered");
-        const element = document.createElement("div");
-        element.id = "geometa-summary";
-        container.appendChild(element);
-        const lastRound = event2.detail.rounds[event2.detail.rounds.length - 1];
-        logInfo("adding app window");
-        mount(App, {
-          target: element,
-          props: {
-            panoId: lastRound.location.panoId,
-            mapId: event2.detail.map.id
-          }
-        });
-      });
-    });
-  });
+  initURLChangeEvent();
   if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", async () => {
-      await setupLearnableMetaFeatures();
-    });
+    document.addEventListener("DOMContentLoaded", setupLearnableMetaFeatures);
   } else {
     await( setupLearnableMetaFeatures());
   }
   async function setupLearnableMetaFeatures() {
-    initLiveChallengeObserver();
-    let lastUrl = "";
-    setInterval(() => {
-      if (window.location.href !== lastUrl) {
-        lastUrl = window.location.href;
-        addLearnableMetaMapPanel();
-      }
-    }, 500);
-  }
-  function initLiveChallengeObserver() {
-    logInfo("live challenge support enabled");
-    let pinChanged = false;
-    const observer = new MutationObserver(async (mutations) => {
-      const pinClass = ".result-map_roundPin__3ieXw";
-      if (!document.querySelector(pinClass)) {
-        pinChanged = false;
-        return;
-      }
-      if (pinChanged) {
-        return;
-      }
-      pinChanged = true;
-      const challengeId = getChallengeId();
-      if (challengeId) {
-        const { mapId, panoId } = await getChallengeInfo(challengeId);
-        const mapInfo = await getMapInfo(mapId, false);
-        if (!mapInfo.mapFound) return;
-        waitForElement("div.game_container__5bsqO").then((container) => {
-          const element = document.createElement("div");
-          element.id = "geometa-summary";
-          container.appendChild(element);
-          mount(App, {
-            target: element,
-            props: {
-              panoId,
-              mapId
-            }
-          });
-        });
-      }
-    });
-    if (document.body) {
-      observer.observe(document.body, { subtree: true, childList: true });
-    } else {
-      console.error("document.body is not available.");
-    }
-  }
-  async function addLearnableMetaMapPanel() {
-    const mapId = extractMapIdFromUrl(window.location.href);
-    if (!mapId) {
-      return;
-    }
-    const mapInfo = await getMapInfo(mapId, true);
-    const mapAvatarContainer = document.querySelector(".map-block_mapImageContainer__j0z_h");
-    if (mapAvatarContainer) {
-      const existingLabel = mapAvatarContainer.querySelector(".map-label");
-      if (existingLabel) {
-        existingLabel.remove();
-      }
-      if (!(mapInfo == null ? void 0 : mapInfo.mapFound)) {
-        return;
-      }
-      const element = document.createElement("div");
-      element.classList.add("map-label");
-      mapAvatarContainer.appendChild(element);
-      mount(MapLabel, {
-        target: element
-      });
-    }
+    initSinglePlayer();
+    initMapLabel();
   }
 
 })();
