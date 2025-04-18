@@ -1,6 +1,6 @@
 <script lang="ts">
   import video from '$lib/assets/showcase.webm';
-  import { GradientButton, Heading } from 'flowbite-svelte';
+  import { Heading } from 'flowbite-svelte';
   import Icon from '@iconify/svelte';
   import { Button } from '$lib/components/ui/button';
 </script>
