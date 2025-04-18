@@ -1,16 +1,8 @@
-import App from './App.svelte';
-import MapLabel from './lib/components/MapLabel.svelte';
-import {
-  getChallengeId,
-  getChallengeInfo,
-  getMapInfo,
-  logInfo,
-  waitForElement,
-  extractMapIdFromUrl
-} from './lib/utils/main';
-
 import { unsafeWindow } from '$';
-import { mount } from 'svelte';
+import { initSinglePlayer } from './lib/singlePlayer';
+import { initLiveChallenge } from './lib/liveChallenge';
+import { initURLChangeEvent } from './lib/utils/url';
+import { initMapLabel } from './lib/mapLabel';
 
 function changelog() {
   return [
@@ -47,23 +39,7 @@ function changelog() {
 if (unsafeWindow.notAValidVariable) {
   console.log(changelog());
 }
-
-//@ts-ignore
-const GeoGuessrEventFramework = unsafeWindow.GeoGuessrEventFramework;
-type GGEvent = {
-  detail: {
-    map: {
-      id: string;
-    };
-    rounds: {
-      location: {
-        lat: number;
-        lng: number;
-        panoId: string;
-      };
-    }[];
-  };
-};
+initURLChangeEvent();
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', async () => {
@@ -74,114 +50,7 @@ if (document.readyState === 'loading') {
 }
 
 async function setupLearnableMetaFeatures() {
-  initLiveChallengeObserver();
-  let lastUrl = '';
-  setInterval(() => {
-    if (window.location.href !== lastUrl) {
-      lastUrl = window.location.href;
-      addLearnableMetaMapPanel();
-    }
-  }, 500);
-}
-
-// Single player
-GeoGuessrEventFramework.init().then(() => {
-  GeoGuessrEventFramework.events.addEventListener('game_start', async (event: GGEvent) => {
-    await getMapInfo(event.detail.map.id, true);
-  });
-  GeoGuessrEventFramework.events.addEventListener('round_end', async (event: GGEvent) => {
-    const mapInfo = await getMapInfo(event.detail.map.id, false);
-    if (!mapInfo.mapFound) {
-      logInfo('not supported map - skip');
-      return;
-    }
-    logInfo('waiting for the result view to render');
-    waitForElement('div[data-qa="result-view-top"]').then((container) => {
-      logInfo('the result view is rendered');
-      const element = document.createElement('div');
-      element.id = 'geometa-summary';
-      container.appendChild(element);
-      const lastRound = event.detail.rounds[event.detail.rounds.length - 1];
-      logInfo('adding app window');
-      mount(App, {
-        target: element,
-        props: {
-          panoId: lastRound.location.panoId,
-          mapId: event.detail.map.id
-        }
-      });
-    });
-  });
-});
-
-
-// Live Challenge
-function initLiveChallengeObserver() {
-  logInfo('live challenge support enabled');
-  let pinChanged = false;
-  const observer = new MutationObserver(async (mutations) => {
-    const pinClass = '.result-map_roundPin__3ieXw';
-    if (!document.querySelector(pinClass)) {
-      pinChanged = false;
-      return;
-    }
-    if (pinChanged) {
-      return;
-    }
-    pinChanged = true;
-    const challengeId = getChallengeId();
-    if (challengeId) {
-      const { mapId, panoId } = await getChallengeInfo(challengeId);
-      const mapInfo = await getMapInfo(mapId, false);
-      if (!mapInfo.mapFound) return;
-      waitForElement('div.game_container__5bsqO').then((container) => {
-        const element = document.createElement('div');
-        element.id = 'geometa-summary';
-        container.appendChild(element);
-        mount(App, {
-          target: element,
-          props: {
-            panoId,
-            mapId
-          }
-        });
-      });
-    }
-  });
-
-  if (document.body) {
-    observer.observe(document.body, { subtree: true, childList: true });
-  } else {
-    console.error('document.body is not available.');
-  }
-}
-
-
-async function addLearnableMetaMapPanel() {
-  const mapId = extractMapIdFromUrl(window.location.href);
-  if (!mapId) {
-    return;
-  }
-  const mapInfo = await getMapInfo(mapId, true);
-  const mapAvatarContainer = document.querySelector('.map-block_mapImageContainer__j0z_h') as HTMLElement;
-  if (mapAvatarContainer) {
-    const existingLabel = mapAvatarContainer.querySelector('.map-label');
-    if (existingLabel) {
-      existingLabel.remove();
-    }
-    if (!mapInfo?.mapFound) {
-    return;
-    }
-
-    const element = document.createElement('div');
-    element.classList.add('map-label');
-    mapAvatarContainer.appendChild(element);
-    mount(MapLabel, {
-      target: element,
-      props: {
-        mapId: mapId
-      }
-    });
-
-  }
+  initSinglePlayer();
+  initLiveChallenge();
+  initMapLabel();
 }

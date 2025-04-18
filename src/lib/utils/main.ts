@@ -1,31 +1,54 @@
 import { GM_xmlhttpRequest, unsafeWindow, GM_info } from '$';
 
-export function waitForElement(selector: string): Promise<Element> {
+
+/**
+ * Waits and returns an element with the specified selector.
+ * Supports dynamic selectors like [class*=map-block_mapImageContainer].
+ * Only works with class selectors!
+ * Will stop looking when URL changes.
+ */
+export function waitForElement(selector: string): Promise<Element | null> {
   return new Promise((resolve) => {
-    const existingElement = document.querySelector(selector);
-    if (existingElement) {
-      resolve(existingElement);
-      return;
+    try {
+      const existingElement = document.querySelector(selector);
+      if (existingElement) {
+        resolve(existingElement);
+        return;
+      }
+    } catch {
     }
 
-    // If not, set up a MutationObserver to watch for it
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.type === 'childList') {
-          const element = document.querySelector(selector);
-          if (element) {
-            observer.disconnect();
-            resolve(element);
-            return;
-          }
+    const observer = new MutationObserver(() => {
+      try {
+        const element = document.querySelector(selector);
+        if (element) {
+          observer.disconnect();
+          removeUrlChangeListener();
+          resolve(element);
+          return;
         }
+      } catch {
       }
     });
+
+    const handleUrlChange = () => {
+      observer.disconnect();
+      removeUrlChangeListener();
+      resolve(null);
+    };
+
+    const removeUrlChangeListener = () => {
+      window.removeEventListener('urlchange', handleUrlChange);
+    };
+
+    window.addEventListener('urlchange', handleUrlChange);
 
     // Start observing the document body for DOM changes
     observer.observe(document.body, {
       childList: true,
-      subtree: true
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['class']
     });
   });
 }
@@ -65,14 +88,14 @@ async function fetchMapInfo(url: string): Promise<MapInfoResponse> {
         if (response.status === 200 || response.status === 404) {
           try {
             const mapInfo = JSON.parse(response.responseText) as MapInfoResponse;
-            logInfo('fetched map info', mapInfo)
+            logInfo('fetched map info', mapInfo);
             resolve(mapInfo);
           } catch (e) {
-            logInfo('failed to parse map info response', e)
+            logInfo('failed to parse map info response', e);
             reject('Failed to parse response');
           }
         } else {
-          logInfo('failed to fetch map info', response)
+          logInfo('failed to fetch map info', response);
           reject(`HTTP error! status: ${response.status}`);
         }
       },
@@ -88,21 +111,21 @@ export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
   if (!forceUpdate) {
     const savedMapInfo = unsafeWindow.localStorage.getItem(localStorageMapInfoKey);
     if (savedMapInfo) {
-      const mapInfo = JSON.parse(savedMapInfo) as MapInfoResponse
-      logInfo('using saved map info', mapInfo)
+      const mapInfo = JSON.parse(savedMapInfo) as MapInfoResponse;
+      logInfo('using saved map info', mapInfo);
       return mapInfo;
     }
   }
   const url = `https://learnablemeta.com/api/map-info/${geoguessrId}`;
   const mapInfo = await fetchMapInfo(url);
   unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(mapInfo));
-  unsafeWindow.localStorage.setItem("geometa:latest-version", mapInfo.userscriptVersion);
+  unsafeWindow.localStorage.setItem('geometa:latest-version', mapInfo.userscriptVersion);
   return mapInfo;
 }
 
 
 export function getLatestVersionInfo() {
-  return unsafeWindow.localStorage.getItem("geometa:latest-version");
+  return unsafeWindow.localStorage.getItem('geometa:latest-version');
 }
 
 export function checkIfOutdated() {
@@ -110,51 +133,51 @@ export function checkIfOutdated() {
 }
 
 export function markHelpMessageAsRead() {
-  unsafeWindow.localStorage.setItem("geometa:help-message-read", "true");
+  unsafeWindow.localStorage.setItem('geometa:help-message-read', 'true');
 }
 
 export function wasHelpMessageRead(): boolean {
-  return unsafeWindow.localStorage.getItem("geometa:help-message-read") == "true";
+  return unsafeWindow.localStorage.getItem('geometa:help-message-read') == 'true';
 }
 
 export const getChallengeId = () => {
-  const regexp = /.*\/live-challenge\/(.*)/
-  const matches = location.pathname.match(regexp)
+  const regexp = /.*\/live-challenge\/(.*)/;
+  const matches = location.pathname.match(regexp);
   if (matches && matches.length > 1) {
     return matches[1];
   }
   return null;
-}
+};
 
 export async function getChallengeInfo(id: string) {
-  const url = `https://game-server.geoguessr.com/api/live-challenge/${id}`
+  const url = `https://game-server.geoguessr.com/api/live-challenge/${id}`;
   const response = await fetch(url, {
-    method: "GET",
-    credentials: "include"
+    method: 'GET',
+    credentials: 'include'
   });
   const data = await response.json();
   const mapId = data.options.mapSlug;
-  const currentRound = data.currentRoundNumber - 1
-  const rounds = data.rounds
-  const panorama = rounds[currentRound].question.panoramaQuestionPayload.panorama
-  const panoIdHex = panorama.panoId
-  const panoId = decodePanoId(panoIdHex)
-  return { mapId, panoId }
+  const currentRound = data.currentRoundNumber - 1;
+  const rounds = data.rounds;
+  const panorama = rounds[currentRound].question.panoramaQuestionPayload.panorama;
+  const panoIdHex = panorama.panoId;
+  const panoId = decodePanoId(panoIdHex);
+  return { mapId, panoId };
 }
 
 export function decodePanoId(encoded: string) {
-  const len = Math.floor(encoded.length / 2)
-  let panoId: string[] = []
+  const len = Math.floor(encoded.length / 2);
+  let panoId: string[] = [];
   for (let i = 0; i < len; i++) {
-    const code = parseInt(encoded.slice(i * 2, i * 2 + 2), 16)
-    const char = String.fromCharCode(code)
-    panoId = [...panoId, char]
+    const code = parseInt(encoded.slice(i * 2, i * 2 + 2), 16);
+    const char = String.fromCharCode(code);
+    panoId = [...panoId, char];
   }
-  return panoId.join("")
+  return panoId.join('');
 }
 
 export function logInfo(name: string, data?: any) {
-  console.log(`ALM: ${name}`, data)
+  console.log(`ALM: ${name}`, data);
 }
 
 
