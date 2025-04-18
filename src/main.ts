@@ -41,9 +41,7 @@ if (unsafeWindow.notAValidVariable) {
 initURLChangeEvent();
 
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', async () => {
-    await setupLearnableMetaFeatures();
-  });
+  document.addEventListener('DOMContentLoaded', setupLearnableMetaFeatures);
 } else {
   await setupLearnableMetaFeatures();
 }
