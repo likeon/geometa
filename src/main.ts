@@ -1,5 +1,5 @@
 import App from './App.svelte';
-import MapLabel from './lib/MapLabel.svelte';
+import MapLabel from './lib/components/MapLabel.svelte';
 import {
   getChallengeId,
   getChallengeInfo,
@@ -51,6 +51,25 @@ if (unsafeWindow.notAValidVariable) {
 //@ts-ignore
 const GeoGuessrEventFramework = unsafeWindow.GeoGuessrEventFramework;
 
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', async () => {
+    await setupLearnableMetaFeatures();
+  });
+} else {
+  await setupLearnableMetaFeatures();
+}
+
+async function setupLearnableMetaFeatures() {
+  initLiveChallengeObserver();
+  let lastUrl = '';
+  setInterval(() => {
+    if (window.location.href !== lastUrl) {
+      lastUrl = window.location.href;
+      addLearnableMetaMapPanel();
+    }
+  }, 500);
+}
+
 type GGEvent = {
   detail: {
     map: {
@@ -99,27 +118,6 @@ GeoGuessrEventFramework.init().then(() => {
 
 
 // Live Challenge
-
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', async () => {
-    await setupLearnableMetaFeatures();
-  });
-} else {
-  await setupLearnableMetaFeatures();
-}
-
-async function setupLearnableMetaFeatures() {
-  initLiveChallengeObserver();
-  let lastUrl = '';
-  setInterval(() => {
-    if (window.location.href !== lastUrl) {
-      lastUrl = window.location.href;
-      addLearnableMetaMapPanel();
-    }
-  }, 500);
-}
-
-
 function initLiveChallengeObserver() {
   logInfo('live challenge support enabled');
   let pinChanged = false;
@@ -162,7 +160,6 @@ function initLiveChallengeObserver() {
 
 
 async function addLearnableMetaMapPanel() {
-  
   const mapId = extractMapIdFromUrl(window.location.href);
   if (!mapId) {
     return;
@@ -177,16 +174,16 @@ async function addLearnableMetaMapPanel() {
     if (!mapInfo?.mapFound) {
     return;
     }
-    
-
 
     const element = document.createElement('div');
     element.classList.add('map-label');
     mapAvatarContainer.appendChild(element);
     mount(MapLabel, {
-      target: element
+      target: element,
+      props: {
+        mapId: mapId
+      }
     });
 
   }
 }
-

@@ -1,17 +1,14 @@
 <script lang="ts">
-  function navigate() {
-    const mapId = window.location.pathname.split('/maps/')[1]; // Extract map ID from URL
-    window.open(`https://learnablemeta.com/maps/${mapId}`, '_blank'); // Open the meta list in a new tab
-  }
+  let { mapId }: {mapId: string} = $props();
 </script>
 
-<div class="container">
+<div class="geometa-map-label-container">
   <p>LearnableMeta Enabled</p>
-  <button onclick={navigate}>Meta List</button>
+  <a href={`https://learnablemeta.com/maps/${mapId}`} target="_blank"><button>Meta List</button></a>
 </div>
 
 <style>
-  .container {
+  .geometa-map-label-container {
     background-color: #252541;
     color: #fff;
     text-align: center;
