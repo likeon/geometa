@@ -1,12 +1,12 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { GM_xmlhttpRequest } from '$';
-  import Spinner from './lib/components/Spinner.svelte';
-  import CountryFlag from './lib/components/CountryFlag.svelte';
-  import { onPointerDown, onPointerMove, onPointerUp, setContainerPosition } from './lib/utils/dragging';
-  import { saveContainerDimensions, setContainerDimensions } from './lib/utils/resizing';
-  import Carousel from './lib/components/Carousel.svelte';
-  import { checkIfOutdated, getLatestVersionInfo, markHelpMessageAsRead, wasHelpMessageRead } from './lib/utils/main';
+  import Spinner from './components/Spinner.svelte';
+  import CountryFlag from './components/CountryFlag.svelte';
+  import { onPointerDown, onPointerMove, onPointerUp, setContainerPosition } from './utils/dragging';
+  import { saveContainerDimensions, setContainerDimensions } from './utils/resizing';
+  import Carousel from './components/Carousel.svelte';
+  import { checkIfOutdated, getLatestVersionInfo, markHelpMessageAsRead, wasHelpMessageRead } from './utils/main';
 
   interface Props {
     panoId: string;
