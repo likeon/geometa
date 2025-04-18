@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { GM_xmlhttpRequest } from '$';
-  import Spinner from './lib/Spinner.svelte';
-  import CountryFlag from './lib/CountryFlag.svelte';
+  import Spinner from './lib/components/Spinner.svelte';
+  import CountryFlag from './lib/components/CountryFlag.svelte';
   import { onPointerDown, onPointerMove, onPointerUp, setContainerPosition } from './lib/dragging';
   import { saveContainerDimensions, setContainerDimensions } from './lib/resizing';
-  import Carousel from './lib/Carousel.svelte';
+  import Carousel from './lib/components/Carousel.svelte';
   import { checkIfOutdated, getLatestVersionInfo, markHelpMessageAsRead, wasHelpMessageRead } from './lib/utils';
 
   interface Props {
