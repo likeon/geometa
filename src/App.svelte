@@ -3,10 +3,10 @@
   import { GM_xmlhttpRequest } from '$';
   import Spinner from './lib/components/Spinner.svelte';
   import CountryFlag from './lib/components/CountryFlag.svelte';
-  import { onPointerDown, onPointerMove, onPointerUp, setContainerPosition } from './lib/dragging';
-  import { saveContainerDimensions, setContainerDimensions } from './lib/resizing';
+  import { onPointerDown, onPointerMove, onPointerUp, setContainerPosition } from './lib/utils/dragging';
+  import { saveContainerDimensions, setContainerDimensions } from './lib/utils/resizing';
   import Carousel from './lib/components/Carousel.svelte';
-  import { checkIfOutdated, getLatestVersionInfo, markHelpMessageAsRead, wasHelpMessageRead } from './lib/utils';
+  import { checkIfOutdated, getLatestVersionInfo, markHelpMessageAsRead, wasHelpMessageRead } from './lib/utils/main';
 
   interface Props {
     panoId: string;

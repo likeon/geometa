@@ -1,4 +1,4 @@
-import { localStorageGetInt } from './utils';
+import { localStorageGetInt } from './main';
 import { unsafeWindow } from '$';
 
 const widthKey = 'geometa:containerWidth';

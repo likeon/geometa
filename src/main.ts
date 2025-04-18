@@ -7,7 +7,7 @@ import {
   logInfo,
   waitForElement,
   extractMapIdFromUrl
-} from './lib/utils';
+} from './lib/utils/main';
 
 import { unsafeWindow } from '$';
 import { mount } from 'svelte';
@@ -50,6 +50,20 @@ if (unsafeWindow.notAValidVariable) {
 
 //@ts-ignore
 const GeoGuessrEventFramework = unsafeWindow.GeoGuessrEventFramework;
+type GGEvent = {
+  detail: {
+    map: {
+      id: string;
+    };
+    rounds: {
+      location: {
+        lat: number;
+        lng: number;
+        panoId: string;
+      };
+    }[];
+  };
+};
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', async () => {
@@ -69,22 +83,6 @@ async function setupLearnableMetaFeatures() {
     }
   }, 500);
 }
-
-type GGEvent = {
-  detail: {
-    map: {
-      id: string;
-    };
-    rounds: {
-      location: {
-        lat: number;
-        lng: number;
-        panoId: string;
-      };
-    }[];
-  };
-};
-
 
 // Single player
 GeoGuessrEventFramework.init().then(() => {
