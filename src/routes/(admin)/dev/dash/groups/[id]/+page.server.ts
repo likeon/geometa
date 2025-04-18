@@ -322,9 +322,17 @@ export const actions = {
 
     if (!validationResult.success) {
       console.debug(validationResult.error.issues);
-      const processedErrors = validationResult.error.issues.map(
-        (issue) => `${issue.path.join(' > ')}: ${issue.message}`
-      );
+      const processedErrors = validationResult.error.issues.map((issue) => {
+        let message: string = issue.message;
+        if (issue.path.includes('tags')) {
+          if (issue.code === 'too_small') {
+            message = "Location doesn't have a tag";
+          } else if (issue.code === 'too_big') {
+            message = 'Location has more than one tag';
+          }
+        }
+        return `${issue.path.join(' > ')}: ${message}`;
+      });
       return setError(form, 'file', processedErrors);
     }
 
