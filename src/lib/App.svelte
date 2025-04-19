@@ -11,9 +11,11 @@
   interface Props {
     panoId: string;
     mapId: string;
+    userscriptVersion: string;
+    source: 'map' | 'challenge' | 'liveChallenge'
   }
 
-  let { panoId, mapId }: Props = $props();
+  let { panoId, mapId, userscriptVersion, source }: Props = $props();
 
   type GeoInfo = {
     country: string;
@@ -31,7 +33,13 @@
   let header: HTMLDivElement;
 
   onMount(() => {
-    const url = `https://learnablemeta.com/location-info?panoId=${panoId}&mapId=${mapId}`;
+    const urlParams = new URLSearchParams({
+      panoId,
+      mapId,
+      userscriptVersion,
+      source
+    }).toString();
+    const url = `https://learnablemeta.com/location-info?${urlParams}`;
 
     GM_xmlhttpRequest({
       method: 'GET',
@@ -144,8 +152,6 @@
       <button onclick={togglePopup} aria-label="More information" style="background: none; border: none; padding: 0;">
         <span class={helpClass}></span>
       </button>
-
-
     </div>
   </div>
   {#if error}
@@ -328,8 +334,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    touch-action: none;    /* Prevent scroll / other gestures */
-    user-select: none;     /* Prevent text selection while dragging */
+    touch-action: none; /* Prevent scroll / other gestures */
+    user-select: none; /* Prevent text selection while dragging */
   }
 
 

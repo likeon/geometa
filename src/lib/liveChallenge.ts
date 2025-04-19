@@ -32,7 +32,9 @@ export function initLiveChallenge() {
           target: element,
           props: {
             panoId,
-            mapId
+            mapId,
+            userscriptVersion: mapInfo.userscriptVersion,
+            source: 'liveChallenge'
           }
         });
       });

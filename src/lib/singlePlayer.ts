@@ -46,7 +46,9 @@ export function initSinglePlayer() {
           target: element,
           props: {
             panoId: lastRound.location.panoId,
-            mapId: event.detail.map.id
+            mapId: event.detail.map.id,
+            userscriptVersion: mapInfo.userscriptVersion,
+            source: (window.location.href.includes('challenge') ? 'challenge' : 'map')
           }
         });
       });
