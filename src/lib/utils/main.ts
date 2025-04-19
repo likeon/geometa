@@ -140,9 +140,46 @@ export function wasHelpMessageRead(): boolean {
   return unsafeWindow.localStorage.getItem('geometa:help-message-read') == 'true';
 }
 
+export const getChallengeId = () => {
+  const regexp = /.*\/live-challenge\/(.*)/;
+  const matches = location.pathname.match(regexp);
+  if (matches && matches.length > 1) {
+    return matches[1];
+  }
+  return null;
+};
+
+export async function getChallengeInfo(id: string) {
+  const url = `https://game-server.geoguessr.com/api/live-challenge/${id}`;
+  const response = await fetch(url, {
+    method: 'GET',
+    credentials: 'include'
+  });
+  const data = await response.json();
+  const mapId = data.options.mapSlug;
+  const currentRound = data.currentRoundNumber - 1;
+  const rounds = data.rounds;
+  const panorama = rounds[currentRound].question.panoramaQuestionPayload.panorama;
+  const panoIdHex = panorama.panoId;
+  const panoId = decodePanoId(panoIdHex);
+  return { mapId, panoId };
+}
+
+export function decodePanoId(encoded: string) {
+  const len = Math.floor(encoded.length / 2);
+  let panoId: string[] = [];
+  for (let i = 0; i < len; i++) {
+    const code = parseInt(encoded.slice(i * 2, i * 2 + 2), 16);
+    const char = String.fromCharCode(code);
+    panoId = [...panoId, char];
+  }
+  return panoId.join('');
+}
+
 export function logInfo(name: string, data?: any) {
   console.log(`ALM: ${name}`, data);
 }
+
 
 export function extractMapIdFromUrl(url: string) {
   const match = url.match(/\/maps\/(.+)/);

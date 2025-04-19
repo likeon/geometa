@@ -1,5 +1,6 @@
 import { unsafeWindow } from '$';
 import { initSinglePlayer } from './lib/singlePlayer';
+import { initLiveChallenge } from './lib/liveChallenge';
 import { initURLChangeEvent } from './lib/utils/url';
 import { initMapLabel } from './lib/mapLabel';
 
@@ -49,5 +50,6 @@ if (document.readyState === 'loading') {
 
 async function setupLearnableMetaFeatures() {
   initSinglePlayer();
+  initLiveChallenge();
   initMapLabel();
 }
