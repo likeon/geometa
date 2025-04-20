@@ -10,9 +10,12 @@ export async function GET({ params, platform, locals }) {
   });
   const userscriptVersionPromise = platform?.env.geometa_kv.get(userscriptVersionKey);
   const [map, userscriptVersion] = await Promise.all([mapPromise, userscriptVersionPromise]);
-  if (!map) {
+  if (!map || map.geoguessrId !== params.geoguessrId) {
     return json({ mapFound: false, userscriptVersion: userscriptVersion }, { status: 404 });
   }
 
-  return json({ mapFound: true, userscriptVersion: userscriptVersion });
+  return json({
+    mapFound: true,
+    userscriptVersion: userscriptVersion
+  });
 }
