@@ -6,6 +6,7 @@ import { initMapLabel } from './lib/mapLabel';
 
 function changelog() {
   return [
+    { '0.81': 'Fixed live challenge support. Added information about userscript version and source of a call (map, challenge, liveChallenge) to location info request to help us with debugging issues.' },
     { '0.80': 'Adjusted window dragging to work on mobile. Improved selection mechanism of elements with dynamic class names. Removed special handling of challenges.' },
     { '0.79': 'Fixed ALM meta list panel when switching to non-ALM map' },
     { '0.78': 'Added info window with version check' },

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.80
+// @version      0.81
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
@@ -17,7 +17,7 @@
 // @run-at       document-start
 // ==/UserScript==
 
-(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(` .loadership_ZOJAQ.svelte-i1jlc0{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-i1jlc0-loadership_ZOJAQ_scale 1.2s infinite,svelte-i1jlc0-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-i1jlc0-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-i1jlc0-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.carousel.svelte-fofh7f{position:relative;overflow:hidden;margin:0 auto}.image-wrapper.svelte-fofh7f{width:100%;height:100%;display:flex;justify-content:center;align-items:center;cursor:zoom-in}.responsive-image.svelte-fofh7f{max-width:100%;height:100%;display:block;object-fit:contain}.lens.svelte-fofh7f{position:absolute;pointer-events:none;border:2px solid #aaa;border-radius:50%;box-shadow:0 0 8px #00000080}.click-area.svelte-fofh7f{position:absolute;top:0;bottom:0;width:1.4em;cursor:pointer}.prev-area.svelte-fofh7f{left:0}.next-area.svelte-fofh7f{right:0}.prev.svelte-fofh7f,.next.svelte-fofh7f{background-color:#00000080;color:#fff;border:none;font-size:1.2em;padding:.2em;cursor:pointer;pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%)}.prev.svelte-fofh7f{left:0}.next.svelte-fofh7f{right:0}.indicators.svelte-fofh7f{position:absolute;bottom:15px;left:50%;transform:translate(-50%);display:flex;justify-content:center;align-items:center;gap:8px}.indicator.svelte-fofh7f{width:12px;height:12px;background-color:#ffffff80;border-radius:50%;cursor:pointer;border:none;padding:0;flex-shrink:0}.indicator.active.svelte-fofh7f{background-color:#fff}.geometa-footer a{color:#188bd2;text-decoration:none}.geometa-footer a:hover{text-decoration:underline}.geometa-container.svelte-46slld{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);resize:both;overflow:auto}.geometa-footer.svelte-46slld{color:#d3d3d3;font-size:small}a.svelte-46slld{color:#188bd2}a.svelte-46slld:hover{text-decoration:underline}.skill-icons--discord.svelte-46slld{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-46slld{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--list.svelte-46slld{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E")}.question-mark-icon.svelte-46slld{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");cursor:pointer}.icons.svelte-46slld{display:inline-block;vertical-align:middle}.flex.svelte-46slld{display:flex;align-items:center}.icons.svelte-46slld a:where(.svelte-46slld) span:where(.svelte-46slld){align-items:center;justify-content:center}hr.svelte-46slld{border:0;border-top:1px solid white;width:100%}.header.svelte-46slld{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center;touch-action:none;-webkit-user-select:none;user-select:none}.geometa-note a{color:#188bd2}.geometa-note a:hover{text-decoration:underline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem}.modal-backdrop.svelte-46slld{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#1e1e1ecc;display:flex;justify-content:center;align-items:center;z-index:1000}.modal.svelte-46slld{background:var(--ds-color-purple-100);padding:15px 25px;border-radius:8px;text-align:center;width:90%;max-width:600px;box-shadow:0 4px 6px #0003;color:#d3d3d3}.modal.svelte-46slld p:where(.svelte-46slld){margin:0 0 10px;font-size:17px}.modal-url.svelte-46slld{font-size:15px;font-weight:700;color:#188bd2;word-break:break-word;margin:10px 0}.modal-buttons.svelte-46slld{display:flex;justify-content:center;gap:15px;margin-top:20px}.proceed-btn.svelte-46slld{background:#188bd2;color:#fff;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out}.proceed-btn.svelte-46slld:hover{background:#0056b3}.close-btn.svelte-46slld{background:transparent;color:#d3d3d3;padding:8px 16px;border:1px solid #d3d3d3;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out,color .2s ease-in-out}.close-btn.svelte-46slld:hover{background:#d3d3d3;color:var(--ds-color-purple-100)}button.svelte-46slld{cursor:pointer;background:none;border:none;padding:0}.blink.svelte-46slld{animation:svelte-46slld-blink-animation 1s infinite}.help-message.svelte-46slld{padding:12px;font-size:16px;line-height:1.5;text-align:left}.help-message.svelte-46slld strong:where(.svelte-46slld){color:#007bff;font-weight:700}@keyframes svelte-46slld-blink-animation{0%{filter:brightness(1)}50%{filter:brightness(2);background-color:#004779}to{filter:brightness(1)}}.outdated.svelte-46slld strong:where(.svelte-46slld){color:red!important}.geometa-map-label-container.svelte-coney7{background-color:#252541;color:#fff;text-align:center;z-index:999999;position:absolute;bottom:-1px;left:0;width:220px;height:50%;box-sizing:border-box;border-radius:0 0 110px 110px;clip-path:inset(40% 0 0 0)}p.svelte-coney7{font-size:14px;margin-top:48px;font-weight:700}button.svelte-coney7{margin-top:6px;padding:6px 12px;font-size:12px;color:#fff;background-color:#4caf50;border:none;border-radius:4px;cursor:pointer} `);
+(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(` .loadership_ZOJAQ.svelte-i1jlc0{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-i1jlc0-loadership_ZOJAQ_scale 1.2s infinite,svelte-i1jlc0-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-i1jlc0-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-i1jlc0-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.carousel.svelte-fofh7f{position:relative;overflow:hidden;margin:0 auto}.image-wrapper.svelte-fofh7f{width:100%;height:100%;display:flex;justify-content:center;align-items:center;cursor:zoom-in}.responsive-image.svelte-fofh7f{max-width:100%;height:100%;display:block;object-fit:contain}.lens.svelte-fofh7f{position:absolute;pointer-events:none;border:2px solid #aaa;border-radius:50%;box-shadow:0 0 8px #00000080}.click-area.svelte-fofh7f{position:absolute;top:0;bottom:0;width:1.4em;cursor:pointer}.prev-area.svelte-fofh7f{left:0}.next-area.svelte-fofh7f{right:0}.prev.svelte-fofh7f,.next.svelte-fofh7f{background-color:#00000080;color:#fff;border:none;font-size:1.2em;padding:.2em;cursor:pointer;pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%)}.prev.svelte-fofh7f{left:0}.next.svelte-fofh7f{right:0}.indicators.svelte-fofh7f{position:absolute;bottom:15px;left:50%;transform:translate(-50%);display:flex;justify-content:center;align-items:center;gap:8px}.indicator.svelte-fofh7f{width:12px;height:12px;background-color:#ffffff80;border-radius:50%;cursor:pointer;border:none;padding:0;flex-shrink:0}.indicator.active.svelte-fofh7f{background-color:#fff}.geometa-footer a{color:#188bd2;text-decoration:none}.geometa-footer a:hover{text-decoration:underline}.geometa-container.svelte-oxxnc1{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);resize:both;overflow:auto}.geometa-footer.svelte-oxxnc1{color:#d3d3d3;font-size:small}a.svelte-oxxnc1{color:#188bd2}a.svelte-oxxnc1:hover{text-decoration:underline}.skill-icons--discord.svelte-oxxnc1{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-oxxnc1{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--list.svelte-oxxnc1{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E")}.question-mark-icon.svelte-oxxnc1{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");cursor:pointer}.icons.svelte-oxxnc1{display:inline-block;vertical-align:middle}.flex.svelte-oxxnc1{display:flex;align-items:center}.icons.svelte-oxxnc1 a:where(.svelte-oxxnc1) span:where(.svelte-oxxnc1){align-items:center;justify-content:center}hr.svelte-oxxnc1{border:0;border-top:1px solid white;width:100%}.header.svelte-oxxnc1{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center;touch-action:none;-webkit-user-select:none;user-select:none}.geometa-note a{color:#188bd2}.geometa-note a:hover{text-decoration:underline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem}.modal-backdrop.svelte-oxxnc1{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#1e1e1ecc;display:flex;justify-content:center;align-items:center;z-index:1000}.modal.svelte-oxxnc1{background:var(--ds-color-purple-100);padding:15px 25px;border-radius:8px;text-align:center;width:90%;max-width:600px;box-shadow:0 4px 6px #0003;color:#d3d3d3}.modal.svelte-oxxnc1 p:where(.svelte-oxxnc1){margin:0 0 10px;font-size:17px}.modal-url.svelte-oxxnc1{font-size:15px;font-weight:700;color:#188bd2;word-break:break-word;margin:10px 0}.modal-buttons.svelte-oxxnc1{display:flex;justify-content:center;gap:15px;margin-top:20px}.proceed-btn.svelte-oxxnc1{background:#188bd2;color:#fff;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out}.proceed-btn.svelte-oxxnc1:hover{background:#0056b3}.close-btn.svelte-oxxnc1{background:transparent;color:#d3d3d3;padding:8px 16px;border:1px solid #d3d3d3;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out,color .2s ease-in-out}.close-btn.svelte-oxxnc1:hover{background:#d3d3d3;color:var(--ds-color-purple-100)}button.svelte-oxxnc1{cursor:pointer;background:none;border:none;padding:0}.blink.svelte-oxxnc1{animation:svelte-oxxnc1-blink-animation 1s infinite}.help-message.svelte-oxxnc1{padding:12px;font-size:16px;line-height:1.5;text-align:left}.help-message.svelte-oxxnc1 strong:where(.svelte-oxxnc1){color:#007bff;font-weight:700}@keyframes svelte-oxxnc1-blink-animation{0%{filter:brightness(1)}50%{filter:brightness(2);background-color:#004779}to{filter:brightness(1)}}.outdated.svelte-oxxnc1 strong:where(.svelte-oxxnc1){color:red!important}.geometa-map-label-container.svelte-coney7{background-color:#252541;color:#fff;text-align:center;z-index:999999;position:absolute;bottom:-1px;left:0;width:220px;height:50%;box-sizing:border-box;border-radius:0 0 110px 110px;clip-path:inset(40% 0 0 0)}p.svelte-coney7{font-size:14px;margin-top:48px;font-weight:700}button.svelte-coney7{margin-top:6px;padding:6px 12px;font-size:12px;color:#fff;background-color:#4caf50;border:none;border-radius:4px;cursor:pointer} `);
 
 (async function () {
   'use strict';
@@ -128,6 +128,39 @@
   }
   function wasHelpMessageRead() {
     return _unsafeWindow.localStorage.getItem("geometa:help-message-read") == "true";
+  }
+  const getChallengeId = () => {
+    const regexp = /.*\/live-challenge\/(.*)/;
+    const matches = location.pathname.match(regexp);
+    if (matches && matches.length > 1) {
+      return matches[1];
+    }
+    return null;
+  };
+  async function getChallengeInfo(id) {
+    const url = `https://game-server.geoguessr.com/api/live-challenge/${id}`;
+    const response = await fetch(url, {
+      method: "GET",
+      credentials: "include"
+    });
+    const data = await response.json();
+    const mapId = data.options.mapSlug;
+    const currentRound = data.currentRoundNumber - 1;
+    const rounds = data.rounds;
+    const panorama = rounds[currentRound].question.panoramaQuestionPayload.panorama;
+    const panoIdHex = panorama.panoId;
+    const panoId = decodePanoId(panoIdHex);
+    return { mapId, panoId };
+  }
+  function decodePanoId(encoded) {
+    const len = Math.floor(encoded.length / 2);
+    let panoId = [];
+    for (let i = 0; i < len; i++) {
+      const code = parseInt(encoded.slice(i * 2, i * 2 + 2), 16);
+      const char = String.fromCharCode(code);
+      panoId = [...panoId, char];
+    }
+    return panoId.join("");
   }
   function logInfo(name, data) {
     console.log(`ALM: ${name}`, data);
@@ -2722,17 +2755,17 @@
       updateHelpClass();
     }
   }
-  var root_1 = /* @__PURE__ */ template(`<p class="svelte-46slld"> </p>`);
-  var root_4 = /* @__PURE__ */ template(`<p class="geometa-footer svelte-46slld"><!></p>`);
-  var root_5 = /* @__PURE__ */ template(`<hr class="svelte-46slld"> <!>`, 1);
-  var root_3 = /* @__PURE__ */ template(`<p class="svelte-46slld"><!> <strong class="svelte-46slld"> </strong> </p> <div class="geometa-note svelte-46slld"><!></div> <!> <!>`, 1);
-  var root_7 = /* @__PURE__ */ template(`<div class="modal-backdrop svelte-46slld"><div class="modal svelte-46slld"><p class="svelte-46slld">You are about to open this site in a new tab:</p> <p class="modal-url svelte-46slld"> </p> <div class="modal-buttons svelte-46slld"><button class="proceed-btn svelte-46slld">Continue</button> <button class="close-btn svelte-46slld">Cancel</button></div></div></div>`);
-  var root_9 = /* @__PURE__ */ template(`<p class="outdated svelte-46slld"><strong class="svelte-46slld"> </strong></p>`);
-  var root_8 = /* @__PURE__ */ template(`<div class="modal-backdrop svelte-46slld"><div class="modal svelte-46slld"><div class="help-message svelte-46slld"><!> <p class="svelte-46slld">Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p> <ul class="svelte-46slld"><li class="svelte-46slld"><strong class="svelte-46slld">Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere on your
-              screen.</li> <li class="svelte-46slld"><strong class="svelte-46slld">Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li> <li class="svelte-46slld"><strong class="svelte-46slld">View Map metalist:</strong> Click the list icon to see all the metas included in the map you
-              are currently playing.</li> <li class="svelte-46slld"><strong class="svelte-46slld">Join the Community:</strong> Click the Discord icon to share feedback, suggest improvements, or
-              just say hi!</li> <li class="svelte-46slld"><strong class="svelte-46slld">Outdated Script:</strong> The question mark icon will blink if the script is outdated.</li></ul></div> <button class="close-btn svelte-46slld">Close</button></div></div>`);
-  var root$1 = /* @__PURE__ */ template(`<div class="geometa-container svelte-46slld"><div class="flex header svelte-46slld"><h2 class="svelte-46slld">Learnable Meta</h2> <div class="icons svelte-46slld"><a target="_blank" aria-label="List of map metas" class="svelte-46slld"><span class="skill-icons--list svelte-46slld"></span></a> <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-46slld"><span class="flat-color-icons--globe svelte-46slld"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-46slld"><span class="skill-icons--discord svelte-46slld"></span></a> <button aria-label="More information" style="background: none; border: none; padding: 0;" class="svelte-46slld"><span></span></button></div></div> <!> <!> <!></div>`);
+  var root_1 = /* @__PURE__ */ template(`<p class="svelte-oxxnc1"> </p>`);
+  var root_4 = /* @__PURE__ */ template(`<p class="geometa-footer svelte-oxxnc1"><!></p>`);
+  var root_5 = /* @__PURE__ */ template(`<hr class="svelte-oxxnc1"> <!>`, 1);
+  var root_3 = /* @__PURE__ */ template(`<p class="svelte-oxxnc1"><!> <strong class="svelte-oxxnc1"> </strong> </p> <div class="geometa-note svelte-oxxnc1"><!></div> <!> <!>`, 1);
+  var root_7 = /* @__PURE__ */ template(`<div class="modal-backdrop svelte-oxxnc1"><div class="modal svelte-oxxnc1"><p class="svelte-oxxnc1">You are about to open this site in a new tab:</p> <p class="modal-url svelte-oxxnc1"> </p> <div class="modal-buttons svelte-oxxnc1"><button class="proceed-btn svelte-oxxnc1">Continue</button> <button class="close-btn svelte-oxxnc1">Cancel</button></div></div></div>`);
+  var root_9 = /* @__PURE__ */ template(`<p class="outdated svelte-oxxnc1"><strong class="svelte-oxxnc1"> </strong></p>`);
+  var root_8 = /* @__PURE__ */ template(`<div class="modal-backdrop svelte-oxxnc1"><div class="modal svelte-oxxnc1"><div class="help-message svelte-oxxnc1"><!> <p class="svelte-oxxnc1">Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p> <ul class="svelte-oxxnc1"><li class="svelte-oxxnc1"><strong class="svelte-oxxnc1">Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere on your
+              screen.</li> <li class="svelte-oxxnc1"><strong class="svelte-oxxnc1">Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li> <li class="svelte-oxxnc1"><strong class="svelte-oxxnc1">View Map metalist:</strong> Click the list icon to see all the metas included in the map you
+              are currently playing.</li> <li class="svelte-oxxnc1"><strong class="svelte-oxxnc1">Join the Community:</strong> Click the Discord icon to share feedback, suggest improvements, or
+              just say hi!</li> <li class="svelte-oxxnc1"><strong class="svelte-oxxnc1">Outdated Script:</strong> The question mark icon will blink if the script is outdated.</li></ul></div> <button class="close-btn svelte-oxxnc1">Close</button></div></div>`);
+  var root$1 = /* @__PURE__ */ template(`<div class="geometa-container svelte-oxxnc1"><div class="flex header svelte-oxxnc1"><h2 class="svelte-oxxnc1">Learnable Meta</h2> <div class="icons svelte-oxxnc1"><a target="_blank" aria-label="List of map metas" class="svelte-oxxnc1"><span class="skill-icons--list svelte-oxxnc1"></span></a> <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-oxxnc1"><span class="flat-color-icons--globe svelte-oxxnc1"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-oxxnc1"><span class="skill-icons--discord svelte-oxxnc1"></span></a> <button aria-label="More information" style="background: none; border: none; padding: 0;" class="svelte-oxxnc1"><span></span></button></div></div> <!> <!> <!></div>`);
   function App($$anchor, $$props) {
     push($$props, true);
     let geoInfo = state(null);
@@ -2740,7 +2773,13 @@
     let container;
     let header;
     onMount(() => {
-      const url = `https://learnablemeta.com/location-info?panoId=${$$props.panoId}&mapId=${$$props.mapId}`;
+      const urlParams = new URLSearchParams({
+        panoId: $$props.panoId,
+        mapId: $$props.mapId,
+        userscriptVersion: $$props.userscriptVersion,
+        source: $$props.source
+      }).toString();
+      const url = `https://learnablemeta.com/location-info?${urlParams}`;
       _GM_xmlhttpRequest({
         method: "GET",
         url,
@@ -2911,7 +2950,7 @@
     });
     template_effect(() => {
       set_attribute(a, "href", "https://learnablemeta.com/maps/" + $$props.mapId);
-      set_class(span, `${get(helpClass) ?? ""} svelte-46slld`);
+      set_class(span, `${get(helpClass) ?? ""} svelte-oxxnc1`);
     });
     append($$anchor, div);
     pop();
@@ -2924,6 +2963,8 @@
         await getMapInfo(event2.detail.map.id, true);
       });
       GeoGuessrEventFramework.events.addEventListener("round_end", async (event2) => {
+        var _a;
+        (_a = document.getElementById("geometa-summary")) == null ? void 0 : _a.remove();
         const mapInfo = await getMapInfo(event2.detail.map.id, false);
         if (!mapInfo.mapFound) {
           logInfo("not supported map - skip");
@@ -2944,12 +2985,56 @@
             target: element,
             props: {
               panoId: lastRound.location.panoId,
-              mapId: event2.detail.map.id
+              mapId: event2.detail.map.id,
+              userscriptVersion: mapInfo.userscriptVersion,
+              source: window.location.href.includes("challenge") ? "challenge" : "map"
             }
           });
         });
       });
     });
+  }
+  function initLiveChallenge() {
+    logInfo("live challenge support enabled");
+    let pinChanged = false;
+    const observer = new MutationObserver(async (mutations) => {
+      if (!document.querySelector("[class*=result-map_roundPin]")) {
+        pinChanged = false;
+        return;
+      }
+      if (pinChanged) {
+        return;
+      }
+      pinChanged = true;
+      const challengeId = getChallengeId();
+      if (challengeId) {
+        const { mapId, panoId } = await getChallengeInfo(challengeId);
+        const mapInfo = await getMapInfo(mapId, false);
+        if (!mapInfo.mapFound) return;
+        waitForElement("[class*=game_container]").then((container) => {
+          if (!container) {
+            return;
+          }
+          const element = document.createElement("div");
+          element.id = "geometa-summary";
+          container.appendChild(element);
+          mount(App, {
+            target: element,
+            props: {
+              panoId,
+              mapId,
+              userscriptVersion: mapInfo.userscriptVersion,
+              source: "liveChallenge"
+            }
+          });
+        });
+      }
+    });
+    if (document.body) {
+      observer.observe(document.body, { subtree: true, childList: true });
+    } else {
+      console.error("document.body is not available.");
+    }
   }
   function initURLChangeEvent() {
     overrideHistoryMethod("pushState");
@@ -3008,6 +3093,7 @@
   }
   function changelog() {
     return [
+      { "0.81": "Fixed live challenge support. Added information about userscript version and source of a call (map, challenge, liveChallenge) to location info request to help us with debugging issues." },
       { "0.80": "Adjusted window dragging to work on mobile. Improved selection mechanism of elements with dynamic class names. Removed special handling of challenges." },
       { "0.79": "Fixed ALM meta list panel when switching to non-ALM map" },
       { "0.78": "Added info window with version check" },
@@ -3046,6 +3132,7 @@
   }
   async function setupLearnableMetaFeatures() {
     initSinglePlayer();
+    initLiveChallenge();
     initMapLabel();
   }
 
