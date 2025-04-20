@@ -26,6 +26,8 @@ export function initSinglePlayer() {
       await getMapInfo(event.detail.map.id, true);
     });
     GeoGuessrEventFramework.events.addEventListener('round_end', async (event: GGEvent) => {
+      document.getElementById('geometa-summary')?.remove();
+
       const mapInfo = await getMapInfo(event.detail.map.id, false);
       if (!mapInfo.mapFound) {
         logInfo('not supported map - skip');

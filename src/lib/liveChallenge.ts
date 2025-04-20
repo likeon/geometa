@@ -6,9 +6,7 @@ export function initLiveChallenge() {
   logInfo('live challenge support enabled');
   let pinChanged = false;
   const observer = new MutationObserver(async (mutations) => {
-    const pinClass = '.result-map_roundPin__3ieXw';
-
-    if (!document.querySelector(pinClass)) {
+    if (!document.querySelector('[class*=result-map_roundPin]')) {
       pinChanged = false;
       return;
     }
