@@ -42,6 +42,9 @@ export async function extractJsonData(file: File) {
 }
 
 export function getCountryFromTagName(tagName: string) {
+  // idk how undefined gets there but it does
+  if (!tagName) return '';
+
   const countryRaw = tagName.split('-')[0];
 
   if (countryRaw === 'UsVirginIslands') {
