@@ -3,9 +3,9 @@
   "version": "0.0.1",
   "scripts": {
     "prepare": "husky",
-    "dev": "vite dev",
-    "build": "svelte-kit sync && vite build",
-    "preview": "vite preview",
+    "dev": "bunx --bun vite dev",
+    "build": "svelte-kit sync && bunx --bun vite build",
+    "preview": "bunx --bun vite vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --check . && eslint .",
