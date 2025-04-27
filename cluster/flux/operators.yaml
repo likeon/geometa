@@ -5,6 +5,7 @@ metadata:
   namespace: kube-system
 resources:
   - operators/cilium.yaml
+  - operators/hcloud-secrets.enc.yaml
   - operators/hcloud.yaml
 spec:
   decryption:
