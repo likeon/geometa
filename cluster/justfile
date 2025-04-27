@@ -1,0 +1,18 @@
+default:
+  just --list
+
+talos-secrets-encrypt:
+  #!/usr/bin/env bash
+  cd talos
+  sops -e controlplane.yaml > controlplane.enc.yaml
+  sops -e worker.yaml > worker.enc.yaml
+  sops -e kubeconfig > kubeconfig.enc
+  sops -e talosconfig > talosconfig
+
+talos-secrets-decrypt:
+  #!/usr/bin/env bash
+  cd talos
+  sops -d controlplane.enc.yaml > controlplane.yaml
+  sops -d worker.enc.yaml > worker.yaml
+  sops -d kubeconfig.enc > kubeconfig
+  sops -d talosconfig.enc > talosconfig
