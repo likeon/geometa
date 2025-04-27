@@ -1,0 +1,20 @@
+{
+  "spellcheck": true,
+  "defaultViewMode": "source",
+  "fileSortOrder": "byModifiedTime",
+  "promptDelete": false,
+  "spellcheckDictionary": [],
+  "trashOption": "none",
+  "newLinkFormat": "relative",
+  "showUnsupportedFiles": false,
+  "attachmentFolderPath": "/",
+  "foldIndent": true,
+  "legacyEditor": false,
+  "livePreview": true,
+  "pdfExportSettings": {
+    "pageSize": "A4",
+    "landscape": false,
+    "margin": "0",
+    "downscalePercent": 73
+  }
+}
