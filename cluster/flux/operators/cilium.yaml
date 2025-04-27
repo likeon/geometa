@@ -21,7 +21,7 @@ spec:
       sourceRef:
         kind: HelmRepository
         name: cilium
-        namespace: flux-system
+        namespace: kube-system
   interval: 1h0m0s
   values:
     ipam:
