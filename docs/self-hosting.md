@@ -1,5 +1,4 @@
 ## Technologies
-
 - Kubernetes (k8s)
   - 3 VM cluster on hetzner
     - 2vCPU 4GB RAM arm
@@ -16,7 +15,6 @@
 
 ## ToDo #1
 Setup k8s operators via flux into `kube-system` namespace
-
 - cilium
 - hetzner hcloud-cloud-controller-manager
 - hetzner csi-driver
@@ -24,4 +22,4 @@ Setup k8s operators via flux into `kube-system` namespace
   - operator and ui
 
 **Setup tailscale**
-There is official operator for k8s that makes it easy to access services and definitely need it, but there is also talos tailsclae plugin which I know nothing about. I assume it is to access the nodes themselves via VPN - if so it is also must have. Current talos config simply whitelists an IP: idk how it is for you, but I don't have a fixed IP from my internet provider.
+There is official operator for k8s that makes it easy to access services and we definitely need it, but there is also talos tailsclae plugin which I know nothing about. I assume it is to access the nodes themselves via VPN - if so it is also must have. Current talos config simply whitelists an IP: idk how it is for you, but I don't have a fixed IP from my internet provider.
