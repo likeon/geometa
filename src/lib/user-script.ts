@@ -5,8 +5,7 @@ import {
   cloudflareKvBulkPut,
   generateFooter,
   generatePlonkitLink,
-  getCountryFromTagName,
-  markdown2Html
+  getCountryFromTagName
 } from '$lib/utils';
 
 export async function syncUserScriptData(db: DB, groupId: number) {

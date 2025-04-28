@@ -22,6 +22,17 @@
   }
 
   const dataPromise = Promise.all([data.map, data.mapMetaList]);
+
+  // duplicate, fixme
+  function getImageUrl(url: string): string {
+    const geometa_storage_prefix = 'https://static.learnablemeta.com/';
+
+    if (url.startsWith(geometa_storage_prefix)) {
+      return `https://learnablemeta.com/cdn-cgi/image/format=avif,quality=80/${url}`;
+    }
+
+    return url;
+  }
 </script>
 
 <svelte:head>
@@ -106,7 +117,10 @@
                     <div
                       class="relative w-full flex justify-center items-center border-transparent"
                       style="height: auto; max-height: 400px;">
-                      <img src={url} alt="" class="max-h-full max-w-full object-contain" />
+                      <img
+                        src={getImageUrl(url)}
+                        alt=""
+                        class="max-h-full max-w-full object-contain" />
                     </div>
                   {/each}
                 </div>
