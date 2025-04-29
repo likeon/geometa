@@ -27,6 +27,11 @@
   function getImageUrl(url: string): string {
     const geometa_storage_prefix = 'https://static.learnablemeta.com/';
 
+    // quick "fix" coz compression wasnt working for avif images
+    if (url.endsWith('.avif')) {
+      return url;
+    }
+
     if (url.startsWith(geometa_storage_prefix)) {
       return `https://learnablemeta.com/cdn-cgi/image/format=avif,quality=80/${url}`;
     }
