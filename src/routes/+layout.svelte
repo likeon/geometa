@@ -7,7 +7,6 @@
   import { env } from '$env/dynamic/public';
   import { building } from '$app/environment';
   import { ModeWatcher } from 'mode-watcher';
-  import AnnouncementBanner from '$lib/components/AnnouncementBanner.svelte';
 
   let { children } = $props();
   let admin = $derived(page.url.pathname.startsWith('/dev/dash'));
@@ -22,7 +21,7 @@
 
 <ModeWatcher />
 <div class="app">
-  <AnnouncementBanner />
+  <!--  <AnnouncementBanner />-->
   <NavBar />
   <main>
     {#if underMaintenance && admin}
