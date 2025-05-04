@@ -37,13 +37,13 @@ export async function geo(
       stateCode: null
     };
   });
-
+  console.debug('IN geo updating function');
   const apiUrl = `https://www.geoguessr.com/api/v4/user-maps/drafts/${geoguessrId}`;
 
   // GET request to fetch the map draft
   const response = await geoguessrAPIFetch(apiUrl);
   if (!response.ok) throw new Error('Failed to fetch the map draft');
-
+  console.debug('IN geo updating function - after map draft request');
   const data = await response.json();
   const { avatar, description, highlighted, name } = data;
   const mapDataToUpload = {
@@ -60,15 +60,18 @@ export async function geo(
     body: JSON.stringify(mapDataToUpload)
   });
 
+  console.debug('IN geo updating function - after mrequerst to update map draft');
+
   if (!updateResponse.ok) throw error(updateResponse.status, 'Failed to update the map draft');
 
   const publishResponse = await geoguessrAPIFetch(`${apiUrl}/publish`, {
     method: 'PUT',
     body: JSON.stringify({})
   });
-
+  console.debug('IN geo updating function - after trying to publish map');
   if (!publishResponse.ok) throw error(publishResponse.status, 'Failed to publish the map');
 
+  console.debug('IN geo updating function after all network requests');
   // assign empty string if its null(shouldnt be when we force it to be not null later so should change that when we do that)
   const currentPanoids = locationsToUpload.map((loc) => loc.panoId || '');
   await db
@@ -102,6 +105,7 @@ export async function autoUpdateMaps(db: DB, mapGroupId: number) {
   }));
 
   let updateCount = 0;
+  console.debug('before checking which maps to update');
   for (const map of mapsToUpdate) {
     const currentLocations = await db
       .select()
