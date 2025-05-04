@@ -521,6 +521,7 @@ export const actions = {
       const TRAUSI_GROUP_ID = 1;
       let updateCount = 0;
       if (groupId == TRAUSI_GROUP_ID) {
+        console.debug('TRYING TO UPDATE TRAUSI MAP GROUP IN GEOGUESSR');
         updateCount = await autoUpdateMaps(event.locals.db, TRAUSI_GROUP_ID);
       }
 
