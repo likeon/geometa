@@ -45,13 +45,14 @@ export async function geo(
   if (!response.ok) throw new Error('Failed to fetch the map draft');
   console.debug('IN geo updating function - after map draft request');
   const data = await response.json();
-  const { avatar, description, highlighted, name } = data;
+  const { avatar, description, highlighted, name, version } = data;
   const mapDataToUpload = {
     avatar,
     description,
     highlighted,
     name,
-    customCoordinates: locationsToUpload
+    customCoordinates: locationsToUpload,
+    version: version + 1
   };
 
   // PUT request to update the map draft
