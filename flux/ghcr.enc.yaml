@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: ghcr-secret
+type: kubernetes.io/dockerconfigjson
+stringData:
+    .dockerconfigjson: ENC[AES256_GCM,data:0JqK3Jdo6PBxVXDzwolAj83vOty3E4T/h5oZtMuggzNDT8iaTYtI4q1lDfgO8dx7E4vTSpulxJ7qc8RZfq+gJi+dDJ12cvfypti654AIjurPCXHmBT80KoDk/wQQ8DCgin400C4z32OuUCpfY83OC0j0jgPZF50JABPxp4BBP3fL9h3cYrd3PmOgR7rDoUWR0Ld/t4xOZZF4xbZlwi64xlKz80mQtytgGwKi,iv:aIgSU6Rvwrah/TGjqeSRqYnj4rrdLBJ+9Y2DhrNYNA4=,tag:NprkUX3Eue6AnLda5LsHmA==,type:str]
+sops:
+    age:
+        - recipient: age1nmyhrpnparuwdkny03zxc52gn488qumxw865ss3vavkqxvauhfwq0e7y34
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBWNHlIdzVZdkhqWnZvT2pl
+            dTJ1OWdtejJoMElacXJrc1RBK2ZJNzMyK3hnCkc1ZkV0T3RPQ2RrRW5DR0dvNnZt
+            RUxrWjlGS2lYOGd4U1VlRFRUYmd0ejAKLS0tIHJOZC94YllVVS9Pb2dlUTZibEd6
+            SXI5NEZ0V1JlS0REbjMxckIvSFdsMkkKR9gNCVdP1XDuzPUhI2vFrRj/bgNPSO/O
+            fo1FOhwGJdH2mX2xPzxKk6wRc+vxVmRM7mlvtMRKLU63K2QKww12yA==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2025-04-30T21:39:27Z"
+    mac: ENC[AES256_GCM,data:5ZWMOnRBB1h/dbc55l0MdDsg4RD5Ie1j/PJwOA6aN//sUbiHM3ouJrqwT0uLAE5lEH7uSDL1BOCznbrkbzBO6fdYIsG03QvMMWYv0NZClw2aJQMwFafP+fYaGjOx44joeEZQogkRQy55D1MFXUixokwibK3nPFALgkfzBP36a4U=,iv:Fdt0vnsdlebMNFmfKZYsjCWhXC1efClYlLTAOIh2X7s=,tag:70BNgyK302V/d11tCgl6KQ==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.10.2

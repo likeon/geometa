@@ -1,0 +1,4 @@
+- op: add
+  path: /cluster/proxy/extraArgs
+  value:
+    metrics-bind-address: "0.0.0.0:10249"

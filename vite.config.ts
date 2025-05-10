@@ -10,8 +10,7 @@ export default defineConfig({
       sourceMapsUploadOptions: {
         org: 'geometa',
         project: 'geometa-web'
-      },
-      adapter: 'cloudflare'
+      }
     }),
     enhancedImages(),
     Icons({

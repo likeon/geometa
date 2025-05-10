@@ -1,0 +1,9 @@
+node_modules/
+.svelte-kit/
+.env*
+
+cluster/
+docs/
+README.md
+Taskfile.yaml
+Tiltfile

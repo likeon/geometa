@@ -1,0 +1,20 @@
+apiVersion: v1alpha1
+kind: ExtensionServiceConfig
+name: tailscale
+environment:
+    - TS_AUTHKEY=tskey-auth-k55U4BVrde11CNTRL-WexzdbiwvjH72VhqXeFjmHwFjPrn9QHbg
+sops:
+    age:
+        - recipient: age1nmyhrpnparuwdkny03zxc52gn488qumxw865ss3vavkqxvauhfwq0e7y34
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBqMlFUTzY2RUcyTENySjVL
+            bDYxTTRqaE1BcEZWODhaR05SZklRUVlGTGpJClIyMXg2OGt5UDRwWlA1QWFrcnNS
+            TXp2ZFZyZ0xYcDVuYjh1N0o0SEVFL3cKLS0tIE5nTjNHc3o0WEVSNG9tM2NyT3k2
+            OUZCdG1iWkdONmF2WWtFUzNMajhyNjgK1sU0CC0p8CGxr413g2Rr3zbUSSSKIoHZ
+            qJ6AtwmosTTlFQgFELXl8iZKY2DMit62RNVRgKolt0y/t5DB6+6bqw==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2025-05-05T22:53:26Z"
+    mac: ENC[AES256_GCM,data:/SsQ0OLRtNkqRk/GdVBOX9OsqpEy85ubwYncv/WmNVUF9WTmtGiEzmgZTjh792jYdLHNq640THhwyLAW9ZKFpaPaysIulmDvMls7Z+Jx0BlR0ndwovHMa+CWqmispYGg/V0tBCijf7zjSLvlGBYyuFw71eN/U/a43PEDo0/o/Ck=,iv:PYCTe010Yn3C5brzoZem4in+Badq1vUqSzPfMZzvVCM=,tag:xAEsQKTZXagzNGjRUCXaBQ==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.10.2

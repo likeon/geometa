@@ -26,7 +26,6 @@ spec:
   values:
     ipam:
       mode: kubernetes
-    kubeProxyReplacement: true
     securityContext:
       capabilities:
         ciliumAgent:
@@ -49,9 +48,12 @@ spec:
       autoMount:
         enabled: false
       hostRoot: /sys/fs/cgroup
-    k8sServiceHost: localhost
-    k8sServicePort: 7445
-    gatewayAPI:
-      enabled: true
-      enableAlpn: true
-      enableAppProtocol: true
+    kubeProxyReplacement: false
+    hubble:
+      relay:
+        enabled: true
+      ui:
+        enabled: true
+        annotations:
+          tailscale.com/expose: "true"
+          tailscale.com/hostname: "geometa-hubble"

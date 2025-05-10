@@ -1,4 +1,3 @@
-import { CLOUDFLARE_BEARER, CLOUDFLARE_KV_NAMESPACE_ID } from '$env/static/private';
 import { type DB } from '$lib/drizzle';
 import { and, eq } from 'drizzle-orm';
 import { mapGroupPermissions, users } from '$lib/db/schema';
@@ -73,14 +72,14 @@ export function delay(ms: number) {
 
 export async function cloudflareKvBulkPut(data: any[]) {
   console.log('In KvBultPut function');
-  const url = `https://api.cloudflare.com/client/v4/accounts/a38064a092904c941dedaf866ea6977e/storage/kv/namespaces/${CLOUDFLARE_KV_NAMESPACE_ID}/bulk`;
+  const url = `https://api.cloudflare.com/client/v4/accounts/a38064a092904c941dedaf866ea6977e/storage/kv/namespaces/${env.CLOUDFLARE_KV_NAMESPACE_ID}/bulk`;
 
-  if (!CLOUDFLARE_KV_NAMESPACE_ID || !CLOUDFLARE_BEARER) {
+  if (!env.CLOUDFLARE_KV_NAMESPACE_ID || !env.CLOUDFLARE_BEARER) {
     throw new Error('Set Cloudflare variables');
   }
 
   const headers = {
-    Authorization: `Bearer ${CLOUDFLARE_BEARER}`,
+    Authorization: `Bearer ${env.CLOUDFLARE_BEARER}`,
     'Content-Type': 'application/json'
   };
   let count = 0;

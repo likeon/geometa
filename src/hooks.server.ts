@@ -1,10 +1,11 @@
 import { sequence } from '@sveltejs/kit/hooks';
 import { handleErrorWithSentry, sentryHandle, initCloudflareSentryHandle } from '@sentry/sveltekit';
 import { type Handle, redirect } from '@sveltejs/kit';
-import { initializeLucia } from '$lib/auth';
+import { getLucia } from '$lib/auth';
 import { getDb } from '$lib/drizzle';
-
-const dev = process.env.NODE_ENV === 'development';
+import { dev } from '$app/environment';
+import { building } from '$app/environment';
+import log from '$lib/log';
 
 // Only use Sentry in production
 const sentryHandlers = dev
@@ -18,8 +19,13 @@ const sentryHandlers = dev
     ];
 
 export const handle: Handle = sequence(...sentryHandlers, async ({ event, resolve }) => {
-  const db = getDb(event.platform!.env);
-  const lucia = initializeLucia(db);
+  event.locals.startTime = Date.now();
+  if (building) {
+    return resolve(event);
+  }
+
+  const db = getDb();
+  const lucia = getLucia();
   event.locals.db = db;
   event.locals.lucia = lucia;
 
@@ -28,15 +34,12 @@ export const handle: Handle = sequence(...sentryHandlers, async ({ event, resolv
 
   const sessionId = event.cookies.get(lucia.sessionCookieName);
   if (!sessionId) {
-    console.log('No session');
     event.locals.user = null;
     event.locals.session = null;
   } else {
     const { session, user } = await lucia.validateSession(sessionId);
     if (session) {
-      console.log('Session is valid');
       if (session.fresh) {
-        console.log('Session needs refresh');
         // session cookie is valid, but needs a refresh
         const sessionCookie = lucia.createSessionCookie(session.id);
         event.cookies.set(sessionCookie.name, sessionCookie.value, {
@@ -47,7 +50,6 @@ export const handle: Handle = sequence(...sentryHandlers, async ({ event, resolv
       redirectToLogin = false;
     }
     if (!session) {
-      console.log('Session is invalid');
       const sessionCookie = lucia.createBlankSessionCookie();
       event.cookies.set(sessionCookie.name, sessionCookie.value, {
         path: '/',
@@ -62,6 +64,10 @@ export const handle: Handle = sequence(...sentryHandlers, async ({ event, resolv
     throw redirect(302, '/login');
   }
 
-  return resolve(event);
+  const response = await resolve(event);
+  log(response.status, event);
+  return response;
 });
+
+// todo: wrap to log into stdout as well
 export const handleError = dev ? undefined : handleErrorWithSentry();

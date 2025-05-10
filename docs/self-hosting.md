@@ -1,11 +1,9 @@
 ## Technologies
 - Kubernetes (k8s)
   - 3 VM cluster on hetzner
-    - 2vCPU 4GB RAM arm
-    - I am guessing it should be enough as we don't have much load, but I am willing to upgrade VM specs if needed
+    - 4vCPU 8GB RAM arm
 - talos
 - flux
-  - read about gitops
 - sops, age
 - helm
 
@@ -19,9 +17,28 @@ Setup k8s operators via flux into `kube-system` namespace
 - [x] hetzner hcloud-cloud-controller-manager ✅ 2025-04-29
 - [x] hetzner csi-driver ✅ 2025-04-30
 - [x] zalando/postgres-operator ✅ 2025-04-30
-  - [x] operator and ui ✅ 2025-04-30
+  - [manifest reference](https://github.com/zalando/postgres-operator/blob/master/docs/reference/cluster_manifest.md) 
+- [x] tailscale ✅ 2025-05-07
 
-- [ ] set docker hub pull secrets
+## ToDo #2
+- [x] cloudflare ✅ 2025-05-08
+- [x] postgres config ✅ 2025-05-10
+- [ ] maps page caching
+- [x] health checks ✅ 2025-05-08
+- [ ] cronjobs
+- [x] metrics ✅ 2025-05-08
+	- [x] hubble? ✅ 2025-05-08
+- [ ] sentry
 
-**Setup tailscale**
-There is official operator for k8s that makes it easy to access services and we definitely need it, but there is also talos tailsclae plugin which I know nothing about. I assume it is to access the nodes themselves via VPN - if so it is also must have. Current talos config simply whitelists an IP: idk how it is for you, but I don't have a fixed IP from my internet provider.
+## Going live
+- [ ] verify that sync to userscript works
+- [ ] update login redirect url
+
+## Post live
+- [ ] image builds
+- [ ] backups
+- [ ] migrations
+- [ ] docker slow build
+- [ ] nfca
+- [ ] tailscale to nodes
+- [ ] lockdown firewall

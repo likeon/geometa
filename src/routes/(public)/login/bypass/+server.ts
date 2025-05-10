@@ -1,9 +1,9 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import { ALLOW_LOGIN_BYPASS } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 
 export async function GET(event: RequestEvent) {
   const userId = event.url.searchParams.get('uid');
-  if (!userId || ALLOW_LOGIN_BYPASS !== 'true') {
+  if (!userId || env.ALLOW_LOGIN_BYPASS !== 'true') {
     return new Response(null, { status: 400 });
   }
   const session = await event.locals.lucia.createSession(userId, {});

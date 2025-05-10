@@ -1,16 +1,16 @@
 import { drizzle } from 'drizzle-orm/postgres-js';
-import postgres from 'postgres';
-import { DATABASE_URL } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import * as schema from '$lib/db/schema';
-import { dev } from '$app/environment';
+import memoizeOne from 'memoize-one';
 
-let poolClient: postgres.Sql;
-if (dev) {
-  poolClient = postgres(DATABASE_URL);
+function createDbInstance() {
+  let databaseURL: string;
+  if (env.DATABASE_URL) {
+    databaseURL = env.DATABASE_URL;
+  } else {
+    databaseURL = `postgresql://geometa:${env.DATABASE_PASSWORD}@postgres/geometa?sslmode=require`;
+  }
+  return drizzle(databaseURL, { schema, logger: false });
 }
-
-export function getDb(platform_env: App.Platform['env']) {
-  const client = poolClient || postgres(platform_env.db?.connectionString || DATABASE_URL);
-  return drizzle(client, { schema, logger: false });
-}
-export type DB = ReturnType<typeof getDb>;
+export type DB = ReturnType<typeof createDbInstance>;
+export const getDb = memoizeOne(createDbInstance);

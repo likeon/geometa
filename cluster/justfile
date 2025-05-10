@@ -7,7 +7,7 @@ talos-secrets-encrypt:
   sops -e controlplane.yaml > controlplane.enc.yaml
   sops -e worker.yaml > worker.enc.yaml
   sops -e kubeconfig > kubeconfig.enc
-  sops -e talosconfig > talosconfig
+  sops -e talosconfig > talosconfig.enc
 
 talos-secrets-decrypt:
   #!/usr/bin/env bash

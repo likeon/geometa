@@ -1,6 +1,6 @@
 import { OAuth2RequestError } from 'arctic';
 import type { RequestEvent } from '@sveltejs/kit';
-import { discord } from '$lib/auth';
+import { getDiscord } from '$lib/auth';
 import { eq } from 'drizzle-orm';
 import { mapGroupPermissions, mapGroups, users } from '$lib/db/schema';
 
@@ -20,7 +20,7 @@ export async function GET(event: RequestEvent) {
   }
 
   try {
-    const tokens = await discord.validateAuthorizationCode(code);
+    const tokens = await getDiscord().validateAuthorizationCode(code);
     const discordUserResponse = await fetch('https://discord.com/api/users/@me', {
       headers: {
         Authorization: `Bearer ${tokens.accessToken}`

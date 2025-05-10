@@ -8,7 +8,8 @@ export async function GET({ params, platform, locals }) {
   const mapPromise = locals.db.query.maps.findFirst({
     where: eq(maps.geoguessrId, params.geoguessrId)
   });
-  const userscriptVersionPromise = platform?.env.geometa_kv.get(userscriptVersionKey);
+  // todo: update?
+  const userscriptVersionPromise = '0.81';
   const [map, userscriptVersion] = await Promise.all([mapPromise, userscriptVersionPromise]);
   if (!map || map.geoguessrId !== params.geoguessrId) {
     return json({ mapFound: false, userscriptVersion: userscriptVersion }, { status: 404 });
