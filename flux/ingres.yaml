@@ -1,14 +1,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: web
+  name: frontend
 spec:
   defaultBackend:
     service:
-      name: web
+      name: frontend
       port:
         number: 80
   ingressClassName: tailscale
   tls:
     - hosts:
-        - geometa-prod-web
+        - geometa-prod-frontend
