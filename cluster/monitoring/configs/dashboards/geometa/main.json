@@ -174,7 +174,7 @@
           },
           "direction": "backward",
           "editorMode": "builder",
-          "expr": "{namespace=`geometa-prod`, app=`web`} != `Listening on ` |= `${query:regex}` | json | level =~ `$level`",
+          "expr": "{namespace=`geometa-prod`, app=`frontend`} != `Listening on ` |= `${query:regex}` | json | level =~ `$level`",
           "queryType": "range",
           "refId": "A"
         }
