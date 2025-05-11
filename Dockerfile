@@ -1,4 +1,6 @@
 FROM node:22-alpine AS builder
+# @sveltejs/enhanced-img needs it
+RUN apk add --no-cache vips-dev
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci

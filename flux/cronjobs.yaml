@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: update-maps-page-cache
+spec:
+  schedule: "*/10 * * * *"
+  concurrencyPolicy: Forbid
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: sync-job
+            image: curlimages/curl:8.13.0
+            command:
+            - /bin/sh
+            - -c
+            - >
+              curl --fail -X POST
+              -H "AAuthorization: Bearer $(CRONJOBS_API_TOKEN)"
+              -H "Content-Type: application/json"
+              http://web/api/cronjobs/update-maps-page-cache
+            env:
+              - name: CRONJOBS_API_TOKEN
+                valueFrom:
+                  secretKeyRef:
+                    name: web
+                    key: CRONJOBS_API_TOKEN
+          restartPolicy: OnFailure

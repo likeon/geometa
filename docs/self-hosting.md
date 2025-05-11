@@ -23,22 +23,26 @@ Setup k8s operators via flux into `kube-system` namespace
 ## ToDo #2
 - [x] cloudflare ✅ 2025-05-08
 - [x] postgres config ✅ 2025-05-10
-- [ ] maps page caching
+- [x] maps page caching ✅ 2025-05-11
 - [x] health checks ✅ 2025-05-08
-- [ ] cronjobs
+- [x] cronjobs ✅ 2025-05-11
 - [x] metrics ✅ 2025-05-08
 	- [x] hubble? ✅ 2025-05-08
-- [ ] sentry
+- [x] sentry ✅ 2025-05-11
 
 ## Going live
 - [ ] verify that sync to userscript works
 - [ ] update login redirect url
+- [ ] enable dashboard maintenance
 
 ## Post live
 - [ ] image builds
 - [ ] backups
 - [ ] migrations
+	- [reddit](https://www.reddit.com/r/sveltejs/comments/1cfupem/comment/l1s83z4/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
 - [ ] docker slow build
 - [ ] nfca
 - [ ] tailscale to nodes
 - [ ] lockdown firewall
+- [ ] cluster-wide pull secrets
+- [ ] preview environment

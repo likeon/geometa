@@ -388,3 +388,16 @@ export const metaLocationsCountView = pgTable('meta_locations_count_view', {
 export const metaLocationsCountViewRelations = relations(metaLocationsCountView, ({ one }) => ({
   meta: one(metas, { fields: [metaLocationsCountView.metaId], references: [metas.id] })
 }));
+
+export const cacheTable = pgTable(
+  'cache',
+  {
+    key: text('key').notNull(),
+    value: text('value').notNull()
+  },
+  (t) => ({
+    keyUnique: uniqueIndex('cache_key_unique').on(t.key)
+    // todo: use after drizzle upgraded
+    // keyHash: index('cache_key_hash_idx').on(t.key).using('hash')
+  })
+);

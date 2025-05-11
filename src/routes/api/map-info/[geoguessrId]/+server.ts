@@ -9,7 +9,7 @@ export async function GET({ params, platform, locals }) {
     where: eq(maps.geoguessrId, params.geoguessrId)
   });
   // todo: update?
-  const userscriptVersionPromise = '0.81';
+  const userscriptVersionPromise = '0.82';
   const [map, userscriptVersion] = await Promise.all([mapPromise, userscriptVersionPromise]);
   if (!map || map.geoguessrId !== params.geoguessrId) {
     return json({ mapFound: false, userscriptVersion: userscriptVersion }, { status: 404 });
