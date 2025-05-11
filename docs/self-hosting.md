@@ -31,14 +31,12 @@ Setup k8s operators via flux into `kube-system` namespace
 - [x] sentry ✅ 2025-05-11
 
 ## Going live
-- [ ] verify that sync to userscript works
-- [ ] update login redirect url
-- [ ] enable dashboard maintenance
-- [ ] init db connection in hooks
+- [x] verify that sync to userscript works ✅ 2025-05-11
+- [x] update login redirect url ✅ 2025-05-11
+- [x] enable dashboard maintenance ✅ 2025-05-11
+- [x] init db connection in hooks ✅ 2025-05-11
 
 ## Post live
-- [ ] ensure every page with multiple forms uses form id
-	- https://superforms.rocks/concepts/multiple-forms
 - [ ] image builds
 - [ ] backups
 - [ ] migrations

@@ -7,6 +7,11 @@ import { dev } from '$app/environment';
 import { building } from '$app/environment';
 import log from '$lib/log';
 
+// initializes db connection
+if (!building) {
+  getDb();
+}
+
 // Only use Sentry in production
 const sentryHandlers = dev
   ? []
