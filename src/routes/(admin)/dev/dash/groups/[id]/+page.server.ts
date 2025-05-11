@@ -153,7 +153,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   }
 
   const metaForm = await superValidate(zod(insertMetasSchema));
-  const mapUploadForm = await superValidate(zod(mapUploadSchema));
+  const mapUploadForm = await superValidate(zod(mapUploadSchema), { id: 'mapUpload' });
   const metasUploadForm = await superValidate(zod(metasUploadSchema));
   const imageUploadForm = await superValidate(zod(imageUploadSchema));
   const copyForm = await superValidate(zod(copyMetaSchema));
@@ -312,8 +312,7 @@ export const actions = {
   uploadMapJson: async ({ request, params, locals }) => {
     const groupId = getGroupId(params);
     await ensurePermissions(locals.db, locals.user?.id, groupId);
-    const form = await superValidate(request, zod(mapUploadSchema));
-
+    const form = await superValidate(request, zod(mapUploadSchema), { id: 'mapUpload' });
     if (!form.valid) {
       return fail(400, withFiles({ form }));
     }
@@ -321,7 +320,6 @@ export const actions = {
     const validationResult = mapJsonSchema.safeParse(jsonData);
 
     if (!validationResult.success) {
-      console.debug(validationResult.error.issues);
       const processedErrors = validationResult.error.issues.map((issue) => {
         let message: string = issue.message;
         if (issue.path.includes('tags')) {

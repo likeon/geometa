@@ -32,3 +32,8 @@ tasks:
   db:reset:
     cmds:
       - psql -h localhost -U postgres postgres -f .ci/db/reset.sql
+
+  build-and-deploy:
+    cmds:
+      - podman build . -t ghcr.io/likeon/geometa-web:latest --arch arm64 && podman push  ghcr.io/likeon/geometa-web:latest
+      - KUBECONFIG=$(pwd)/cluster/talos/kubeconfig kubectl -n geometa-prod rollout restart deployment web

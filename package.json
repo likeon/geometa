@@ -22,7 +22,7 @@
     "@lucide/svelte": "^0.488.0",
     "@neoconfetti/svelte": "^2.0.0",
     "@sentry/vite-plugin": "^3.2.2",
-    "@sveltejs/adapter-auto": "^6.0.0",
+    "@sveltejs/adapter-node": "^5.2.12",
     "@sveltejs/enhanced-img": "^0.3.10",
     "@sveltejs/kit": "^2.7.3",
     "@sveltejs/vite-plugin-svelte": "^4.0.0",
@@ -62,7 +62,6 @@
   "dependencies": {
     "@lucia-auth/adapter-drizzle": "^1.1.0",
     "@sentry/sveltekit": "^9.5.0",
-    "@sveltejs/adapter-node": "^5.2.12",
     "active-table": "^1.1.5",
     "arctic": "^1.9.2",
     "aws4fetch": "^1.0.20",

@@ -26,6 +26,7 @@ export default async function log(statusCode: number, event: RequestEvent) {
     }
     const logData: object = {
       level: level,
+      type: 'request',
       method: event.request.method,
       path: event.url.pathname,
       status: statusCode,

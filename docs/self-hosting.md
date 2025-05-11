@@ -34,8 +34,11 @@ Setup k8s operators via flux into `kube-system` namespace
 - [ ] verify that sync to userscript works
 - [ ] update login redirect url
 - [ ] enable dashboard maintenance
+- [ ] init db connection in hooks
 
 ## Post live
+- [ ] ensure every page with multiple forms uses form id
+	- https://superforms.rocks/concepts/multiple-forms
 - [ ] image builds
 - [ ] backups
 - [ ] migrations
@@ -46,3 +49,5 @@ Setup k8s operators via flux into `kube-system` namespace
 - [ ] lockdown firewall
 - [ ] cluster-wide pull secrets
 - [ ] preview environment
+- [ ] sentry disable telemetry
+- [ ] locations upload: show form error when file over BODY_SIZE_LIMIT
