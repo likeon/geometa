@@ -9,28 +9,28 @@
 
 <style>
   .geometa-map-label-container {
-    background-color: #252541;
-    color: #fff;
-    text-align: center;
-    z-index: 999999;
-    position: absolute;
-    bottom: -1px;
-    left: 0;
-    width: 220px;
-    height: 50%;
-    box-sizing: border-box;
-    border-radius: 0 0 110px 110px;
-    clip-path: inset(40% 0 0 0);
+    background-color: #0003;
+  color: #fff;
+  text-align: center;
+  z-index: 999999;
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  box-sizing: border-box;
+  border-radius: 8px;
+  padding: 8px;
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
   }
 
   p {
     font-size: 14px;
-    margin-top: 48px;
     font-weight: bold;
   }
 
   button {
-    margin-top: 6px;
     padding: 6px 12px;
     font-size: 12px;
     color: #fff;
