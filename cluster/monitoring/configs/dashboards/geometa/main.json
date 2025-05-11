@@ -139,6 +139,131 @@
       "type": "stat"
     },
     {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Request time",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "h": 8,
+        "w": 24
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "line",
+            "lineInterpolation": "smooth",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "lineWidth": 1,
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "spanNulls": false,
+            "insertNulls": false,
+            "showPoints": "auto",
+            "pointSize": 5,
+            "stacking": {
+              "mode": "none",
+              "group": "A"
+            },
+            "axisPlacement": "auto",
+            "axisLabel": "",
+            "axisColorMode": "text",
+            "axisBorderShow": false,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "axisCenteredZero": false,
+            "hideFrom": {
+              "tooltip": false,
+              "viz": false,
+              "legend": false
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "color": {
+            "mode": "palette-classic"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "value": null,
+                "color": "green"
+              },
+              {
+                "value": 80,
+                "color": "red"
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "pluginVersion": "11.5.2",
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "quantile_over_time(\n  0.50,\n  {namespace=\"geometa-prod\",app=\"frontend\"} != \"Listening on\"\n    | json\n    | __error__ = \"\"\n    | path = \"/maps\"\n    | unwrap rt[1m]\n)\nby ()",
+          "queryType": "range",
+          "datasource": {
+            "type": "loki",
+            "uid": "P8E80F9AEF21F6940"
+          },
+          "editorMode": "code",
+          "direction": "backward",
+          "legendFormat": "0.50"
+        },
+        {
+          "refId": "B",
+          "expr": "quantile_over_time(\n  0.75,\n  {namespace=\"geometa-prod\",app=\"frontend\"} != \"Listening on\"\n    | json\n    | __error__ = \"\"\n    | path = \"/maps\"\n    | unwrap rt[1m]\n)\nby ()",
+          "queryType": "range",
+          "datasource": {
+            "uid": "P8E80F9AEF21F6940",
+            "type": "loki"
+          },
+          "hide": false,
+          "editorMode": "code",
+          "direction": "backward",
+          "legendFormat": "0.75"
+        },
+        {
+          "refId": "C",
+          "expr": "quantile_over_time(\n  0.95,\n  {namespace=\"geometa-prod\",app=\"frontend\"} != \"Listening on\"\n    | json\n    | __error__ = \"\"\n    | path = \"/maps\"\n    | unwrap rt[1m]\n)\nby ()",
+          "queryType": "range",
+          "datasource": {
+            "uid": "P8E80F9AEF21F6940",
+            "type": "loki"
+          },
+          "hide": false,
+          "editorMode": "code",
+          "direction": "backward",
+          "legendFormat": "0.95"
+        }
+      ],
+      "maxDataPoints": 30,
+      "datasource": {
+        "uid": "P8E80F9AEF21F6940",
+        "type": "loki"
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none",
+          "hideZeros": false
+        },
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom",
+          "calcs": []
+        }
+      }
+    },
+    {
       "datasource": {
         "type": "loki",
         "uid": "P8E80F9AEF21F6940"
