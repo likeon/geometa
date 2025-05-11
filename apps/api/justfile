@@ -1,0 +1,9 @@
+drizzle-generate:
+  bunx drizzle-kit generate
+
+drizzle-migrate:
+  bunx drizzle-kit migrate
+
+build:
+  podman build . -t ghcr.io/likeon/geometa-api:latest --arch arm64
+  podman push ghcr.io/likeon/geometa-api:latest

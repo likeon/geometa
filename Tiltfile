@@ -10,3 +10,10 @@ local_resource(
     resource_deps=['postgres-server'],
     links=['http://localhost:5173/'],
 )
+local_resource(
+    'api',
+    serve_dir='./apps/api',
+    serve_cmd='bun run dev',
+    resource_deps=['postgres-server'],
+    links=['http://localhost:5173/'],
+)

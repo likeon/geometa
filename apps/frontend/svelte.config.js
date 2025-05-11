@@ -13,7 +13,8 @@ const config = {
     // See https://kit.svelte.dev/docs/adapters for more information about adapters.
     adapter: adapter(),
     alias: {
-      $routes: 'src/routes'
+      $routes: 'src/routes',
+      $api: '../api/src'
     },
     prerender: {
       crawl: false
