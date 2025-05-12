@@ -42,6 +42,7 @@ spec:
     geometa: []
   databases:
     geometa: geometa
+  enableLogicalBackup: true
 
   resources:
     requests:
