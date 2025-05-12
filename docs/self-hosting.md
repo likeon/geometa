@@ -18,6 +18,7 @@ Setup k8s operators via flux into `kube-system` namespace
 - [x] hetzner csi-driver ✅ 2025-04-30
 - [x] zalando/postgres-operator ✅ 2025-04-30
   - [manifest reference](https://github.com/zalando/postgres-operator/blob/master/docs/reference/cluster_manifest.md) 
+  - [chart values](https://github.com/zalando/postgres-operator/blob/master/charts/postgres-operator/values.yaml)
 - [x] tailscale ✅ 2025-05-07
 
 ## ToDo #2

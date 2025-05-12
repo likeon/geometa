@@ -3,14 +3,13 @@
   "version": "1.0.50",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
+    "build": "bun build src/index.ts --target bun --outdir ./build --production",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
     "db:migrate": "dotenv -e .env drizzle-kit migrate",
     "db:migrate:prod": "dotenv -e .env.prod.local -e .env drizzle-kit migrate"
   },
   "dependencies": {
-    "@elysiajs/eden": "^1.3.2",
-    "@elysiajs/swagger": "^1.3.0",
     "drizzle-orm": "^0.43.1",
     "elysia": "^1.3.1"
   },
