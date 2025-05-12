@@ -299,7 +299,7 @@
           },
           "direction": "backward",
           "editorMode": "builder",
-          "expr": "{namespace=`geometa-prod`, app~=`frontend|api`} != `Listening on ` |= `${query:regex}` | json | level =~ `$level`",
+          "expr": "{namespace=`geometa-prod`, app=~`frontend|api`} != `Listening on ` |= `${query:regex}` | json | level =~ `$level`",
           "queryType": "range",
           "refId": "A"
         }
@@ -309,7 +309,7 @@
     }
   ],
   "preload": false,
-  "refresh": "10s",
+  "refresh": "30s",
   "schemaVersion": 40,
   "tags": [],
   "time": {
