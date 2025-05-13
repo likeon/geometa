@@ -1,0 +1,14 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: registry
+spec:
+  defaultBackend:
+    service:
+      name: registry
+      port:
+        number: 80
+  ingressClassName: tailscale
+  tls:
+    - hosts:
+        - geometa-container-registry
