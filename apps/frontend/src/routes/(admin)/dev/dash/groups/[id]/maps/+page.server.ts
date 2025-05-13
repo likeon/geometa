@@ -83,7 +83,7 @@ export const actions = {
       error(400, 'Invalid ID');
     }
 
-    const map = await locals.db.query.metas.findFirst({ where: eq(maps.id, mapId) });
+    const map = await locals.db.query.maps.findFirst({ where: eq(maps.id, mapId) });
     await ensurePermissions(locals.db, locals.user?.id, map?.mapGroupId);
 
     await locals.db.delete(maps).where(eq(maps.id, mapId));
