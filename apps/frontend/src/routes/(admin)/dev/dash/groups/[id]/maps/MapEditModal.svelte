@@ -120,6 +120,7 @@
         <TooltipName
           name="Name"
           tooltipText="The name that will appear on the map list page if your map is published by the admin team." />
+           {#if selectedMap?.id}
         <form action="?/deleteMap" method="post" onsubmit={confirmDelete} class="inline-block">
           <input type="hidden" name="id" value={selectedMap?.id} />
           <button
@@ -129,6 +130,7 @@
             <Icon icon="ic:baseline-delete" width="1rem" height="1rem" color="gray" />
           </button>
         </form>
+        {/if}
       </div>
       <Input
         type="text"
