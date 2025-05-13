@@ -83,9 +83,11 @@
         if (selectedColumn && columns.some((c) => c.key === selectedColumn)) {
           const valueA = a[selectedColumn];
           const valueB = b[selectedColumn];
-
-          // Check if both values are numbers
-          if (typeof valueA === 'number' && typeof valueB === 'number') {
+          //temporary fix for location count not sorting properly
+          if (selectedColumn == 'locationsCount') {
+            return (valueA.total -valueB.total) * sortOrder;
+          }
+          else if (typeof valueA === 'number' && typeof valueB === 'number') {
             return (valueA - valueB) * sortOrder; // Numerical comparison
           } else if (typeof valueA === 'string' && typeof valueB === 'string') {
             return valueA.localeCompare(valueB) * sortOrder; // String comparison
