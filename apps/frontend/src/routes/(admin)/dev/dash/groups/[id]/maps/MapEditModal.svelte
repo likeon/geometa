@@ -16,6 +16,7 @@
   import FilterManager from './FilterManager.svelte';
   import { Carta, MarkdownEditor } from 'carta-md';
   import TooltipName from '$lib/components/TooltipName.svelte';
+  import Icon from '@iconify/svelte';
 
   interface Props {
     data: SuperValidated<Infer<InsertMapsSchema>>;
@@ -102,17 +103,33 @@
   let includeFilterInput = $state('');
 
   let excludeFilterInput = $state('');
+
+  const confirmDelete = (event: { preventDefault: () => void }) => {
+    if (!confirm('Are you sure you want to delete this map?')) {
+      event.preventDefault();
+    }
+  };
 </script>
 
 <Modal bind:open={isMapModalOpen}>
   <form action="?/updateMap" class="flex flex-col gap-2" method="post" use:enhance>
     <Input type="hidden" name="id" bind:value={$form.id} />
     <Input type="hidden" name="mapGroupId" bind:value={$form.mapGroupId} />
-    <Label>
-      <TooltipName
-        name="Name"
-        tooltipText="The name that will appear on the map list page if your map is published by the admin team.">
-      </TooltipName>
+    <Label class="flex flex-col gap-1">
+      <div class="flex items-center gap-2">
+        <TooltipName
+          name="Name"
+          tooltipText="The name that will appear on the map list page if your map is published by the admin team." />
+        <form action="?/deleteMap" method="post" onsubmit={confirmDelete} class="inline-block">
+          <input type="hidden" name="id" value={selectedMap?.id} />
+          <button
+            type="submit"
+            class="inline-flex items-center justify-center p-0 m-0 bg-transparent border-none"
+            title="Delete">
+            <Icon icon="ic:baseline-delete" width="1rem" height="1rem" color="gray" />
+          </button>
+        </form>
+      </div>
       <Input
         type="text"
         name="name"

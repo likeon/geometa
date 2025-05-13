@@ -16,7 +16,7 @@ import { setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
-import { geoguessrGetMapInfo, markdown2Html } from '$lib/utils';
+import { ensurePermissions, geoguessrGetMapInfo, markdown2Html } from '$lib/utils';
 
 const insertMapsSchema = createInsertSchema(maps)
   .extend({
@@ -75,6 +75,20 @@ export const load = async ({ locals, params }) => {
 };
 
 export const actions = {
+  deleteMap: async ({ request, locals }) => {
+    const data = await request.formData();
+    const mapId = parseInt((data.get('id') as string) || '', 10);
+
+    if (isNaN(mapId)) {
+      error(400, 'Invalid ID');
+    }
+
+    const map = await locals.db.query.metas.findFirst({ where: eq(maps.id, mapId) });
+    await ensurePermissions(locals.db, locals.user?.id, map?.mapGroupId);
+
+    await locals.db.delete(maps).where(eq(maps.id, mapId));
+  },
+
   updateMap: async ({ request, locals }) => {
     const form = await superValidate(request, zod(insertMapsSchema));
     if (!form.valid) {
