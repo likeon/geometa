@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: registries
+type: kubernetes.io/dockerconfigjson
+stringData:
+    .dockerconfigjson: ENC[AES256_GCM,data:Fiw/l6jgcJFQVyx0hW4GjsN6o/USMe5GTlf7lW7ef1ZkLk6G5FBgyTsUwV8ce41LBsnjq87cv37klRq/Ae4C49vq7beRPlHioOMKr8zW0lrZV+xmRZ7z5N63KcHude8ta5PMAJ6L+W8RGnwZGW4kzsPxqLh3l0dCZa3ycS1ECFOKVbr1TKmuX8/T/Izq8UW7Frq9b/euPz8pKzNsBRgaFDpUqstVc5SxWlP52zMEmAOiMWh4MfDmJ4TOIq5Fm1O5SkAdpJrAeHD9yHYjJ84QfzvE0Qik9Ujkdxjxm/THB+8Qcp4JEYFMZ6zcOsdz5mv+AOLQYO2kgT3B2dFU668Kp95Mt5pFvpeN8TzKY9wLACP3SnZy6Qs1DuouxLpzjofQxg2CzYZaG4cH3YXHxaD3rbrqxliaOMb8cwk7xKztXXNvKJLegM6G7qNsFE9DyZ5S2HWnu4qQyFDTrCXDilPWs7G4UsWztgtyQgflPIeA1cAq3b1SHduSgs9r0xtstc0=,iv:hNMcU4DfhMc+EdjdmG1QO87qmg1QOdSEzTJHb4xIH/M=,tag:vWEWhFqN+/nfPGrFm+XLHA==,type:str]
+sops:
+    age:
+        - recipient: age1nmyhrpnparuwdkny03zxc52gn488qumxw865ss3vavkqxvauhfwq0e7y34
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBWNHlIdzVZdkhqWnZvT2pl
+            dTJ1OWdtejJoMElacXJrc1RBK2ZJNzMyK3hnCkc1ZkV0T3RPQ2RrRW5DR0dvNnZt
+            RUxrWjlGS2lYOGd4U1VlRFRUYmd0ejAKLS0tIHJOZC94YllVVS9Pb2dlUTZibEd6
+            SXI5NEZ0V1JlS0REbjMxckIvSFdsMkkKR9gNCVdP1XDuzPUhI2vFrRj/bgNPSO/O
+            fo1FOhwGJdH2mX2xPzxKk6wRc+vxVmRM7mlvtMRKLU63K2QKww12yA==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2025-05-13T22:53:24Z"
+    mac: ENC[AES256_GCM,data:f9/kSGaidqcJe54M+RNcJ09+1iMwF5il4M9BmwEmzh+WHJpQ01syKhxCIdjI4bEaPHWSRczccPkBKayQ2YShPKCGOcj973ueVxwrj0vVTwv2vPtZNP10qYJb0ODxUew+LxTyME89JbWzCabrIm2wBiGikHJEl24QeSPhS4E1Qs4=,iv:7PcP8MMmmN9fy3jLu2J6B4JW9lxLriiX/M3OMGEQHQA=,tag:QNZBFMPHFpN3DSGF1j0Nug==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.10.2
