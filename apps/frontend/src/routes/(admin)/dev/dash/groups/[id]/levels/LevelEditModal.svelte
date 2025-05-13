@@ -3,6 +3,7 @@
   import type { InsertLevelsSchema } from './+page.server';
   import type { PageData } from './$types';
   import { Alert, Button, Input, Label, Modal } from 'flowbite-svelte';
+  import Icon from '@iconify/svelte';
 
   interface Props {
     data: SuperValidated<Infer<InsertLevelsSchema>>;
@@ -34,14 +35,34 @@
       }
     }
   });
+
+    const confirmDelete = (event: { preventDefault: () => void }) => {
+    if (!confirm('Are you sure you want to delete this level?')) {
+      event.preventDefault();
+    }
+  };
 </script>
 
 <Modal bind:open={isLevelModalOpen}>
   <form action="?/updateLevel" class="flex flex-col space-y-6" method="post" use:enhance>
     <Input type="hidden" name="id" bind:value={$form.id} />
     <Input type="hidden" name="mapGroupId" bind:value={$form.mapGroupId} />
-    <Label class="space-y-2">
-      <span>Name</span>
+    <Label class="flex flex-col gap-1">
+      <div class="flex items-center gap-2">
+        <span>Name</span>
+        {#if selectedLevel?.id}
+        <form action="?/deleteLevel" method="post" onsubmit={confirmDelete} class="inline-block">
+          <input type="hidden" name="id" value={selectedLevel?.id} />
+          <button
+            type="submit"
+            class="inline-flex items-center justify-center p-0 m-0 bg-transparent border-none"
+            title="Delete">
+            <Icon icon="ic:baseline-delete" width="1rem" height="1rem" color="gray" />
+          </button>
+        </form>
+        {/if}
+      </div>
+      
       <Input
         type="text"
         name="name"
