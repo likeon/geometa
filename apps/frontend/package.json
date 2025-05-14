@@ -63,7 +63,7 @@
     "aws4fetch": "^1.0.20",
     "carta-md": "^4.6.1",
     "drizzle-orm": "^0.43.1",
-    "drizzle-zod": "^0.5.1",
+    "drizzle-zod": "^0.7.1",
     "lucia": "^3.2.0",
     "memoize-one": "^6.0.0",
     "mode-watcher": "^0.5.1",
