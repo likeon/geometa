@@ -41,7 +41,6 @@
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "prettier-plugin-svelte": "^3.3.3",
-    "prisma": "^5.19.0",
     "svelte": "^5.23.1",
     "svelte-check": "^4.2.0",
     "sveltekit-superforms": "^2.17.0",
