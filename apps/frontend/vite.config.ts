@@ -14,7 +14,8 @@ export default defineConfig({
     }),
     enhancedImages(),
     Icons({
-      compiler: 'svelte'
+      compiler: 'svelte',
+      autoInstall: true
     }),
     sveltekit()
   ]
