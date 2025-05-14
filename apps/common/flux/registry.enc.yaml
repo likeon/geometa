@@ -4,7 +4,7 @@ metadata:
     name: registries
 type: kubernetes.io/dockerconfigjson
 stringData:
-    .dockerconfigjson: ENC[AES256_GCM,data:Fiw/l6jgcJFQVyx0hW4GjsN6o/USMe5GTlf7lW7ef1ZkLk6G5FBgyTsUwV8ce41LBsnjq87cv37klRq/Ae4C49vq7beRPlHioOMKr8zW0lrZV+xmRZ7z5N63KcHude8ta5PMAJ6L+W8RGnwZGW4kzsPxqLh3l0dCZa3ycS1ECFOKVbr1TKmuX8/T/Izq8UW7Frq9b/euPz8pKzNsBRgaFDpUqstVc5SxWlP52zMEmAOiMWh4MfDmJ4TOIq5Fm1O5SkAdpJrAeHD9yHYjJ84QfzvE0Qik9Ujkdxjxm/THB+8Qcp4JEYFMZ6zcOsdz5mv+AOLQYO2kgT3B2dFU668Kp95Mt5pFvpeN8TzKY9wLACP3SnZy6Qs1DuouxLpzjofQxg2CzYZaG4cH3YXHxaD3rbrqxliaOMb8cwk7xKztXXNvKJLegM6G7qNsFE9DyZ5S2HWnu4qQyFDTrCXDilPWs7G4UsWztgtyQgflPIeA1cAq3b1SHduSgs9r0xtstc0=,iv:hNMcU4DfhMc+EdjdmG1QO87qmg1QOdSEzTJHb4xIH/M=,tag:vWEWhFqN+/nfPGrFm+XLHA==,type:str]
+    .dockerconfigjson: ENC[AES256_GCM,data:uRcAdhHMXpYeqgAvaAPn1ANykdO8616iYc/zI2WO3zMn1wa5QTngwZ8BAi14UeHO87LFlJ/obDenPXzRN5HswXTXkFqbvjVHEQ++qI394tD6FYF5U6Ny0GIhq43XVg94/pwBspU/gliGwPBCSjEhMecJiUGoljwYHv8jICV7n/omHl50IskUn7FwgECBpCEfJgsLgrfWv0iDtz6Cq/CYIt//yi9+rRhxqAXAefV997nZbYMxlaxO2Ddbh7yHcR5P7CGvsvcF0RkA9WgUczYGkkE4RCD0xTZ9t3u03GcydzuESLu5tNpkUH/EnRpz/1fLm2IYdgW8BxfXl5urAdyFmI2blgIVBo5YM6t7ypUhzEYAKaEI+/N9cPjH8m8QNJlEYsGaoo+fR3BhlWDg9MXEuZS1Ml2SnwFDoXDXaUOe5TNPcr9yj2aGMi6smAWSBrLrT1SEtMnTg6NNwr0ACVE1f+fux1Gd5rV+d7AkMSM2vhT9ypiYOF+Exx30R3eYbYfYnveCcmHqWpgnOrRC6lvPkyV5fN1yxlFoz/wdthYCX08tUK34MwlnCORH5CCj3F8h59I1k1i+84+uIKAifhdGMpZC3I4/Z24dZaJw0cC3spTUtl998VcG6BdBbmsmh2g6otYmyv5LJ3jasKS+0VgcXNaqamqkbe79NIR9QtU4qF29XLW15OCn5Wpd+nBRwCDip+ubi7ETdlMY3Y4+ksDVxsYPHQmrITnTZ2ojxPuQO9eHOgf9MlhMLFdLW0ni/wSC+zXV4+RK9rg=,iv:bYkqx8D4iTnVmpa7HqLURZ2gmECLYSaPgwdUtoQ82IU=,tag:VHM8bzEf6ZfM/SeUHsdZzg==,type:str]
 sops:
     age:
         - recipient: age1nmyhrpnparuwdkny03zxc52gn488qumxw865ss3vavkqxvauhfwq0e7y34
@@ -16,7 +16,7 @@ sops:
             SXI5NEZ0V1JlS0REbjMxckIvSFdsMkkKR9gNCVdP1XDuzPUhI2vFrRj/bgNPSO/O
             fo1FOhwGJdH2mX2xPzxKk6wRc+vxVmRM7mlvtMRKLU63K2QKww12yA==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-05-13T22:53:24Z"
-    mac: ENC[AES256_GCM,data:f9/kSGaidqcJe54M+RNcJ09+1iMwF5il4M9BmwEmzh+WHJpQ01syKhxCIdjI4bEaPHWSRczccPkBKayQ2YShPKCGOcj973ueVxwrj0vVTwv2vPtZNP10qYJb0ODxUew+LxTyME89JbWzCabrIm2wBiGikHJEl24QeSPhS4E1Qs4=,iv:7PcP8MMmmN9fy3jLu2J6B4JW9lxLriiX/M3OMGEQHQA=,tag:QNZBFMPHFpN3DSGF1j0Nug==,type:str]
+    lastmodified: "2025-05-14T13:24:51Z"
+    mac: ENC[AES256_GCM,data:8X1GWUg0Hl3DJS6rXr5o1mnoVaCpS6ZFQgQgLvMwclOV0hk9II4J5Dr1GHWd8pKbl7cehjMMQAI2/RIf3ItzxXn7AU5lqYfcaP85Rn/HxLyCT2Niez6xdD4RhhpicUhLXutvi/0O58YtcmD2Us9LO8qAK0ZLi8gTDbG4jVasA1c=,iv:NnwkTSsjUx1YMllploSbgZaxreWaawUXQ0lE8458btI=,tag:gzlQV+D0+eZF31tfQFAwfw==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.10.2

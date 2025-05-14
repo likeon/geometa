@@ -16,3 +16,9 @@ talos-secrets-decrypt:
   sops -d worker.enc.yaml > worker.yaml
   sops -d kubeconfig.enc > kubeconfig
   sops -d talosconfig.enc > talosconfig
+
+flux-switch-branch BRANCH_NAME:
+  kubectl -n flux-system patch gitrepository flux-system \
+    --type merge \
+    --patch '{"spec":{"ref":{"branch":"{{BRANCH_NAME}}"}}}'
+  flux reconcile source git flux-system --namespace flux-system

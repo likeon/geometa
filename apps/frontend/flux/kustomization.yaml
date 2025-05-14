@@ -5,4 +5,4 @@ resources:
   - deployment.yaml
   - cronjobs.yaml
   - ingres.yaml
-
+  - image-update.yaml

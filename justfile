@@ -23,9 +23,3 @@ db-dump:
 
 db-reset:
   psql -h localhost -U postgres postgres -f .ci/db/reset.sql
-
-frontend-build-and-deploy:
-  cd apps/frontend && \
-    podman build . -t ghcr.io/likeon/geometa-web:latest --arch arm64 && \
-    podman push ghcr.io/likeon/geometa-web:latest
-  KUBECONFIG=$(pwd)/cluster/talos/kubeconfig kubectl -n geometa-prod rollout restart deployment frontend
