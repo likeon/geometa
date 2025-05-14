@@ -4,7 +4,7 @@ import { getDb } from '$lib/drizzle';
 
 const cacheKey = 'queries:mapsPage';
 
-async function getDbData() {
+export async function getDbData() {
   const db = getDb();
   const regionsListPromise = db.select().from(regions).orderBy(asc(regions.ordering));
   const allMapsPromise = db.query.maps.findMany({
