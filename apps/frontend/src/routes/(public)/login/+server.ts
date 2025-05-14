@@ -5,7 +5,8 @@ import { getDiscord } from '$lib/auth';
 
 export async function GET(event) {
   const state = generateState();
-  const url = await getDiscord().createAuthorizationURL(state, { scopes: ['identify'] });
+  const scopes = ['identify'];
+ const url = await getDiscord().createAuthorizationURL(state,null,scopes);
 
   event.cookies.set('discord_oauth_state', state, {
     path: '/',

@@ -20,10 +20,10 @@ export async function GET(event: RequestEvent) {
   }
 
   try {
-    const tokens = await getDiscord().validateAuthorizationCode(code);
+    const tokens = await getDiscord().validateAuthorizationCode(code, null);
     const discordUserResponse = await fetch('https://discord.com/api/users/@me', {
       headers: {
-        Authorization: `Bearer ${tokens.accessToken}`
+        Authorization: `Bearer ${tokens.accessToken()}`
       }
     });
 

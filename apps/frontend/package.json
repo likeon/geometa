@@ -59,18 +59,18 @@
     "@lucia-auth/adapter-drizzle": "^1.1.0",
     "@sentry/sveltekit": "^9.19.0",
     "active-table": "^1.1.5",
-    "arctic": "^1.9.2",
+    "arctic": "^3.6.1",
     "aws4fetch": "^1.0.20",
     "carta-md": "^4.6.1",
     "drizzle-orm": "^0.43.1",
     "drizzle-zod": "^0.7.1",
-    "lucia": "^3.2.0",
+    "lucia": "^3.2.2",
     "memoize-one": "^6.0.0",
     "mode-watcher": "^0.5.1",
     "postgres": "^3.4.5",
     "rehype-external-links": "^3.0.0",
     "rehype-sanitize": "^6.0.0",
     "runed": "^0.25.0",
-    "zod": "^3.23.8"
+    "zod": "^3.24.4"
   }
 }
