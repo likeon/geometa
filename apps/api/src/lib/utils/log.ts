@@ -22,9 +22,9 @@ function paramsToObject(searchParams: URLSearchParams) {
 }
 
 
-function statusToNumber(value: number | keyof StatusMap | undefined): number {
+function statusToNumber(value: number | keyof StatusMap | undefined): number | null {
   if (!value) {
-    return 0;
+    return null;
   }
 
   if (typeof value === 'number') {
@@ -33,12 +33,12 @@ function statusToNumber(value: number | keyof StatusMap | undefined): number {
   return Number(value);
 }
 
-function logRequest(startTime: number, server: Server | null, request: BunRequest, status: number) {
+function logRequest(startTime: number, server: Server | null, request: BunRequest, status: number | null) {
   const { pathname, searchParams } = new URL(request.url);
   if (process.env.NODE_ENV === 'production' && pathname == '/api/health-check') {
     return;
   }
-  const error = status >= 400;
+  const error = (status ? status >= 400 : true);
   const data = {
     level: (error ? 'error' : 'info'),
     type: 'request',
@@ -73,6 +73,15 @@ export const logger = () => {
     })
     .onAfterResponse(({ server, request, set, store }) => {
       logRequest((store as any)['startTime'], server, request as BunRequest, statusToNumber(set.status));
+    })
+    .onError(({ server, request, error, store }) => {
+      let status: number | null;
+      if ('status' in error) {
+        status = error.status;
+      } else {
+        status = null;
+      }
+      logRequest((store as any)['startTime'], server, request as BunRequest, status);
     });
 
   return app.as('global');
