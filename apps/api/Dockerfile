@@ -1,16 +1,16 @@
-FROM oven/bun:1 AS build
-WORKDIR /usr/src/app
+FROM oven/bun:1 as build
+WORKDIR /app
 
 COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile --production
 COPY . .
 RUN bun run build
 
-FROM build as release
+FROM gcr.io/distroless/base
+WORKDIR /app
 
-COPY --from=build /usr/src/app/node_modules node_modules
-COPY --from=build /usr/src/app/package.json /usr/src/app/build/index.js  ./
+COPY --from=build /app/server server
 
-USER bun
-EXPOSE 3000/tcp
-ENTRYPOINT [ "bun", "run", "index.js" ]
+ENV NODE_ENV=production
+CMD ["./server"]
+EXPOSE 3000
