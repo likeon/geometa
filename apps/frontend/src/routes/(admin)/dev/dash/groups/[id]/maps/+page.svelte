@@ -3,40 +3,9 @@
   import MapEditModal from './MapEditModal.svelte';
   import DashNavBar from '$lib/components/DashNavBar.svelte';
   import SortFilterTable from '$lib/components/SortFilterTable.svelte';
+  import { columns } from './columns';
+  import BaseTable from '$lib/components/BaseTable/BaseTable.svelte';
   let { data } = $props();
-  let columns = [
-    { key: 'name', label: 'Name', width: '30%', sortable: true, searchable: true },
-    {
-      key: 'mapLevels',
-      label: 'Levels',
-      width: '30%',
-      display: (a: any) => a.map((item: { level: { name: any } }) => item.level.name).join(', '),
-      sortable: false,
-      searchable: true
-    },
-    { key: 'locationsCount', label: 'Locations count', sortable: true, searchable: false },
-    {
-      key: 'link',
-      label: 'Geoguessr Link',
-      sortable: false,
-      searchable: false,
-      display: (item: any) => `https://www.geoguessr.com/maps/${item.geoguessrId}`
-    },
-    {
-      key: 'link',
-      label: 'Download JSON',
-      sortable: false,
-      searchable: false,
-      display: (item: any) => `/dev/dash/groups/${data.group.id}/maps/${item.id}/download`
-    },
-    {
-      key: 'link',
-      label: 'Metas Link',
-      sortable: false,
-      searchable: false,
-      display: (item: any) => `/maps/${item.geoguessrId}`
-    }
-  ];
 
   let isMapModalOpen = $state(false);
   let searchText = $state('');
@@ -70,13 +39,13 @@
       <Button onclick={addMap}>Add map</Button>
     </div>
   </div>
-
-  <SortFilterTable
-    data={maps}
-    {searchText}
+  <BaseTable
     {columns}
+    data={maps}
+    bind:selectedId={selectedMapId}
     bind:isModalOpen={isMapModalOpen}
-    bind:selectedRowId={selectedMapId} />
+    initialSorting={[{ id: 'name', desc: false }]}>
+  </BaseTable>
 </div>
 <MapEditModal
   bind:isMapModalOpen
