@@ -3,10 +3,9 @@
   import DashNavBar from '$lib/components/DashNavBar.svelte';
   import { Button } from 'flowbite-svelte';
   import LevelEditModal from './LevelEditModal.svelte';
-  import SortFilterTable from '$lib/components/SortFilterTable.svelte';
-
+  import BaseTable from '$lib/components/BaseTable/BaseTable.svelte';
+  import { columns } from './columns';
   let levels = $derived(data.group.levels);
-  let columns = [{ key: 'name', label: 'Name', sortable: true, searchable: true }];
 
   let selectedLevelId = $state(-1);
   let isLevelModalOpen = $state(false);
@@ -29,12 +28,12 @@
       <Button onclick={addLevel}>Add level</Button>
     </div>
   </div>
-  <SortFilterTable
-    data={levels}
+  <BaseTable
     {columns}
-    searchText=""
-    bind:selectedRowId={selectedLevelId}
-    bind:isModalOpen={isLevelModalOpen} />
+    data={levels}
+    bind:selectedId={selectedLevelId}
+    bind:isModalOpen={isLevelModalOpen}
+    initialSorting={[{ id: 'name', desc: false }]} />
 </div>
 
 <LevelEditModal
