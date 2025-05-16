@@ -12,12 +12,13 @@ import { createInsertSchema } from 'drizzle-zod';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { ensurePermissions } from '$lib/utils';
+import type { PageServerLoad } from './$types';
 
 export const prerender = false;
 const insertMapGroupSchema = createInsertSchema(mapGroups).pick({ name: true });
 const updateMapGroupSchema = createInsertSchema(mapGroups).pick({ name: true, id: true });
 
-export const load = async ({ locals }) => {
+export const load: PageServerLoad = async ({ locals }) => {
   const userGroups = await locals.db
     .select({
       id: mapGroups.id,

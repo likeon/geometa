@@ -1,67 +1,12 @@
 <script lang="ts">
   import { Alert, Button, Dropdown, DropdownItem, Input, Label, Modal } from 'flowbite-svelte';
   import { superForm } from 'sveltekit-superforms';
-  import SortFilterTable from '$lib/components/SortFilterTable.svelte';
+  import BaseTable from '$lib/components/BaseTable/BaseTable.svelte';
+  import { columns } from './columns';
 
   let { data } = $props();
   let mapGroupCreationModalOpen = $state(false);
   const { form, errors, constraints } = superForm(data.mapGroupForm);
-  let searchText = $state('');
-
-  export function escapeHTML(input: string): string {
-    const map: { [key: string]: string } = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#39;',
-      '/': '&#x2F;',
-      '`': '&#x60;',
-      '=': '&#x3D;'
-    };
-
-    return input.replace(/[&<>"'`=/]/g, (char) => map[char]);
-  }
-
-  let columns = [
-    {
-      key: 'name',
-      label: 'Name',
-      width: '32%',
-      searchable: true,
-      sortable: true,
-      displayHtml: (item: (typeof data.userGroups)[number]) =>
-        `<a href="/dev/dash/groups/${item.id}">${escapeHTML(item.name.trim() || '<No name>')}</a>`
-    },
-    {
-      key: 'metasCount',
-      label: 'Metas',
-      width: '17%',
-      searchable: false,
-      sortable: true
-    },
-    {
-      key: 'locationCount',
-      label: 'Locations',
-      width: '17%',
-      searchable: false,
-      sortable: true
-    },
-    {
-      key: 'mapsCount',
-      label: 'Maps',
-      width: '17%',
-      searchable: false,
-      sortable: true
-    },
-    {
-      key: 'gamesPlayed',
-      label: 'Games played',
-      width: '17%',
-      searchable: false,
-      sortable: true
-    }
-  ];
 </script>
 
 <svelte:head>
@@ -70,9 +15,6 @@
 
 <div class="container">
   <div class="flex flex-wrap items-center">
-    <div class="w-1/3">
-      <Input type="text" placeholder="Search..." autocomplete="off" bind:value={searchText} />
-    </div>
     <div class="flex-grow flex items-center justify-end space-x-3">
       <Button color="dark">Documentation</Button>
       <Dropdown>
@@ -87,12 +29,7 @@
     </div>
   </div>
   <div class="mb-5">
-    <SortFilterTable
-      data={data.userGroups}
-      {searchText}
-      {columns}
-      isModalOpen={false}
-      selectedRowId={undefined} />
+    <BaseTable {columns} data={data.userGroups} initialSorting={[{ id: 'name', desc: false }]} />
   </div>
   {#if data.allGroups}
     <div>
