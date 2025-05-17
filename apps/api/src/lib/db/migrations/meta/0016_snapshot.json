@@ -1,5 +1,5 @@
 {
-  "id": "6092c2c9-726e-48da-92cb-da429c7fa33e",
+  "id": "2c164a8d-6de0-4587-8dbc-b8b07f2eb630",
   "prevId": "715f6cbc-a450-4991-9d41-731aa879e182",
   "version": "7",
   "dialect": "postgresql",
@@ -1349,15 +1349,15 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "synced_location_synced_meta_id_synced_meta_metaId_fk": {
-          "name": "synced_location_synced_meta_id_synced_meta_metaId_fk",
+        "synced_location_synced_meta_id_synced_meta_meta_id_fk": {
+          "name": "synced_location_synced_meta_id_synced_meta_meta_id_fk",
           "tableFrom": "synced_location",
           "tableTo": "synced_meta",
           "columnsFrom": [
             "synced_meta_id"
           ],
           "columnsTo": [
-            "metaId"
+            "meta_id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -1409,15 +1409,15 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "synced_map_meta_synced_meta_id_synced_meta_metaId_fk": {
-          "name": "synced_map_meta_synced_meta_id_synced_meta_metaId_fk",
+        "synced_map_meta_synced_meta_id_synced_meta_meta_id_fk": {
+          "name": "synced_map_meta_synced_meta_id_synced_meta_meta_id_fk",
           "tableFrom": "synced_map_meta",
           "tableTo": "synced_meta",
           "columnsFrom": [
             "synced_meta_id"
           ],
           "columnsTo": [
-            "metaId"
+            "meta_id"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -1441,8 +1441,8 @@
       "name": "synced_meta",
       "schema": "",
       "columns": {
-        "metaId": {
-          "name": "metaId",
+        "meta_id": {
+          "name": "meta_id",
           "type": "bigint",
           "primaryKey": true,
           "notNull": true

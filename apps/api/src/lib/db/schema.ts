@@ -348,7 +348,7 @@ export const cacheTable = pgTable(
 
 export const syncedMeta = pgTable('synced_meta', {
   // meta could be deleted without syncing
-  metaId: bigint('metaId', { mode: 'number' }).notNull().primaryKey(),
+  metaId: bigint('meta_id', { mode: 'number' }).notNull().primaryKey(),
   // for cleanup
   // idk if actually needed
   mapGroupId: bigint('map_group_id', { mode: 'number' }).notNull().references(

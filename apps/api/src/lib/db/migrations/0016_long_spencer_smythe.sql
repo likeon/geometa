@@ -12,7 +12,7 @@ CREATE TABLE "synced_map_meta" (
 );
 --> statement-breakpoint
 CREATE TABLE "synced_meta" (
-	"metaId" bigint PRIMARY KEY NOT NULL,
+	"meta_id" bigint PRIMARY KEY NOT NULL,
 	"map_group_id" bigint NOT NULL,
 	"name" text NOT NULL,
 	"note" text NOT NULL,
@@ -26,11 +26,11 @@ ALTER TABLE "cache" ADD PRIMARY KEY ("key");--> statement-breakpoint
 ALTER TABLE "maps" ALTER COLUMN "map_group_id" DROP NOT NULL;--> statement-breakpoint
 ALTER TABLE "maps" ADD COLUMN "is_personal" boolean DEFAULT false NOT NULL;--> statement-breakpoint
 ALTER TABLE "maps" ADD COLUMN "is_deleted" boolean DEFAULT false;--> statement-breakpoint
-ALTER TABLE "synced_location" ADD CONSTRAINT "synced_location_synced_meta_id_synced_meta_metaId_fk" FOREIGN KEY ("synced_meta_id") REFERENCES "public"."synced_meta"("metaId") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "synced_location" ADD CONSTRAINT "synced_location_synced_meta_id_synced_meta_meta_id_fk" FOREIGN KEY ("synced_meta_id") REFERENCES "public"."synced_meta"("meta_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "synced_map_meta" ADD CONSTRAINT "synced_map_meta_map_id_maps_id_fk" FOREIGN KEY ("map_id") REFERENCES "public"."maps"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "synced_map_meta" ADD CONSTRAINT "synced_map_meta_synced_meta_id_synced_meta_metaId_fk" FOREIGN KEY ("synced_meta_id") REFERENCES "public"."synced_meta"("metaId") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "synced_map_meta" ADD CONSTRAINT "synced_map_meta_synced_meta_id_synced_meta_meta_id_fk" FOREIGN KEY ("synced_meta_id") REFERENCES "public"."synced_meta"("meta_id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "synced_meta" ADD CONSTRAINT "synced_meta_map_group_id_map_groups_id_fk" FOREIGN KEY ("map_group_id") REFERENCES "public"."map_groups"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-CREATE UNIQUE INDEX "maps_geoguessr_id_unique" ON "maps" USING btree ("geoguessr_id") WHERE NOT "maps"."is_deleted";--> statement-breakpoint
+CREATE UNIQUE INDEX "maps_geoguessr_id_unique" ON "maps" USING btree ("geoguessr_id") WHERE "maps"."is_deleted" = $1;--> statement-breakpoint
 ALTER TABLE "maps" ADD CONSTRAINT "map_group_id_not_null" CHECK (("maps"."is_personal" AND "maps"."map_group_id" IS NULL)
           OR (NOT
           "maps"."is_personal"
