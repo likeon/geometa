@@ -57,6 +57,7 @@
   "dependencies": {
     "@lucia-auth/adapter-drizzle": "^1.1.0",
     "@sentry/sveltekit": "^9.19.0",
+    "@tanstack/svelte-virtual": "^3.13.8",
     "@tanstack/table-core": "^8.21.3",
     "active-table": "^1.1.5",
     "arctic": "^3.6.1",

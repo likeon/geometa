@@ -8,11 +8,10 @@
   import MetaEditModal from './MetaEditModal.svelte';
   import DashNavBar from '$lib/components/DashNavBar.svelte';
   import Icon from '@iconify/svelte';
-  import SortFilterTable from '$lib/components/SortFilterTable.svelte';
   import LoadingSmall from '$lib/components/LoadingSmall.svelte';
-
+  import DataTable from './table.svelte';
+  import { columns } from './columns';
   let { data } = $props();
-  type Meta = (typeof data.group.metas)[number];
 
   const levelChoices = data.group.levels.map((item) => ({
     value: item.id,
@@ -26,85 +25,16 @@
       name: permission.mapGroup.name
     }));
 
-  let columns = [
-    {
-      key: 'tagName',
-      label: 'Tag name',
-      searchable: true,
-      sortable: true,
-      width: '25%'
-    },
-    {
-      key: 'name',
-      label: 'Name',
-      width: '25%',
-      searchable: true,
-      sortable: true
-    },
-    {
-      key: 'locationsCount',
-      label: 'Locations',
-      searchable: false,
-      sortable: true,
-      display: (item: Meta['locationsCount']) => item?.total || 0
-    },
-    {
-      key: 'note',
-      label: 'Note',
-      display: (item: string) => item != '',
-      searchable: false,
-      filterable: true,
-      type: 'select',
-      options: ['Any note', 'Has note', 'Missing note'],
-      filterLogic: (filter: string, item: Meta) =>
-        filter == 'Any note' || (filter === 'Has note' ? !!item.note : !item.note)
-    },
-    {
-      key: 'images',
-      label: 'Image',
-      display: (item: []) => item.length != 0,
-      searchable: false,
-      filterable: true,
-      type: 'select',
-      options: ['Any image', 'Has image', 'Missing image'],
-      filterLogic: (filter: string, item: Meta) => {
-        return (
-          filter == 'Any image' ||
-          (filter == 'Has image' && item.images.length > 0) ||
-          (filter == 'Missing image' && item.images.length == 0)
-        );
-      }
-    },
-    {
-      key: 'metaLevels',
-      label: 'Level',
-      display: (item: (typeof data.group.metas)[number]['metaLevels']) =>
-        item.map((metaLevel) => metaLevel.level.name).join(', '),
-      searchable: false,
-      filterable: true,
-      type: 'select',
-      options: [
-        'All Levels',
-        'Missing Level',
-        ...levelChoices.map((levelChoice) => levelChoice.name)
-      ], // Add "All Levels" option
-      filterLogic: (filter: string, item: Meta) =>
-        filter == 'All Levels' ||
-        (filter == 'Missing Level' && item.metaLevels.length == 0) ||
-        item.metaLevels.some((metaLevel) => metaLevel.level.name === filter)
-    }
-  ];
-
   let isMetaModalOpen = $state(false);
   let isMapUploadModalOpen = $state(false);
   let isMetasUploadModalOpen = $state(false);
-  let searchText = $state('');
   let metas = $derived(data.group.metas);
   let selectedMetaId = $state(-1);
   let selectedMeta = $derived.by(() => {
     const meta = metas.find((meta) => meta.id == selectedMetaId);
     return meta != undefined ? meta : null;
   });
+
   let numberOfLocationsUploaded = $state(0);
 
   $effect(() => {
@@ -144,9 +74,6 @@
 <div>
   <DashNavBar groupId={data.group.id} groupName={data.group.name}></DashNavBar>
   <div class="flex flex-wrap items-center">
-    <div class="w-1/3">
-      <Input type="text" placeholder="Search..." autocomplete="off" bind:value={searchText} />
-    </div>
     <div class="flex-grow flex items-center justify-end">
       <GradientButton color="cyanToBlue" class="ml-3" onclick={uploadLocations}
         >Upload locations
@@ -258,12 +185,9 @@
       </Dropdown>
     </div>
   </div>
-  <SortFilterTable
-    data={metas}
-    {searchText}
-    {columns}
-    bind:isModalOpen={isMetaModalOpen}
-    bind:selectedRowId={selectedMetaId} />
+
+  <DataTable data={metas} {columns} bind:isModalOpen={isMetaModalOpen} bind:selectedId={selectedMetaId}/>
+
   {#if data.group.metas.length === 0}
     <div class="justify-center w-full flex mt-2">
       <p class="text-2xl">

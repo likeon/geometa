@@ -16,7 +16,7 @@
   } = $props();
 </script>
 
-<Button {variant} {...restProps}>
+<Button {variant} {...restProps} class="pl-0">
   {name}
   {#if sort === 'asc'}
     <ArrowUp class="ml-2" size={16} />
