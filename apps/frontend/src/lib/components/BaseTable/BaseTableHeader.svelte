@@ -15,14 +15,15 @@
     sort?: 'asc' | 'desc' | false;
   } = $props();
 </script>
-
-<Button {variant} {...restProps} class="pl-0">
-  {name}
+<Button {variant} {...restProps} class="pl-0 hover:bg-transparent focus:bg-transparent active:bg-transparent {sort === undefined ? 'pointer-events-none cursor-default' : ''}">
+   {name}
+   {#if sort != undefined}
   {#if sort === 'asc'}
     <ArrowUp class="ml-2" size={16} />
   {:else if sort === 'desc'}
     <ArrowDown class="ml-2" size={16} />
   {:else}
     <ArrowUpDown class="ml-2" size={16} />
+  {/if}
   {/if}
 </Button>

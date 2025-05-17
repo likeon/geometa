@@ -15,13 +15,11 @@
     type VisibilityState
   } from '@tanstack/table-core';
   import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
-  import * as Table from '$lib/components/ui/table/index.js';
   import BaseTableFilterPopover from '$lib/components/BaseTable/BaseTableFilterPopover.svelte';
   import { Button } from '$lib/components/ui/button';
   import X from '@lucide/svelte/icons/x';
   import { Input } from '$lib/components/ui/input';
   import { createVirtualizer } from './index.svelte';
-  import { onMount, tick } from 'svelte';
 
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
@@ -120,28 +118,7 @@
   const paddingBottom = $derived(
     items.length > 0 ? virtualizer.getTotalSize() - items[items.length - 1].end : 0
   );
-
-  let tableEl: HTMLTableElement | null = null;
-  let columnWidths: number[] = $state([]);
-  let fixedLayout = $state(false);
-
-  async function measureColumnWidths() {
-    await tick();
-    if (!tableEl) return;
-    const ths = tableEl.querySelectorAll('thead th');
-    columnWidths = Array.from(ths).map((th) => (th as HTMLElement).offsetWidth);
-    fixedLayout = true;
-  }
-
-  onMount(() => {
-    measureColumnWidths();
-  });
-
-  $effect(() => {
-    if (items && items.length && !fixedLayout) {
-      measureColumnWidths();
-    }
-  });
+  
 </script>
 
 <div class="rounded-md">
@@ -186,19 +163,8 @@
     style="height: 700px; overflow: auto; relative w-full overflow-auto"
     bind:this={virtualListEl}>
     <table
-      style="--virtualPaddingTop: {paddingTop}px; --virtualPaddingBottom: {paddingBottom}px; text-sm
-      {fixedLayout ? 'table-layout: fixed;' : ''}
-      "
-      bind:this={tableEl}>
-      {#if fixedLayout && columnWidths.length}
-        <colgroup>
-          {#each columnWidths as width}
-            <col style="width: {width}px;" />
-          {/each}
-        </colgroup>
-      {/if}
-
-      <thead>
+      style="--virtualPaddingTop: {paddingTop}px; --virtualPaddingBottom: {paddingBottom}px; text-sm;">
+            <thead>
         {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
           <tr>
             {#each headerGroup.headers as header (header.id)}
@@ -222,9 +188,10 @@
             onclick={() => {
               selectedId = rows[row.index].original.id;
               isModalOpen = true;
-            }}>
+            }}
+            >
             {#each rows[row.index].getVisibleCells() as cell (cell.id)}
-              <td class={cell.column.columnDef.meta?.class}>
+              <td class="{cell.column.columnDef.meta?.class}">
                 <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
               </td>
             {/each}
@@ -242,9 +209,10 @@
 <style>
   table {
     width: 100%;
-    table-layout: auto;
+    table-layout: fixed;
     border-spacing: 0;
     isolation: isolate;
+   border-collapse: collapse;
   }
 
   tbody::before {
@@ -260,4 +228,5 @@
   th {
     text-align: left;
   }
+
 </style>
