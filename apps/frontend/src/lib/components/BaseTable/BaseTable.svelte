@@ -80,7 +80,7 @@
   });
 </script>
 
-<div class="rounded-md border">
+<div class="rounded-md">
   <Table.Root>
     <Table.Header>
       {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}

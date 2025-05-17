@@ -19,7 +19,9 @@
   import { Button } from '$lib/components/ui/button';
   import X from '@lucide/svelte/icons/x';
   import { Input } from '$lib/components/ui/input';
-  import { createVirtualizer } from './index.svelte';
+
+  import * as Table from '$lib/components/ui/table/index.js';
+  import { createVirtualizer } from '$lib/virtualizer.svelte';
 
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
@@ -109,7 +111,7 @@
     createVirtualizer<HTMLDivElement, HTMLDivElement>({
       count: rows.length,
       getScrollElement: () => virtualListEl,
-      estimateSize: () => 36,
+      estimateSize: () => 49,
       overscan: 16
     })
   );
@@ -122,7 +124,7 @@
 </script>
 
 <div class="rounded-md">
-  <div class="flex flex-1 items-center space-x-2">
+  <div class="min-h-[40px] flex flex-1 items-center space-x-2">
     <Input
       placeholder="Filter tags"
       value={(table.getColumn('search')?.getFilterValue() as string) ?? ''}
@@ -162,28 +164,28 @@
   <div
     style="height: 700px; overflow: auto; relative w-full overflow-auto"
     bind:this={virtualListEl}>
-    <table
-      style="--virtualPaddingTop: {paddingTop}px; --virtualPaddingBottom: {paddingBottom}px; text-sm;">
-            <thead>
+    <Table.Root
+      style="--virtualPaddingTop: {paddingTop}px; --virtualPaddingBottom: {paddingBottom}px; table-layout: fixed;">
+            <Table.Header>
         {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
-          <tr>
+          <Table.Row>
             {#each headerGroup.headers as header (header.id)}
-              <th
+              <Table.Head
                 style="position: sticky; top:0; z-index :2;"
-                class="bg-green-100 dark:bg-green-900 {header.column.columnDef.meta?.class}">
+                class=" {header.column.columnDef.meta?.class}">
                 {#if !header.isPlaceholder}
                   <FlexRender
                     content={header.column.columnDef.header}
                     context={header.getContext()} />
                 {/if}
-              </th>
+              </Table.Head>
             {/each}
-          </tr>
+          </Table.Row>
         {/each}
-      </thead>
-      <tbody>
+            </Table.Header>
+      <Table.Body>
         {#each items as row, idx (row.index)}
-          <tr
+          <Table.Row
             data-state={rows[row.index].getIsSelected() && 'selected'}
             onclick={() => {
               selectedId = rows[row.index].original.id;
@@ -191,42 +193,30 @@
             }}
             >
             {#each rows[row.index].getVisibleCells() as cell (cell.id)}
-              <td class="{cell.column.columnDef.meta?.class}">
+              <td class="p-2 align-middle {cell.column.columnDef.meta?.class}">
                 <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
               </td>
             {/each}
-          </tr>
+          </Table.Row>
         {:else}
-          <tr>
+          <Table.Row>
             <td colspan={columns.length} class="h-24 text-center">No results.</td>
-          </tr>
+          </Table.Row>
         {/each}
-      </tbody>
-    </table>
+      </Table.Body>
+    </Table.Root>
   </div>
 </div>
 
 <style>
-  table {
-    width: 100%;
-    table-layout: fixed;
-    border-spacing: 0;
-    isolation: isolate;
-   border-collapse: collapse;
-  }
-
-  tbody::before {
+  :global(tbody::before) {
     display: block;
     padding-top: var(--virtualPaddingTop);
     content: '';
   }
-  tbody::after {
+  :global(tbody::after) {
     display: block;
     padding-bottom: var(--virtualPaddingBottom);
     content: '';
   }
-  th {
-    text-align: left;
-  }
-
 </style>
