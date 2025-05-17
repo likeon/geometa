@@ -12,7 +12,7 @@ import {
   primaryKey,
   bigint
 } from 'drizzle-orm/pg-core';
-import { relations, sql, type InferModelFromColumns, eq } from 'drizzle-orm';
+import { relations, sql, type InferModelFromColumns, eq, InferSelectModel } from 'drizzle-orm';
 
 export const metaSuggestions = pgTable('meta_suggestions', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
@@ -195,6 +195,7 @@ export const metas = pgTable(
     index('metas_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt)
   ]
 );
+export type Meta = InferSelectModel<typeof metas>;
 export const metasRelations = relations(metas, ({ one, many }) => ({
   mapGroup: one(mapGroups, { fields: [metas.mapGroupId], references: [mapGroups.id] }),
   metaLevels: many(metaLevels),
@@ -356,6 +357,7 @@ export const syncedMetas = pgTable('synced_meta', {
   ),
   name: text().notNull(),
   note: text().notNull(),
+  noteFromPlonkit: boolean('note_from_plonkit').notNull(),
   footer: text().notNull(),
   images: text().array()
 });
