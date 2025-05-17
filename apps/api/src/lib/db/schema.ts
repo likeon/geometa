@@ -346,7 +346,7 @@ export const cacheTable = pgTable(
   }
 );
 
-export const syncedMeta = pgTable('synced_meta', {
+export const syncedMetas = pgTable('synced_meta', {
   // meta could be deleted without syncing
   metaId: bigint('meta_id', { mode: 'number' }).notNull().primaryKey(),
   // for cleanup
@@ -360,9 +360,9 @@ export const syncedMeta = pgTable('synced_meta', {
   images: text().array()
 });
 
-export const syncedLocation = pgTable('synced_location', {
+export const syncedLocations = pgTable('synced_location', {
   syncedMetaId: bigint('synced_meta_id', {mode: 'number' }).notNull().references(
-    () => syncedMeta.metaId, { onDelete: 'cascade' }
+    () => syncedMetas.metaId, { onDelete: 'cascade' }
   ),
   panoId: text('panoId').notNull(),
   // keep country here because we might use geospatial data in the future
@@ -372,7 +372,7 @@ export const syncedLocation = pgTable('synced_location', {
   primaryKey({ columns: [t.syncedMetaId, t.panoId] })
 ])));
 
-export const syncedMapMeta = pgTable(
+export const syncedMapMetas = pgTable(
   'synced_map_meta',
   {
     mapId: bigint('map_id', {mode: 'number' })
@@ -380,7 +380,7 @@ export const syncedMapMeta = pgTable(
       .references(() => maps.id, { onDelete: 'cascade' }),
     syncedMetaId: bigint('synced_meta_id', {mode: 'number' })
       .notNull()
-      .references(() => syncedMeta.metaId, { onDelete: 'cascade' })
+      .references(() => syncedMetas.metaId, { onDelete: 'cascade' })
   },
   (t) => ([
     primaryKey({ columns: [t.mapId, t.syncedMetaId] })

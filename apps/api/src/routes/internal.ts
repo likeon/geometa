@@ -13,8 +13,4 @@ export const internalRouter = new Elysia({prefix: '/internal'})
     await syncToCache(id);
   }, {
     params: t.Object({ id: t.Integer()}),
-    query: t.Object({
-      mapId: t.String(),
-      panoId: t.String()
-    })
   });
