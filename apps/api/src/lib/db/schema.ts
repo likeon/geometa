@@ -8,9 +8,11 @@ import {
   pgView,
   boolean,
   timestamp,
-  bigserial
+  bigserial, check,
+  primaryKey,
+  bigint
 } from 'drizzle-orm/pg-core';
-import { relations, sql, type InferModelFromColumns } from 'drizzle-orm';
+import { relations, sql, type InferModelFromColumns, eq } from 'drizzle-orm';
 
 export const metaSuggestions = pgTable('meta_suggestions', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
@@ -69,13 +71,14 @@ export const maps = pgTable(
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
     mapGroupId: integer('map_group_id')
-      .notNull()
       .references(() => mapGroups.id, { onDelete: 'cascade' }),
     name: text('name').notNull(),
     geoguessrId: text('geoguessr_id').notNull(),
     description: text('description'),
     isPublished: boolean('is_published').notNull().default(false),
+    // todo: remove
     isCommunity: boolean('is_community').notNull().default(false),
+    isPersonal: boolean('is_personal').notNull().default(false),
     authors: text('authors').default(''),
     ordering: integer('ordering').notNull().default(0),
     autoUpdate: boolean('auto_update').notNull().default(false),
@@ -85,11 +88,24 @@ export const maps = pgTable(
     difficulty: integer('difficulty').notNull().default(0),
     isVerified: boolean('is_verified').notNull().default(false),
     numberOfGamesPlayed: integer('number_of_games_played'),
-    numberOfGamesPlayedDiminished: integer('number_of_games_played_diminished')
+    numberOfGamesPlayedDiminished: integer('number_of_games_played_diminished'),
+    isDeleted: boolean('is_deleted').default(false)
   },
   (t) => [
-    uniqueIndex('maps_geoguessr_id_unique').on(t.geoguessrId),
-    index('maps_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt)
+    uniqueIndex('maps_geoguessr_id_unique').on(t.geoguessrId).where(eq(t.isDeleted, false)),
+    index('maps_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt),
+    check(
+      'map_group_id_not_null',
+      sql`(${t.isPersonal} AND ${t.mapGroupId} IS NULL)
+          OR (NOT
+          ${t.isPersonal}
+          AND
+          ${t.mapGroupId}
+          IS
+          NOT
+          NULL
+          )`
+    )
   ]
 );
 export const mapsRelations = relations(maps, ({ one, many }) => ({
@@ -169,8 +185,10 @@ export const metas = pgTable(
     footer: text('footer').notNull().default(''),
     footerHtml: text('footer_html').notNull().default(''),
     noteFromPlonkit: boolean('note_from_plonkit').notNull().default(false),
+    // todo: remove?
     hasImage: boolean('has_image').notNull().default(false),
     modifiedAt: integer('modified_at').default(1730419200).notNull()
+    // todo: add soft-delete
   },
   (t) => [
     uniqueIndex('metas_unique').on(t.mapGroupId, t.tagName),
@@ -320,6 +338,55 @@ export const mapRegionsRelations = relations(mapRegions, ({ one }) => ({
   region: one(regions, { fields: [mapRegions.regionId], references: [regions.id] })
 }));
 
+export const cacheTable = pgTable(
+  'cache',
+  {
+    key: text('key').notNull().primaryKey(),
+    value: text('value').notNull()
+  }
+);
+
+export const syncedMeta = pgTable('synced_meta', {
+  // meta could be deleted without syncing
+  metaId: bigint('metaId', { mode: 'number' }).notNull().primaryKey(),
+  // for cleanup
+  // idk if actually needed
+  mapGroupId: bigint('map_group_id', { mode: 'number' }).notNull().references(
+    () => mapGroups.id, { onDelete: 'cascade' }
+  ),
+  name: text().notNull(),
+  note: text().notNull(),
+  footer: text().notNull(),
+  images: text().array()
+});
+
+export const syncedLocation = pgTable('synced_location', {
+  syncedMetaId: bigint('synced_meta_id', {mode: 'number' }).notNull().references(
+    () => syncedMeta.metaId, { onDelete: 'cascade' }
+  ),
+  panoId: text('panoId').notNull(),
+  // keep country here because we might use geospatial data in the future
+  // different countries per meta are possible
+  country: text()
+}, (t => ([
+  primaryKey({ columns: [t.syncedMetaId, t.panoId] })
+])));
+
+export const syncedMapMeta = pgTable(
+  'synced_map_meta',
+  {
+    mapId: bigint('map_id', {mode: 'number' })
+      .notNull()
+      .references(() => maps.id, { onDelete: 'cascade' }),
+    syncedMetaId: bigint('synced_meta_id', {mode: 'number' })
+      .notNull()
+      .references(() => syncedMeta.metaId, { onDelete: 'cascade' })
+  },
+  (t) => ([
+    primaryKey({ columns: [t.mapId, t.syncedMetaId] })
+  ])
+);
+
 // --------------
 // VIEWS
 // --------------
@@ -388,16 +455,3 @@ export const metaLocationsCountView = pgTable('meta_locations_count_view', {
 export const metaLocationsCountViewRelations = relations(metaLocationsCountView, ({ one }) => ({
   meta: one(metas, { fields: [metaLocationsCountView.metaId], references: [metas.id] })
 }));
-
-export const cacheTable = pgTable(
-  'cache',
-  {
-    key: text('key').notNull(),
-    value: text('value').notNull()
-  },
-  (t) => ({
-    keyUnique: uniqueIndex('cache_key_unique').on(t.key)
-    // todo: use after drizzle upgraded
-    // keyHash: index('cache_key_hash_idx').on(t.key).using('hash')
-  })
-);

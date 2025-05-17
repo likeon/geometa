@@ -38,10 +38,9 @@ Setup k8s operators via flux into `kube-system` namespace
 - [x] init db connection in hooks ✅ 2025-05-11
 
 ## Post live
-- [ ] image builds
+- [x] image builds ✅ 2025-05-16
 - [x] backups ✅ 2025-05-13
 - [ ] migrations
-	- [reddit](https://www.reddit.com/r/sveltejs/comments/1cfupem/comment/l1s83z4/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
 - [ ] docker slow build
 - [ ] nfca
 - [ ] tailscale to nodes
