@@ -120,7 +120,6 @@
   const paddingBottom = $derived(
     items.length > 0 ? virtualizer.getTotalSize() - items[items.length - 1].end : 0
   );
-  
 </script>
 
 <div class="rounded-md">
@@ -166,7 +165,7 @@
     bind:this={virtualListEl}>
     <Table.Root
       style="--virtualPaddingTop: {paddingTop}px; --virtualPaddingBottom: {paddingBottom}px; table-layout: fixed;">
-            <Table.Header>
+      <Table.Header>
         {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
           <Table.Row>
             {#each headerGroup.headers as header (header.id)}
@@ -182,7 +181,7 @@
             {/each}
           </Table.Row>
         {/each}
-            </Table.Header>
+      </Table.Header>
       <Table.Body>
         {#each items as row, idx (row.index)}
           <Table.Row
@@ -190,10 +189,13 @@
             onclick={() => {
               selectedId = rows[row.index].original.id;
               isModalOpen = true;
-            }}
-            >
+            }}>
             {#each rows[row.index].getVisibleCells() as cell (cell.id)}
-              <td class="p-2 align-middle {cell.column.columnDef.meta?.class}">
+              <td
+                class="p-2 align-middle {cell.column.columnDef.meta?.class}"
+                onclick={cell.column.columnDef.meta?.preventRowClick
+                  ? (e) => e.stopPropagation()
+                  : undefined}>
                 <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
               </td>
             {/each}

@@ -27,7 +27,9 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
       }),
     enableSorting: false,
     enableHiding: false,
-    meta: { class: 'pl-2 w-8 min-w-8 max-w-8' }
+    meta: { class: 'pl-2 w-8 min-w-8 max-w-8',
+        preventRowClick: true 
+     }
   },
   {
     accessorKey: 'tagName',
