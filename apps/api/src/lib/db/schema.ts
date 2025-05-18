@@ -385,7 +385,6 @@ export const syncedMetas = pgTable('synced_metas', {
   // meta could be deleted without syncing
   metaId: bigint('meta_id', { mode: 'number' }).notNull().primaryKey(),
   // for cleanup
-  // idk if actually needed
   mapGroupId: bigint('map_group_id', { mode: 'number' })
     .notNull()
     .references(() => mapGroups.id, { onDelete: 'cascade' }),
@@ -402,7 +401,7 @@ export const syncedLocations = pgTable(
     syncedMetaId: bigint('synced_meta_id', { mode: 'number' })
       .notNull()
       .references(() => syncedMetas.metaId, { onDelete: 'cascade' }),
-    panoId: text('panoId').notNull(),
+    panoId: text('pano_id').notNull(),
     // keep country here because we might use geospatial data in the future
     // different countries per meta are possible
     country: text(),

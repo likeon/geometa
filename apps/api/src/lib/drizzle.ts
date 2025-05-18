@@ -8,6 +8,6 @@ function createDbInstance() {
   } else {
     databaseURL = `postgresql://geometa:${process.env.DATABASE_PASSWORD}@postgres/geometa?sslmode=require`;
   }
-  return drizzle(databaseURL, { schema, logger: true });
+  return drizzle(databaseURL, { schema, logger: process.env.DRIZZLE_LOGGER === 'true' });
 }
 export const db = createDbInstance();

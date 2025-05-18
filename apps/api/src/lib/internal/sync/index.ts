@@ -4,7 +4,7 @@ import {
   mapGroupLocations,
   mapGroups,
   metaImages,
-  metas,
+  metas
 } from '@lib/db/schema';
 import { createRawSqlArray } from '@lib/db/utils';
 import { getImageUrl } from './utils';
@@ -16,48 +16,30 @@ const metasSelectStatement = db
     (SELECT array_agg(${metaImages.image_url} ORDER BY ${metaImages.id})
     FROM ${metaImages}
     WHERE ${metaImages.metaId} = ${metas.id})
-  `,
+  `
   })
   .from(metas)
   .where(
     and(
       eq(metas.mapGroupId, sql.placeholder('mapGroupId')),
       sql`${sql.placeholder('groupSyncedAt')}::bigint IS NULL OR
-      ${metas.modifiedAt} > ${sql.placeholder('groupSyncedAt')}::bigint`,
-    ),
+      ${metas.modifiedAt} > ${sql.placeholder('groupSyncedAt')}::bigint`
+    )
   )
   .prepare('metas_to_sync');
-
-const metaLocationsSelectStatement = db
-  .select()
-  .from(mapGroupLocations)
-  .innerJoin(
-    metas,
-    and(
-      eq(metas.mapGroupId, mapGroupLocations.mapGroupId),
-      eq(metas.tagName, mapGroupLocations.extraTag),
-    ),
-  )
-  .where(
-    and(
-      eq(mapGroupLocations.mapGroupId, sql.placeholder('mapGroupId')),
-      sql`${sql.placeholder('groupSyncedAt')}::bigint IS NULL OR
-      ${mapGroupLocations.modifiedAt} > ${sql.placeholder('groupSyncedAt')}::bigint`,
-    ),
-  );
 
 export async function syncMapGroup(groupId: number) {
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const group = await db.query.mapGroups.findFirst({
-    where: eq(mapGroups.id, groupId),
+    where: eq(mapGroups.id, groupId)
   });
   if (!group) {
-    throw new Error(`Invalid group id`);
+    throw new Error('Invalid group id');
   }
 
   const metasToSync = await metasSelectStatement.execute({
     mapGroupId: groupId,
-    groupSyncedAt: group.syncedAt,
+    groupSyncedAt: group.syncedAt
   });
   const metaValuesSql = sql.join(
     metasToSync.map(
@@ -69,9 +51,9 @@ export async function syncMapGroup(groupId: number) {
         ${meta.noteFromPlonkit},
         ${meta.footerHtml},
         ${createRawSqlArray(meta.images.map(getImageUrl))}
-      )`,
+      )`
     ),
-    sql.raw(', '),
+    sql.raw(', ')
   );
   await db.execute(sql`
     MERGE INTO synced_metas sm
@@ -95,6 +77,28 @@ export async function syncMapGroup(groupId: number) {
       sm.map_group_id = ${groupId} AND
       sm.meta_id NOT IN (SELECT m2.id FROM metas m2 WHERE m2.map_group_id = ${groupId}) THEN
         DELETE
+    ;
+  `);
+
+  await db.execute(sql`
+    WITH l AS (
+      select
+        "metas"."id" as synced_meta_id,
+        "map_group_locations"."pano_id",
+        "map_group_locations"."extra_tag"
+       from "map_group_locations"
+       join "metas" on ("metas"."map_group_id" = "map_group_locations"."map_group_id" and "metas"."tag_name" = "map_group_locations"."extra_tag")
+       where ("map_group_locations"."map_group_id" = ${groupId} and (${group.syncedAt}::bigint IS NULL OR
+          ${mapGroupLocations.modifiedAt} > ${group.syncedAt}::bigint))
+    )
+    MERGE INTO synced_locations sl
+    USING l
+    ON sl.synced_meta_id = l.synced_meta_id AND sl.pano_id = l.pano_id
+    WHEN NOT MATCHED BY TARGET THEN
+      INSERT (synced_meta_id, pano_id, country)
+      VALUES (l.synced_meta_id, l.pano_id, get_country_from_tag_name(l.extra_tag))
+    WHEN NOT MATCHED BY SOURCE AND sl.synced_meta_id NOT IN (SELECT sm.meta_id FROM synced_metas sm WHERE sm.map_group_id = ${groupId}) THEN
+      DELETE
     ;
   `);
 }
