@@ -105,5 +105,4 @@ export async function syncMapGroup(group: {
   `);
 
   // map-meta association
-
 }

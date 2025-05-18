@@ -7,7 +7,10 @@ import { Elysia, t } from 'elysia';
 
 const userscriptVersion = '0.82';
 
-export const userscriptRouter = new Elysia({ prefix: '/userscript' })
+export const userscriptRouter = new Elysia({
+  prefix: '/userscript',
+  detail: { tags: ['userscript'] },
+})
   .get(
     '/map/:geoguessrId',
     async ({ params: { geoguessrId }, set, server, request }) => {

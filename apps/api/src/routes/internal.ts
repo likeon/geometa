@@ -6,7 +6,10 @@ import { Elysia, t } from 'elysia';
 
 // not displayed to user
 // used privately by backend portion of sveltekit
-export const internalRouter = new Elysia({ prefix: '/internal' }).get(
+export const internalRouter = new Elysia({
+  prefix: '/internal',
+  detail: { tags: ['internal'] },
+}).get(
   '/map-groups/:id/sync',
   async ({ params: { id }, query, set }) => {
     // todo: permissions
