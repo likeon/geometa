@@ -4,14 +4,12 @@ import swagger from '@elysiajs/swagger';
 import { logger } from '@lib/utils/log';
 import { Elysia } from 'elysia';
 
-const swaggerExclude = [
-  /^\/api\/health-check/
-]
+const swaggerExclude = [/^\/api\/health-check/];
 
-const swaggerServers = []
+const swaggerServers = [];
 if (process.env.NODE_ENV === 'production') {
-  swaggerExclude.push(/^\/api\/internal/)
-  swaggerServers.push({ url: 'https://learnablemeta.com' })
+  swaggerExclude.push(/^\/api\/internal/);
+  swaggerServers.push({ url: 'https://learnablemeta.com' });
 }
 
 const api = new Elysia({ prefix: '/api' })
@@ -29,7 +27,10 @@ const app = new Elysia()
     swagger({
       path: '/api/swagger',
       exclude: swaggerExclude,
-      documentation: { info: { title: 'Learnable Meta API', version: '1' }, servers: swaggerServers },
+      documentation: {
+        info: { title: 'Learnable Meta API', version: '1' },
+        servers: swaggerServers,
+      },
     }),
   )
   .use(api)
