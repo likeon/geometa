@@ -11,7 +11,10 @@
 <div class="mb-1">
   <span class="inline-flex items-center">
     {name}
-    <Icon icon="akar-icons:question-fill" class="w-4 h-4 ml-1 align-middle {colorClass}" />
+    <span>
+<Icon icon="akar-icons:question-fill" class="w-4 h-4 ml-1 align-middle {colorClass}" />
+    </span>
+    
     <Tooltip placement="right-end">
       <span class="whitespace-pre-line">
         {tooltipText}
