@@ -1,5 +1,5 @@
 {
-  "id": "2c164a8d-6de0-4587-8dbc-b8b07f2eb630",
+  "id": "d99f5a51-abf8-43e0-9b48-4617fa991ff4",
   "prevId": "715f6cbc-a450-4991-9d41-731aa879e182",
   "version": "7",
   "dialect": "postgresql",
@@ -1324,8 +1324,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.synced_location": {
-      "name": "synced_location",
+    "public.synced_locations": {
+      "name": "synced_locations",
       "schema": "",
       "columns": {
         "synced_meta_id": {
@@ -1349,10 +1349,10 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "synced_location_synced_meta_id_synced_meta_meta_id_fk": {
-          "name": "synced_location_synced_meta_id_synced_meta_meta_id_fk",
-          "tableFrom": "synced_location",
-          "tableTo": "synced_meta",
+        "synced_locations_synced_meta_id_synced_metas_meta_id_fk": {
+          "name": "synced_locations_synced_meta_id_synced_metas_meta_id_fk",
+          "tableFrom": "synced_locations",
+          "tableTo": "synced_metas",
           "columnsFrom": [
             "synced_meta_id"
           ],
@@ -1364,8 +1364,8 @@
         }
       },
       "compositePrimaryKeys": {
-        "synced_location_synced_meta_id_panoId_pk": {
-          "name": "synced_location_synced_meta_id_panoId_pk",
+        "synced_locations_synced_meta_id_panoId_pk": {
+          "name": "synced_locations_synced_meta_id_panoId_pk",
           "columns": [
             "synced_meta_id",
             "panoId"
@@ -1377,8 +1377,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.synced_map_meta": {
-      "name": "synced_map_meta",
+    "public.synced_map_metas": {
+      "name": "synced_map_metas",
       "schema": "",
       "columns": {
         "map_id": {
@@ -1396,9 +1396,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "synced_map_meta_map_id_maps_id_fk": {
-          "name": "synced_map_meta_map_id_maps_id_fk",
-          "tableFrom": "synced_map_meta",
+        "synced_map_metas_map_id_maps_id_fk": {
+          "name": "synced_map_metas_map_id_maps_id_fk",
+          "tableFrom": "synced_map_metas",
           "tableTo": "maps",
           "columnsFrom": [
             "map_id"
@@ -1409,10 +1409,10 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "synced_map_meta_synced_meta_id_synced_meta_meta_id_fk": {
-          "name": "synced_map_meta_synced_meta_id_synced_meta_meta_id_fk",
-          "tableFrom": "synced_map_meta",
-          "tableTo": "synced_meta",
+        "synced_map_metas_synced_meta_id_synced_metas_meta_id_fk": {
+          "name": "synced_map_metas_synced_meta_id_synced_metas_meta_id_fk",
+          "tableFrom": "synced_map_metas",
+          "tableTo": "synced_metas",
           "columnsFrom": [
             "synced_meta_id"
           ],
@@ -1424,8 +1424,8 @@
         }
       },
       "compositePrimaryKeys": {
-        "synced_map_meta_map_id_synced_meta_id_pk": {
-          "name": "synced_map_meta_map_id_synced_meta_id_pk",
+        "synced_map_metas_map_id_synced_meta_id_pk": {
+          "name": "synced_map_metas_map_id_synced_meta_id_pk",
           "columns": [
             "map_id",
             "synced_meta_id"
@@ -1437,8 +1437,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.synced_meta": {
-      "name": "synced_meta",
+    "public.synced_metas": {
+      "name": "synced_metas",
       "schema": "",
       "columns": {
         "meta_id": {
@@ -1465,6 +1465,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "note_from_plonkit": {
+          "name": "note_from_plonkit",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true
+        },
         "footer": {
           "name": "footer",
           "type": "text",
@@ -1480,9 +1486,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "synced_meta_map_group_id_map_groups_id_fk": {
-          "name": "synced_meta_map_group_id_map_groups_id_fk",
-          "tableFrom": "synced_meta",
+        "synced_metas_map_group_id_map_groups_id_fk": {
+          "name": "synced_metas_map_group_id_map_groups_id_fk",
+          "tableFrom": "synced_metas",
           "tableTo": "map_groups",
           "columnsFrom": [
             "map_group_id"

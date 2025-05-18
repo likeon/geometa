@@ -1,1 +1,0 @@
-ALTER TABLE "synced_meta" ADD COLUMN "note_from_plonkit" boolean NOT NULL;

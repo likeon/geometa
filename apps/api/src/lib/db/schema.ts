@@ -347,7 +347,7 @@ export const cacheTable = pgTable(
   }
 );
 
-export const syncedMetas = pgTable('synced_meta', {
+export const syncedMetas = pgTable('synced_metas', {
   // meta could be deleted without syncing
   metaId: bigint('meta_id', { mode: 'number' }).notNull().primaryKey(),
   // for cleanup
@@ -362,7 +362,7 @@ export const syncedMetas = pgTable('synced_meta', {
   images: text().array()
 });
 
-export const syncedLocations = pgTable('synced_location', {
+export const syncedLocations = pgTable('synced_locations', {
   syncedMetaId: bigint('synced_meta_id', {mode: 'number' }).notNull().references(
     () => syncedMetas.metaId, { onDelete: 'cascade' }
   ),
@@ -375,7 +375,7 @@ export const syncedLocations = pgTable('synced_location', {
 ])));
 
 export const syncedMapMetas = pgTable(
-  'synced_map_meta',
+  'synced_map_metas',
   {
     mapId: bigint('map_id', {mode: 'number' })
       .notNull()
