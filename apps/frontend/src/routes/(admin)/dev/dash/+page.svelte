@@ -28,7 +28,7 @@
       <Button onclick={() => (mapGroupCreationModalOpen = true)}>Create group</Button>
     </div>
   </div>
-  <div class="mb-5">
+  <div class="my-5">
     <BaseTable {columns} data={data.userGroups} initialSorting={[{ id: 'name', desc: false }]} />
   </div>
   {#if data.allGroups}

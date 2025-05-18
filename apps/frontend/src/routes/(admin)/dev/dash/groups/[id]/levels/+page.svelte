@@ -5,6 +5,7 @@
   import LevelEditModal from './LevelEditModal.svelte';
   import BaseTable from '$lib/components/BaseTable/BaseTable.svelte';
   import { columns } from './columns';
+
   let levels = $derived(data.group.levels);
 
   let selectedLevelId = $state(-1);
@@ -28,12 +29,14 @@
       <Button onclick={addLevel}>Add level</Button>
     </div>
   </div>
-  <BaseTable
-    {columns}
-    data={levels}
-    bind:selectedId={selectedLevelId}
-    bind:isModalOpen={isLevelModalOpen}
-    initialSorting={[{ id: 'name', desc: false }]} />
+  <div class="mt-5">
+    <BaseTable
+      {columns}
+      data={levels}
+      bind:selectedId={selectedLevelId}
+      bind:isModalOpen={isLevelModalOpen}
+      initialSorting={[{ id: 'name', desc: false }]} />
+  </div>
 </div>
 
 <LevelEditModal

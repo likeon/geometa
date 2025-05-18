@@ -5,6 +5,7 @@
   import SortFilterTable from '$lib/components/SortFilterTable.svelte';
   import { columns } from './columns';
   import BaseTable from '$lib/components/BaseTable/BaseTable.svelte';
+
   let { data } = $props();
 
   let isMapModalOpen = $state(false);
@@ -39,13 +40,15 @@
       <Button onclick={addMap}>Add map</Button>
     </div>
   </div>
-  <BaseTable
-    {columns}
-    data={maps}
-    bind:selectedId={selectedMapId}
-    bind:isModalOpen={isMapModalOpen}
-    initialSorting={[{ id: 'name', desc: false }]}>
-  </BaseTable>
+  <div class="mt-5">
+    <BaseTable
+      {columns}
+      data={maps}
+      bind:selectedId={selectedMapId}
+      bind:isModalOpen={isMapModalOpen}
+      initialSorting={[{ id: 'name', desc: false }]}>
+    </BaseTable>
+  </div>
 </div>
 <MapEditModal
   bind:isMapModalOpen
