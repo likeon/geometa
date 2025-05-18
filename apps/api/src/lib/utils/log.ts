@@ -2,7 +2,10 @@ import Elysia, { StatusMap } from 'elysia';
 import { BunRequest, Server } from 'bun';
 
 export function getRequestIp(server: Server | null, request: BunRequest) {
-  return request.headers.get('cf-connecting-ip') || server?.requestIP(request)?.address;
+  return (
+    request.headers.get('cf-connecting-ip') ||
+    server?.requestIP(request)?.address
+  );
 }
 
 function paramsToObject(searchParams: URLSearchParams) {
@@ -21,8 +24,9 @@ function paramsToObject(searchParams: URLSearchParams) {
   return obj;
 }
 
-
-function statusToNumber(value: number | keyof StatusMap | undefined): number | null {
+function statusToNumber(
+  value: number | keyof StatusMap | undefined,
+): number | null {
   if (!value) {
     return null;
   }
@@ -33,22 +37,28 @@ function statusToNumber(value: number | keyof StatusMap | undefined): number | n
   return Number(value);
 }
 
-function logRequest(startTime: number, server: Server | null, request: BunRequest, status: number | null) {
+function logRequest(
+  startTime: number,
+  server: Server | null,
+  request: BunRequest,
+  status: number | null,
+) {
   const { pathname, searchParams } = new URL(request.url);
-  if (process.env.NODE_ENV === 'production' && pathname == '/api/health-check') {
+  if (
+    process.env.NODE_ENV === 'production' &&
+    pathname == '/api/health-check'
+  ) {
     return;
   }
-  const error = (status ? status >= 400 : true);
+  const error = status ? status >= 400 : true;
   const data = {
-    level: (error ? 'error' : 'info'),
+    level: error ? 'error' : 'info',
     type: 'request',
     method: request.method,
     path: pathname,
     status: status,
     searchParams: paramsToObject(searchParams),
-    rt: Math.round(
-      performance.now() - startTime
-    ),
+    rt: Math.round(performance.now() - startTime),
     ip: getRequestIp(server, request),
   };
   const responseJson = JSON.stringify(data);
@@ -61,18 +71,23 @@ function logRequest(startTime: number, server: Server | null, request: BunReques
 
 export const logger = () => {
   const app = new Elysia({
-    name: 'logger'
+    name: 'logger',
   });
 
   app
-    .onRequest(ctx => {
+    .onRequest((ctx) => {
       ctx.store = {
         ...ctx.store,
-        ['startTime']: performance.now()
+        ['startTime']: performance.now(),
       };
     })
     .onAfterResponse(({ server, request, set, store }) => {
-      logRequest((store as any)['startTime'], server, request as BunRequest, statusToNumber(set.status));
+      logRequest(
+        (store as any)['startTime'],
+        server,
+        request as BunRequest,
+        statusToNumber(set.status),
+      );
     })
     .onError(({ server, request, error, store }) => {
       let status: number | null;
@@ -81,7 +96,12 @@ export const logger = () => {
       } else {
         status = null;
       }
-      logRequest((store as any)['startTime'], server, request as BunRequest, status);
+      logRequest(
+        (store as any)['startTime'],
+        server,
+        request as BunRequest,
+        status,
+      );
     });
 
   return app.as('global');

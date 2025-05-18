@@ -12,7 +12,6 @@ const api = new Elysia({ prefix: '/api' })
   .use(userscriptRouter)
   .use(internalRouter);
 
-
 const app = new Elysia()
   // works around https://github.com/elysiajs/elysia/issues/1071
   // says it's fixed, but it's not

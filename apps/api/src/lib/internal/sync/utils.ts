@@ -48,7 +48,8 @@ export async function markdown2Html(markdown: string) {
 
 export function checkIfValidCountry(countryName: string): boolean {
   return countryNames.some(
-    (country) => country.toLocaleLowerCase().trim() == countryName.toLocaleLowerCase()
+    (country) =>
+      country.toLocaleLowerCase().trim() == countryName.toLocaleLowerCase(),
   );
 }
 
@@ -67,23 +68,26 @@ export function generatePlonkitLink(countryName: string) {
   return `https://www.plonkit.net/${countryUrl}`;
 }
 
-export async function generateFooter(countryName: string, creditPlonkit: boolean): Promise<string> {
+export async function generateFooter(
+  countryName: string,
+  creditPlonkit: boolean,
+): Promise<string> {
   const plonkitCountryUrl = generatePlonkitLink(countryName);
 
   if (checkIfValidCountry(countryName)) {
     if (creditPlonkit) {
       return await markdown2Html(
-        `Description and images taken from: [${plonkitCountryUrl}](${plonkitCountryUrl}).`
+        `Description and images taken from: [${plonkitCountryUrl}](${plonkitCountryUrl}).`,
       );
     }
     return await markdown2Html(
-      `Check out [${plonkitCountryUrl}](${plonkitCountryUrl}) for more clues.`
+      `Check out [${plonkitCountryUrl}](${plonkitCountryUrl}) for more clues.`,
     );
   }
 
   if (creditPlonkit) {
     return await markdown2Html(
-      `Description and images taken from: [https://www.plonkit.net/](https://www.plonkit.net/).`
+      `Description and images taken from: [https://www.plonkit.net/](https://www.plonkit.net/).`,
     );
   }
 
@@ -290,5 +294,5 @@ export const countryNames = [
   'Vietnam',
   'Yemen',
   'Zambia',
-  'Zimbabwe'
+  'Zimbabwe',
 ];

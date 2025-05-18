@@ -7,40 +7,49 @@ import { BunRequest } from 'bun';
 
 const userscriptVersion = '0.82';
 
-export const userscriptRouter = new Elysia({prefix: '/userscript'})
-  .get('/map/:geoguessrId', async ({ params: { geoguessrId }, set, server, request }) => {
-    const map = await db.query.maps.findFirst({
-      where: eq(maps.geoguessrId, geoguessrId)
-    });
-    if (!map || map.geoguessrId !== geoguessrId) {
-      if (map) {
-        console.error(JSON.stringify({
-          'level': 'error',
-          'type': 'foundMapMismatch',
-          'ip': getRequestIp(server, request as BunRequest)
-        }));
+export const userscriptRouter = new Elysia({ prefix: '/userscript' })
+  .get(
+    '/map/:geoguessrId',
+    async ({ params: { geoguessrId }, set, server, request }) => {
+      const map = await db.query.maps.findFirst({
+        where: eq(maps.geoguessrId, geoguessrId),
+      });
+      if (!map || map.geoguessrId !== geoguessrId) {
+        if (map) {
+          console.error(
+            JSON.stringify({
+              level: 'error',
+              type: 'foundMapMismatch',
+              ip: getRequestIp(server, request as BunRequest),
+            }),
+          );
+        }
+        set.status = 404;
+        return { mapFound: false, userscriptVersion: userscriptVersion };
       }
-      set.status = 404;
-      return { mapFound: false, userscriptVersion: userscriptVersion };
-    }
 
-    return {
-      mapFound: true,
-      userscriptVersion: userscriptVersion
-    };
-  })
-  .get('/location/', async ({ query, set }) => {
-    const key = `${query.mapId}:${query.panoId}`;
-    const value = 1;
-    if (!value) {
-      set.status = 404;
-      return ['NOT_FOUND'];
-    }
-    set.headers['content-type'] = 'application/json'
-    return value;
-  }, {
-    query: t.Object({
-      mapId: t.String(),
-      panoId: t.String()
-    })
-  });
+      return {
+        mapFound: true,
+        userscriptVersion: userscriptVersion,
+      };
+    },
+  )
+  .get(
+    '/location/',
+    async ({ query, set }) => {
+      const key = `${query.mapId}:${query.panoId}`;
+      const value = 1;
+      if (!value) {
+        set.status = 404;
+        return ['NOT_FOUND'];
+      }
+      set.headers['content-type'] = 'application/json';
+      return value;
+    },
+    {
+      query: t.Object({
+        mapId: t.String(),
+        panoId: t.String(),
+      }),
+    },
+  );

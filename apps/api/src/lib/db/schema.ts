@@ -8,11 +8,18 @@ import {
   pgView,
   boolean,
   timestamp,
-  bigserial, check,
+  bigserial,
+  check,
   primaryKey,
-  bigint
+  bigint,
 } from 'drizzle-orm/pg-core';
-import { relations, sql, type InferModelFromColumns, eq, InferSelectModel } from 'drizzle-orm';
+import {
+  relations,
+  sql,
+  type InferModelFromColumns,
+  eq,
+  InferSelectModel,
+} from 'drizzle-orm';
 
 export const metaSuggestions = pgTable('meta_suggestions', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
@@ -20,13 +27,13 @@ export const metaSuggestions = pgTable('meta_suggestions', {
   url: text('url').notNull(),
   description: text('description').notNull(),
   author_nickname: text('author_nickname'),
-  status: text('status').default('new')
+  status: text('status').default('new'),
 });
 
 export const mapGroups = pgTable('map_groups', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
   name: text('name').notNull(),
-  syncedAt: integer('synced_at')
+  syncedAt: integer('synced_at'),
 });
 
 export const mapGroupsRelations = relations(mapGroups, ({ many }) => ({
@@ -34,7 +41,7 @@ export const mapGroupsRelations = relations(mapGroups, ({ many }) => ({
   maps: many(maps),
   locations: many(mapGroupLocations),
   levels: many(levels),
-  permissions: many(mapGroupPermissions)
+  permissions: many(mapGroupPermissions),
 }));
 
 export const mapGroupLocations = pgTable(
@@ -54,24 +61,34 @@ export const mapGroupLocations = pgTable(
     extraPanoId: text('extra_pano_id'),
     extraPanoDate: text('extra_pano_date'),
     updatedAt: integer('updated_at'),
-    modifiedAt: integer('modified_at').default(1730419200).notNull()
+    modifiedAt: integer('modified_at').default(1730419200).notNull(),
   },
   (t) => [
     uniqueIndex('map_group_locations_unique').on(t.mapGroupId, t.panoId),
     index('map_group_locations_map_group_tag_idx').on(t.mapGroupId, t.extraTag),
-    index('map_group_locations_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt)
-  ]
+    index('map_group_locations_map_group_modified_idx').on(
+      t.mapGroupId,
+      t.modifiedAt,
+    ),
+  ],
 );
-export const mapGroupLocationsRelations = relations(mapGroupLocations, ({ one }) => ({
-  mapGroup: one(mapGroups, { fields: [mapGroupLocations.mapGroupId], references: [mapGroups.id] })
-}));
+export const mapGroupLocationsRelations = relations(
+  mapGroupLocations,
+  ({ one }) => ({
+    mapGroup: one(mapGroups, {
+      fields: [mapGroupLocations.mapGroupId],
+      references: [mapGroups.id],
+    }),
+  }),
+);
 
 export const maps = pgTable(
   'maps',
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
-    mapGroupId: integer('map_group_id')
-      .references(() => mapGroups.id, { onDelete: 'cascade' }),
+    mapGroupId: integer('map_group_id').references(() => mapGroups.id, {
+      onDelete: 'cascade',
+    }),
     name: text('name').notNull(),
     geoguessrId: text('geoguessr_id').notNull(),
     description: text('description'),
@@ -89,10 +106,12 @@ export const maps = pgTable(
     isVerified: boolean('is_verified').notNull().default(false),
     numberOfGamesPlayed: integer('number_of_games_played'),
     numberOfGamesPlayedDiminished: integer('number_of_games_played_diminished'),
-    isDeleted: boolean('is_deleted').default(false)
+    isDeleted: boolean('is_deleted').default(false),
   },
   (t) => [
-    uniqueIndex('maps_geoguessr_id_unique').on(t.geoguessrId).where(eq(t.isDeleted, false)),
+    uniqueIndex('maps_geoguessr_id_unique')
+      .on(t.geoguessrId)
+      .where(eq(t.isDeleted, false)),
     index('maps_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt),
     check(
       'map_group_id_not_null',
@@ -104,15 +123,18 @@ export const maps = pgTable(
           IS
           NOT
           NULL
-          )`
-    )
-  ]
+          )`,
+    ),
+  ],
 );
 export const mapsRelations = relations(maps, ({ one, many }) => ({
-  mapGroup: one(mapGroups, { fields: [maps.mapGroupId], references: [mapGroups.id] }),
+  mapGroup: one(mapGroups, {
+    fields: [maps.mapGroupId],
+    references: [mapGroups.id],
+  }),
   mapLevels: many(mapLevels),
   filters: many(mapFilters),
-  mapRegions: many(mapRegions)
+  mapRegions: many(mapRegions),
 }));
 
 export const levels = pgTable(
@@ -122,15 +144,18 @@ export const levels = pgTable(
     mapGroupId: integer('map_group_id')
       .notNull()
       .references(() => mapGroups.id, { onDelete: 'cascade' }),
-    name: text('name').notNull()
+    name: text('name').notNull(),
   },
   (t) => ({
-    nameUnique: uniqueIndex('levels_unique').on(t.name, t.mapGroupId)
-  })
+    nameUnique: uniqueIndex('levels_unique').on(t.name, t.mapGroupId),
+  }),
 );
 export const levelsRelations = relations(levels, ({ one, many }) => ({
-  mapGroup: one(mapGroups, { fields: [levels.mapGroupId], references: [mapGroups.id] }),
-  metaLevels: many(maps)
+  mapGroup: one(mapGroups, {
+    fields: [levels.mapGroupId],
+    references: [mapGroups.id],
+  }),
+  metaLevels: many(maps),
 }));
 
 export const mapLevels = pgTable(
@@ -142,15 +167,15 @@ export const mapLevels = pgTable(
       .references(() => maps.id, { onDelete: 'cascade' }),
     levelId: integer('level_id')
       .notNull()
-      .references(() => levels.id, { onDelete: 'cascade' })
+      .references(() => levels.id, { onDelete: 'cascade' }),
   },
   (t) => ({
-    mapLevelUnique: uniqueIndex('map_levels_unique').on(t.mapId, t.levelId)
-  })
+    mapLevelUnique: uniqueIndex('map_levels_unique').on(t.mapId, t.levelId),
+  }),
 );
 export const mapLevelRelations = relations(mapLevels, ({ one }) => ({
   map: one(maps, { fields: [mapLevels.mapId], references: [maps.id] }),
-  level: one(levels, { fields: [mapLevels.levelId], references: [levels.id] })
+  level: one(levels, { fields: [mapLevels.levelId], references: [levels.id] }),
 }));
 
 export const mapFilters = pgTable(
@@ -161,14 +186,14 @@ export const mapFilters = pgTable(
       .notNull()
       .references(() => maps.id, { onDelete: 'cascade' }),
     tagLike: text('tag_like'),
-    isExclude: boolean('is_exclude').notNull().default(false)
+    isExclude: boolean('is_exclude').notNull().default(false),
   },
   (t) => ({
-    mapFilterUnique: uniqueIndex('map_filters_unique').on(t.mapId, t.tagLike)
-  })
+    mapFilterUnique: uniqueIndex('map_filters_unique').on(t.mapId, t.tagLike),
+  }),
 );
 export const mapFiltersRelations = relations(mapFilters, ({ one }) => ({
-  map: one(maps, { fields: [mapFilters.mapId], references: [maps.id] })
+  map: one(maps, { fields: [mapFilters.mapId], references: [maps.id] }),
 }));
 
 export const metas = pgTable(
@@ -187,20 +212,23 @@ export const metas = pgTable(
     noteFromPlonkit: boolean('note_from_plonkit').notNull().default(false),
     // todo: remove?
     hasImage: boolean('has_image').notNull().default(false),
-    modifiedAt: integer('modified_at').default(1730419200).notNull()
+    modifiedAt: integer('modified_at').default(1730419200).notNull(),
     // todo: add soft-delete
   },
   (t) => [
     uniqueIndex('metas_unique').on(t.mapGroupId, t.tagName),
-    index('metas_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt)
-  ]
+    index('metas_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt),
+  ],
 );
 export type Meta = InferSelectModel<typeof metas>;
 export const metasRelations = relations(metas, ({ one, many }) => ({
-  mapGroup: one(mapGroups, { fields: [metas.mapGroupId], references: [mapGroups.id] }),
+  mapGroup: one(mapGroups, {
+    fields: [metas.mapGroupId],
+    references: [mapGroups.id],
+  }),
   metaLevels: many(metaLevels),
   images: many(metaImages),
-  locationsCount: one(metaLocationsCountView)
+  locationsCount: one(metaLocationsCountView),
 }));
 
 export const metaLevels = pgTable(
@@ -212,15 +240,15 @@ export const metaLevels = pgTable(
       .references(() => metas.id, { onDelete: 'cascade' }),
     levelId: integer('level_id')
       .notNull()
-      .references(() => levels.id, { onDelete: 'cascade' })
+      .references(() => levels.id, { onDelete: 'cascade' }),
   },
   (t) => ({
-    metaLevelUnique: uniqueIndex('meta_levels_unique').on(t.metaId, t.levelId)
-  })
+    metaLevelUnique: uniqueIndex('meta_levels_unique').on(t.metaId, t.levelId),
+  }),
 );
 export const metaLevelRelations = relations(metaLevels, ({ one }) => ({
   meta: one(metas, { fields: [metaLevels.metaId], references: [metas.id] }),
-  level: one(levels, { fields: [metaLevels.levelId], references: [levels.id] })
+  level: one(levels, { fields: [metaLevels.levelId], references: [levels.id] }),
 }));
 
 export const metaImages = pgTable(
@@ -230,24 +258,24 @@ export const metaImages = pgTable(
     metaId: integer('meta_id')
       .notNull()
       .references(() => metas.id, { onDelete: 'cascade' }),
-    image_url: text('image_url').notNull()
+    image_url: text('image_url').notNull(),
   },
   (t) => ({
-    metaImageUnique: uniqueIndex('meta_image_unique').on(t.metaId, t.image_url)
-  })
+    metaImageUnique: uniqueIndex('meta_image_unique').on(t.metaId, t.image_url),
+  }),
 );
 export const metaImagesRelations = relations(metaImages, ({ one }) => ({
-  meta: one(metas, { fields: [metaImages.metaId], references: [metas.id] })
+  meta: one(metas, { fields: [metaImages.metaId], references: [metas.id] }),
 }));
 
 export const users = pgTable('user', {
   id: text('id').notNull().primaryKey(),
   username: text('username').notNull(),
   isTrusted: boolean('is_trusted').notNull().default(false),
-  isSuperadmin: boolean('is_superadmin').notNull().default(false)
+  isSuperadmin: boolean('is_superadmin').notNull().default(false),
 });
 export const usersRelations = relations(users, ({ many }) => ({
-  permissions: many(mapGroupPermissions)
+  permissions: many(mapGroupPermissions),
 }));
 
 export const sessions = pgTable('session', {
@@ -257,8 +285,8 @@ export const sessions = pgTable('session', {
     .references(() => users.id),
   expiresAt: timestamp('expires_at', {
     withTimezone: true,
-    mode: 'date'
-  }).notNull()
+    mode: 'date',
+  }).notNull(),
 });
 
 export const mapGroupPermissions = pgTable(
@@ -270,22 +298,28 @@ export const mapGroupPermissions = pgTable(
       .references(() => mapGroups.id, { onDelete: 'cascade' }),
     userId: text('user_id')
       .notNull()
-      .references(() => users.id, { onDelete: 'cascade' })
+      .references(() => users.id, { onDelete: 'cascade' }),
   },
   (t) => ({
     mapGroupPermissionsUnique: uniqueIndex('map_group_permissions_unique').on(
       t.mapGroupId,
-      t.userId
-    )
-  })
-);
-export const mapGroupPermissionsRelations = relations(mapGroupPermissions, ({ one }) => ({
-  mapGroup: one(mapGroups, {
-    fields: [mapGroupPermissions.mapGroupId],
-    references: [mapGroups.id]
+      t.userId,
+    ),
   }),
-  user: one(users, { fields: [mapGroupPermissions.userId], references: [users.id] })
-}));
+);
+export const mapGroupPermissionsRelations = relations(
+  mapGroupPermissions,
+  ({ one }) => ({
+    mapGroup: one(mapGroups, {
+      fields: [mapGroupPermissions.mapGroupId],
+      references: [mapGroups.id],
+    }),
+    user: one(users, {
+      fields: [mapGroupPermissions.userId],
+      references: [users.id],
+    }),
+  }),
+);
 
 export const mapData = pgTable(
   'map_data',
@@ -297,25 +331,25 @@ export const mapData = pgTable(
     lastUpdatedPanoids: text('last_updated_panoids')
       .notNull()
       .$type<string[]>()
-      .default(sql`'[]'`)
+      .default(sql`'[]'`),
   },
   (t) => ({
-    mapDataUnique: uniqueIndex('map_data_unique').on(t.mapId)
-  })
+    mapDataUnique: uniqueIndex('map_data_unique').on(t.mapId),
+  }),
 );
 
 export const mapDataRelations = relations(mapData, ({ one }) => ({
-  map: one(maps, { fields: [mapData.mapId], references: [maps.id] })
+  map: one(maps, { fields: [mapData.mapId], references: [maps.id] }),
 }));
 
 export const regions = pgTable('regions', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
   name: text('name').notNull(),
-  ordering: integer('ordering').notNull().default(0)
+  ordering: integer('ordering').notNull().default(0),
 });
 
 export const regionsRelations = relations(regions, ({ many }) => ({
-  mapRegions: many(mapRegions)
+  mapRegions: many(mapRegions),
 }));
 
 export const mapRegions = pgTable(
@@ -327,66 +361,66 @@ export const mapRegions = pgTable(
       .references(() => maps.id, { onDelete: 'cascade' }),
     regionId: integer('region_id')
       .notNull()
-      .references(() => regions.id, { onDelete: 'cascade' })
+      .references(() => regions.id, { onDelete: 'cascade' }),
   },
   (t) => ({
-    mapRegionUnique: uniqueIndex('map_region_unique').on(t.mapId, t.regionId)
-  })
+    mapRegionUnique: uniqueIndex('map_region_unique').on(t.mapId, t.regionId),
+  }),
 );
 
 export const mapRegionsRelations = relations(mapRegions, ({ one }) => ({
   map: one(maps, { fields: [mapRegions.mapId], references: [maps.id] }),
-  region: one(regions, { fields: [mapRegions.regionId], references: [regions.id] })
+  region: one(regions, {
+    fields: [mapRegions.regionId],
+    references: [regions.id],
+  }),
 }));
 
-export const cacheTable = pgTable(
-  'cache',
-  {
-    key: text('key').notNull().primaryKey(),
-    value: text('value').notNull()
-  }
-);
+export const cacheTable = pgTable('cache', {
+  key: text('key').notNull().primaryKey(),
+  value: text('value').notNull(),
+});
 
 export const syncedMetas = pgTable('synced_metas', {
   // meta could be deleted without syncing
   metaId: bigint('meta_id', { mode: 'number' }).notNull().primaryKey(),
   // for cleanup
   // idk if actually needed
-  mapGroupId: bigint('map_group_id', { mode: 'number' }).notNull().references(
-    () => mapGroups.id, { onDelete: 'cascade' }
-  ),
+  mapGroupId: bigint('map_group_id', { mode: 'number' })
+    .notNull()
+    .references(() => mapGroups.id, { onDelete: 'cascade' }),
   name: text().notNull(),
   note: text().notNull(),
   noteFromPlonkit: boolean('note_from_plonkit').notNull(),
   footer: text().notNull(),
-  images: text().array()
+  images: text().array(),
 });
 
-export const syncedLocations = pgTable('synced_locations', {
-  syncedMetaId: bigint('synced_meta_id', {mode: 'number' }).notNull().references(
-    () => syncedMetas.metaId, { onDelete: 'cascade' }
-  ),
-  panoId: text('panoId').notNull(),
-  // keep country here because we might use geospatial data in the future
-  // different countries per meta are possible
-  country: text()
-}, (t => ([
-  primaryKey({ columns: [t.syncedMetaId, t.panoId] })
-])));
+export const syncedLocations = pgTable(
+  'synced_locations',
+  {
+    syncedMetaId: bigint('synced_meta_id', { mode: 'number' })
+      .notNull()
+      .references(() => syncedMetas.metaId, { onDelete: 'cascade' }),
+    panoId: text('panoId').notNull(),
+    // keep country here because we might use geospatial data in the future
+    // different countries per meta are possible
+    country: text(),
+  },
+  (t) => [primaryKey({ columns: [t.syncedMetaId, t.panoId] })],
+);
 
 export const syncedMapMetas = pgTable(
   'synced_map_metas',
   {
-    mapId: bigint('map_id', {mode: 'number' })
+    mapId: bigint('map_id', { mode: 'number' })
       .notNull()
       .references(() => maps.id, { onDelete: 'cascade' }),
-    syncedMetaId: bigint('synced_meta_id', {mode: 'number' })
+    syncedMetaId: bigint('synced_meta_id', { mode: 'number' })
       .notNull()
-      .references(() => syncedMetas.metaId, { onDelete: 'cascade' })
+      .references(() => syncedMetas.metaId, { onDelete: 'cascade' }),
   },
-  (t) => ([
-    primaryKey({ columns: [t.mapId, t.syncedMetaId] })
-  ])
+  (t) => [primaryKey({ columns: [t.mapId, t.syncedMetaId] })],
 );
 
 // --------------
@@ -405,7 +439,7 @@ export const locationMetas = pgView('location_metas_view', {
   extraPanoId: text('extra_pano_id'),
   extraPanoDate: text('extra_pano_date').notNull(),
   modifiedAt: integer('modified_at').notNull(),
-  metaModifiedAt: integer('meta_modified_at').notNull()
+  metaModifiedAt: integer('meta_modified_at').notNull(),
 }).existing();
 
 export const mapLocations = pgView('map_locations_view', {
@@ -422,11 +456,13 @@ export const mapLocations = pgView('map_locations_view', {
   tagName: text('tag_name').notNull(),
   metaNote: text('meta_note').notNull(),
   metaNoteHtml: text('meta_note_html').notNull(),
-  metaNoteFromPlonkit: boolean('meta_note_from_plonkit').notNull().default(false),
+  metaNoteFromPlonkit: boolean('meta_note_from_plonkit')
+    .notNull()
+    .default(false),
   metaId: integer('meta_id').notNull(),
   modifiedAt: integer('modified_at').notNull(),
   metaModifiedAt: integer('meta_modified_at').notNull(),
-  mapModifiedAt: integer('map_modified_at').notNull()
+  mapModifiedAt: integer('map_modified_at').notNull(),
 }).existing();
 
 export const mapMetas = pgView('map_metas_view', {
@@ -439,7 +475,7 @@ export const mapMetas = pgView('map_metas_view', {
   metaNoteHtml: text('meta_note_html').notNull(),
   metaImageUrls: text('meta_image_urls'),
   metaFooterHtml: text('meta_footer_html').notNull(),
-  metaNoteFromPlonkit: boolean('meta_note_from_plonkit').notNull()
+  metaNoteFromPlonkit: boolean('meta_note_from_plonkit').notNull(),
 }).existing();
 export type MapMetas = InferModelFromColumns<
   typeof mapMetas._.selectedFields,
@@ -452,8 +488,14 @@ export const metaLocationsCountView = pgTable('meta_locations_count_view', {
   metaId: integer('meta_id')
     .notNull()
     .references(() => metas.id, { onDelete: 'no action' }),
-  total: integer('total').notNull()
+  total: integer('total').notNull(),
 });
-export const metaLocationsCountViewRelations = relations(metaLocationsCountView, ({ one }) => ({
-  meta: one(metas, { fields: [metaLocationsCountView.metaId], references: [metas.id] })
-}));
+export const metaLocationsCountViewRelations = relations(
+  metaLocationsCountView,
+  ({ one }) => ({
+    meta: one(metas, {
+      fields: [metaLocationsCountView.metaId],
+      references: [metas.id],
+    }),
+  }),
+);

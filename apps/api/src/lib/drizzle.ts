@@ -1,5 +1,5 @@
 import { drizzle } from 'drizzle-orm/bun-sql';
-import * as schema from './db/schema'
+import * as schema from './db/schema';
 
 function createDbInstance() {
   let databaseURL: string;
