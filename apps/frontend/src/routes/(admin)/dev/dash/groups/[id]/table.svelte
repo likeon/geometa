@@ -22,6 +22,7 @@
 
   import * as Table from '$lib/components/ui/table/index.js';
   import { createVirtualizer } from '$lib/virtualizer.svelte';
+  import { enhance } from '$app/forms';
 
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
@@ -120,10 +121,48 @@
   const paddingBottom = $derived(
     items.length > 0 ? virtualizer.getTotalSize() - items[items.length - 1].end : 0
   );
+  const selectedRows = $derived(table.getFilteredSelectedRowModel().rows);
+
+
+  let prevDataSize = data?.length ?? 0;
+
+ // if data is removed/added unselected all rows
+$effect(() => {
+  if (data && data.length !== prevDataSize) {
+    table.resetRowSelection();
+  }
+  prevDataSize = data?.length ?? 0;
+});
 </script>
 
 <div class="rounded-md">
   <div class="min-h-[40px] flex flex-1 items-center space-x-2">
+    {#if selectedRows.length != 0}
+<form
+  action="?/deleteMetas"
+  method="post"
+  id={`delete-metas-form`}
+  use:enhance={({ cancel }) => {
+    const confirmed = confirm(`Are you sure you want to delete ${selectedRows.length} meta(s)? IT'S PERMAMENT DELETION`);
+    if (!confirmed) {
+      cancel();
+    }
+    return async ({ update }) => {
+      update();
+    };
+  }}>
+  {#each selectedRows as row}
+    <input type="hidden" name="id" value={row.original.id} />
+  {/each}
+ <button
+  type="submit"
+  class="w-full text-left px-2 py-1.5 bg-red-600 text-white font-semibold rounded hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
+>
+    MASS DELETE
+  </button>
+</form>
+
+    {/if}
     <Input
       placeholder="Filter tags"
       value={(table.getColumn('search')?.getFilterValue() as string) ?? ''}

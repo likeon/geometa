@@ -224,18 +224,31 @@ export const actions = {
       await locals.db.insert(metaLevels).values(levelsInsertValues).onConflictDoNothing();
     }
   },
-  deleteMeta: async ({ request, locals }) => {
+  deleteMetas: async ({ request, locals }) => {
     const data = await request.formData();
-    const metaId = parseInt((data.get('id') as string) || '', 10);
+    const idsRaw = data.getAll('id');
+    const ids = idsRaw
+      .flatMap((val) => (Array.isArray(val) ? val : [val]))
+      .map((id) => parseInt(id as string, 10))
+      .filter((id) => !isNaN(id));
 
-    if (isNaN(metaId)) {
-      error(400, 'Invalid ID');
+    if (ids.length === 0) {
+      error(400, 'No valid IDs provided');
+    }
+    const metasToDelete = await locals.db.query.metas.findMany({ where: inArray(metas.id, ids) });
+
+    if (metasToDelete.length !== ids.length) {
+      error(404, 'Some metas not found');
     }
 
-    const meta = await locals.db.query.metas.findFirst({ where: eq(metas.id, metaId) });
-    await ensurePermissions(locals.db, locals.user?.id, meta?.mapGroupId);
+    const mapGroupIds = [...new Set(metasToDelete.map((meta) => meta.mapGroupId))];
 
-    await locals.db.delete(metas).where(eq(metas.id, metaId));
+    if (mapGroupIds.length !== 1) {
+      error(400, 'All metas must belong to the same map group');
+    }
+    await ensurePermissions(locals.db, locals.user?.id, mapGroupIds[0]);
+
+    await locals.db.delete(metas).where(inArray(metas.id, ids));
   },
   copyMetaTo: async ({ request, locals }) => {
     const form = await superValidate(request, zod(copyMetaSchema));

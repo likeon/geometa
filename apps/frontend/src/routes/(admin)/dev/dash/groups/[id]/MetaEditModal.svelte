@@ -256,7 +256,7 @@
           </div>
         </form>
       </TabItem>
-      <form action="?/deleteMeta" method="post" onsubmit={confirmDelete}>
+      <form action="?/deleteMetas" method="post" onsubmit={confirmDelete}>
         <div class="items-center flex h-full">
           <input type="hidden" name="id" value={selectedMeta.id} />
           <button type="submit">

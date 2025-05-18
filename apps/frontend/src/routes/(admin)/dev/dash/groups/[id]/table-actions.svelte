@@ -6,7 +6,7 @@
 </script>
 
 {#snippet dropdownContent()}
-  <BaseTableDropdownDeleteForm action="?/deleteMeta" {id} bind:dropdownOpen />
+  <BaseTableDropdownDeleteForm action="?/deleteMetas" {id} bind:dropdownOpen />
 {/snippet}
 
 <BaseTableDropDown bind:dropdownOpen {dropdownContent} />
