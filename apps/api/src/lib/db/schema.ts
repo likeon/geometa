@@ -1,25 +1,25 @@
 import {
-  text,
-  integer,
-  pgTable,
-  uniqueIndex,
-  index,
-  real,
-  pgView,
-  boolean,
-  timestamp,
-  bigserial,
-  check,
-  primaryKey,
-  bigint,
-} from 'drizzle-orm/pg-core';
-import {
+  type InferModelFromColumns,
+  type InferSelectModel,
+  eq,
   relations,
   sql,
-  type InferModelFromColumns,
-  eq,
-  InferSelectModel,
 } from 'drizzle-orm';
+import {
+  bigint,
+  bigserial,
+  boolean,
+  check,
+  index,
+  integer,
+  pgTable,
+  pgView,
+  primaryKey,
+  real,
+  text,
+  timestamp,
+  uniqueIndex,
+} from 'drizzle-orm/pg-core';
 
 export const metaSuggestions = pgTable('meta_suggestions', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),

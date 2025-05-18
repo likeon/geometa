@@ -1,8 +1,8 @@
-import { Elysia } from 'elysia';
-import { userscriptRouter } from '@/routes/userscript';
 import { internalRouter } from '@/routes/internal';
-import { logger } from '@lib/utils/log';
+import { userscriptRouter } from '@/routes/userscript';
 import swagger from '@elysiajs/swagger';
+import { logger } from '@lib/utils/log';
+import { Elysia } from 'elysia';
 
 const api = new Elysia({ prefix: '/api' })
   .use(logger())

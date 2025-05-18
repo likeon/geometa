@@ -1,9 +1,9 @@
-import { unified } from 'unified';
+import rehypeExternalLinks from 'rehype-external-links';
+import rehypeSanitize from 'rehype-sanitize';
+import rehypeStringify from 'rehype-stringify';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
-import rehypeSanitize from 'rehype-sanitize';
-import rehypeExternalLinks from 'rehype-external-links';
-import rehypeStringify from 'rehype-stringify';
+import { unified } from 'unified';
 
 export function getImageUrl(url: string): string {
   const geometa_storage_prefix = 'https://static.learnablemeta.com/';
@@ -49,7 +49,7 @@ export async function markdown2Html(markdown: string) {
 export function checkIfValidCountry(countryName: string): boolean {
   return countryNames.some(
     (country) =>
-      country.toLocaleLowerCase().trim() == countryName.toLocaleLowerCase(),
+      country.toLocaleLowerCase().trim() === countryName.toLocaleLowerCase(),
   );
 }
 
@@ -87,7 +87,7 @@ export async function generateFooter(
 
   if (creditPlonkit) {
     return await markdown2Html(
-      `Description and images taken from: [https://www.plonkit.net/](https://www.plonkit.net/).`,
+      'Description and images taken from: [https://www.plonkit.net/](https://www.plonkit.net/).',
     );
   }
 

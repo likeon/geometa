@@ -1,9 +1,9 @@
-import { Elysia, t } from 'elysia';
-import { db } from '@lib/drizzle';
 import { maps } from '@lib/db/schema';
-import { eq } from 'drizzle-orm';
+import { db } from '@lib/drizzle';
 import { getRequestIp } from '@lib/utils/log';
 import type { BunRequest } from 'bun';
+import { eq } from 'drizzle-orm';
+import { Elysia, t } from 'elysia';
 
 const userscriptVersion = '0.82';
 

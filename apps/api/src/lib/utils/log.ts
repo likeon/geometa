@@ -1,5 +1,5 @@
-import Elysia, { StatusMap } from 'elysia';
-import { BunRequest, Server } from 'bun';
+import type { BunRequest, Server } from 'bun';
+import Elysia, { type StatusMap } from 'elysia';
 
 export function getRequestIp(server: Server | null, request: BunRequest) {
   return (
@@ -46,7 +46,7 @@ function logRequest(
   const { pathname, searchParams } = new URL(request.url);
   if (
     process.env.NODE_ENV === 'production' &&
-    pathname == '/api/health-check'
+    pathname === '/api/health-check'
   ) {
     return;
   }
@@ -69,6 +69,10 @@ function logRequest(
   }
 }
 
+type LoggerStore = {
+  startTime: number;
+};
+
 export const logger = () => {
   const app = new Elysia({
     name: 'logger',
@@ -78,30 +82,27 @@ export const logger = () => {
     .onRequest((ctx) => {
       ctx.store = {
         ...ctx.store,
-        ['startTime']: performance.now(),
+        startTime: performance.now(),
       };
     })
     .onAfterResponse(({ server, request, set, store }) => {
+      const loggerStore = store as unknown as LoggerStore;
       logRequest(
-        (store as any)['startTime'],
+        loggerStore.startTime,
         server,
         request as BunRequest,
         statusToNumber(set.status),
       );
     })
     .onError(({ server, request, error, store }) => {
+      const loggerStore = store as unknown as LoggerStore;
       let status: number | null;
       if ('status' in error) {
         status = error.status;
       } else {
         status = null;
       }
-      logRequest(
-        (store as any)['startTime'],
-        server,
-        request as BunRequest,
-        status,
-      );
+      logRequest(loggerStore.startTime, server, request as BunRequest, status);
     });
 
   return app.as('global');
