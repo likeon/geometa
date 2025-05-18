@@ -3,7 +3,7 @@ import { db } from '@lib/drizzle';
 import { maps } from '@lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { getRequestIp } from '@lib/utils/log';
-import { BunRequest } from 'bun';
+import type { BunRequest } from 'bun';
 
 const userscriptVersion = '0.82';
 
