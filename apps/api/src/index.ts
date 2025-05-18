@@ -31,6 +31,9 @@ const app = new Elysia()
         info: { title: 'Learnable Meta API', version: '1' },
         servers: swaggerServers,
       },
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
     }),
   )
   .use(api)

@@ -1,5 +1,10 @@
 import { mapGroups } from '@lib/db/schema';
 import { db } from '@lib/drizzle';
+import { auth } from '@lib/internal/auth';
+import {
+  ensurePermissions,
+  permissionErrorCatcher,
+} from '@lib/internal/permissions';
 import { syncMapGroup } from '@lib/internal/sync';
 import { eq } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
@@ -9,21 +14,31 @@ import { Elysia, t } from 'elysia';
 export const internalRouter = new Elysia({
   prefix: '/internal',
   detail: { tags: ['internal'] },
-}).get(
-  '/map-groups/:id/sync',
-  async ({ params: { id }, query, set }) => {
-    // todo: permissions
-    const group = await db.query.mapGroups.findFirst({
-      where: eq(mapGroups.id, id),
-    });
-    if (!group) {
+})
+  .onRequest(({ request, set }) => {
+    if (request.headers.get('cf-connecting-ip')) {
+      // don't allow connections from outside network
       set.status = 404;
       return;
     }
-    await syncMapGroup(group);
-    return ['ok'];
-  },
-  {
-    params: t.Object({ id: t.Integer() }),
-  },
-);
+  })
+  .use(auth())
+  .get(
+    '/map-groups/:id/sync',
+    async ({ params: { id: groupId }, userId, set }) => {
+      await ensurePermissions(userId, groupId);
+      const group = await db.query.mapGroups.findFirst({
+        where: eq(mapGroups.id, groupId),
+      });
+      if (!group) {
+        set.status = 404;
+        return;
+      }
+      await syncMapGroup(group);
+      return;
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+    },
+  )
+  .use(permissionErrorCatcher());

@@ -74,11 +74,9 @@ type LoggerStore = {
 };
 
 export const logger = () => {
-  const app = new Elysia({
+  return new Elysia({
     name: 'logger',
-  });
-
-  app
+  })
     .onRequest((ctx) => {
       ctx.store = {
         ...ctx.store,
@@ -103,7 +101,6 @@ export const logger = () => {
         status = null;
       }
       logRequest(loggerStore.startTime, server, request as BunRequest, status);
-    });
-
-  return app.as('global');
+    })
+    .as('global');
 };

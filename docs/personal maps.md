@@ -34,7 +34,7 @@
 	- api validates that token is valid
 	- should only work in prod
 		- skip in development
-- [ ] disable internal api endpoints from api swagger in prod
+- [x] disable internal api endpoints from api swagger in prod ✅ 2025-05-18
 - [ ] implement api userscript location endpoint to fetch data from the new tables
 - [ ] update api userscript location to fetch data from 3 sources in parallel
 	- we need it running for the period of time during which we migrate from cloudflare service
@@ -48,6 +48,7 @@
 	- needs to be completed after the task above is done - cloudflare kv should not receive any new writes to avoid data loss
 	- dump all existing kv data and duplicate it in postgres
 	- remove proxying from cloudflare service
+- [ ] make generic 500
 
 ## Todo
 - [ ] maps soft-delete
