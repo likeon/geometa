@@ -1,4 +1,5 @@
 import {
+  cacheTable,
   maps,
   syncedLocations,
   syncedMapMetas,
@@ -42,6 +43,13 @@ const locationSelect = db
   .limit(1)
   .prepare('userscript_get_location');
 
+const legacyLocationSelect = db
+  .select({ value: cacheTable.value })
+  .from(cacheTable)
+  .where(eq(cacheTable.key, sql.placeholder('key')))
+  .limit(1)
+  .prepare('userscript_legacy_get_location');
+
 export const userscriptRouter = new Elysia({
   prefix: '/userscript',
   detail: { tags: ['userscript'] },
@@ -75,12 +83,22 @@ export const userscriptRouter = new Elysia({
   .get(
     '/location/',
     async ({ query, set }) => {
-      const result = await locationSelect.execute(query);
-      const [meta] = result;
-      if (!meta) {
+      const cacheKey = `${query.mapId}:${query.panoId}`;
+      const [metaResult, legacyCacheResult] = await Promise.all([
+        locationSelect.execute(query),
+        legacyLocationSelect.execute({ key: cacheKey }),
+      ]);
+      if (!metaResult.length && !legacyCacheResult.length) {
         set.status = 404;
         return ['NOT_FOUND'];
       }
+
+      // fallback to legacy
+      if (!metaResult.length) {
+        return JSON.parse(legacyCacheResult[0].value);
+      }
+
+      const [meta] = metaResult;
       // hack for now, should country be marked as not null in schema since we will always have it?
       const country = meta.country || '';
 
