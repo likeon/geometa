@@ -134,6 +134,13 @@
       "when": 1747577091252,
       "tag": "0018_abandoned_sheva_callister",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "7",
+      "when": 1747683146649,
+      "tag": "0019_silent_shriek",
+      "breakpoints": true
     }
   ]
 }

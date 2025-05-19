@@ -90,7 +90,7 @@ export const maps = pgTable(
       onDelete: 'cascade',
     }),
     name: text('name').notNull(),
-    geoguessrId: text('geoguessr_id').notNull(),
+    geoguessrId: text('geoguessr_id').notNull().unique(),
     description: text('description'),
     isPublished: boolean('is_published').notNull().default(false),
     // todo: remove
@@ -106,24 +106,13 @@ export const maps = pgTable(
     isVerified: boolean('is_verified').notNull().default(false),
     numberOfGamesPlayed: integer('number_of_games_played'),
     numberOfGamesPlayedDiminished: integer('number_of_games_played_diminished'),
-    isDeleted: boolean('is_deleted').default(false),
   },
   (t) => [
-    uniqueIndex('maps_geoguessr_id_unique')
-      .on(t.geoguessrId)
-      .where(eq(t.isDeleted, false)),
     index('maps_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt),
     check(
       'map_group_id_not_null',
       sql`(${t.isPersonal} AND ${t.mapGroupId} IS NULL)
-          OR (NOT
-          ${t.isPersonal}
-          AND
-          ${t.mapGroupId}
-          IS
-          NOT
-          NULL
-          )`,
+          OR (NOT ${t.isPersonal} AND ${t.mapGroupId} IS NOT NULL)`,
     ),
   ],
 );

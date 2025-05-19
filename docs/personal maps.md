@@ -53,6 +53,5 @@ Removing   plonkitCountryUrl from response in new api because we don't use it an
 - [ ] make generic 500
 
 ## Todo
-- [ ] maps soft-delete
 - [x] Reset modified at ✅ 2025-05-17
 - [ ] reroute to new location-info address
