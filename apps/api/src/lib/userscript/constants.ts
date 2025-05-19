@@ -203,25 +203,3 @@ export const countryNames = [
   'Zambia',
   'Zimbabwe',
 ];
-
-function checkIfValidCountry(countryName: string): boolean {
-  return countryNames.some(
-    (country) =>
-      country.toLocaleLowerCase().trim() === countryName.toLocaleLowerCase(),
-  );
-}
-
-function generatePlonkitLink(countryName: string) {
-  let countryUrl: string;
-
-  switch (countryName) {
-    case 'Israel':
-      countryUrl = 'israel-west-bank';
-      break;
-    default:
-      countryUrl = countryName.toLowerCase().replace(/ /g, '-');
-      break;
-  }
-
-  return `https://www.plonkit.net/${countryUrl}`;
-}

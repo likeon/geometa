@@ -1,5 +1,6 @@
 import { internalRouter } from '@/routes/internal';
 import { userscriptRouter } from '@/routes/userscript';
+import serverTiming from '@elysiajs/server-timing';
 import swagger from '@elysiajs/swagger';
 import { logger } from '@lib/utils/log';
 import { Elysia } from 'elysia';
@@ -14,6 +15,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const api = new Elysia({ prefix: '/api' })
   .use(logger())
+  .use(serverTiming())
   .get('/health-check', () => {
     return 'ok';
   })

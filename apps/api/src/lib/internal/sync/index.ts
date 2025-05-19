@@ -5,7 +5,6 @@ import {
   metas,
   syncedMetas,
 } from '@lib/db/schema';
-import { createRawSqlArray } from '@lib/db/utils';
 import { db } from '@lib/drizzle';
 import { and, eq, getTableColumns, sql } from 'drizzle-orm';
 import { getImageUrl } from './utils';
@@ -14,12 +13,15 @@ const metasSelectStatement = db
   .select({
     ...getTableColumns(metas),
     images: sql<string[]>`
-    (SELECT array_agg(${metaImages.image_url} ORDER BY ${metaImages.id})
-    FROM ${metaImages}
-    WHERE ${metaImages.metaId} = ${metas.id})
-  `,
+      COALESCE(
+        array_agg(${metaImages.image_url} ORDER BY ${metaImages.id})
+        FILTER (WHERE ${metaImages.image_url} IS NOT NULL),
+        '{}'
+      )
+    `,
   })
   .from(metas)
+  .leftJoin(metaImages, eq(metaImages.metaId, metas.id))
   .where(
     and(
       eq(metas.mapGroupId, sql.placeholder('mapGroupId')),
@@ -27,6 +29,7 @@ const metasSelectStatement = db
       ${metas.modifiedAt} > ${sql.placeholder('groupSyncedAt')}::bigint`,
     ),
   )
+  .groupBy(...Object.values(getTableColumns(metas)))
   .prepare('metas_to_sync');
 
 export async function syncMapGroup(group: {
@@ -42,17 +45,17 @@ export async function syncMapGroup(group: {
       groupSyncedAt: group.syncedAt,
     });
     const metaValuesSql = sql.join(
-      metasToSync.map(
-        (meta) => sql`(
-        ${meta.id},
-        ${meta.mapGroupId},
-        ${meta.name},
-        ${meta.noteHtml},
-        ${meta.noteFromPlonkit},
-        ${meta.footerHtml},
-        ${createRawSqlArray(meta.images.map(getImageUrl))}
-      )`,
-      ),
+      metasToSync.map((meta) => {
+        return sql`(
+          ${meta.id},
+          ${meta.mapGroupId},
+          ${meta.name},
+          ${meta.noteHtml},
+          ${meta.noteFromPlonkit},
+          ${meta.footerHtml},
+          string_to_array(${meta.images.map(getImageUrl).join('|')}, '|')
+        )`;
+      }),
       sql.raw(', '),
     );
     if (metasToSync.length) {

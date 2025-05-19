@@ -1,3 +1,4 @@
+import { type SQLWrapper, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/bun-sql';
 import * as schema from './db/schema';
 
@@ -14,3 +15,8 @@ function createDbInstance() {
   });
 }
 export const db = createDbInstance();
+
+export const explainAnalyze = async <T extends SQLWrapper>(query: T) => {
+  const debugResult = await db.execute(sql`EXPLAIN ANALYZE ${query.getSQL()}`);
+  console.debug(debugResult);
+};
