@@ -12,11 +12,13 @@
   country: string;
   metaName: string;  
   note: string;  
-  plonkitCountryUrl: string;  
   images?: string[];  
   footer: string;
 }
 ```
+
+Removing   plonkitCountryUrl from response in new api because we don't use it anymore for long time
+
 ## Data model
 - map
 	- +isPersonal
@@ -35,7 +37,7 @@
 	- should only work in prod
 		- skip in development
 - [x] disable internal api endpoints from api swagger in prod ✅ 2025-05-18
-- [ ] implement api userscript location endpoint to fetch data from the new tables
+- [x] implement api userscript location endpoint to fetch data from the new tables
 - [ ] update api userscript location to fetch data from 3 sources in parallel
 	- we need it running for the period of time during which we migrate from cloudflare service
 	- try to get data from the following sources in parallel, prefer in order
