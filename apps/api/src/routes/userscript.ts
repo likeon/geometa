@@ -1,4 +1,3 @@
-import { generateFooter } from '@/lib/internal/sync/utils';
 import {
   maps,
   syncedLocations,
@@ -6,12 +5,42 @@ import {
   syncedMetas,
 } from '@lib/db/schema';
 import { db } from '@lib/drizzle';
+import { generateFooter } from '@lib/userscript/utils';
 import { getRequestIp } from '@lib/utils/log';
 import type { BunRequest } from 'bun';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 const userscriptVersion = '0.82';
+
+const locationSelect = db
+  .select({
+    name: syncedMetas.name,
+    note: syncedMetas.note,
+    noteFromPlonkit: syncedMetas.noteFromPlonkit,
+    footer: syncedMetas.footer,
+    images: syncedMetas.images,
+    country: syncedLocations.country,
+    mapFooter: maps.footerHtml,
+  })
+  .from(syncedMetas)
+  .innerJoin(
+    syncedMapMetas,
+    eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId),
+  )
+  .innerJoin(maps, eq(syncedMapMetas.mapId, maps.id))
+  .innerJoin(
+    syncedLocations,
+    eq(syncedLocations.syncedMetaId, syncedMetas.metaId),
+  )
+  .where(
+    and(
+      eq(maps.geoguessrId, sql.placeholder('mapId')),
+      eq(syncedLocations.panoId, sql.placeholder('panoId')),
+    ),
+  )
+  .limit(1)
+  .prepare('userscript_get_location');
 
 export const userscriptRouter = new Elysia({
   prefix: '/userscript',
@@ -46,64 +75,29 @@ export const userscriptRouter = new Elysia({
   .get(
     '/location/',
     async ({ query, set }) => {
-      const key = `${query.mapId}:${query.panoId}`;
-
-      const result = await db
-        .select({
-          name: syncedMetas.name,
-          note: syncedMetas.note,
-          noteFromPlonkit: syncedMetas.noteFromPlonkit,
-          footer: syncedMetas.footer,
-          images: syncedMetas.images,
-          country: syncedLocations.country,
-          mapFooter: maps.footerHtml,
-        })
-        .from(syncedMetas)
-        .innerJoin(
-          syncedMapMetas,
-          eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId),
-        )
-        .innerJoin(maps, eq(syncedMapMetas.mapId, maps.id))
-        .innerJoin(
-          syncedLocations,
-          eq(syncedLocations.syncedMetaId, syncedMetas.metaId),
-        )
-        .where(
-          and(
-            eq(maps.geoguessrId, query.mapId),
-            eq(syncedLocations.panoId, query.panoId),
-          ),
-        )
-        .limit(1);
+      const result = await locationSelect.execute(query);
       const [meta] = result;
       if (!meta) {
         set.status = 404;
         return ['NOT_FOUND'];
       }
-      let footer: string;
-
       // hack for now, should country be marked as not null in schema since we will always have it?
       const country = meta.country || '';
 
-      if (meta.noteFromPlonkit) {
-        footer = await generateFooter(country, meta.noteFromPlonkit);
-      } else {
-        footer = meta.footer.trim() || meta.mapFooter.trim();
+      const footer = generateFooter(
+        meta.noteFromPlonkit,
+        country,
+        meta.footer,
+        meta.mapFooter,
+      );
 
-        if (!footer) {
-          footer = await generateFooter(country, meta.noteFromPlonkit);
-        }
-      }
-
-      const value = {
+      return {
         country: country,
         metaName: meta.name,
         note: meta.note,
         images: meta.images,
         footer: footer,
       };
-      set.headers['content-type'] = 'application/json';
-      return value;
     },
     {
       query: t.Object({
