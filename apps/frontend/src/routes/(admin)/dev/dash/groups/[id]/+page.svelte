@@ -112,22 +112,15 @@
             update();
           };
         }}>
-        <!--{#if data.group.hasUnsycnedData}-->
-        <!--  <GradientButton color="pinkToOrange" class="ml-3" type="submit">-->
-        <!--    {@render userScriptSyncButtonContent()}-->
-        <!--  </GradientButton>-->
-        <!--{:else}-->
-        <!--  <Button color="dark" class="ml-3" type="submit">-->
-        <!--    {@render userScriptSyncButtonContent()}-->
-        <!--  </Button>-->
-        <!--{/if}-->
-        <Button
-          color="dark"
-          class="ml-3"
-          disabled={!['104498565430116352', '134938422182805504'].includes(data.user.id)}
-          type="submit">
-          {@render userScriptSyncButtonContent()}
-        </Button>
+        {#if data.group.hasUnsycnedData}
+          <GradientButton color="pinkToOrange" class="ml-3" type="submit">
+            {@render userScriptSyncButtonContent()}
+          </GradientButton>
+        {:else}
+          <Button color="dark" class="ml-3" type="submit">
+            {@render userScriptSyncButtonContent()}
+          </Button>
+        {/if}
         <Tooltip>
           Update your changes after editing or adding metas/maps to make them visible to users of
           the LearnableMeta script.
@@ -193,11 +186,7 @@
     </div>
   </div>
 
-  <DataTable
-    data={metas}
-    {columns}
-    bind:isModalOpen={isMetaModalOpen}
-    bind:selectedId={selectedMetaId} />
+  <DataTable data={metas} {columns} bind:isModalOpen={isMetaModalOpen} bind:selectedId={selectedMetaId}/>
 
   {#if data.group.metas.length === 0}
     <div class="justify-center w-full flex mt-2">

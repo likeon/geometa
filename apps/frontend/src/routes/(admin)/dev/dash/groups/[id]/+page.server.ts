@@ -526,9 +526,6 @@ export const actions = {
     return { success: true, imageId: imageId };
   },
   prepareUserScriptData: async (event) => {
-    if (!['104498565430116352', '134938422182805504'].includes(event.locals.user!.id)) {
-      throw error(503, 'Syncing is temporary disabled');
-    }
     const groupId = getGroupId(event.params);
     // make it so every request has this user id as header
     await api.internal['map-groups'][groupId].sync.post(undefined,  {
