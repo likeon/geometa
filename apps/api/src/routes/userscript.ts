@@ -74,6 +74,7 @@ export const userscriptRouter = new Elysia({
         return { mapFound: false, userscriptVersion: userscriptVersion };
       }
 
+      set.status = 200;
       return {
         mapFound: true,
         userscriptVersion: userscriptVersion,
@@ -93,6 +94,7 @@ export const userscriptRouter = new Elysia({
         return ['NOT_FOUND'];
       }
 
+      set.status = 200;
       // fallback to legacy
       if (!metaResult.length) {
         return JSON.parse(legacyCacheResult[0].value);

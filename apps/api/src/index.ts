@@ -16,9 +16,6 @@ if (process.env.NODE_ENV === 'production') {
 const api = new Elysia({ prefix: '/api' })
   .use(logger())
   .use(serverTiming())
-  .head('/health-check', ({ set }) => {
-    set.status = 200;
-  })
   .get('/health-check', ({ set }) => {
     set.status = 200;
     return 'ok';
