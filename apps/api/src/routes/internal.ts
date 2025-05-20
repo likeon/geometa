@@ -23,7 +23,7 @@ export const internalRouter = new Elysia({
     }
   })
   .use(auth())
-  .get(
+  .post(
     '/map-groups/:id/sync',
     async ({ params: { id: groupId }, userId, set }) => {
       await ensurePermissions(userId, groupId);

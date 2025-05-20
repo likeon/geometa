@@ -26,6 +26,7 @@ import rehypeStringify from 'rehype-stringify';
 import rehypeExternalLinks from 'rehype-external-links';
 import { autoUpdateMaps } from './geo';
 import { uploadMetas } from '$routes/(admin)/dev/dash/groups/[id]/metasUpload';
+import { api } from '$lib/api';
 
 const insertMetasSchema = createInsertSchema(metas)
   .pick({
@@ -529,25 +530,14 @@ export const actions = {
       throw error(503, 'Syncing is temporary disabled');
     }
     const groupId = getGroupId(event.params);
-    await ensurePermissions(event.locals.db, event.locals.user?.id, groupId);
-    try {
-      await syncUserScriptData(event.locals.db, groupId);
-      const TRAUSI_GROUP_ID = 1;
-      let updateCount = 0;
-      if (groupId == TRAUSI_GROUP_ID) {
-        console.debug('TRYING TO UPDATE TRAUSI MAP GROUP IN GEOGUESSR');
-        updateCount = await autoUpdateMaps(event.locals.db, TRAUSI_GROUP_ID);
-      }
-
-      return {
-        status: 200,
-        updateCount
-      };
-    } catch (err) {
-      const errorMessage = (err as Error).message || 'An error occurred';
-      const errorStatus = (err as { status?: number }).status || 500;
-      throw error(errorStatus, errorMessage);
+    // make it so every request has this user id as header
+    await api.internal['map-groups'][groupId].sync.post(undefined,  {
+    headers: {
+       'x-api-user-id': event.locals.user!.id
     }
+  }
+);
+ 
   },
   populateNotesHtml: async (event) => {
     const groupId = getGroupId(event.params);
