@@ -20,7 +20,14 @@ const api = new Elysia({ prefix: '/api' })
     return 'ok';
   })
   .use(userscriptRouter)
-  .use(internalRouter);
+  .use(internalRouter)
+  .onError(({ set }) => {
+    set.status = 500;
+    return {
+      error: 'Internal server error',
+      message: 'Something went wrong on our end; please try again later.',
+    };
+  });
 
 const app = new Elysia()
   // works around https://github.com/elysiajs/elysia/issues/1071
