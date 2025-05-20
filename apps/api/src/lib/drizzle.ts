@@ -1,3 +1,4 @@
+import { SQL } from 'bun';
 import { type SQLWrapper, sql } from 'drizzle-orm';
 import { drizzle } from 'drizzle-orm/bun-sql';
 import * as schema from './db/schema';
@@ -9,7 +10,8 @@ function createDbInstance() {
   } else {
     databaseURL = `postgresql://geometa:${process.env.DATABASE_PASSWORD}@postgres/geometa?sslmode=require`;
   }
-  return drizzle(databaseURL, {
+  const client = new SQL(databaseURL, { max: 5 });
+  return drizzle(client, {
     schema,
     logger: process.env.DRIZZLE_LOGGER === 'true',
   });
