@@ -24,11 +24,17 @@
   "fileIcons": {
     "Taxes": {
       "icon": "lucide-chart-no-axes-combined",
-      "unsynced": ["940c15a5bc2801ca"]
+      "unsynced": [
+        "940c15a5bc2801ca",
+        "c86af6f2f9616861"
+      ]
     },
     "templates": {
       "icon": "lucide-layout-template",
-      "unsynced": ["940c15a5bc2801ca"]
+      "unsynced": [
+        "940c15a5bc2801ca",
+        "c86af6f2f9616861"
+      ]
     }
   },
   "bookmarkIcons": {},
