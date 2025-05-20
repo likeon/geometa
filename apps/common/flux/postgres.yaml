@@ -11,7 +11,7 @@ spec:
   postgresql:
     version: "17"
     parameters:
-      max_connections: "60"
+      max_connections: "100"
       shared_buffers: "2GB"
       effective_cache_size: "3GB"
       maintenance_work_mem: "256MB"
