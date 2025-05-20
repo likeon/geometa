@@ -19,7 +19,8 @@ const api = new Elysia({ prefix: '/api' })
   .head('/health-check', ({ set }) => {
     set.status = 200;
   })
-  .get('/health-check', () => {
+  .get('/health-check', ({ set }) => {
+    set.status = 200;
     return 'ok';
   })
   .use(userscriptRouter)
