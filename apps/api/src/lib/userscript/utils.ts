@@ -44,7 +44,7 @@ export function generateFooter(
 
   const countryFooter = countries.get(countryName.toLocaleLowerCase().trim());
   if (countryFooter) {
-    return countryFooter;
+    return countryFooter.footer;
   }
 
   return '';
