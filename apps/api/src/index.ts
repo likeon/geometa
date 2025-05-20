@@ -15,7 +15,7 @@ if (process.env.NODE_ENV === 'production') {
 
 const api = new Elysia({ prefix: '/api' })
   .use(logger())
-  // .use(serverTiming())
+  .use(serverTiming())
   .get('/health-check', () => {
     return 'ok';
   })
@@ -32,19 +32,19 @@ const api = new Elysia({ prefix: '/api' })
 const app = new Elysia()
   // works around https://github.com/elysiajs/elysia/issues/1071
   // says it's fixed, but it's not
-  // .use(
-  //   swagger({
-  //     path: '/api/swagger',
-  //     exclude: swaggerExclude,
-  //     documentation: {
-  //       info: { title: 'Learnable Meta API', version: '1' },
-  //       servers: swaggerServers,
-  //     },
-  //     swaggerOptions: {
-  //       persistAuthorization: true,
-  //     },
-  //   }),
-  // )
+  .use(
+    swagger({
+      path: '/api/swagger',
+      exclude: swaggerExclude,
+      documentation: {
+        info: { title: 'Learnable Meta API', version: '1' },
+        servers: swaggerServers,
+      },
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    }),
+  )
   .use(api)
   .listen(3000);
 export type App = typeof app;
