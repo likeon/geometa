@@ -5,10 +5,10 @@ import swagger from '@elysiajs/swagger';
 import { logger } from '@lib/utils/log';
 import { Elysia } from 'elysia';
 
+const prod = process.env.NODE_ENV === 'production';
 const swaggerExclude = [/^\/api\/health-check/];
-
 const swaggerServers = [];
-if (process.env.NODE_ENV === 'production') {
+if (prod) {
   swaggerExclude.push(/^\/api\/internal/);
   swaggerServers.push({ url: 'https://learnablemeta.com' });
 }
@@ -22,12 +22,19 @@ const api = new Elysia({ prefix: '/api' })
   })
   .use(userscriptRouter)
   .use(internalRouter)
-  .onError(({ set }) => {
-    set.status = 500;
-    return {
-      error: 'Internal server error',
-      message: 'Something went wrong on our end; please try again later.',
-    };
+  .onError(({ set, code }) => {
+    switch (code) {
+      case 'VALIDATION':
+      case 'PARSE':
+        set.status = 400;
+        break;
+      case 'NOT_FOUND':
+        set.status = 404;
+        break;
+      default:
+        set.status = 500;
+        return { message: 'Internal Server Error' };
+    }
   });
 
 const app = new Elysia()

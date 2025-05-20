@@ -55,8 +55,13 @@ def chunk_list(data, chunk_size=100):
 
 
 def fetch_key_batch(key_batch):
-    response = session.post(bulk_get_url, headers=headers, json={'keys': key_batch})
-    response.raise_for_status()
+    try:
+        response = session.post(bulk_get_url, headers=headers, json={'keys': key_batch})
+        response.raise_for_status()
+    except:
+        print('failed to fetch')
+        print(key_batch)
+        return []
     return list(response.json()['result']['values'].items())
 
 

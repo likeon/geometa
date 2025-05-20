@@ -73,6 +73,8 @@ type LoggerStore = {
   startTime: number;
 };
 
+const ignoredErrors = ['VALIDATION', 'PARSE', 'NOT_FOUND'];
+
 export const logger = () => {
   return new Elysia({
     name: 'logger',
@@ -92,7 +94,7 @@ export const logger = () => {
         statusToNumber(set.status),
       );
     })
-    .onError(({ server, request, error, store }) => {
+    .onError(({ server, request, error, code, store }) => {
       const loggerStore = store as unknown as LoggerStore;
       let status: number | null;
       if ('status' in error) {
@@ -101,7 +103,14 @@ export const logger = () => {
         status = null;
       }
       logRequest(loggerStore.startTime, server, request as BunRequest, status);
-      console.error(error);
+      switch (code) {
+        case 'VALIDATION':
+        case 'PARSE':
+        case 'NOT_FOUND':
+          break;
+        default:
+          console.error(error);
+      }
     })
     .as('global');
 };
