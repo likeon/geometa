@@ -101,6 +101,7 @@ export const logger = () => {
         status = null;
       }
       logRequest(loggerStore.startTime, server, request as BunRequest, status);
+      console.error(error);
     })
     .as('global');
 };

@@ -122,14 +122,5 @@ export const userscriptRouter = new Elysia({
         mapId: t.String(),
         panoId: t.String(),
       }),
-      response: {
-        200: t.Object({
-          country: t.String(),
-          metaName: t.String(),
-          note: t.String(),
-          images: t.Array(t.String()),
-          footer: t.String(),
-        }),
-      },
     },
   );
