@@ -4,3 +4,4 @@ resources:
   - deployment.yaml
   - secrets.enc.yaml
   - image-update.yaml
+  - ingres.yaml

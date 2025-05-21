@@ -26,7 +26,6 @@ const api = new Elysia({ prefix: '/api' })
   .use(logger())
   .use(serverTiming())
   .get('/health-check', ({ set }) => {
-    set.status = 200;
     return 'ok';
   })
   .use(userscriptRouter)
