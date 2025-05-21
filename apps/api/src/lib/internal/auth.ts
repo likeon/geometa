@@ -19,7 +19,13 @@ export function auth() {
           return;
         }
       }
+    })
+    .as('global');
+}
 
+export function user() {
+  return new Elysia({ name: 'geometa-user' })
+    .onBeforeHandle(({ headers, set }) => {
       if (!headers['x-api-user-id']) {
         set.status = 400;
         return prod ? undefined : 'set x-api-user-id header';

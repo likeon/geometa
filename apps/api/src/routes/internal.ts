@@ -1,6 +1,6 @@
-import { mapGroups } from '@lib/db/schema';
+import { mapGroups, maps } from '@lib/db/schema';
 import { db } from '@lib/drizzle';
-import { auth } from '@lib/internal/auth';
+import { auth, user } from '@lib/internal/auth';
 import {
   ensurePermissions,
   permissionErrorCatcher,
@@ -23,6 +23,10 @@ export const internalRouter = new Elysia({
     }
   })
   .use(auth())
+  .get('/maps', async () => {
+    return db.select().from(maps);
+  })
+  .use(user())
   .post(
     '/map-groups/:id/sync',
     async ({ params: { id: groupId }, userId, set }) => {
