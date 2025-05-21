@@ -14,11 +14,13 @@ if (prod) {
   swaggerServers.push({ url: 'https://learnablemeta.com' });
 }
 
-runMigrate().catch((err) => {
-  console.error('❌ Migration failed');
-  console.error(err);
-  process.exit(1);
-});
+if (prod) {
+  runMigrate().catch((err) => {
+    console.error('❌ Migration failed');
+    console.error(err);
+    process.exit(1);
+  });
+}
 
 const api = new Elysia({ prefix: '/api' })
   .use(logger())
