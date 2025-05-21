@@ -15,13 +15,6 @@ export const internalRouter = new Elysia({
   prefix: '/internal',
   detail: { tags: ['internal'] },
 })
-  .onRequest(({ request, set }) => {
-    if (request.headers.get('cf-connecting-ip')) {
-      // don't allow connections from outside network
-      set.status = 404;
-      return;
-    }
-  })
   .use(auth())
   .get('/maps', async () => {
     return db.select().from(maps);
