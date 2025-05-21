@@ -22,20 +22,3 @@ export function auth() {
     })
     .as('global');
 }
-
-export function user() {
-  return new Elysia({ name: 'geometa-user' })
-    .onBeforeHandle(({ headers, set }) => {
-      if (!headers['x-api-user-id']) {
-        set.status = 400;
-        return prod ? undefined : 'set x-api-user-id header';
-      }
-    })
-    .guard({ headers: t.Object({ 'x-api-user-id': t.String() }) })
-    .resolve(({ headers }) => {
-      return {
-        userId: headers['x-api-user-id'],
-      };
-    })
-    .as('global');
-}
