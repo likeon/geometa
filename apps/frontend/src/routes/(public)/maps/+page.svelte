@@ -22,16 +22,14 @@
   let searchText = $state('');
   let selectedDifficulties = $state(difficultyMap.map((d) => d.value));
 
-  let filterMapsPromise = $derived(
-    data.allMaps.then((allMaps) => {
-      return allMaps.filter(
-        (map) =>
-          map.regions?.includes(activeRegion) &&
-          (map.name.toLowerCase().includes(searchText.toLowerCase()) ||
-            map.authors?.toLocaleLowerCase().includes(searchText.toLocaleLowerCase())) &&
-          selectedDifficulties.includes(map.difficulty as DifficultyValue)
-      );
-    })
+  let filterMaps = $derived(
+    data.allMaps.filter(
+      (map) =>
+        map.regions?.includes(activeRegion) &&
+        (map.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          map.authors?.toLocaleLowerCase().includes(searchText.toLocaleLowerCase())) &&
+        selectedDifficulties.includes(map.difficulty as DifficultyValue)
+    )
   );
 
   function handleDifficultyChange(difficultyValue: DifficultyValue, checked: boolean) {
@@ -52,22 +50,20 @@
 <div class="container">
   <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between py-2 gap-4">
     <div class="flex overflow-x-auto space-x-2 lg:space-x-2 scroll-container flex-shrink">
-      {#await data.regionList then regionList}
+      <button
+        class={regionButtonClass}
+        class:selected={activeRegion === ''}
+        onclick={() => (activeRegion = '')}>
+        All
+      </button>
+      {#each data.regionsList as region (region.id)}
         <button
           class={regionButtonClass}
-          class:selected={activeRegion === ''}
-          onclick={() => (activeRegion = '')}>
-          All
+          class:selected={activeRegion === region.name}
+          onclick={() => (activeRegion = region.name)}>
+          {region.name}
         </button>
-        {#each regionList as region (region.id)}
-          <button
-            class={regionButtonClass}
-            class:selected={activeRegion === region.name}
-            onclick={() => (activeRegion = region.name)}>
-            {region.name}
-          </button>
-        {/each}
-      {/await}
+      {/each}
     </div>
 
     <div class="flex items-center w-full lg:w-auto relative">
@@ -114,34 +110,14 @@
     </div>
   </div>
   <div>
-    {#await filterMapsPromise}
-      <div
-        class="mx-auto flex justify-center bg-background shadow-lg rounded-lg w-full max-w-[1500px] lg:h-[calc(100vh-90px)] h-[calc(100vh-80px)]">
-        <div class="loadership_RHKDA">
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-          <div></div>
-        </div>
-      </div>
-    {:then filterMaps}
-      <div class="grid grid-cols-1 gap-2 xl:grid-cols-3">
-        {#each filterMaps as map}
-          <MapCard {map} />
-        {/each}
-      </div>
-      {#if filterMaps.length === 0}
-        <p class="text-center text-muted-foreground py-8">No maps match the current filters.</p>
-      {/if}
-    {/await}
+    <div class="grid grid-cols-1 gap-2 xl:grid-cols-3">
+      {#each filterMaps as map}
+        <MapCard {map} />
+      {/each}
+    </div>
+    {#if filterMaps.length === 0}
+      <p class="text-center text-muted-foreground py-8">No maps match the current filters.</p>
+    {/if}
   </div>
 </div>
 
@@ -164,109 +140,5 @@
   ::-webkit-scrollbar-thumb {
     background-color: #cbd5e1; /* Tailwind slate-300 */
     border-radius: 3px;
-  }
-
-  .loadership_RHKDA {
-    display: flex;
-    position: relative;
-    width: 186.5px;
-    height: 186.5px;
-  }
-
-  .loadership_RHKDA div {
-    position: absolute;
-    width: 19px;
-    height: 19px;
-    border-radius: 50%;
-    background: #057a55;
-    animation:
-      loadership_RHKDA_scale 1.2s infinite,
-      loadership_RHKDA_fade 1.2s infinite;
-    animation-timing-function: linear;
-  }
-
-  .loadership_RHKDA div:nth-child(1) {
-    animation-delay: 0s;
-    top: 163px;
-    left: 84px;
-  }
-  .loadership_RHKDA div:nth-child(2) {
-    animation-delay: -0.1s;
-    top: 152px;
-    left: 123px;
-  }
-  .loadership_RHKDA div:nth-child(3) {
-    animation-delay: -0.2s;
-    top: 123px;
-    left: 152px;
-  }
-  .loadership_RHKDA div:nth-child(4) {
-    animation-delay: -0.3s;
-    top: 84px;
-    left: 163px;
-  }
-  .loadership_RHKDA div:nth-child(5) {
-    animation-delay: -0.4s;
-    top: 44px;
-    left: 152px;
-  }
-  .loadership_RHKDA div:nth-child(6) {
-    animation-delay: -0.5s;
-    top: 15px;
-    left: 123px;
-  }
-  .loadership_RHKDA div:nth-child(7) {
-    animation-delay: -0.6s;
-    top: 5px;
-    left: 84px;
-  }
-  .loadership_RHKDA div:nth-child(8) {
-    animation-delay: -0.7s;
-    top: 15px;
-    left: 44px;
-  }
-  .loadership_RHKDA div:nth-child(9) {
-    animation-delay: -0.8s;
-    top: 44px;
-    left: 15px;
-  }
-  .loadership_RHKDA div:nth-child(10) {
-    animation-delay: -0.9s;
-    top: 84px;
-    left: 5px;
-  }
-  .loadership_RHKDA div:nth-child(11) {
-    animation-delay: -1s;
-    top: 123px;
-    left: 15px;
-  }
-  .loadership_RHKDA div:nth-child(12) {
-    animation-delay: -1.1s;
-    top: 152px;
-    left: 44px;
-  }
-
-  @keyframes loadership_RHKDA_scale {
-    0%,
-    20%,
-    80%,
-    100% {
-      transform: scale(1);
-    }
-    50% {
-      transform: scale(1.5);
-    }
-  }
-
-  @keyframes loadership_RHKDA_fade {
-    0%,
-    20%,
-    80%,
-    100% {
-      opacity: 0.8;
-    }
-    50% {
-      opacity: 1;
-    }
   }
 </style>
