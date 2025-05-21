@@ -2,6 +2,7 @@ import { internalRouter } from '@/routes/internal';
 import { userscriptRouter } from '@/routes/userscript';
 import serverTiming from '@elysiajs/server-timing';
 import swagger from '@elysiajs/swagger';
+import { runMigrate } from '@lib/db/migrate';
 import { logger } from '@lib/utils/log';
 import { Elysia } from 'elysia';
 
@@ -12,6 +13,12 @@ if (prod) {
   swaggerExclude.push(/^\/api\/internal/);
   swaggerServers.push({ url: 'https://learnablemeta.com' });
 }
+
+runMigrate().catch((err) => {
+  console.error('❌ Migration failed');
+  console.error(err);
+  process.exit(1);
+});
 
 const api = new Elysia({ prefix: '/api' })
   .use(logger())

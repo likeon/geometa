@@ -6,10 +6,11 @@ RUN bun install --frozen-lockfile --production
 COPY . .
 RUN bun run build
 
-FROM gcr.io/distroless/base
+FROM oven/bun:1
 WORKDIR /app
 
 COPY --from=build /app/server server
+COPY src/lib/db/migrations ./migrations
 
 ENV NODE_ENV=production
 CMD ["./server"]
