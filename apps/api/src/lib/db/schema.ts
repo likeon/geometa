@@ -106,6 +106,7 @@ export const maps = pgTable(
     isVerified: boolean('is_verified').notNull().default(false),
     numberOfGamesPlayed: integer('number_of_games_played'),
     numberOfGamesPlayedDiminished: integer('number_of_games_played_diminished'),
+    isBlackout: boolean('is_blackout').notNull().default(false),
   },
   (t) => [
     index('maps_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt),

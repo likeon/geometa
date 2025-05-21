@@ -37,7 +37,7 @@
   };
 </script>
 
-<Card.Root class="flex flex-col">
+<Card.Root class="flex flex-col relative overflow-hidden">
   <Card.Header>
     <div class="flex flex-row pb-2">
       {#if map.isVerified}
@@ -90,4 +90,11 @@
       </Button>
     </div>
   </Card.Content>
+  {#if map.isBlackout}
+  <div class="absolute inset-0 bg-black/70 text-white flex items-center justify-center text-center px-4 py-6 rounded-md z-10">
+    <p class="text-sm sm:text-base font-medium leading-relaxed">
+      This map is currently blacked out as part of the community protest against GeoGuessr’s decision to host their event in Saudi Arabia.
+    </p>
+  </div>
+{/if}
 </Card.Root>
