@@ -25,7 +25,7 @@ if (prod) {
 const api = new Elysia({ prefix: '/api' })
   .use(logger())
   .use(serverTiming())
-  .get('/health-check', ({ set }) => {
+  .get('/health-check', () => {
     return 'ok';
   })
   .use(userscriptRouter)

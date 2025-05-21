@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: update-maps-page-cache
 spec:
-  schedule: "*/10 * * * *"
+  schedule: "* * * * *"
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 1
   successfulJobsHistoryLimit: 3
