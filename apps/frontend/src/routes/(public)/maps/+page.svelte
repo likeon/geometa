@@ -4,7 +4,7 @@
   import * as Popover from '$lib/components/ui/popover';
   import { Checkbox } from '$lib/components/ui/checkbox';
   import { Label } from '$lib/components/ui/label';
-  import Icon from '@iconify/svelte';
+  import FilterFielledIcon from '~icons/tabler/filter-filled';
 
   let { data } = $props();
 
@@ -31,6 +31,7 @@
         selectedDifficulties.includes(map.difficulty as DifficultyValue)
     )
   );
+
   function handleDifficultyChange(difficultyValue: DifficultyValue, checked: boolean) {
     if (checked) {
       if (!selectedDifficulties.includes(difficultyValue)) {
@@ -75,7 +76,7 @@
           <Popover.Trigger
             class="flex items-center justify-center h-6 w-6 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
             aria-label="Filter by difficulty">
-            <Icon icon="tabler:filter-filled" class="h-4 w-4" />
+            <FilterFielledIcon class="h-4 w-4" />
           </Popover.Trigger>
           <Popover.Content class="w-56 p-4">
             <div class="grid gap-4">
@@ -122,7 +123,8 @@
 
 <style lang="postcss">
   .selected {
-    @apply bg-primary text-primary-foreground; /* Updated for better contrast */
+    @apply bg-primary text-primary-foreground;
+    /* Updated for better contrast */
     font-weight: bold;
   }
 

@@ -2,8 +2,14 @@
   import { Badge, Tooltip } from 'flowbite-svelte';
   import { Button } from '$lib/components/ui/button';
   import * as Card from '$lib/components/ui/card';
-  import Icon from '@iconify/svelte';
+  import RaStarlineIcon from '~icons/ri/star-line';
+  import SkillLevelBasicIcon from '~icons/carbon/skill-level-basic';
+  import SkillLevelIntermediateIcon from '~icons/carbon/skill-level-intermediate';
+  import SkillLevelAdvancedIcon from '~icons/carbon/skill-level-advanced';
+  import MapPinIcon from '~icons/gravity-ui/map-pin';
+  import CliListIcon from '~icons/cil/list';
   import type { PageData } from './$types';
+  import type { Component } from 'svelte';
 
   let {
     map
@@ -15,23 +21,23 @@
     number,
     {
       class: string;
-      icon: string;
+      icon: Component;
       label: string;
     }
   > = {
     1: {
       class: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300/70',
-      icon: 'carbon:skill-level-basic',
+      icon: SkillLevelBasicIcon,
       label: 'Beginner'
     },
     2: {
       class: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-500/70',
-      icon: 'carbon:skill-level-intermediate',
+      icon: SkillLevelIntermediateIcon,
       label: 'Intermediate'
     },
     3: {
       class: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300/70',
-      icon: 'carbon:skill-level-advanced',
+      icon: SkillLevelAdvancedIcon,
       label: 'Advanced'
     }
   };
@@ -44,25 +50,26 @@
         <div>
           <Badge
             class="bg-yellow-200 text-yellow-800 dark:bg-yellow-700/50 dark:text-yellow-200/80">
-            <Icon icon="ri:star-line" class="inline-block  mr-1" />
+            <RaStarlineIcon class="inline-block  mr-1" />
             Verified
           </Badge>
         </div>
       {/if}
-      <div class="ml-auto">
+      <div class="ml-auto flex items-center gap-2 whitespace-nowrap">
         {#if map.difficulty in difficulties}
           <Badge class={difficulties[map.difficulty].class}>
-            <Icon icon={difficulties[map.difficulty].icon} class="inline-block mr-1" />
+            {@const IconComponent = difficulties[map.difficulty].icon}
+            <IconComponent class="inline-block mr-1" />
             {difficulties[map.difficulty].label}
           </Badge>
         {/if}
         <Badge class="bg-pink-50 text-pink-500 dark:bg-pink-900/50 dark:text-pink-300/70">
-          <Icon icon="gravity-ui:map-pin" class="inline-block  mr-1" />
+          <MapPinIcon class="inline-block mr-1" />
           {map.locationsCount}
         </Badge>
         <Tooltip>Number of locations in the map.</Tooltip>
         <Badge class="bg-indigo-50 text-indigo-500 dark:bg-indigo-900/50 dark:text-indigo-300">
-          <Icon icon="cil:list" class="inline-block  mr-1" />
+          <CliListIcon class="inline-block mr-1" />
           {map.metasCount}</Badge>
         <Tooltip>Number of metas in the map.</Tooltip>
       </div>
@@ -85,16 +92,18 @@
       </Button>
       <!-- Meta List Button -->
       <Button variant="outline" class="flex-1" href={'/maps/' + map.geoguessrId} target="_blank">
-        <Icon icon="cil:list" class="inline-block  mr-1" />
+        <CliListIcon class="inline-block mr-1" />
         Meta List
       </Button>
     </div>
   </Card.Content>
   {#if map.isBlackout}
-  <div class="absolute inset-0 bg-black/70 text-white flex items-center justify-center text-center px-4 py-6 rounded-md z-10">
-    <p class="text-sm sm:text-base font-medium leading-relaxed">
-      This map is currently blacked out as part of the community protest against GeoGuessr’s decision to host their event in Saudi Arabia.
-    </p>
-  </div>
-{/if}
+    <div
+      class="absolute inset-0 bg-black/70 text-white flex items-center justify-center text-center px-4 py-6 rounded-md z-10">
+      <p class="text-sm sm:text-base font-medium leading-relaxed">
+        This map is currently blacked out as part of the community protest against GeoGuessr’s
+        decision to host their event in Saudi Arabia.
+      </p>
+    </div>
+  {/if}
 </Card.Root>
