@@ -58,7 +58,6 @@
     $form.ordering = 0;
     $form.description = '';
     $form.isPublished = false;
-    $form.isCommunity = false;
     $form.authors = '';
     $form.autoUpdate = false;
     $form.levels = [];
@@ -81,7 +80,6 @@
         $form.ordering = selectedMap.ordering;
         $form.description = selectedMap.description;
         $form.isPublished = selectedMap.isPublished;
-        $form.isCommunity = selectedMap.isCommunity;
         $form.authors = selectedMap.authors;
         $form.autoUpdate = selectedMap.autoUpdate;
         $form.levels = selectedMap.mapLevels.map((item) => item.levelId);
@@ -120,16 +118,16 @@
         <TooltipName
           name="Name"
           tooltipText="The name that will appear on the map list page if your map is published by the admin team." />
-           {#if selectedMap?.id}
-        <form action="?/deleteMap" method="post" onsubmit={confirmDelete} class="inline-block">
-          <input type="hidden" name="id" value={selectedMap?.id} />
-          <button
-            type="submit"
-            class="inline-flex items-center justify-center p-0 m-0 bg-transparent border-none"
-            title="Delete">
-            <Icon icon="ic:baseline-delete" width="1rem" height="1rem" color="gray" />
-          </button>
-        </form>
+        {#if selectedMap?.id}
+          <form action="?/deleteMap" method="post" onsubmit={confirmDelete} class="inline-block">
+            <input type="hidden" name="id" value={selectedMap?.id} />
+            <button
+              type="submit"
+              class="inline-flex items-center justify-center p-0 m-0 bg-transparent border-none"
+              title="Delete">
+              <Icon icon="ic:baseline-delete" width="1rem" height="1rem" color="gray" />
+            </button>
+          </form>
         {/if}
       </div>
       <Input

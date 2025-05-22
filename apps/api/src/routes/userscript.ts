@@ -4,10 +4,10 @@ import {
   syncedLocations,
   syncedMapMetas,
   syncedMetas,
-} from '@lib/db/schema';
-import { db } from '@lib/drizzle';
-import { generateFooter } from '@lib/userscript/utils';
-import { getRequestIp } from '@lib/utils/log';
+} from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
+import { generateFooter } from '@api/lib/userscript/utils';
+import { getRequestIp } from '@api/lib/utils/log';
 import type { BunRequest } from 'bun';
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';

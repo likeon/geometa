@@ -1,4 +1,4 @@
-import { db } from '@lib/drizzle';
+import { db } from '@api/lib/drizzle';
 import { migrate } from 'drizzle-orm/bun-sql/migrator';
 
 export const runMigrate = async () => {

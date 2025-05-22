@@ -66,7 +66,6 @@ export const load: PageServerLoad = async ({ locals, params }) => {
   const levelList = await db.query.levels.findMany({ where: eq(levels.mapGroupId, group.id) });
   const regionList = await db.query.regions.findMany({ orderBy: [asc(regions.ordering)] });
   const mapForm = await superValidate(zod(insertMapsSchema));
-  console.debug(insertMapsSchema.shape);
 
   const user = await db.query.users.findFirst({ where: eq(users.id, locals.user!.id) });
   if (!user) {
@@ -131,7 +130,6 @@ export const actions = {
       // do not update those if user isn't an admin
       dataNoId.ordering = undefined;
       dataNoId.autoUpdate = undefined;
-      dataNoId.isCommunity = !!user!.isTrusted;
       dataNoId.isVerified = undefined;
     }
     if (!user!.isSuperadmin && !user!.isTrusted) {

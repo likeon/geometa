@@ -19,11 +19,6 @@
         "assumeIsSvelteProject": true // if true, skip detection and always assume it's a Svelte project
       }
     ],
-    "composite": true,
-    "paths": {
-      "@/*": ["../api/src/*"],
-      "@lib/*": ["../api/src/lib/*"]
-    }
   },
   "references": [
     {

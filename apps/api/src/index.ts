@@ -1,9 +1,9 @@
-import { internalRouter } from '@/routes/internal';
-import { userscriptRouter } from '@/routes/userscript';
+import { internalRouter } from './routes/internal';
+import { userscriptRouter } from './routes/userscript';
 import serverTiming from '@elysiajs/server-timing';
 import swagger from '@elysiajs/swagger';
-import { runMigrate } from '@lib/db/migrate';
-import { logger } from '@lib/utils/log';
+import { runMigrate } from '@api/lib/db/migrate';
+import { logger } from '@api/lib/utils/log';
 import { Elysia } from 'elysia';
 
 const prod = process.env.NODE_ENV === 'production';

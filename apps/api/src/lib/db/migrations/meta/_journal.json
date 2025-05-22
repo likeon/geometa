@@ -155,6 +155,13 @@
       "when": 1747901878110,
       "tag": "0021_narrow_invisible_woman",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1747943781779,
+      "tag": "0022_faithful_marvel_zombies",
+      "breakpoints": true
     }
   ]
 }

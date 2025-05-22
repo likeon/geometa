@@ -17,7 +17,7 @@ const config = {
     },
     alias: {
       $routes: 'src/routes',
-      $api: '../api/src'
+      '@api': '../api/src'
     },
     prerender: {
       crawl: false

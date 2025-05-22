@@ -1,11 +1,11 @@
-import { mapGroups, maps } from '@lib/db/schema';
-import { db } from '@lib/drizzle';
-import { auth } from '@lib/internal/auth';
+import { mapGroups, maps } from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
+import { auth } from '@api/lib/internal/auth';
 import {
   ensurePermissions,
   permissionErrorCatcher,
-} from '@lib/internal/permissions';
-import { syncMapGroup } from '@lib/internal/sync';
+} from '@api/lib/internal/permissions';
+import { syncMapGroup } from '@api/lib/internal/sync';
 import { eq } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 

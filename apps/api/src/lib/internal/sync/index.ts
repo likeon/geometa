@@ -4,8 +4,8 @@ import {
   metaImages,
   metas,
   syncedMetas,
-} from '@lib/db/schema';
-import { db } from '@lib/drizzle';
+} from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
 import { and, eq, getTableColumns, sql } from 'drizzle-orm';
 import { getImageUrl } from './utils';
 

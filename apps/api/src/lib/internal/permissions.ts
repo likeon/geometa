@@ -1,4 +1,4 @@
-import { db } from '@lib/drizzle';
+import { db } from '@api/lib/drizzle';
 import { and, eq } from 'drizzle-orm';
 import { Elysia } from 'elysia';
 import { mapGroupPermissions, users } from '../db/schema';
