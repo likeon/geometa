@@ -21,14 +21,13 @@ export const internalRouter = new Elysia({
   })
   .post(
     '/map-groups/:id/sync',
-    async ({ params: { id: groupId }, userId, set }) => {
+    async ({ params: { id: groupId }, userId, status }) => {
       await ensurePermissions(userId, groupId);
       const group = await db.query.mapGroups.findFirst({
         where: eq(mapGroups.id, groupId),
       });
       if (!group) {
-        set.status = 404;
-        return;
+        return status(404);
       }
       await syncMapGroup(group);
       return;

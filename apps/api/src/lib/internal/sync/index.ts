@@ -25,8 +25,8 @@ const metasSelectStatement = db
   .where(
     and(
       eq(metas.mapGroupId, sql.placeholder('mapGroupId')),
-      sql`${sql.placeholder('groupSyncedAt')}::bigint IS NULL OR
-      ${metas.modifiedAt} > ${sql.placeholder('groupSyncedAt')}::bigint`,
+      sql`(${sql.placeholder('groupSyncedAt')}::bigint IS NULL OR
+      ${metas.modifiedAt} > ${sql.placeholder('groupSyncedAt')}::bigint)`,
     ),
   )
   .groupBy(...Object.values(getTableColumns(metas)))
@@ -84,7 +84,8 @@ export async function syncMapGroup(group: {
         ;
     `);
     } else {
-      tx.delete(syncedMetas).where(eq(syncedMetas.mapGroupId, group.id));
+      // fixme
+      // tx.delete(syncedMetas).where(eq(syncedMetas.mapGroupId, group.id));
     }
 
     // locations
