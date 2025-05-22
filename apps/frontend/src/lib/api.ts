@@ -1,6 +1,6 @@
 import { treaty } from '@elysiajs/eden';
-import type { App } from '$api';
 import { env } from '$env/dynamic/private';
+import type { App } from '@/index';
 const frontendToken = env.FRONTEND_API_TOKEN;
 const prod = env.NODE_ENV === 'production';
 
