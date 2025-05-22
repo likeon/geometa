@@ -26,15 +26,16 @@
   let activeUrl = $derived(page.url.pathname);
   let admin = $derived(activeUrl.startsWith('/dev/dash'));
 
+  // keep both dark and non-dark
+  // otherwise it will use default
   const activeClass =
-    'text-white bg-primary-700 md:bg-transparent md:text-primary-700 md:dark:text-white dark:bg-primary-600 md:dark:bg-transparent';
+    'text-white bg-primary-600 md:bg-transparent md:text-white md:dark:text-white dark:bg-primary-600 md:dark:bg-transparent';
   const nonActiveClass =
-    'text-gray-700 hover:bg-gray-100 md:hover:bg-transparent md:border-0 md:hover:text-primary-700 dark:text-zinc-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent';
+    'text-zinc-400 md:hover:text-white hover:bg-gray-700 hover:text-white md:hover:bg-transparent dark:text-zinc-400 md:dark:hover:text-white dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent';
 </script>
 
-<Navbar
-  class="px-2 sm:px-4 py-0 w-full bg-gradient-to-r from-green-100 to-sky-100 dark:from-green-900 dark:to-sky-900">
-  <NavBrand href={admin ? '/dev/dash' : '/'} class="text-gray-700">
+<Navbar class="px-2 sm:px-4 py-0 w-full bg-gradient-to-r from-green-900 to-sky-900">
+  <NavBrand href={admin ? '/dev/dash' : '/'} class="text-white">
     <enhanced:img src={logo} class="h-6 sm:h-9 w-auto" alt="Logo" />
     <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
       >LearnableMeta</span>
@@ -52,8 +53,8 @@
       </div>
     </NavLi>
     <div class="md:space-x-2 hidden md:flex">
-      <div class="md:h-5 md:w-px md:bg-zinc-900/10 md:dark:bg-white/15"></div>
-      <button class="text-gray-700 hover:text-black dark:text-zinc-400 dark:hover:text-white">
+      <div class="md:h-5 md:w-px md:bg-white/15"></div>
+      <button class="text-zinc-400 hover:text-white">
         <LightDarkIcon class="w-5 h-5 flex-shrink-0 " />
       </button>
       {#if browser}
@@ -66,7 +67,7 @@
       <a
         href="/dev/dash"
         title="Creator dashboard"
-        class="hidden md:flex items-center justify-center text-gray-700 hover:text-black dark:text-zinc-400 dark:hover:text-white">
+        class="hidden md:flex items-center justify-center text-zinc-400 hover:text-white">
         <FaSolidToolsIcon class="w-4 h-4 flex-shrink-0" />
       </a>
     </div>
