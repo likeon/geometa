@@ -85,25 +85,6 @@ export const userscriptRouter = new Elysia({
     '/location/',
     async ({ query, set }) => {
       const cacheKey = `${query.mapId}:${query.panoId}`;
-      const result = await db.query.maps.findFirst({
-        where: eq(maps.geoguessrId, query.mapId),
-        columns: {
-          isBlackout: true,
-        },
-      });
-      const isBlackout = result?.isBlackout ?? false;
-      if (isBlackout) {
-        const blackoutFooter = `<p><a href="https://shorturl.at/jeT1y" rel="nofollow" target="_blank">Read more about blackout by clicking this link</a></p>`;
-        return {
-          country: 'BLACKOUT',
-          metaName: 'BLACKOUT',
-          note: 'The creator of this map has gone dark in solidarity with the blackout — a protest over GeoGuessr’s choice to participate in a tournament in Saudi Arabia, where human rights violations remain a serious issue.',
-          images: [
-            'https://learnablemeta.com/cdn-cgi/image/format=avif,quality=80/https://static.learnablemeta.com/blackout.png',
-          ],
-          footer: blackoutFooter,
-        };
-      }
       const [metaResult, legacyCacheResult] = await Promise.all([
         locationSelect.execute(query),
         legacyLocationSelect.execute({ key: cacheKey }),
@@ -112,6 +93,7 @@ export const userscriptRouter = new Elysia({
         set.status = 404;
         return ['NOT_FOUND'];
       }
+
       set.status = 200;
       // fallback to legacy
       if (!metaResult.length) {

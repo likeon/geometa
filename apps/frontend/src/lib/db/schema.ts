@@ -85,8 +85,7 @@ export const maps = pgTable(
     difficulty: integer('difficulty').notNull().default(0),
     isVerified: boolean('is_verified').notNull().default(false),
     numberOfGamesPlayed: integer('number_of_games_played'),
-    numberOfGamesPlayedDiminished: integer('number_of_games_played_diminished'),
-    isBlackout: boolean('is_blackout').notNull().default(false),
+    numberOfGamesPlayedDiminished: integer('number_of_games_played_diminished')
   },
   (t) => [
     uniqueIndex('maps_geoguessr_id_unique').on(t.geoguessrId),

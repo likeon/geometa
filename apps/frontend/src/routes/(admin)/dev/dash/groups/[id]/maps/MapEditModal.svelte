@@ -67,7 +67,6 @@
     $form.excludeFilters = [];
     $form.difficulty = 0;
     $form.isVerified = false;
-    $form.isBlackout = false;
   }
   nullifyForm();
 
@@ -95,7 +94,6 @@
         $form.excludeFilters = selectedMap.filters
           .filter((item) => item.isExclude == true)
           .map((item) => item.tagLike as string);
-        $form.isBlackout = selectedMap.isBlackout;
       } else {
         nullifyForm();
       }
@@ -216,7 +214,6 @@
         <Alert color="red">{$errors.authors}</Alert>
       {/if}
     </Label>
-    <Checkbox bind:checked={$form.isBlackout}>BLACKOUT</Checkbox>
     {#if user.isSuperadmin || user.isTrusted}
       <Label>
         <div class="flex flex-row space-x-2">
