@@ -7,6 +7,7 @@
   import { env } from '$env/dynamic/public';
   import { building } from '$app/environment';
   import { ModeWatcher } from 'mode-watcher';
+  import { updated } from '$app/state';
 
   let { children } = $props();
   let admin = $derived(page.url.pathname.startsWith('/dev/dash'));
@@ -20,7 +21,7 @@
 </svelte:head>
 
 <ModeWatcher />
-<div class="app">
+<div class="app" data-sveltekit-reload={updated ? '' : 'off'}>
   <!--  <AnnouncementBanner />-->
   <NavBar />
   <main>

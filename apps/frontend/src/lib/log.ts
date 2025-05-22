@@ -37,6 +37,6 @@ export default async function log(statusCode: number, event: RequestEvent) {
     };
     console.log(JSON.stringify(logData));
   } catch (err) {
-    throw new Error(`Failed to log: ${JSON.stringify(err)}`);
+    console.error('Failed to log', err);
   }
 }
