@@ -67,7 +67,7 @@
       <a
         href="/dev/dash"
         title="Creator dashboard"
-        class="hidden md:flex items-center justify-center text-zinc-400 hover:text-white">
+        class="hidden md:flex items-center justify-center text-zinc-400 dark:text-zinc-400 hover:text-white">
         <FaSolidToolsIcon class="w-4 h-4 flex-shrink-0" />
       </a>
     </div>
