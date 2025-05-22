@@ -20,5 +20,17 @@ export function auth() {
         }
       }
     })
+    .macro({
+      userId: {
+        async resolve({ status, request: { headers } }) {
+          const userId = headers.get('x-api-user-id');
+          if (!userId) {
+            return status(401);
+          }
+
+          return { userId };
+        },
+      },
+    })
     .as('global');
 }

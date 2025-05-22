@@ -19,30 +19,23 @@ export const internalRouter = new Elysia({
   .get('/maps', async () => {
     return db.select().from(maps);
   })
-  .guard({ headers: t.Object({ 'x-api-user-id': t.String() }) }, (app) =>
-    app
-      .resolve(({ headers }) => {
-        return {
-          userId: headers['x-api-user-id'],
-        };
-      })
-      .post(
-        '/map-groups/:id/sync',
-        async ({ params: { id: groupId }, userId, set }) => {
-          await ensurePermissions(userId, groupId);
-          const group = await db.query.mapGroups.findFirst({
-            where: eq(mapGroups.id, groupId),
-          });
-          if (!group) {
-            set.status = 404;
-            return;
-          }
-          await syncMapGroup(group);
-          return;
-        },
-        {
-          params: t.Object({ id: t.Integer() }),
-        },
-      ),
+  .post(
+    '/map-groups/:id/sync',
+    async ({ params: { id: groupId }, userId, set }) => {
+      await ensurePermissions(userId, groupId);
+      const group = await db.query.mapGroups.findFirst({
+        where: eq(mapGroups.id, groupId),
+      });
+      if (!group) {
+        set.status = 404;
+        return;
+      }
+      await syncMapGroup(group);
+      return;
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      userId: true,
+    },
   )
   .use(permissionErrorCatcher());
