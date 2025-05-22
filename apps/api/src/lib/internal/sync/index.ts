@@ -105,7 +105,7 @@ export async function syncMapGroup(group: {
       WHEN NOT MATCHED BY TARGET THEN
         INSERT (synced_meta_id, pano_id, country)
         VALUES (l.synced_meta_id, l.pano_id, get_country_from_tag_name(l.extra_tag))
-      WHEN NOT MATCHED BY SOURCE AND sl.synced_meta_id NOT IN (SELECT sm.meta_id FROM synced_metas sm WHERE sm.map_group_id != ${group.id}) THEN
+      WHEN NOT MATCHED BY SOURCE AND sl.synced_meta_id NOT IN (SELECT sm.meta_id FROM synced_metas sm) THEN
         DELETE
       ;
   `);
