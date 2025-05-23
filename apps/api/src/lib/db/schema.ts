@@ -44,6 +44,18 @@ export const mapGroupsRelations = relations(mapGroups, ({ many }) => ({
   permissions: many(mapGroupPermissions),
 }));
 
+const commonLocationFields = {
+  lat: real('lat').notNull(),
+  lng: real('lng').notNull(),
+  heading: real('heading').notNull(),
+  pitch: real('pitch').notNull(),
+  zoom: real('zoom').notNull(),
+  panoId: text('pano_id').notNull(),
+  extraTag: text('extra_tag').notNull(),
+  extraPanoId: text('extra_pano_id'),
+  extraPanoDate: text('extra_pano_date'),
+};
+
 export const mapGroupLocations = pgTable(
   'map_group_locations',
   {
@@ -51,17 +63,9 @@ export const mapGroupLocations = pgTable(
     mapGroupId: integer('map_group_id')
       .notNull()
       .references(() => mapGroups.id, { onDelete: 'cascade' }),
-    lat: real('lat').notNull(),
-    lng: real('lng').notNull(),
-    heading: real('heading').notNull(),
-    pitch: real('pitch').notNull(),
-    zoom: real('zoom').notNull(),
-    panoId: text('pano_id'),
-    extraTag: text('extra_tag').notNull(),
-    extraPanoId: text('extra_pano_id'),
-    extraPanoDate: text('extra_pano_date'),
     updatedAt: integer('updated_at'),
     modifiedAt: integer('modified_at').default(1730419200).notNull(),
+    ...commonLocationFields,
   },
   (t) => [
     uniqueIndex('map_group_locations_unique').on(t.mapGroupId, t.panoId),
@@ -263,6 +267,7 @@ export const users = pgTable('user', {
   username: text('username').notNull(),
   isTrusted: boolean('is_trusted').notNull().default(false),
   isSuperadmin: boolean('is_superadmin').notNull().default(false),
+  apiToken: text('api_token').unique(),
 });
 export const usersRelations = relations(users, ({ many }) => ({
   permissions: many(mapGroupPermissions),
@@ -391,10 +396,10 @@ export const syncedLocations = pgTable(
     syncedMetaId: bigint('synced_meta_id', { mode: 'number' })
       .notNull()
       .references(() => syncedMetas.metaId, { onDelete: 'cascade' }),
-    panoId: text('pano_id').notNull(),
     // keep country here because we might use geospatial data in the future
     // different countries per meta are possible
     country: text(),
+    ...commonLocationFields,
   },
   (t) => [primaryKey({ columns: [t.syncedMetaId, t.panoId] })],
 );

@@ -162,6 +162,20 @@
       "when": 1747943781779,
       "tag": "0022_faithful_marvel_zombies",
       "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1748002133167,
+      "tag": "0023_red_thena",
+      "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1748004089084,
+      "tag": "0024_dusty_lockjaw",
+      "breakpoints": true
     }
   ]
 }

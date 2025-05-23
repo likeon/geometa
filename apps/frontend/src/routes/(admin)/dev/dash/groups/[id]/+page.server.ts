@@ -528,11 +528,17 @@ export const actions = {
   prepareUserScriptData: async (event) => {
     const groupId = getGroupId(event.params);
     // make it so every request has this user id as header
-    await api.internal['map-groups']({ id: groupId }).sync.post(undefined, {
-      headers: {
-        'x-api-user-id': event.locals.user!.id
+    const { error: apiError } = await api.internal['map-groups']({ id: groupId }).sync.post(
+      undefined,
+      {
+        headers: {
+          'x-api-user-id': event.locals.user!.id
+        }
       }
-    });
+    );
+    if (apiError) {
+      error(500);
+    }
   },
   populateNotesHtml: async (event) => {
     const groupId = getGroupId(event.params);

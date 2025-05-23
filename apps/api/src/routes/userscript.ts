@@ -1,83 +1,96 @@
-import {
-  cacheTable,
-  maps,
-  syncedLocations,
-  syncedMapMetas,
-  syncedMetas,
-} from '@api/lib/db/schema';
+import { maps, users } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
+import {
+  legacyLocationSelect,
+  locationSelect,
+  personalMapLocationsExportSelect,
+} from '@api/lib/userscript/locations';
 import { generateFooter } from '@api/lib/userscript/utils';
-import { getRequestIp } from '@api/lib/utils/log';
-import type { BunRequest } from 'bun';
+import bearer from '@elysiajs/bearer';
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 const userscriptVersion = '0.82';
 
-const locationSelect = db
-  .select({
-    name: syncedMetas.name,
-    note: syncedMetas.note,
-    noteFromPlonkit: syncedMetas.noteFromPlonkit,
-    footer: syncedMetas.footer,
-    images: syncedMetas.images,
-    country: syncedLocations.country,
-    mapFooter: maps.footerHtml,
+const mapInfoQuery = db.query.maps
+  .findFirst({
+    where: eq(maps.geoguessrId, sql.placeholder('geoguessrId')),
+    columns: {
+      isPersonal: true,
+    },
   })
-  .from(syncedMetas)
-  .innerJoin(
-    syncedMapMetas,
-    eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId),
-  )
-  .innerJoin(maps, eq(syncedMapMetas.mapId, maps.id))
-  .innerJoin(
-    syncedLocations,
-    eq(syncedLocations.syncedMetaId, syncedMetas.metaId),
-  )
-  .where(
-    and(
-      eq(maps.geoguessrId, sql.placeholder('mapId')),
-      eq(syncedLocations.panoId, sql.placeholder('panoId')),
-    ),
-  )
-  .limit(1)
-  .prepare('userscript_get_location');
-
-const legacyLocationSelect = db
-  .select({ value: cacheTable.value })
-  .from(cacheTable)
-  .where(eq(cacheTable.key, sql.placeholder('key')))
-  .limit(1)
-  .prepare('userscript_legacy_get_location');
+  .prepare('userscript_get_map_info');
 
 export const userscriptRouter = new Elysia({
   prefix: '/userscript',
   detail: { tags: ['userscript'] },
 })
-  .get(
-    '/map/:geoguessrId',
-    async ({ params: { geoguessrId }, set, server, request }) => {
-      const map = await db.query.maps.findFirst({
-        where: eq(maps.geoguessrId, geoguessrId),
+  .use(bearer())
+  .get('/map/:geoguessrId', async ({ params: { geoguessrId }, status }) => {
+    const map = await mapInfoQuery.execute({ geoguessrId });
+    if (!map) {
+      return status(404, {
+        mapFound: false,
+        userscriptVersion: userscriptVersion,
       });
-      if (!map || map.geoguessrId !== geoguessrId) {
-        if (map) {
-          console.error(
-            JSON.stringify({
-              level: 'error',
-              type: 'foundMapMismatch',
-              ip: getRequestIp(server, request as BunRequest),
-            }),
-          );
-        }
-        set.status = 404;
-        return { mapFound: false, userscriptVersion: userscriptVersion };
+    }
+
+    return {
+      mapFound: true,
+      isPersonal: map.isPersonal,
+      userscriptVersion: userscriptVersion,
+    };
+  })
+  .get(
+    '/map/:geoguessrId/locations',
+    async ({ params: { geoguessrId }, bearer, status }) => {
+      if (!bearer) {
+        return status(401);
+      }
+      const mapResult = await db
+        .select({
+          id: maps.id,
+          mapGroupId: maps.mapGroupId,
+          userApiToken: users.apiToken,
+          isPersonal: maps.isPersonal,
+        })
+        .from(maps)
+        .leftJoin(users, eq(users.id, maps.userId))
+        .where(and(eq(maps.geoguessrId, geoguessrId)));
+      if (!mapResult.length) {
+        return status(404);
       }
 
-      set.status = 200;
+      const [map] = mapResult;
+
+      // authenticate and get locations differently depending on what kind of map it is
+      if (!map.isPersonal) {
+        // not implemented yet
+        return status(501);
+      }
+
+      if (!map.userApiToken || bearer !== map.userApiToken) {
+        return status(403);
+      }
+
+      const locations = await personalMapLocationsExportSelect.execute({
+        mapId: map.id,
+      });
       return {
-        mapFound: true,
-        userscriptVersion: userscriptVersion,
+        customCoordinates: locations.map((location) => ({
+          lat: location.lat,
+          lng: location.lng,
+          heading: location.heading,
+          pitch: location.pitch,
+          zoom: location.zoom,
+          panoId: location.panoId,
+          countryCode: null,
+          stateCode: null,
+          extra: {
+            panoDate: location.extraPanoDate,
+            panoId: location.extraPanoId,
+          },
+        })),
       };
     },
   )

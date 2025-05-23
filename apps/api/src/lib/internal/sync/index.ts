@@ -37,7 +37,6 @@ export async function syncMapGroup(group: {
   syncedAt: number | null;
 }) {
   const currentTimestamp = Math.floor(Date.now() / 1000);
-
   await db.transaction(async (tx) => {
     // metas
     const metasToSync = await metasSelectStatement.execute({
@@ -77,35 +76,51 @@ export async function syncMapGroup(group: {
                   note_from_plonkit, footer, images)
           VALUES (m.meta_id, m.map_group_id, m.name, m.note,
                   m.note_from_plonkit, m.footer, m.images)
-        WHEN NOT MATCHED BY SOURCE AND
-          sm.map_group_id = ${group.id} AND
-          sm.meta_id NOT IN (SELECT m2.id FROM metas m2 WHERE m2.map_group_id = ${group.id}) THEN
-            DELETE
         ;
     `);
-    } else {
-      // fixme
-      // tx.delete(syncedMetas).where(eq(syncedMetas.mapGroupId, group.id));
     }
+    tx.delete(syncedMetas).where(
+      sql`${syncedMetas.mapGroupId} = ${group.id} AND
+        ${syncedMetas.metaId} NOT IN (SELECT id FROM ${metas} WHERE ${metas.mapGroupId} = ${group.id})`,
+    );
 
     // locations
     await tx.execute(sql`
       WITH l AS (
         select
-          "metas"."id" as synced_meta_id,
-          "map_group_locations"."pano_id",
-          "map_group_locations"."extra_tag"
-         from "map_group_locations"
-         join "metas" on ("metas"."map_group_id" = "map_group_locations"."map_group_id" and "metas"."tag_name" = "map_group_locations"."extra_tag")
-         where ("map_group_locations"."map_group_id" = ${group.id} and (${group.syncedAt}::bigint IS NULL OR
-            ${mapGroupLocations.modifiedAt} > ${group.syncedAt}::bigint))
+          m.id as synced_meta_id,
+          mgl.lat,
+          mgl.lng,
+          mgl.heading,
+          mgl.pitch,
+          mgl.zoom,
+          mgl.pano_id,
+          mgl.extra_tag,
+          mgl.extra_pano_id,
+          mgl.extra_pano_date
+         from map_group_locations mgl
+         join metas m on m.map_group_id = mgl.map_group_id and m.tag_name = mgl.extra_tag
+         where mgl.map_group_id = ${group.id} and (${group.syncedAt}::bigint IS NULL OR
+            mgl.modified_at > ${group.syncedAt}::bigint)
       )
       MERGE INTO synced_locations sl
       USING l
       ON sl.synced_meta_id = l.synced_meta_id AND sl.pano_id = l.pano_id
+      WHEN MATCHED THEN
+        UPDATE SET
+          lat = l.lat,
+          lng = l.lng,
+          heading = l.heading,
+          pitch = l.pitch,
+          zoom = l.zoom,
+          pano_id = l.pano_id,
+          extra_tag = l.extra_tag,
+          extra_pano_id = l.extra_pano_id,
+          extra_pano_date = l.extra_pano_date,
+          country = get_country_from_tag_name(l.extra_tag)
       WHEN NOT MATCHED BY TARGET THEN
-        INSERT (synced_meta_id, pano_id, country)
-        VALUES (l.synced_meta_id, l.pano_id, get_country_from_tag_name(l.extra_tag))
+        INSERT (synced_meta_id, lat, lng, heading, pitch, zoom, pano_id, extra_tag, extra_pano_id, extra_pano_date, country)
+        VALUES (l.synced_meta_id, l.lat, l.lng, l.heading, l.pitch, l.zoom, l.pano_id, l.extra_tag, l.extra_pano_id, l.extra_pano_date, get_country_from_tag_name(l.extra_tag))
       WHEN NOT MATCHED BY SOURCE AND sl.synced_meta_id NOT IN (SELECT sm.meta_id FROM synced_metas sm) THEN
         DELETE
       ;

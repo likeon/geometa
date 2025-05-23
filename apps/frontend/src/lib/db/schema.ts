@@ -228,7 +228,8 @@ export const users = pgTable('user', {
   id: text('id').notNull().primaryKey(),
   username: text('username').notNull(),
   isTrusted: boolean('is_trusted').notNull().default(false),
-  isSuperadmin: boolean('is_superadmin').notNull().default(false)
+  isSuperadmin: boolean('is_superadmin').notNull().default(false),
+  apiToken: text('api_token').unique()
 });
 export const usersRelations = relations(users, ({ many }) => ({
   permissions: many(mapGroupPermissions)
