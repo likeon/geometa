@@ -3,6 +3,7 @@ import { permissionErrorCatcher } from '@api/lib/internal/permissions';
 import { Elysia } from 'elysia';
 import { mapGroupsRouter } from './map-groups';
 import { mapsRouter } from './maps';
+import { personalMapsRouter } from './personal-maps';
 
 export const internalRouter = new Elysia({
   prefix: '/internal',
@@ -17,4 +18,5 @@ export const internalRouter = new Elysia({
   })
   .use(mapGroupsRouter)
   .use(mapsRouter)
+  .use(personalMapsRouter)
   .use(permissionErrorCatcher());
