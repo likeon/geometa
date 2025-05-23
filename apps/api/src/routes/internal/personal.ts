@@ -10,7 +10,7 @@ import { ensureMapAccess } from '@api/lib/internal/permissions';
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
-export const personalMapsRouter = new Elysia({ prefix: '/personal-maps' })
+export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
   .use(auth())
   .get(
     '/',

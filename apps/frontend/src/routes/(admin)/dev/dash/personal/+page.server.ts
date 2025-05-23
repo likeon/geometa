@@ -15,7 +15,7 @@ const insertPersonalMap = z.object({
 export type InsertPersonalMapSchema = typeof insertPersonalMap;
 
 export const load: PageServerLoad = async ({ locals }) => {
-  const personalMapsResult = await api.internal['personal-maps'].get({
+  const personalMapsResult = await api.internal.maps.personal.get({
     headers: {
       'x-api-user-id': locals.user!.id
     }
@@ -34,7 +34,7 @@ export const actions = {
     if (!form.valid) {
       return fail(400, { form });
     }
-    const insertedPersonalMapResult = await api.internal['personal-maps'].post(
+    const insertedPersonalMapResult = await api.internal.maps.personal.post(
       {
         name: form.data.name,
         geoguessrId: form.data.geoguessrId
