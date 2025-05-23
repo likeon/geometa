@@ -1,8 +1,8 @@
+import { prod } from '@api/lib/utils/env';
 import bearer from '@elysiajs/bearer';
 import { Elysia, t } from 'elysia';
 
 const frontendToken = process.env.FRONTEND_API_TOKEN;
-const prod = process.env.NODE_ENV === 'production';
 
 export function auth() {
   return new Elysia({ name: 'geometa-auth' })

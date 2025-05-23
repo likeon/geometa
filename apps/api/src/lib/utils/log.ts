@@ -1,3 +1,4 @@
+import { prod } from '@api/lib/utils/env';
 import type { BunRequest, Server } from 'bun';
 import Elysia, { type StatusMap } from 'elysia';
 
@@ -44,10 +45,7 @@ function logRequest(
   status: number | null,
 ) {
   const { pathname, searchParams } = new URL(request.url);
-  if (
-    process.env.NODE_ENV === 'production' &&
-    pathname === '/api/health-check'
-  ) {
+  if (prod && pathname === '/api/health-check') {
     return;
   }
   const error = status ? status >= 400 : true;
@@ -62,10 +60,10 @@ function logRequest(
     ip: getRequestIp(server, request),
   };
   const responseJson = JSON.stringify(data);
-  if (error) {
-    console.error(responseJson);
-  } else {
-    console.log(responseJson);
+  try {
+    console[error ? 'error' : 'log'](responseJson);
+  } catch (err) {
+    console.error('Failed to log response:', err);
   }
 }
 

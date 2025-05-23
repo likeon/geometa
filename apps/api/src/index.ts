@@ -1,12 +1,13 @@
-import { internalRouter } from './routes/internal';
-import { userscriptRouter } from './routes/userscript';
+import { runMigrate } from '@api/lib/db/migrate';
+import { prod } from '@api/lib/utils/env';
+import { logger } from '@api/lib/utils/log';
+import { sentry } from '@api/lib/utils/sentry';
 import serverTiming from '@elysiajs/server-timing';
 import swagger from '@elysiajs/swagger';
-import { runMigrate } from '@api/lib/db/migrate';
-import { logger } from '@api/lib/utils/log';
 import { Elysia } from 'elysia';
+import { internalRouter } from './routes/internal';
+import { userscriptRouter } from './routes/userscript';
 
-const prod = process.env.NODE_ENV === 'production';
 const swaggerExclude = [/^\/api\/health-check/];
 const swaggerServers = [];
 if (prod) {
@@ -23,6 +24,7 @@ if (prod) {
 }
 
 const api = new Elysia({ prefix: '/api' })
+  .use(sentry())
   .use(logger())
   .use(serverTiming())
   .get('/health-check', () => {
@@ -50,7 +52,7 @@ const app = new Elysia()
   // says it's fixed, but it's not
   .use(
     swagger({
-      path: '/api/swagger',
+      path: '/api/docs',
       exclude: swaggerExclude,
       documentation: {
         info: { title: 'Learnable Meta API', version: '1' },
