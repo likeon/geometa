@@ -1,39 +1,26 @@
-import {
-  maps,
-  syncedLocations,
-  syncedMapMetas,
-  syncedMetas,
-} from '@api/lib/db/schema';
-import { db } from '@api/lib/drizzle';
-import { auth } from '@api/lib/internal/auth';
-import { ensureMapAccess } from '@api/lib/internal/permissions';
-import { and, eq, sql } from 'drizzle-orm';
-import { Elysia, t } from 'elysia';
+import { maps, syncedLocations, syncedMapMetas, syncedMetas } from "@api/lib/db/schema";
+import { db } from "@api/lib/drizzle";
+import { auth } from "@api/lib/internal/auth";
+import { ensureMapAccess } from "@api/lib/internal/permissions";
+import { and, eq, sql } from "drizzle-orm";
+import { Elysia, t } from "elysia";
 
-export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
+export const personalMapsRouter = new Elysia({ prefix: "maps/personal" })
   .use(auth())
   .get(
-    '/',
+    "/",
     async ({ userId }) => {
       const personalMaps = await db
         .select({
           id: maps.id,
           name: maps.name,
           geoguessrId: maps.geoguessrId,
-          metasCount:
-            sql<number>`COUNT(DISTINCT ${syncedMapMetas.syncedMetaId})`.as(
-              'syncedMetasCount',
-            ),
-          locationsCount: sql<number>`COUNT(${syncedLocations.panoId})`.as(
-            'syncedLocationsCount',
-          ),
+          metasCount: sql<number>`COUNT(DISTINCT ${syncedMapMetas.syncedMetaId})`.as("syncedMetasCount"),
+          locationsCount: sql<number>`COUNT(${syncedLocations.panoId})`.as("syncedLocationsCount"),
         })
         .from(maps)
         .leftJoin(syncedMapMetas, eq(syncedMapMetas.mapId, maps.id))
-        .leftJoin(
-          syncedLocations,
-          eq(syncedLocations.syncedMetaId, syncedMapMetas.syncedMetaId),
-        )
+        .leftJoin(syncedLocations, eq(syncedLocations.syncedMetaId, syncedMapMetas.syncedMetaId))
         .where(and(eq(maps.userId, userId), eq(maps.isPersonal, true)))
         .groupBy(maps.id, maps.name, maps.geoguessrId);
 
@@ -51,15 +38,15 @@ export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
               metasCount: t.Integer(),
               locationsCount: t.Integer(),
             },
-            { description: 'PersonalMap object' },
+            { description: "PersonalMap object" }
           ),
-          { description: 'Array of personal maps' },
+          { description: "Array of personal maps" }
         ),
       },
-    },
+    }
   )
   .post(
-    '/',
+    "/",
     async ({ userId, body, set }) => {
       const { name, geoguessrId } = body;
       // TODO: add checking if geoguessrID is popular map and if its valid
@@ -76,16 +63,12 @@ export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
 
         return { id: result[0].id };
       } catch (e) {
-        if (
-          e instanceof Error &&
-          'message' in e &&
-          e.message.includes('unique constraint')
-        ) {
+        if (e instanceof Error && "message" in e && e.message.includes("unique constraint")) {
           set.status = 409;
-          return { error: 'Map with this GeoGuessr ID already exists.' };
+          return { error: "Map with this GeoGuessr ID already exists." };
         }
         set.status = 500;
-        return { error: 'Internal Server Error' };
+        return { error: "Internal Server Error" };
       }
     },
     {
@@ -94,12 +77,13 @@ export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
         geoguessrId: t.String({ minLength: 1 }),
       }),
       userId: true,
-    },
+    }
   )
   .get(
-    '/:id',
+    "/:id",
     async ({ params: { id: mapId }, userId }) => {
       await ensureMapAccess(userId, mapId);
+
       const metas = await db
         .select({
           metaId: syncedMetas.metaId,
@@ -121,10 +105,7 @@ export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
     )`,
         })
         .from(syncedMapMetas)
-        .innerJoin(
-          syncedMetas,
-          eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId),
-        )
+        .innerJoin(syncedMetas, eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId))
         .where(eq(syncedMapMetas.mapId, mapId));
 
       return metas;
@@ -141,10 +122,53 @@ export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
               locationsCount: t.Integer(),
               usedInMapName: t.Nullable(t.String()),
             },
-            { description: 'PersonalMap object' },
+            { description: "PersonalMap object" }
           ),
-          { description: 'Array of personal maps' },
+          { description: "Array of personal maps" }
         ),
       },
+    }
+  )
+  .patch(
+    "/:id",
+    async ({ params: { id: mapId }, body, userId, set }) => {
+      await ensureMapAccess(userId, mapId);
+      const { name, geoguessrId } = body;
+
+      try {
+        const result = await db
+          .update(maps)
+          .set({
+            name,
+            geoguessrId,
+          })
+          .where(and(eq(maps.id, mapId), eq(maps.userId, userId), eq(maps.isPersonal, true)))
+          .returning({ id: maps.id });
+
+        if (result.length === 0) {
+          set.status = 404;
+          return { error: "Map not found" };
+        }
+
+        return { id: result[0].id };
+      } catch (e) {
+        if (e instanceof Error && "message" in e && e.message.includes("unique constraint")) {
+          set.status = 409;
+          return { error: "Map with this GeoGuessr ID already exists." };
+        }
+
+        set.status = 500;
+        return { error: "Internal Server Error" };
+      }
     },
+    {
+      params: t.Object({
+        id: t.Integer(),
+      }),
+      body: t.Object({
+        name: t.Optional(t.String({ minLength: 1 })),
+        geoguessrId: t.Optional(t.String({ minLength: 1 })),
+      }),
+      userId: true,
+    }
   );
