@@ -15,6 +15,7 @@
         "rehype-stringify": "^10.0.1",
         "remark-parse": "^11.0.0",
         "remark-rehype": "^11.1.2",
+        "remeda": "^2.22.1",
         "unified": "^11.0.5",
       },
       "devDependencies": {
@@ -396,6 +397,8 @@
     "remark-parse": ["remark-parse@11.0.0", "", { "dependencies": { "@types/mdast": "^4.0.0", "mdast-util-from-markdown": "^2.0.0", "micromark-util-types": "^2.0.0", "unified": "^11.0.0" } }, "sha512-FCxlKLNGknS5ba/1lmpYijMUzX2esxW5xQqjWxw2eHFfS2MSdaHVINFmhjo+qN1WhZhNimq0dZATN9pH0IDrpA=="],
 
     "remark-rehype": ["remark-rehype@11.1.2", "", { "dependencies": { "@types/hast": "^3.0.0", "@types/mdast": "^4.0.0", "mdast-util-to-hast": "^13.0.0", "unified": "^11.0.0", "vfile": "^6.0.0" } }, "sha512-Dh7l57ianaEoIpzbp0PC9UKAdCSVklD8E5Rpw7ETfbTl3FqcOOgq5q2LVDhgGCkaBv7p24JXikPdvhhmHvKMsw=="],
+
+    "remeda": ["remeda@2.22.1", "", { "dependencies": { "type-fest": "^4.40.1" } }, "sha512-7bcggqt1D7sEmkpzuGowcsAfkO5Ae03+HFt6zA+AfJ/r5+wVJMq8DEHBAitbKWsdyeUX7qqjfi/jnH9HmdU3uA=="],
 
     "require-in-the-middle": ["require-in-the-middle@7.5.2", "", { "dependencies": { "debug": "^4.3.5", "module-details-from-path": "^1.0.3", "resolve": "^1.22.8" } }, "sha512-gAZ+kLqBdHarXB64XpAe2VCjB7rIRv+mU8tfRWziHRJ5umKsIHN2tLLv6EtMw7WCdP19S0ERVMldNvxYCHnhSQ=="],
 
