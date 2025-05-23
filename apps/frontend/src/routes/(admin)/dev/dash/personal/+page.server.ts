@@ -62,5 +62,48 @@ export const actions = {
         message: 'Failed to create map. Please try again later.'
       });
     }
+  },
+  updatePersonalMapName: async ({ request, locals }) => {
+    const form = await request.formData();
+    const name = form.get('name');
+
+    if (!name || typeof name !== 'string') {
+      console.log("here");
+     return fail(400, {
+        message: 'Name cannot be empty.'
+      });
+    }
+// todo: check if request went properly
+ await api.internal.maps.personal[form.get('id')].patch({
+  name
+ },{
+    headers: {
+      'x-api-user-id': locals.user!.id
+    }
+  });
+
+    return { success: true };
+  },
+
+  updatePersonalMapGeoguessrId: async ({ request, locals }) => {
+    const form = await request.formData();
+    const geoguessrId = form.get('geoguessrId');
+
+    if (!geoguessrId || typeof geoguessrId !== 'string') {
+     return fail(400, {
+        message: 'Geoguessrid cannot be empty.'
+      });
+    }
+// todo: check if request went properly
+console.log(geoguessrId);
+ await api.internal.maps.personal[form.get('id')].patch({
+  geoguessrId: geoguessrId
+ },{
+    headers: {
+      'x-api-user-id': locals.user!.id
+    }
+  });
+
+    return { success: true };
   }
 };

@@ -48,18 +48,28 @@
     {/snippet}
   </PopoverTrigger>
 
-  <PopoverContent align="start" side="bottom" class="w-40 p-2">
-    <div class="flex flex-col space-y-1">
-      {#each options as opt (opt.value)}
-        <button class="flex items-center rounded px-2 py-1" onclick={() => toggle(opt.value)}>
-          <Icon
-            class="mr-2"
-            icon={selected().has(opt.value) ? 'mdi:checkbox-marked' : 'mdi:checkbox-blank-outline'}
-            width="20"
-            height="20" />
-          {opt.label}
-        </button>
-      {/each}
-    </div>
-  </PopoverContent>
+<PopoverContent
+  align="start"
+  side="bottom"
+  class="w-auto max-w-[90vw] p-2 whitespace-normal break-words"
+>
+  <div class="flex flex-col space-y-1">
+    {#each options as opt (opt.value)}
+      <button
+        class="flex items-start text-left rounded px-2 py-1 hover:bg-gray-100 dark:hover:bg-gray-800"
+        onclick={() => toggle(opt.value)}
+      >
+        <Icon
+          class="mt-0.5 mr-2 shrink-0"
+          icon={selected().has(opt.value)
+            ? 'mdi:checkbox-marked'
+            : 'mdi:checkbox-blank-outline'}
+          width="20"
+          height="20"
+        />
+        <span class="break-words">{opt.label}</span>
+      </button>
+    {/each}
+  </div>
+</PopoverContent>
 </Popover>
