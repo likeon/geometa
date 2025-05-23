@@ -4,7 +4,7 @@ import { auth } from "@api/lib/internal/auth";
 import { eq, sql, and } from "drizzle-orm";
 import { Elysia, t } from "elysia";
 
-export const personalMapsRouter = new Elysia({ prefix: "/personal-maps" }).use(auth()).post(
+export const personalMapsRouter = new Elysia({ prefix: "/personal-maps" }).use(auth()).get(
   "/",
   async ({ userId }) => {
     const personalMaps = await db
@@ -40,5 +40,39 @@ export const personalMapsRouter = new Elysia({ prefix: "/personal-maps" }).use(a
           { description: 'Array of personal maps' },
         ),
       },
+  }
+)
+.post("/",
+  async ({ userId,body,set}) => {
+     const { name, geoguessrId } = body;
+    // TODO: add checking if geoguessrID is popular map and if its valid
+     try {
+      const result = await db.insert(maps).values({
+        name,
+        geoguessrId,
+        userId,
+        isPersonal: true,
+      }).returning({ id: maps.id });
+
+      return { id: result[0].id };
+    } catch (e) {
+      if (
+        e instanceof Error &&
+        'message' in e &&
+        e.message.includes('unique constraint')
+      ) {
+        set.status = 409;
+        return { error: 'Map with this GeoGuessr ID already exists.' };
+      }
+      set.status = 500;
+      return { error: 'Internal Server Error' };
+    }
+  },
+  {
+     body: t.Object({
+      name: t.String({ minLength: 1 }),
+      geoguessrId: t.String({ minLength: 1 }),
+    }),
+    userId: true,
   }
 );
