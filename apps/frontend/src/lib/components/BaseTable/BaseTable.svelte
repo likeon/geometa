@@ -22,6 +22,7 @@
     selectedId?: Number;
     selectedIds?: Number[];
     isModalOpen?: Boolean;
+    emptyText?: String;
   };
 
   let {
@@ -30,7 +31,8 @@
     initialSorting = [],
     selectedId = $bindable(),
     selectedIds = $bindable(),
-    isModalOpen = $bindable()
+    isModalOpen = $bindable(),
+    emptyText = "No results."
   }: DataTableProps<TData, TValue> = $props();
   let sorting = $state<SortingState>(initialSorting);
   let rowSelection = $state<RowSelectionState>({});
@@ -113,7 +115,7 @@
         </Table.Row>
       {:else}
         <Table.Row>
-          <Table.Cell colspan={columns.length} class="h-24 text-center">No results.</Table.Cell>
+          <Table.Cell colspan={columns.length} class="h-24 text-center">{emptyText}</Table.Cell>
         </Table.Row>
       {/each}
     </Table.Body>
