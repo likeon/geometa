@@ -50,12 +50,15 @@ export const actions = {
         }
       }
     );
-
+console.log(apiError);
     if (apiError) {
       switch (apiError.status) {
         case 409:
           form.errors.geoguessrId = ['A map with this GeoGuessr ID already exists in our system'];
           return fail(409, { form });
+        case 403:
+          form.errors.geoguessrId = ['This is a popular map which requires additional verification - ask for it in #map-making discord channel'];
+          return fail(403, { form });
         default:
           return fail(500, {
             form,
@@ -81,7 +84,6 @@ export const actions = {
       });
     }
 
-    // check if id was provided in form, it should always be but checking anyways
     const idRaw = form.get('id');
     const id = Number(idRaw);
     if (!idRaw || isNaN(id)) {
