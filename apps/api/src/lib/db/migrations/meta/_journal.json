@@ -176,6 +176,13 @@
       "when": 1748004089084,
       "tag": "0024_dusty_lockjaw",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1748116470484,
+      "tag": "0025_fair_shadowcat",
+      "breakpoints": true
     }
   ]
 }

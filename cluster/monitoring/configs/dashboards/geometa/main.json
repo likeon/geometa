@@ -141,7 +141,7 @@
     {
       "id": 7,
       "type": "timeseries",
-      "title": "Request time",
+      "title": "api: response time",
       "gridPos": {
         "x": 0,
         "y": 0,
@@ -207,7 +207,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "quantile_over_time(\n  0.50,\n  {namespace=\"geometa-prod\",app=\"frontend\"} != \"Listening on\"\n    | json\n    | __error__ = \"\"\n    | path = \"/maps\"\n    | unwrap rt[$__interval]\n)\nby ()",
+          "expr": "quantile_over_time(\n  0.50,\n  {namespace=\"geometa-prod\",app=\"api\"}\n    | json\n    | __error__ = \"\"\n    | unwrap rt[$__interval]\n)\nby ()",
           "queryType": "range",
           "datasource": {
             "type": "loki",
@@ -219,7 +219,7 @@
         },
         {
           "refId": "B",
-          "expr": "quantile_over_time(\n  0.75,\n  {namespace=\"geometa-prod\",app=\"frontend\"} != \"Listening on\"\n    | json\n    | __error__ = \"\"\n    | path = \"/maps\"\n    | unwrap rt[$__interval]\n)\nby ()",
+          "expr": "quantile_over_time(\n  0.75,\n  {namespace=\"geometa-prod\",app=\"api\"}\n    | json\n    | __error__ = \"\"\n    | unwrap rt[$__interval]\n)\nby ()",
           "queryType": "range",
           "datasource": {
             "uid": "P8E80F9AEF21F6940",
@@ -232,7 +232,7 @@
         },
         {
           "refId": "C",
-          "expr": "quantile_over_time(\n  0.95,\n  {namespace=\"geometa-prod\",app=\"frontend\"} != \"Listening on\"\n    | json\n    | __error__ = \"\"\n    | path = \"/maps\"\n    | unwrap rt[$__interval]\n)\nby ()",
+          "expr": "quantile_over_time(\n  0.95,\n  {namespace=\"geometa-prod\",app=\"api\"}\n    | json\n    | __error__ = \"\"\n    | unwrap rt[$__interval]\n)\nby ()",
           "queryType": "range",
           "datasource": {
             "uid": "P8E80F9AEF21F6940",

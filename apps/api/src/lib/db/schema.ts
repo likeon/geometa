@@ -387,7 +387,7 @@ export const syncedMetas = pgTable('synced_metas', {
   note: text().notNull(),
   noteFromPlonkit: boolean('note_from_plonkit').notNull(),
   footer: text().notNull(),
-  images: text().array(),
+  images: text().array().notNull(),
 });
 
 export const syncedLocations = pgTable(
