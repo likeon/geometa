@@ -8,7 +8,6 @@
   import { building } from '$app/environment';
   import { ModeWatcher } from 'mode-watcher';
   import { updated } from '$app/state';
-
   let { children } = $props();
   let admin = $derived(page.url.pathname.startsWith('/dev/dash'));
   const underMaintenance = !building && env.PUBLIC_DASHBOARD_MAINTENANCE === 'true';
@@ -21,7 +20,7 @@
 </svelte:head>
 
 <ModeWatcher />
-<div class="app" data-sveltekit-reload={updated ? '' : 'off'}>
+<div class="app" data-sveltekit-reload={updated}>
   <!--  <AnnouncementBanner />-->
   <NavBar />
   <main>
