@@ -88,7 +88,7 @@ export const actions = {
       error(400, 'Invalid or missing ID');
     }
 
-    const { data, error: apiError } = await api.internal.maps.personal({ id }).patch(
+    const { error: apiError } = await api.internal.maps.personal({ id }).patch(
       {
         name
       },
@@ -100,13 +100,9 @@ export const actions = {
     );
 
     if (apiError) {
-      switch (apiError.status) {
-        default:
-          return fail(500, {
-            form,
-            message: 'Failed to create map. Please try again later.'
-          });
-      }
+      return fail(apiError.status ?? 500, {
+        message: apiError.value ?? 'Unknown error'
+      });
     }
 
     return { success: true };
@@ -121,15 +117,14 @@ export const actions = {
         message: 'Geoguessrid cannot be empty.'
       });
     }
-  
-  // check if id was provided in form, it should always be but checking anyways
+
     const idRaw = form.get('id');
     const id = Number(idRaw);
     if (!idRaw || isNaN(id)) {
       error(400, 'Invalid or missing ID');
     }
 
-    const {data, error:apiError} = await api.internal.maps.personal({id}).patch(
+    const { error: apiError } = await api.internal.maps.personal({ id }).patch(
       {
         geoguessrId: geoguessrId
       },
@@ -140,14 +135,10 @@ export const actions = {
       }
     );
 
-   if (apiError) {
-      switch (apiError.status) {
-        default:
-          return fail(500, {
-            form,
-            message: 'Failed to create map. Please try again later.'
-          });
-      }
+    if (apiError) {
+      return fail(apiError.status ?? 500, {
+        message: apiError.value ?? 'Unknown error'
+      });
     }
 
     return { success: true };
