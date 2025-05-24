@@ -10,7 +10,7 @@
 </svelte:head>
 
 <div
-  class="bg-gradient-to-r from-emerald-200 via-rose-200 to-blue-200 dark:from-gray-800 dark:via-gray-900 dark:to-black relative isolate overflow-hidden">
+  class="bg-gradient-to-r from-emerald-200/40 via-rose-200/30 to-blue-200/60 dark:from-gray-800 dark:via-gray-900 dark:to-black relative isolate overflow-hidden">
   <div class="items-center mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-10">
     <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
       <h1 class="mt-10 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
