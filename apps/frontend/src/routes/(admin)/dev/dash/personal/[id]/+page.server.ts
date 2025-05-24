@@ -4,20 +4,26 @@ import { error } from '@sveltejs/kit';
 
 export const prerender = false;
 
-
-export const load: PageServerLoad = async ({ params,locals }) => {
- const id = parseInt(params.id, 10);
+export const load: PageServerLoad = async ({ params, locals }) => {
+  const id = parseInt(params.id, 10);
   if (isNaN(id)) {
     error(400, 'Invalid ID');
   }
 
-  const result = await api.internal.maps.personal[id].get({
+  const { data, error: apiError } = await api.internal.maps.personal({ id }).get({
     headers: {
       'x-api-user-id': locals.user!.id
     }
   });
-  // change it(?)
-  const metaList = result.data!.metas;
-  const mapName = result.data!.name;
-  return { id, metaList, mapName };
+
+  if (apiError) {
+    switch (apiError.status) {
+      case 404:
+        error(404, 'Map not found');
+      default:
+        error(500, 'Something went wrong.');
+    }
+  }
+
+  return { id, metaList: data.metas, mapName: data.name };
 };

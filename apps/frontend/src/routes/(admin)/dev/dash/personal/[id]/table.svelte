@@ -2,7 +2,7 @@
   lang="ts"
   generics="TData extends {
     metaId: number;
-    usedInMapName: string;
+    usedInMapName: string | null;
   }, TValue">
   import {
     type ColumnDef,
@@ -100,8 +100,9 @@
   });
 
 
-  const usedInMapOptions = [...new Set(data.map(item => item.usedInMapName))]
-  .map(name => ({ label: name, value: name }));
+const usedInMapOptions = [
+  ...new Set(data.map(item => item.usedInMapName).filter(name => name != null))
+].map(name => ({ label: name, value: name }));
   const isFiltered = $derived(table.getState().columnFilters.length > 0);
 
   const rows = $derived(table.getRowModel().rows);

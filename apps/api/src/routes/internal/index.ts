@@ -10,12 +10,6 @@ export const internalRouter = new Elysia({
   detail: { tags: ['internal'] },
 })
   .use(auth())
-  .onRequest(({ request, set }) => {
-    if (request.headers.get('cf-connecting-ip')) {
-      set.status = 404;
-      return;
-    }
-  })
   .use(mapGroupsRouter)
   .use(mapsRouter)
   .use(personalMapsRouter)

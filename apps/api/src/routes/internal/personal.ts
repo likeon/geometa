@@ -60,7 +60,7 @@ export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
   )
   .post(
     '/',
-    async ({ userId, body, set }) => {
+    async ({ userId, body, status }) => {
       const { name, geoguessrId } = body;
       // TODO: add checking if geoguessrID is popular map and if its valid
       try {
@@ -81,11 +81,9 @@ export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
           'message' in e &&
           e.message.includes('unique constraint')
         ) {
-          set.status = 409;
-          return { error: 'Map with this GeoGuessr ID already exists.' };
+          return status(409, 'Map with this GeoGuessr ID already exists.');
         }
-        set.status = 500;
-        return { error: 'Internal Server Error' };
+        return status(500, 'Internal Server Error');
       }
     },
     {
@@ -98,7 +96,7 @@ export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
   )
   .get(
     '/:id',
-    async ({ params: { id: mapId }, userId, set }) => {
+    async ({ params: { id: mapId }, userId, status }) => {
       await ensureMapAccess(userId, mapId);
 
       // Fetch map details
@@ -115,8 +113,7 @@ export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
       });
 
       if (!map) {
-        set.status = 404;
-        return { error: 'Map not found' };
+        return status(404, 'Map not found');
       }
 
       // Fetch associated metas
@@ -156,28 +153,11 @@ export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
     {
       userId: true,
       params: t.Object({ id: t.Integer() }),
-      response: {
-        200: t.Object({
-          geoguessrId: t.String(),
-          name: t.String(),
-          metas: t.Array(
-            t.Object({
-              metaId: t.Integer(),
-              name: t.String(),
-              locationsCount: t.Integer(),
-              usedInMapName: t.Nullable(t.String()),
-            }),
-          ),
-        }),
-        404: t.Object({
-          error: t.String(),
-        }),
-      },
     },
   )
   .patch(
     '/:id',
-    async ({ params: { id: mapId }, body, userId, set }) => {
+    async ({ params: { id: mapId }, body, userId, status }) => {
       await ensureMapAccess(userId, mapId);
       console.log(body);
       const { name, geoguessrId } = body;
@@ -199,8 +179,7 @@ export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
           .returning({ id: maps.id });
 
         if (result.length === 0) {
-          set.status = 404;
-          return { error: 'Map not found' };
+          return status(404, 'Map not found');
         }
 
         return { id: result[0].id };
@@ -210,12 +189,9 @@ export const personalMapsRouter = new Elysia({ prefix: 'maps/personal' })
           'message' in e &&
           e.message.includes('unique constraint')
         ) {
-          set.status = 409;
-          return { error: 'Map with this GeoGuessr ID already exists.' };
+          return status(409, 'Map with this GeoGuessr ID already exists.')
         }
-
-        set.status = 500;
-        return { error: 'Internal Server Error' };
+        return status(500,'Internal Server Error' )
       }
     },
     {
