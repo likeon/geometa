@@ -25,7 +25,7 @@ export const userscriptRouter = new Elysia({
   prefix: '/userscript',
   detail: { tags: ['userscript'] },
 })
-  .use(bearer())
+  // .use(bearer())
   .get('/map/:geoguessrId', async ({ params: { geoguessrId }, status }) => {
     const map = await mapInfoQuery.execute({ geoguessrId });
     if (!map) {
@@ -41,59 +41,59 @@ export const userscriptRouter = new Elysia({
       userscriptVersion: userscriptVersion,
     };
   })
-  .get(
-    '/map/:geoguessrId/locations',
-    async ({ params: { geoguessrId }, bearer, status }) => {
-      if (!bearer) {
-        return status(401);
-      }
-      const mapResult = await db
-        .select({
-          id: maps.id,
-          mapGroupId: maps.mapGroupId,
-          userApiToken: users.apiToken,
-          isPersonal: maps.isPersonal,
-        })
-        .from(maps)
-        .leftJoin(users, eq(users.id, maps.userId))
-        .where(and(eq(maps.geoguessrId, geoguessrId)));
-      if (!mapResult.length) {
-        return status(404);
-      }
-
-      const [map] = mapResult;
-
-      // authenticate and get locations differently depending on what kind of map it is
-      if (!map.isPersonal) {
-        // not implemented yet
-        return status(501);
-      }
-
-      if (!map.userApiToken || bearer !== map.userApiToken) {
-        return status(403);
-      }
-
-      const locations = await personalMapLocationsExportSelect.execute({
-        mapId: map.id,
-      });
-      return {
-        customCoordinates: locations.map((location) => ({
-          lat: location.lat,
-          lng: location.lng,
-          heading: location.heading,
-          pitch: location.pitch,
-          zoom: location.zoom,
-          panoId: location.panoId,
-          countryCode: null,
-          stateCode: null,
-          extra: {
-            panoDate: location.extraPanoDate,
-            panoId: location.extraPanoId,
-          },
-        })),
-      };
-    },
-  )
+  // .get(
+  //   '/map/:geoguessrId/locations',
+  //   async ({ params: { geoguessrId }, bearer, status }) => {
+  //     if (!bearer) {
+  //       return status(401);
+  //     }
+  //     const mapResult = await db
+  //       .select({
+  //         id: maps.id,
+  //         mapGroupId: maps.mapGroupId,
+  //         userApiToken: users.apiToken,
+  //         isPersonal: maps.isPersonal,
+  //       })
+  //       .from(maps)
+  //       .leftJoin(users, eq(users.id, maps.userId))
+  //       .where(and(eq(maps.geoguessrId, geoguessrId)));
+  //     if (!mapResult.length) {
+  //       return status(404);
+  //     }
+  //
+  //     const [map] = mapResult;
+  //
+  //     // authenticate and get locations differently depending on what kind of map it is
+  //     if (!map.isPersonal) {
+  //       // not implemented yet
+  //       return status(501);
+  //     }
+  //
+  //     if (!map.userApiToken || bearer !== map.userApiToken) {
+  //       return status(403);
+  //     }
+  //
+  //     const locations = await personalMapLocationsExportSelect.execute({
+  //       mapId: map.id,
+  //     });
+  //     return {
+  //       customCoordinates: locations.map((location) => ({
+  //         lat: location.lat,
+  //         lng: location.lng,
+  //         heading: location.heading,
+  //         pitch: location.pitch,
+  //         zoom: location.zoom,
+  //         panoId: location.panoId,
+  //         countryCode: null,
+  //         stateCode: null,
+  //         extra: {
+  //           panoDate: location.extraPanoDate,
+  //           panoId: location.extraPanoId,
+  //         },
+  //       })),
+  //     };
+  //   },
+  // )
   .get(
     '/location/',
     async ({ query, set }) => {
