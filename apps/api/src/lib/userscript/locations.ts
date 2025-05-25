@@ -12,11 +12,13 @@ import { pick } from 'remeda';
 
 export const locationSelect = db
   .select({
-    name: syncedMetas.name,
-    note: syncedMetas.note,
-    noteFromPlonkit: syncedMetas.noteFromPlonkit,
-    footer: syncedMetas.footer,
-    images: syncedMetas.images,
+    ...pick(getTableColumns(syncedMetas), [
+      'name',
+      'note',
+      'footer',
+      'images',
+      'noteFromPlonkit',
+    ]),
     country: syncedLocations.country,
     mapFooter: maps.footerHtml,
   })

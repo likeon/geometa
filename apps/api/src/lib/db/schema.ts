@@ -97,7 +97,7 @@ export const maps = pgTable(
     geoguessrId: text('geoguessr_id').notNull().unique(),
     description: text('description'),
     isPublished: boolean('is_published').notNull().default(false),
-    isShared: boolean('is_community').notNull().default(false),
+    isShared: boolean('is_shared').notNull().default(false),
     isPersonal: boolean('is_personal').notNull().default(false),
     // only for personal maps
     userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
