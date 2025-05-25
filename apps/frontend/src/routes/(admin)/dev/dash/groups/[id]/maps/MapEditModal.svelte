@@ -66,6 +66,7 @@
     $form.excludeFilters = [];
     $form.difficulty = 0;
     $form.isVerified = false;
+    $form.isShared = false;
   }
   nullifyForm();
 
@@ -86,6 +87,7 @@
         $form.regions = selectedMap.mapRegions.map((item) => item.regionId);
         $form.difficulty = selectedMap.difficulty;
         $form.isVerified = selectedMap.isVerified;
+        $form.isShared = selectedMap.isShared;
         $form.includeFilters = selectedMap.filters
           .filter((item) => item.isExclude == false)
           .map((item) => item.tagLike as string);
@@ -212,6 +214,7 @@
         <Alert color="red">{$errors.authors}</Alert>
       {/if}
     </Label>
+    <Checkbox bind:checked={$form.isShared}>Share metas for personal maps</Checkbox>
     {#if user.isSuperadmin || user.isTrusted}
       <Label>
         <div class="flex flex-row space-x-2">
