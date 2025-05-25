@@ -21,7 +21,6 @@
   id={`delete-form-${id}`}
   use:enhance={({ cancel }) => {
     const confirmed = confirm(confirmMessage);
-    console.log(confirmed);
     if (!confirmed) {
       cancel();
       dropdownOpen = false;

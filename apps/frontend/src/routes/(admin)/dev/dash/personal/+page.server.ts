@@ -155,7 +155,7 @@ export const actions = {
       error(400, 'Invalid or missing ID');
     }
 
-    const { error: apiError } = await api.internal.maps.personal({ mapId:id }).delete(null,
+    const { error: apiError } = await api.internal.maps.personal({ id }).delete(null,
       {
         headers: {
           'x-api-user-id': locals.user!.id

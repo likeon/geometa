@@ -14,15 +14,15 @@
     type SortingState,
     type VisibilityState
   } from '@tanstack/table-core';
-  import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
+  import {createSvelteTable, FlexRender} from '$lib/components/ui/data-table/index.js';
   import BaseTableFilterPopover from '$lib/components/BaseTable/BaseTableFilterPopover.svelte';
-  import { Button } from '$lib/components/ui/button';
+  import {Button} from '$lib/components/ui/button';
   import X from '@lucide/svelte/icons/x';
-  import { Input } from '$lib/components/ui/input';
+  import {Input} from '$lib/components/ui/input';
 
   import * as Table from '$lib/components/ui/table/index.js';
-  import { createVirtualizer } from '$lib/virtualizer.svelte';
-  import { enhance } from '$app/forms';
+  import {createVirtualizer} from '$lib/virtualizer.svelte';
+  import {enhance} from '$app/forms';
 
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
@@ -102,7 +102,7 @@
   const levelOptions = $derived(
     Array.from(new Set(data.flatMap((row) => row.metaLevels.map((m) => m.level.name))))
       .sort((a, b) => a.localeCompare(b))
-      .map((name) => ({ label: name, value: name }))
+      .map((name) => ({label: name, value: name}))
   );
   const isFiltered = $derived(table.getState().columnFilters.length > 0);
 
@@ -126,23 +126,23 @@
 
   let prevDataSize = data?.length ?? 0;
 
- // if data is removed/added unselected all rows
-$effect(() => {
-  if (data && data.length !== prevDataSize) {
-    table.resetRowSelection();
-  }
-  prevDataSize = data?.length ?? 0;
-});
+  // if data is removed/added unselected all rows
+  $effect(() => {
+    if (data && data.length !== prevDataSize) {
+      table.resetRowSelection();
+    }
+    prevDataSize = data?.length ?? 0;
+  });
 </script>
 
 <div class="rounded-md">
   <div class="min-h-[40px] flex flex-1 items-center space-x-2">
     {#if selectedRows.length != 0}
-<form
-  action="?/deleteMetas"
-  method="post"
-  id={`delete-metas-form`}
-  use:enhance={({ cancel }) => {
+      <form
+        action="?/deleteMetas"
+        method="post"
+        id={`delete-metas-form`}
+        use:enhance={({ cancel }) => {
     const confirmed = confirm(`Are you sure you want to delete ${selectedRows.length} meta(s)? IT'S PERMAMENT DELETION`);
     if (!confirmed) {
       cancel();
@@ -151,16 +151,16 @@ $effect(() => {
       update();
     };
   }}>
-  {#each selectedRows as row}
-    <input type="hidden" name="id" value={row.original.id} />
-  {/each}
- <button
-  type="submit"
-  class="w-full text-left px-2 py-1.5 bg-red-600 text-white font-semibold rounded hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
->
-    MASS DELETE
-  </button>
-</form>
+        {#each selectedRows as row}
+          <input type="hidden" name="id" value={row.original.id}/>
+        {/each}
+        <button
+          type="submit"
+          class="w-full text-left px-2 py-1.5 bg-red-600 text-white font-semibold rounded hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
+        >
+          MASS DELETE
+        </button>
+      </form>
 
     {/if}
     <Input
@@ -172,7 +172,7 @@ $effect(() => {
       oninput={(e) => {
         table.getColumn('search')?.setFilterValue(e.currentTarget.value);
       }}
-      class="h-8 w-[150px] lg:w-[250px]" />
+      class="h-8 w-[150px] lg:w-[250px]"/>
     <BaseTableFilterPopover
       {table}
       columnId="images"
@@ -180,7 +180,7 @@ $effect(() => {
       options={[
         { label: 'Has Image', value: 'has' },
         { label: 'No Image', value: 'none' }
-      ]} />
+      ]}/>
     <BaseTableFilterPopover
       {table}
       columnId="note"
@@ -188,14 +188,14 @@ $effect(() => {
       options={[
         { label: 'Has Note', value: 'has' },
         { label: 'Missing Note', value: 'none' }
-      ]} />
+      ]}/>
     {#if levelOptions.length !== 0}
-      <BaseTableFilterPopover {table} columnId="levels" title="Levels" options={levelOptions} />
+      <BaseTableFilterPopover {table} columnId="levels" title="Levels" options={levelOptions}/>
     {/if}
     {#if isFiltered}
       <Button variant="ghost" onclick={() => table.resetColumnFilters()} class="h-8 px-2 lg:px-3">
         Reset
-        <X size={16} />
+        <X size={16}/>
       </Button>
     {/if}
   </div>
@@ -214,7 +214,7 @@ $effect(() => {
                 {#if !header.isPlaceholder}
                   <FlexRender
                     content={header.column.columnDef.header}
-                    context={header.getContext()} />
+                    context={header.getContext()}/>
                 {/if}
               </Table.Head>
             {/each}
@@ -235,7 +235,7 @@ $effect(() => {
                 onclick={cell.column.columnDef.meta?.preventRowClick
                   ? (e) => e.stopPropagation()
                   : undefined}>
-                <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+                <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()}/>
               </td>
             {/each}
           </Table.Row>
@@ -255,6 +255,7 @@ $effect(() => {
     padding-top: var(--virtualPaddingTop);
     content: '';
   }
+
   :global(tbody::after) {
     display: block;
     padding-bottom: var(--virtualPaddingBottom);

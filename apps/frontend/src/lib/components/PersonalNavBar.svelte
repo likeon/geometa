@@ -81,18 +81,18 @@ interface Props {
   </div>
 
 
-  
+
   <nav class="-mb-px flex space-x-8" aria-label="Tabs">
     {@render navItem({
-      name: 'Metas',       
+      name: 'Metas',
     })}
     {@render navItem({
       name: 'Settings',
       slug: 'settings'
     })}
   </nav>
- 
- 
+
+
 </div>
 
 
@@ -103,7 +103,6 @@ interface Props {
   action="/dev/dash/personal?/updatePersonalMapName"
   use:enhance={() => {
     return async ({ result, formData }) => {
-      console.log(result);
       if (result.type === 'failure') {
 errorMessage = (result.data as { message?: string })?.message ?? 'Something went wrong';
   return;

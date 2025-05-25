@@ -3,10 +3,16 @@
   import { Button } from '$lib/components/ui/button';
   import { fade } from 'svelte/transition';
   import type { PageProps } from './$types';
+  import { enhance } from '$app/forms';
+  import { SvelteSet } from 'svelte/reactivity';
+  import {Alert} from "flowbite-svelte";
+
 
   let { data }: PageProps = $props();
-
-
+let showNotLoggedInAlert = $state(false);
+let showNoPersonalMapsAlert = $state(false);
+let showAddedMetasAlert = $state(false);
+let showErrorAlert = $state(false);
 
   type Meta = {
     id: number;
@@ -20,6 +26,31 @@
 
   let selectedMeta: Meta =  $state(data.metaList[0]);
   let rightPanelRef: HTMLDivElement | undefined = $state();
+
+
+  let selectedMetaIds = new SvelteSet<number>();
+  let selectAll = $state(false);
+
+
+  function toggleMeta(id: number, checked: boolean) {
+    if (checked) {
+      selectedMetaIds.add(id);
+    } else {
+      selectedMetaIds.delete(id);
+    }
+  }
+
+  function toggleAll(checked: boolean) {
+    if (checked) {
+      for (const id of data.metaList.map((m) => m.id)) {
+        selectedMetaIds.add(id);
+      }
+    } else {
+      selectedMetaIds.clear();
+    }
+    selectAll = checked;
+  }
+
 </script>
 
 <svelte:head>
@@ -33,26 +64,178 @@
           <div
         in:fade
         class="mx-auto flex flex-col lg:flex-row bg-white dark:bg-black shadow-lg rounded-lg overflow-hidden w-full max-w-[1500px] lg:h-[calc(100vh-90px)] h-[calc(100vh-80px)]">
-        <div
-          class="lg:w-1/4 p-4 border-b lg:border-b-0 lg:border-r border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-900 rounded-t-lg lg:rounded-l-lg overflow-y-auto h-[130px] lg:h-full">
-          <table class="table-auto w-full text-left">
-            <tbody>
-              {#each data.metaList as meta (meta.id)}
-                <tr
-                  class={`cursor-pointer hover:bg-gray-200 hover:dark:bg-gray-800 ${
-                    selectedMeta.id === meta.id ? 'bg-blue-100 dark:bg-green-900 font-semibold' : ''
-                  }`}
-                  onclick={() => {
-                    selectedMeta =meta;
-                    if (rightPanelRef) rightPanelRef.scrollTop = 0;
-                  }}>
-                  <td class="py-2 px-4 text-sm">{`${meta.name}(${meta.locationsCount})`}</td>
-                </tr>
-              {/each}
-            </tbody>
-          </table>
-        </div>
 
+            <div class="lg:w-1/4 p-4 border-b lg:border-b-0 lg:border-r border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-900 rounded-t-lg lg:rounded-l-lg  h-[130px] lg:h-full">
+              {#if showErrorAlert}
+                <Alert color="red" class="relative pr-10">
+                  There was an error, try again later.
+                  <button
+                    class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-gray-800"
+                    onclick={() => (showErrorAlert = false)}
+                    aria-label="Close"
+                  >
+                    &times;
+                  </button>
+                </Alert>
+              {/if}
+
+
+                {#if showNotLoggedInAlert}
+                  <Alert class="relative pr-10">
+                    You are not logged in, you can login with discord
+                    <a href="/dev/dash/personal" class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900">here</a> and create your personal map.
+                    <button
+                      class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-gray-800"
+                      onclick={() => (showNotLoggedInAlert = false)}
+                      aria-label="Close"
+                    >
+                      &times;
+                    </button>
+                  </Alert>
+                {/if}
+              {#if showNoPersonalMapsAlert}
+                <Alert class="relative pr-10">
+                  You don't have any personal maps, you can do it
+                  <a href="/dev/dash/personal" class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900">here</a>.
+                  <button
+                    class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-gray-800"
+                    onclick={() => (showNoPersonalMapsAlert = false)}
+                    aria-label="Close"
+                  >
+                    &times;
+                  </button>
+                </Alert>
+              {/if}
+              {#if showAddedMetasAlert}
+                <Alert class="relative pr-10">
+                  <p>You added {selectedMetaIds.size} meta(s) to your personal map!</p>
+                  <p>Click
+                  <a
+                    target="_blank"
+                    href={`/dev/dash/personal/${data.personalMaps[0]?.id}`}
+                    class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900"
+                  >here</a> to see meta list for your personal map. </p>
+                  <button
+                    class="absolute top-2 right-2 text-2xl text-gray-500 hover:text-gray-800"
+                    onclick={() => (showAddedMetasAlert = false)}
+                    aria-label="Close"
+                  >
+                    &times;
+                  </button>
+                </Alert>
+              {/if}
+
+
+
+              <div class="grid grid-rows-[auto_1fr_auto] h-full">
+                {#if data.isMapShared}
+              <form
+                action="?/addMetasToPersonalMap"
+                method="post"
+                id='delete-metas-form'
+                use:enhance={({ cancel }) => {
+                  showNoPersonalMapsAlert = false;
+                  showNotLoggedInAlert = false;
+                  showAddedMetasAlert = false;
+                  showErrorAlert = false;
+                      if (!data.isLoggedIn) {
+                        cancel();
+                        showNotLoggedInAlert = true;
+                        return;
+                      }
+                      if (data.personalMaps.length === 0) {
+                        cancel();
+                      showNoPersonalMapsAlert = true;
+                      return;
+                      }
+    const confirmed = confirm(`Are you sure you wanna add ${selectedMetaIds.size} meta(s) to your personal map?`);
+    if (!confirmed) {
+      cancel();
+    }
+    return async ({ update, result }) => {
+      if (result.status !== 200) {
+        showErrorAlert = true;
+        return;
+        }
+       showAddedMetasAlert = true;
+      update();
+    };
+  }}>
+
+                {#each selectedMetaIds as metaId (metaId)}
+                  <input type="hidden" name="id" value={metaId} />
+                {/each}
+                <input type="hidden" name="mapId" value={data.personalMaps[0]?.id} />
+                <button
+                  type="submit"
+                  class="w-full text-left px-2 py-1.5 bg-green-600 text-white font-semibold rounded hover:bg-green-700 active:bg-red-800 transition-colors shadow-sm"
+                >
+                  Add to personal map
+                </button>
+              </form>
+                {/if}
+              <div class="mb-2 text-right overflow-y-auto">
+              <table class="table-auto w-full text-left">
+                {#if data.isMapShared}
+                <thead>
+                <tr>
+                  <th
+                    class="px-2 w-8 text-center align-middle cursor-pointer"
+                    onclick={() => {
+                      toggleAll(!selectAll);                  }}
+                  >
+                    <input
+                      type="checkbox"
+                      bind:checked={selectAll}
+                      onclick={(event) => event.stopPropagation()}
+                      onchange={() => toggleAll(selectAll)}
+                    />
+                  </th>
+                  <th class="px-2">Select all</th>
+                </tr>
+                </thead>
+                  {/if}
+                <tbody>
+                {#each data.metaList as meta (meta.id)}
+
+                  <tr
+                    class={`hover:bg-gray-200 hover:dark:bg-gray-800 ${
+            selectedMeta.id === meta.id ? 'bg-blue-100 dark:bg-green-900 font-semibold' : ''
+          }`}
+                  >
+                    {#if data.isMapShared}
+                    <td
+                      class="px-2 w-8 text-center align-middle cursor-pointer"
+                      onclick={() => toggleMeta(meta.id, !selectedMetaIds.has(meta.id))}
+                    >
+                      <label class="flex justify-center items-center h-full w-full">
+                        <input
+                          type="checkbox"
+                          class="cursor-pointer"
+                          checked={selectedMetaIds.has(meta.id)}
+                          onclick={(event) => event.stopPropagation()}
+                          onchange={(e) => toggleMeta(meta.id, e.currentTarget.checked)}
+                        />
+                      </label>
+                    </td>
+                      {/if}
+                    <td
+                      class="py-2 px-2 text-sm cursor-pointer"
+                      onclick={() => {
+              selectedMeta = meta;
+              if (rightPanelRef) rightPanelRef.scrollTop = 0;
+            }}
+                    >
+                      {`${meta.name} (${meta.locationsCount})`}
+                    </td>
+                  </tr>
+                {/each}
+                </tbody>
+              </table>
+
+</div>
+</div>
+</div>
         <div class="lg:w-3/4 p-4 overflow-y-auto h-full" bind:this={rightPanelRef}>
           <div class="flex w-full items-center mb-3">
             <h1 class="text-xl">Meta List - {data.mapName}</h1>

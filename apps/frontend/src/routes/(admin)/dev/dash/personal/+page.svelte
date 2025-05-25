@@ -18,7 +18,6 @@
       if (result.result.type === 'success' && result.result.data?.success) {
         personalMapCreationModalOpen = false;
       }
-      console.log(result.result);
     }
   });
 </script>

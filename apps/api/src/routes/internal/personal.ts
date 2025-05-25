@@ -9,7 +9,7 @@ import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensureMapAccess } from '@api/lib/internal/permissions';
 import { geoguessrGetMapInfo } from '@api/lib/internal/utils';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
@@ -198,18 +198,68 @@ export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
       }),
       userId: true,
     },
-  ).delete(
+  )
+  .delete(
     '/:id',
     async ({ params: { id: mapId }, userId }) => {
       await ensureMapAccess(userId, mapId);
-      await db
-        .delete(maps)
-        .where(eq(maps.id, mapId));
+      await db.delete(maps).where(eq(maps.id, mapId));
       return;
     },
     {
       params: t.Object({
         id: t.Integer(),
+      }),
+      userId: true,
+    },
+  )
+  .post(
+    '/:id/metas',
+    async ({ params, body, userId, status }) => {
+      const mapId = Number(params.id);
+      await ensureMapAccess(userId, mapId);
+      const { metaIds } = body;
+
+      if (
+        !Array.isArray(metaIds) ||
+        metaIds.some((id) => typeof id !== 'number')
+      ) {
+        return status(400, 'Invalid metaIds array');
+      }
+
+      // check if provided metaids are for sure from the map that has sharing enabled(not sure if needed but someone technically could send request with ids that are from not shared map?)
+      const validMetaIds = await db
+        .selectDistinct({ syncedMetaId: syncedMapMetas.syncedMetaId })
+        .from(syncedMapMetas)
+        .innerJoin(maps, eq(maps.id, syncedMapMetas.mapId))
+        .where(
+          and(
+            eq(maps.isShared, true),
+            inArray(syncedMapMetas.syncedMetaId, metaIds),
+          ),
+        );
+
+      const validIdsSet = new Set(validMetaIds.map((m) => m.syncedMetaId));
+      if (validIdsSet.size === 0) {
+        return status(400, 'No valid metaIds provided');
+      }
+
+      const valuesToInsert = Array.from(validIdsSet).map((syncedMetaId) => ({
+        mapId,
+        syncedMetaId,
+      }));
+
+      await db
+        .insert(syncedMapMetas)
+        .values(valuesToInsert)
+        .onConflictDoNothing(); // avoid duplicate errors
+
+      return { success: true, inserted: valuesToInsert.length };
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      body: t.Object({
+        metaIds: t.Array(t.Integer()),
       }),
       userId: true,
     },

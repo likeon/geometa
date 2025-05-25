@@ -105,7 +105,6 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
   .get(
     '/personal',
     async ({ userId }) => {
-      console.log('HERE');
       return db
         .select({
           id: maps.id,
