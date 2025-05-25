@@ -9,6 +9,7 @@ import {
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
+import { maybeWrapImageUrl } from '@api/lib/internal/utils';
 import { generateFooter } from '@api/lib/userscript/utils';
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
@@ -179,11 +180,14 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
             isSingleCountry || meta.countries.length === 0
               ? meta.name
               : `${meta.countries[0]} - ${meta.name}`;
+
+          //for metas that are taken not from syncedMeta images have no compression, we can remove it later when most map will be on new system
+          const images = meta.images.map((image) => maybeWrapImageUrl(image));
           return {
             id: meta.id,
             name,
             note: meta.note,
-            images: meta.images,
+            images,
             locationsCount: meta.locationsCount,
             footer,
           };

@@ -51,3 +51,20 @@ export async function geoguessrGetMapInfo(geoguessrId: string) {
 
   return mapInfo;
 }
+
+//for metas that are taken not from syncedMeta images have no compression, we can remove it later when most map will be on new system
+export function maybeWrapImageUrl(url: string): string {
+  const cdnPrefix =
+    'https://learnablemeta.com/cdn-cgi/image/format=avif,quality=80/';
+  const staticPrefix = 'https://static.learnablemeta.com/';
+
+  const isAlreadyWrapped = url.startsWith(cdnPrefix);
+  const isStaticImage = url.startsWith(staticPrefix);
+  const endsWithAvif = url.endsWith('.avif');
+
+  if (!isAlreadyWrapped && isStaticImage && !endsWithAvif) {
+    return `${cdnPrefix}${url}`;
+  }
+
+  return url;
+}
