@@ -19,7 +19,7 @@ const countries = new Map(
       name.toLocaleLowerCase().trim(),
       {
         name: name,
-        footer: `Check out  <a href="https://www.plonkit.net/${slug}" rel="nofollow" target="_blank">www.plonkit.net/${slug}</a>. for more clues.`,
+        footer: `Check out  <a href="https://www.plonkit.net/${slug}" rel="nofollow" target="_blank">www.plonkit.net/${slug}</a> for more clues.`,
       },
     ];
   }),
