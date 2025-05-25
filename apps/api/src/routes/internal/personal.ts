@@ -92,21 +92,29 @@ export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
         .select({
           metaId: syncedMetas.metaId,
           name: syncedMetas.name,
+          countries: sql<string[]>`
+            ARRAY(
+            SELECT DISTINCT ${syncedLocations.country}
+            FROM ${syncedLocations}
+            WHERE ${syncedLocations.syncedMetaId} = ${syncedMetas.metaId}
+              AND ${syncedLocations.country} IS NOT NULL
+              )
+          `,
           locationsCount: sql<number>`(
-          SELECT COUNT(*)
-          FROM ${syncedLocations} sl
-          WHERE sl.synced_meta_id = ${syncedMetas.metaId}
-        )`,
+                                        SELECT COUNT(*)
+                                        FROM ${syncedLocations} sl
+                                        WHERE sl.synced_meta_id = ${syncedMetas.metaId}
+                                      )`,
           usedInMapName: sql<string | null>`(
-          SELECT m.name
-          FROM ${syncedMapMetas} sm
-          INNER JOIN ${maps} m ON m.id = sm.map_id
-          WHERE
-            sm.synced_meta_id = ${syncedMetas.metaId}
-            AND m.is_personal = FALSE
-          ORDER BY m.number_of_games_played DESC NULLS LAST, m.id ASC
-          LIMIT 1
-        )`,
+      SELECT m.name
+      FROM ${syncedMapMetas} sm
+      INNER JOIN ${maps} m ON m.id = sm.map_id
+      WHERE
+        sm.synced_meta_id = ${syncedMetas.metaId}
+        AND m.is_personal = FALSE
+      ORDER BY m.number_of_games_played DESC NULLS LAST, m.id ASC
+      LIMIT 1
+    )`,
         })
         .from(syncedMapMetas)
         .innerJoin(

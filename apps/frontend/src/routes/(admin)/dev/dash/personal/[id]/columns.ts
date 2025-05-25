@@ -23,12 +23,16 @@ export const columns: ColumnDef<PageData['metaList'][number]>[] = [
     enableSorting: false,
     enableHiding: false,
     meta: { class: 'pl-2 w-8 min-w-8 max-w-8',
-        preventRowClick: true 
+        preventRowClick: true
      }
   },
-  
+
 {
     accessorKey: 'name',
+  accessorFn: (row) => {
+    const country = row.countries?.[0] || 'Unknown country';
+    return `${country} - ${row.name}`;
+  },
     header: ({ column }) =>
       renderComponent(BaseTableHeader, {
         name: 'Name',
