@@ -80,7 +80,7 @@ export const metasFromMapStatement = db
       (
         SELECT COUNT(*)
         FROM ${mapGroupLocations} mgl
-        JOIN ${maps} m ON m.map_group_id = mgl.map_group_id
+               JOIN ${maps} m ON m.map_group_id = mgl.map_group_id
         WHERE m.id = ${mapMetas.mapId}
           AND mgl.extra_tag = ${mapMetas.metaTag}
       )
@@ -170,20 +170,23 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
       return metas
         .map((meta) => {
           const footer = generateFooter(
-            meta.noteFromPlonkit,
+            !meta.noteFromPlonkit,
             meta.countries[0] || '',
             meta.footer,
             meta.mapFooter,
           );
+
+          const name =
+            isSingleCountry || meta.countries.length === 0
+              ? meta.name
+              : `${meta.countries[0]} - ${meta.name}`;
           return {
             id: meta.id,
-            name: isSingleCountry
-              ? meta.name
-              : `${meta.countries[0] || 'Unknown country'} - ${meta.name}`,
+            name,
             note: meta.note,
             images: meta.images,
             locationsCount: meta.locationsCount,
-            footer: footer,
+            footer,
           };
         })
         .sort((a, b) => a.name.localeCompare(b.name));
