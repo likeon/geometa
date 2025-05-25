@@ -3,6 +3,7 @@
   import PersonalNavBar from '$lib/components/PersonalNavBar.svelte';
   import Icon from '@iconify/svelte';
   import { Button, Heading, Input, Label, Modal } from 'flowbite-svelte';
+  import {goto} from "$app/navigation";
  let { data } = $props();
 
 
@@ -30,9 +31,27 @@ Geoguessrid: {geoguessrId}
       <div>
         <p class="font-semibold">Delete this map</p>
       </div>
-      <Button color="red" class="dark:bg-red-900" onclick={() => console.log("Delete map")}
-        >Delete
-      </Button>
+      <form
+        action="/dev/dash/personal?/deletePersonalMap"
+        method="post"
+        id=data.id
+        use:enhance={({ cancel }) => {
+    const confirmed = confirm('Are you sure you want to delete this map?');
+    if (!confirmed) {
+      cancel();
+    }
+    return async () => {
+       await goto('/dev/dash/personal');
+    };
+  }}>
+        <input type="hidden" name="id" value={data.id} />
+        <button
+          type="submit"
+          class="w-full text-left px-2 py-1.5 bg-red-600 text-white font-semibold rounded hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
+        >
+          DELETE
+        </button>
+      </form>
     </div>
   </div>
 </div>

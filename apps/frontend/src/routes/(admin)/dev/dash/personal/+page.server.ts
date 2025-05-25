@@ -50,7 +50,8 @@ export const actions = {
         }
       }
     );
-console.log(apiError);
+
+
     if (apiError) {
       switch (apiError.status) {
         case 409:
@@ -143,5 +144,30 @@ console.log(apiError);
     }
 
     return { success: true };
+  },
+
+
+  deletePersonalMap: async ({ request, locals }) => {
+    const form = await request.formData();
+    const idRaw = form.get('id');
+    const id = Number(idRaw);
+    if (!idRaw || isNaN(id)) {
+      error(400, 'Invalid or missing ID');
+    }
+
+    const { error: apiError } = await api.internal.maps.personal({ mapId:id }).delete(null,
+      {
+        headers: {
+          'x-api-user-id': locals.user!.id
+        }
+      }
+    );
+
+    if (apiError) {
+      return fail(apiError.status ?? 500, {
+        message: apiError.value ?? 'Unknown error'
+      });
+    }
   }
+
 };

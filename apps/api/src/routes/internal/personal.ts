@@ -130,7 +130,6 @@ export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
     '/:id',
     async ({ params: { id: mapId }, body, userId, status }) => {
       await ensureMapAccess(userId, mapId);
-      console.log(body);
       const { name, geoguessrId } = body;
 
       const user = await db.query.users.findFirst({
@@ -188,6 +187,21 @@ export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
       body: t.Object({
         name: t.Optional(t.String({ minLength: 1 })),
         geoguessrId: t.Optional(t.String({ minLength: 1 })),
+      }),
+      userId: true,
+    },
+  ).delete(
+    '/:id',
+    async ({ params: { id: mapId }, userId }) => {
+      await ensureMapAccess(userId, mapId);
+      await db
+        .delete(maps)
+        .where(eq(maps.id, mapId));
+      return;
+    },
+    {
+      params: t.Object({
+        id: t.Integer(),
       }),
       userId: true,
     },
