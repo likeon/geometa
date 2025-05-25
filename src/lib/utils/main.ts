@@ -182,6 +182,6 @@ export function logInfo(name: string, data?: any) {
 
 
 export function extractMapIdFromUrl(url: string) {
-  const match = url.match(/\/maps\/(.+)/);
+  const match = url.match(/\/maps\/([^\/]+)/);
   return match ? match[1] : null;
 }
