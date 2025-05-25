@@ -1,58 +1,27 @@
-import { eq } from 'drizzle-orm';
-import { mapMetas, maps, type MapMetas } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
-import { generateFooter, getCountryFromTagName } from '$lib/utils.js';
-import type { DB } from '$lib/drizzle.js';
+import { api } from '$lib/api';
+import type { PageServerLoad } from './$types';
 
-async function processMapMetaList(db: DB, rawMapMetaList: MapMetas[]) {
-  const countries = rawMapMetaList.map((meta) => getCountryFromTagName(meta.metaTag));
-  const uniqueCountries = new Set(countries);
-  const isSingleCountry = uniqueCountries.size === 1;
+export const load: PageServerLoad = async ({ params }) => {
+  const geoguessrId = params.geoguessrMapId;
 
-  const mapMetaList = await Promise.all(
-    rawMapMetaList.map(async (meta, index) => {
-      let footer: string = meta.metaFooterHtml.trim() || meta.mapFooterHtml.trim();
+  const {data: map, error: mapApiError} = await api.internal.maps({ geoguessrId }).get();
 
-      if (!footer) {
-        footer = await generateFooter(countries[index], meta.metaNoteFromPlonkit);
-      }
-
-      return {
-        name: isSingleCountry ? meta.metaName : `${countries[index]} - ${meta.metaName}`,
-        noteHtml: meta.metaNoteHtml,
-        imageUrls: meta.metaImageUrls ? meta.metaImageUrls.split(',').map((url) => url.trim()) : [],
-        footer
-      };
-    })
-  );
-
-  mapMetaList.sort((a, b) => a.name.localeCompare(b.name));
-  return mapMetaList;
-}
-
-export const load = async ({ params, locals }) => {
-  const geoguessrMapId = params.geoguessrMapId;
-
-  const rawMapMetaList = await locals.db
-    .select()
-    .from(mapMetas)
-    .where(eq(mapMetas.geoguessrId, geoguessrMapId))
-    .orderBy(mapMetas.metaTag);
-
-  if (rawMapMetaList.length == 0) {
-    throw error(404, 'Map not found');
+  if (mapApiError) {
+    error(500);
   }
 
-  const mapName = rawMapMetaList[0].mapName;
+  if (map.isPersonal) {
+    error(500);
+  }
 
-  const mapPromise = locals.db.query.maps.findFirst({
-    where: eq(maps.geoguessrId, geoguessrMapId)
-  });
-  const mapMetaListPromise = processMapMetaList(locals.db, rawMapMetaList);
-
+  const  {data: metaList, error: apiError} =  await api.internal.maps.metas({mapId: map.id}).get();
+  if (apiError) {
+    error(500);
+  }
   return {
-    mapName,
-    map: mapPromise,
-    mapMetaList: mapMetaListPromise
+    metaList,
+    mapName: map.name,
+    mapGeoguessrId: map.geoguessrId
   };
 };
