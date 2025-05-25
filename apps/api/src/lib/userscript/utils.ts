@@ -1,4 +1,7 @@
-import { countryNames, plonkitCreditFooter } from '@api/lib/userscript/constants';
+import {
+  countryNames,
+  plonkitCreditFooter,
+} from '@api/lib/userscript/constants';
 
 export function getPlonkitCountrySlug(countryName: string) {
   switch (countryName) {

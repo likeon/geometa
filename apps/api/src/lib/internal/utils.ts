@@ -1,6 +1,6 @@
 export async function geoguessrAPIFetch(
   url: string,
-  { method = 'GET', headers, ...restOptions }: RequestInit = {}
+  { method = 'GET', headers, ...restOptions }: RequestInit = {},
 ) {
   const ncfaToken = process.env.NFCA_TOKEN || null;
 
@@ -10,18 +10,18 @@ export async function geoguessrAPIFetch(
 
   const defaultHeaders: HeadersInit = {
     Cookie: `_ncfa=${ncfaToken}`,
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
   };
 
   const mergedHeaders: HeadersInit = {
     ...defaultHeaders,
-    ...(headers || {})
+    ...(headers || {}),
   };
 
   return await fetch(url, {
     method,
     headers: mergedHeaders,
-    ...restOptions
+    ...restOptions,
   });
 }
 
@@ -51,4 +51,3 @@ export async function geoguessrGetMapInfo(geoguessrId: string) {
 
   return mapInfo;
 }
-

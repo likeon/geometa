@@ -5,14 +5,13 @@ import {
   metas,
   syncedLocations,
   syncedMapMetas,
-  syncedMetas
+  syncedMetas,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
-import {Elysia, t} from 'elysia';
-import {and, eq, sql} from "drizzle-orm";
-import {generateFooter} from "@api/lib/userscript/utils";
-
+import { generateFooter } from '@api/lib/userscript/utils';
+import { and, eq, sql } from 'drizzle-orm';
+import { Elysia, t } from 'elysia';
 
 const syncedMetasStatement = db
   .select({
@@ -38,14 +37,8 @@ const syncedMetasStatement = db
     )`,
   })
   .from(syncedMapMetas)
-  .innerJoin(
-    syncedMetas,
-    eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId)
-  )
-  .innerJoin(
-    maps,
-    eq(maps.id, syncedMapMetas.mapId),
-  )
+  .innerJoin(syncedMetas, eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId))
+  .innerJoin(maps, eq(maps.id, syncedMapMetas.mapId))
   .where(eq(syncedMapMetas.mapId, sql.placeholder('mapId')))
   .groupBy(
     syncedMetas.metaId,
@@ -54,10 +47,9 @@ const syncedMetasStatement = db
     syncedMetas.noteFromPlonkit,
     syncedMetas.footer,
     syncedMetas.images,
-    maps.footerHtml
+    maps.footerHtml,
   )
   .prepare('get_synced_metas_by_map_id');
-
 
 export const metasFromMapStatement = db
   .select({
@@ -92,26 +84,28 @@ export const metasFromMapStatement = db
         WHERE m.id = ${mapMetas.mapId}
           AND mgl.extra_tag = ${mapMetas.metaTag}
       )
-    `
+    `,
   })
   .from(mapMetas)
   .innerJoin(
     metas,
     and(
       eq(mapMetas.metaTag, metas.tagName),
-      eq(mapMetas.mapId, sql`(SELECT m.id FROM ${maps} m WHERE m.map_group_id = ${metas.mapGroupId} AND m.id = ${mapMetas.mapId})`)
-    )
+      eq(
+        mapMetas.mapId,
+        sql`(SELECT m.id FROM ${maps} m WHERE m.map_group_id = ${metas.mapGroupId} AND m.id = ${mapMetas.mapId})`,
+      ),
+    ),
   )
   .where(eq(mapMetas.mapId, sql.placeholder('mapId')))
   .prepare('get_metas_by_map_id_with_id');
-
 
 export const mapsRouter = new Elysia({ prefix: '/maps' })
   .use(auth())
   .get(
     '/personal',
     async ({ userId }) => {
-      console.log("HERE");
+      console.log('HERE');
       return db
         .select({
           id: maps.id,
@@ -155,54 +149,61 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
   )
   .get('/', async () => {
     return db.select().from(maps);
-  }).get(
+  })
+  .get(
     '/metas/:mapId',
-    async ({ params: { mapId }}) => {
-
-      const syncedMapQuery = await db.select()
+    async ({ params: { mapId } }) => {
+      const syncedMapQuery = await db
+        .select()
         .from(syncedMapMetas)
         .where(eq(syncedMapMetas.mapId, mapId))
         .limit(1);
 
       const wasMapSynced = syncedMapQuery.length > 0;
-      console.log(wasMapSynced);
+      const metas = wasMapSynced
+        ? await syncedMetasStatement.execute({ mapId })
+        : await metasFromMapStatement.execute({ mapId });
 
-      const metas = wasMapSynced ? await syncedMetasStatement.execute({ mapId }) : await metasFromMapStatement.execute({ mapId });
-
-
-      const allCountries =  new Set(metas.flatMap(meta => meta.countries));
-console.log(allCountries);
+      const allCountries = new Set(metas.flatMap((meta) => meta.countries));
       const isSingleCountry = allCountries.size === 1;
 
-
-      const metasToDisplay = metas.map(meta => {
-        const footer = generateFooter(
-          meta.noteFromPlonkit,
-          meta.countries[0] || '',
-          meta.footer,
-          meta.mapFooter,
-        );
-
-        return {
-          id: meta.id,
-          name: isSingleCountry ? meta.name : `${meta.countries[0] || 'Unknown country' } - ${meta.name}`,
-          note: meta.note,
-          images: meta.images,
-          locationsCount: meta.locationsCount,
-          footer: footer,
-        }
-      }).sort((a, b) => a.name.localeCompare(b.name));
-      return metasToDisplay;
+      return metas
+        .map((meta) => {
+          const footer = generateFooter(
+            meta.noteFromPlonkit,
+            meta.countries[0] || '',
+            meta.footer,
+            meta.mapFooter,
+          );
+          return {
+            id: meta.id,
+            name: isSingleCountry
+              ? meta.name
+              : `${meta.countries[0] || 'Unknown country'} - ${meta.name}`,
+            note: meta.note,
+            images: meta.images,
+            locationsCount: meta.locationsCount,
+            footer: footer,
+          };
+        })
+        .sort((a, b) => a.name.localeCompare(b.name));
     },
     {
       params: t.Object({ mapId: t.Integer() }),
     },
-  ).get('/:geoguessrId', async ({ params: { geoguessrId }, status }) => {
-    const map = await db.query.maps.findFirst({ where: eq(maps.geoguessrId, geoguessrId) });
-    if (!map) {
-      return status(404, 'Map not found');
-    }
-    return map;
-  }, {
-    params: t.Object({ geoguessrId: t.String() }),
-  });
+  )
+  .get(
+    '/:geoguessrId',
+    async ({ params: { geoguessrId }, status }) => {
+      const map = await db.query.maps.findFirst({
+        where: eq(maps.geoguessrId, geoguessrId),
+      });
+      if (!map) {
+        return status(404, 'Map not found');
+      }
+      return map;
+    },
+    {
+      params: t.Object({ geoguessrId: t.String() }),
+    },
+  );

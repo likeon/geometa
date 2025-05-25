@@ -78,7 +78,6 @@ console.log(apiError);
     const name = form.get('name');
 
     if (!name || typeof name !== 'string') {
-      console.log('here');
       return fail(400, {
         message: 'Name cannot be empty.'
       });

@@ -1,5 +1,3 @@
-import { internalRouter } from './routes/internal';
-import { userscriptRouter } from './routes/userscript';
 import { runMigrate } from '@api/lib/db/migrate';
 import { prod } from '@api/lib/utils/env';
 import { logger } from '@api/lib/utils/log';
@@ -7,6 +5,8 @@ import { sentry } from '@api/lib/utils/sentry';
 import serverTiming from '@elysiajs/server-timing';
 import swagger from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
+import { internalRouter } from './routes/internal';
+import { userscriptRouter } from './routes/userscript';
 
 const swaggerExclude = [/^\/api\/health-check/];
 const swaggerServers = [];

@@ -2,14 +2,15 @@ import {
   maps,
   syncedLocations,
   syncedMapMetas,
-  syncedMetas, users,
+  syncedMetas,
+  users,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensureMapAccess } from '@api/lib/internal/permissions';
+import { geoguessrGetMapInfo } from '@api/lib/internal/utils';
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
-import {geoguessrGetMapInfo} from "@api/lib/internal/utils";
 
 export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
   .use(auth())
@@ -17,14 +18,19 @@ export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
     '/',
     async ({ userId, body, status }) => {
       const { name, geoguessrId } = body;
-      const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+      });
       if (!user) {
-        return status(500)
+        return status(500);
       }
-      if (!user.isSuperadmin ) {
+      if (!user.isSuperadmin) {
         const mapInfo = await geoguessrGetMapInfo(geoguessrId);
         if (mapInfo && mapInfo.numberOfGamesPlayed > 10000) {
-         return status(403, 'This is a popular map which requires additional verification - ask for it in #map-making Discord channel')
+          return status(
+            403,
+            'This is a popular map which requires additional verification - ask for it in #map-making Discord channel',
+          );
         }
       }
 
@@ -127,14 +133,19 @@ export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
       console.log(body);
       const { name, geoguessrId } = body;
 
-      const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
+      const user = await db.query.users.findFirst({
+        where: eq(users.id, userId),
+      });
       if (!user) {
-        return status(500)
+        return status(500);
       }
       if (!user.isSuperadmin && geoguessrId) {
         const mapInfo = await geoguessrGetMapInfo(geoguessrId);
         if (mapInfo && mapInfo.numberOfGamesPlayed > 10000) {
-          return status(403, 'This is a popular map which requires additional verification - ask for it in #map-making Discord channel')
+          return status(
+            403,
+            'This is a popular map which requires additional verification - ask for it in #map-making Discord channel',
+          );
         }
       }
 
@@ -165,9 +176,9 @@ export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
           'message' in e &&
           e.message.includes('unique constraint')
         ) {
-          return status(409, 'Map with this GeoGuessr ID already exists.')
+          return status(409, 'Map with this GeoGuessr ID already exists.');
         }
-        return status(500,'Internal Server Error' )
+        return status(500, 'Internal Server Error');
       }
     },
     {
