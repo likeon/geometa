@@ -124,11 +124,9 @@ export const userscriptRouter = new Elysia({
       if (!map.userApiToken || bearer !== map.userApiToken) {
         return status(403);
       }
-      console.debug(map.id);
       const locations = await personalMapLocationsExportSelect.execute({
         mapId: map.id,
       });
-      console.debug(locations);
       return {
         customCoordinates: locations.map((location) => ({
           lat: location.lat,
