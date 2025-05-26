@@ -25,9 +25,6 @@
       if (result.type == 'success') {
         isUploadModalOpen = false;
       }
-
-      if (result.type == 'failure') {
-      }
     }
   });
   const file = fileProxy(form, 'file');

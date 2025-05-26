@@ -1,10 +1,4 @@
-import {
-  mapGroupLocations,
-  mapGroups,
-  metaImages,
-  metas,
-  syncedMetas,
-} from '@api/lib/db/schema';
+import { mapGroups, metaImages, metas, syncedMetas } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { and, eq, getTableColumns, sql } from 'drizzle-orm';
 import { getImageUrl } from './utils';

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Dropdown, DropdownItem, GradientButton, Input, Tooltip } from 'flowbite-svelte';
+  import { Button, Dropdown, DropdownItem, GradientButton, Tooltip } from 'flowbite-svelte';
   import { applyAction, enhance } from '$app/forms';
   import { SvelteToast } from '@zerodevx/svelte-toast';
   import { toast } from '@zerodevx/svelte-toast';
@@ -87,8 +87,8 @@
           return async ({ result, update }) => {
             syncingUserScript = false;
             if (result.type === 'success') {
-              applyAction(result);
-              if (data.group.id == 1) {
+              await applyAction(result);
+              if (data.group.id === 1) {
                 const updateCount = result.data?.updateCount || 0;
                 toast.push(`Updated ${updateCount} map(s)`);
               }
@@ -97,13 +97,11 @@
                 duration: 10000
               });
             } else if (result.type === 'failure') {
-              console.log(result.data);
               const errorMessage = result.data?.message || 'Something went wrong';
               toast.push(errorMessage, {
                 theme: { '--toastBackground': 'red', '--toastColor': 'white' }
               });
             } else if (result.type === 'error') {
-              console.log(result.error);
               const errorMessage = result.error.message || 'An error occurred';
               toast.push(errorMessage, {
                 theme: { '--toastBackground': 'red', '--toastColor': 'white' }
@@ -186,7 +184,11 @@
     </div>
   </div>
 
-  <DataTable data={metas} {columns} bind:isModalOpen={isMetaModalOpen} bind:selectedId={selectedMetaId}/>
+  <DataTable
+    data={metas}
+    {columns}
+    bind:isModalOpen={isMetaModalOpen}
+    bind:selectedId={selectedMetaId} />
 
   {#if data.group.metas.length === 0}
     <div class="justify-center w-full flex mt-2">

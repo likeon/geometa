@@ -1,4 +1,4 @@
-<script lang="ts" generics="TData extends {id: number}, TValue">
+<script lang="ts" generics="TData extends { id: number }, TValue">
   import {
     type ColumnDef,
     type ColumnFiltersState,
@@ -11,18 +11,14 @@
   import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
   import * as Table from '$lib/components/ui/table/index.js';
 
-  type MyColumnMeta = {
-    class?: string;
-  };
-
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
     initialSorting?: SortingState;
-    selectedId?: Number;
-    selectedIds?: Number[];
-    isModalOpen?: Boolean;
-    emptyText?: String;
+    selectedId?: number;
+    selectedIds?: number[];
+    isModalOpen?: boolean;
+    emptyText?: string;
   };
 
   let {
@@ -30,9 +26,8 @@
     columns,
     initialSorting = [],
     selectedId = $bindable(),
-    selectedIds = $bindable(),
     isModalOpen = $bindable(),
-    emptyText = "No results."
+    emptyText = 'No results.'
   }: DataTableProps<TData, TValue> = $props();
   let sorting = $state<SortingState>(initialSorting);
   let rowSelection = $state<RowSelectionState>({});

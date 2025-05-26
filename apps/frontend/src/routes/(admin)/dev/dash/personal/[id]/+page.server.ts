@@ -40,13 +40,16 @@ export const actions = {
     if (ids.length === 0) {
       error(400, 'No valid IDs provided');
     }
-    const { error: apiError } = await api.internal.maps.personal({id: params.id}).metas.delete({
-      metaIds: ids
-    },{
-      headers: {
-        'x-api-user-id': locals.user!.id
+    const { error: apiError } = await api.internal.maps.personal({ id: params.id }).metas.delete(
+      {
+        metaIds: ids
+      },
+      {
+        headers: {
+          'x-api-user-id': locals.user!.id
+        }
       }
-    });
+    );
     if (apiError) {
       return fail(apiError.status ?? 500, {
         message: apiError.value ?? 'Unknown error'
@@ -54,10 +57,7 @@ export const actions = {
     }
 
     return {
-      success: true,
+      success: true
     };
-
-  },
-
-
-}
+  }
+};

@@ -14,22 +14,22 @@
     type SortingState,
     type VisibilityState
   } from '@tanstack/table-core';
-  import {createSvelteTable, FlexRender} from '$lib/components/ui/data-table/index.js';
+  import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
   import BaseTableFilterPopover from '$lib/components/BaseTable/BaseTableFilterPopover.svelte';
-  import {Button} from '$lib/components/ui/button';
+  import { Button } from '$lib/components/ui/button';
   import X from '@lucide/svelte/icons/x';
-  import {Input} from '$lib/components/ui/input';
+  import { Input } from '$lib/components/ui/input';
 
   import * as Table from '$lib/components/ui/table/index.js';
-  import {createVirtualizer} from '$lib/virtualizer.svelte';
-  import {enhance} from '$app/forms';
+  import { createVirtualizer } from '$lib/virtualizer.svelte';
+  import { enhance } from '$app/forms';
 
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
     initialSorting?: SortingState;
-    selectedId?: Number;
-    isModalOpen?: Boolean;
+    selectedId?: number;
+    isModalOpen?: boolean;
   };
 
   let {
@@ -102,7 +102,7 @@
   const levelOptions = $derived(
     Array.from(new Set(data.flatMap((row) => row.metaLevels.map((m) => m.level.name))))
       .sort((a, b) => a.localeCompare(b))
-      .map((name) => ({label: name, value: name}))
+      .map((name) => ({ label: name, value: name }))
   );
   const isFiltered = $derived(table.getState().columnFilters.length > 0);
 
@@ -123,7 +123,6 @@
   );
   const selectedRows = $derived(table.getFilteredSelectedRowModel().rows);
 
-
   let prevDataSize = data?.length ?? 0;
 
   // if data is removed/added unselected all rows
@@ -137,42 +136,43 @@
 
 <div class="rounded-md">
   <div class="min-h-[40px] flex flex-1 items-center space-x-2">
-    {#if selectedRows.length != 0}
+    {#if selectedRows.length !== 0}
       <form
         action="?/deleteMetas"
         method="post"
-        id={`delete-metas-form`}
-        use:enhance={({ cancel }) => {
-    const confirmed = confirm(`Are you sure you want to delete ${selectedRows.length} meta(s)? IT'S PERMAMENT DELETION`);
-    if (!confirmed) {
-      cancel();
-    }
-    return async ({ update }) => {
-      update();
-    };
-  }}>
-        {#each selectedRows as row}
-          <input type="hidden" name="id" value={row.original.id}/>
-        {/each}
+        id="delete-metas-form"
+        use:enhance={({ cancel, formData }) => {
+          const confirmed = confirm(
+            `Are you sure you want to delete ${selectedRows.length} meta(s)? IT'S PERMAMENT DELETION`
+          );
+          if (!confirmed) {
+            cancel();
+          }
+          selectedRows.forEach((row) => {
+            formData.append('id', `${row.original.id}`);
+          });
+
+          return async ({ update }) => {
+            update();
+          };
+        }}>
         <button
           type="submit"
-          class="w-full text-left px-2 py-1.5 bg-red-600 text-white font-semibold rounded hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
-        >
+          class="w-full text-left px-2 py-1.5 bg-red-600 text-white font-semibold rounded hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm">
           MASS DELETE
         </button>
       </form>
-
     {/if}
     <Input
       placeholder="Filter tags"
-      value={(table.getColumn('search')?.getFilterValue() as string) ?? ''}
+      value={table.getColumn('search')?.getFilterValue() ?? ''}
       onchange={(e) => {
         table.getColumn('search')?.setFilterValue(e.currentTarget.value);
       }}
       oninput={(e) => {
         table.getColumn('search')?.setFilterValue(e.currentTarget.value);
       }}
-      class="h-8 w-[150px] lg:w-[250px]"/>
+      class="h-8 w-[150px] lg:w-[250px]" />
     <BaseTableFilterPopover
       {table}
       columnId="images"
@@ -180,7 +180,7 @@
       options={[
         { label: 'Has Image', value: 'has' },
         { label: 'No Image', value: 'none' }
-      ]}/>
+      ]} />
     <BaseTableFilterPopover
       {table}
       columnId="note"
@@ -188,20 +188,18 @@
       options={[
         { label: 'Has Note', value: 'has' },
         { label: 'Missing Note', value: 'none' }
-      ]}/>
+      ]} />
     {#if levelOptions.length !== 0}
-      <BaseTableFilterPopover {table} columnId="levels" title="Levels" options={levelOptions}/>
+      <BaseTableFilterPopover {table} columnId="levels" title="Levels" options={levelOptions} />
     {/if}
     {#if isFiltered}
       <Button variant="ghost" onclick={() => table.resetColumnFilters()} class="h-8 px-2 lg:px-3">
         Reset
-        <X size={16}/>
+        <X size={16} />
       </Button>
     {/if}
   </div>
-  <div
-    style="height: 700px; overflow: auto; relative w-full overflow-auto"
-    bind:this={virtualListEl}>
+  <div class="h-[700px] overflow-auto relative w-full" bind:this={virtualListEl}>
     <Table.Root
       style="--virtualPaddingTop: {paddingTop}px; --virtualPaddingBottom: {paddingBottom}px; table-layout: fixed;">
       <Table.Header>
@@ -214,7 +212,7 @@
                 {#if !header.isPlaceholder}
                   <FlexRender
                     content={header.column.columnDef.header}
-                    context={header.getContext()}/>
+                    context={header.getContext()} />
                 {/if}
               </Table.Head>
             {/each}
@@ -222,7 +220,7 @@
         {/each}
       </Table.Header>
       <Table.Body>
-        {#each items as row, idx (row.index)}
+        {#each items as row (row.index)}
           <Table.Row
             data-state={rows[row.index].getIsSelected() && 'selected'}
             onclick={() => {
@@ -235,7 +233,7 @@
                 onclick={cell.column.columnDef.meta?.preventRowClick
                   ? (e) => e.stopPropagation()
                   : undefined}>
-                <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()}/>
+                <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
               </td>
             {/each}
           </Table.Row>

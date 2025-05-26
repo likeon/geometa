@@ -36,5 +36,5 @@ export const columns: ColumnDef<PageData['personalMaps'][number]>[] = [
         onclick: column.getToggleSortingHandler(),
         sort: column.getIsSorted()
       })
-  },
+  }
 ];

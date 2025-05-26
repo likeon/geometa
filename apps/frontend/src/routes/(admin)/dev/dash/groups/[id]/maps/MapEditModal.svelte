@@ -219,7 +219,6 @@
         name="Shared metas"
         tooltipText="If you enable sharing metas, people will be able select metas from your map to use in their own personal maps!">
       </TooltipName>
-
     </Checkbox>
     {#if user.isSuperadmin || user.isTrusted}
       <Label>

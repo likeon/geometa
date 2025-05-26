@@ -36,19 +36,19 @@ export const load: PageServerLoad = async ({ params, locals }) => {
 
 export const actions = {
   deleteLevel: async ({ request, locals }) => {
-      const data = await request.formData();
-      const levelId = parseInt((data.get('id') as string) || '', 10);
-  
-      if (isNaN(levelId)) {
-        error(400, 'Invalid ID');
-      }
-  
-      const level = await locals.db.query.levels.findFirst({ where: eq(levels.id, levelId) });
-      await ensurePermissions(locals.db, locals.user?.id, level?.mapGroupId);
-  
-      await locals.db.delete(levels).where(eq(levels.id, levelId));
-    },
-  
+    const data = await request.formData();
+    const levelId = parseInt((data.get('id') as string) || '', 10);
+
+    if (isNaN(levelId)) {
+      error(400, 'Invalid ID');
+    }
+
+    const level = await locals.db.query.levels.findFirst({ where: eq(levels.id, levelId) });
+    await ensurePermissions(locals.db, locals.user?.id, level?.mapGroupId);
+
+    await locals.db.delete(levels).where(eq(levels.id, levelId));
+  },
+
   updateLevel: async ({ request, locals }) => {
     const form = await superValidate(request, zod(insertLevelsSchema));
     if (!form.valid) {

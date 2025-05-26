@@ -95,7 +95,7 @@
       {#if $errors.file}
         <div class="text-red-500 leading-5">
           {#if Array.isArray($errors.file)}
-            {#each $errors.file as error}
+            {#each $errors.file as error, index (index)}
               <p>{error}</p>
             {/each}
           {:else}

@@ -1,7 +1,6 @@
 import {
   cacheTable,
   maps,
-  metas,
   syncedLocations,
   syncedMapMetas,
   syncedMetas,

@@ -2,14 +2,12 @@
   import { Button } from 'flowbite-svelte';
   import MapEditModal from './MapEditModal.svelte';
   import DashNavBar from '$lib/components/DashNavBar.svelte';
-  import SortFilterTable from '$lib/components/SortFilterTable.svelte';
   import { columns } from './columns';
   import BaseTable from '$lib/components/BaseTable/BaseTable.svelte';
 
   let { data } = $props();
 
   let isMapModalOpen = $state(false);
-  let searchText = $state('');
   let selectedMapId = $state(-1);
   let maps = $derived(data.group.maps);
   let selectedMap = $derived.by(() => {

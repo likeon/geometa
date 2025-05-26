@@ -8,7 +8,6 @@ import Check from '@lucide/svelte/icons/check';
 import ImageIcon from '@lucide/svelte/icons/image';
 import StickyNoteIcon from '@lucide/svelte/icons/sticky-note';
 
-
 export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
   {
     id: 'select',
@@ -27,9 +26,7 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
       }),
     enableSorting: false,
     enableHiding: false,
-    meta: { class: 'pl-2 w-8 min-w-8 max-w-8',
-        preventRowClick: true 
-     }
+    meta: { class: 'pl-2 w-8 min-w-8 max-w-8', preventRowClick: true }
   },
   {
     accessorKey: 'tagName',
@@ -39,9 +36,9 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
         onclick: column.getToggleSortingHandler(),
         sort: column.getIsSorted()
       }),
-      meta: {
-  class: 'pl-2 flex-[2] min-w-[120px] max-w-[220px] xl:flex-[1] xl:max-w-[150px]'
-}
+    meta: {
+      class: 'pl-2 flex-[2] min-w-[120px] max-w-[220px] xl:flex-[1] xl:max-w-[150px]'
+    }
   },
 
   {
@@ -52,9 +49,9 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
         onclick: column.getToggleSortingHandler(),
         sort: column.getIsSorted()
       }),
-      meta: {
-  class: 'flex-[2] min-w-[120px] max-w-[220px] xl:flex-[1] xl:max-w-[150px]'
-}
+    meta: {
+      class: 'flex-[2] min-w-[120px] max-w-[220px] xl:flex-[1] xl:max-w-[150px]'
+    }
   },
   {
     accessorKey: 'locationsCount',
@@ -66,8 +63,8 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
       }),
     accessorFn: (row) => row.locationsCount?.total ?? 0,
     meta: {
-  class: 'w-24 min-w-16 max-w-28 pl-2 xl:w-32 xl:max-w-40'
-}
+      class: 'w-24 min-w-16 max-w-28 pl-2 xl:w-32 xl:max-w-40'
+    }
   },
   {
     accessorKey: 'levels',
@@ -88,25 +85,23 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
 
       const joined: string = row.getValue<string>(columnId) ?? '';
 
-      const result = filters.some((f) =>
+      return filters.some((f) =>
         joined
           .toLowerCase()
           .split(/\s*,\s*/)
           .includes(f.toLowerCase())
       );
-
-      return result;
     },
     meta: {
-  class: 'w-40 min-w-[96px] max-w-[160px] truncate xl:w-64 xl:max-w-[240px]'
-}
+      class: 'w-40 min-w-[96px] max-w-[160px] truncate xl:w-64 xl:max-w-[240px]'
+    }
   },
   {
     accessorKey: 'images',
     header: () => renderComponent(ImageIcon, { size: 16, class: 'mx-auto' }),
     cell: ({ row }) => {
       if (row.original.images.length != 0) {
-        return renderComponent(Check, { size: 16, color: 'green',class: 'mx-auto' });
+        return renderComponent(Check, { size: 16, color: 'green', class: 'mx-auto' });
       } else {
         return '';
       }
@@ -132,9 +127,11 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
   },
   {
     accessorKey: 'note',
-  header: () => renderComponent(StickyNoteIcon, { size: 16, class: 'mx-auto' }),
+    header: () => renderComponent(StickyNoteIcon, { size: 16, class: 'mx-auto' }),
     cell: ({ row }) =>
-      row.getValue<string>('note') ? renderComponent(Check, { size: 16, color: 'green',class: 'mx-auto' }) : '',
+      row.getValue<string>('note')
+        ? renderComponent(Check, { size: 16, color: 'green', class: 'mx-auto' })
+        : '',
     filterFn: (row, columnId, filterValue) => {
       const filters = Array.isArray(filterValue)
         ? filterValue
@@ -171,7 +168,7 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
       return renderComponent(DataTableActions, { id: row.original.id });
     },
     meta: {
-      class: 'w-12 min-w-12 max-w-12 text-right' 
+      class: 'w-12 min-w-12 max-w-12 text-right'
     }
   }
 ];

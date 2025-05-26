@@ -263,7 +263,8 @@ export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
       }),
       userId: true,
     },
-  ).delete(
+  )
+  .delete(
     '/:id/metas',
     async ({ params, body, userId, status }) => {
       const mapId = params.id;
@@ -277,22 +278,20 @@ export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
         return status(400, 'Invalid metaIds array');
       }
 
-
-
       await db
         .delete(syncedMapMetas)
         .where(
           and(
             eq(syncedMapMetas.mapId, mapId),
             inArray(syncedMapMetas.syncedMetaId, metaIds),
-          )
+          ),
         );
-          },
+    },
     {
       params: t.Object({ id: t.Integer() }),
       body: t.Object({
         metaIds: t.Array(t.Integer()),
       }),
       userId: true,
-    }
+    },
   );

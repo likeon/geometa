@@ -1,13 +1,13 @@
 import { prod } from '@api/lib/utils/env';
 import bearer from '@elysiajs/bearer';
-import { Elysia, t } from 'elysia';
+import { Elysia } from 'elysia';
 
 const frontendToken = process.env.FRONTEND_API_TOKEN;
 
 export function auth() {
   return new Elysia({ name: 'geometa-auth' })
     .use(bearer())
-    .onBeforeHandle(({ bearer, headers, set }) => {
+    .onBeforeHandle(({ bearer, set }) => {
       if (prod) {
         if (!bearer) {
           set.status = 401;

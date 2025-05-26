@@ -17,19 +17,18 @@
   import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
   import BaseTableFilterPopover from '$lib/components/BaseTable/BaseTableFilterPopover.svelte';
   import { Button } from '$lib/components/ui/button';
-  import X from '@lucide/svelte/icons/x';
   import { Input } from '$lib/components/ui/input';
-
   import * as Table from '$lib/components/ui/table/index.js';
   import { createVirtualizer } from '$lib/virtualizer.svelte';
   import { enhance } from '$app/forms';
+  import Icon from '@iconify/svelte';
 
   type DataTableProps<TData, TValue> = {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
     initialSorting?: SortingState;
-    selectedId?: Number;
-    isModalOpen?: Boolean;
+    selectedId?: number;
+    isModalOpen?: boolean;
   };
 
   let {
@@ -99,10 +98,9 @@
     enableSortingRemoval: false
   });
 
-
-const usedInMapOptions = [
-  ...new Set(data.map(item => item.usedInMapName).filter(name => name != null))
-].map(name => ({ label: name, value: name }));
+  const usedInMapOptions = [
+    ...new Set(data.map((item) => item.usedInMapName).filter((name) => name != null))
+  ].map((name) => ({ label: name, value: name }));
   const isFiltered = $derived(table.getState().columnFilters.length > 0);
 
   const rows = $derived(table.getRowModel().rows);
@@ -122,46 +120,45 @@ const usedInMapOptions = [
   );
   const selectedRows = $derived(table.getFilteredSelectedRowModel().rows);
 
-
   let prevDataSize = data?.length ?? 0;
 
- // if data is removed/added unselected all rows
-$effect(() => {
-  if (data && data.length !== prevDataSize) {
-    table.resetRowSelection();
-  }
-  prevDataSize = data?.length ?? 0;
-});
+  // if data is removed/added unselected all rows
+  $effect(() => {
+    if (data && data.length !== prevDataSize) {
+      table.resetRowSelection();
+    }
+    prevDataSize = data?.length ?? 0;
+  });
 </script>
 
 <div class="rounded-md">
   <div class="min-h-[40px] flex flex-1 items-center space-x-2">
-    {#if selectedRows.length != 0}
-<form
-  action="?/removeMetasFromPersonalMap"
-  method="post"
-  id='remove-metas-form'
-  use:enhance={({ cancel }) => {
-    const confirmed = confirm(`Are you sure you want to remove ${selectedRows.length} meta(s) from your map?`);
-    if (!confirmed) {
-      cancel();
-    }
-    return async ({ update }) => {
-      update();
-    };
-  }}>
-  {#each selectedRows as row (row.original.metaId)}
-    <input type="hidden" name="id" value={row.original.metaId} />
-  {/each}
-  <input type="hidden" name="mapId" value={data} />
- <button
-  type="submit"
-  class="w-full text-left px-2 py-1.5 bg-red-600 text-white font-semibold rounded hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
->
-    Remove meta(s)
-  </button>
-</form>
-
+    {#if selectedRows.length !== 0}
+      <form
+        action="?/removeMetasFromPersonalMap"
+        method="post"
+        id="remove-metas-form"
+        use:enhance={({ cancel }) => {
+          const confirmed = confirm(
+            `Are you sure you want to remove ${selectedRows.length} meta(s) from your map?`
+          );
+          if (!confirmed) {
+            cancel();
+          }
+          return async ({ update }) => {
+            update();
+          };
+        }}>
+        {#each selectedRows as row (row.original.metaId)}
+          <input type="hidden" name="id" value={row.original.metaId} />
+        {/each}
+        <input type="hidden" name="mapId" value={data} />
+        <button
+          type="submit"
+          class="w-full text-left px-2 py-1.5 bg-red-600 text-white font-semibold rounded hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm">
+          Remove meta(s)
+        </button>
+      </form>
     {/if}
     <Input
       placeholder="Filter tags"
@@ -174,12 +171,15 @@ $effect(() => {
       }}
       class="h-8 w-[150px] lg:w-[250px]" />
     {#if usedInMapOptions.length !== 0}
-      <BaseTableFilterPopover {table} columnId="usedInMapName" title="Meta Maps" options={usedInMapOptions} />
+      <BaseTableFilterPopover
+        {table}
+        columnId="usedInMapName"
+        title="Meta Maps"
+        options={usedInMapOptions} />
     {/if}
     {#if isFiltered}
       <Button variant="ghost" onclick={() => table.resetColumnFilters()} class="h-8 px-2 lg:px-3">
-        Reset
-        <X size={16} />
+        Reset <Icon class="ml-2" icon="ic:twotone-clear" />
       </Button>
     {/if}
   </div>
@@ -206,7 +206,7 @@ $effect(() => {
         {/each}
       </Table.Header>
       <Table.Body>
-        {#each items as row, idx (row.index)}
+        {#each items as row (row.index)}
           <Table.Row
             data-state={rows[row.index].getIsSelected() && 'selected'}
             onclick={() => {
@@ -239,6 +239,7 @@ $effect(() => {
     padding-top: var(--virtualPaddingTop);
     content: '';
   }
+
   :global(tbody::after) {
     display: block;
     padding-bottom: var(--virtualPaddingBottom);

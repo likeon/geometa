@@ -31,8 +31,8 @@ export const columns: ColumnDef<PageData['group']['maps'][number]>[] = [
         sort: column.getIsSorted()
       }),
     sortingFn: (rowA, rowB) => {
-      const a = rowA.original.locationsCount as Number;
-      const b = rowB.original.locationsCount as Number;
+      const a = rowA.original.locationsCount as number;
+      const b = rowB.original.locationsCount as number;
       return a > b ? 1 : a < b ? -1 : 0;
     },
     cell: ({ row }) => {

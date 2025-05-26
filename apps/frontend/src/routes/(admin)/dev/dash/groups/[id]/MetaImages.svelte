@@ -22,10 +22,7 @@
     enhance: imageEnhance,
     submit: imageSubmit
   } = superForm(data, {
-    async onUpdated({ form }) {
-      if (form.valid) {
-      }
-    }
+    async onUpdated({ form }) {}
   });
 
   const file = fileProxy(imageForm, 'file');
@@ -64,7 +61,7 @@
         action="?/deleteMetaImage"
         use:enhance={() => {
           return async ({ result }) => {
-            invalidateAll();
+            await invalidateAll();
             await applyAction(result);
           };
         }}>
