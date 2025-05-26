@@ -6,7 +6,6 @@ import {
   personalMapLocationsExportSelect,
 } from '@api/lib/userscript/locations';
 import { generateFooter } from '@api/lib/userscript/utils';
-import bearer from '@elysiajs/bearer';
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
@@ -41,59 +40,6 @@ export const userscriptRouter = new Elysia({
       userscriptVersion: userscriptVersion,
     };
   })
-  // .get(
-  //   '/map/:geoguessrId/locations',
-  //   async ({ params: { geoguessrId }, bearer, status }) => {
-  //     if (!bearer) {
-  //       return status(401);
-  //     }
-  //     const mapResult = await db
-  //       .select({
-  //         id: maps.id,
-  //         mapGroupId: maps.mapGroupId,
-  //         userApiToken: users.apiToken,
-  //         isPersonal: maps.isPersonal,
-  //       })
-  //       .from(maps)
-  //       .leftJoin(users, eq(users.id, maps.userId))
-  //       .where(and(eq(maps.geoguessrId, geoguessrId)));
-  //     if (!mapResult.length) {
-  //       return status(404);
-  //     }
-  //
-  //     const [map] = mapResult;
-  //
-  //     // authenticate and get locations differently depending on what kind of map it is
-  //     if (!map.isPersonal) {
-  //       // not implemented yet
-  //       return status(501);
-  //     }
-  //
-  //     if (!map.userApiToken || bearer !== map.userApiToken) {
-  //       return status(403);
-  //     }
-  //
-  //     const locations = await personalMapLocationsExportSelect.execute({
-  //       mapId: map.id,
-  //     });
-  //     return {
-  //       customCoordinates: locations.map((location) => ({
-  //         lat: location.lat,
-  //         lng: location.lng,
-  //         heading: location.heading,
-  //         pitch: location.pitch,
-  //         zoom: location.zoom,
-  //         panoId: location.panoId,
-  //         countryCode: null,
-  //         stateCode: null,
-  //         extra: {
-  //           panoDate: location.extraPanoDate,
-  //           panoId: location.extraPanoId,
-  //         },
-  //       })),
-  //     };
-  //   },
-  // )
   .get(
     '/location/',
     async ({ query, set }) => {
@@ -137,5 +83,67 @@ export const userscriptRouter = new Elysia({
         mapId: t.String(),
         panoId: t.String(),
       }),
+    },
+  )
+  // todo: move elsewhere after personal maps merged
+  .derive(({ headers }) => {
+    const auth = headers.authorization;
+
+    return {
+      bearer: auth?.startsWith('Bearer ') ? auth.slice(7) : null,
+    };
+  })
+  .get(
+    '/map/:geoguessrId/locations',
+    async ({ params: { geoguessrId }, status, bearer }) => {
+      if (!bearer) {
+        return status(401);
+      }
+      const mapResult = await db
+        .select({
+          id: maps.id,
+          mapGroupId: maps.mapGroupId,
+          userApiToken: users.apiToken,
+          isPersonal: maps.isPersonal,
+        })
+        .from(maps)
+        .leftJoin(users, eq(users.id, maps.userId))
+        .where(and(eq(maps.geoguessrId, geoguessrId)));
+      if (!mapResult.length) {
+        return status(404);
+      }
+
+      const [map] = mapResult;
+
+      // authenticate and get locations differently depending on what kind of map it is
+      if (!map.isPersonal) {
+        // not implemented yet
+        return status(501);
+      }
+
+      if (!map.userApiToken || bearer !== map.userApiToken) {
+        return status(403);
+      }
+      console.debug(map.id);
+      const locations = await personalMapLocationsExportSelect.execute({
+        mapId: map.id,
+      });
+      console.debug(locations);
+      return {
+        customCoordinates: locations.map((location) => ({
+          lat: location.lat,
+          lng: location.lng,
+          heading: location.heading,
+          pitch: location.pitch,
+          zoom: location.zoom,
+          panoId: location.panoId,
+          countryCode: null,
+          stateCode: null,
+          extra: {
+            panoDate: location.extraPanoDate,
+            panoId: location.extraPanoId,
+          },
+        })),
+      };
     },
   );

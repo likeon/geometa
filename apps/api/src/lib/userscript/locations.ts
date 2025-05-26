@@ -69,5 +69,5 @@ export const personalMapLocationsExportSelect = db
     syncedLocations,
     eq(syncedLocations.syncedMetaId, syncedMetas.metaId),
   )
-  .where(eq(syncedMapMetas.syncedMetaId, sql.placeholder('mapId')))
+  .where(eq(syncedMapMetas.mapId, sql.placeholder('mapId')))
   .prepare('userscript_personal_map_get_locations');
