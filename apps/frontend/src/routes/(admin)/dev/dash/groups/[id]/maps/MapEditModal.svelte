@@ -214,7 +214,13 @@
         <Alert color="red">{$errors.authors}</Alert>
       {/if}
     </Label>
-    <Checkbox bind:checked={$form.isShared}>Share metas for personal maps</Checkbox>
+    <Checkbox bind:checked={$form.isShared}>
+      <TooltipName
+        name="Shared metas"
+        tooltipText="If you enable sharing metas, people will be able select metas from your map to use in their own personal maps!">
+      </TooltipName>
+
+    </Checkbox>
     {#if user.isSuperadmin || user.isTrusted}
       <Label>
         <div class="flex flex-row space-x-2">
