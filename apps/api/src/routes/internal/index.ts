@@ -4,6 +4,7 @@ import { personalMapsRouter } from '@api/routes/internal/personal';
 import { Elysia } from 'elysia';
 import { mapGroupsRouter } from './map-groups';
 import { mapsRouter } from './maps';
+import { usersRouter } from './users';
 
 export const internalRouter = new Elysia({
   prefix: '/internal',
@@ -13,4 +14,5 @@ export const internalRouter = new Elysia({
   .use(mapGroupsRouter)
   .use(personalMapsRouter)
   .use(mapsRouter)
+  .use(usersRouter)
   .use(permissionErrorCatcher());
