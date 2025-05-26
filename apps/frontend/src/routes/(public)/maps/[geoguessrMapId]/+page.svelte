@@ -5,7 +5,7 @@
   import type { PageProps } from './$types';
   import { enhance } from '$app/forms';
   import { SvelteSet } from 'svelte/reactivity';
-  import {Alert} from "flowbite-svelte";
+  import {Alert, Label, Modal, Select} from "flowbite-svelte";
 
 
   let { data }: PageProps = $props();
@@ -26,10 +26,10 @@ let showErrorAlert = $state(false);
 
   let selectedMeta: Meta =  $state(data.metaList[0]);
   let rightPanelRef: HTMLDivElement | undefined = $state();
-
-
   let selectedMetaIds = new SvelteSet<number>();
   let selectAll = $state(false);
+  let personalMapChoiceModalOpen = $state(false);
+  let confirmAdding = $state(false);
 
 
   function toggleMeta(id: number, checked: boolean) {
@@ -50,6 +50,17 @@ let showErrorAlert = $state(false);
     }
     selectAll = checked;
   }
+
+  let modalResolve: ((value: boolean) => void) | null = null;
+
+  function openModal(): Promise<boolean> {
+    personalMapChoiceModalOpen = true;
+    return new Promise((resolve) => {
+      modalResolve = resolve;
+    });
+  }
+
+  let selectedPersonalMapId = $state(data.personalMaps[0].id || null );
 
 </script>
 
@@ -112,7 +123,7 @@ let showErrorAlert = $state(false);
                   <p>Click
                   <a
                     target="_blank"
-                    href={`/dev/dash/personal/${data.personalMaps[0]?.id}`}
+                    href={`/dev/dash/personal/${selectedPersonalMapId}`}
                     class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900"
                   >here</a> to see meta list for your personal map. </p>
                   <button
@@ -133,7 +144,7 @@ let showErrorAlert = $state(false);
                 action="?/addMetasToPersonalMap"
                 method="post"
                 id='delete-metas-form'
-                use:enhance={({ cancel }) => {
+                use:enhance={async ({ cancel }) => {
                   showNoPersonalMapsAlert = false;
                   showNotLoggedInAlert = false;
                   showAddedMetasAlert = false;
@@ -148,10 +159,20 @@ let showErrorAlert = $state(false);
                       showNoPersonalMapsAlert = true;
                       return;
                       }
-    const confirmed = confirm(`Are you sure you wanna add ${selectedMetaIds.size} meta(s) to your personal map?`);
-    if (!confirmed) {
+
+
+confirmAdding = false;
+if (data.personalMaps.length > 1) {
+   confirmAdding = await openModal();
+} else {
+  selectedPersonalMapId = data.personalMaps[0].id;
+   confirmAdding = confirm(`Are you sure you wanna add ${selectedMetaIds.size} meta(s) to your personal map?`);
+}
+
+    if (!confirmAdding) {
       cancel();
     }
+    console.log("HERE2222");
     return async ({ update, result }) => {
       if (result.status !== 200) {
         showErrorAlert = true;
@@ -165,7 +186,7 @@ let showErrorAlert = $state(false);
                 {#each selectedMetaIds as metaId (metaId)}
                   <input type="hidden" name="id" value={metaId} />
                 {/each}
-                <input type="hidden" name="mapId" value={data.personalMaps[0]?.id} />
+                <input type="hidden" name="mapId" value={selectedPersonalMapId} />
                 <button
                   type="submit"
                   class="w-full text-left px-2 py-1.5 bg-green-600 text-white font-semibold rounded hover:bg-green-700 active:bg-red-800 transition-colors shadow-sm"
@@ -289,6 +310,29 @@ let showErrorAlert = $state(false);
       </div>
   </div>
 </div>
+
+<Modal title='Choose personal map' bind:open={personalMapChoiceModalOpen}>
+  <Label>
+    Select personal map you wanna add metas to
+    <Select bind:value={selectedPersonalMapId}>
+      {#each data.personalMaps as map (map.id)}
+        <option value={map.id}>{map.name}</option>
+      {/each}
+    </Select>
+  </Label>
+  <div class="mt-4 flex justify-between">
+    <Button color="green" onclick={() => {
+personalMapChoiceModalOpen = false;
+    modalResolve?.(true);
+}}>Add</Button>
+    <Button color="red" onclick={() => {
+    personalMapChoiceModalOpen = false;
+    modalResolve?.(false);
+}}>Cancel</Button>
+  </div>
+</Modal>
+
+
 
 <style>
   :global(.note ul li) {
