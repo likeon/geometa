@@ -216,7 +216,7 @@ export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
   .post(
     '/:id/metas',
     async ({ params, body, userId, status }) => {
-      const mapId = Number(params.id);
+      const mapId = params.id;
       await ensureMapAccess(userId, mapId);
       const { metaIds } = body;
 
@@ -263,4 +263,36 @@ export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
       }),
       userId: true,
     },
+  ).delete(
+    '/:id/metas',
+    async ({ params, body, userId, status }) => {
+      const mapId = params.id;
+      await ensureMapAccess(userId, mapId);
+      const { metaIds } = body;
+
+      if (
+        !Array.isArray(metaIds) ||
+        metaIds.some((id) => typeof id !== 'number')
+      ) {
+        return status(400, 'Invalid metaIds array');
+      }
+
+
+
+      await db
+        .delete(syncedMapMetas)
+        .where(
+          and(
+            eq(syncedMapMetas.mapId, mapId),
+            inArray(syncedMapMetas.syncedMetaId, metaIds),
+          )
+        );
+          },
+    {
+      params: t.Object({ id: t.Integer() }),
+      body: t.Object({
+        metaIds: t.Array(t.Integer()),
+      }),
+      userId: true,
+    }
   );

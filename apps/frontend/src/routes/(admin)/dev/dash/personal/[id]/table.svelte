@@ -138,11 +138,11 @@ $effect(() => {
   <div class="min-h-[40px] flex flex-1 items-center space-x-2">
     {#if selectedRows.length != 0}
 <form
-  action="?/deleteMetas"
+  action="?/removeMetasFromPersonalMap"
   method="post"
-  id={`delete-metas-form`}
+  id='remove-metas-form'
   use:enhance={({ cancel }) => {
-    const confirmed = confirm(`Are you sure you want to delete ${selectedRows.length} meta(s)? IT'S PERMAMENT DELETION`);
+    const confirmed = confirm(`Are you sure you want to remove ${selectedRows.length} meta(s) from your map?`);
     if (!confirmed) {
       cancel();
     }
@@ -150,14 +150,15 @@ $effect(() => {
       update();
     };
   }}>
-  {#each selectedRows as row}
+  {#each selectedRows as row (row.original.metaId)}
     <input type="hidden" name="id" value={row.original.metaId} />
   {/each}
+  <input type="hidden" name="mapId" value={data} />
  <button
   type="submit"
   class="w-full text-left px-2 py-1.5 bg-red-600 text-white font-semibold rounded hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm"
 >
-    MASS DELETE
+    Remove meta(s)
   </button>
 </form>
 
