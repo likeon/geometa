@@ -83,14 +83,20 @@ export const logger = () => {
         startTime: performance.now(),
       };
     })
-    .onAfterResponse(({ server, request, set, store }) => {
+    .onAfterResponse(({ server, request, set, store, response }) => {
       const loggerStore = store as unknown as LoggerStore;
-      logRequest(
-        loggerStore.startTime,
-        server,
-        request as BunRequest,
-        statusToNumber(set.status),
-      );
+      let status: number | null;
+      if (
+        response &&
+        typeof response === 'object' &&
+        'code' in response &&
+        typeof response.code === 'number'
+      ) {
+        status = response.code;
+      } else {
+        status = statusToNumber(set.status);
+      }
+      logRequest(loggerStore.startTime, server, request as BunRequest, status);
     })
     .onError(({ server, request, error, code, store }) => {
       const loggerStore = store as unknown as LoggerStore;
