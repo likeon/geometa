@@ -164,7 +164,7 @@
               }}>
               <button
                 type="submit"
-                class="w-full text-left px-2 py-1.5 bg-green-600 text-white font-semibold rounded hover:bg-green-700 active:bg-red-800 transition-colors shadow-sm">
+                class="w-full text-left px-2 py-1.5 bg-emerald-600 text-white font-semibold rounded hover:bg-emerald-700 active:bg-emerald-800 transition-colors shadow-sm mb-2">
                 Add to personal map
               </button>
             </form>

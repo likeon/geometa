@@ -46,12 +46,12 @@
 <Card.Root class="flex flex-col">
   <Card.Header>
     <div class="flex flex-row pb-2">
-      {#if map.isVerified}
+      {#if map.isShared}
         <div>
           <Badge
-            class="bg-yellow-200 text-yellow-800 dark:bg-yellow-700/50 dark:text-yellow-200/80">
-            <RaStarlineIcon class="inline-block  mr-1" />
-            Verified
+            class="bg-emerald-200 text-emerald-800 dark:bg-emerald-700/50 dark:text-emerald-200/80">
+            <RaStarlineIcon class="inline-block mr-1" />
+            Shared
           </Badge>
         </div>
       {/if}

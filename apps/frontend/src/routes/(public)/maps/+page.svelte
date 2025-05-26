@@ -21,6 +21,7 @@
   let activeRegion = $state('');
   let searchText = $state('');
   let selectedDifficulties = $state(difficultyMap.map((d) => d.value));
+  let sharedFilter = $state(false);
 
   let allMaps = $state<any[]>([]);
 
@@ -28,6 +29,7 @@
   $effect(() => {
     data.allMaps.then((maps) => {
       allMaps = maps;
+      console.log(maps[0]);
     });
   });
 
@@ -36,8 +38,9 @@
       (map) =>
         map.regions?.includes(activeRegion) &&
         (map.name.toLowerCase().includes(searchText.toLowerCase()) ||
-          map.authors?.toLocaleLowerCase().includes(searchText.toLocaleLowerCase())) &&
-        selectedDifficulties.includes(map.difficulty as DifficultyValue)
+          map.authors?.toLowerCase().includes(searchText.toLowerCase())) &&
+        selectedDifficulties.includes(map.difficulty as DifficultyValue) &&
+        (!sharedFilter || map.isShared)
     )
   );
 
@@ -91,6 +94,14 @@
           </Popover.Trigger>
           <Popover.Content class="w-56 p-4">
             <div class="grid gap-4">
+              <div class="space-y-2">
+                <div class="flex items-center space-x-2">
+                  <Checkbox id="shared-checkbox" bind:checked={sharedFilter}></Checkbox>
+                  <Label for="shared-checkbox" class="text-sm font-medium capitalize">
+                    Show only shared maps
+                  </Label>
+                </div>
+              </div>
               <div class="space-y-2">
                 <h4 class="font-medium leading-none">Difficulty</h4>
                 <p class="text-sm text-muted-foreground">Filter maps by difficulty level.</p>
