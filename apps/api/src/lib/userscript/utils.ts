@@ -25,14 +25,20 @@ const countries = new Map(
   }),
 );
 
+function getCountryOrDefaultFooter(countryName: string) {
+  const normalizedCountryName = countryName.toLocaleLowerCase().trim();
+  const countryData = countries.get(normalizedCountryName);
+  return countryData ? countryData.footer : plonkitCreditFooter;
+}
+
 export function generateFooter(
   creditPlonkit: boolean,
   countryName: string,
   metaFooter: string,
   mapFooter: string,
 ) {
-  if (!creditPlonkit) {
-    return plonkitCreditFooter;
+  if (creditPlonkit) {
+    return getCountryOrDefaultFooter(countryName);
   }
 
   const trimmedMetaFooter = metaFooter.trim();
@@ -45,10 +51,5 @@ export function generateFooter(
     return trimmedMapFooter;
   }
 
-  const countryFooter = countries.get(countryName.toLocaleLowerCase().trim());
-  if (countryFooter) {
-    return countryFooter.footer;
-  }
-
-  return '';
+  return getCountryOrDefaultFooter(countryName);
 }
