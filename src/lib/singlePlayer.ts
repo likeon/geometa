@@ -47,6 +47,7 @@ export function initSinglePlayer() {
         mount(App, {
           target: element,
           props: {
+            roundNumber: event.detail.rounds.length,
             panoId: lastRound.location.panoId,
             mapId: event.detail.map.id,
             userscriptVersion: mapInfo.userscriptVersion,
