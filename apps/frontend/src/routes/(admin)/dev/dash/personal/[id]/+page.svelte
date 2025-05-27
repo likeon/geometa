@@ -18,6 +18,6 @@
       enable the "Shared" filter to see which maps are available for selecting metas!
     </p>
   {:else}
-    <DataTable data={data.metaList} {columns} />
+    <DataTable data={data.metaList} {columns} initialSorting={[{ id: 'name', desc: false }]} />
   {/if}
 </div>

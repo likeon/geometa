@@ -188,7 +188,8 @@
     data={metas}
     {columns}
     bind:isModalOpen={isMetaModalOpen}
-    bind:selectedId={selectedMetaId} />
+    bind:selectedId={selectedMetaId}
+    initialSorting={[{ id: 'tagName', desc: false }]} />
 
   {#if data.group.metas.length === 0}
     <div class="justify-center w-full flex mt-2">
