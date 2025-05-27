@@ -31,6 +31,7 @@
   let confirmAdding = $state(false);
 
   function toggleMeta(id: number, checked: boolean) {
+    showAddedMetasAlert = false;
     if (checked) {
       selectedMetaIds.add(id);
     } else {
@@ -39,6 +40,7 @@
   }
 
   function toggleAll(checked: boolean) {
+    showAddedMetasAlert = false;
     if (checked) {
       for (const id of data.metaList.map((m) => m.id)) {
         selectedMetaIds.add(id);
