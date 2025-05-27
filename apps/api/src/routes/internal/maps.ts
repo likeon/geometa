@@ -52,6 +52,53 @@ const syncedMetasStatement = db
   )
   .prepare('get_synced_metas_by_map_id');
 
+const syncedMetasPersonalStatement = db
+  .select({
+    id: syncedMetas.metaId,
+    name: syncedMetas.name,
+    note: syncedMetas.note,
+    noteFromPlonkit: syncedMetas.noteFromPlonkit,
+    footer: syncedMetas.footer,
+    mapFooter: sql<string>`
+      COALESCE((SELECT m.footer_html
+      FROM ${syncedMapMetas} sm
+      INNER JOIN ${maps} m ON m.id = sm.map_id
+      WHERE
+        sm.synced_meta_id = ${syncedMetas.metaId}
+        AND m.is_personal = FALSE
+      ORDER BY m.number_of_games_played DESC NULLS LAST, m.id ASC
+      LIMIT 1), '')
+    `,
+    images: syncedMetas.images,
+    countries: sql<string[]>`
+      ARRAY(
+        SELECT DISTINCT ${syncedLocations.country}
+        FROM ${syncedLocations}
+        WHERE ${syncedLocations.syncedMetaId} = ${syncedMetas.metaId}
+          AND ${syncedLocations.country} IS NOT NULL
+      )
+    `,
+    locationsCount: sql<number>`(
+      SELECT COUNT(*)
+      FROM ${syncedLocations}
+      WHERE ${syncedLocations.syncedMetaId} = ${syncedMetas.metaId}
+    )`,
+  })
+  .from(syncedMapMetas)
+  .innerJoin(syncedMetas, eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId))
+  .innerJoin(maps, eq(maps.id, syncedMapMetas.mapId))
+  .where(eq(syncedMapMetas.mapId, sql.placeholder('mapId')))
+  .groupBy(
+    syncedMetas.metaId,
+    syncedMetas.name,
+    syncedMetas.note,
+    syncedMetas.noteFromPlonkit,
+    syncedMetas.footer,
+    syncedMetas.images,
+    maps.footerHtml,
+  )
+  .prepare('get_synced_metas_by_personal_map_id');
+
 export const metasFromMapStatement = db
   .select({
     id: metas.id,
@@ -154,15 +201,24 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
     '/metas/:mapId',
     async ({ params: { mapId } }) => {
       const syncedMapQuery = await db
-        .select()
+        .select({
+          isPersonal: maps.isPersonal,
+        })
         .from(syncedMapMetas)
+        .innerJoin(maps, eq(syncedMapMetas.mapId, maps.id))
         .where(eq(syncedMapMetas.mapId, mapId))
         .limit(1);
 
       const wasMapSynced = syncedMapQuery.length > 0;
-      const metas = wasMapSynced
-        ? await syncedMetasStatement.execute({ mapId })
-        : await metasFromMapStatement.execute({ mapId });
+      let metas;
+
+      if (wasMapSynced && syncedMapQuery[0].isPersonal) {
+        metas = await syncedMetasPersonalStatement.execute({ mapId });
+      } else if (wasMapSynced) {
+        metas = await syncedMetasStatement.execute({ mapId });
+      } else {
+        metas = await metasFromMapStatement.execute({ mapId });
+      }
 
       const allCountries = new Set(metas.flatMap((meta) => meta.countries));
       const isSingleCountry = allCountries.size === 1;
@@ -170,7 +226,7 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
       return metas
         .map((meta) => {
           const footer = generateFooter(
-            !meta.noteFromPlonkit,
+            meta.noteFromPlonkit,
             meta.countries[0] || '',
             meta.footer,
             meta.mapFooter,
