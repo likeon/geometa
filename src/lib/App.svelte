@@ -7,24 +7,31 @@
   import { saveContainerDimensions, setContainerDimensions } from './utils/resizing';
   import Carousel from './components/Carousel.svelte';
   import { checkIfOutdated, getLatestVersionInfo, markHelpMessageAsRead, wasHelpMessageRead } from './utils/main';
+  import {
+    getAnnouncement,
+    getLastDismissedAnnouncementTimestamp,
+    markAnnouncementAsDismissed
+  } from './utils/announcement';
 
   interface Props {
     panoId: string;
     mapId: string;
     userscriptVersion: string;
-    source: 'map' | 'challenge' | 'liveChallenge'
+    source: 'map' | 'challenge' | 'liveChallenge',
+    roundNumber: number,
   }
 
-  let { panoId, mapId, userscriptVersion, source }: Props = $props();
+  let { panoId, mapId, userscriptVersion, source, roundNumber }: Props = $props();
 
   type GeoInfo = {
     country: string;
     metaName: string;
     note: string;
-    plonkitCountryUrl: string;
     images?: string[];
     footer: string;
   };
+
+
 
   let geoInfo: GeoInfo | null = $state(null);
   let error: string | null = $state(null);
@@ -33,7 +40,7 @@
   let header: HTMLDivElement;
 
   onMount(() => {
-    const urlParams = new URLSearchParams({
+        const urlParams = new URLSearchParams({
       panoId,
       mapId,
       userscriptVersion,
@@ -83,6 +90,10 @@
       document.removeEventListener('pointermove', (event) => onPointerMove(event, container));
       document.removeEventListener('pointerup', (event) => onPointerUp(event, container));
     };
+
+
+
+
   });
 
   function confirmNavigation(event: any) {
@@ -123,19 +134,35 @@
 
   updateHelpClass();
 
-  $effect(() => {
+  $effect( () => {
     if (geoInfo) {
       const links = document.querySelectorAll('.geometa-footer a, .geometa-note a');
       links.forEach((link) => {
         link.removeEventListener('click', confirmNavigation);
         link.addEventListener('click', confirmNavigation);
       });
+
     }
   });
+
+  let lastDismissedTimestamp = $state(getLastDismissedAnnouncementTimestamp());
 
 </script>
 
 <div class="geometa-container" bind:this={container}>
+
+  {#await getAnnouncement() then announcement}
+    {#if roundNumber >= 4 && announcement && (!lastDismissedTimestamp || announcement.timestamp > lastDismissedTimestamp) }
+      <div class="announcement">
+        <div>
+          {@html announcement.htmlMessage}
+        </div>
+        <button class="vote-close-btn" onclick={() =>  {markAnnouncementAsDismissed(announcement.timestamp);lastDismissedTimestamp = announcement.timestamp }} aria-label="Dismiss announcement">×</button>
+      </div>
+      {/if}
+    {/await}
+
+
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="flex header" bind:this={header}>
     <h2>Learnable Meta</h2>
@@ -250,10 +277,54 @@
     resize: both;
     overflow: auto;
   }
+  .geometa-container > .header {
+    margin-top: 0; /* Remove top margin if vote notification is above it */
+  }
 
   .geometa-footer {
     color: #d3d3d3;
     font-size: small;
+  }
+
+  .announcement {
+    background-color: #e6f7ff;
+    color: #0050b3;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 8px;
+    border: 1px solid #91d5ff;
+  }
+
+  :global(.announcement a) {
+    color: #0050b3;
+    font-weight: bold;
+    text-decoration: underline;
+  }
+
+  :global(.announcement a:hover) {
+    color: #003a8c;
+  }
+
+  .vote-close-btn {
+    background: none;
+    border: none;
+    color: #0050b3;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 0 5px;
+    line-height: 1;
+    opacity: 0.7;
+  }
+
+  .vote-close-btn:hover {
+    opacity: 1;
   }
 
   a {

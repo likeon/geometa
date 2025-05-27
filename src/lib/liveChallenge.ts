@@ -29,6 +29,8 @@ export function initLiveChallenge() {
         mount(App, {
           target: element,
           props: {
+            // this is to display announcements and there is not easy way to calculate which round it is
+            roundNumber: 4,
             panoId,
             mapId,
             userscriptVersion: mapInfo.userscriptVersion,
