@@ -32,10 +32,10 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     error(500);
   }
 
-  if (map.isPersonal) {
-    // TODO: show map different way when its personal map
-    error(500);
-  }
+  // if (map.isPersonal) {
+  //   // TODO: show map different way when its personal map(add maybe like from which map is meta etc)
+  //   error(500);
+  // }
 
   const { data: metaList, error: apiError } = await api.internal.maps
     .metas({ mapId: map.id })
