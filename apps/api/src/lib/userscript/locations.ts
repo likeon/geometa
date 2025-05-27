@@ -46,7 +46,7 @@ export const legacyLocationSelect = db
   .limit(1)
   .prepare('userscript_legacy_get_location');
 
-export const personalMapLocationsExportSelect = db
+export const mapLocationsExportSelect = db
   .select(
     pick(getTableColumns(syncedLocations), [
       'lat',
@@ -55,8 +55,6 @@ export const personalMapLocationsExportSelect = db
       'pitch',
       'zoom',
       'panoId',
-      'extraPanoDate',
-      'extraPanoId',
     ]),
   )
   .from(syncedMetas)
@@ -69,4 +67,4 @@ export const personalMapLocationsExportSelect = db
     eq(syncedLocations.syncedMetaId, syncedMetas.metaId),
   )
   .where(eq(syncedMapMetas.mapId, sql.placeholder('mapId')))
-  .prepare('userscript_personal_map_get_locations');
+  .prepare('userscript_map_get_locations');

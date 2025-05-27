@@ -1,12 +1,12 @@
-import { maps, users } from '@api/lib/db/schema';
+import { mapGroupPermissions, maps, users } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import {
   legacyLocationSelect,
   locationSelect,
-  personalMapLocationsExportSelect,
+  mapLocationsExportSelect,
 } from '@api/lib/userscript/locations';
 import { generateFooter } from '@api/lib/userscript/utils';
-import { and, eq, sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 const userscriptVersion = '0.82';
@@ -99,33 +99,44 @@ export const userscriptRouter = new Elysia({
       if (!bearer) {
         return status(401);
       }
-      const mapResult = await db
+
+      const results = await db
         .select({
-          id: maps.id,
-          mapGroupId: maps.mapGroupId,
-          userApiToken: users.apiToken,
-          isPersonal: maps.isPersonal,
+          mapId: maps.id,
+          userApiTokens: sql<string[]>`
+            CASE
+      WHEN ${maps.isPersonal} = TRUE THEN
+            COALESCE(
+            (SELECT ARRAY_AGG(${users.apiToken})
+            FILTER (WHERE ${users.id} = ${maps.userId})
+            FROM ${users} WHERE ${users.id} = ${maps.userId}),'{}'::text[]
+            )
+            ELSE
+            COALESCE(
+            (
+            SELECT ARRAY_AGG(${users.apiToken})
+            FILTER (WHERE ${users.apiToken} IS NOT NULL)
+            FROM ${mapGroupPermissions}
+            JOIN ${users} ON ${users.id} = ${mapGroupPermissions.userId}
+            WHERE ${mapGroupPermissions.mapGroupId} = ${maps.mapGroupId}
+            ),'{}'::text[]
+            )
+            END
+          `.as('user_api_tokens'),
         })
         .from(maps)
         .leftJoin(users, eq(users.id, maps.userId))
-        .where(and(eq(maps.geoguessrId, geoguessrId)));
-      if (!mapResult.length) {
-        return status(404);
-      }
+        .where(eq(maps.geoguessrId, geoguessrId));
 
-      const [map] = mapResult;
-
-      // authenticate and get locations differently depending on what kind of map it is
-      if (!map.isPersonal) {
-        // not implemented yet
-        return status(501);
-      }
-
-      if (!map.userApiToken || bearer !== map.userApiToken) {
+      const [data] = results;
+      if (
+        data.userApiTokens.length === 0 ||
+        !data.userApiTokens.includes(bearer)
+      ) {
         return status(403);
       }
-      const locations = await personalMapLocationsExportSelect.execute({
-        mapId: map.id,
+      const locations = await mapLocationsExportSelect.execute({
+        mapId: data.mapId,
       });
       return {
         customCoordinates: locations.map((location) => ({
@@ -137,10 +148,6 @@ export const userscriptRouter = new Elysia({
           panoId: location.panoId,
           countryCode: null,
           stateCode: null,
-          extra: {
-            panoDate: location.extraPanoDate,
-            panoId: location.extraPanoId,
-          },
         })),
       };
     },
