@@ -49,7 +49,7 @@
       {#if map.isShared}
         <div>
           <Badge
-            class="bg-emerald-200 text-emerald-800 dark:bg-emerald-700/50 dark:text-emerald-200/80">
+            class="bg-amber-500 text-black dark:bg-amber-400 dark:text-amber-950 font-semibold px-2.5 py-0.5 rounded-md">
             <RaStarlineIcon class="inline-block mr-1" />
             Shared
           </Badge>
