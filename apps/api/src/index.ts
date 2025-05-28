@@ -66,3 +66,10 @@ const app = new Elysia()
   .use(api)
   .listen(3000);
 export type App = typeof app;
+
+
+console.log(
+  app.routes
+    .map((route) => `${route.method} - ${route.path}`)
+    .join('\n')
+);
