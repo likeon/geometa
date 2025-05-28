@@ -1,10 +1,9 @@
 import { api } from '$lib/api';
-import type { PageServerLoad } from '../../../../../../.svelte-kit/types/src/routes';
 import { error } from '@sveltejs/kit';
 
 export const prerender = false;
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load = async ({ params, locals }) => {
   const id = parseInt(params.id, 10);
   if (isNaN(id)) {
     error(400, 'Invalid ID');

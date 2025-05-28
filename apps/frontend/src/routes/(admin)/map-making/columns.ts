@@ -1,6 +1,6 @@
 import { renderComponent } from '$lib/components/ui/data-table';
 import type { ColumnDef } from '@tanstack/table-core';
-import type { PageData } from '../../../../.svelte-kit/types/src/routes';
+import type { PageData } from './$types';
 import BaseTableHeader from '$lib/components/BaseTable/BaseTableHeader.svelte';
 import BaseTableLink from '$lib/components/BaseTable/BaseTableLink.svelte';
 export const columns: ColumnDef<PageData['userGroups'][number]>[] = [

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { superForm, type Infer, type SuperValidated } from 'sveltekit-superforms';
   import type { InsertMapsSchema } from './+page.server';
-  import type { PageData } from '../../../../../../../.svelte-kit/types/src/routes';
+  import type { PageData } from './$types';
   import {
     Alert,
     Button,

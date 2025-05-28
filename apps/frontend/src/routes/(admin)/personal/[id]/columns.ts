@@ -2,7 +2,7 @@ import { renderComponent } from '$lib/components/ui/data-table';
 import type { ColumnDef } from '@tanstack/table-core';
 import BaseTableHeader from '$lib/components/BaseTable/BaseTableHeader.svelte';
 import { Checkbox } from '$lib/components/ui/checkbox';
-import type { PageData } from '../../../../../.svelte-kit/types/src/routes';
+import type { PageData } from './$types';
 
 export const columns: ColumnDef<PageData['metaList'][number]>[] = [
   {

@@ -1,4 +1,3 @@
-import type { PageServerLoad } from '../../../../../../../.svelte-kit/types/src/routes';
 import { asc, eq } from 'drizzle-orm';
 import { levels, mapGroups } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
@@ -11,7 +10,7 @@ import { ensurePermissions } from '$lib/utils';
 const insertLevelsSchema = createInsertSchema(levels);
 export type InsertLevelsSchema = typeof insertLevelsSchema;
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load = async ({ params, locals }) => {
   const id = getGroupId(params);
 
   const group = await locals.db.query.mapGroups.findFirst({

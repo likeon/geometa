@@ -1,4 +1,3 @@
-import type { PageServerLoad } from '../../../../../../.svelte-kit/types/src/routes';
 import { and, asc, eq, isNull, lt, not, or, sql, TransactionRollbackError } from 'drizzle-orm';
 import { mapGroupLocations, mapGroups, metaImages, metaLevels, metas, users } from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
@@ -110,7 +109,7 @@ const metasUploadSchema = z.object({
 });
 export type MetasUploadSchema = typeof metasUploadSchema;
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load = async ({ params, locals }) => {
   if (!locals.user?.id) {
     error(403, 'Permission denied');
   }

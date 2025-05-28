@@ -1,6 +1,5 @@
 import { api } from '$lib/api';
 import { z } from 'zod';
-import type { PageServerLoad } from '../../../../.svelte-kit/types/src/routes';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { error, fail } from '@sveltejs/kit';
@@ -14,7 +13,7 @@ const insertPersonalMap = z.object({
 });
 export type InsertPersonalMapSchema = typeof insertPersonalMap;
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load = async ({ locals }) => {
   const { data, error: apiError } = await api.internal.maps.personal.get({
     headers: {
       'x-api-user-id': locals.user!.id

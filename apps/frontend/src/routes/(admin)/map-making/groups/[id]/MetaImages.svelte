@@ -2,7 +2,7 @@
   import { Button, Input } from 'flowbite-svelte';
   import { fileProxy, type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
   import type { ImageUploadSchema } from './+page.server';
-  import type { PageData } from '../../../../../../.svelte-kit/types/src/routes';
+  import type { PageData } from './$types';
   import { applyAction, enhance } from '$app/forms';
   import { invalidateAll } from '$app/navigation';
 

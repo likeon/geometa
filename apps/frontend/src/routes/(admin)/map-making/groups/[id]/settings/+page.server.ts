@@ -1,4 +1,3 @@
-import type { PageServerLoad } from '../../../../../../../.svelte-kit/types/src/routes';
 import { and, eq, sql } from 'drizzle-orm';
 import { mapGroupPermissions, mapGroups, users } from '$lib/db/schema';
 import { error, fail, redirect } from '@sveltejs/kit';
@@ -74,7 +73,7 @@ function createPermissionCreateSchema(db: DB, groupId: number) {
     });
 }
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+export const load = async ({ params, locals }) => {
   const id = getGroupId(params);
   await ensurePermissions(locals.db, locals.user!.id, id);
 

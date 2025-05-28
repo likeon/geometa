@@ -17,7 +17,6 @@ import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
 import { ensurePermissions, geoguessrGetMapInfo, markdown2Html } from '$lib/utils';
-import type { PageServerLoad } from '../../../../../../../.svelte-kit/types/src/routes';
 
 const insertMapsSchema = createInsertSchema(maps)
   .extend({
@@ -37,7 +36,7 @@ const insertMapsSchema = createInsertSchema(maps)
   });
 export type InsertMapsSchema = typeof insertMapsSchema;
 
-export const load: PageServerLoad = async ({ locals, params }) => {
+export const load = async ({ locals, params }) => {
   const groupId = getGroupId(params);
   const db = locals.db;
   const group = await db.query.mapGroups.findFirst({

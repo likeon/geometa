@@ -3,13 +3,12 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { api } from '$lib/api';
-import type { PageServerLoad } from '../../../../../../../.svelte-kit/types/src/routes';
 
 const regenerateApiTokenSchema = z.object({
   newRawToken: z.string().optional()
 });
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load = async ({ locals }) => {
   const { data, error: apiError } = await api.internal.users.profile.get({
     headers: {
       'x-api-user-id': locals.user!.id

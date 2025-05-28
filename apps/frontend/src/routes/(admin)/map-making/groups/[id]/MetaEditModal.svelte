@@ -13,7 +13,7 @@
   } from 'flowbite-svelte';
   import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
   import type { CopyMetaSchema, ImageUploadSchema, InsertMetasSchema } from './+page.server';
-  import type { PageData } from '../../../../../../.svelte-kit/types/src/routes';
+  import type { PageData } from './$types';
   import MetaImages from '$routes/(admin)/map-making/groups/[id]/MetaImages.svelte';
   import Icon from '@iconify/svelte';
   import { Carta, MarkdownEditor } from 'carta-md';

@@ -3,7 +3,7 @@ import type { ColumnDef } from '@tanstack/table-core';
 import DataTableActions from './table-actions.svelte';
 import BaseTableHeader from '$lib/components/BaseTable/BaseTableHeader.svelte';
 import { Checkbox } from '$lib/components/ui/checkbox';
-import type { PageData } from '../../../../../../.svelte-kit/types/src/routes';
+import type { PageData } from './$types';
 import Check from '@lucide/svelte/icons/check';
 import ImageIcon from '@lucide/svelte/icons/image';
 import StickyNoteIcon from '@lucide/svelte/icons/sticky-note';
