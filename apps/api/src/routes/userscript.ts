@@ -9,7 +9,7 @@ import { generateFooter } from '@api/lib/userscript/utils';
 import { eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
-const userscriptVersion = '0.82';
+const userscriptVersion = '0.83';
 
 const mapInfoQuery = db.query.maps
   .findFirst({
@@ -24,7 +24,6 @@ export const userscriptRouter = new Elysia({
   prefix: '/userscript',
   detail: { tags: ['userscript'] },
 })
-  // .use(bearer())
   .get('/map/:geoguessrId', async ({ params: { geoguessrId }, status }) => {
     const map = await mapInfoQuery.execute({ geoguessrId });
     if (!map) {
@@ -43,16 +42,14 @@ export const userscriptRouter = new Elysia({
   .get(
     '/announcement/',
     async ({}) => {
-      return {
-            };
+      return {};
       // example announcement
       // return {
       //   timestamp: 1748360716,
       //   htmlMessage: `🎉 Check out our <a href='#' target='_blank'>new features</a> page for exciting updates. This is a test message!`
       // };
     },
-    {
-    },
+    {},
   )
   .get(
     '/location/',
