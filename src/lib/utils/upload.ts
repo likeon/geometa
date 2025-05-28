@@ -114,7 +114,7 @@ export async function uploadLocations(geoguessrId: string, apiKey: string): Prom
 
 function fetchMapLocationsGM(geoguessrId: string, apiToken: string): Promise<[]> {
   return new Promise((resolve, reject) => {
-    const apiUrl = `http://localhost:3000/api/userscript/map/${geoguessrId}/locations`;
+    const apiUrl = `https://learnablemeta.com/api/userscript/map/${geoguessrId}/locations`;
 
     GM_xmlhttpRequest({
       method: 'GET',

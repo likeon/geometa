@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.82
+// @version      0.83
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
@@ -11,18 +11,24 @@
 // @require      https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/b0c7492f4f346d4acb594a2015d592616a665096/geoguessr-event-framework.js
 // @connect      learnablemeta.com
 // @grant        GM_addStyle
+// @grant        GM_getValue
 // @grant        GM_info
+// @grant        GM_registerMenuCommand
+// @grant        GM_setValue
 // @grant        GM_xmlhttpRequest
 // @grant        unsafeWindow
 // @run-at       document-start
 // ==/UserScript==
 
-(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(` .loadership_ZOJAQ.svelte-i1jlc0{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-i1jlc0-loadership_ZOJAQ_scale 1.2s infinite,svelte-i1jlc0-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-i1jlc0-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-i1jlc0-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.carousel.svelte-fofh7f{position:relative;overflow:hidden;margin:0 auto}.image-wrapper.svelte-fofh7f{width:100%;height:100%;display:flex;justify-content:center;align-items:center;cursor:zoom-in}.responsive-image.svelte-fofh7f{max-width:100%;height:100%;display:block;object-fit:contain}.lens.svelte-fofh7f{position:absolute;pointer-events:none;border:2px solid #aaa;border-radius:50%;box-shadow:0 0 8px #00000080}.click-area.svelte-fofh7f{position:absolute;top:0;bottom:0;width:1.4em;cursor:pointer}.prev-area.svelte-fofh7f{left:0}.next-area.svelte-fofh7f{right:0}.prev.svelte-fofh7f,.next.svelte-fofh7f{background-color:#00000080;color:#fff;border:none;font-size:1.2em;padding:.2em;cursor:pointer;pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%)}.prev.svelte-fofh7f{left:0}.next.svelte-fofh7f{right:0}.indicators.svelte-fofh7f{position:absolute;bottom:15px;left:50%;transform:translate(-50%);display:flex;justify-content:center;align-items:center;gap:8px}.indicator.svelte-fofh7f{width:12px;height:12px;background-color:#ffffff80;border-radius:50%;cursor:pointer;border:none;padding:0;flex-shrink:0}.indicator.active.svelte-fofh7f{background-color:#fff}.geometa-footer a{color:#188bd2;text-decoration:none}.geometa-footer a:hover{text-decoration:underline}.geometa-container.svelte-oxxnc1{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);resize:both;overflow:auto}.geometa-footer.svelte-oxxnc1{color:#d3d3d3;font-size:small}a.svelte-oxxnc1{color:#188bd2}a.svelte-oxxnc1:hover{text-decoration:underline}.skill-icons--discord.svelte-oxxnc1{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-oxxnc1{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--list.svelte-oxxnc1{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E")}.question-mark-icon.svelte-oxxnc1{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");cursor:pointer}.icons.svelte-oxxnc1{display:inline-block;vertical-align:middle}.flex.svelte-oxxnc1{display:flex;align-items:center}.icons.svelte-oxxnc1 a:where(.svelte-oxxnc1) span:where(.svelte-oxxnc1){align-items:center;justify-content:center}hr.svelte-oxxnc1{border:0;border-top:1px solid white;width:100%}.header.svelte-oxxnc1{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center;touch-action:none;-webkit-user-select:none;user-select:none}.geometa-note a{color:#188bd2}.geometa-note a:hover{text-decoration:underline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem}.modal-backdrop.svelte-oxxnc1{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#1e1e1ecc;display:flex;justify-content:center;align-items:center;z-index:1000}.modal.svelte-oxxnc1{background:var(--ds-color-purple-100);padding:15px 25px;border-radius:8px;text-align:center;width:90%;max-width:600px;box-shadow:0 4px 6px #0003;color:#d3d3d3}.modal.svelte-oxxnc1 p:where(.svelte-oxxnc1){margin:0 0 10px;font-size:17px}.modal-url.svelte-oxxnc1{font-size:15px;font-weight:700;color:#188bd2;word-break:break-word;margin:10px 0}.modal-buttons.svelte-oxxnc1{display:flex;justify-content:center;gap:15px;margin-top:20px}.proceed-btn.svelte-oxxnc1{background:#188bd2;color:#fff;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out}.proceed-btn.svelte-oxxnc1:hover{background:#0056b3}.close-btn.svelte-oxxnc1{background:transparent;color:#d3d3d3;padding:8px 16px;border:1px solid #d3d3d3;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out,color .2s ease-in-out}.close-btn.svelte-oxxnc1:hover{background:#d3d3d3;color:var(--ds-color-purple-100)}button.svelte-oxxnc1{cursor:pointer;background:none;border:none;padding:0}.blink.svelte-oxxnc1{animation:svelte-oxxnc1-blink-animation 1s infinite}.help-message.svelte-oxxnc1{padding:12px;font-size:16px;line-height:1.5;text-align:left}.help-message.svelte-oxxnc1 strong:where(.svelte-oxxnc1){color:#007bff;font-weight:700}@keyframes svelte-oxxnc1-blink-animation{0%{filter:brightness(1)}50%{filter:brightness(2);background-color:#004779}to{filter:brightness(1)}}.outdated.svelte-oxxnc1 strong:where(.svelte-oxxnc1){color:red!important}.geometa-map-label-container.svelte-tonh26{background-color:#0003;color:#fff;text-align:center;z-index:999999;position:absolute;bottom:4px;right:4px;box-sizing:border-box;border-radius:8px;padding:8px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;gap:8px}p.svelte-tonh26{font-size:14px;font-weight:700}button.svelte-tonh26{padding:6px 12px;font-size:12px;color:#fff;background-color:#4caf50;border:none;border-radius:4px;cursor:pointer} `);
+(e=>{if(typeof GM_addStyle=="function"){GM_addStyle(e);return}const t=document.createElement("style");t.textContent=e,document.head.append(t)})(` .loadership_ZOJAQ.svelte-i1jlc0{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-i1jlc0-loadership_ZOJAQ_scale 1.2s infinite,svelte-i1jlc0-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-i1jlc0 div:where(.svelte-i1jlc0):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-i1jlc0-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-i1jlc0-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-7lhsry{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.carousel.svelte-fofh7f{position:relative;overflow:hidden;margin:0 auto}.image-wrapper.svelte-fofh7f{width:100%;height:100%;display:flex;justify-content:center;align-items:center;cursor:zoom-in}.responsive-image.svelte-fofh7f{max-width:100%;height:100%;display:block;object-fit:contain}.lens.svelte-fofh7f{position:absolute;pointer-events:none;border:2px solid #aaa;border-radius:50%;box-shadow:0 0 8px #00000080}.click-area.svelte-fofh7f{position:absolute;top:0;bottom:0;width:1.4em;cursor:pointer}.prev-area.svelte-fofh7f{left:0}.next-area.svelte-fofh7f{right:0}.prev.svelte-fofh7f,.next.svelte-fofh7f{background-color:#00000080;color:#fff;border:none;font-size:1.2em;padding:.2em;cursor:pointer;pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%)}.prev.svelte-fofh7f{left:0}.next.svelte-fofh7f{right:0}.indicators.svelte-fofh7f{position:absolute;bottom:15px;left:50%;transform:translate(-50%);display:flex;justify-content:center;align-items:center;gap:8px}.indicator.svelte-fofh7f{width:12px;height:12px;background-color:#ffffff80;border-radius:50%;cursor:pointer;border:none;padding:0;flex-shrink:0}.indicator.active.svelte-fofh7f{background-color:#fff}.geometa-footer a{color:#188bd2;text-decoration:none}.geometa-footer a:hover{text-decoration:underline}.geometa-container.svelte-z0rh71{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100);padding:6px 10px;border-radius:5px;font-size:17px;width:min(25%,500px);resize:both;overflow:auto}.geometa-container.svelte-z0rh71>.header:where(.svelte-z0rh71){margin-top:0}.geometa-footer.svelte-z0rh71{color:#d3d3d3;font-size:small}.announcement.svelte-z0rh71{background-color:#e6f7ff;color:#0050b3;padding:8px 12px;border-radius:4px;font-size:14px;display:flex;justify-content:space-between;align-items:center;width:100%;box-sizing:border-box;margin-bottom:8px;border:1px solid #91d5ff}.announcement a{color:#0050b3;font-weight:700;text-decoration:underline}.announcement a:hover{color:#003a8c}.vote-close-btn.svelte-z0rh71{background:none;border:none;color:#0050b3;font-size:18px;font-weight:700;cursor:pointer;padding:0 5px;line-height:1;opacity:.7}.vote-close-btn.svelte-z0rh71:hover{opacity:1}a.svelte-z0rh71{color:#188bd2}a.svelte-z0rh71:hover{text-decoration:underline}.skill-icons--discord.svelte-z0rh71{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-z0rh71{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--list.svelte-z0rh71{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E")}.question-mark-icon.svelte-z0rh71{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");cursor:pointer}.icons.svelte-z0rh71{display:inline-block;vertical-align:middle}.flex.svelte-z0rh71{display:flex;align-items:center}.icons.svelte-z0rh71 a:where(.svelte-z0rh71) span:where(.svelte-z0rh71){align-items:center;justify-content:center}hr.svelte-z0rh71{border:0;border-top:1px solid white;width:100%}.header.svelte-z0rh71{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center;touch-action:none;-webkit-user-select:none;user-select:none}.geometa-note a{color:#188bd2}.geometa-note a:hover{text-decoration:underline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem}.modal-backdrop.svelte-z0rh71{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#1e1e1ecc;display:flex;justify-content:center;align-items:center;z-index:1000}.modal.svelte-z0rh71{background:var(--ds-color-purple-100);padding:15px 25px;border-radius:8px;text-align:center;width:90%;max-width:600px;box-shadow:0 4px 6px #0003;color:#d3d3d3}.modal.svelte-z0rh71 p:where(.svelte-z0rh71){margin:0 0 10px;font-size:17px}.modal-url.svelte-z0rh71{font-size:15px;font-weight:700;color:#188bd2;word-break:break-word;margin:10px 0}.modal-buttons.svelte-z0rh71{display:flex;justify-content:center;gap:15px;margin-top:20px}.proceed-btn.svelte-z0rh71{background:#188bd2;color:#fff;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out}.proceed-btn.svelte-z0rh71:hover{background:#0056b3}.close-btn.svelte-z0rh71{background:transparent;color:#d3d3d3;padding:8px 16px;border:1px solid #d3d3d3;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out,color .2s ease-in-out}.close-btn.svelte-z0rh71:hover{background:#d3d3d3;color:var(--ds-color-purple-100)}button.svelte-z0rh71{cursor:pointer;background:none;border:none;padding:0}.blink.svelte-z0rh71{animation:svelte-z0rh71-blink-animation 1s infinite}.help-message.svelte-z0rh71{padding:12px;font-size:16px;line-height:1.5;text-align:left}.help-message.svelte-z0rh71 strong:where(.svelte-z0rh71){color:#007bff;font-weight:700}@keyframes svelte-z0rh71-blink-animation{0%{filter:brightness(1)}50%{filter:brightness(2);background-color:#004779}to{filter:brightness(1)}}.outdated.svelte-z0rh71 strong:where(.svelte-z0rh71){color:red!important}.geometa-map-label-container.svelte-1mmcvqu{background-color:#0003;color:#fff;text-align:center;z-index:999999;position:absolute;bottom:4px;right:4px;box-sizing:border-box;border-radius:8px;padding:8px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;gap:8px;text-shadow:0 0 10px rgba(255,255,255,.1)}p.svelte-1mmcvqu{font-size:14px;font-weight:700}button.svelte-1mmcvqu{padding:6px 12px;font-size:12px;color:#fff;background-color:#4caf50;border:none;border-radius:4px;cursor:pointer}.toast-notification.svelte-1rq8lsd{z-index:10001;min-width:250px;max-width:400px;padding:14px 22px;border-radius:8px;box-shadow:0 5px 15px #0003;color:#fff;display:flex;align-items:center;justify-content:space-between;font-size:.95em;line-height:1.4}.toast-success.svelte-1rq8lsd{background-color:#28a745;border-left:5px solid #1e7e34}.toast-error.svelte-1rq8lsd{background-color:#dc3545;border-left:5px solid #b02a37}.toast-info.svelte-1rq8lsd{background-color:#17a2b8;border-left:5px solid #117a8b}.toast-warning.svelte-1rq8lsd{background-color:#ffc107;color:#212529;border-left:5px solid #d39e00}.toast-message.svelte-1rq8lsd{flex-grow:1;margin-right:10px}.toast-close-button.svelte-1rq8lsd{background:transparent;border:none;color:inherit;font-size:1.6em;font-weight:700;margin-left:10px;cursor:pointer;padding:0;line-height:1;opacity:.7;transition:opacity .2s ease}.toast-close-button.svelte-1rq8lsd:hover{opacity:1}.custom-yellow-button.svelte-1dwotw1{background-color:#f5c542;border-color:#e0b000;color:#00008b;padding:6px 12px;border-radius:4px;cursor:pointer;font-weight:700}.custom-yellow-button.svelte-1dwotw1:hover{background-color:#eab308;border-color:#d39e00}.custom-yellow-button.svelte-1dwotw1:disabled{background-color:#ccc;border-color:#aaa;color:#666;cursor:not-allowed}.modal-overlay.svelte-1dwotw1{position:fixed;top:0;left:0;width:100%;height:100%;background-color:#0009;display:flex;justify-content:center;align-items:center;z-index:10000}.modal-content.svelte-1dwotw1{background-color:#fff;padding:25px 30px;border-radius:8px;box-shadow:0 5px 15px #0000004d;width:90%;max-width:450px;color:#333}.modal-content.svelte-1dwotw1 h2:where(.svelte-1dwotw1){margin-top:0;margin-bottom:15px;color:#2c3e50}.modal-content.svelte-1dwotw1 p:where(.svelte-1dwotw1){margin-bottom:15px;line-height:1.6}.modal-content.svelte-1dwotw1 p:where(.svelte-1dwotw1) a:where(.svelte-1dwotw1){color:#007bff;text-decoration:underline}.modal-content.svelte-1dwotw1 p:where(.svelte-1dwotw1) a:where(.svelte-1dwotw1):hover{color:#0056b3}.modal-input.svelte-1dwotw1{width:calc(100% - 20px);padding:10px;margin-bottom:20px;border:1px solid #ccc;border-radius:4px;font-size:1em}.modal-actions.svelte-1dwotw1{display:flex;justify-content:flex-end;gap:10px}.modal-button.svelte-1dwotw1{padding:10px 18px;border:none;border-radius:4px;cursor:pointer;font-weight:700;transition:background-color .2s ease}.modal-button-save.svelte-1dwotw1{background-color:#28a745;color:#fff}.modal-button-save.svelte-1dwotw1:hover{background-color:#218838}.modal-button-cancel.svelte-1dwotw1{background-color:#6c757d;color:#fff}.modal-button-cancel.svelte-1dwotw1:hover{background-color:#5a6268}.modal-note.svelte-1dwotw1{font-size:.85em;color:#555;margin-top:15px;text-align:center} `);
 
 (async function () {
   'use strict';
 
+  var _GM_getValue = /* @__PURE__ */ (() => typeof GM_getValue != "undefined" ? GM_getValue : void 0)();
   var _GM_info = /* @__PURE__ */ (() => typeof GM_info != "undefined" ? GM_info : void 0)();
+  var _GM_registerMenuCommand = /* @__PURE__ */ (() => typeof GM_registerMenuCommand != "undefined" ? GM_registerMenuCommand : void 0)();
+  var _GM_setValue = /* @__PURE__ */ (() => typeof GM_setValue != "undefined" ? GM_setValue : void 0)();
   var _GM_xmlhttpRequest = /* @__PURE__ */ (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
   var _unsafeWindow = /* @__PURE__ */ (() => typeof unsafeWindow != "undefined" ? unsafeWindow : void 0)();
   function waitForElement(selector) {
@@ -111,7 +117,7 @@
         return mapInfo2;
       }
     }
-    const url = `https://learnablemeta.com/api/map-info/${geoguessrId}`;
+    const url = `https://learnablemeta.com/api/userscript/map/${geoguessrId}`;
     const mapInfo = await fetchMapInfo(url);
     _unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(mapInfo));
     _unsafeWindow.localStorage.setItem("geometa:latest-version", mapInfo.userscriptVersion);
@@ -166,7 +172,7 @@
     console.log(`ALM: ${name}`, data);
   }
   function extractMapIdFromUrl(url) {
-    const match = url.match(/\/maps\/(.+)/);
+    const match = url.match(/\/maps\/([^\/]+)/);
     return match ? match[1] : null;
   }
   const DEV = false;
@@ -178,6 +184,14 @@
   var object_prototype = Object.prototype;
   var array_prototype = Array.prototype;
   var get_prototype_of = Object.getPrototypeOf;
+  function is_function(thing) {
+    return typeof thing === "function";
+  }
+  const noop = () => {
+  };
+  function is_promise(value) {
+    return typeof (value == null ? void 0 : value.then) === "function";
+  }
   function run(fn) {
     return fn();
   }
@@ -361,6 +375,12 @@
   const EACH_ITEM_IMMUTABLE = 1 << 4;
   const PROPS_IS_IMMUTABLE = 1;
   const PROPS_IS_RUNES = 1 << 1;
+  const PROPS_IS_UPDATED = 1 << 2;
+  const PROPS_IS_BINDABLE = 1 << 3;
+  const PROPS_IS_LAZY_INITIAL = 1 << 4;
+  const TRANSITION_IN = 1;
+  const TRANSITION_OUT = 1 << 1;
+  const TRANSITION_GLOBAL = 1 << 2;
   const TEMPLATE_FRAGMENT = 1;
   const TEMPLATE_USE_IMPORT_NODE = 1 << 1;
   const UNINITIALIZED = Symbol();
@@ -876,8 +896,8 @@
     set_signal_status(effect2, DESTROYED);
     var transitions = effect2.transitions;
     if (transitions !== null) {
-      for (const transition of transitions) {
-        transition.stop();
+      for (const transition2 of transitions) {
+        transition2.stop();
       }
     }
     execute_effect_teardown(effect2);
@@ -910,8 +930,8 @@
     var remaining = transitions.length;
     if (remaining > 0) {
       var check = () => --remaining || fn();
-      for (var transition of transitions) {
-        transition.out(check);
+      for (var transition2 of transitions) {
+        transition2.out(check);
       }
     } else {
       fn();
@@ -921,9 +941,9 @@
     if ((effect2.f & INERT) !== 0) return;
     effect2.f ^= INERT;
     if (effect2.transitions !== null) {
-      for (const transition of effect2.transitions) {
-        if (transition.is_global || local) {
-          transitions.push(transition);
+      for (const transition2 of effect2.transitions) {
+        if (transition2.is_global || local) {
+          transitions.push(transition2);
         }
       }
     }
@@ -952,9 +972,9 @@
       child2 = sibling2;
     }
     if (effect2.transitions !== null) {
-      for (const transition of effect2.transitions) {
-        if (transition.is_global || local) {
-          transition.in();
+      for (const transition2 of effect2.transitions) {
+        if (transition2.is_global || local) {
+          transition2.in();
         }
       }
     }
@@ -974,11 +994,19 @@
     }
     current_queued_micro_tasks.push(fn);
   }
+  function flush_tasks() {
+    if (is_micro_task_queued$1) {
+      process_micro_tasks();
+    }
+  }
   function lifecycle_outside_component(name) {
     {
       throw new Error("lifecycle_outside_component");
     }
   }
+  const FLUSH_MICROTASK = 0;
+  const FLUSH_SYNC = 1;
+  let scheduler_mode = FLUSH_MICROTASK;
   let is_micro_task_queued = false;
   let is_flushing_effect = false;
   let is_destroying_effect = false;
@@ -1011,6 +1039,9 @@
   let current_version = 0;
   let skip_reaction = false;
   let component_context = null;
+  function set_component_context(context) {
+    component_context = context;
+  }
   function increment_version() {
     return ++current_version;
   }
@@ -1245,7 +1276,7 @@
     }
   }
   function schedule_effect(signal) {
-    {
+    if (scheduler_mode === FLUSH_MICROTASK) {
       if (!is_micro_task_queued) {
         is_micro_task_queued = true;
         queueMicrotask(process_deferred);
@@ -1306,6 +1337,29 @@
       child2 = effects[i];
       collected_effects.push(child2);
       process_effects(child2, collected_effects);
+    }
+  }
+  function flush_sync(fn) {
+    var previous_scheduler_mode = scheduler_mode;
+    var previous_queued_root_effects = queued_root_effects;
+    try {
+      infinite_loop_guard();
+      const root_effects = [];
+      scheduler_mode = FLUSH_SYNC;
+      queued_root_effects = root_effects;
+      is_micro_task_queued = false;
+      flush_queued_root_effects(previous_queued_root_effects);
+      var result = fn == null ? void 0 : fn();
+      flush_tasks();
+      if (queued_root_effects.length > 0 || root_effects.length > 0) {
+        flush_sync();
+      }
+      flush_count = 0;
+      if (DEV) ;
+      return result;
+    } finally {
+      scheduler_mode = previous_scheduler_mode;
+      queued_root_effects = previous_queued_root_effects;
     }
   }
   function get(signal) {
@@ -1663,6 +1717,7 @@
   function is_passive_event(name) {
     return PASSIVE_EVENTS.includes(name);
   }
+  let should_intro = true;
   function set_text(text, value) {
     var str = value == null ? "" : typeof value === "object" ? value + "" : value;
     if (str !== (text.__t ?? (text.__t = text.nodeValue))) {
@@ -1710,7 +1765,9 @@
         if (events) {
           props.$$events = events;
         }
+        should_intro = intro;
         component = Component(anchor_node, props) || {};
+        should_intro = true;
         if (context) {
           pop();
         }
@@ -1741,6 +1798,90 @@
     return component;
   }
   let mounted_components = /* @__PURE__ */ new WeakMap();
+  const PENDING = 0;
+  const THEN = 1;
+  const CATCH = 2;
+  function await_block(node, get_input, pending_fn, then_fn, catch_fn) {
+    var anchor = node;
+    var runes = is_runes();
+    var active_component_context = component_context;
+    var input;
+    var pending_effect;
+    var then_effect;
+    var catch_effect;
+    var input_source = (runes ? source : mutable_source)(
+      /** @type {V} */
+      void 0
+    );
+    var error_source = (runes ? source : mutable_source)(void 0);
+    var resolved = false;
+    function update(state2, restore) {
+      resolved = true;
+      if (restore) {
+        set_active_effect(effect2);
+        set_active_reaction(effect2);
+        set_component_context(active_component_context);
+      }
+      if (state2 === PENDING && pending_fn) {
+        if (pending_effect) resume_effect(pending_effect);
+        else pending_effect = branch(() => pending_fn(anchor));
+      }
+      if (state2 === THEN && then_fn) {
+        if (then_effect) resume_effect(then_effect);
+        else then_effect = branch(() => then_fn(anchor, input_source));
+      }
+      if (state2 === CATCH && catch_fn) {
+        if (catch_effect) resume_effect(catch_effect);
+        else catch_effect = branch(() => catch_fn(anchor, error_source));
+      }
+      if (state2 !== PENDING && pending_effect) {
+        pause_effect(pending_effect, () => pending_effect = null);
+      }
+      if (state2 !== THEN && then_effect) {
+        pause_effect(then_effect, () => then_effect = null);
+      }
+      if (state2 !== CATCH && catch_effect) {
+        pause_effect(catch_effect, () => catch_effect = null);
+      }
+      if (restore) {
+        set_component_context(null);
+        set_active_reaction(null);
+        set_active_effect(null);
+        flush_sync();
+      }
+    }
+    var effect2 = block(() => {
+      if (input === (input = get_input())) return;
+      if (is_promise(input)) {
+        var promise = input;
+        resolved = false;
+        promise.then(
+          (value) => {
+            if (promise !== input) return;
+            internal_set(input_source, value);
+            update(THEN, true);
+          },
+          (error) => {
+            if (promise !== input) return;
+            internal_set(error_source, error);
+            update(CATCH, true);
+            {
+              throw error_source.v;
+            }
+          }
+        );
+        {
+          queue_micro_task(() => {
+            if (!resolved) update(PENDING, true);
+          });
+        }
+      } else {
+        internal_set(input_source, input);
+        update(THEN, false);
+      }
+      return () => input = null;
+    });
+  }
   function if_block(node, get_condition, consequent_fn, alternate_fn = null, elseif = false) {
     var anchor = node;
     var consequent_effect = null;
@@ -2110,6 +2251,31 @@
       });
     });
   }
+  let listening_to_form_reset = false;
+  function add_form_reset_listener() {
+    if (!listening_to_form_reset) {
+      listening_to_form_reset = true;
+      document.addEventListener(
+        "reset",
+        (evt) => {
+          Promise.resolve().then(() => {
+            var _a;
+            if (!evt.defaultPrevented) {
+              for (
+                const e of
+                /**@type {HTMLFormElement} */
+                evt.target.elements
+              ) {
+                (_a = e.__on_r) == null ? void 0 : _a.call(e);
+              }
+            }
+          });
+        },
+        // In the capture phase to guarantee we get noticed of it (no possiblity of stopPropagation)
+        { capture: true }
+      );
+    }
+  }
   function set_attribute(element, attribute, value, skip_warning) {
     var attributes = element.__attributes ?? (element.__attributes = {});
     if (attributes[attribute] === (attributes[attribute] = value)) return;
@@ -2160,6 +2326,314 @@
   }
   function to_class(value) {
     return value == null ? "" : value;
+  }
+  function set_style(dom, key, value, important) {
+    var styles = dom.__styles ?? (dom.__styles = {});
+    if (styles[key] === value) {
+      return;
+    }
+    styles[key] = value;
+    if (value == null) {
+      dom.style.removeProperty(key);
+    } else {
+      dom.style.setProperty(key, value, "");
+    }
+  }
+  const request_animation_frame = requestAnimationFrame;
+  const now = () => performance.now();
+  const raf = {
+    tick: (
+      /** @param {any} _ */
+      (_) => request_animation_frame(_)
+    ),
+    now: () => now(),
+    tasks: /* @__PURE__ */ new Set()
+  };
+  function run_tasks(now2) {
+    raf.tasks.forEach((task) => {
+      if (!task.c(now2)) {
+        raf.tasks.delete(task);
+        task.f();
+      }
+    });
+    if (raf.tasks.size !== 0) {
+      raf.tick(run_tasks);
+    }
+  }
+  function loop(callback) {
+    let task;
+    if (raf.tasks.size === 0) {
+      raf.tick(run_tasks);
+    }
+    return {
+      promise: new Promise((fulfill) => {
+        raf.tasks.add(task = { c: callback, f: fulfill });
+      }),
+      abort() {
+        raf.tasks.delete(task);
+      }
+    };
+  }
+  function dispatch_event(element, type) {
+    element.dispatchEvent(new CustomEvent(type));
+  }
+  function css_property_to_camelcase(style) {
+    if (style === "float") return "cssFloat";
+    if (style === "offset") return "cssOffset";
+    if (style.startsWith("--")) return style;
+    const parts = style.split("-");
+    if (parts.length === 1) return parts[0];
+    return parts[0] + parts.slice(1).map(
+      /** @param {any} word */
+      (word) => word[0].toUpperCase() + word.slice(1)
+    ).join("");
+  }
+  function css_to_keyframe(css) {
+    const keyframe = {};
+    const parts = css.split(";");
+    for (const part of parts) {
+      const [property, value] = part.split(":");
+      if (!property || value === void 0) break;
+      const formatted_property = css_property_to_camelcase(property.trim());
+      keyframe[formatted_property] = value.trim();
+    }
+    return keyframe;
+  }
+  const linear$1 = (t) => t;
+  function transition(flags, element, get_fn, get_params) {
+    var is_intro = (flags & TRANSITION_IN) !== 0;
+    var is_outro = (flags & TRANSITION_OUT) !== 0;
+    var is_both = is_intro && is_outro;
+    var is_global = (flags & TRANSITION_GLOBAL) !== 0;
+    var direction = is_both ? "both" : is_intro ? "in" : "out";
+    var current_options;
+    var inert = element.inert;
+    var intro;
+    var outro;
+    function get_options() {
+      var previous_reaction = active_reaction;
+      var previous_effect = active_effect;
+      set_active_reaction(null);
+      set_active_effect(null);
+      try {
+        return current_options ?? (current_options = get_fn()(element, (get_params == null ? void 0 : get_params()) ?? /** @type {P} */
+        {}, {
+          direction
+        }));
+      } finally {
+        set_active_reaction(previous_reaction);
+        set_active_effect(previous_effect);
+      }
+    }
+    var transition2 = {
+      is_global,
+      in() {
+        var _a;
+        element.inert = inert;
+        if (!is_intro) {
+          outro == null ? void 0 : outro.abort();
+          (_a = outro == null ? void 0 : outro.reset) == null ? void 0 : _a.call(outro);
+          return;
+        }
+        if (!is_outro) {
+          intro == null ? void 0 : intro.abort();
+        }
+        dispatch_event(element, "introstart");
+        intro = animate(element, get_options(), outro, 1, () => {
+          dispatch_event(element, "introend");
+          intro == null ? void 0 : intro.abort();
+          intro = current_options = void 0;
+        });
+      },
+      out(fn) {
+        if (!is_outro) {
+          fn == null ? void 0 : fn();
+          current_options = void 0;
+          return;
+        }
+        element.inert = true;
+        dispatch_event(element, "outrostart");
+        outro = animate(element, get_options(), intro, 0, () => {
+          dispatch_event(element, "outroend");
+          fn == null ? void 0 : fn();
+        });
+      },
+      stop: () => {
+        intro == null ? void 0 : intro.abort();
+        outro == null ? void 0 : outro.abort();
+      }
+    };
+    var e = (
+      /** @type {Effect} */
+      active_effect
+    );
+    (e.transitions ?? (e.transitions = [])).push(transition2);
+    if (is_intro && should_intro) {
+      var run2 = is_global;
+      if (!run2) {
+        var block2 = (
+          /** @type {Effect | null} */
+          e.parent
+        );
+        while (block2 && (block2.f & EFFECT_TRANSPARENT) !== 0) {
+          while (block2 = block2.parent) {
+            if ((block2.f & BLOCK_EFFECT) !== 0) break;
+          }
+        }
+        run2 = !block2 || (block2.f & EFFECT_RAN) !== 0;
+      }
+      if (run2) {
+        effect(() => {
+          untrack(() => transition2.in());
+        });
+      }
+    }
+  }
+  function animate(element, options, counterpart, t2, on_finish) {
+    var is_intro = t2 === 1;
+    if (is_function(options)) {
+      var a;
+      var aborted = false;
+      queue_micro_task(() => {
+        if (aborted) return;
+        var o = options({ direction: is_intro ? "in" : "out" });
+        a = animate(element, o, counterpart, t2, on_finish);
+      });
+      return {
+        abort: () => {
+          aborted = true;
+          a == null ? void 0 : a.abort();
+        },
+        deactivate: () => a.deactivate(),
+        reset: () => a.reset(),
+        t: () => a.t()
+      };
+    }
+    counterpart == null ? void 0 : counterpart.deactivate();
+    if (!(options == null ? void 0 : options.duration)) {
+      on_finish();
+      return {
+        abort: noop,
+        deactivate: noop,
+        reset: noop,
+        t: () => t2
+      };
+    }
+    const { delay = 0, css, tick, easing = linear$1 } = options;
+    var keyframes = [];
+    if (is_intro && counterpart === void 0) {
+      if (tick) {
+        tick(0, 1);
+      }
+      if (css) {
+        var styles = css_to_keyframe(css(0, 1));
+        keyframes.push(styles, styles);
+      }
+    }
+    var get_t = () => 1 - t2;
+    var animation = element.animate(keyframes, { duration: delay });
+    animation.onfinish = () => {
+      var t1 = (counterpart == null ? void 0 : counterpart.t()) ?? 1 - t2;
+      counterpart == null ? void 0 : counterpart.abort();
+      var delta = t2 - t1;
+      var duration = (
+        /** @type {number} */
+        options.duration * Math.abs(delta)
+      );
+      var keyframes2 = [];
+      if (duration > 0) {
+        if (css) {
+          var n = Math.ceil(duration / (1e3 / 60));
+          for (var i = 0; i <= n; i += 1) {
+            var t = t1 + delta * easing(i / n);
+            var styles2 = css(t, 1 - t);
+            keyframes2.push(css_to_keyframe(styles2));
+          }
+        }
+        get_t = () => {
+          var time = (
+            /** @type {number} */
+            /** @type {globalThis.Animation} */
+            animation.currentTime
+          );
+          return t1 + delta * easing(time / duration);
+        };
+        if (tick) {
+          loop(() => {
+            if (animation.playState !== "running") return false;
+            var t3 = get_t();
+            tick(t3, 1 - t3);
+            return true;
+          });
+        }
+      }
+      animation = element.animate(keyframes2, { duration, fill: "forwards" });
+      animation.onfinish = () => {
+        get_t = () => t2;
+        tick == null ? void 0 : tick(t2, 1 - t2);
+        on_finish();
+      };
+    };
+    return {
+      abort: () => {
+        if (animation) {
+          animation.cancel();
+          animation.effect = null;
+          animation.onfinish = noop;
+        }
+      },
+      deactivate: () => {
+        on_finish = noop;
+      },
+      reset: () => {
+        if (t2 === 0) {
+          tick == null ? void 0 : tick(1, 0);
+        }
+      },
+      t: () => get_t()
+    };
+  }
+  function listen_to_event_and_reset_event(element, event2, handler, on_reset = handler) {
+    element.addEventListener(event2, handler);
+    const prev2 = element.__on_r;
+    if (prev2) {
+      element.__on_r = () => {
+        prev2();
+        on_reset();
+      };
+    } else {
+      element.__on_r = on_reset;
+    }
+    add_form_reset_listener();
+  }
+  function bind_value(input, get2, set2 = get2) {
+    var runes = is_runes();
+    listen_to_event_and_reset_event(input, "input", () => {
+      var value = is_numberlike_input(input) ? to_number(input.value) : input.value;
+      set2(value);
+      if (runes && value !== (value = get2())) {
+        input.value = value ?? "";
+      }
+    });
+    render_effect(() => {
+      var value = get2();
+      if (is_numberlike_input(input) && value === to_number(input.value)) {
+        return;
+      }
+      if (input.type === "date" && !value && !input.value) {
+        return;
+      }
+      if (value !== input.value) {
+        input.value = value ?? "";
+      }
+    });
+  }
+  function is_numberlike_input(input) {
+    var type = input.type;
+    return type === "number" || type === "range";
+  }
+  function to_number(value) {
+    return value === "" ? null : +value;
   }
   function is_bound_this(bound_value, element_or_component) {
     return bound_value === element_or_component || (bound_value == null ? void 0 : bound_value[STATE_SYMBOL]) === element_or_component;
@@ -2274,13 +2748,18 @@
     var _a;
     var immutable = (flags & PROPS_IS_IMMUTABLE) !== 0;
     var runes = (flags & PROPS_IS_RUNES) !== 0;
+    var bindable = (flags & PROPS_IS_BINDABLE) !== 0;
+    var lazy = (flags & PROPS_IS_LAZY_INITIAL) !== 0;
     var is_store_sub = false;
     var prop_value;
-    {
+    if (bindable) {
       [prop_value, is_store_sub] = capture_store_binding(() => (
         /** @type {V} */
         props[key]
       ));
+    } else {
+      prop_value = /** @type {V} */
+      props[key];
     }
     var setter = (_a = get_descriptor(props, key)) == null ? void 0 : _a.set;
     var fallback_value = (
@@ -2288,14 +2767,19 @@
       fallback
     );
     var fallback_dirty = true;
+    var fallback_used = false;
     var get_fallback = () => {
+      fallback_used = true;
       if (fallback_dirty) {
         fallback_dirty = false;
-        {
+        if (lazy) {
           fallback_value = untrack(
             /** @type {() => V} */
             fallback
           );
+        } else {
+          fallback_value = /** @type {V} */
+          fallback;
         }
       }
       return fallback_value;
@@ -2308,7 +2792,18 @@
       if (setter) setter(prop_value);
     }
     var getter;
-    {
+    if (runes) {
+      getter = () => {
+        var value = (
+          /** @type {V} */
+          props[key]
+        );
+        if (value === void 0) return get_fallback();
+        fallback_dirty = true;
+        fallback_used = false;
+        return value;
+      };
+    } else {
       var derived_getter = with_parent_branch(
         () => (immutable ? derived : derived_safe_equal)(() => (
           /** @type {V} */
@@ -2323,9 +2818,58 @@
         return value === void 0 ? fallback_value : value;
       };
     }
-    {
+    if ((flags & PROPS_IS_UPDATED) === 0) {
       return getter;
     }
+    if (setter) {
+      var legacy_parent = props.$$legacy;
+      return function(value, mutation) {
+        if (arguments.length > 0) {
+          if (!runes || !mutation || legacy_parent || is_store_sub) {
+            setter(mutation ? getter() : value);
+          }
+          return value;
+        } else {
+          return getter();
+        }
+      };
+    }
+    var from_child = false;
+    var was_from_child = false;
+    var inner_current_value = /* @__PURE__ */ mutable_source(prop_value);
+    var current_value = with_parent_branch(
+      () => /* @__PURE__ */ derived(() => {
+        var parent_value = getter();
+        var child_value = get(inner_current_value);
+        var current_derived = (
+          /** @type {Derived} */
+          active_reaction
+        );
+        if (from_child || parent_value === void 0 && (current_derived.f & DESTROYED) !== 0) {
+          from_child = false;
+          was_from_child = true;
+          return child_value;
+        }
+        was_from_child = false;
+        return inner_current_value.v = parent_value;
+      })
+    );
+    if (!immutable) current_value.equals = safe_equals;
+    return function(value, mutation) {
+      if (arguments.length > 0) {
+        const new_value = mutation ? get(current_value) : runes && bindable ? proxy(value) : value;
+        if (!current_value.equals(new_value)) {
+          from_child = true;
+          set(inner_current_value, new_value);
+          if (fallback_used && fallback_value !== void 0) {
+            fallback_value = new_value;
+          }
+          untrack(() => get(current_value));
+        }
+        return value;
+      }
+      return get(current_value);
+    };
   }
   function onMount(fn) {
     if (component_context === null) {
@@ -2353,9 +2897,9 @@
   const PUBLIC_VERSION = "5";
   if (typeof window !== "undefined")
     (window.__svelte || (window.__svelte = { v: /* @__PURE__ */ new Set() })).v.add(PUBLIC_VERSION);
-  var root$3 = /* @__PURE__ */ template(`<div class="loadership_ZOJAQ svelte-i1jlc0"><div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div></div>`);
+  var root$5 = /* @__PURE__ */ template(`<div class="loadership_ZOJAQ svelte-i1jlc0"><div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div> <div class="svelte-i1jlc0"></div></div>`);
   function Spinner($$anchor) {
-    var div = root$3();
+    var div = root$5();
     append($$anchor, div);
   }
   var root_1$1 = /* @__PURE__ */ template(`<img class="fi svelte-7lhsry">`);
@@ -2656,11 +3200,11 @@
     set(lensX, event2.clientX - rect.left);
     set(lensY, event2.clientY - rect.top);
   }
-  var root_4$1 = /* @__PURE__ */ template(`<div class="lens svelte-fofh7f"></div>`);
+  var root_4 = /* @__PURE__ */ template(`<div class="lens svelte-fofh7f"></div>`);
   var root_3$1 = /* @__PURE__ */ template(`<div class="image-wrapper svelte-fofh7f" role="img" aria-label="Zoomable image"><img class="responsive-image svelte-fofh7f"> <!></div>`);
-  var root_6 = /* @__PURE__ */ template(`<button></button>`);
+  var root_6$1 = /* @__PURE__ */ template(`<button></button>`);
   var root_5$1 = /* @__PURE__ */ template(`<div class="controls"><button class="click-area prev-area svelte-fofh7f" type="button" aria-label="Previous image"><span class="prev svelte-fofh7f">&#10094;</span></button> <button class="click-area next-area svelte-fofh7f" type="button" aria-label="Next image"><span class="next svelte-fofh7f">&#10095;</span></button></div> <div class="indicators svelte-fofh7f"></div>`, 1);
-  var root$2 = /* @__PURE__ */ template(`<div class="carousel svelte-fofh7f"><!> <!></div>`);
+  var root$4 = /* @__PURE__ */ template(`<div class="carousel svelte-fofh7f"><!> <!></div>`);
   function Carousel($$anchor, $$props) {
     push($$props, false);
     let images = prop($$props, "images", 24, () => []);
@@ -2679,7 +3223,7 @@
       set(isZoomed, false);
     }
     init();
-    var div = root$2();
+    var div = root$4();
     var node = child(div);
     if_block(node, () => images().length, ($$anchor2) => {
       var fragment = comment();
@@ -2696,7 +3240,7 @@
           set_attribute(img, "alt", `Image ${index2 + 1}`);
           var node_3 = sibling(img, 2);
           if_block(node_3, () => get(isZoomed) && get(imageRef), ($$anchor5) => {
-            var div_2 = root_4$1();
+            var div_2 = root_4();
             template_effect(() => set_attribute(div_2, "style", `
                 /* Position the lens so the mouse is in its center */
                 top: ${get(lensY) - lensSize / 2}px;
@@ -2729,7 +3273,7 @@
       button_1.__click = [next, currentIndex, images];
       var div_4 = sibling(div_3, 2);
       each(div_4, 5, images, index, ($$anchor3, _, index2) => {
-        var button_2 = root_6();
+        var button_2 = root_6$1();
         set_attribute(button_2, "aria-label", `Switch to image ${index2 + 1}`);
         button_2.__click = () => set(currentIndex, index2);
         template_effect(() => set_class(button_2, `indicator ${(index2 === get(currentIndex) ? "active" : "") ?? ""} svelte-fofh7f`));
@@ -2741,6 +3285,94 @@
     pop();
   }
   delegate(["mousemove", "click"]);
+  const ANNOUNCEMENT_CACHE_KEY = "geometa:cached-announcement";
+  const ANNOUNCEMENT_CACHE_DURATION_MS = 60 * 60 * 1e3;
+  const ANNOUNCEMENT_API_URL = "https://learnablemeta.com/api/userscript/announcement/";
+  async function getAnnouncement() {
+    try {
+      const cachedItemString = localStorage.getItem(ANNOUNCEMENT_CACHE_KEY);
+      if (cachedItemString) {
+        const cachedEntry = JSON.parse(cachedItemString);
+        const now2 = Date.now();
+        if (now2 - cachedEntry.fetchedAt < ANNOUNCEMENT_CACHE_DURATION_MS) {
+          return cachedEntry.data;
+        } else {
+          localStorage.removeItem(ANNOUNCEMENT_CACHE_KEY);
+        }
+      }
+    } catch (e) {
+      localStorage.removeItem(ANNOUNCEMENT_CACHE_KEY);
+    }
+    return new Promise((resolve) => {
+      _GM_xmlhttpRequest({
+        method: "GET",
+        url: ANNOUNCEMENT_API_URL,
+        timeout: 3e3,
+        onload: (response) => {
+          let announcementToCache = null;
+          if (response.status === 200) {
+            try {
+              console.log("HERE!!");
+              if (response.responseText && response.responseText.trim().toLowerCase() !== "null") {
+                const parsedData = JSON.parse(response.responseText);
+                if (parsedData && typeof parsedData.timestamp === "number" && typeof parsedData.htmlMessage === "string") {
+                  announcementToCache = parsedData;
+                }
+              }
+            } catch (parseError) {
+              console.error("Failed to parse announcement JSON from API:", parseError, response.responseText);
+            }
+          } else {
+            console.error(`Error fetching announcement from API: ${response.status} ${response.statusText}`);
+          }
+          const itemToCache = {
+            data: announcementToCache,
+            fetchedAt: Date.now()
+          };
+          try {
+            localStorage.setItem(ANNOUNCEMENT_CACHE_KEY, JSON.stringify(itemToCache));
+            console.log(announcementToCache ? "Fetched announcement cached." : "Fetched 'no announcement' state cached.");
+          } catch (e) {
+            console.warn("Error writing announcement state to localStorage cache:", e);
+          }
+          resolve(announcementToCache);
+        },
+        onerror: (error) => {
+          console.error("Network error fetching announcement from API:", error);
+          resolve(null);
+        },
+        ontimeout: () => {
+          console.error("Timeout fetching announcement from API.");
+          resolve(null);
+        }
+      });
+    });
+  }
+  const LAST_DISMISSED_ANNOUNCEMENT_TIMESTAMP_KEY = "geometa:last-dismissed-announcement";
+  function getLastDismissedAnnouncementTimestamp() {
+    try {
+      const storedValue = localStorage.getItem(LAST_DISMISSED_ANNOUNCEMENT_TIMESTAMP_KEY);
+      if (storedValue) {
+        const timestamp = parseInt(storedValue, 10);
+        return !isNaN(timestamp) ? timestamp : null;
+      }
+      return null;
+    } catch (e) {
+      console.warn("LocalStorage Error: Could not retrieve last dismissed announcement timestamp.", e);
+      return null;
+    }
+  }
+  function markAnnouncementAsDismissed(announcementTimestamp) {
+    if (isNaN(announcementTimestamp)) {
+      console.error("Invalid timestamp provided to markAnnouncementAsDismissed. Must be a number.", announcementTimestamp);
+      return;
+    }
+    try {
+      localStorage.setItem(LAST_DISMISSED_ANNOUNCEMENT_TIMESTAMP_KEY, announcementTimestamp.toString());
+    } catch (e) {
+      console.warn("LocalStorage Error: Could not save last dismissed announcement timestamp.", e);
+    }
+  }
   function proceed(_, showModal, currentUrl) {
     set(showModal, false);
     window.open(get(currentUrl), "_blank");
@@ -2755,17 +3387,22 @@
       updateHelpClass();
     }
   }
-  var root_1 = /* @__PURE__ */ template(`<p class="svelte-oxxnc1"> </p>`);
-  var root_4 = /* @__PURE__ */ template(`<p class="geometa-footer svelte-oxxnc1"><!></p>`);
-  var root_5 = /* @__PURE__ */ template(`<hr class="svelte-oxxnc1"> <!>`, 1);
-  var root_3 = /* @__PURE__ */ template(`<p class="svelte-oxxnc1"><!> <strong class="svelte-oxxnc1"> </strong> </p> <div class="geometa-note svelte-oxxnc1"><!></div> <!> <!>`, 1);
-  var root_7 = /* @__PURE__ */ template(`<div class="modal-backdrop svelte-oxxnc1"><div class="modal svelte-oxxnc1"><p class="svelte-oxxnc1">You are about to open this site in a new tab:</p> <p class="modal-url svelte-oxxnc1"> </p> <div class="modal-buttons svelte-oxxnc1"><button class="proceed-btn svelte-oxxnc1">Continue</button> <button class="close-btn svelte-oxxnc1">Cancel</button></div></div></div>`);
-  var root_9 = /* @__PURE__ */ template(`<p class="outdated svelte-oxxnc1"><strong class="svelte-oxxnc1"> </strong></p>`);
-  var root_8 = /* @__PURE__ */ template(`<div class="modal-backdrop svelte-oxxnc1"><div class="modal svelte-oxxnc1"><div class="help-message svelte-oxxnc1"><!> <p class="svelte-oxxnc1">Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p> <ul class="svelte-oxxnc1"><li class="svelte-oxxnc1"><strong class="svelte-oxxnc1">Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere on your
-              screen.</li> <li class="svelte-oxxnc1"><strong class="svelte-oxxnc1">Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li> <li class="svelte-oxxnc1"><strong class="svelte-oxxnc1">View Map metalist:</strong> Click the list icon to see all the metas included in the map you
-              are currently playing.</li> <li class="svelte-oxxnc1"><strong class="svelte-oxxnc1">Join the Community:</strong> Click the Discord icon to share feedback, suggest improvements, or
-              just say hi!</li> <li class="svelte-oxxnc1"><strong class="svelte-oxxnc1">Outdated Script:</strong> The question mark icon will blink if the script is outdated.</li></ul></div> <button class="close-btn svelte-oxxnc1">Close</button></div></div>`);
-  var root$1 = /* @__PURE__ */ template(`<div class="geometa-container svelte-oxxnc1"><div class="flex header svelte-oxxnc1"><h2 class="svelte-oxxnc1">Learnable Meta</h2> <div class="icons svelte-oxxnc1"><a target="_blank" aria-label="List of map metas" class="svelte-oxxnc1"><span class="skill-icons--list svelte-oxxnc1"></span></a> <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-oxxnc1"><span class="flat-color-icons--globe svelte-oxxnc1"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-oxxnc1"><span class="skill-icons--discord svelte-oxxnc1"></span></a> <button aria-label="More information" style="background: none; border: none; padding: 0;" class="svelte-oxxnc1"><span></span></button></div></div> <!> <!> <!></div>`);
+  var on_click = (__3, announcement, lastDismissedTimestamp) => {
+    markAnnouncementAsDismissed(get(announcement).timestamp);
+    set(lastDismissedTimestamp, proxy(get(announcement).timestamp));
+  };
+  var root_2 = /* @__PURE__ */ template(`<div class="announcement svelte-z0rh71"><div class="svelte-z0rh71"><!></div> <button class="vote-close-btn svelte-z0rh71" aria-label="Dismiss announcement">×</button></div>`);
+  var root_3 = /* @__PURE__ */ template(`<p class="svelte-z0rh71"> </p>`);
+  var root_6 = /* @__PURE__ */ template(`<p class="geometa-footer svelte-z0rh71"><!></p>`);
+  var root_7 = /* @__PURE__ */ template(`<hr class="svelte-z0rh71"> <!>`, 1);
+  var root_5 = /* @__PURE__ */ template(`<p class="svelte-z0rh71"><!> <strong class="svelte-z0rh71"> </strong> </p> <div class="geometa-note svelte-z0rh71"><!></div> <!> <!>`, 1);
+  var root_9 = /* @__PURE__ */ template(`<div class="modal-backdrop svelte-z0rh71"><div class="modal svelte-z0rh71"><p class="svelte-z0rh71">You are about to open this site in a new tab:</p> <p class="modal-url svelte-z0rh71"> </p> <div class="modal-buttons svelte-z0rh71"><button class="proceed-btn svelte-z0rh71">Continue</button> <button class="close-btn svelte-z0rh71">Cancel</button></div></div></div>`);
+  var root_11 = /* @__PURE__ */ template(`<p class="outdated svelte-z0rh71"><strong class="svelte-z0rh71"> </strong></p>`);
+  var root_10 = /* @__PURE__ */ template(`<div class="modal-backdrop svelte-z0rh71"><div class="modal svelte-z0rh71"><div class="help-message svelte-z0rh71"><!> <p class="svelte-z0rh71">Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p> <ul class="svelte-z0rh71"><li class="svelte-z0rh71"><strong class="svelte-z0rh71">Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere on your
+              screen.</li> <li class="svelte-z0rh71"><strong class="svelte-z0rh71">Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li> <li class="svelte-z0rh71"><strong class="svelte-z0rh71">View Map metalist:</strong> Click the list icon to see all the metas included in the map you
+              are currently playing.</li> <li class="svelte-z0rh71"><strong class="svelte-z0rh71">Join the Community:</strong> Click the Discord icon to share feedback, suggest improvements, or
+              just say hi!</li> <li class="svelte-z0rh71"><strong class="svelte-z0rh71">Outdated Script:</strong> The question mark icon will blink if the script is outdated.</li></ul></div> <button class="close-btn svelte-z0rh71">Close</button></div></div>`);
+  var root$3 = /* @__PURE__ */ template(`<div class="geometa-container svelte-z0rh71"><!> <div class="flex header svelte-z0rh71"><h2 class="svelte-z0rh71">Learnable Meta</h2> <div class="icons svelte-z0rh71"><a target="_blank" aria-label="List of map metas" class="svelte-z0rh71"><span class="skill-icons--list svelte-z0rh71"></span></a> <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-z0rh71"><span class="flat-color-icons--globe svelte-z0rh71"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-z0rh71"><span class="skill-icons--discord svelte-z0rh71"></span></a> <button aria-label="More information" style="background: none; border: none; padding: 0;" class="svelte-z0rh71"><span></span></button></div></div> <!> <!> <!></div>`);
   function App($$anchor, $$props) {
     push($$props, true);
     let geoInfo = state(null);
@@ -2779,7 +3416,7 @@
         userscriptVersion: $$props.userscriptVersion,
         source: $$props.source
       }).toString();
-      const url = `https://learnablemeta.com/location-info?${urlParams}`;
+      const url = `https://learnablemeta.com/api/userscript/location?${urlParams}`;
       _GM_xmlhttpRequest({
         method: "GET",
         url,
@@ -2844,113 +3481,133 @@
         });
       }
     });
-    var div = root$1();
+    let lastDismissedTimestamp = state(proxy(getLastDismissedAnnouncementTimestamp()));
+    var div = root$3();
     bind_this(div, ($$value) => container = $$value, () => container);
-    var div_1 = child(div);
-    bind_this(div_1, ($$value) => header = $$value, () => header);
-    var div_2 = sibling(child(div_1), 2);
-    var a = child(div_2);
-    var button = sibling(a, 6);
-    button.__click = [togglePopup, showHelpPopup, updateHelpClass];
-    var span = child(button);
-    var node = sibling(div_1, 2);
+    var node = child(div);
+    await_block(node, getAnnouncement, null, ($$anchor2, announcement) => {
+      var fragment = comment();
+      var node_1 = first_child(fragment);
+      if_block(node_1, () => $$props.roundNumber >= 4 && get(announcement) && (!get(lastDismissedTimestamp) || get(announcement).timestamp > get(lastDismissedTimestamp)), ($$anchor3) => {
+        var div_1 = root_2();
+        var div_2 = child(div_1);
+        var node_2 = child(div_2);
+        html(node_2, () => get(announcement).htmlMessage);
+        var button = sibling(div_2, 2);
+        button.__click = [
+          on_click,
+          announcement,
+          lastDismissedTimestamp
+        ];
+        append($$anchor3, div_1);
+      });
+      append($$anchor2, fragment);
+    });
+    var div_3 = sibling(node, 2);
+    bind_this(div_3, ($$value) => header = $$value, () => header);
+    var div_4 = sibling(child(div_3), 2);
+    var a = child(div_4);
+    var button_1 = sibling(a, 6);
+    button_1.__click = [togglePopup, showHelpPopup, updateHelpClass];
+    var span = child(button_1);
+    var node_3 = sibling(div_3, 2);
     if_block(
-      node,
+      node_3,
       () => get(error),
       ($$anchor2) => {
-        var p = root_1();
+        var p = root_3();
         var text = child(p);
         template_effect(() => set_text(text, `Error: ${get(error) ?? ""}`));
         append($$anchor2, p);
       },
       ($$anchor2) => {
-        var fragment = comment();
-        var node_1 = first_child(fragment);
+        var fragment_1 = comment();
+        var node_4 = first_child(fragment_1);
         if_block(
-          node_1,
+          node_4,
           () => get(geoInfo),
           ($$anchor3) => {
-            var fragment_1 = root_3();
-            var p_1 = first_child(fragment_1);
-            var node_2 = child(p_1);
-            CountryFlag(node_2, {
+            var fragment_2 = root_5();
+            var p_1 = first_child(fragment_2);
+            var node_5 = child(p_1);
+            CountryFlag(node_5, {
               get countryName() {
                 return get(geoInfo).country;
               }
             });
-            var strong = sibling(node_2, 2);
+            var strong = sibling(node_5, 2);
             var text_1 = child(strong);
             var text_2 = sibling(strong);
-            var div_3 = sibling(p_1, 2);
-            var node_3 = child(div_3);
-            html(node_3, () => get(geoInfo).note);
-            var node_4 = sibling(div_3, 2);
-            if_block(node_4, () => get(geoInfo).footer, ($$anchor4) => {
-              var p_2 = root_4();
-              var node_5 = child(p_2);
-              html(node_5, () => get(geoInfo).footer);
+            var div_5 = sibling(p_1, 2);
+            var node_6 = child(div_5);
+            html(node_6, () => get(geoInfo).note);
+            var node_7 = sibling(div_5, 2);
+            if_block(node_7, () => get(geoInfo).footer, ($$anchor4) => {
+              var p_2 = root_6();
+              var node_8 = child(p_2);
+              html(node_8, () => get(geoInfo).footer);
               append($$anchor4, p_2);
             });
-            var node_6 = sibling(node_4, 2);
-            if_block(node_6, () => get(geoInfo).images && get(geoInfo).images.length, ($$anchor4) => {
-              var fragment_2 = root_5();
-              var node_7 = sibling(first_child(fragment_2), 2);
-              Carousel(node_7, {
+            var node_9 = sibling(node_7, 2);
+            if_block(node_9, () => get(geoInfo).images && get(geoInfo).images.length, ($$anchor4) => {
+              var fragment_3 = root_7();
+              var node_10 = sibling(first_child(fragment_3), 2);
+              Carousel(node_10, {
                 get images() {
                   return get(geoInfo).images;
                 }
               });
-              append($$anchor4, fragment_2);
+              append($$anchor4, fragment_3);
             });
             template_effect(() => {
               set_text(text_1, get(geoInfo).country);
               set_text(text_2, ` - ${get(geoInfo).metaName ?? ""}`);
             });
-            append($$anchor3, fragment_1);
+            append($$anchor3, fragment_2);
           },
           ($$anchor3) => {
             Spinner($$anchor3);
           },
           true
         );
-        append($$anchor2, fragment);
+        append($$anchor2, fragment_1);
       }
     );
-    var node_8 = sibling(node, 2);
-    if_block(node_8, () => get(showModal), ($$anchor2) => {
-      var div_4 = root_7();
-      var div_5 = child(div_4);
-      var p_3 = sibling(child(div_5), 2);
+    var node_11 = sibling(node_3, 2);
+    if_block(node_11, () => get(showModal), ($$anchor2) => {
+      var div_6 = root_9();
+      var div_7 = child(div_6);
+      var p_3 = sibling(child(div_7), 2);
       var text_3 = child(p_3);
-      var div_6 = sibling(p_3, 2);
-      var button_1 = child(div_6);
-      button_1.__click = [proceed, showModal, currentUrl];
-      var button_2 = sibling(button_1, 2);
-      button_2.__click = [cancel, showModal];
+      var div_8 = sibling(p_3, 2);
+      var button_2 = child(div_8);
+      button_2.__click = [proceed, showModal, currentUrl];
+      var button_3 = sibling(button_2, 2);
+      button_3.__click = [cancel, showModal];
       template_effect(() => set_text(text_3, get(currentUrl)));
-      append($$anchor2, div_4);
+      append($$anchor2, div_6);
     });
-    var node_9 = sibling(node_8, 2);
-    if_block(node_9, () => get(showHelpPopup), ($$anchor2) => {
-      var div_7 = root_8();
-      var div_8 = child(div_7);
-      var div_9 = child(div_8);
-      var node_10 = child(div_9);
-      if_block(node_10, checkIfOutdated, ($$anchor3) => {
-        var p_4 = root_9();
+    var node_12 = sibling(node_11, 2);
+    if_block(node_12, () => get(showHelpPopup), ($$anchor2) => {
+      var div_9 = root_10();
+      var div_10 = child(div_9);
+      var div_11 = child(div_10);
+      var node_13 = child(div_11);
+      if_block(node_13, checkIfOutdated, ($$anchor3) => {
+        var p_4 = root_11();
         var strong_1 = child(p_4);
         var text_4 = child(strong_1);
         template_effect(() => set_text(text_4, `Your script version is out of date - please install the latest
               version (${getLatestVersionInfo() ?? ""})!`));
         append($$anchor3, p_4);
       });
-      var button_3 = sibling(div_9, 2);
-      button_3.__click = [togglePopup, showHelpPopup, updateHelpClass];
-      append($$anchor2, div_7);
+      var button_4 = sibling(div_11, 2);
+      button_4.__click = [togglePopup, showHelpPopup, updateHelpClass];
+      append($$anchor2, div_9);
     });
     template_effect(() => {
       set_attribute(a, "href", "https://learnablemeta.com/maps/" + $$props.mapId);
-      set_class(span, `${get(helpClass) ?? ""} svelte-oxxnc1`);
+      set_class(span, `${get(helpClass) ?? ""} svelte-z0rh71`);
     });
     append($$anchor, div);
     pop();
@@ -2984,6 +3641,7 @@
           mount(App, {
             target: element,
             props: {
+              roundNumber: event2.detail.rounds.length,
               panoId: lastRound.location.panoId,
               mapId: event2.detail.map.id,
               userscriptVersion: mapInfo.userscriptVersion,
@@ -3021,6 +3679,8 @@
           mount(App, {
             target: element,
             props: {
+              // this is to display announcements and there is not easy way to calculate which round it is
+              roundNumber: 4,
               panoId,
               mapId,
               userscriptVersion: mapInfo.userscriptVersion,
@@ -3051,9 +3711,9 @@
       return result;
     };
   }
-  var root = /* @__PURE__ */ template(`<div class="geometa-map-label-container svelte-tonh26"><p class="svelte-tonh26">LearnableMeta Enabled</p> <a target="_blank"><button class="svelte-tonh26">Meta List</button></a></div>`);
+  var root$2 = /* @__PURE__ */ template(`<div class="geometa-map-label-container svelte-1mmcvqu"><p class="svelte-1mmcvqu">LearnableMeta Enabled</p> <a target="_blank"><button class="svelte-1mmcvqu">Meta List</button></a></div>`);
   function MapLabel($$anchor, $$props) {
-    var div = root();
+    var div = root$2();
     var a = sibling(child(div), 2);
     template_effect(() => set_attribute(a, "href", `https://learnablemeta.com/maps/${$$props.mapId}`));
     append($$anchor, div);
@@ -3091,8 +3751,413 @@
       }
     });
   }
+  async function geoguessrAPIFetch(url, options = {}) {
+    const { method = "GET", headers: initialHeaders, body, ...restOptions } = options;
+    const effectiveHeaders = new Headers(initialHeaders);
+    effectiveHeaders.set("Content-Type", "application/json");
+    const response = await fetch(url, {
+      method,
+      headers: effectiveHeaders,
+      body,
+      ...restOptions
+    });
+    if (!response.ok) {
+      let errorPayload = null;
+      let errorMessage = `Request to ${url.substring(0, 100)}... failed with status ${response.status}: ${response.statusText}`;
+      try {
+        const contentType = response.headers.get("content-type");
+        if (contentType && contentType.includes("application/json")) {
+          errorPayload = await response.json();
+          if (errorPayload && errorPayload.message) {
+            errorMessage = `API Error (${response.status}): ${errorPayload.message}`;
+          } else if (errorPayload) {
+            errorMessage = `API Error (${response.status}) for ${url.substring(0, 50)}...: ${JSON.stringify(errorPayload).substring(0, 100)}...`;
+          }
+        } else {
+          const errorText = await response.text();
+          errorPayload = errorText;
+          if (errorText) {
+            errorMessage = `API Error (${response.status}) for ${url.substring(0, 50)}...: ${errorText.substring(0, 100)}...`;
+          }
+        }
+      } catch (e) {
+        console.warn("Could not parse error response body from Geoguessr API:", e);
+      }
+      console.error(`geoguessrAPIFetch Error (Status: ${response.status}) for URL ${url}:`, errorMessage, "Full Payload:", errorPayload);
+      throw new Error(errorMessage);
+    }
+    return response;
+  }
+  async function uploadLocations(geoguessrId, apiKey) {
+    const geoguessrDraftApiUrl = `https://www.geoguessr.com/api/v4/user-maps/drafts/${geoguessrId}`;
+    let geoguessrMapDetails;
+    try {
+      const response = await geoguessrAPIFetch(geoguessrDraftApiUrl);
+      geoguessrMapDetails = await response.json();
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Failed to fetch Geoguessr map info:", error);
+      throw new Error(`Geoguessr Error: Could not fetch map details. ${errorMessage}`);
+    }
+    const { avatar, description, highlighted, name, version } = geoguessrMapDetails;
+    let locationsToUpload;
+    try {
+      locationsToUpload = await fetchMapLocationsGM(geoguessrId, apiKey);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Failed to fetch map locations from backend:", error);
+      throw new Error(`LearnableMeta Error: ${errorMessage}`);
+    }
+    if (!locationsToUpload || locationsToUpload.length === 0) {
+      const errorMessage = "Cannot publish an empty map. Please add locations via LearnableMeta first.";
+      console.warn(errorMessage);
+      throw new Error(errorMessage);
+    }
+    const mapDataToUpload = {
+      avatar,
+      description,
+      highlighted,
+      name,
+      customCoordinates: locationsToUpload,
+      version: version + 1
+    };
+    try {
+      await geoguessrAPIFetch(geoguessrDraftApiUrl, {
+        method: "PUT",
+        body: JSON.stringify(mapDataToUpload)
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Failed to update Geoguessr map draft:", error);
+      throw new Error(`Geoguessr Error: Could not update map draft. ${errorMessage}`);
+    }
+    try {
+      console.log("Publishing Geoguessr map...");
+      await geoguessrAPIFetch(`${geoguessrDraftApiUrl}/publish`, {
+        method: "PUT",
+        body: JSON.stringify({})
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      console.error("Failed to publish Geoguessr map:", error);
+      throw new Error(`Geoguessr Error: Could not publish map. ${errorMessage}`);
+    }
+  }
+  function fetchMapLocationsGM(geoguessrId, apiToken) {
+    return new Promise((resolve, reject) => {
+      const apiUrl = `https://learnablemeta.com/api/userscript/map/${geoguessrId}/locations`;
+      _GM_xmlhttpRequest({
+        method: "GET",
+        url: apiUrl,
+        headers: {
+          "Authorization": `Bearer ${apiToken}`,
+          "Content-Type": "application/json"
+        },
+        timeout: 15e3,
+        // Add a timeout (e.g., 15 seconds)
+        onload: (response) => {
+          if (response.status >= 200 && response.status < 300) {
+            try {
+              const data = JSON.parse(response.responseText);
+              if (data && Array.isArray(data.customCoordinates)) {
+                resolve(data.customCoordinates);
+              } else {
+                console.error("Unexpected data structure from backend:", data);
+                reject(new Error("Received invalid location data structure from backend."));
+              }
+            } catch (parseError) {
+              console.error("Error parsing JSON response from backend:", parseError, response.responseText);
+              reject(new Error(`Backend Error: Failed to parse location data: ${parseError.message.substring(0, 100)}`));
+            }
+          } else {
+            let errorMessage = `Backend Error (${response.status}): ${response.statusText || "Failed to fetch locations"}`;
+            let rawErrorResponse = response.responseText;
+            try {
+              const parsedJsonError = JSON.parse(response.responseText);
+              if (parsedJsonError && parsedJsonError.message) {
+                errorMessage = `Backend Error (${response.status}): ${parsedJsonError.message}`;
+              } else if (parsedJsonError) {
+                errorMessage = `Backend Error (${response.status}): ${JSON.stringify(parsedJsonError).substring(0, 100)}...`;
+              }
+              rawErrorResponse = parsedJsonError;
+            } catch (e) {
+              if (response.responseText) {
+                errorMessage = `Backend Error (${response.status}): ${response.responseText.substring(0, 100)}...`;
+              }
+            }
+            console.error(`Error fetching map locations from backend (Status: ${response.status}):`, rawErrorResponse);
+            reject(new Error(errorMessage));
+          }
+        },
+        onerror: (error) => {
+          console.error("Failed to fetch map locations (XHR onerror):", error);
+          let detail = error.error || error.statusText || "Network request failed";
+          reject(new Error(`Network Error: Could not reach backend to fetch locations. ${detail}`));
+        },
+        ontimeout: () => {
+          console.error("Failed to fetch map locations: Request timed out", apiUrl);
+          reject(new Error("Backend Timeout: Request to fetch locations timed out."));
+        }
+      });
+    });
+  }
+  const linear = (x) => x;
+  function fade(node, { delay = 0, duration = 400, easing = linear } = {}) {
+    const o = +getComputedStyle(node).opacity;
+    return {
+      delay,
+      duration,
+      easing,
+      css: (t) => `opacity: ${t * o}`
+    };
+  }
+  var root$1 = /* @__PURE__ */ template(`<div role="alert"><span class="toast-message svelte-1rq8lsd"> </span> <button class="toast-close-button svelte-1rq8lsd" aria-label="Close">×</button></div>`);
+  function ToastNotification($$anchor, $$props) {
+    let type = prop($$props, "type", 3, "info");
+    var div = root$1();
+    var span = child(div);
+    var text = child(span);
+    var button = sibling(span, 2);
+    button.__click = function(...$$args) {
+      var _a;
+      (_a = $$props.onClose) == null ? void 0 : _a.apply(this, $$args);
+    };
+    template_effect(() => {
+      set_class(div, `toast-notification toast-${type() ?? ""} svelte-1rq8lsd`);
+      set_style(div, "position", "absolute");
+      set_style(div, "top", "100%");
+      set_style(div, "transform", "translateX(-75%) translateY(-10px)");
+      set_style(div, "margin-top", "10px");
+      set_text(text, $$props.message);
+    });
+    transition(1, div, () => fade, () => ({ duration: 200, delay: 50 }));
+    transition(2, div, () => fade, () => ({ duration: 300 }));
+    append($$anchor, div);
+  }
+  delegate(["click"]);
+  async function handleUploadClick(_, isLoading, currentApiKey, getApiKeyFromGM, apiKeyInput, showApiKeyModal, performUpload) {
+    if (get(isLoading)) return;
+    set(currentApiKey, proxy(getApiKeyFromGM()));
+    if (!get(currentApiKey) || get(currentApiKey).trim() === "") {
+      set(apiKeyInput, "");
+      set(showApiKeyModal, true);
+    } else {
+      await performUpload(get(currentApiKey));
+    }
+  }
+  function handleSaveApiKey(__1, apiKeyInput, saveApiKeyToGM, currentApiKey, showApiKeyModal, showCustomToast, performUpload) {
+    const trimmedKey = get(apiKeyInput).trim();
+    if (trimmedKey) {
+      saveApiKeyToGM(trimmedKey);
+      set(currentApiKey, proxy(trimmedKey));
+      set(showApiKeyModal, false);
+      showCustomToast("API Key saved!", "success", 2e3);
+      performUpload(trimmedKey);
+    } else {
+      showCustomToast("Please enter a valid API key.", "error", 3e3);
+    }
+  }
+  function handleCancelModal(__2, showApiKeyModal, apiKeyInput) {
+    set(showApiKeyModal, false);
+    set(apiKeyInput, "");
+  }
+  var root_1 = /* @__PURE__ */ template(`<div class="modal-overlay svelte-1dwotw1" role="dialog" aria-modal="true" aria-labelledby="apiKeyModalTitle"><div class="modal-content svelte-1dwotw1"><h2 id="apiKeyModalTitle" class="svelte-1dwotw1">Enter LearnableMeta API Key</h2> <p class="svelte-1dwotw1">An API key is required to upload locations. Please paste your key below.</p> <p class="svelte-1dwotw1">You can generate your API token by visiting <a target="_blank" rel="noopener noreferrer" class="svelte-1dwotw1">profile page</a> on LearnableMeta and generating it there.</p> <input type="text" placeholder="Paste your API key here" aria-label="API Key Input" class="modal-input svelte-1dwotw1"> <div class="modal-actions svelte-1dwotw1"><button class="modal-button modal-button-save svelte-1dwotw1">Save & Upload</button> <button class="modal-button modal-button-cancel svelte-1dwotw1">Cancel</button></div> <p class="modal-note svelte-1dwotw1">Your API key will be stored securely in your browser's userscript storage for future
+        use.</p></div></div>`);
+  var root = /* @__PURE__ */ template(`<div class="upload-label-container"><button class="button_button__aR6_e button_sizeSmall__MB_qj custom-yellow-button svelte-1dwotw1"> </button></div> <!> <!>`, 1);
+  function UploadLocations($$anchor, $$props) {
+    push($$props, true);
+    const API_KEY_STORAGE_NAME = "learnableMeta_apiKey";
+    const URL_TO_GENERATE_TOKEN = "https://learnablemeta.com/profile/token";
+    let showApiKeyModal = state(false);
+    let apiKeyInput = state("");
+    let currentApiKey = state(null);
+    let isLoading = state(false);
+    let toastState = state(null);
+    let toastTimer = state(void 0);
+    function showCustomToast(message, type = "info", duration = 3e3) {
+      clearTimeout(get(toastTimer));
+      const displayToast = () => {
+        set(toastState, proxy({ message, type }));
+        if (duration > 0) {
+          set(toastTimer, proxy(setTimeout(
+            () => {
+              hideCustomToast();
+            },
+            duration
+          )));
+        }
+      };
+      if (get(toastState)) {
+        hideCustomToast();
+        setTimeout(displayToast, 350);
+      } else {
+        displayToast();
+      }
+    }
+    function hideCustomToast() {
+      clearTimeout(get(toastTimer));
+      set(toastState, null);
+    }
+    function getApiKeyFromGM() {
+      try {
+        return _GM_getValue(API_KEY_STORAGE_NAME, null);
+      } catch (e) {
+        console.warn("GM_getValue is not available. API key functionality might be limited.", e);
+        showCustomToast("Userscript storage (GM_getValue) is not available. Please ensure Tampermonkey/Violentmonkey is correctly configured.", "error", 0);
+        return null;
+      }
+    }
+    function saveApiKeyToGM(key) {
+      try {
+        _GM_setValue(API_KEY_STORAGE_NAME, key);
+      } catch (e) {
+        console.warn("GM_setValue is not available. API key functionality might be limited.", e);
+        showCustomToast("Userscript storage (GM_setValue) is not available. Please ensure Tampermonkey/Violentmonkey is correctly configured.", "error", 0);
+      }
+    }
+    onMount(() => {
+      set(currentApiKey, proxy(getApiKeyFromGM()));
+      if (typeof _GM_registerMenuCommand === "function") {
+        _GM_registerMenuCommand("LearnableMeta - Set/Update API Key", () => {
+          set(currentApiKey, null);
+          const newKey = prompt("Enter your new LearnableMeta API Key:");
+          if (newKey && newKey.trim() !== "") {
+            saveApiKeyToGM(newKey.trim());
+            set(currentApiKey, proxy(newKey.trim()));
+            showCustomToast("LearnableMeta API Key updated!", "success");
+          } else if (newKey !== null) {
+            showCustomToast("API Key not updated (empty value provided).", "info");
+          }
+        });
+        _GM_registerMenuCommand("LearnableMeta - Clear API Key", () => {
+          if (confirm("Are you sure you want to clear your LearnableMeta API Key?")) {
+            saveApiKeyToGM("");
+            set(currentApiKey, null);
+            showCustomToast("LearnableMeta API Key cleared.", "success");
+          }
+        });
+      }
+    });
+    async function performUpload(apiKey) {
+      set(isLoading, true);
+      try {
+        await uploadLocations($$props.mapId, apiKey);
+        showCustomToast("Locations uploaded and map published successfully! The page will refresh shortly.", "success", 4500);
+        setTimeout(
+          () => {
+            window.location.reload();
+          },
+          5e3
+        );
+      } catch (error) {
+        console.error("Upload process failed:", error);
+        let toastMessage = "An unexpected error occurred during upload.";
+        if (error && error.message) {
+          toastMessage = error.message;
+        }
+        if (toastMessage.includes("401") || toastMessage.includes("403") || toastMessage.toLowerCase().includes("unauthorized") || toastMessage.toLowerCase().includes("invalid token")) {
+          showCustomToast(`Upload failed: ${toastMessage}. Please check your API Key.`, "error", 0);
+        } else {
+          showCustomToast(`Upload failed: ${toastMessage}`, "error", 0);
+        }
+        set(isLoading, false);
+      }
+    }
+    var fragment = root();
+    var div = first_child(fragment);
+    var button = child(div);
+    button.__click = [
+      handleUploadClick,
+      isLoading,
+      currentApiKey,
+      getApiKeyFromGM,
+      apiKeyInput,
+      showApiKeyModal,
+      performUpload
+    ];
+    var text = child(button);
+    var node = sibling(div, 2);
+    if_block(node, () => get(showApiKeyModal), ($$anchor2) => {
+      var div_1 = root_1();
+      var div_2 = child(div_1);
+      var p = sibling(child(div_2), 4);
+      var a = sibling(child(p));
+      set_attribute(a, "href", URL_TO_GENERATE_TOKEN);
+      var input = sibling(p, 2);
+      var div_3 = sibling(input, 2);
+      var button_1 = child(div_3);
+      button_1.__click = [
+        handleSaveApiKey,
+        apiKeyInput,
+        saveApiKeyToGM,
+        currentApiKey,
+        showApiKeyModal,
+        showCustomToast,
+        performUpload
+      ];
+      var button_2 = sibling(button_1, 2);
+      button_2.__click = [
+        handleCancelModal,
+        showApiKeyModal,
+        apiKeyInput
+      ];
+      bind_value(input, () => get(apiKeyInput), ($$value) => set(apiKeyInput, $$value));
+      append($$anchor2, div_1);
+    });
+    var node_1 = sibling(node, 2);
+    if_block(node_1, () => get(toastState), ($$anchor2) => {
+      ToastNotification($$anchor2, {
+        get message() {
+          return get(toastState).message;
+        },
+        get type() {
+          return get(toastState).type;
+        },
+        onClose: hideCustomToast
+      });
+    });
+    template_effect(() => {
+      button.disabled = get(isLoading);
+      set_text(text, get(isLoading) ? "Uploading..." : "LearnableMeta - Upload");
+    });
+    append($$anchor, fragment);
+    pop();
+  }
+  delegate(["click"]);
+  function extractMapIdFromMapMakerUrl(url) {
+    const match = url.match(/\/map-maker\/([^\/]+)/);
+    return match ? match[1] : null;
+  }
+  function initLocationsUpload() {
+    addLocationsUploadButtons();
+    window.addEventListener("urlchange", () => {
+      addLocationsUploadButtons();
+    });
+  }
+  async function addLocationsUploadButtons() {
+    const mapId = extractMapIdFromMapMakerUrl(window.location.href);
+    if (!mapId) {
+      return;
+    }
+    const mapInfo = await getMapInfo(mapId, true);
+    if (!(mapInfo == null ? void 0 : mapInfo.mapFound)) {
+      return;
+    }
+    const container = document.querySelector(".top-bar-menu_topBarMenu__kd9zX");
+    if (container) {
+      const target = document.createElement("div");
+      container.insertBefore(target, container.lastElementChild);
+      mount(UploadLocations, {
+        target,
+        props: {
+          mapId
+        }
+      });
+    }
+  }
   function changelog() {
     return [
+      { "0.83": "Added uploading locations and announcements system" },
       { "0.82": "Changed position of LearnableMeta map label for new Geoguessr UI" },
       { "0.81": "Fixed live challenge support. Added information about userscript version and source of a call (map, challenge, liveChallenge) to location info request to help us with debugging issues." },
       { "0.80": "Adjusted window dragging to work on mobile. Improved selection mechanism of elements with dynamic class names. Removed special handling of challenges." },
@@ -3135,6 +4200,7 @@
     initSinglePlayer();
     initLiveChallenge();
     initMapLabel();
+    initLocationsUpload();
   }
 
 })();
