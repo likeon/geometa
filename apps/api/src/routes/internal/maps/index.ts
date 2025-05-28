@@ -13,6 +13,7 @@ import { maybeWrapImageUrl } from '@api/lib/internal/utils';
 import { generateFooter } from '@api/lib/userscript/utils';
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
+import { personalMapsRouter } from './personal';
 
 const syncedMetasStatement = db
   .select({
@@ -150,6 +151,7 @@ export const metasFromMapStatement = db
 
 export const mapsRouter = new Elysia({ prefix: '/maps' })
   .use(auth())
+  .use(personalMapsRouter)
   .get(
     '/personal',
     async ({ userId }) => {
