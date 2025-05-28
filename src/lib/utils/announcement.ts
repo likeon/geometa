@@ -13,8 +13,7 @@ interface CachedItem {
 const ANNOUNCEMENT_CACHE_KEY = 'geometa:cached-announcement';
 // 1 hour cache
 const ANNOUNCEMENT_CACHE_DURATION_MS = 60 * 60 * 1000;
-// TODO: change this url before release
-const ANNOUNCEMENT_API_URL = 'http://localhost:3000/api/userscript/announcement/';
+const ANNOUNCEMENT_API_URL = 'https://learnablemeta.com/api/userscript/announcement/';
 
 export async function getAnnouncement(): Promise<Announcement | null> {
   try {

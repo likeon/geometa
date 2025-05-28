@@ -7,8 +7,7 @@
   let { mapId }: { mapId: string } = $props();
 
   const API_KEY_STORAGE_NAME = 'learnableMeta_apiKey';
-  // TODO: change before building for release
-  const URL_TO_GENERATE_TOKEN = "http://localhost:5173/dev/dash/profile/token"
+  const URL_TO_GENERATE_TOKEN = "https://learnablemeta.com/profile/token"
 
   let showApiKeyModal = $state(false);
   let apiKeyInput = $state('');

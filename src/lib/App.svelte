@@ -31,8 +31,6 @@
     footer: string;
   };
 
-
-
   let geoInfo: GeoInfo | null = $state(null);
   let error: string | null = $state(null);
 
@@ -40,13 +38,13 @@
   let header: HTMLDivElement;
 
   onMount(() => {
-        const urlParams = new URLSearchParams({
+    const urlParams = new URLSearchParams({
       panoId,
       mapId,
       userscriptVersion,
       source
     }).toString();
-    const url = `https://learnablemeta.com/location-info?${urlParams}`;
+    const url = `https://learnablemeta.com/api/userscript/location?${urlParams}`;
 
     GM_xmlhttpRequest({
       method: 'GET',
@@ -92,8 +90,6 @@
     };
 
 
-
-
   });
 
   function confirmNavigation(event: any) {
@@ -134,7 +130,7 @@
 
   updateHelpClass();
 
-  $effect( () => {
+  $effect(() => {
     if (geoInfo) {
       const links = document.querySelectorAll('.geometa-footer a, .geometa-note a');
       links.forEach((link) => {
@@ -157,10 +153,13 @@
         <div>
           {@html announcement.htmlMessage}
         </div>
-        <button class="vote-close-btn" onclick={() =>  {markAnnouncementAsDismissed(announcement.timestamp);lastDismissedTimestamp = announcement.timestamp }} aria-label="Dismiss announcement">×</button>
+        <button class="vote-close-btn"
+                onclick={() =>  {markAnnouncementAsDismissed(announcement.timestamp);lastDismissedTimestamp = announcement.timestamp }}
+                aria-label="Dismiss announcement">×
+        </button>
       </div>
-      {/if}
-    {/await}
+    {/if}
+  {/await}
 
 
   <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -277,6 +276,7 @@
     resize: both;
     overflow: auto;
   }
+
   .geometa-container > .header {
     margin-top: 0; /* Remove top margin if vote notification is above it */
   }
