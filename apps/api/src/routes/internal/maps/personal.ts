@@ -12,7 +12,7 @@ import { geoguessrGetMapInfo } from '@api/lib/internal/utils';
 import { and, eq, inArray, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
-export const personalMapsRouter = new Elysia({ prefix: '/maps/personal' })
+export const personalMapsRouter = new Elysia({ prefix: '/personal' })
   .use(auth())
   .post(
     '/',
