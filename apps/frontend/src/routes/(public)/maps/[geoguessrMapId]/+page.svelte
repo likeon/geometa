@@ -68,17 +68,15 @@
 
 {#snippet notLoggedInAlert()}
   You are not logged in, you can login with discord
-  <a
-    href="/dev/dash/personal"
-    class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900">here</a>
+  <a href="/personal" class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900"
+    >here</a>
   and create your personal map.
 {/snippet}
 
 {#snippet noPersonalMapAlert()}
   You don't have any personal maps, you can do it
-  <a
-    href="/dev/dash/personal"
-    class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900">here</a
+  <a href="/personal" class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900"
+    >here</a
   >.
 {/snippet}
 
@@ -88,7 +86,7 @@
     Click
     <a
       target="_blank"
-      href={`/dev/dash/personal/${selectedPersonalMapId}`}
+      href={`/personal/${selectedPersonalMapId}`}
       class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900">here</a> to see meta
     list for your personal map.
   </p>

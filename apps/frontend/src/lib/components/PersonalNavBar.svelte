@@ -34,7 +34,7 @@
   slug?: string;
   tooltipText?: string;
 })}
-  {@const url = `/dev/dash/personal/${id}` + (slug ? `/${slug}` : '')}
+  {@const url = `/personal/${id}` + (slug ? `/${slug}` : '')}
   <a
     href={url}
     class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium dark:text-gray-300 {isActive(
@@ -64,7 +64,7 @@
     </div>
 
     <div>
-      <Button onclick={() => goto('/dev/dash/personal/')}>Back to personal map list</Button>
+      <Button onclick={() => goto('/personal/')}>Back to personal map list</Button>
     </div>
   </div>
 
@@ -82,7 +82,7 @@
 <Modal bind:open={mapRenameModalOpen}>
   <form
     method="POST"
-    action="/dev/dash/personal?/updatePersonalMapName"
+    action="/personal?/updatePersonalMapName"
     use:enhance={() => {
       return async ({ result }) => {
         if (result.type === 'failure') {

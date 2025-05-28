@@ -9,7 +9,7 @@
   import { ModeWatcher } from 'mode-watcher';
   import { updated } from '$app/state';
   let { children } = $props();
-  let admin = $derived(page.url.pathname.startsWith('/dev/dash'));
+  let admin = $derived(page.url.pathname.startsWith('/map-making'));
   const underMaintenance = !building && env.PUBLIC_DASHBOARD_MAINTENANCE === 'true';
 </script>
 

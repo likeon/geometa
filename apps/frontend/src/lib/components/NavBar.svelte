@@ -15,6 +15,7 @@
   import DiscordFillIcon from '~icons/mingcute/discord-fill';
   import LightDarkIcon from '~icons/ix/light-dark';
   import FaSolidToolsIcon from '~icons/fa-solid/tools';
+  import MdiAccountIcon from '~icons/mdi/account';
 
   let modeWatcherDropdownOpen = $state(false);
 
@@ -24,7 +25,7 @@
   }
 
   let activeUrl = $derived(page.url.pathname);
-  let admin = $derived(activeUrl.startsWith('/dev/dash'));
+  let mapMaking = $derived(activeUrl.startsWith('/map-making'));
 
   // keep both dark and non-dark
   // otherwise it will use default
@@ -35,7 +36,7 @@
 </script>
 
 <Navbar class="px-2 sm:px-4 py-0 w-full bg-gradient-to-r from-green-900 to-sky-900">
-  <NavBrand href={admin ? '/dev/dash' : '/'} class="text-white">
+  <NavBrand href={mapMaking ? '/map-making' : '/'} class="text-white">
     <enhanced:img src={logo} class="h-6 sm:h-9 w-auto" alt="Logo" />
     <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white"
       >LearnableMeta</span>
@@ -65,9 +66,15 @@
         </Dropdown>
       {/if}
       <a
-        href="/dev/dash"
+        href="/personal"
+        title="Personal maps"
+        class="hidden md:flex items-center justify-center text-zinc-400 dark:text-zinc-400 hover:text-white dark:hover:text-white">
+        <MdiAccountIcon class="w-5 h-5 flex-shrink-0" />
+      </a>
+      <a
+        href="/map-making"
         title="Creator dashboard"
-        class="hidden md:flex items-center justify-center text-zinc-400 dark:text-zinc-400 hover:text-white">
+        class="hidden md:flex items-center justify-center text-zinc-400 dark:text-zinc-400 hover:text-white dark:hover:text-white">
         <FaSolidToolsIcon class="w-4 h-4 flex-shrink-0" />
       </a>
     </div>

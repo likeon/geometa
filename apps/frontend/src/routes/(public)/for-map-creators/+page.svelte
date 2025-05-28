@@ -69,7 +69,7 @@
     </li>
   </ul>
   <div class="mt-3 w-full flex justify-center">
-    <Button href="/dev/dash"
+    <Button href="/map-making"
       ><Icon icon="gis:poi-map" color="white" class="mr-3 h-4 w-4" />Open Creator Dashboard</Button>
   </div>
   <div class="w-full flex justify-center mb-10 mt-2">

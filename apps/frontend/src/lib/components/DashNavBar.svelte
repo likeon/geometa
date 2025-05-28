@@ -32,7 +32,7 @@
   slug?: string;
   tooltipText?: string;
 })}
-  {@const url = `/dev/dash/groups/${groupId}` + (slug ? `/${slug}` : '')}
+  {@const url = `/map-making/groups/${groupId}` + (slug ? `/${slug}` : '')}
   <a
     href={url}
     class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium dark:text-gray-300 {isActive(
@@ -94,7 +94,7 @@
 <Modal bind:open={groupRenameModalOpen}>
   <form
     method="POST"
-    action="/dev/dash?/updateGroupName"
+    action="/map-making?/updateGroupName"
     use:enhance={() => {
       return async ({ result }) => {
         await applyAction(result);

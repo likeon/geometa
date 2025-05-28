@@ -56,10 +56,12 @@ export async function GET(event: RequestEvent) {
       ...sessionCookie.attributes
     });
 
+    const redirectUrl = event.cookies.get('afterLoginRedirectUrl');
+
     return new Response(null, {
       status: 302,
       headers: {
-        Location: '/dev/dash'
+        Location: redirectUrl || '/map-making'
       }
     });
   } catch (e) {
