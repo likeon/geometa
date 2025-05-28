@@ -116,7 +116,7 @@ export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
       return mapInfo;
     }
   }
-  const url = `https://learnablemeta.com/api/map-info/${geoguessrId}`;
+  const url = `https://learnablemeta.com/api/userscript/map/${geoguessrId}`;
   const mapInfo = await fetchMapInfo(url);
   unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(mapInfo));
   unsafeWindow.localStorage.setItem('geometa:latest-version', mapInfo.userscriptVersion);
