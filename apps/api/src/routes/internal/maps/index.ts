@@ -151,7 +151,6 @@ export const metasFromMapStatement = db
 
 export const mapsRouter = new Elysia({ prefix: '/maps' })
   .use(auth())
-  .use(personalMapsRouter)
   .get('/', async () => {
     return db.select().from(maps);
   })
@@ -226,4 +225,5 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
     {
       params: t.Object({ geoguessrId: t.String() }),
     },
-  );
+  )
+  .use(personalMapsRouter);

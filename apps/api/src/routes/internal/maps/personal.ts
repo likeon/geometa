@@ -15,7 +15,7 @@ import { Elysia, t } from 'elysia';
 export const personalMapsRouter = new Elysia({ prefix: '/personal' })
   .use(auth())
   .get(
-    '/',
+    '',
     async ({ userId }) => {
       return db
         .select({
@@ -59,7 +59,7 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
     },
   )
   .post(
-    '/',
+    '',
     async ({ userId, body, status }) => {
       const { name, geoguessrId } = body;
       const user = await db.query.users.findFirst({

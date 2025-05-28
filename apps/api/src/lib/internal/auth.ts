@@ -7,16 +7,14 @@ const frontendToken = process.env.FRONTEND_API_TOKEN;
 export function auth() {
   return new Elysia({ name: 'geometa-auth' })
     .use(bearer())
-    .onBeforeHandle(({ bearer, set }) => {
+    .onBeforeHandle(({ bearer, status }) => {
       if (prod) {
         if (!bearer) {
-          set.status = 401;
-          return;
+          return status(401);
         }
 
         if (bearer !== frontendToken) {
-          set.status = 403;
-          return;
+          return status(403);
         }
       }
     })
