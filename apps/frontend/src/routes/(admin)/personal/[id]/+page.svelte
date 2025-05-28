@@ -6,7 +6,7 @@
   let { data } = $props();
 </script>
 
-<PersonalNavBar mapName={data.mapName} id={data.id} />
+<PersonalNavBar mapName={data.mapName} id={data.id} geoguessrId={data.geoguessrId} />
 <div class="mt-5">
   {#if data.metaList.length === 0}
     <p>

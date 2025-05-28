@@ -4,6 +4,7 @@
   import BaseTable from '$lib/components/BaseTable/BaseTable.svelte';
   import { superForm } from 'sveltekit-superforms';
   import TooltipName from '$lib/components/TooltipName.svelte';
+  import * as Collapsible from '$lib/components/ui/collapsible';
   let { data } = $props();
   let personalMapCreationModalOpen = $state(false);
 
@@ -23,6 +24,18 @@
 </script>
 
 <div class="container">
+  <Collapsible.Root>
+    <Collapsible.Trigger
+      ><div class="p-2 bg-gray-300 dark:bg-gray-500 rounded">
+        What are the personal maps?
+      </div></Collapsible.Trigger>
+    <Collapsible.Content>
+      <p>
+        Personal maps let you create your own custom maps by adding selected metas shared by other
+        map-makers from their maps. You can add metas to your map by going to shared map meta list.
+      </p>
+    </Collapsible.Content>
+  </Collapsible.Root>
   <div class="flex flex-wrap items-center">
     <div class="flex-grow flex items-center justify-end space-x-3">
       <Button onclick={() => (personalMapCreationModalOpen = true)}>Add personal map</Button>

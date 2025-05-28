@@ -10,9 +10,10 @@
   interface Props {
     id: number;
     mapName: string;
+    geoguessrId: string;
   }
 
-  let { id, mapName }: Props = $props();
+  let { id, mapName, geoguessrId }: Props = $props();
 
   let activeRoute = $derived(page.url.pathname);
   let mapRenameModalOpen = $state(false);
@@ -63,8 +64,14 @@
       </button>
     </div>
 
-    <div>
-      <Button onclick={() => goto('/personal/')}>Back to personal map list</Button>
+    <div class="flex gap-x-2">
+      <div>
+        <Button variant="secondary" href="/personal/">Back to personal map list</Button>
+      </div>
+      <div>
+        <Button href={`https://www.geoguessr.com/map-maker/${geoguessrId}`} target="_blank"
+          >Upload to Geoguessr</Button>
+      </div>
     </div>
   </div>
 

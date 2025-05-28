@@ -53,6 +53,7 @@
             <RaStarlineIcon class="inline-block mr-1" />
             Shared
           </Badge>
+          <Tooltip>Allows to add metas to personal maps.</Tooltip>
         </div>
       {/if}
       <div class="ml-auto flex items-center gap-2 whitespace-nowrap">
