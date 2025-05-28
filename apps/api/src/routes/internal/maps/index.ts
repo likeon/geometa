@@ -152,50 +152,6 @@ export const metasFromMapStatement = db
 export const mapsRouter = new Elysia({ prefix: '/maps' })
   .use(auth())
   .use(personalMapsRouter)
-  .get(
-    '/personal',
-    async ({ userId }) => {
-      return db
-        .select({
-          id: maps.id,
-          name: maps.name,
-          geoguessrId: maps.geoguessrId,
-          metasCount:
-            sql<number>`COUNT(DISTINCT ${syncedMapMetas.syncedMetaId})`.as(
-              'syncedMetasCount',
-            ),
-          locationsCount: sql<number>`COUNT(${syncedLocations.panoId})`.as(
-            'syncedLocationsCount',
-          ),
-        })
-        .from(maps)
-        .leftJoin(syncedMapMetas, eq(syncedMapMetas.mapId, maps.id))
-        .leftJoin(
-          syncedLocations,
-          eq(syncedLocations.syncedMetaId, syncedMapMetas.syncedMetaId),
-        )
-        .where(and(eq(maps.userId, userId), eq(maps.isPersonal, true)))
-        .groupBy(maps.id, maps.name, maps.geoguessrId);
-    },
-    {
-      userId: true,
-      response: {
-        200: t.Array(
-          t.Object(
-            {
-              id: t.Integer(),
-              name: t.String(),
-              geoguessrId: t.String(),
-              metasCount: t.Integer(),
-              locationsCount: t.Integer(),
-            },
-            { description: 'PersonalMap object' },
-          ),
-          { description: 'Array of personal maps' },
-        ),
-      },
-    },
-  )
   .get('/', async () => {
     return db.select().from(maps);
   })
