@@ -41,6 +41,20 @@ export const userscriptRouter = new Elysia({
     };
   })
   .get(
+    '/announcement/',
+    async ({}) => {
+      return {
+            };
+      // example announcement
+      // return {
+      //   timestamp: 1748360716,
+      //   htmlMessage: `🎉 Check out our <a href='#' target='_blank'>new features</a> page for exciting updates. This is a test message!`
+      // };
+    },
+    {
+    },
+  )
+  .get(
     '/location/',
     async ({ query, set }) => {
       const cacheKey = `${query.mapId}:${query.panoId}`;
