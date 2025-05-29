@@ -42,10 +42,7 @@ export const userscriptRouter = new Elysia({
   .get(
     '/announcement/',
     async ({}) => {
-      return {
-        timestamp: 1748360716,
-        htmlMessage: `This is a test message!`
-      };
+      return {};
       // example announcement
       // return {
       //   timestamp: 1748360716,
