@@ -6,3 +6,4 @@ resources:
   - sentry.enc.yaml
   - postgres-s3-secrets.enc.yaml
   - postgres.yaml
+  - image-proxy.yaml

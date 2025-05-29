@@ -45,6 +45,7 @@
     "prettier-plugin-svelte": "^3.3.3",
     "svelte": "^5.23.1",
     "svelte-check": "^4.2.0",
+    "svelte-dnd-action": "^0.9.61",
     "sveltekit-superforms": "^2.17.0",
     "tailwind-merge": "^3.0.2",
     "tailwind-variants": "^1.0.0",
