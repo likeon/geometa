@@ -15,9 +15,9 @@
       <p class="mt-4 text-base leading-7">Take control of your learning experience.</p>
 
       <p class="mt-2 text-base leading-7">
-        When playing Learnable maps with lots of metas, it’s normal to fully learn some of them and
-        want to focus only on the ones you haven’t learned yet. But before, there was no way to
-        remove the metas you already know from the map.
+        When playing Learnable maps with lots of metas, it's normal to fully learn some and want to
+        focus only on the ones you haven't mastered yet. Previously, there was no easy way to remove
+        the metas you already knew from the map.
       </p>
 
       <p class="mt-2 text-base leading-7">
@@ -26,7 +26,8 @@
 
       <ul class="mt-4 list-disc list-inside text-base leading-7">
         <li>
-          <span>Select specific metas</span> from any map (if the map creator has enabled sharing).
+          <span class="font-medium">Select specific metas</span> from any map (as long as the map creator
+          has enabled sharing).
         </li>
         <li>
           <span class="font-medium">Mix metas from different maps</span> to create your own custom map
@@ -43,7 +44,7 @@
               ><strong class="font-semibold text-gray-900 dark:text-gray-200"
                 >Create a GeoGuessr map.</strong>
               First, you’ll need to create a GeoGuessr map. You can do that
-              <a href="https://www.geoguessr.com/me/maps" target="_blank">here</a>.
+              <a href="https://www.geoguessr.com/map-maker" target="_blank">here</a>.
             </span>
           </div>
         </li>
@@ -52,7 +53,9 @@
           <span
             ><strong class="font-semibold text-gray-900 dark:text-gray-200"
               >Create a personal map.</strong>
-            After creating your GeoGuessr map, copy its ID and use it to create a personal map in our
+            After creating your GeoGuessr map, copy the map ID from the URL. It’s the long string of
+            letters and numbers at the end of the address bar (e.g., after geoguessr.com/map-maker/)
+            and use it to create a personal map in our
             <a href="/personal" target="_blank">portal</a>.
           </span>
         </li>
@@ -62,8 +65,9 @@
           <span
             ><strong class="font-semibold text-gray-900 dark:text-gray-200"
               >Choose metas from community maps.</strong>
-            Find <a href="/maps">maps</a> with the shared tag and pick as many metas as you want. Add
-            them to your map.</span>
+            Find <a href="/maps">maps</a> with the "shared" tag and select as many metas as you want.
+            You can use the filter in the top right corner to show only maps with shared metas. Then,
+            add them to your map.</span>
         </li>
         <li>
           <div class="flex gap-x-3">
@@ -72,14 +76,14 @@
               ><strong class="font-semibold text-gray-900 dark:text-gray-200"
                 >Upload locations to your map.</strong>
               Once you’ve added metas in the portal, it’s time to make your map playable. Go to the
-              <a href="https://www.geoguessr.com/me/maps" target="_blank">your maps</a> section on GeoGuessr,
-              choose the map that you used for creating personal map, and with our userscript you can
-              upload locations with one click.
+              <a href="https://www.geoguessr.com/me/maps" target="_blank">Your Maps</a> section on GeoGuessr,
+              select the map you used to create your personal version, and use our userscript to upload
+              locations with a single click.
             </span>
           </div>
           <p class="text-gray-600 dark:text-gray-400 ml-9 italic">
-            * The first time you upload locations, it will ask you for an API key from our portal.
-            You can get it by clicking the link that shows up when prompted.
+            * When you upload locations for the first time, you’ll need an API key from our portal.
+            Just click the link that shows up when prompted to get it.
           </p>
         </li>
       </ul>

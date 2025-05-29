@@ -47,6 +47,11 @@
     <NavLi href="/about">How To</NavLi>
     <NavLi href="/maps">Maps</NavLi>
     <NavLi href="/for-map-creators">For Map Creators</NavLi>
+    <NavLi href="/personal-maps">
+      <span class={activeUrl.endsWith('/personal-maps') ? 'text-white' : 'text-yellow-300'}>
+        Personal Maps
+      </span>
+    </NavLi>
     <NavLi href="https://discord.gg/AcXEWznYZe" target="_blank">
       <div class="flex">
         <DiscordFillIcon class="w-5 h-5 flex-shrink-0 mr-1" />

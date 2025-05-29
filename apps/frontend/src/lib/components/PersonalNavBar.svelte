@@ -69,8 +69,11 @@
         <Button variant="secondary" href="/personal/">Back to personal map list</Button>
       </div>
       <div>
-        <Button href={`https://www.geoguessr.com/map-maker/${geoguessrId}`} target="_blank"
-          >Upload to Geoguessr</Button>
+        <Button href={`https://www.geoguessr.com/map-maker/${geoguessrId}`} target="_blank">
+          <TooltipName
+            name="Upload to Geoguessr"
+            tooltipText="This will take you to geoguessr website where you can upload locations using our script, just press the Learnablemeta - upload button and it's all done! If you don't see a button your userscript is probably not updated." />
+        </Button>
       </div>
     </div>
   </div>
