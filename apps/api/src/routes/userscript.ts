@@ -9,7 +9,7 @@ import { generateFooter } from '@api/lib/userscript/utils';
 import { eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
-const userscriptVersion = '0.83';
+const userscriptVersion = '0.84';
 
 const mapInfoQuery = db.query.maps
   .findFirst({
