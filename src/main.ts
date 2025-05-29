@@ -7,6 +7,7 @@ import { initLocationsUpload } from './lib/locationsUpload';
 
 function changelog() {
   return [
+    {'0.84': 'Fixed multiple instances of upload button, adjusted styles'},
     {'0.83': 'Added uploading locations and announcements system'},
     {'0.82': 'Changed position of LearnableMeta map label for new Geoguessr UI'},
     { '0.81': 'Fixed live challenge support. Added information about userscript version and source of a call (map, challenge, liveChallenge) to location info request to help us with debugging issues.' },

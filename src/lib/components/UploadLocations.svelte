@@ -194,25 +194,49 @@
 
 <style>
   .custom-yellow-button {
-    background-color: #f5c542;
-    border-color: #e0b000;
-    color: darkblue;
-    padding: 6px 12px;
-    border-radius: 4px;
+    background: linear-gradient(180deg, #ffeb99 0%, #f5c542 100%);
+    border: 1px solid #e0b000;
+    color: #002147;
+    border-radius: 3.75rem;
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
     cursor: pointer;
-    font-weight: bold;
+    transition:
+      background 0.2s ease-in-out,
+      transform 0.1s ease,
+      box-shadow 0.2s ease-in-out;
   }
 
-  .custom-yellow-button:hover {
-    background-color: #eab308;
-    border-color: #d39e00;
+  .custom-yellow-button:hover:not(:disabled) {
+    background: linear-gradient(180deg, #ffe066 0%, #eab308 100%);
+    box-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transform: translateY(-1px);
+  }
+
+  .custom-yellow-button:active:not(:disabled) {
+    background: linear-gradient(180deg, #eab308 0%, #d39e00 100%);
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.2) inset;
+    transform: translateY(1px);
+  }
+
+  .custom-yellow-button:focus {
+    outline: none;
+    box-shadow:
+      0 0 0 3px rgba(234, 179, 8, 0.5),
+      0 2px 4px rgba(0, 0, 0, 0.15);
   }
 
   .custom-yellow-button:disabled {
-    background-color: #cccccc;
-    border-color: #aaaaaa;
-    color: #666666;
+    background: #e0e0e0;
+    border-color: #bbbbbb;
+    color: #888888;
+    box-shadow: none;
     cursor: not-allowed;
+    transform: none;
   }
 
   .modal-overlay {
