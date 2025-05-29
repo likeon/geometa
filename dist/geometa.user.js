@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.84
+// @version      0.85
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
@@ -4145,10 +4145,15 @@
     if (!(mapInfo == null ? void 0 : mapInfo.mapFound)) {
       return;
     }
+    const targetId = "geometa-locations-upload-container";
     const container = document.querySelector(".top-bar-menu_topBarMenu__kd9zX");
     if (container) {
+      const existingElement = container.querySelector("#" + targetId);
+      if (existingElement) {
+        return;
+      }
       const target = document.createElement("div");
-      target.id = containerId;
+      target.id = targetId;
       container.insertBefore(target, container.lastElementChild);
       mount(UploadLocations, {
         target,
@@ -4160,6 +4165,7 @@
   }
   function changelog() {
     return [
+      { "0.85": "Another fix for multiple instances of upload button" },
       { "0.84": "Fixed multiple instances of upload button, adjusted styles" },
       { "0.83": "Added uploading locations and announcements system" },
       { "0.82": "Changed position of LearnableMeta map label for new Geoguessr UI" },

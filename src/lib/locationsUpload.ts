@@ -30,10 +30,15 @@ async function addLocationsUploadButtons() {
   if (!mapInfo?.mapFound) {
     return;
   }
+
+  const targetId = 'geometa-locations-upload-container';
   const container = document.querySelector('.top-bar-menu_topBarMenu__kd9zX');
+
   if (container) {
+    const existingElement = container.querySelector('#' + targetId);
+    if (existingElement) { return; }
     const target = document.createElement('div');
-    target.id = containerId;
+    target.id = targetId;
     container.insertBefore(target, container.lastElementChild);
     mount(UploadLocations, {
       target,
