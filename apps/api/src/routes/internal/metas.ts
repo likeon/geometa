@@ -28,8 +28,12 @@ export const metasRouter = new Elysia({ prefix: '/metas' }).use(auth()).post(
     let avifFile: Buffer;
     try {
       avifFile = await sharp(await fileToBuffer(body.file))
+        .resize(800, 800, {
+          fit: 'inside',
+          withoutEnlargement: true,
+        })
         .avif({
-          quality: 80,
+          quality: 70,
         })
         .toBuffer();
     } catch (e) {
