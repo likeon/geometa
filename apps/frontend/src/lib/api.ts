@@ -1,6 +1,7 @@
 import { treaty } from '@elysiajs/eden';
 import { env } from '$env/dynamic/private';
 import type { App } from '@api';
+import type { RequestEvent } from '@sveltejs/kit';
 const frontendToken = env.FRONTEND_API_TOKEN;
 const prod = env.NODE_ENV === 'production';
 
@@ -13,3 +14,11 @@ export const api = treaty<App>(`http://${apiHost}`, {
       };
   }
 }).api;
+
+export function internalHeaders(locals: RequestEvent['locals']) {
+  return {
+    headers: {
+      'x-api-user-id': locals.user!.id
+    }
+  };
+}

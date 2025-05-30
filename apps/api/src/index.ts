@@ -33,17 +33,9 @@ const api = new Elysia({ prefix: '/api' })
   .use(userscriptRouter)
   .use(internalRouter)
   .onError(({ set, code }) => {
-    switch (code) {
-      case 'VALIDATION':
-      case 'PARSE':
-        set.status = 400;
-        break;
-      case 'NOT_FOUND':
-        set.status = 404;
-        break;
-      default:
-        set.status = 500;
-        return { message: 'Internal Server Error' };
+    if (code === 'INTERNAL_SERVER_ERROR' || code === 'UNKNOWN') {
+      set.status = 500;
+      return { message: 'Internal Server Error' };
     }
   });
 
@@ -66,10 +58,3 @@ const app = new Elysia()
   .use(api)
   .listen(3000);
 export type App = typeof app;
-
-
-console.log(
-  app.routes
-    .map((route) => `${route.method} - ${route.path}`)
-    .join('\n')
-);

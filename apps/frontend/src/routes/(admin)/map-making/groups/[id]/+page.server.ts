@@ -6,26 +6,16 @@ import { message, setError, superValidate, withFiles } from 'sveltekit-superform
 import { zod } from 'sveltekit-superforms/adapters';
 import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
-import {
-  ensurePermissions,
-  extractJsonData,
-  generateRandomString,
-  getFileExtension,
-  markdown2Html
-} from '$lib/utils';
+import { ensurePermissions, extractJsonData, markdown2Html } from '$lib/utils';
 import { getGroupId } from './utils';
-import { uploadFile } from '$lib/s3';
-import { dev } from '$app/environment';
-import { syncUserScriptData } from '$lib/user-script';
 import { unified } from 'unified';
 import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import rehypeSanitize from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
 import rehypeExternalLinks from 'rehype-external-links';
-import { autoUpdateMaps } from './geo';
 import { uploadMetas } from '$routes/(admin)/map-making/groups/[id]/metasUpload';
-import { api } from '$lib/api';
+import { api, internalHeaders } from '$lib/api';
 
 const insertMetasSchema = createInsertSchema(metas)
   .pick({
@@ -486,23 +476,20 @@ export const actions = {
     if (!form.valid) {
       return fail(400, withFiles({ form }));
     }
-    const meta = await locals.db.query.metas.findFirst({ where: eq(metas.id, form.data.metaId) });
-    await ensurePermissions(locals.db, locals.user?.id, meta?.mapGroupId);
 
-    const imageName = `${meta!.mapGroupId}/${generateRandomString(36)}.${getFileExtension(form.data.file)}`;
-    await uploadFile(form.data.file, imageName);
+    const { data, status } = await api.internal
+      .metas({ id: form.data.metaId })
+      .images.post({ file: form.data.file }, internalHeaders(locals));
 
-    const url = `https://static${dev ? '-dev' : ''}.learnablemeta.com/${imageName}`;
-
-    const result = await locals.db
-      .insert(metaImages)
-      .values({ metaId: form.data.metaId, image_url: url })
-      .returning({ id: metaImages.id, metaId: metaImages.metaId, image_url: metaImages.image_url });
-    await locals.db
-      .update(metas)
-      .set({ modifiedAt: Math.floor(Date.now() / 1000) })
-      .where(eq(metas.id, form.data.metaId));
-    return message(form, result[0]);
+    switch (status) {
+      case 200:
+        return message(form, data!.imageUrl);
+      case 400:
+        return setError(form, 'file', 'Failed to process the image');
+      default:
+        console.debug(status);
+        throw new Error('unexpected response');
+    }
   },
   deleteMetaImage: async ({ request, locals }) => {
     const data = await request.formData();

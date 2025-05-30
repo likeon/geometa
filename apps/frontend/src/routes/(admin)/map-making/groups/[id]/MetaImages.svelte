@@ -5,6 +5,7 @@
   import type { PageData } from './$types';
   import { applyAction, enhance } from '$app/forms';
   import { invalidateAll } from '$app/navigation';
+  import LoadingSmall from '$lib/components/LoadingSmall.svelte';
 
   interface Props {
     data: SuperValidated<Infer<ImageUploadSchema>>;
@@ -15,6 +16,7 @@
 
   let images = $derived(selectedMeta.images);
   let isDragging = $state(false);
+  let isUploading = $state(false);
 
   const {
     form: imageForm,
@@ -22,6 +24,12 @@
     enhance: imageEnhance,
     submit: imageSubmit
   } = superForm(data, {
+    onSubmit() {
+      isUploading = true;
+    },
+    onResult() {
+      isUploading = false;
+    },
     async onUpdated({ form }) {}
   });
 
@@ -96,6 +104,10 @@
       <div class="invalid">{$imageErrors.file}</div>
     {/if}
   </label>
+
+  {#if isUploading}
+    <div class="mx-auto"><LoadingSmall /></div>
+  {/if}
 
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div
