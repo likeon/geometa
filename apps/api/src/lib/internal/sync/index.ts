@@ -78,6 +78,24 @@ export async function syncMapGroup(group: {
         ${syncedMetas.metaId} NOT IN (SELECT id FROM ${metas} WHERE ${metas.mapGroupId} = ${group.id})`,
     );
 
+
+    // remove locations that changed tag name
+
+    await tx.execute(sql`
+  DELETE FROM synced_locations sl
+  USING synced_metas sm,
+        map_group_locations mgl,
+        metas m
+  WHERE sl.synced_meta_id = sm.meta_id
+    AND sm.map_group_id = ${group.id}
+    AND mgl.map_group_id = sm.map_group_id
+    AND mgl.pano_id = sl.pano_id
+    AND m.map_group_id = sm.map_group_id
+    AND m.id = sl.synced_meta_id
+    AND mgl.extra_tag != m.tag_name
+`);
+
+
     // locations
     await tx.execute(sql`
       WITH l AS (
