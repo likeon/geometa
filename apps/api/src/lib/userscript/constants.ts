@@ -1,6 +1,9 @@
 export const plonkitCreditFooter =
   '<p>Description and images taken from: <a href="https://www.plonkit.net/" rel="nofollow" target="_blank">https://www.plonkit.net/</a>.</p>';
 
+export const plonkitFooter =
+  '<p>Check out <a href="https://www.plonkit.net/" rel="nofollow" target="_blank">https://www.plonkit.net/</a> for more clues.</p>';
+
 export const countryNames = [
   'Afghanistan',
   'Albania',
