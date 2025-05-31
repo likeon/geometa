@@ -42,12 +42,10 @@ export const userscriptRouter = new Elysia({
   .get(
     '/announcement/',
     async ({}) => {
-      return {};
-      // example announcement
-      // return {
-      //   timestamp: 1748360716,
-      //   htmlMessage: `🎉 Check out our <a href='#' target='_blank'>new features</a> page for exciting updates. This is a test message!`
-      // };
+      return {
+        timestamp: 1748668889,
+        htmlMessage: `✨ New: Try Personal Maps — pick metas from any map and focus on what you want to learn. <a href="https://learnablemeta.com/personal-maps" target="_blank">More info</a>`
+      };
     },
     {},
   )
