@@ -44,7 +44,7 @@ export const userscriptRouter = new Elysia({
     async ({}) => {
       return {
         timestamp: 1748668889,
-        htmlMessage: `✨ New: Try Personal Maps — pick metas from any map and focus on what you want to learn. <a href="https://learnablemeta.com/personal-maps" target="_blank">More info</a>`
+        htmlMessage: `✨ New: Try Personal Maps — pick metas from any map and focus on what you want to learn. <a href="https://learnablemeta.com/personal-maps" target="_blank">Click here for more info!</a>`
       };
     },
     {},
