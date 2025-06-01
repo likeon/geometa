@@ -7,6 +7,7 @@ import { initLocationsUpload } from './lib/locationsUpload';
 
 function changelog() {
   return [
+    {'0.86': 'Changed look of announcement closing button'},
     {'0.85': 'Another fix for multiple instances of upload button'},
     {'0.84': 'Fixed multiple instances of upload button, adjusted styles'},
     {'0.83': 'Added uploading locations and announcements system'},

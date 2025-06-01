@@ -155,7 +155,7 @@
         </div>
         <button class="vote-close-btn"
                 onclick={() =>  {markAnnouncementAsDismissed(announcement.timestamp);lastDismissedTimestamp = announcement.timestamp }}
-                aria-label="Dismiss announcement">×
+                aria-label="Dismiss announcement">Dismiss
         </button>
       </div>
     {/if}
@@ -312,20 +312,27 @@
   }
 
   .vote-close-btn {
-    background: none;
-    border: none;
+    background-color: #b3d9ff;
+    border: 1px solid #0050b3;
     color: #0050b3;
-    font-size: 18px;
-    font-weight: bold;
+    font-size: 12px;
     cursor: pointer;
-    padding: 0 5px;
+    padding: 1px 10px;
+    border-radius: 4px;
     line-height: 1;
-    opacity: 0.7;
+    margin-left: 5px;
+    text-transform: none;
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
 
-  .vote-close-btn:hover {
-    opacity: 1;
+  .vote-close-btn:hover,
+  .vote-close-btn:focus {
+    background-color: #0050b3;
+    color: #ffffff;
+    border-color: #003366;
+    outline: none;
   }
+
 
   a {
     color: #188bd2;
