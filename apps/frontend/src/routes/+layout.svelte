@@ -8,6 +8,7 @@
   import { building } from '$app/environment';
   import { ModeWatcher } from 'mode-watcher';
   import { updated } from '$app/state';
+  import AnnouncementBanner from '$lib/components/AnnouncementBanner.svelte';
   let { children } = $props();
   let admin = $derived(page.url.pathname.startsWith('/map-making'));
   const underMaintenance = !building && env.PUBLIC_DASHBOARD_MAINTENANCE === 'true';
@@ -21,7 +22,7 @@
 
 <ModeWatcher />
 <div class="app" data-sveltekit-reload={updated}>
-  <!--  <AnnouncementBanner />-->
+  <AnnouncementBanner />
   <NavBar />
   <main>
     {#if underMaintenance && admin}
