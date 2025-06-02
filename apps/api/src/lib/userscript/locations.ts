@@ -6,12 +6,13 @@ import {
   syncedMetas,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
-import { originalMapCTE } from '@api/lib/utils/common';
-import { and, eq, getTableColumns, sql } from 'drizzle-orm';
+import { and, desc, eq, getTableColumns, sql } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { pick } from 'remeda';
 
+const originalSyncedMapMetas = alias(syncedMapMetas, 'osmm');
+const originalMaps = alias(maps, 'om');
 export const locationSelect = db
-  .with(originalMapCTE)
   .select({
     ...pick(getTableColumns(syncedMetas), [
       'name',
@@ -22,19 +23,13 @@ export const locationSelect = db
     ]),
     country: syncedLocations.country,
     isPersonalMap: maps.isPersonal,
-    mapFooter: sql<string>`
-      CASE
-        WHEN ${maps.isPersonal} = FALSE THEN ${maps.footerHtml}
-        ELSE COALESCE(${originalMapCTE.footerHtml}, '')
-      END
-    `.as('mapFooter'),
-    mapName: sql<string>`COALESCE(${originalMapCTE.name}, '')`.as('mapName'),
-    mapAuthors: sql<string>`COALESCE(${originalMapCTE.authors}, '')`.as(
-      'mapAuthors',
-    ),
-    mapGeoguessrId: sql<string>`COALESCE(${originalMapCTE.geoguessrId}, '')`.as(
-      'mapGeoguessrId',
-    ),
+    mapFooter:
+      sql<string>`coalesce(${originalMaps.footerHtml}, ${maps.footerHtml})`.as(
+        'mapFooter',
+      ),
+    mapName: originalMaps.name,
+    mapAuthors: originalMaps.authors,
+    mapGeoguessrId: originalMaps.geoguessrId,
   })
   .from(syncedMetas)
   .innerJoin(
@@ -46,13 +41,22 @@ export const locationSelect = db
     syncedLocations,
     eq(syncedLocations.syncedMetaId, syncedMetas.metaId),
   )
-  .leftJoin(originalMapCTE, eq(originalMapCTE.syncedMetaId, syncedMetas.metaId))
+  .leftJoin(
+    originalSyncedMapMetas,
+    and(
+      eq(maps.isPersonal, true),
+      eq(originalSyncedMapMetas.syncedMetaId, syncedMapMetas.syncedMetaId),
+    ),
+  )
+  .leftJoin(originalMaps, eq(originalMaps.id, originalSyncedMapMetas.mapId))
   .where(
     and(
       eq(maps.geoguessrId, sql.placeholder('mapId')),
       eq(syncedLocations.panoId, sql.placeholder('panoId')),
     ),
   )
+  // prefer original map with footer
+  .orderBy(desc(originalMaps.footerHtml))
   .limit(1)
   .prepare('userscript_get_location');
 
