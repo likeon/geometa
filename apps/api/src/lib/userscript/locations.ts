@@ -21,6 +21,7 @@ export const locationSelect = db
       'noteFromPlonkit',
     ]),
     country: syncedLocations.country,
+    isPersonalMap: maps.isPersonal,
     mapFooter: sql<string>`
       CASE
         WHEN ${maps.isPersonal} = FALSE THEN ${maps.footerHtml}

@@ -78,7 +78,7 @@ export const userscriptRouter = new Elysia({
         meta.footer,
         meta.mapFooter,
       );
-      if (meta.mapAuthors && meta.mapName) {
+      if (meta.isPersonalMap && meta.mapAuthors && meta.mapName) {
         footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
       }
       return {
