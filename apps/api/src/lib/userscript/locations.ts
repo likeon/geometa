@@ -55,8 +55,8 @@ export const locationSelect = db
       eq(syncedLocations.panoId, sql.placeholder('panoId')),
     ),
   )
-  // prefer original map with footer
-  .orderBy(desc(originalMaps.footerHtml))
+  // prefer most played original map
+  .orderBy(sql`${originalMaps.numberOfGamesPlayed} DESC NULLS LAST`)
   .limit(1)
   .prepare('userscript_get_location');
 
