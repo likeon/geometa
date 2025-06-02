@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { Badge, Tooltip } from 'flowbite-svelte';
   import { Button } from '$lib/components/ui/button';
   import * as Card from '$lib/components/ui/card';
   import RaStarlineIcon from '~icons/ri/star-line';
@@ -10,6 +9,8 @@
   import CliListIcon from '~icons/cil/list';
   import type { PageData } from './$types';
   import type { Component } from 'svelte';
+  import { Badge } from '$lib/components/ui/badge';
+  import Tooltip from '$lib/components/Tooltip.svelte';
 
   let {
     map
@@ -48,12 +49,13 @@
     <div class="flex flex-row pb-2">
       {#if map.isShared}
         <div>
-          <Badge
-            class="bg-amber-500 text-amber-900 dark:bg-amber-400 dark:text-amber-950 font-semibold px-2.5 py-0.5 rounded-md">
-            <RaStarlineIcon class="inline-block mr-1" />
-            Shared
-          </Badge>
-          <Tooltip>Allows to add metas to personal maps.</Tooltip>
+          <Tooltip content="You can add metas from this map to personal map!:)">
+            <Badge
+              class="bg-amber-500 text-amber-900 dark:bg-amber-400 dark:text-amber-950 font-semibold px-2.5 py-0.5 rounded-md">
+              <RaStarlineIcon class="inline-block mr-1" />
+              Shared
+            </Badge>
+          </Tooltip>
         </div>
       {/if}
       <div class="ml-auto flex items-center gap-2 whitespace-nowrap">
@@ -64,15 +66,17 @@
             {difficulties[map.difficulty].label}
           </Badge>
         {/if}
-        <Badge class="bg-pink-50 text-pink-500 dark:bg-pink-900/50 dark:text-pink-300/70">
-          <MapPinIcon class="inline-block mr-1" />
-          {map.locationsCount}
-        </Badge>
-        <Tooltip>Number of locations in the map.</Tooltip>
-        <Badge class="bg-indigo-50 text-indigo-500 dark:bg-indigo-900/50 dark:text-indigo-300">
-          <CliListIcon class="inline-block mr-1" />
-          {map.metasCount}</Badge>
-        <Tooltip>Number of metas in the map.</Tooltip>
+        <Tooltip content="Number of locations in the map.">
+          <Badge class="bg-pink-50 text-pink-500 dark:bg-pink-900/50 dark:text-pink-300/70">
+            <MapPinIcon class="inline-block mr-1" />
+            {map.locationsCount}
+          </Badge>
+        </Tooltip>
+        <Tooltip content="Number of metas in the map.">
+          <Badge class="bg-indigo-50 text-indigo-500 dark:bg-indigo-900/50 dark:text-indigo-300">
+            <CliListIcon class="inline-block mr-1" />
+            {map.metasCount}</Badge>
+        </Tooltip>
       </div>
     </div>
     <Card.Title>{map.name}</Card.Title>
@@ -80,7 +84,7 @@
   </Card.Header>
   <Card.Content class="pt-0 flex flex-col h-full">
     <p
-      class="mt-6 text-base text-gray-600 dark:text-gray-300 whitespace-pre-line leading-snug break-words flex-grow">
+      class="mt-6 text-base text-gray-600 dark:text-gray-300 whitespace-pre-line leading-snug break-words grow">
       {map.description}
     </p>
     <div class="mt-7 flex gap-4">

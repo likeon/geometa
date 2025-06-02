@@ -22,7 +22,8 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
       renderComponent(Checkbox, {
         checked: row.getIsSelected(),
         onCheckedChange: (value) => row.toggleSelected(!!value),
-        'aria-label': 'Select row'
+        'aria-label': 'Select row',
+        onclick: (e: Event) => e.stopPropagation()
       }),
     enableSorting: false,
     enableHiding: false,
@@ -37,7 +38,7 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
         sort: column.getIsSorted()
       }),
     meta: {
-      class: 'pl-2 flex-[2] min-w-[120px] max-w-[220px] xl:flex-[1] xl:max-w-[150px]'
+      class: 'pl-2 flex-2 min-w-[120px] max-w-[220px] xl:flex-1 xl:max-w-[150px]'
     }
   },
 
@@ -50,7 +51,7 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
         sort: column.getIsSorted()
       }),
     meta: {
-      class: 'flex-[2] min-w-[120px] max-w-[220px] xl:flex-[1] xl:max-w-[150px]'
+      class: 'flex-2 min-w-[120px] max-w-[220px] xl:flex-1 xl:max-w-[150px]'
     }
   },
   {
@@ -71,7 +72,7 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
     header: () => renderComponent(BaseTableHeader, { name: 'Levels' }),
     accessorFn: (row) =>
       row.metaLevels
-        .map((m) => m.level.name)
+        .map((m: { level: { name: any } }) => m.level.name)
         .sort()
         .join(', '),
     filterFn: (row, columnId, filterValue) => {
@@ -168,7 +169,7 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
       return renderComponent(DataTableActions, { id: row.original.id });
     },
     meta: {
-      class: 'w-12 min-w-12 max-w-12 text-right'
+      class: 'min-w-[48px] max-w-[48px] text-right !w-[48px]'
     }
   }
 ];

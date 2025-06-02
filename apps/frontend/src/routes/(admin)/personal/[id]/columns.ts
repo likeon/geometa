@@ -18,7 +18,8 @@ export const columns: ColumnDef<PageData['metaList'][number]>[] = [
       renderComponent(Checkbox, {
         checked: row.getIsSelected(),
         onCheckedChange: (value) => row.toggleSelected(!!value),
-        'aria-label': 'Select row'
+        'aria-label': 'Select row',
+        onclick: (e: Event) => e.stopPropagation()
       }),
     enableSorting: false,
     enableHiding: false,
@@ -38,7 +39,7 @@ export const columns: ColumnDef<PageData['metaList'][number]>[] = [
         sort: column.getIsSorted()
       }),
     meta: {
-      class: 'pl-2 flex-[2] min-w-[120px] max-w-[220px] xl:flex-[1] xl:max-w-[150px]'
+      class: 'pl-2 flex-2 min-w-[120px] max-w-[220px] xl:flex-1 xl:max-w-[150px]'
     }
   },
   {
@@ -68,7 +69,7 @@ export const columns: ColumnDef<PageData['metaList'][number]>[] = [
       );
     },
     meta: {
-      class: 'pl-2 flex-[2] min-w-[120px] max-w-[220px] xl:flex-[1] xl:max-w-[150px]'
+      class: 'pl-2 flex-2 min-w-[120px] max-w-[220px] xl:flex-1 xl:max-w-[150px]'
     }
   },
   {

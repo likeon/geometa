@@ -1,6 +1,5 @@
 <script lang="ts">
   import video from '$lib/assets/showcase.webm';
-  import { Heading } from 'flowbite-svelte';
   import Icon from '@iconify/svelte';
   import { Button } from '$lib/components/ui/button';
 </script>
@@ -10,9 +9,9 @@
 </svelte:head>
 
 <div
-  class="bg-gradient-to-r from-emerald-200/40 via-rose-200/30 to-blue-200/60 dark:from-gray-800 dark:via-gray-900 dark:to-black relative isolate overflow-hidden">
+  class="bg-linear-to-r from-emerald-200/40 via-rose-200/30 to-blue-200/60 dark:from-gray-800 dark:via-gray-900 dark:to-black relative isolate overflow-hidden">
   <div class="items-center mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-10">
-    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
+    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:shrink-0 lg:pt-8">
       <h1 class="mt-10 text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-6xl">
         Want this on <span class="text-nowrap">your map</span>?
       </h1>
@@ -37,7 +36,7 @@
 
 <div id="content" class="mx-auto max-w-3xl mt-10 container">
   <p class="w-full flex justify-center"></p>
-  <Heading tag="h2">Learnable Meta for Map Creators</Heading>
+  <h2>Learnable Meta for Map Creators</h2>
   <p class="text-base font-semibold leading-7 text-green-700">
     Enhance your map with our UserScript in 2 easy steps
   </p>
@@ -51,7 +50,7 @@
   <ul role="list" class="mt-8 max-w-xl space-y-4 text-gray-600 dark:text-gray-400">
     <li>
       <div class="flex gap-x-3">
-        <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
+        <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
         <span
           ><strong class="font-semibold text-gray-900 dark:text-gray-100">Adjust your map.</strong>
           First, you need to tag your locations in the map-making app. Only one tag per location in
@@ -59,7 +58,7 @@
       </div>
     </li>
     <li class="flex gap-x-3">
-      <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
+      <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
       <span
         ><strong class="font-semibold text-gray-900 dark:text-gray-100"
           >Upload map JSON and enter tag descriptions.</strong>

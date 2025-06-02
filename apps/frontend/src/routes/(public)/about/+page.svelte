@@ -1,5 +1,4 @@
 <script>
-  import { Heading } from 'flowbite-svelte';
   import Icon from '@iconify/svelte';
   import geoPin from '$lib/assets/GeoGuessr-Pin.png?enhanced';
 </script>
@@ -12,7 +11,7 @@
   <div class="mx-auto max-w-3xl text-base leading-7">
     <div class="main-content">
       <p class="text-base font-semibold leading-7 text-green-700">Introducing</p>
-      <Heading tag="h1">A Learnable Meta World maps</Heading>
+      <h1>A Learnable Meta World maps</h1>
       <p>
         When someone wants to improve at GeoGuessr, they often try to memorize lists of bollards,
         signs, Google cars, and other clues. This can be quite overwhelming because there are so
@@ -36,7 +35,7 @@
           <a href="/maps" class="font-bold text-3xl">Our GeoGuessr maps</a>
         </div>
       </div>
-      <Heading tag="h2" class="mt-4 mb-[-10px]">How to use</Heading>
+      <h2 class="mt-4 mb-[-10px]">How to use</h2>
       <p>
         To get helpful hints in GeoGuessr, you'll need a browser extension that allows you to run
         userscripts, such as
@@ -44,11 +43,11 @@
         Training Mode, you might already be familiar with it. But if this is your first time hearing
         about it, don't worry—it's easy to set up.
       </p>
-      <Heading tag="h4" class="mt-4 mb-[-20px]">Here's how to do it</Heading>
+      <h4 class="mt-4 mb-[-20px]">Here's how to do it</h4>
       <ul role="list" class="mt-8 max-w-xl space-y-4 text-gray-600 dark:text-white">
         <li>
           <div class="flex gap-x-3">
-            <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
+            <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
             <span
               ><strong class="font-semibold text-gray-900 dark:text-gray-200"
                 >Install the Browser Extension.</strong>
@@ -69,7 +68,7 @@
           </p>
         </li>
         <li class="flex gap-x-3">
-          <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
+          <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
           <span
             ><strong class="font-semibold text-gray-900 dark:text-gray-200"
               >Install the Userscript.</strong>
@@ -89,7 +88,7 @@
         </li>
 
         <li class="flex gap-x-3">
-          <Icon icon="icon-park-solid:check-one" class="h-6 w-6 flex-shrink-0" color="green" />
+          <Icon icon="icon-park-solid:check-one" class="h-6 w-6 shrink-0" color="green" />
           <span
             ><strong class="font-semibold text-gray-900 dark:text-gray-200"
               >Play one of our maps.</strong>
@@ -104,7 +103,7 @@
           >discord server</a> if you have any questions or feedback.
       </p>
     </div>
-    <Heading tag="h3" class="mt-4">Credits</Heading>
+    <h3 class="mt-4">Credits</h3>
     <p><strong>Map Creator</strong>: trausi</p>
     <p><strong>UserScript Creator</strong>: plurk</p>
     <p><i>Also big thanks to Bastu, Gelotris and Micha for help with making the map.</i></p>
@@ -116,6 +115,7 @@
 </div>
 
 <style lang="postcss">
+  @reference "tailwindcss";
   .main-content p {
     @apply mt-4;
   }

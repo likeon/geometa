@@ -16,7 +16,7 @@
   type DifficultyValue = (typeof difficultyMap)[number]['value'];
 
   const regionButtonClass =
-    'px-4 py-1 rounded-lg border focus:outline-none hover:bg-gray-200 dark:hover:bg-gray-900';
+    'px-4 py-1 rounded-lg border focus:outline-hidden hover:bg-gray-200 dark:hover:bg-gray-900';
 
   let activeRegion = $state('');
   let searchText = $state('');
@@ -61,7 +61,7 @@
 
 <div class="container">
   <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between py-2 gap-4">
-    <div class="flex overflow-x-auto space-x-2 lg:space-x-2 scroll-container flex-shrink">
+    <div class="flex overflow-x-auto space-x-2 lg:space-x-2 scroll-container shrink">
       {#await data.regionList then regionList}
         <button
           class={regionButtonClass}
@@ -84,7 +84,7 @@
       <Input
         placeholder="Search maps"
         bind:value={searchText}
-        class="max-w-xs flex-grow lg:flex-grow-0 pr-10" />
+        class="max-w-xs grow lg:grow-0 pr-10" />
       <div class="absolute right-2">
         <Popover.Root>
           <Popover.Trigger
@@ -165,6 +165,7 @@
 </div>
 
 <style lang="postcss">
+  @reference "../../../app.css";
   .selected {
     @apply bg-primary text-primary-foreground;
     /* Updated for better contrast */

@@ -11,30 +11,11 @@ import {
   mapRegions
 } from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
-import { createInsertSchema } from 'drizzle-zod';
-import { setError, superValidate } from 'sveltekit-superforms';
+import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
-import { z } from 'zod';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
 import { ensurePermissions, geoguessrGetMapInfo, markdown2Html } from '$lib/utils';
-
-const insertMapsSchema = createInsertSchema(maps)
-  .extend({
-    includeFilters: z.array(z.string()),
-    excludeFilters: z.array(z.string()),
-    levels: z.array(z.number()),
-    regions: z.array(z.number()),
-    ordering: z.coerce.number(),
-    footerNote: z.string(),
-    footer: z.string().optional().default('')
-  })
-  .omit({
-    modifiedAt: true,
-    footerHtml: true,
-    numberOfGamesPlayed: true,
-    numberOfGamesPlayedDiminished: true
-  });
-export type InsertMapsSchema = typeof insertMapsSchema;
+import { insertMapsSchema } from '$lib/form-schema';
 
 export const load = async ({ locals, params }) => {
   const groupId = getGroupId(params);
@@ -124,32 +105,63 @@ export const actions = {
         );
       }
     }
-    if (!user!.isSuperadmin) {
-      // @ts-ignore
-      // do not update those if user isn't an admin
-      dataNoId.ordering = undefined;
-      dataNoId.autoUpdate = undefined;
-      dataNoId.isVerified = undefined;
-    }
-    if (!user!.isSuperadmin && !user!.isTrusted) {
-      dataNoId.isPublished = undefined;
-    }
-
     const footerHtml = await markdown2Html(dataNoId.footer || '');
+    const baseValues = {
+      mapGroupId: dataNoId.mapGroupId,
+      name: dataNoId.name,
+      geoguessrId: dataNoId.geoguessrId,
+      description: dataNoId.description,
+      isShared: dataNoId.isShared,
+      authors: dataNoId.authors,
+      footer: dataNoId.footer,
+      difficulty: dataNoId.difficulty,
+      modifiedAt: Math.floor(Date.now() / 1000),
+      footerHtml
+    };
+
+    const values = {
+      ...baseValues,
+      ...(user!.isSuperadmin && {
+        ordering: dataNoId.ordering,
+        autoUpdate: dataNoId.autoUpdate,
+        isVerified: dataNoId.isVerified
+      }),
+      ...((user!.isSuperadmin || user!.isTrusted) && {
+        isPublished: dataNoId.isPublished
+      })
+    };
 
     let mapId;
-    if (id === undefined) {
-      const insertResult = await db
-        .insert(maps)
-        .values({ ...dataNoId, modifiedAt: Math.floor(Date.now() / 1000), footerHtml })
-        .returning({ insertedId: maps.id });
-      mapId = insertResult[0].insertedId;
-    } else {
-      await db
-        .update(maps)
-        .set({ ...dataNoId, modifiedAt: Math.floor(Date.now() / 1000), footerHtml })
-        .where(eq(maps.id, id));
-      mapId = id;
+    try {
+      if (id === undefined) {
+        const insertResult = await db
+          .insert(maps)
+          .values({ ...values, modifiedAt: Math.floor(Date.now() / 1000) })
+          .returning({ insertedId: maps.id });
+        mapId = insertResult[0].insertedId;
+      } else {
+        await db
+          .update(maps)
+          .set({ ...values, modifiedAt: Math.floor(Date.now() / 1000) })
+          .where(eq(maps.id, id));
+        mapId = id;
+      }
+    } catch (error: any) {
+      if (error.code === '23505' && error.constraint_name === 'maps_geoguessr_id_unique') {
+        return setError(
+          form,
+          'geoguessrId',
+          'This GeoGuessr ID is already used by another map. Please use a different ID.'
+        );
+      }
+
+      // Log the error for debugging
+      console.error('Error updating/creating map:', error);
+
+      // Return a general error message
+      return message(form, 'Something went wrong while saving the map. Please try again.', {
+        status: 500
+      });
     }
 
     // todo: make a method to DRY

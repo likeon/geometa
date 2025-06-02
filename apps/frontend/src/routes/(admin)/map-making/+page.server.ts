@@ -8,14 +8,12 @@ import {
 } from '$lib/db/schema';
 import { desc, eq, sql } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
-import { createInsertSchema } from 'drizzle-zod';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { ensurePermissions } from '$lib/utils';
+import { insertMapGroupSchema, updateMapGroupSchema } from '$lib/form-schema';
 
 export const prerender = false;
-const insertMapGroupSchema = createInsertSchema(mapGroups).pick({ name: true });
-const updateMapGroupSchema = createInsertSchema(mapGroups).pick({ name: true, id: true });
 
 export const load = async ({ locals }) => {
   const userGroups = await locals.db

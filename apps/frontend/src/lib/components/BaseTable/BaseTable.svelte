@@ -17,7 +17,7 @@
     initialSorting?: SortingState;
     selectedId?: number;
     selectedIds?: number[];
-    isModalOpen?: boolean;
+    isDialogOpen?: boolean;
     emptyText?: string;
   };
 
@@ -26,7 +26,7 @@
     columns,
     initialSorting = [],
     selectedId = $bindable(),
-    isModalOpen = $bindable(),
+    isDialogOpen = $bindable(),
     emptyText = 'No results.'
   }: DataTableProps<TData, TValue> = $props();
   let sorting = $state<SortingState>(initialSorting);
@@ -100,7 +100,7 @@
           data-state={row.getIsSelected() && 'selected'}
           onclick={() => {
             selectedId = row.original.id;
-            isModalOpen = true;
+            isDialogOpen = true;
           }}>
           {#each row.getVisibleCells() as cell (cell.id)}
             <Table.Cell class={cell.column.columnDef.meta?.class}>

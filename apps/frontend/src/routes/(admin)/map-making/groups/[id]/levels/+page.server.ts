@@ -2,13 +2,10 @@ import { asc, eq } from 'drizzle-orm';
 import { levels, mapGroups } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
 import { getGroupId } from '../utils';
-import { createInsertSchema } from 'drizzle-zod';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { ensurePermissions } from '$lib/utils';
-
-const insertLevelsSchema = createInsertSchema(levels);
-export type InsertLevelsSchema = typeof insertLevelsSchema;
+import { insertLevelsSchema } from '$lib/form-schema';
 
 export const load = async ({ params, locals }) => {
   const id = getGroupId(params);

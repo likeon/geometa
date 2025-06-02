@@ -1,17 +1,10 @@
 import { api } from '$lib/api';
-import { z } from 'zod';
 import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { error, fail } from '@sveltejs/kit';
+import { insertPersonalMap } from '$lib/form-schema';
 
 export const prerender = false;
-
-const insertPersonalMap = z.object({
-  id: z.number().nullable(),
-  name: z.string(),
-  geoguessrId: z.string()
-});
-export type InsertPersonalMapSchema = typeof insertPersonalMap;
 
 export const load = async ({ locals }) => {
   const { data, error: apiError } = await api.internal.maps.personal.get({

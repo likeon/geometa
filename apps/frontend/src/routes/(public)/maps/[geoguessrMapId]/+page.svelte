@@ -5,8 +5,10 @@
   import type { PageProps } from './$types';
   import { enhance } from '$app/forms';
   import { SvelteSet } from 'svelte/reactivity';
-  import { Label, Modal, Select } from 'flowbite-svelte';
   import DismissibleAlert from '$lib/components/DismissibleAlert.svelte';
+  import { Label } from '$lib/components/ui/label';
+  import * as Dialog from '$lib/components/ui/dialog/index';
+  import * as Select from '$lib/components/ui/select';
 
   let { data }: PageProps = $props();
   let showNotLoggedInAlert = $state(false);
@@ -27,7 +29,7 @@
   let rightPanelRef: HTMLDivElement | undefined = $state();
   let selectedMetaIds = new SvelteSet<number>();
   let selectAll = $state(false);
-  let personalMapChoiceModalOpen = $state(false);
+  let personalMapChoiceDialogOpen = $state(false);
   let confirmAdding = $state(false);
 
   function toggleMeta(id: number, checked: boolean) {
@@ -51,15 +53,17 @@
     selectAll = checked;
   }
 
-  let modalResolve: ((value: boolean) => void) | null = null;
+  let dialogResolve: ((value: boolean) => void) | null = null;
 
-  function openModal(): Promise<boolean> {
-    personalMapChoiceModalOpen = true;
+  function openDialog(): Promise<boolean> {
+    personalMapChoiceDialogOpen = true;
     return new Promise((resolve) => {
-      modalResolve = resolve;
+      dialogResolve = resolve;
     });
   }
-  let selectedPersonalMapId: number | null = $state(null);
+
+  // Change this to string | undefined to match Select component expectations
+  let selectedPersonalMapId: string | undefined = $state(undefined);
 </script>
 
 {#snippet errorAlert()}
@@ -104,10 +108,22 @@
       class="mx-auto flex flex-col lg:flex-row bg-white dark:bg-black shadow-lg rounded-lg overflow-hidden w-full max-w-[1500px] lg:h-[calc(100vh-90px)] h-[calc(100vh-80px)]">
       <div
         class="lg:w-1/4 p-4 border-b lg:border-b-0 lg:border-r border-gray-200 bg-gray-100 dark:border-gray-800 dark:bg-gray-900 rounded-t-lg lg:rounded-l-lg h-[130px] lg:h-full">
-        <DismissibleAlert color="red" bind:showAlert={showErrorAlert} alertText={errorAlert} />
-        <DismissibleAlert bind:showAlert={showNotLoggedInAlert} alertText={notLoggedInAlert} />
-        <DismissibleAlert bind:showAlert={showNoPersonalMapsAlert} alertText={noPersonalMapAlert} />
-        <DismissibleAlert bind:showAlert={showAddedMetasAlert} alertText={addedMetasAlert} />
+        <DismissibleAlert
+          variant="destructive"
+          bind:showAlert={showErrorAlert}
+          alertText={errorAlert} />
+        <DismissibleAlert
+          variant="default"
+          bind:showAlert={showNotLoggedInAlert}
+          alertText={notLoggedInAlert} />
+        <DismissibleAlert
+          variant="default"
+          bind:showAlert={showNoPersonalMapsAlert}
+          alertText={noPersonalMapAlert} />
+        <DismissibleAlert
+          variant="success"
+          bind:showAlert={showAddedMetasAlert}
+          alertText={addedMetasAlert} />
 
         <div class="grid grid-rows-[auto_1fr_auto] h-full">
           {#if data.isMapShared}
@@ -135,11 +151,11 @@
                 if (data.personalMaps.length > 1) {
                   // if there is no personal map selected, select first one from list
                   if (!selectedPersonalMapId) {
-                    selectedPersonalMapId = data.personalMaps[0].id;
+                    selectedPersonalMapId = data.personalMaps[0].id.toString();
                   }
-                  confirmAdding = await openModal();
+                  confirmAdding = await openDialog();
                 } else {
-                  selectedPersonalMapId = data.personalMaps[0].id;
+                  selectedPersonalMapId = data.personalMaps[0].id.toString();
                   confirmAdding = confirm(
                     `Are you sure you wanna add ${selectedMetaIds.size} meta(s) to your personal map?`
                   );
@@ -151,7 +167,8 @@
                 selectedMetaIds.forEach((id) => {
                   formData.append('id', `${id}`);
                 });
-                formData.append('mapId', `${selectedPersonalMapId}`);
+                // Convert string back to number when appending to formData
+                formData.append('mapId', selectedPersonalMapId || '');
 
                 return async ({ update, result }) => {
                   if (result.status !== 200) {
@@ -164,7 +181,7 @@
               }}>
               <button
                 type="submit"
-                class="w-full text-left px-2 py-1.5 bg-emerald-600 text-white font-semibold rounded hover:bg-emerald-700 active:bg-emerald-800 transition-colors shadow-sm mb-2">
+                class="w-full text-left px-2 py-1.5 bg-emerald-600 text-white font-semibold rounded hover:bg-emerald-700 active:bg-emerald-800 transition-colors shadow-xs mb-2">
                 Add to personal map
               </button>
             </form>
@@ -192,7 +209,7 @@
               <tbody>
                 {#each data.metaList as meta (meta.id)}
                   <tr
-                    class={`hover:bg-gray-200 hover:dark:bg-gray-800 ${
+                    class={`hover:bg-gray-200 dark:hover:bg-gray-800 ${
                       selectedMeta.id === meta.id
                         ? 'bg-blue-100 dark:bg-green-900 font-semibold'
                         : ''
@@ -272,35 +289,48 @@
     </div>
   </div>
 </div>
-
-<Modal title="Choose personal map" bind:open={personalMapChoiceModalOpen}>
-  <Label>
-    Select personal map you wanna add metas to
-    <Select bind:value={selectedPersonalMapId}>
-      {#each data.personalMaps as map (map.id)}
-        <option value={map.id}>{map.name}</option>
-      {/each}
-    </Select>
-  </Label>
-  <div class="mt-4 flex justify-between">
-    <Button
-      color="green"
-      onclick={() => {
-        personalMapChoiceModalOpen = false;
-        modalResolve?.(true);
-      }}
-      >Add
-    </Button>
-    <Button
-      color="red"
-      onclick={() => {
-        personalMapChoiceModalOpen = false;
-        modalResolve?.(false);
-      }}
-      >Cancel
-    </Button>
-  </div>
-</Modal>
+<Dialog.Root bind:open={personalMapChoiceDialogOpen}>
+  <Dialog.Content>
+    <Label>
+      Select personal map you wanna add metas to
+      <Select.Root type="single" name="personalMapId" bind:value={selectedPersonalMapId}>
+        <Select.Trigger class="w-[180px]">
+          {selectedPersonalMapId
+            ? data.personalMaps.find((m) => m.id.toString() === selectedPersonalMapId)?.name
+            : 'Select a map'}
+        </Select.Trigger>
+        <Select.Content>
+          <Select.Group>
+            <Select.Label>Personal Maps</Select.Label>
+            {#each data.personalMaps as map (map.id)}
+              <Select.Item value={map.id.toString()} label={map.name}>
+                {map.name}
+              </Select.Item>
+            {/each}
+          </Select.Group>
+        </Select.Content>
+      </Select.Root>
+    </Label>
+    <div class="mt-4 flex justify-between">
+      <Button
+        color="green"
+        onclick={() => {
+          personalMapChoiceDialogOpen = false;
+          dialogResolve?.(true);
+        }}
+        >Add
+      </Button>
+      <Button
+        color="red"
+        onclick={() => {
+          personalMapChoiceDialogOpen = false;
+          dialogResolve?.(false);
+        }}
+        >Cancel
+      </Button>
+    </div>
+  </Dialog.Content>
+</Dialog.Root>
 
 <style>
   :global(.note ul li) {

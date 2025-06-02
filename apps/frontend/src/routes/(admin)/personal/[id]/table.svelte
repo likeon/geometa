@@ -28,7 +28,7 @@
     data: TData[];
     initialSorting?: SortingState;
     selectedId?: number;
-    isModalOpen?: boolean;
+    isDialogOpen?: boolean;
   };
 
   let {
@@ -36,7 +36,7 @@
     columns,
     initialSorting = [],
     selectedId = $bindable(),
-    isModalOpen = $bindable()
+    isDialogOpen = $bindable()
   }: DataTableProps<TData, TValue> = $props();
   let sorting = $state<SortingState>(initialSorting);
   let rowSelection = $state<RowSelectionState>({});
@@ -98,9 +98,11 @@
     enableSortingRemoval: false
   });
 
-  const usedInMapOptions = [
-    ...new Set(data.map((item) => item.usedInMapName).filter((name) => name != null))
-  ].map((name) => ({ label: name, value: name }));
+  const usedInMapOptions = $derived(
+    Array.from(new Set(data.map((item) => item.usedInMapName).filter((name) => name != null)))
+      .sort((a, b) => a.localeCompare(b))
+      .map((name) => ({ label: name, value: name }))
+  );
   const isFiltered = $derived(table.getState().columnFilters.length > 0);
 
   const rows = $derived(table.getRowModel().rows);
@@ -109,8 +111,8 @@
     createVirtualizer<HTMLDivElement, HTMLDivElement>({
       count: rows.length,
       getScrollElement: () => virtualListEl,
-      estimateSize: () => 49,
-      overscan: 16
+      estimateSize: () => 48,
+      overscan: 75
     })
   );
   const items = $derived(virtualizer.getVirtualItems());
@@ -155,7 +157,7 @@
         <input type="hidden" name="mapId" value={data} />
         <button
           type="submit"
-          class="w-full text-left px-2 py-1.5 bg-red-600 text-white font-semibold rounded hover:bg-red-700 active:bg-red-800 transition-colors shadow-sm">
+          class="w-full text-left px-2 py-1.5 bg-red-600 text-white font-semibold rounded hover:bg-red-700 active:bg-red-800 transition-colors shadow-xs">
           Remove meta(s)
         </button>
       </form>
@@ -183,17 +185,14 @@
       </Button>
     {/if}
   </div>
-  <div
-    style="height: 700px; overflow: auto; relative w-full overflow-auto"
-    bind:this={virtualListEl}>
-    <Table.Root
-      style="--virtualPaddingTop: {paddingTop}px; --virtualPaddingBottom: {paddingBottom}px; table-layout: fixed;">
-      <Table.Header>
+  <div class="h-[700px] overflow-auto relative w-full" bind:this={virtualListEl}>
+    <Table.Root style="position: relative; width: 100%; table-layout: fixed;">
+      <Table.Header style="position: sticky; top: 0; z-index: 10;">
         {#each table.getHeaderGroups() as headerGroup (headerGroup.id)}
           <Table.Row>
             {#each headerGroup.headers as header (header.id)}
               <Table.Head
-                style="position: sticky; top:0; z-index :2;"
+                style="background-color: var(--background, white);"
                 class=" {header.column.columnDef.meta?.class}">
                 {#if !header.isPlaceholder}
                   <FlexRender
@@ -205,44 +204,40 @@
           </Table.Row>
         {/each}
       </Table.Header>
-      <Table.Body>
+      <Table.Body style="position: relative;">
+        {#if paddingTop > 0}
+          <tr style="height: {paddingTop}px;"></tr>
+        {/if}
         {#each items as row (row.index)}
-          <Table.Row
-            data-state={rows[row.index].getIsSelected() && 'selected'}
-            onclick={() => {
-              selectedId = rows[row.index].original.metaId;
-              isModalOpen = true;
-            }}>
-            {#each rows[row.index].getVisibleCells() as cell (cell.id)}
-              <td
-                class="p-2 align-middle {cell.column.columnDef.meta?.class}"
-                onclick={cell.column.columnDef.meta?.preventRowClick
-                  ? (e) => e.stopPropagation()
-                  : undefined}>
-                <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
-              </td>
-            {/each}
-          </Table.Row>
+          {@const tableRow = rows[row.index]}
+          {#if tableRow}
+            <Table.Row
+              data-state={tableRow.getIsSelected() && 'selected'}
+              onclick={() => {
+                selectedId = tableRow.original.metaId;
+                isDialogOpen = true;
+              }}
+              style="height: 48px;">
+              {#each tableRow.getVisibleCells() as cell (cell.id)}
+                <td
+                  class="p-2 align-middle {cell.column.columnDef.meta?.class}"
+                  onclick={cell.column.columnDef.meta?.preventRowClick
+                    ? (e) => e.stopPropagation()
+                    : undefined}>
+                  <FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
+                </td>
+              {/each}
+            </Table.Row>
+          {/if}
         {:else}
           <Table.Row>
             <td colspan={columns.length} class="h-24 text-center">No results.</td>
           </Table.Row>
         {/each}
+        {#if paddingBottom > 0}
+          <tr style="height: {paddingBottom}px;"></tr>
+        {/if}
       </Table.Body>
     </Table.Root>
   </div>
 </div>
-
-<style>
-  :global(tbody::before) {
-    display: block;
-    padding-top: var(--virtualPaddingTop);
-    content: '';
-  }
-
-  :global(tbody::after) {
-    display: block;
-    padding-bottom: var(--virtualPaddingBottom);
-    content: '';
-  }
-</style>

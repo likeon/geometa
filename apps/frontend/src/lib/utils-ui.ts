@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { cubicOut } from 'svelte/easing';
 import type { TransitionConfig } from 'svelte/transition';
+import type { HTMLAnchorAttributes, HTMLAttributes, HTMLImgAttributes } from 'svelte/elements';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -54,3 +55,16 @@ export const flyAndScale = (
     easing: cubicOut
   };
 };
+export type WithoutChild<T> = T extends { child?: any } ? Omit<T, 'child'> : T;
+export type WithoutChildrenOrChild<T> = WithoutChildren<WithoutChild<T>>;
+export type WithoutChildren<T> = T extends { children?: any } ? Omit<T, 'children'> : T;
+export type WithElementRef<T, U extends HTMLElement = HTMLElement> = T & { ref?: U | null };
+
+export type PrimitiveDivAttributes = WithElementRef<HTMLAttributes<HTMLDivElement>>;
+export type PrimitiveElementAttributes = WithElementRef<HTMLAttributes<HTMLElement>>;
+export type PrimitiveAnchorAttributes = WithElementRef<HTMLAnchorAttributes>;
+export type PrimitiveHeadingAttributes = WithElementRef<HTMLAttributes<HTMLHeadingElement>>;
+export type PrimitiveTableSectionAttributes = WithElementRef<
+  HTMLAttributes<HTMLTableSectionElement>
+>;
+export type PrimitiveImgAttributes = WithElementRef<HTMLImgAttributes>;

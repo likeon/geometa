@@ -6,13 +6,13 @@
 </script>
 
 <div class="bg-cover bg-center bg-no-repeat relative isolate overflow-hidden min-h-screen">
-  <!--  <div style="background-image: url('path/to/your/image.jpg');" class="absolute inset-0 -z-10 h-full w-full stroke-gray-200 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]" aria-hidden="true"></div>-->
+  <!--  <div style="background-image: url('path/to/your/image.jpg');" class="absolute inset-0 -z-10 h-full w-full stroke-gray-200 mask-[radial-gradient(100%_100%_at_top_right,white,transparent)]" aria-hidden="true"></div>-->
   <enhanced:img
     src={background}
     alt="background"
     class="absolute inset-0 -z-10 h-full w-full object-cover object-center" />
   <div class="items-center mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-32 lg:flex lg:px-8 lg:py-40">
-    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:flex-shrink-0 lg:pt-8">
+    <div class="mx-auto max-w-2xl lg:mx-0 lg:max-w-xl lg:shrink-0 lg:pt-8">
       <!--      <GeoIcon style="color: dodgerblue" width="2rem" height="2rem"/>-->
       <h1
         class="mt-10 text-4xl font-bold tracking-tight text-white dark:text-zinc-300 sm:text-6xl shadow-2xl">
@@ -27,7 +27,7 @@
       <div class="max-w-xl flex-none sm:max-w-5xl lg:max-w-3xl">
         <div
           class="-m-2 rounded-xl bg-gray-900/5 p-2 ring-1 ring-inset ring-gray-900/10 lg:-m-4 lg:rounded-2xl lg:p-4">
-          <!--          <img src="https://tailwindui.com/img/component-images/project-app-screenshot.png" alt="App screenshot" width="2432" height="1442" class="w-[76rem] rounded-md shadow-2xl ring-1 ring-gray-900/10">-->
+          <!--          <img src="https://tailwindui.com/img/component-images/project-app-screenshot.png" alt="App screenshot" width="2432" height="1442" class="w-304 rounded-md shadow-2xl ring-1 ring-gray-900/10">-->
           <video autoplay loop muted playsinline>
             <source src={video} type="video/webm" />
             Your browser does not support the video tag.

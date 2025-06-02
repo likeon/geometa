@@ -1,12 +1,22 @@
 <script lang="ts">
-  import { Alert, Button, Dropdown, DropdownItem, Input, Label, Modal } from 'flowbite-svelte';
   import { superForm } from 'sveltekit-superforms';
   import BaseTable from '$lib/components/BaseTable/BaseTable.svelte';
   import { columns } from './columns';
+  import { Button } from '$lib/components/ui/button';
+  import { Input } from '$lib/components/ui/input';
+  import * as Dialog from '$lib/components/ui/dialog/index';
+  import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index';
+  import * as Form from '$lib/components/ui/form/index';
+  import { zodClient } from 'sveltekit-superforms/adapters';
+  import { insertMapGroupSchema } from '$lib/form-schema';
 
   let { data } = $props();
-  let mapGroupCreationModalOpen = $state(false);
-  const { form, errors, constraints } = superForm(data.mapGroupForm);
+  let mapGroupCreationDialogOpen = $state(false);
+
+  const form = superForm(data.mapGroupForm, {
+    validators: zodClient(insertMapGroupSchema)
+  });
+  const { form: formData, enhance } = form;
 </script>
 
 <svelte:head>
@@ -15,17 +25,32 @@
 
 <div class="container">
   <div class="flex flex-wrap items-center">
-    <div class="flex-grow flex items-center justify-end space-x-3">
-      <Button color="dark">Documentation</Button>
-      <Dropdown>
-        <DropdownItem
-          target="_blank"
-          href="https://docs.google.com/document/d/15FMgCvyT5pn-U_Ckfd-hoezsWhZMR2NpKBkoiD1aN6Y"
-          >Text
-        </DropdownItem>
-        <DropdownItem target="_blank" href="https://youtu.be/0O2mg9G35xg">Video</DropdownItem>
-      </Dropdown>
-      <Button onclick={() => (mapGroupCreationModalOpen = true)}>Create group</Button>
+    <div class="grow flex items-center justify-end space-x-3">
+      <DropdownMenu.Root>
+        <DropdownMenu.Trigger>
+          <Button>Documentation</Button>
+        </DropdownMenu.Trigger>
+        <DropdownMenu.Content>
+          <a
+            href="https://docs.google.com/document/d/15FMgCvyT5pn-U_Ckfd-hoezsWhZMR2NpKBkoiD1aN6Y"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="block">
+            <DropdownMenu.Item>Text</DropdownMenu.Item>
+          </a>
+          <a
+            href="https://youtu.be/0O2mg9G35xg"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="block">
+            <DropdownMenu.Item>Video</DropdownMenu.Item>
+          </a>
+        </DropdownMenu.Content>
+      </DropdownMenu.Root>
+      <Button
+        onclick={() => {
+          mapGroupCreationDialogOpen = true;
+        }}>Create group</Button>
     </div>
   </div>
   <div class="my-5">
@@ -44,21 +69,22 @@
       </ul>
     </div>
   {/if}
-  <Modal bind:open={mapGroupCreationModalOpen}>
-    <form method="POST" action="?/createGroup">
-      <Label class="space-y-2">
-        <span>Group name</span>
-        <Input
-          type="text"
-          name="name"
-          aria-invalid={$errors.name ? 'true' : undefined}
-          bind:value={$form.name}
-          {...$constraints.name} />
-        {#if $errors.name}
-          <Alert color="red">{$errors.name}</Alert>
-        {/if}
-      </Label>
-      <Button type="submit" class="w-full mt-3">Save</Button>
-    </form>
-  </Modal>
+
+  <Dialog.Root bind:open={mapGroupCreationDialogOpen}>
+    <Dialog.Content class="sm:max-w-md">
+      <!--     TODO: currently allows for empty strings, check it-->
+      <form method="POST" use:enhance action="?/createGroup">
+        <Form.Field {form} name="name">
+          <Form.Control>
+            {#snippet children({ props })}
+              <Form.Label>Name</Form.Label>
+              <Input {...props} bind:value={$formData.name} />
+            {/snippet}
+          </Form.Control>
+          <Form.FieldErrors />
+        </Form.Field>
+        <Form.Button>Create map group</Form.Button>
+      </form>
+    </Dialog.Content>
+  </Dialog.Root>
 </div>

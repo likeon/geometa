@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { goto } from '$app/navigation';
   import { page } from '$app/state';
-  import TooltipName from '$lib/components/TooltipName.svelte';
   import Icon from '@iconify/svelte';
-  import Button from './ui/button/button.svelte';
-  import { Input, Label, Modal } from 'flowbite-svelte';
+  import { Button } from '$lib/components/ui/button';
+  import { Input } from '$lib/components/ui/input';
+  import { Label } from '$lib/components/ui/label';
+  import { Dialog, DialogContent, DialogHeader, DialogTitle } from '$lib/components/ui/dialog';
   import { applyAction, enhance } from '$app/forms';
+  import Tooltip from '$lib/components/Tooltip.svelte';
 
   interface Props {
     id: number;
@@ -16,7 +17,7 @@
   let { id, mapName, geoguessrId }: Props = $props();
 
   let activeRoute = $derived(page.url.pathname);
-  let mapRenameModalOpen = $state(false);
+  let mapRenameDialogOpen = $state(false);
   let errorMessage = $state('');
 
   function isActive(route: string) {
@@ -24,17 +25,16 @@
       ? 'border-green-500 text-green-600'
       : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:hover:border-gray-700 hover:text-gray-300';
   }
+
+  type NavItemProps = {
+    name: string;
+    slug?: string;
+    tooltipText?: string;
+  };
 </script>
 
-{#snippet navItem({
-  name,
-  slug,
-  tooltipText
-}: {
-  name: string;
-  slug?: string;
-  tooltipText?: string;
-})}
+{#snippet navItem(props: NavItemProps)}
+  {@const { name, slug, tooltipText } = props}
   {@const url = `/personal/${id}` + (slug ? `/${slug}` : '')}
   <a
     href={url}
@@ -42,20 +42,16 @@
       url
     )}">
     {#if tooltipText}
-      <TooltipName {name} {tooltipText}></TooltipName>
+      <Tooltip content={tooltipText}>{name}</Tooltip>
     {:else}
-      <div class="mb-1">
-        <span class="inline-flex items-center">{name}</span>
-      </div>
-    {/if}
-  </a>
-{/snippet}
+      <div class="mb-1"><span class="inline-flex items-center">{name}</span></div>{/if}</a
+  >{/snippet}
 
 <div class="border-b border-gray-200 mb-4">
   <div class="flex items-center justify-between">
     <div class="flex items-center text-sm font-semibold text-gray-600 dark:text-gray-400 group">
       Map: {mapName}
-      <button onclick={() => (mapRenameModalOpen = true)} class="items-center h-full">
+      <button onclick={() => (mapRenameDialogOpen = true)} class="items-center h-full">
         <Icon
           icon="ic:baseline-edit"
           class="hidden group-hover:block ml-1 mt-[2px]"
@@ -70,9 +66,10 @@
       </div>
       <div>
         <Button href={`https://www.geoguessr.com/map-maker/${geoguessrId}`} target="_blank">
-          <TooltipName
-            name="Upload to Geoguessr"
-            tooltipText="This will take you to geoguessr website where you can upload locations using our script, just press the Learnablemeta - upload button and it's all done! If you don't see a button your userscript is probably not updated." />
+          <Tooltip
+            content="This will take you to geoguessr website where you can upload locations using our script, just press the LearnableMeta - upload button and it's all done! If you don't see a button your userscript is probably not updated">
+            Upload to Geoguessr
+          </Tooltip>
         </Button>
       </div>
     </div>
@@ -89,42 +86,47 @@
   </nav>
 </div>
 
-<Modal bind:open={mapRenameModalOpen}>
-  <form
-    method="POST"
-    action="/personal?/updatePersonalMapName"
-    use:enhance={() => {
-      return async ({ result }) => {
-        if (result.type === 'failure') {
-          errorMessage = 'Something went wrong';
-          const maybeMessage = result.data?.message;
-          if (typeof maybeMessage === 'string') {
-            errorMessage = maybeMessage;
+<Dialog bind:open={mapRenameDialogOpen}>
+  <DialogContent>
+    <DialogHeader>
+      <DialogTitle>Rename Map</DialogTitle>
+    </DialogHeader>
+    <form
+      method="POST"
+      action="/personal?/updatePersonalMapName"
+      use:enhance={() => {
+        return async ({ result }) => {
+          if (result.type === 'failure') {
+            errorMessage = 'Something went wrong';
+            const maybeMessage = result.data?.message;
+            if (typeof maybeMessage === 'string') {
+              errorMessage = maybeMessage;
+            }
+            return;
           }
-          return;
-        }
 
-        await applyAction(result);
-        if (result.type === 'success') {
-          const maybeMapName = result.data?.mapName;
-          if (typeof maybeMapName === 'string') {
-            mapName = maybeMapName;
+          await applyAction(result);
+          if (result.type === 'success') {
+            const maybeMapName = result.data?.mapName;
+            if (typeof maybeMapName === 'string') {
+              mapName = maybeMapName;
+            }
           }
-        }
-        mapRenameModalOpen = false;
-      };
-    }}>
-    <Input type="hidden" name="id" value={id} />
-    <Label class="space-y-2">
-      <span>Map name</span>
-      <Input type="text" name="name" defaultValue={mapName} />
-    </Label>
-    {#if errorMessage}
-      <p class="text-sm text-red-500 mt-1">{errorMessage}</p>
-    {/if}
-    <Button type="submit" class="w-full mt-3">Save</Button>
-  </form>
-</Modal>
+          mapRenameDialogOpen = false;
+        };
+      }}>
+      <input type="hidden" name="id" value={id} />
+      <div class="space-y-2">
+        <Label for="map-name">Map name</Label>
+        <Input id="map-name" type="text" name="name" value={mapName} />
+      </div>
+      {#if errorMessage}
+        <p class="text-sm text-red-500 mt-1">{errorMessage}</p>
+      {/if}
+      <Button type="submit" class="w-full mt-3">Save</Button>
+    </form>
+  </DialogContent>
+</Dialog>
 
 <style>
   a {

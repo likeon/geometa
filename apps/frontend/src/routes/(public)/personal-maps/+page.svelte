@@ -1,5 +1,4 @@
 <script>
-  import { Heading } from 'flowbite-svelte';
   import Icon from '@iconify/svelte';
 </script>
 
@@ -11,7 +10,7 @@
   <div class="mx-auto max-w-3xl text-base leading-7">
     <div class="main-content">
       <p class="text-base font-semibold leading-7 text-green-700">Introducing</p>
-      <Heading tag="h1">Personal maps</Heading>
+      <h1>Personal maps</h1>
       <p class="mt-4 text-base leading-7">Take control of your learning experience.</p>
 
       <p class="mt-2 text-base leading-7">
@@ -35,11 +34,11 @@
         </li>
       </ul>
 
-      <Heading tag="h2" class="mt-4 mb-[-20px]">Here's how to do it</Heading>
+      <h2 class="mt-4 mb-[-20px]">Here's how to do it</h2>
       <ul role="list" class="mt-8 max-w-xl space-y-4 text-gray-600 dark:text-white">
         <li>
           <div class="flex gap-x-3">
-            <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
+            <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
             <span
               ><strong class="font-semibold text-gray-900 dark:text-gray-200"
                 >Create a GeoGuessr map.</strong>
@@ -49,7 +48,7 @@
           </div>
         </li>
         <li class="flex gap-x-3">
-          <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
+          <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
           <span
             ><strong class="font-semibold text-gray-900 dark:text-gray-200"
               >Create a personal map.</strong>
@@ -61,7 +60,7 @@
         </li>
 
         <li class="flex gap-x-3">
-          <Icon icon="icon-park-solid:check-one" class="h-6 w-6 flex-shrink-0" color="green" />
+          <Icon icon="icon-park-solid:check-one" class="h-6 w-6 shrink-0" color="green" />
           <span
             ><strong class="font-semibold text-gray-900 dark:text-gray-200"
               >Choose metas from community maps.</strong>
@@ -71,7 +70,7 @@
         </li>
         <li>
           <div class="flex gap-x-3">
-            <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 flex-shrink-0" />
+            <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
             <span
               ><strong class="font-semibold text-gray-900 dark:text-gray-200"
                 >Upload locations to your map.</strong>
@@ -98,6 +97,7 @@
 </div>
 
 <style lang="postcss">
+  @reference "tailwindcss";
   .main-content p {
     @apply mt-4;
   }

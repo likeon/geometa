@@ -1,7 +1,6 @@
 <script lang="ts">
+	import { cn, type WithElementRef } from "$lib/utils-ui.js";
 	import type { HTMLThAttributes } from "svelte/elements";
-	import type { WithElementRef } from "bits-ui";
-	import { cn } from "$lib/utils-ui.js";
 
 	let {
 		ref = $bindable(null),
@@ -13,8 +12,9 @@
 
 <th
 	bind:this={ref}
+	data-slot="table-head"
 	class={cn(
-		" bg-green-100 dark:bg-green-900 text-muted-foreground h-10 px-2 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+		"text-foreground h-10 whitespace-nowrap px-2 text-left align-middle font-medium [&:has([role=checkbox])]:pr-0",
 		className
 	)}
 	{...restProps}

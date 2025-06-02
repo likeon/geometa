@@ -14,10 +14,11 @@
   } = $props();
 </script>
 
+<!--  TODO: hack: it's set to !pl-0 so text hugs the button so it looks aligned with rest of cells, do it better way because button looks ugly when hovered-->
 <Button
   {variant}
   {...restProps}
-  class="pl-0 hover:bg-transparent focus:bg-transparent active:bg-transparent {sort === undefined
+  class=" !pl-0 hover:bg-transparent focus:bg-transparent active:bg-transparent {sort === undefined
     ? 'pointer-events-none cursor-default'
     : ''}">
   {name}

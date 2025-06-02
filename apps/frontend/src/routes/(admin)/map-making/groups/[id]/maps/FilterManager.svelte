@@ -1,15 +1,33 @@
 <script lang="ts">
-  import Icon from '@iconify/svelte';
-  import { Badge, Input, Label } from 'flowbite-svelte';
+  import { Badge } from '$lib/components/ui/badge';
+  import { Button } from '$lib/components/ui/button';
+  import { Input } from '$lib/components/ui/input';
+  import { Label } from '$lib/components/ui/label';
+  import { X, Plus, AlertCircle } from '@lucide/svelte';
 
-  // Dispatch event to update parent filter list
+  interface Props {
+    filters: string[];
+    filterInput: string;
+    oppositeFilters: string[];
+    label?: string;
+  }
+
+  let {
+    filters = $bindable(),
+    filterInput = $bindable(),
+    oppositeFilters,
+    label = 'Filters'
+  }: Props = $props();
+
+  let errorMessage = $state('');
+
   const addFilter = () => {
     const trimmedFilter = filterInput.trim();
+    errorMessage = ''; // Clear any existing error
+
     if (trimmedFilter && !filters.includes(trimmedFilter)) {
       if (oppositeFilters.includes(trimmedFilter)) {
-        alert(
-          `Cannot add the filter "${trimmedFilter}" because it is already in the opposite filter list.`
-        );
+        errorMessage = `Cannot add the filter "${trimmedFilter}" because it is already in the opposite filter list.`;
       } else {
         filters = [...filters, trimmedFilter];
         filterInput = '';
@@ -21,41 +39,64 @@
     filters = filters.filter((f) => f !== filter);
   };
 
-  interface Props {
-    filters: string[];
-    filterInput: string;
-    oppositeFilters: string[];
-  }
+  const handleKeydown = (event: KeyboardEvent) => {
+    if (event.key === 'Enter') {
+      event.preventDefault();
+      addFilter();
+    }
+  };
 
-  let { filters = $bindable(), filterInput = $bindable(), oppositeFilters }: Props = $props();
+  // Clear error when user starts typing
+  const handleInput = () => {
+    if (errorMessage) {
+      errorMessage = '';
+    }
+  };
 </script>
 
-<Label>
-  <div class="flex items-center space-x-2">
+<div class="space-y-2">
+  <Label class="text-sm font-medium">{label}</Label>
+  <div class="flex items-center gap-2">
     <Input
       type="text"
       name="filters"
       bind:value={filterInput}
-      class="w-[300px] text-sm px-2 py-1" />
-    <button
-      type="button"
-      onclick={addFilter}
-      class="bg-primary-700 text-white px-3 py-1 rounded-lg hover:bg-primary-800">
-      +
-    </button>
+      onkeydown={handleKeydown}
+      oninput={handleInput}
+      class="h-8 text-sm flex-1"
+      placeholder="Add filter..." />
+    <Button type="button" onclick={addFilter} size="sm" class="h-8 w-8 p-0">
+      <Plus class="w-4 h-4" />
+    </Button>
   </div>
 
-  <div class="mt-2 flex flex-wrap justify-start gap-2">
-    {#each filters as filter, index (index)}
-      <Badge class="flex items-center gap-1 p-1">
-        {filter}
-        <button
-          type="button"
-          class="p-0.5 rounded-full hover:bg-gray-200"
-          onclick={() => removeFilter(filter)}>
-          <Icon icon="material-symbols:delete" class="w-4 h-4" color="red" />
-        </button>
-      </Badge>
-    {/each}
-  </div>
-</Label>
+  {#if errorMessage}
+    <div
+      class="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+      <AlertCircle class="w-4 h-4 flex-shrink-0" />
+      <span class="flex-1">{errorMessage}</span>
+      <button
+        type="button"
+        class="rounded-sm opacity-70 hover:opacity-100 focus:outline-none focus:ring-1 focus:ring-ring"
+        onclick={() => (errorMessage = '')}>
+        <X class="w-4 h-4" />
+      </button>
+    </div>
+  {/if}
+
+  {#if filters.length > 0}
+    <div class="flex flex-wrap gap-1.5">
+      {#each filters as filter (filter)}
+        <Badge variant="secondary" class="text-xs px-2 py-0.5 pr-1 flex items-center gap-1">
+          <span>{filter}</span>
+          <button
+            type="button"
+            class="ml-1 rounded-sm opacity-70 hover:opacity-100 focus:outline-none focus:ring-1 focus:ring-ring"
+            onclick={() => removeFilter(filter)}>
+            <X class="w-3 h-3" />
+          </button>
+        </Badge>
+      {/each}
+    </div>
+  {/if}
+</div>

@@ -3,7 +3,7 @@ import { levels, metaImages, metaLevels, metas } from '$lib/db/schema';
 import { and, eq, sql } from 'drizzle-orm';
 import { markdown2Html } from '$lib/utils';
 import { inArray, notInArray } from 'drizzle-orm/sql/expressions/conditions';
-import type { MetasUploadContentSchemaSafeParse } from '$routes/(admin)/map-making/groups/[id]/+page.server';
+import type { MetasUploadContentSchemaSafeParse } from '$lib/form-schema';
 
 export async function uploadMetas(
   db: DB,
