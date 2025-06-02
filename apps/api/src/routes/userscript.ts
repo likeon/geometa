@@ -43,8 +43,8 @@ export const userscriptRouter = new Elysia({
     '/announcement/',
     async ({}) => {
       return {
-        timestamp: 1748668889,
-        htmlMessage: `✨ New: Try Personal Maps — pick metas from any map and focus on what you want to learn. <a href="https://learnablemeta.com/personal-maps" target="_blank">Click here for more info!</a>`,
+        timestamp: 1748891186,
+        htmlMessage : `🎉 We're nominated for the 2025 GeoGuessr Awards! If you enjoy LearnableMeta, <a href="https://www.geoguessr.com/community/awards/2025" target="_blank">vote for us here!</a> Thank you for the support!`
       };
     },
     {},
