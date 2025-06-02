@@ -1,3 +1,7 @@
+import { maps, syncedMapMetas } from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
+import { asc, desc, eq, sql } from 'drizzle-orm';
+
 export function assertNotNullish<T>(
   value: T,
   message = 'Value must not be null or undefined',
@@ -16,3 +20,18 @@ export function generateRandomString(length: number) {
     .map((byte) => charset[byte % charset.length])
     .join('');
 }
+
+export const originalMapCTE = db.$with('originalMap').as(
+  db
+    .select({
+      syncedMetaId: syncedMapMetas.syncedMetaId,
+      name: maps.name,
+      footerHtml: maps.footerHtml,
+      authors: maps.authors,
+      geoguessrId: maps.geoguessrId,
+    })
+    .from(syncedMapMetas)
+    .innerJoin(maps, eq(syncedMapMetas.mapId, maps.id))
+    .where(eq(maps.isPersonal, false))
+    .orderBy(desc(sql`COALESCE(${maps.numberOfGamesPlayed}, 0)`), asc(maps.id)),
+);

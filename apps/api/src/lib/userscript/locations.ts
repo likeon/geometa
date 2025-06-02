@@ -6,10 +6,12 @@ import {
   syncedMetas,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
+import { originalMapCTE } from '@api/lib/utils/common';
 import { and, eq, getTableColumns, sql } from 'drizzle-orm';
 import { pick } from 'remeda';
 
 export const locationSelect = db
+  .with(originalMapCTE)
   .select({
     ...pick(getTableColumns(syncedMetas), [
       'name',
@@ -19,7 +21,19 @@ export const locationSelect = db
       'noteFromPlonkit',
     ]),
     country: syncedLocations.country,
-    mapFooter: maps.footerHtml,
+    mapFooter: sql<string>`
+      CASE
+        WHEN ${maps.isPersonal} = FALSE THEN ${maps.footerHtml}
+        ELSE COALESCE(${originalMapCTE.footerHtml}, '')
+      END
+    `.as('mapFooter'),
+    mapName: sql<string>`COALESCE(${originalMapCTE.name}, '')`.as('mapName'),
+    mapAuthors: sql<string>`COALESCE(${originalMapCTE.authors}, '')`.as(
+      'mapAuthors',
+    ),
+    mapGeoguessrId: sql<string>`COALESCE(${originalMapCTE.geoguessrId}, '')`.as(
+      'mapGeoguessrId',
+    ),
   })
   .from(syncedMetas)
   .innerJoin(
@@ -31,6 +45,7 @@ export const locationSelect = db
     syncedLocations,
     eq(syncedLocations.syncedMetaId, syncedMetas.metaId),
   )
+  .leftJoin(originalMapCTE, eq(originalMapCTE.syncedMetaId, syncedMetas.metaId))
   .where(
     and(
       eq(maps.geoguessrId, sql.placeholder('mapId')),
@@ -39,6 +54,7 @@ export const locationSelect = db
   )
   .limit(1)
   .prepare('userscript_get_location');
+
 export const legacyLocationSelect = db
   .select({ value: cacheTable.value })
   .from(cacheTable)

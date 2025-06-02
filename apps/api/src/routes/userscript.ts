@@ -44,7 +44,7 @@ export const userscriptRouter = new Elysia({
     async ({}) => {
       return {
         timestamp: 1748668889,
-        htmlMessage: `✨ New: Try Personal Maps — pick metas from any map and focus on what you want to learn. <a href="https://learnablemeta.com/personal-maps" target="_blank">Click here for more info!</a>`
+        htmlMessage: `✨ New: Try Personal Maps — pick metas from any map and focus on what you want to learn. <a href="https://learnablemeta.com/personal-maps" target="_blank">Click here for more info!</a>`,
       };
     },
     {},
@@ -72,13 +72,15 @@ export const userscriptRouter = new Elysia({
       // hack for now, should country be marked as not null in schema since we will always have it?
       const country = meta.country || '';
 
-      const footer = generateFooter(
+      let footer = generateFooter(
         meta.noteFromPlonkit,
         country,
         meta.footer,
         meta.mapFooter,
       );
-
+      if (meta.mapAuthors && meta.mapName) {
+        footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
+      }
       return {
         country: country,
         metaName: meta.name,
