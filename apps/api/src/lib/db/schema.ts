@@ -253,10 +253,11 @@ export const metaImages = pgTable(
       .notNull()
       .references(() => metas.id, { onDelete: 'cascade' }),
     image_url: text('image_url').notNull(),
+    order: integer('order').notNull().default(0),
   },
-  (t) => ({
-    metaImageUnique: uniqueIndex('meta_image_unique').on(t.metaId, t.image_url),
-  }),
+  (t) => ([
+    uniqueIndex('meta_image_unique').on(t.metaId, t.image_url),
+  ]),
 );
 export const metaImagesRelations = relations(metaImages, ({ one }) => ({
   meta: one(metas, { fields: [metaImages.metaId], references: [metas.id] }),

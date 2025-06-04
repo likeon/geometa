@@ -209,7 +209,8 @@
   mapGroupChoices={groupChoices}
   groupId={data.group.id}
   {selectedMeta}
-  imageUploadForm={data.imageUploadForm} />
+  imageUploadForm={data.imageUploadForm}
+  imageOrderUpdateForm={data.imageOrderUpdateForm} />
 
 <MapUploadModal
   bind:isUploadModalOpen={isMapUploadModalOpen}

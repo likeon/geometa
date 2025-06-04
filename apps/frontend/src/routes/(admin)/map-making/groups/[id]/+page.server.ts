@@ -41,6 +41,15 @@ const imageUploadSchema = z.object({
 });
 export type ImageUploadSchema = typeof imageUploadSchema;
 
+const imageOrderUpdateSchema = z.object({
+  metaId: z.number(),
+  updates: z.array(z.object({
+    imageId: z.number(),
+    order: z.number()
+  })).min(1, 'At least one image update is required')
+});
+export type ImageOrderUpdateSchema = typeof imageOrderUpdateSchema;
+
 const copyMetaSchema = z.object({
   metaId: z.number(),
   mapGroupIdToCopy: z.number()
@@ -110,7 +119,11 @@ export const load = async ({ params, locals }) => {
       with: {
         metas: {
           orderBy: [asc(metas.id)],
-          with: { metaLevels: { with: { level: true } }, images: true, locationsCount: true }
+          with: {
+            metaLevels: { with: { level: true } },
+            images: { orderBy: [asc(metaImages.order), asc(metaImages.id)] },
+            locationsCount: true
+          }
         },
         levels: true
       },
@@ -146,6 +159,7 @@ export const load = async ({ params, locals }) => {
   const mapUploadForm = await superValidate(zod(mapUploadSchema), { id: 'mapUpload' });
   const metasUploadForm = await superValidate(zod(metasUploadSchema));
   const imageUploadForm = await superValidate(zod(imageUploadSchema));
+  const imageOrderUpdateForm = await superValidate(zod(imageOrderUpdateSchema));
   const copyForm = await superValidate(zod(copyMetaSchema));
 
   return {
@@ -154,6 +168,7 @@ export const load = async ({ params, locals }) => {
     mapUploadForm,
     metasUploadForm,
     imageUploadForm,
+    imageOrderUpdateForm,
     user,
     copyForm
   };
@@ -510,6 +525,25 @@ export const actions = {
       .set({ modifiedAt: Math.floor(Date.now() / 1000) })
       .where(eq(metas.id, savedImage[0].metas.id));
     return { success: true, imageId: imageId };
+  },
+  updateImageOrder: async ({ request, locals }) => {
+    const form = await superValidate(request, zod(imageOrderUpdateSchema));
+
+    if (!form.valid) {
+      return fail(400, { form });
+    }
+
+    // Call the internal API to update image order
+    const { error: apiError } = await api.internal
+      .metas({ id: form.data.metaId })
+      .images.order.put({ updates: form.data.updates }, internalHeaders(locals));
+
+    if (apiError) {
+      console.error('Failed to update image order:', apiError);
+      return setError(form, '', 'Failed to update image order');
+    }
+
+    return message(form, 'Image order updated successfully');
   },
   prepareUserScriptData: async (event) => {
     const groupId = getGroupId(event.params);

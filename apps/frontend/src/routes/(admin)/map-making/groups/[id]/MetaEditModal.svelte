@@ -12,7 +12,12 @@
     Tabs
   } from 'flowbite-svelte';
   import { type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
-  import type { CopyMetaSchema, ImageUploadSchema, InsertMetasSchema } from './+page.server';
+  import type {
+    CopyMetaSchema,
+    ImageUploadSchema,
+    ImageOrderUpdateSchema,
+    InsertMetasSchema
+  } from './+page.server';
   import type { PageData } from './$types';
   import MetaImages from '$routes/(admin)/map-making/groups/[id]/MetaImages.svelte';
   import Icon from '@iconify/svelte';
@@ -32,7 +37,8 @@
     groupId,
     imageUploadForm,
     mapGroupChoices,
-    copyForm
+    copyForm,
+    imageOrderUpdateForm
   }: {
     isMetaModalOpen: boolean;
     selectedMeta: PageData['group']['metas'][number] | null;
@@ -42,6 +48,7 @@
     imageUploadForm: SuperValidated<Infer<ImageUploadSchema>>;
     mapGroupChoices: { value: number; name: string }[];
     copyForm: SuperValidated<Infer<CopyMetaSchema>>;
+    imageOrderUpdateForm: SuperValidated<Infer<ImageOrderUpdateSchema>>;
   } = $props();
 
   const {
@@ -229,7 +236,7 @@
             savedForm = $formMeta;
           }
         }}>
-        <MetaImages data={imageUploadForm} {selectedMeta} />
+        <MetaImages data={imageUploadForm} orderData={imageOrderUpdateForm} {selectedMeta} />
       </TabItem>
       <TabItem
         title="Copy"
