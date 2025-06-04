@@ -1,7 +1,6 @@
 import { mapGroupPermissions, maps, users } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import {
-  legacyLocationSelect,
   locationSelect,
   mapLocationsExportSelect,
 } from '@api/lib/userscript/locations';
@@ -52,21 +51,13 @@ export const userscriptRouter = new Elysia({
   .get(
     '/location/',
     async ({ query, set }) => {
-      const cacheKey = `${query.mapId}:${query.panoId}`;
-      const [metaResult, legacyCacheResult] = await Promise.all([
-        locationSelect.execute(query),
-        legacyLocationSelect.execute({ key: cacheKey }),
-      ]);
-      if (!metaResult.length && !legacyCacheResult.length) {
+      const metaResult = await locationSelect.execute(query);
+      if (!metaResult.length) {
         set.status = 404;
         return ['NOT_FOUND'];
       }
 
       set.status = 200;
-      // fallback to legacy
-      if (!metaResult.length) {
-        return JSON.parse(legacyCacheResult[0].value);
-      }
 
       const [meta] = metaResult;
       // hack for now, should country be marked as not null in schema since we will always have it?
