@@ -42,10 +42,10 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
         return status(400, undefined);
       }
 
-      // todo: use something collision-safe
+      const imageName = `${Date.now()}-${generateRandomString(3)}.avif`;
       const imageUrl = await uploadImage(
         avifFile.buffer as ArrayBuffer,
-        `${meta.mapGroupId}/${generateRandomString(48)}.avif`,
+        `${meta.mapGroupId}/${imageName}`,
       );
       await db
         .insert(metaImages)
