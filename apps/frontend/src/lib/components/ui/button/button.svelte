@@ -14,6 +14,7 @@
 					"bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 border",
 				secondary: "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
 				ghost: "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
+				"dark-ghost": "text-white hover:bg-gray-900",
 				link: "text-primary underline-offset-4 hover:underline",
 			},
 			size: {

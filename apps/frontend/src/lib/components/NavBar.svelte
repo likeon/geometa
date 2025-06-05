@@ -39,7 +39,7 @@
       <div class="ml-auto flex flex-1 items-center gap-2 justify-end">
         <nav class="flex items-center gap-0.5">
           <Button
-            variant="ghost"
+            variant="dark-ghost"
             size="icon"
             class="size-8 px-0"
             href="https://discord.gg/AcXEWznYZe"
@@ -47,10 +47,10 @@
           >
             <DiscordFillIcon class="size-5 flex-shrink-0" />
           </Button>
-          <Button variant="ghost" size="icon" class="size-8 px-0" href="/personal">
+          <Button variant="dark-ghost" size="icon" class="size-8 px-0" href="/personal">
             <FaSolidUserIcon class="w-5 h-5 flex-shrink-0" />
           </Button>
-          <Button variant="ghost" size="icon" class="size-8 px-0" href="/map-making">
+          <Button variant="dark-ghost" size="icon" class="size-8 px-0" href="/map-making">
             <FaSolidToolsIcon class="w-5 h-5 flex-shrink-0" />
           </Button>
 
