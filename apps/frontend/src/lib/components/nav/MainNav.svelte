@@ -25,7 +25,7 @@
 <div class="mr-4 hidden md:flex">
   <a href={linkHref} class="mr-4 flex items-center gap-2 lg:mr-6">
     <enhanced:img src={logo} class="h-6 sm:h-9 w-auto" alt="Logo" />
-    <span class="self-center whitespace-nowrap text-xl font-semibold dark:text-white">
+    <span class="self-center whitespace-nowrap text-xl font-semibold text-white">
       LearnableMeta
     </span>
   </a>

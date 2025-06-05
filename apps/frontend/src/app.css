@@ -1,10 +1,11 @@
 @import 'tailwindcss';
 
-
-
-/*a {*/
-/*  @apply text-blue-600 dark:text-blue-400 hover:underline;*/
-/*}*/
+@layer base {
+  a:not(button):not([role="button"]):not([data-slot="button"]) {
+    color: var(--link-color);
+    @apply hover:underline;
+  }
+}
 
 .carta-font-code {
   font-family: '...', monospace;
@@ -75,6 +76,7 @@ html.dark .carta-wrapper {
 :root {
   --background: hsl(0 0% 100%);
   --foreground: hsl(240 10% 3.9%);
+  --link-color: hsl(220.3 82.9% 62.7%); /* blue-600 */
   --card: hsl(0 0% 100%);
   --card-foreground: hsl(240 10% 3.9%);
   --popover: hsl(0 0% 100%);
@@ -106,6 +108,7 @@ html.dark .carta-wrapper {
 .dark {
   --background: hsl(0 0% 10%);
   --foreground: hsl(0 0% 95%);
+  --link-color: hsl(217.1 92.7% 67.6%); /* blue-400 */
   --card: hsl(24 9.8% 10%);
   --card-foreground: hsl(0 0% 95%);
   --popover: hsl(0 0% 9%);
