@@ -40,13 +40,12 @@ export const userscriptRouter = new Elysia({
   })
   .get(
     '/announcement/',
-    async ({}) => {
+    async () => {
       return {
         timestamp: 1748891186,
         htmlMessage : `🎉 We're nominated for the 2025 GeoGuessr Awards! If you enjoy LearnableMeta, <a href="https://www.geoguessr.com/community/awards/2025" target="_blank">vote for us here!</a> Thank you for the support!`
       };
     },
-    {},
   )
   .get(
     '/location/',
