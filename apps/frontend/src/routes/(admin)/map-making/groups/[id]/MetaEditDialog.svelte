@@ -12,8 +12,11 @@
   import { Checkbox } from '$lib/components/ui/checkbox';
   import FormLabelWithTooltip from '$lib/components/FormLabelWithTooltip.svelte';
   import MetaImages from '$routes/(admin)/map-making/groups/[id]/MetaImages.svelte';
-  import type { ImageUploadSchema } from '$routes/(admin)/map-making/groups/[id]/+page.server';
   import MultiSelect from '$lib/components/MultiSelect.svelte';
+  import type {
+    ImageOrderUpdateSchema,
+    ImageUploadSchema
+  } from '$routes/(admin)/map-making/groups/[id]/+page.server';
 
   let {
     isMetaDialogOpen = $bindable(),
@@ -21,7 +24,8 @@
     levelChoices,
     groupId,
     selectedMeta,
-    imageUploadForm
+    imageUploadForm,
+    imageOrderUpdateForm
   }: {
     isMetaDialogOpen: boolean;
     metaForm: SuperValidated<Infer<InsertMetasSchema>>;
@@ -29,6 +33,7 @@
     groupId: number;
     selectedMeta: PageData['group']['metas'][number] | null;
     imageUploadForm: SuperValidated<Infer<ImageUploadSchema>>;
+    imageOrderUpdateForm: SuperValidated<Infer<ImageOrderUpdateSchema>>;
   } = $props();
 
   const formMeta = superForm(metaForm, {
@@ -211,7 +216,8 @@ Czechia - Arrow Signs" />
       </Tabs.Content>
       {#if selectedMeta}
         <Tabs.Content value="images">
-          <MetaImages {selectedMeta} {imageUploadForm}></MetaImages>
+          <MetaImages {selectedMeta} {imageUploadForm} orderData={imageOrderUpdateForm}
+          ></MetaImages>
         </Tabs.Content>
       {/if}
     </Tabs.Root>

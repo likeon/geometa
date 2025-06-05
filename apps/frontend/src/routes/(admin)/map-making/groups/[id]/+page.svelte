@@ -493,7 +493,8 @@
   {levelChoices}
   {selectedMeta}
   groupId={data.group.id}
-  imageUploadForm={data.imageUploadForm} />
+  imageUploadForm={data.imageUploadForm}
+  imageOrderUpdateForm={data.imageOrderUpdateForm} />
 
 <MapUploadDialog
   bind:isUploadDialogOpen={isMapUploadDialogOpen}
