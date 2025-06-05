@@ -184,6 +184,25 @@ html.dark .carta-wrapper {
   body {
     @apply bg-background text-foreground;
   }
+
+  h1 {
+    @apply text-4xl font-bold mb-4;
+  }
+  h2 {
+    @apply text-3xl font-semibold mb-3;
+  }
+  h3 {
+    @apply text-2xl font-medium mb-2;
+  }
+  h4 {
+    @apply text-xl font-medium mb-2;
+  }
+  h5 {
+    @apply text-lg font-medium mb-1;
+  }
+  h6 {
+    @apply text-base font-medium mb-1;
+  }
 }
 
 
@@ -191,4 +210,3 @@ html.dark .carta-wrapper {
   margin-inline: auto;
   padding-inline: 1rem;
 }
-
