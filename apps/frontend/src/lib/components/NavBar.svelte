@@ -33,7 +33,7 @@
 
 <header class="px-2 sm:px-4 py-0 w-full bg-gradient-to-r from-green-900 to-sky-900">
   <div class="container-wrapper">
-    <div class="container flex h-14 items-center gap-2 md:gap-4">
+    <div class="container flex h-13 items-center gap-2 md:gap-4">
       <MainNav {navLinks} />
       <MobileNav {navLinks} />
       <div class="ml-auto flex flex-1 items-center gap-2 justify-end">
