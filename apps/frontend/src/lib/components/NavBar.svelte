@@ -43,14 +43,15 @@
             size="icon"
             class="size-8 px-0"
             href="https://discord.gg/AcXEWznYZe"
-            target="_blank">
-            <DiscordFillIcon class="w-5 h-5 flex-shrink-0 mr-1" />
+            target="_blank"
+          >
+            <DiscordFillIcon class="size-5 flex-shrink-0" />
           </Button>
           <Button variant="ghost" size="icon" class="size-8 px-0" href="/personal">
-            <FaSolidUserIcon class="w-5 h-5 flex-shrink-0 mr-1" />
+            <FaSolidUserIcon class="w-5 h-5 flex-shrink-0" />
           </Button>
           <Button variant="ghost" size="icon" class="size-8 px-0" href="/map-making">
-            <FaSolidToolsIcon class="w-5 h-5 flex-shrink-0 mr-1" />
+            <FaSolidToolsIcon class="w-5 h-5 flex-shrink-0" />
           </Button>
 
           <ModeSwitcher />
