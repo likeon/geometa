@@ -9,6 +9,7 @@
   import { ModeWatcher } from 'mode-watcher';
   import { updated } from '$app/state';
   import * as Tooltip from '$lib/components/ui/tooltip/index';
+  import AnnouncementBanner from '$lib/components/AnnouncementBanner.svelte';
 
   let { children } = $props();
   let admin = $derived(page.url.pathname.startsWith('/map-making'));
@@ -24,7 +25,7 @@
 <ModeWatcher />
 <Tooltip.Provider>
   <div class="app" data-sveltekit-reload={updated.current}>
-    <!--  <AnnouncementBanner />-->
+    <AnnouncementBanner />
     <NavBar />
     <main>
       {#if underMaintenance && admin}
