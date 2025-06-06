@@ -49,8 +49,7 @@
           <div class="flex gap-x-3">
             <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
             <span
-              ><strong class="font-semibold text-gray-900 dark:text-gray-200"
-                >Install the Browser Extension.</strong>
+              ><strong class="font-semibold text-foreground">Install the Browser Extension.</strong>
               First, you need to install a userscript manager extension for your browser. Tampermonkey
               is available for
               <a
@@ -70,8 +69,7 @@
         <li class="flex gap-x-3">
           <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
           <span
-            ><strong class="font-semibold text-gray-900 dark:text-gray-200"
-              >Install the Userscript.</strong>
+            ><strong class="font-semibold text-foreground">Install the Userscript.</strong>
             Once you have the extension installed, you can install the userscript by clicking
             <a
               href="https://github.com/likeon/geometa/raw/main/dist/geometa.user.js"
@@ -90,8 +88,7 @@
         <li class="flex gap-x-3">
           <Icon icon="icon-park-solid:check-one" class="h-6 w-6 shrink-0" color="green" />
           <span
-            ><strong class="font-semibold text-gray-900 dark:text-gray-200"
-              >Play one of our maps.</strong>
+            ><strong class="font-semibold text-foreground">Play one of our maps.</strong>
             Guess a location on
             <a href="/maps">our maps</a>. On the results screen, a note will be displayed showing
             the meta that was in the round, in case you missed it.</span>

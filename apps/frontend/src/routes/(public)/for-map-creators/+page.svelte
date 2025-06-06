@@ -52,7 +52,7 @@
       <div class="flex gap-x-3">
         <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
         <span
-          ><strong class="font-semibold text-gray-900 dark:text-gray-100">Adjust your map.</strong>
+          ><strong class="font-semibold text-foreground">Adjust your map.</strong>
           First, you need to tag your locations in the map-making app. Only one tag per location in
           <span class="italic">CountryName-Any tag name</span> format.</span>
       </div>
@@ -60,7 +60,7 @@
     <li class="flex gap-x-3">
       <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
       <span
-        ><strong class="font-semibold text-gray-900 dark:text-gray-100"
+        ><strong class="font-semibold text-foreground"
           >Upload map JSON and enter tag descriptions.</strong>
         Upload the map into our platform and fill-out the notes for each tag. What you entered is going
         to be shown to the users after a guess on location that uses this tag.

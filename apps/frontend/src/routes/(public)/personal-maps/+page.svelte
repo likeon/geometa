@@ -40,8 +40,7 @@
           <div class="flex gap-x-3">
             <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
             <span
-              ><strong class="font-semibold text-gray-900 dark:text-gray-200"
-                >Create a GeoGuessr map.</strong>
+              ><strong class="font-semibold text-foreground">Create a GeoGuessr map.</strong>
               First, you’ll need to create a GeoGuessr map. You can do that
               <a href="https://www.geoguessr.com/map-maker" target="_blank">here</a>.
             </span>
@@ -50,8 +49,7 @@
         <li class="flex gap-x-3">
           <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
           <span
-            ><strong class="font-semibold text-gray-900 dark:text-gray-200"
-              >Create a personal map.</strong>
+            ><strong class="font-semibold text-foreground">Create a personal map.</strong>
             After creating your GeoGuessr map, copy the map ID from the URL. It’s the long string of
             letters and numbers at the end of the address bar (e.g., after geoguessr.com/map-maker/)
             and use it to create a personal map in our
@@ -62,7 +60,7 @@
         <li class="flex gap-x-3">
           <Icon icon="icon-park-solid:check-one" class="h-6 w-6 shrink-0" color="green" />
           <span
-            ><strong class="font-semibold text-gray-900 dark:text-gray-200"
+            ><strong class="font-semibold text-foreground"
               >Choose metas from community maps.</strong>
             Find <a href="/maps">maps</a> with the "shared" tag and select as many metas as you want.
             You can use the filter in the top right corner to show only maps with shared metas. Then,
@@ -72,8 +70,7 @@
           <div class="flex gap-x-3">
             <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
             <span
-              ><strong class="font-semibold text-gray-900 dark:text-gray-200"
-                >Upload locations to your map.</strong>
+              ><strong class="font-semibold text-foreground">Upload locations to your map.</strong>
               Once you’ve added metas in the portal, it’s time to make your map playable. Go to the
               <a href="https://www.geoguessr.com/me/maps" target="_blank">Your Maps</a> section on GeoGuessr,
               select the map you used to create your personal version, and use our userscript to upload
