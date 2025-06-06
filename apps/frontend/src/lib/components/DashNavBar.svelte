@@ -48,7 +48,7 @@
 {/snippet}
 
 <div class="border-b border-gray-200 mb-4">
-  <span class="text-sm font-semibold text-gray-600 dark:text-gray-400 flex group">
+  <span class="text-sm font-semibold text-muted-foreground flex group">
     Group: {groupName || '<No name>'}
     <button onclick={() => (groupRenameDialogOpen = true)} class=" items-center h-full"
       ><Icon

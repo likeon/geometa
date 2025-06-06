@@ -60,7 +60,7 @@
                 >Firefox</a
               >.</span>
           </div>
-          <p class="text-gray-600 dark:text-gray-400 ml-9 italic">
+          <p class="text-muted-foreground ml-9 italic">
             * - Chrome: <a
               href="https://www.tampermonkey.net/faq.php?locale=en#Q209"
               target="_blank">Enable developer mode</a> in extensions to ensure Tampermonkey works properly

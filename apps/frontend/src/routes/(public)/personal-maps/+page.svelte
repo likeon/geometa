@@ -77,7 +77,7 @@
               locations with a single click.
             </span>
           </div>
-          <p class="text-gray-600 dark:text-gray-400 ml-9 italic">
+          <p class="text-muted-foreground ml-9 italic">
             * When you upload locations for the first time, you’ll need an API key from our portal.
             Just click the link that shows up when prompted to get it.
           </p>

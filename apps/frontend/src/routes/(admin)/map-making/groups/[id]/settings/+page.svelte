@@ -104,10 +104,10 @@
       <div class="flex justify-between items-center py-3 space-x-4">
         <div>
           <p class="font-semibold">Delete this map group</p>
-          <p class="text-sm text-gray-600 dark:text-gray-400">
+          <p class="text-sm text-muted-foreground">
             Once you delete a group, there is no going back.
           </p>
-          <p class="text-sm text-gray-600 dark:text-gray-400">Please be certain.</p>
+          <p class="text-sm text-muted-foreground">Please be certain.</p>
         </div>
         <Button variant="destructive" onclick={() => (deleteDialogOpen = true)}>Delete</Button>
       </div>
@@ -125,7 +125,7 @@
       <div class="p-4">
         <Icon icon="entypo:location" width="80" height="80" />
       </div>
-      <p class="mt-2 text-md text-gray-600 dark:text-gray-400">
+      <p class="mt-2 text-md text-muted-foreground">
         {data.group.metasCount}
         {pluralize('meta', data.group.metasCount)} · {data.group.locationsCount}
         {pluralize('location', data.group.locationsCount)}

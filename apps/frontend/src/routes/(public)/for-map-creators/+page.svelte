@@ -47,7 +47,7 @@
   <p class="mt-3">
     We built a platform that easily allows you to share helpful insights with the users of your map.
   </p>
-  <ul role="list" class="mt-8 max-w-xl space-y-4 text-gray-600 dark:text-gray-400">
+  <ul role="list" class="mt-8 max-w-xl space-y-4 text-muted-foreground">
     <li>
       <div class="flex gap-x-3">
         <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />

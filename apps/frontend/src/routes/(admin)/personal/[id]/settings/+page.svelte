@@ -18,7 +18,7 @@
 <div>
   <PersonalNavBar mapName={data.mapName} id={data.id} geoguessrId={data.geoguessrId} />
 
-  <span class="text-m font-semibold text-gray-600 dark:text-gray-400 flex group">
+  <span class="text-m font-semibold text-muted-foreground flex group">
     Geoguessrid: {geoguessrId}
     <button onclick={() => (geoguessrIdChangeDialogOpen = true)} class=" items-center h-full"
       ><Icon
