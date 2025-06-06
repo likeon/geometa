@@ -45,13 +45,12 @@ export async function updateCache(data: DbData) {
 }
 
 export async function getData() {
-  // disabled it for localhost change it
-  // const cachedData = await getDb().query.cacheTable.findFirst({
-  //   where: eq(cacheTable.key, cacheKey)
-  // });
-  // if (cachedData) {
-  //   return JSON.parse(cachedData.value) as DbData;
-  // }
+  const cachedData = await getDb().query.cacheTable.findFirst({
+    where: eq(cacheTable.key, cacheKey)
+  });
+  if (cachedData) {
+    return JSON.parse(cachedData.value) as DbData;
+  }
   const dbData = await getDbData();
   updateCache(dbData);
   return dbData;
