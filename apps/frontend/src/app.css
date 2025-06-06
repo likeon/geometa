@@ -75,6 +75,10 @@ html.dark .carta-wrapper {
   }
 }
 
+.container-wrapper {
+  @apply w-full;
+}
+
 :root {
   --background: hsl(0 0% 100%);
   --foreground: hsl(240 10% 3.9%);
@@ -211,4 +215,6 @@ html.dark .carta-wrapper {
 @utility container {
   margin-inline: auto;
   padding-inline: 1rem;
+  width: 100%;
+  max-width: 80rem;
 }
