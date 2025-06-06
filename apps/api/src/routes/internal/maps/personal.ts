@@ -136,6 +136,8 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
         .select({
           metaId: syncedMetas.metaId,
           name: syncedMetas.name,
+          note: syncedMetas.note,
+          images: syncedMetas.images,
           countries: sql<string[]>`
             ARRAY(
             SELECT DISTINCT ${syncedLocations.country}
