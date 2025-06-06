@@ -1,5 +1,7 @@
 @import 'tailwindcss';
 
+@variant dark (&:where(.dark, .dark *));
+
 @layer base {
   a:not(button):not([role="button"]):not([data-slot="button"]) {
     color: var(--link-color);
