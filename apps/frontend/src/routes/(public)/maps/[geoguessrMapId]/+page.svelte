@@ -290,45 +290,86 @@
   </div>
 </div>
 <Dialog.Root bind:open={personalMapChoiceDialogOpen}>
-  <Dialog.Content>
-    <Label>
-      Select personal map you wanna add metas to
-      <Select.Root type="single" name="personalMapId" bind:value={selectedPersonalMapId}>
-        <Select.Trigger class="w-[180px]">
-          {selectedPersonalMapId
-            ? data.personalMaps.find((m) => m.id.toString() === selectedPersonalMapId)?.name
-            : 'Select a map'}
-        </Select.Trigger>
-        <Select.Content>
-          <Select.Group>
-            <Select.Label>Personal Maps</Select.Label>
-            {#each data.personalMaps as map (map.id)}
-              <Select.Item value={map.id.toString()} label={map.name}>
-                {map.name}
-              </Select.Item>
-            {/each}
-          </Select.Group>
-        </Select.Content>
-      </Select.Root>
-    </Label>
-    <div class="mt-4 flex justify-between">
+  <Dialog.Content class="sm:max-w-[425px]">
+    <Dialog.Header>
+      <Dialog.Title>Add to Personal Map</Dialog.Title>
+      <Dialog.Description>
+        Choose which personal map you want to add {selectedMetaIds.size} selected meta{selectedMetaIds.size !==
+        1
+          ? 's'
+          : ''} to.
+      </Dialog.Description>
+    </Dialog.Header>
+
+    <div class="grid gap-4 py-4">
+      <div class="space-y-2">
+        <Label for="personal-map-select">Select destination map</Label>
+        <Select.Root type="single" name="personalMapId" bind:value={selectedPersonalMapId}>
+          <Select.Trigger class="w-[180px]">
+            {selectedPersonalMapId
+              ? data.personalMaps.find((m) => m.id.toString() === selectedPersonalMapId)?.name
+              : 'Select a map'}
+          </Select.Trigger>
+          <Select.Content>
+            <Select.Group>
+              <Select.Label>Your Personal Maps</Select.Label>
+              {#each data.personalMaps as map (map.id)}
+                <Select.Item value={map.id.toString()} label={map.name}>
+                  <div class="flex items-center justify-between w-full">
+                    <span>{map.name}</span>
+                  </div>
+                </Select.Item>
+              {/each}
+            </Select.Group>
+          </Select.Content>
+        </Select.Root>
+      </div>
+
+      <div class="rounded-md bg-muted p-3 space-y-2">
+        <p class="text-sm font-medium">Selected metas to add:</p>
+        <div class="max-h-[120px] overflow-y-auto space-y-1">
+          {#each data.metaList as meta (meta.id)}
+            <p class="text-sm text-muted-foreground">{meta.name}</p>
+          {/each}
+        </div>
+      </div>
+
+      {#if selectedPersonalMapId}
+        {@const selectedMap = data.personalMaps.find(
+          (m) => m.id.toString() === selectedPersonalMapId
+        )}
+        {#if selectedMap}
+          <div
+            class="rounded-md bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 p-3">
+            <p class="text-sm text-blue-700 dark:text-blue-300">
+              These metas will be added to <span class="font-semibold">{selectedMap.name}</span>
+            </p>
+          </div>
+        {/if}
+      {/if}
+    </div>
+
+    <Dialog.Footer>
       <Button
-        color="green"
-        onclick={() => {
-          personalMapChoiceDialogOpen = false;
-          dialogResolve?.(true);
-        }}
-        >Add
-      </Button>
-      <Button
-        color="red"
+        type="button"
+        variant="outline"
         onclick={() => {
           personalMapChoiceDialogOpen = false;
           dialogResolve?.(false);
-        }}
-        >Cancel
+        }}>
+        Cancel
       </Button>
-    </div>
+      <Button
+        type="button"
+        variant="default"
+        disabled={!selectedPersonalMapId}
+        onclick={() => {
+          personalMapChoiceDialogOpen = false;
+          dialogResolve?.(true);
+        }}>
+        Add to Map
+      </Button>
+    </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>
 
