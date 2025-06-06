@@ -121,7 +121,7 @@
   <DashNavBar groupId={data.group.id} groupName={data.group.name}></DashNavBar>
   <div class="flex flex-wrap items-center">
     <div class="grow flex items-center justify-end">
-      <Button class="ml-3" onclick={uploadLocations}>Upload locations</Button>
+      <Button variant="outline" class="ml-3" onclick={uploadLocations}>Upload locations</Button>
       <Button class="ml-3" onclick={addMeta}>Add meta</Button>
       <form
         method="post"

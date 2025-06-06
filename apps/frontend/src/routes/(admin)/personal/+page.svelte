@@ -29,7 +29,7 @@
   <div class="flex flex-wrap items-center">
     <div class="grow flex items-center justify-end space-x-3">
       <a href="/personal-maps" target="_blank" rel="noopener noreferrer">
-        <Button>What are personal maps?</Button>
+        <Button variant="outline">What are personal maps?</Button>
       </a>
       <Button onclick={() => (personalMapCreationDialogOpen = true)}>Add personal map</Button>
     </div>

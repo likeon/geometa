@@ -94,7 +94,7 @@
         </Alert>
       {/if}
     </div>
-    <Button type="submit">Save</Button>
+    <Button type="submit" variant="outline">Share</Button>
   </form>
 
   <h4 class="text-lg font-semibold mt-3">Danger Zone</h4>

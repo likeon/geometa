@@ -28,7 +28,7 @@
     <div class="grow flex items-center justify-end space-x-3">
       <DropdownMenu.Root>
         <DropdownMenu.Trigger>
-          <Button>Documentation</Button>
+          <Button variant="outline">Documentation</Button>
         </DropdownMenu.Trigger>
         <DropdownMenu.Content>
           <a
