@@ -121,7 +121,7 @@ html.dark .carta-wrapper {
   --popover-foreground: hsl(0 0% 95%);
   --primary: hsl(161 92% 25%);
   --primary-foreground: hsl(144.9 80.4% 10%);
-  --secondary: hsl(240 3.7% 15.9%);
+  --secondary: hsl(240 3.7% 20.9%);
   --secondary-foreground: hsl(0 0% 98%);
   --muted: hsl(0 0% 15%);
   --muted-foreground: hsl(240 5% 64.9%);
@@ -130,7 +130,7 @@ html.dark .carta-wrapper {
   --destructive: hsl(0 62.8% 30.6%);
   --destructive-foreground: hsl(0 85.7% 97.3%);
   --border: hsl(240 3.7% 15.9%);
-  --input: hsl(240 3.7% 15.9%);
+  --input: hsl(240 3.7% 25.5%);
   --ring: hsl(142.4 71.8% 29.2%);
   --sidebar: hsl(240 5.9% 10%);
   --sidebar-foreground: hsl(240 4.8% 95.9%);
