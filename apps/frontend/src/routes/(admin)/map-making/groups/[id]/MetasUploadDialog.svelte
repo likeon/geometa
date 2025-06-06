@@ -15,6 +15,7 @@
   let pastedFile: null | File = null;
   let { isUploadDialogOpen = $bindable(), data }: Props = $props();
   const form = superForm(data, {
+    id: 'upload-metas-form',
     onResult({ result }) {
       if (result.type == 'success') {
         isUploadDialogOpen = false;
