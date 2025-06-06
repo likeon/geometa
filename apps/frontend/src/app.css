@@ -15,6 +15,10 @@
   caret-color: black;
 }
 
+.dark .carta-font-code {
+  caret-color: white;
+}
+
 textarea.carta-font-code,
 div.carta-font-code {
   line-height: 1.2rem;
@@ -189,6 +193,10 @@ html.dark .carta-wrapper {
 
   body {
     @apply bg-background text-foreground;
+  }
+
+  input, textarea {
+    caret-color: hsl(var(--foreground));
   }
 
   h1 {
