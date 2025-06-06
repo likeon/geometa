@@ -61,6 +61,7 @@
   }
 
   let syncingUserScript = $state(false);
+  let sharingMetas = $state(false);
 
   // Dialog state for adding levels
   let isAddLevelsDialogOpen = $state(false);
@@ -103,6 +104,16 @@
     </div>
   {:else}
     Sync UserScript
+  {/if}
+{/snippet}
+
+{#snippet sharingMetasButtonContent()}
+  {#if sharingMetas}
+    <div class="h-6 w-28 flex items-center justify-center">
+      <LoadingSmall />
+    </div>
+  {:else}
+    Share to Group
   {/if}
 {/snippet}
 
@@ -396,7 +407,9 @@
       method="post"
       action="?/shareMetas"
       use:enhance={() => {
+        sharingMetas = true;
         return async ({ update }) => {
+          sharingMetas = false;
           await update();
           isShareDialogOpen = false;
           selectedGroupId = '';
@@ -456,7 +469,9 @@
           }}>
           Cancel
         </Button>
-        <Button type="submit" disabled={!selectedGroupId}>Share to Group</Button>
+        <Button type="submit" disabled={!selectedGroupId}>
+          {@render sharingMetasButtonContent()}
+        </Button>
       </Dialog.Footer>
     </form>
   </Dialog.Content>
