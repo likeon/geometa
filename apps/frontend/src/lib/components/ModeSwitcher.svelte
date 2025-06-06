@@ -5,7 +5,7 @@
   import { Button } from '$lib/components/ui/form';
 </script>
 
-<Button variant="ghost" class="group/toggle size-8 px-0" onclick={toggleMode}>
+<Button variant="dark-ghost" class="group/toggle size-8 px-0" onclick={toggleMode}>
   {#if mode.current === 'dark'}
     <SunIcon />
   {:else}
