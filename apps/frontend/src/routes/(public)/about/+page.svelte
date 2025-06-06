@@ -44,7 +44,7 @@
         about it, don't worry—it's easy to set up.
       </p>
       <h4 class="mt-4 mb-[-20px]">Here's how to do it</h4>
-      <ul role="list" class="mt-8 max-w-xl space-y-4 text-gray-600 dark:text-white">
+      <ul role="list" class="mt-8 max-w-xl space-y-4 text-sidebar-foreground">
         <li>
           <div class="flex gap-x-3">
             <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
