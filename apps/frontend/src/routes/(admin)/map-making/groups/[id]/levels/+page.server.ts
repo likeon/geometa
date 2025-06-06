@@ -38,6 +38,7 @@ export const actions = {
     if (isNaN(levelId)) {
       error(400, 'Invalid ID');
     }
+    console.log('HERE');
 
     const level = await locals.db.query.levels.findFirst({ where: eq(levels.id, levelId) });
     await ensurePermissions(locals.db, locals.user?.id, level?.mapGroupId);
@@ -45,18 +46,23 @@ export const actions = {
     await locals.db.delete(levels).where(eq(levels.id, levelId));
   },
 
-  updateLevel: async ({ request, locals }) => {
+  updateLevel: async ({ request, locals, params }) => {
+    const mapGroupId = getGroupId(params);
     const form = await superValidate(request, zod(insertLevelsSchema));
     if (!form.valid) {
       return fail(400, { form });
     }
 
     const { id, ...dataNoId } = form.data;
+    const dataWithGroupId = {
+      ...dataNoId,
+      mapGroupId
+    };
 
     if (id == undefined) {
-      await locals.db.insert(levels).values(dataNoId).onConflictDoNothing();
+      await locals.db.insert(levels).values(dataWithGroupId).onConflictDoNothing();
     } else {
-      await locals.db.update(levels).set(dataNoId).where(eq(levels.id, id));
+      await locals.db.update(levels).set(dataWithGroupId).where(eq(levels.id, id));
     }
   }
 };

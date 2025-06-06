@@ -1,5 +1,3 @@
-import { createInsertSchema } from 'drizzle-zod';
-import { levels } from '$lib/db/schema';
 import { z } from 'zod';
 
 export const insertMapGroupSchema = z.object({
@@ -100,5 +98,8 @@ export const insertMapsSchema = z
 
 export type InsertMapsSchema = typeof insertMapsSchema;
 
-export const insertLevelsSchema = createInsertSchema(levels);
+export const insertLevelsSchema = z.object({
+  name: z.string().min(1, 'Name cannot be empty').default(''),
+  id: z.number().optional()
+});
 export type InsertLevelsSchema = typeof insertLevelsSchema;
