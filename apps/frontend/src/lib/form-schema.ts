@@ -58,25 +58,45 @@ export const insertPersonalMap = z.object({
 });
 export type InsertPersonalMapSchema = typeof insertPersonalMap;
 
-export const insertMapsSchema = z.object({
-  id: z.number().optional(),
-  mapGroupId: z.number().default(-1),
-  name: z.string().min(1, 'Name cannot be empty').default(''),
-  geoguessrId: z.string().min(1, 'GeoguessrId cannot be empty').default(''),
-  description: z.string().nullable(),
-  isPublished: z.boolean().default(false),
-  isShared: z.boolean().default(false),
-  authors: z.string().nullable().default(''),
-  ordering: z.coerce.number().default(0),
-  autoUpdate: z.boolean().default(false),
-  footer: z.string().default(''),
-  isVerified: z.boolean().default(false),
-  includeFilters: z.array(z.string()).default([]),
-  excludeFilters: z.array(z.string()).default([]),
-  regions: z.array(z.number()).default([]),
-  levels: z.array(z.number()).default([]),
-  difficulty: z.coerce.number().default(0)
-});
+export const insertMapsSchema = z
+  .object({
+    id: z.number().optional(),
+    mapGroupId: z.number().default(-1),
+    name: z.string().min(1, 'Name cannot be empty').default(''),
+    geoguessrId: z.string().min(1, 'GeoguessrId cannot be empty').default(''),
+    description: z.string().nullable(),
+    isPublished: z.boolean().default(false),
+    isShared: z.boolean().default(false),
+    authors: z.string().nullable().default(''),
+    ordering: z.coerce.number().default(0),
+    autoUpdate: z.boolean().default(false),
+    footer: z.string().default(''),
+    isVerified: z.boolean().default(false),
+    includeFilters: z.array(z.string()).default([]),
+    excludeFilters: z.array(z.string()).default([]),
+    regions: z.array(z.number()).default([]),
+    levels: z.array(z.number()).default([]),
+    difficulty: z.coerce.number().default(0)
+  })
+  .refine((data) => !data.isPublished || data.difficulty !== 0, {
+    message: 'You need to set difficulty to publish the map.',
+    path: ['difficulty']
+  })
+  .refine((data) => !data.isPublished || data.regions.length > 0, {
+    message: 'You must select region to publish the map.',
+    path: ['regions']
+  })
+  .refine((data) => !data.isPublished || (data.authors !== null && data.authors.trim() !== ''), {
+    message: 'You must set author to publish the map.',
+    path: ['authors']
+  })
+  .refine(
+    (data) => !data.isPublished || (data.description !== null && data.description.trim() !== ''),
+    {
+      message: 'You must set description to publish the map.',
+      path: ['description']
+    }
+  );
 
 export type InsertMapsSchema = typeof insertMapsSchema;
 
