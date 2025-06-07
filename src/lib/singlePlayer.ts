@@ -27,6 +27,9 @@ declare global {
   }
 }
 
+let currentObserver: MutationObserver | null = null;
+let currentPinObserver: MutationObserver | null = null;
+
 
 function clearMetaCache() {
   if (window.geometaMetaCache) {
@@ -94,15 +97,18 @@ export function initSinglePlayer() {
       });
 
 
-      const observer = new MutationObserver(() => {
+      if (currentObserver) {
+        currentObserver.disconnect();
+      }
+
+      currentObserver = new MutationObserver(() => {
         const listWrapper = document.querySelector('.result-list_listWrapper__7SmiM');
         if (listWrapper && !listWrapper.querySelector('.geometa-meta-btn')) {
           addMetaButtonsToRounds(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
         }
       });
 
-
-      observer.observe(document.body, {
+      currentObserver.observe(document.body, {
         childList: true,
         subtree: true
       });
@@ -113,6 +119,14 @@ export function initSinglePlayer() {
 
     window.addEventListener('urlchange', () => {
       clearMetaCache();
+      if (currentObserver) {
+        currentObserver.disconnect();
+        currentObserver = null;
+      }
+      if (currentPinObserver) {
+        currentPinObserver.disconnect();
+        currentPinObserver = null;
+      }
     });
   });
 }
@@ -176,8 +190,11 @@ function showMetaForRound(panoId: string, mapId: string, userscriptVersion: stri
 }
 
 function addClickableIconsToPins(rounds: GGEvent['detail']['rounds'], mapId: string, userscriptVersion: string) {
+  if (currentPinObserver) {
+    currentPinObserver.disconnect();
+  }
 
-  const pinObserver = new MutationObserver(() => {
+  currentPinObserver = new MutationObserver(() => {
     const pins = document.querySelectorAll('[class*="map-pin_mapPin"]');
     pins.forEach(pin => {
 
@@ -218,7 +235,7 @@ function addClickableIconsToPins(rounds: GGEvent['detail']['rounds'], mapId: str
   });
 
   // Start observing for map pins
-  pinObserver.observe(document.body, {
+  currentPinObserver.observe(document.body, {
     childList: true,
     subtree: true,
     attributes: true
