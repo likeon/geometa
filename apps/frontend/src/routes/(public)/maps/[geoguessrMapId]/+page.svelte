@@ -13,6 +13,8 @@
   import { Input } from '$lib/components/ui/input';
   import { Checkbox } from '$lib/components/ui/checkbox';
   import { Search } from '@lucide/svelte';
+  import Icon from '@iconify/svelte';
+  import Tooltip from '$lib/components/Tooltip.svelte';
 
   let { data }: PageProps = $props();
   let showNotLoggedInAlert = $state(false);
@@ -97,6 +99,10 @@
     selectedMeta = meta;
     if (rightPanelRef) rightPanelRef.scrollTop = 0;
   }
+
+  function getMetaCountText(count: number): string {
+    return count === 1 ? '1 meta' : `${count} metas`;
+  }
 </script>
 
 {#snippet errorAlert()}
@@ -136,12 +142,231 @@
 <div
   class="relative min-h-screen bg-cover bg-center"
   style="background-image: url({background}); background-attachment: fixed;">
-  <div class="items-center mx-auto max-w-8xl px-3 py-2 h-screen">
-    <div
-      in:fade
-      class="mx-auto flex flex-col lg:flex-row bg-background shadow-lg rounded-lg overflow-hidden w-full max-w-[1500px] lg:h-[calc(100vh-90px)] h-[calc(100vh-80px)]">
+  <!-- Mobile Layout -->
+  <div class="lg:hidden">
+    <div in:fade class="mx-auto max-w-4xl px-3 py-2 space-y-4">
+      <!-- Mobile Header -->
+      <div class="bg-background shadow-lg rounded-lg p-4">
+        <div class="flex items-start justify-between">
+          <div class="space-y-1">
+            <h1 class="text-xl font-bold tracking-tight">{data.mapName}</h1>
+            <div class="flex items-center gap-2 text-sm">
+              <span class="text-muted-foreground">{data.metaList.length} locations</span>
+              {#if data.mapAuthors}
+                <span class="text-muted-foreground">·</span>
+                <span class="text-muted-foreground">by <span class="text-foreground font-medium">{data.mapAuthors}</span></span>
+              {/if}
+            </div>
+          </div>
+          <Button 
+            target="_blank" 
+            href={`https://www.geoguessr.com/maps/${data.mapGeoguessrId}`}
+            size="sm">
+            <Icon icon="material-symbols:play-arrow" class="mr-1 h-4 w-4" />
+            Play
+          </Button>
+        </div>
+      </div>
+
+      <!-- Mobile Meta Selection -->
+      {#if data.isMapShared}
+        <div class="bg-background shadow-lg rounded-lg p-4">
+          <DismissibleAlert
+            variant="destructive"
+            bind:showAlert={showErrorAlert}
+            alertText={errorAlert} />
+          <DismissibleAlert
+            variant="default"
+            bind:showAlert={showNotLoggedInAlert}
+            alertText={notLoggedInAlert} />
+          <DismissibleAlert
+            variant="default"
+            bind:showAlert={showNoPersonalMapsAlert}
+            alertText={noPersonalMapAlert} />
+          <DismissibleAlert
+            variant="success"
+            bind:showAlert={showAddedMetasAlert}
+            alertText={addedMetasAlert} />
+
+          <form
+            action="?/addMetasToPersonalMap"
+            method="post"
+            id="mobile-delete-metas-form"
+            use:enhance={async ({ cancel, formData }) => {
+              showNoPersonalMapsAlert = false;
+              showNotLoggedInAlert = false;
+              showAddedMetasAlert = false;
+              showErrorAlert = false;
+              if (!data.isLoggedIn) {
+                cancel();
+                showNotLoggedInAlert = true;
+                return;
+              }
+              if (data.personalMaps.length === 0) {
+                cancel();
+                showNoPersonalMapsAlert = true;
+                return;
+              }
+
+              confirmAdding = false;
+              if (!selectedPersonalMapId) {
+                selectedPersonalMapId = data.personalMaps[0].id.toString();
+              }
+              confirmAdding = await openDialog();
+
+              if (!confirmAdding) {
+                cancel();
+              }
+
+              visibleSelectedMetaIds.forEach((id) => {
+                formData.append('id', `${id}`);
+              });
+              formData.append('mapId', selectedPersonalMapId || '');
+
+              return async ({ update, result }) => {
+                if (result.status !== 200) {
+                  showErrorAlert = true;
+                  return;
+                }
+                showAddedMetasAlert = true;
+                update();
+              };
+            }}>
+            {#if visibleSelectedMetaIds.size > 0}
+              <Button
+                type="submit"
+                class="w-full bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 mb-4">
+                Add {visibleSelectedMetaIds.size} visible meta{visibleSelectedMetaIds.size !== 1 ? 's' : ''} to personal map
+              </Button>
+            {:else}
+              <Button type="submit" variant="outline" disabled class="w-full mb-4">
+                No visible metas selected
+              </Button>
+            {/if}
+          </form>
+
+          <!-- Search Input -->
+          <div class="relative mb-4">
+            <Search class="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search metas..."
+              bind:value={searchQuery}
+              class="pl-8" />
+          </div>
+
+          <!-- Meta List -->
+          <div class="space-y-2 max-h-[80px] overflow-y-auto">
+            {#each filteredMetaList as meta (meta.id)}
+              <div 
+                class="flex items-center space-x-3 p-3 rounded-lg border {selectedMeta.id === meta.id ? 'bg-accent border-accent-foreground/20' : 'hover:bg-muted/50'}"
+                onclick={() => selectMetaAndScroll(meta)}>
+                {#if data.isMapShared}
+                  <Checkbox
+                    checked={selectedMetaIds.has(meta.id)}
+                    onCheckedChange={(checked) => toggleMeta(meta.id, !!checked)} />
+                {/if}
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <span class="font-medium text-sm truncate">{meta.name}</span>
+                    <div class="flex items-center gap-1 text-xs text-muted-foreground ml-2 shrink-0">
+                      <Icon icon="material-symbols:location-on" class="h-3 w-3" />
+                      <span>{meta.locationsCount}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            {/each}
+          </div>
+
+          {#if selectedMetaIds.size > 0}
+            <div class="text-sm text-muted-foreground text-center mt-4">
+              {#if searchQuery && visibleSelectedMetaIds.size !== selectedMetaIds.size}
+                {visibleSelectedMetaIds.size} of {selectedMetaIds.size} selected metas visible
+              {:else}
+                {selectedMetaIds.size} meta{selectedMetaIds.size !== 1 ? 's' : ''} selected
+              {/if}
+            </div>
+          {/if}
+        </div>
+      {/if}
+
+      <!-- Mobile Meta Detail -->
+      <div class="bg-background shadow-lg rounded-lg p-4 space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-bold tracking-tight">{selectedMeta.name}</h2>
+          <Tooltip content="This meta has {selectedMeta.locationsCount} location{selectedMeta.locationsCount !== 1 ? 's' : ''}">
+            <div class="flex items-center gap-1 text-sm text-muted-foreground cursor-help">
+              <Icon icon="material-symbols:location-on" class="h-4 w-4" />
+              <span>{selectedMeta.locationsCount}</span>
+            </div>
+          </Tooltip>
+        </div>
+
+        {#if selectedMeta.note || selectedMeta.footer !== ''}
+          <div class="prose prose-sm dark:prose-invert max-w-none">
+            <div class="rounded-lg border bg-muted/50 p-4 space-y-3">
+              {#if selectedMeta.note}
+                <div>
+                  {@html selectedMeta.note}
+                </div>
+              {/if}
+              {#if selectedMeta.footer !== ''}
+                <div class="text-sm text-muted-foreground border-t pt-3">
+                  {@html selectedMeta.footer}
+                </div>
+              {/if}
+            </div>
+          </div>
+        {/if}
+
+        <div class="space-y-3">
+          <div class="flex items-center gap-2">
+            <Icon icon="material-symbols:image" class="h-4 w-4 text-muted-foreground" />
+            <h3 class="font-semibold">Images</h3>
+            {#if selectedMeta.images.length > 0}
+              <span class="text-sm text-muted-foreground">({selectedMeta.images.length})</span>
+            {/if}
+          </div>
+
+          {#if selectedMeta.images.length > 0}
+            <div class="space-y-3">
+              {#each selectedMeta.images as url (url)}
+                <div class="group relative overflow-hidden rounded-lg border bg-muted">
+                  <img 
+                    src={url} 
+                    alt="Meta location" 
+                    class="w-full h-auto max-h-[250px] object-contain" 
+                  />
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 hover:bg-black/70 text-white p-2 rounded-md">
+                    <Icon icon="material-symbols:open-in-new" class="h-4 w-4" />
+                  </a>
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <div class="text-center py-8 text-muted-foreground">
+              <Icon icon="material-symbols:image-not-supported-outline" class="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p class="text-sm">No images available</p>
+            </div>
+          {/if}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Desktop Layout -->
+  <div class="hidden lg:block">
+    <div class="items-center mx-auto max-w-8xl px-3 py-2 h-screen">
       <div
-        class="lg:w-1/4 p-4 border-b lg:border-b-0 lg:border-r border-border bg-muted/10 rounded-t-lg lg:rounded-l-lg h-[130px] lg:h-full">
+        in:fade
+        class="mx-auto flex flex-row bg-background shadow-lg rounded-lg overflow-hidden w-full max-w-[1500px] h-[calc(100vh-90px)]">
+        <div
+          class="w-1/4 p-4 border-r border-border bg-muted/10 rounded-l-lg h-full">
         <DismissibleAlert
           variant="destructive"
           bind:showAlert={showErrorAlert}
@@ -292,9 +517,13 @@
                         onclick={() => selectMetaAndScroll(meta)}>
                         <div class="flex items-center justify-between w-full">
                           <span
-                            class={`block w-full whitespace-normal break-words ${selectedMeta.id === meta.id ? 'font-semibold' : ''}`}>
-                            {meta.name} ({meta.locationsCount})
+                            class={`whitespace-normal break-words ${selectedMeta.id === meta.id ? 'font-semibold' : ''}`}>
+                            {meta.name}
                           </span>
+                          <div class="flex items-center gap-1 text-xs text-muted-foreground ml-2 shrink-0">
+                            <Icon icon="material-symbols:location-on" class="h-3 w-3" />
+                            <span>{meta.locationsCount}</span>
+                          </div>
                         </div>
                       </Table.Cell>
                     </Table.Row>
@@ -316,48 +545,102 @@
         </div>
       </div>
 
-      <div class="lg:w-3/4 p-4 overflow-y-auto h-full" bind:this={rightPanelRef}>
-        <div class="flex w-full items-center mb-3">
-          <h1 class="text-xl">Meta List - {data.mapName}</h1>
-          <div class="ml-3">
-            <Button target="_blank" href={`https://www.geoguessr.com/maps/${data.mapGeoguessrId}`}
-              >Play
+      <div class="lg:w-3/4 overflow-hidden flex flex-col" bind:this={rightPanelRef}>
+        <!-- Header Section -->
+        <div class="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-6">
+          <div class="flex items-start justify-between">
+            <div class="space-y-1">
+              <h1 class="text-2xl font-bold tracking-tight">{data.mapName}</h1>
+              <div class="flex items-center gap-2 text-sm">
+                <span class="text-muted-foreground">Meta List · {data.metaList.length} locations</span>
+                {#if data.mapAuthors}
+                  <span class="text-muted-foreground">·</span>
+                  <span class="text-muted-foreground">by <span class="text-foreground font-medium">{data.mapAuthors}</span></span>
+                {/if}
+              </div>
+            </div>
+            <Button 
+              target="_blank" 
+              href={`https://www.geoguessr.com/maps/${data.mapGeoguessrId}`}
+              class="shrink-0">
+              <Icon icon="material-symbols:play-arrow" class="mr-2 h-4 w-4" />
+              Play Map
             </Button>
           </div>
         </div>
-        <div>
-          <h3 class="text-2xl font-bold mb-4 text-foreground text-center">
-            {selectedMeta.name}
-          </h3>
-          <div class="note mb-1 text-muted-foreground">
-            {@html selectedMeta.note}
-          </div>
-          {#if selectedMeta.footer !== ''}
-            <div
-              class="text-sm text-muted-foreground/80 break-words"
-              style="overflow-wrap: break-word; word-wrap: break-word; word-break: break-word;">
-              {@html selectedMeta.footer}
-            </div>
-          {/if}
 
-          <h4 class="text-lg font-semibold mb-4 text-foreground">Images:</h4>
-          {#if selectedMeta.images.length > 0}
-            <div
-              class={`grid gap-6 ${
-                selectedMeta.images.length > 2 ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'
-              }`}>
-              {#each selectedMeta.images as url (url)}
-                <div
-                  class="relative w-full flex justify-center items-center border-transparent"
-                  style="height: auto; max-height: 400px;">
-                  <img src={url} alt="" class="max-h-full max-w-full object-contain" />
+        <!-- Meta Content Section -->
+        <div class="flex-1 overflow-y-auto p-6">
+          <div class="max-w-4xl mx-auto space-y-6">
+            <!-- Meta Title -->
+            <div class="flex items-center justify-between">
+              <h2 class="text-2xl font-bold tracking-tight">{selectedMeta.name}</h2>
+              <Tooltip content="This meta has {selectedMeta.locationsCount} location{selectedMeta.locationsCount !== 1 ? 's' : ''}">
+                <div class="flex items-center gap-1 text-sm text-muted-foreground cursor-help">
+                  <Icon icon="material-symbols:location-on" class="h-4 w-4" />
+                  <span>{selectedMeta.locationsCount}</span>
                 </div>
-              {/each}
+              </Tooltip>
             </div>
-          {:else}
-            <p class="text-muted-foreground">No images available.</p>
-          {/if}
+
+            <!-- Meta Description -->
+            {#if selectedMeta.note || selectedMeta.footer !== ''}
+              <div class="prose prose-sm dark:prose-invert max-w-none">
+                <div class="rounded-lg border bg-muted/50 p-4 space-y-3">
+                  {#if selectedMeta.note}
+                    <div>
+                      {@html selectedMeta.note}
+                    </div>
+                  {/if}
+                  {#if selectedMeta.footer !== ''}
+                    <div class="text-sm text-muted-foreground border-t pt-3">
+                      {@html selectedMeta.footer}
+                    </div>
+                  {/if}
+                </div>
+              </div>
+            {/if}
+
+            <!-- Images Section -->
+            <div class="space-y-4">
+              <div class="flex items-center gap-2">
+                <Icon icon="material-symbols:image" class="h-5 w-5 text-muted-foreground" />
+                <h3 class="text-lg font-semibold">Images</h3>
+                {#if selectedMeta.images.length > 0}
+                  <span class="text-sm text-muted-foreground">({selectedMeta.images.length})</span>
+                {/if}
+              </div>
+
+              {#if selectedMeta.images.length > 0}
+                <div class="grid gap-4 {selectedMeta.images.length === 1 ? 'grid-cols-1 max-w-2xl mx-auto' : 'grid-cols-1 md:grid-cols-2'}">
+                  {#each selectedMeta.images as url (url)}
+                    <div class="group relative overflow-hidden rounded-lg border bg-muted">
+                      <img 
+                        src={url} 
+                        alt="Meta location" 
+                        class="w-full h-auto max-h-[300px] object-contain transition-transform group-hover:scale-[1.02]" 
+                      />
+                      <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                      <a
+                        href={url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 hover:bg-black/70 text-white p-2 rounded-md">
+                        <Icon icon="material-symbols:open-in-new" class="h-4 w-4" />
+                      </a>
+                    </div>
+                  {/each}
+                </div>
+              {:else}
+                <div class="text-center py-12 text-muted-foreground">
+                  <Icon icon="material-symbols:image-not-supported-outline" class="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>No images available for this location</p>
+                </div>
+              {/if}
+            </div>
+          </div>
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -393,6 +676,9 @@
                 <Select.Item value={map.id.toString()} label={map.name}>
                   <div class="flex items-center justify-between w-full">
                     <span class="truncate pr-2" title={map.name}>{map.name}</span>
+                    <span class="text-xs text-muted-foreground">
+                      {getMetaCountText(map.metasCount)}
+                    </span>
                   </div>
                 </Select.Item>
               {/each}

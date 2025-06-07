@@ -5,6 +5,7 @@ import type { PageServerLoad } from './$types';
 type PersonalMap = {
   name: string;
   id: number;
+  metasCount: number;
 };
 
 export const load: PageServerLoad = async ({ params, locals }) => {
@@ -23,7 +24,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
       error(500);
     }
 
-    personalMaps = data.map(({ id, name }) => ({ id, name }));
+    personalMaps = data.map(({ id, name, metasCount }) => ({ id, name, metasCount }));
   }
 
   const { data: map, error: mapApiError } = await api.internal.maps({ geoguessrId }).get();
@@ -47,6 +48,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   return {
     metaList,
     mapName: map.name,
+    mapAuthors: map.authors,
     isMapShared: map.isShared,
     mapGeoguessrId: map.geoguessrId,
     isLoggedIn,
