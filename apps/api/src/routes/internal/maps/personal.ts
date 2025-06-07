@@ -9,8 +9,11 @@ import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensureMapAccess } from '@api/lib/internal/permissions';
 import { geoguessrGetMapInfo } from '@api/lib/internal/utils';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, eq, inArray, sql, getTableColumns } from 'drizzle-orm';
+import { alias } from 'drizzle-orm/pg-core';
 import { Elysia, t } from 'elysia';
+import { pick } from 'remeda';
+import { generateFooter } from '@api/lib/userscript/utils';
 
 export const personalMapsRouter = new Elysia({ prefix: '/personal' })
   .use(auth())
@@ -131,13 +134,19 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
         return status(404, 'Map not found');
       }
 
-      // Fetch associated metas
+      const originalSyncedMapMetas = alias(syncedMapMetas, 'osmm');
+      const originalMaps = alias(maps, 'om');
+
       const metas = await db
         .select({
           metaId: syncedMetas.metaId,
-          name: syncedMetas.name,
-          note: syncedMetas.note,
-          images: syncedMetas.images,
+          ...pick(getTableColumns(syncedMetas), [
+            'name',
+            'note',
+            'footer',
+            'images',
+            'noteFromPlonkit',
+          ]),
           countries: sql<string[]>`
             ARRAY(
             SELECT DISTINCT ${syncedLocations.country}
@@ -151,28 +160,54 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
                                         FROM ${syncedLocations} sl
                                         WHERE sl.synced_meta_id = ${syncedMetas.metaId}
                                       )`,
-          usedInMapName: sql<string | null>`(
-      SELECT m.name
-      FROM ${syncedMapMetas} sm
-      INNER JOIN ${maps} m ON m.id = sm.map_id
-      WHERE
-        sm.synced_meta_id = ${syncedMetas.metaId}
-        AND m.is_personal = FALSE
-      ORDER BY m.number_of_games_played DESC NULLS LAST, m.id ASC
-      LIMIT 1
-    )`,
+          usedInMapName: originalMaps.name,
+          usedInMapAuthors: originalMaps.authors,
+          usedInMapGeoguessrId: originalMaps.geoguessrId,
+          usedInMapFooter: sql<string>`coalesce(${originalMaps.footerHtml}, '')`.as('usedInMapFooter'),
         })
         .from(syncedMapMetas)
         .innerJoin(
           syncedMetas,
           eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId),
         )
+        .leftJoin(
+          originalSyncedMapMetas,
+          and(
+            eq(originalSyncedMapMetas.syncedMetaId, syncedMapMetas.syncedMetaId),
+            sql`${originalSyncedMapMetas.mapId} = (
+              SELECT smm2.map_id
+              FROM ${syncedMapMetas} smm2
+              INNER JOIN ${maps} m2 ON m2.id = smm2.map_id
+              WHERE smm2.synced_meta_id = ${syncedMapMetas.syncedMetaId}
+                AND m2.is_personal = FALSE
+              ORDER BY m2.number_of_games_played DESC NULLS LAST
+              LIMIT 1
+            )`
+          ),
+        )
+        .leftJoin(originalMaps, eq(originalMaps.id, originalSyncedMapMetas.mapId))
         .where(eq(syncedMapMetas.mapId, mapId));
+
+      // Generate footer for each meta (same logic as userscript endpoint)
+      const metasWithFooter = metas.map((meta) => {
+        const country = meta.countries?.[0] || '';
+        let footer = generateFooter(
+          meta.noteFromPlonkit,
+          country,
+          meta.footer,
+          meta.usedInMapFooter || '',
+        );
+
+        return {
+          ...meta,
+          generatedFooter: footer,
+        };
+      });
 
       return {
         geoguessrId: map.geoguessrId,
         name: map.name,
-        metas,
+        metas: metasWithFooter,
       };
     },
     {

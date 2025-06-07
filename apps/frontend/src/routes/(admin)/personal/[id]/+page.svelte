@@ -74,16 +74,39 @@
   {/if}
 </div>
 
-<!-- Meta Details Dialog -->
 <Dialog.Root bind:open={isDialogOpen}>
   <Dialog.Content class="sm:max-w-[700px] max-h-[90vh] overflow-hidden flex flex-col">
     {#if selectedMeta}
       {@const metaName = `${selectedMeta.countries?.[0] || 'Unknown country'} - ${selectedMeta.name}`}
       <Dialog.Header>
-        <Dialog.Title class="text-2xl">{metaName}</Dialog.Title>
+        <Dialog.Title class="text-2xl flex items-baseline gap-2 flex-wrap">
+          {metaName}
+          {#if selectedMeta.locationsCount}
+            <span
+              class="inline-flex items-center gap-1 px-2 py-0.5 bg-muted rounded-full text-sm font-normal text-muted-foreground">
+              <Icon icon="material-symbols:location-on" width="14" height="14" />
+              {selectedMeta.locationsCount}
+            </span>
+          {/if}
+        </Dialog.Title>
+
         {#if selectedMeta.usedInMapName}
           <Dialog.Description>
-            From: {selectedMeta.usedInMapName}
+            From:
+            {#if selectedMeta.usedInMapGeoguessrId}
+              <a
+                href="/maps/{selectedMeta.usedInMapGeoguessrId}"
+                class="underline hover:text-primary"
+                target="_blank"
+                rel="noopener noreferrer">
+                {selectedMeta.usedInMapName}
+              </a>
+            {:else}
+              {selectedMeta.usedInMapName}
+            {/if}
+            {#if selectedMeta.usedInMapAuthors}
+              by {selectedMeta.usedInMapAuthors}
+            {/if}
           </Dialog.Description>
         {/if}
       </Dialog.Header>
@@ -93,6 +116,13 @@
           <div class="space-y-2">
             <div class="prose prose-sm dark:prose-invert max-w-none rounded-md bg-muted/50 p-4">
               {@html selectedMeta.note}
+              {#if selectedMeta.generatedFooter}
+                <div class="mt-4 pt-2 border-t border-muted-foreground/20">
+                  <div class="text-xs text-muted-foreground not-prose">
+                    {@html selectedMeta.generatedFooter}
+                  </div>
+                </div>
+              {/if}
             </div>
           </div>
         {/if}
@@ -134,21 +164,6 @@
             <p>No images available for this meta</p>
           </div>
         {/if}
-
-        <!-- Additional Meta Information -->
-        {#if selectedMeta.locationsCount}
-          <div class="rounded-md bg-muted/50 p-3 flex items-center gap-2">
-            <Icon
-              icon="material-symbols:location-on"
-              width="20"
-              height="20"
-              class="text-muted-foreground" />
-            <span class="text-sm">
-              <span class="font-medium">{selectedMeta.locationsCount}</span>
-              location{selectedMeta.locationsCount !== 1 ? 's' : ''}
-            </span>
-          </div>
-        {/if}
       </div>
 
       <Dialog.Footer class="pt-4">
@@ -168,7 +183,6 @@
   </Dialog.Content>
 </Dialog.Root>
 
-<!--Hidden delete form-->
 <form
   bind:this={deleteFormElement}
   id="delete-form"
