@@ -379,10 +379,12 @@
       <div class="space-y-2">
         <Label for="personal-map-select">Select destination map</Label>
         <Select.Root type="single" name="personalMapId" bind:value={selectedPersonalMapId}>
-          <Select.Trigger class="w-[180px]">
-            {selectedPersonalMapId
-              ? data.personalMaps.find((m) => m.id.toString() === selectedPersonalMapId)?.name
-              : 'Select a map'}
+          <Select.Trigger class="w-[240px]">
+            <span class="truncate">
+              {selectedPersonalMapId
+                ? data.personalMaps.find((m) => m.id.toString() === selectedPersonalMapId)?.name
+                : 'Select a map'}
+            </span>
           </Select.Trigger>
           <Select.Content>
             <Select.Group>
@@ -390,7 +392,7 @@
               {#each data.personalMaps as map (map.id)}
                 <Select.Item value={map.id.toString()} label={map.name}>
                   <div class="flex items-center justify-between w-full">
-                    <span>{map.name}</span>
+                    <span class="truncate pr-2" title={map.name}>{map.name}</span>
                   </div>
                 </Select.Item>
               {/each}
@@ -415,7 +417,10 @@
         {#if selectedMap}
           <div class="rounded-md bg-primary/10 border border-primary/20 p-3">
             <p class="text-sm text-primary">
-              These metas will be added to <span class="font-semibold">{selectedMap.name}</span>
+              These metas will be added to:
+            </p>
+            <p class="text-sm font-semibold text-primary mt-1 break-words">
+              {selectedMap.name}
             </p>
           </div>
         {/if}
