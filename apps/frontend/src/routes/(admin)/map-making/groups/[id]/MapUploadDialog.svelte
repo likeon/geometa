@@ -7,6 +7,8 @@
   import * as Dialog from '$lib/components/ui/dialog/index';
   import * as Form from '$lib/components/ui/form';
   import { type MapUploadSchema } from '$lib/form-schema';
+  import Icon from '@iconify/svelte';
+  import { Button } from '$lib/components/ui/button';
 
   interface Props {
     isUploadDialogOpen: boolean;
@@ -79,71 +81,123 @@
 
 <Dialog.Root bind:open={isUploadDialogOpen}>
   <Dialog.Content>
-    <form
-      class="flex flex-col space-y-6"
-      method="post"
-      action="?/uploadMapJson"
-      enctype="multipart/form-data"
-      use:enhance>
-      <Form.Field {form} name="partialUpload">
-        <Form.Control>
-          {#snippet children({ props })}
-            <div class="flex flex-row items-start space-x-1 space-y-0 mb-2">
-              <Checkbox {...props} bind:checked={$formData.partialUpload} name="partialUpload" />
-              <Label
-                for={props.id}
-                class="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Keep old locations (will only add/update locations and not remove any already added
-                locations)
-              </Label>
-            </div>
-          {/snippet}
-        </Form.Control>
-        <Form.FieldErrors />
-      </Form.Field>
+    <Dialog.Header>
+      <Dialog.Title>Upload Locations</Dialog.Title>
+      <Dialog.Description>
+        Upload map JSON from map-making.app to add or update locations in this group.
+      </Dialog.Description>
+    </Dialog.Header>
 
-      <Form.Field {form} name="file">
-        <Form.Control>
-          {#snippet children({ props })}
-            <div class="space-y-2">
-              <Label for={props.id}>
-                Upload Map json from <a
-                  target="_blank"
-                  href="https://map-making.app/"
-                  class="text-blue-600 hover:underline">map-making.app</a
-                >:
-              </Label>
-              <Input
-                {...props}
-                type="file"
-                accept="application/json"
-                name="file"
-                bind:files={$file}
-                onchange={() => submit()} />
+    <div class="space-y-4 py-4">
+      <!-- Upload Mode Info -->
+      {#if !isPartialUpload}
+        <div class="rounded-md bg-destructive/10 border border-destructive/20 p-3">
+          <div class="flex items-start space-x-2">
+            <Icon 
+              icon="material-symbols:warning-rounded" 
+              width="1rem" 
+              height="1rem" 
+              class="text-destructive mt-0.5" />
+            <div class="space-y-1">
+              <p class="text-sm font-medium text-destructive">Full replacement mode</p>
+              <p class="text-xs text-muted-foreground">
+                All existing locations will be replaced. Metas and descriptions will be preserved.
+              </p>
             </div>
-          {/snippet}
-        </Form.Control>
-        <Form.FieldErrors />
-      </Form.Field>
-    </form>
+          </div>
+        </div>
+      {:else}
+        <div class="rounded-md bg-blue-50 border border-blue-200 p-3 dark:bg-blue-950/20 dark:border-blue-900/30">
+          <div class="flex items-start space-x-2">
+            <Icon 
+              icon="material-symbols:info-rounded" 
+              width="1rem" 
+              height="1rem" 
+              class="text-blue-600 mt-0.5 dark:text-blue-400" />
+            <div class="space-y-1">
+              <p class="text-sm font-medium text-blue-800 dark:text-blue-200">Partial upload mode</p>
+              <p class="text-xs text-muted-foreground">
+                New locations will be added and existing ones updated. No locations will be removed.
+              </p>
+            </div>
+          </div>
+        </div>
+      {/if}
 
-    <div class="text-green-900 dark:text-white">
-      <p>
-        You can also paste locations from your clipboard (ctrl+V) after copying them from map-making
-        app (by using copy button there).
-      </p>
-      <br />
-      <br />
-      <p>
-        Each location <strong>must</strong> have exactly one tag in
-        <span class="whitespace-nowrap font-semibold">CountryName-Your Meta Name</span> format!
-      </p>
-      <p>Examples:</p>
-      <ol class="list-disc ml-5">
-        <li>Czechia-Bollard</li>
-        <li>Portugal-LicensePlate</li>
-        <li>Singapore-StreetSign</li>
-      </ol>
+      <!-- File Upload Section -->
+      <form
+        method="post"
+        action="?/uploadMapJson"
+        enctype="multipart/form-data"
+        use:enhance>
+        
+        <Form.Field form={form} name="partialUpload">
+          <Form.Control>
+            {#snippet children({ props })}
+              <div class="flex items-center space-x-2">
+                <Checkbox {...props} bind:checked={$formData.partialUpload} name="partialUpload" />
+                <Label for={props.id} class="text-sm font-normal cursor-pointer">
+                  Keep existing locations (partial upload)
+                </Label>
+              </div>
+            {/snippet}
+          </Form.Control>
+          <Form.FieldErrors />
+        </Form.Field>
+
+        <Form.Field form={form} name="file">
+          <Form.Control>
+            {#snippet children({ props })}
+              <div class="space-y-2">
+                <label for={props.id} class="text-sm font-medium">Select JSON file</label>
+                <Input
+                  {...props}
+                  type="file"
+                  accept="application/json"
+                  name="file"
+                  bind:files={$file}
+                  onchange={() => submit()} />
+              </div>
+            {/snippet}
+          </Form.Control>
+          <Form.FieldErrors />
+        </Form.Field>
+      </form>
+
+      <!-- Instructions -->
+      <div class="space-y-3">
+        <div class="rounded-md bg-muted p-3">
+          <p class="text-sm font-medium mb-2">Alternative methods:</p>
+          <p class="text-xs text-muted-foreground">
+            You can also paste locations directly from your clipboard (Ctrl+V) after copying them from 
+            <a href="https://map-making.app/" target="_blank" class="underline hover:text-primary">map-making.app</a>.
+          </p>
+        </div>
+
+        <div class="rounded-md bg-muted p-3">
+          <p class="text-sm font-medium mb-2">Tag format requirements:</p>
+          <p class="text-xs text-muted-foreground mb-2">
+            Each location must have exactly one tag in <code class="bg-background px-1 rounded">CountryName-Your Meta Name</code> format.
+          </p>
+          <div class="text-xs text-muted-foreground space-y-1">
+            <p class="font-medium">Examples:</p>
+            <ul class="list-disc list-inside ml-2 space-y-0.5">
+              <li><code class="bg-background px-1 rounded">Czechia-Bollard</code></li>
+              <li><code class="bg-background px-1 rounded">Portugal-LicensePlate</code></li>
+              <li><code class="bg-background px-1 rounded">Singapore-StreetSign</code></li>
+            </ul>
+          </div>
+        </div>
+      </div>
     </div>
+
+    <Dialog.Footer>
+      <Button 
+        type="button" 
+        variant="outline" 
+        onclick={() => (isUploadDialogOpen = false)}>
+        Cancel
+      </Button>
+    </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>

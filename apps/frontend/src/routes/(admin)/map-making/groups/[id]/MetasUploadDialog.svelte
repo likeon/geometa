@@ -7,6 +7,8 @@
   import * as Dialog from '$lib/components/ui/dialog';
   import * as Form from '$lib/components/ui/form';
   import type { MetasUploadSchema } from '$lib/form-schema';
+  import Icon from '@iconify/svelte';
+  import { Button } from '$lib/components/ui/button';
 
   interface Props {
     isUploadDialogOpen: boolean;
@@ -73,51 +75,114 @@
 
 <Dialog.Root bind:open={isUploadDialogOpen}>
   <Dialog.Content>
-    <form
-      class="flex flex-col space-y-6"
-      method="post"
-      action="?/uploadMetas"
-      enctype="multipart/form-data"
-      use:enhance>
-      <Form.Field {form} name="partialUpload">
-        <Form.Control>
-          {#snippet children({ props })}
-            <div class="flex flex-row items-start space-x-1 space-y-0 mb-2">
-              <Checkbox {...props} bind:checked={$formData.partialUpload} name="partialUpload" />
-              <Label
-                for={props.id}
-                class="text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                Keep old metas (will only add/update metas and not remove any already existing ones)
-              </Label>
-            </div>
-          {/snippet}
-        </Form.Control>
-        <Form.FieldErrors />
-      </Form.Field>
+    <Dialog.Header>
+      <Dialog.Title>Upload Metas</Dialog.Title>
+      <Dialog.Description>
+        Upload meta data JSON to add or update metas in this group.
+      </Dialog.Description>
+    </Dialog.Header>
 
-      <Form.Field {form} name="file">
-        <Form.Control>
-          {#snippet children({ props })}
-            <div class="space-y-2">
-              <Label for={props.id}>Upload metas json:</Label>
-              <Input
-                {...props}
-                type="file"
-                accept="application/json"
-                name="file"
-                bind:files={$file}
-                onchange={() => submit()} />
+    <div class="space-y-4 py-4">
+      <!-- Upload Mode Info -->
+      {#if !isPartialUpload}
+        <div class="rounded-md bg-destructive/10 border border-destructive/20 p-3">
+          <div class="flex items-start space-x-2">
+            <Icon 
+              icon="material-symbols:warning-rounded" 
+              width="1rem" 
+              height="1rem" 
+              class="text-destructive mt-0.5" />
+            <div class="space-y-1">
+              <p class="text-sm font-medium text-destructive">Full replacement mode</p>
+              <p class="text-xs text-muted-foreground">
+                All existing metas will be replaced with the uploaded ones.
+              </p>
             </div>
-          {/snippet}
-        </Form.Control>
-        <Form.FieldErrors />
-      </Form.Field>
-    </form>
+          </div>
+        </div>
+      {:else}
+        <div class="rounded-md bg-blue-50 border border-blue-200 p-3 dark:bg-blue-950/20 dark:border-blue-900/30">
+          <div class="flex items-start space-x-2">
+            <Icon 
+              icon="material-symbols:info-rounded" 
+              width="1rem" 
+              height="1rem" 
+              class="text-blue-600 mt-0.5 dark:text-blue-400" />
+            <div class="space-y-1">
+              <p class="text-sm font-medium text-blue-800 dark:text-blue-200">Partial upload mode</p>
+              <p class="text-xs text-muted-foreground">
+                New metas will be added and existing ones updated. No metas will be removed.
+              </p>
+            </div>
+          </div>
+        </div>
+      {/if}
 
-    <p class="text-xl"></p>
-    <div class="text-green-900">
-      <p>You can also paste metas from your clipboard (ctrl+V).</p>
-      <p><a href="/map-making/docs/meta-uploads" target="_blank">Docs are here.</a></p>
+      <!-- File Upload Section -->
+      <form
+        method="post"
+        action="?/uploadMetas"
+        enctype="multipart/form-data"
+        use:enhance>
+        
+        <Form.Field form={form} name="partialUpload">
+          <Form.Control>
+            {#snippet children({ props })}
+              <div class="flex items-center space-x-2">
+                <Checkbox {...props} bind:checked={$formData.partialUpload} name="partialUpload" />
+                <Label for={props.id} class="text-sm font-normal cursor-pointer">
+                  Keep existing metas (partial upload)
+                </Label>
+              </div>
+            {/snippet}
+          </Form.Control>
+          <Form.FieldErrors />
+        </Form.Field>
+
+        <Form.Field form={form} name="file">
+          <Form.Control>
+            {#snippet children({ props })}
+              <div class="space-y-2">
+                <label for={props.id} class="text-sm font-medium">Select JSON file</label>
+                <Input
+                  {...props}
+                  type="file"
+                  accept="application/json"
+                  name="file"
+                  bind:files={$file}
+                  onchange={() => submit()} />
+              </div>
+            {/snippet}
+          </Form.Control>
+          <Form.FieldErrors />
+        </Form.Field>
+      </form>
+
+      <!-- Instructions -->
+      <div class="space-y-3">
+        <div class="rounded-md bg-muted p-3">
+          <p class="text-sm font-medium mb-2">Alternative methods:</p>
+          <p class="text-xs text-muted-foreground">
+            You can also paste metas directly from your clipboard (Ctrl+V).
+          </p>
+        </div>
+
+        <div class="rounded-md bg-muted p-3">
+          <p class="text-sm font-medium mb-2">Need help?</p>
+          <p class="text-xs text-muted-foreground">
+            Check the <a href="/map-making/docs/meta-uploads" target="_blank" class="underline hover:text-primary">documentation</a> for detailed format requirements and examples.
+          </p>
+        </div>
+      </div>
     </div>
+
+    <Dialog.Footer>
+      <Button 
+        type="button" 
+        variant="outline" 
+        onclick={() => (isUploadDialogOpen = false)}>
+        Cancel
+      </Button>
+    </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>
