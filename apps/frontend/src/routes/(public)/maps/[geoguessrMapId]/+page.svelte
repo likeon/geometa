@@ -182,17 +182,10 @@
                 }
 
                 confirmAdding = false;
-                if (data.personalMaps.length > 1) {
-                  if (!selectedPersonalMapId) {
-                    selectedPersonalMapId = data.personalMaps[0].id.toString();
-                  }
-                  confirmAdding = await openDialog();
-                } else {
+                if (!selectedPersonalMapId) {
                   selectedPersonalMapId = data.personalMaps[0].id.toString();
-                  confirmAdding = confirm(
-                    `Are you sure you want to add ${visibleSelectedMetaIds.size} visible meta(s) to your personal map?`
-                  );
                 }
+                confirmAdding = await openDialog();
 
                 if (!confirmAdding) {
                   cancel();
