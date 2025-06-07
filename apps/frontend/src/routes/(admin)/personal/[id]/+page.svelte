@@ -6,6 +6,7 @@
   import * as Dialog from '$lib/components/ui/dialog';
   import { Button } from '$lib/components/ui/button';
   import Icon from '@iconify/svelte';
+  import ConfirmationDialog from '$lib/components/ConfirmationDialog.svelte';
 
   let { data } = $props();
   let selectedId = $state<number>();
@@ -26,6 +27,15 @@
 
   let selectedIds: number[] = $state([]);
   let deleteFormElement: HTMLFormElement;
+  let isDeleteDialogOpen = $state(false);
+
+  function handleDeleteConfirm() {
+    deleteFormElement.requestSubmit();
+  }
+
+  function handleDeleteCancel() {
+    // Dialog will close automatically
+  }
 </script>
 
 <PersonalNavBar mapName={data.mapName} id={data.id} geoguessrId={data.geoguessrId} />
@@ -65,7 +75,7 @@
             icon: '🗑',
             variant: 'destructive',
             handler: () => {
-              deleteFormElement.requestSubmit();
+              isDeleteDialogOpen = true;
             }
           }
         ]
@@ -190,13 +200,8 @@
   action="?/removeMetasFromPersonalMap"
   use:enhance={() => {
     return async ({ update }) => {
-      const confirmed = confirm(
-        `Are you sure you want to delete ${selectedIds.length} meta(s)? IT'S PERMANENT DELETION`
-      );
-      if (!confirmed) {
-        return;
-      }
       await update();
+      isDeleteDialogOpen = false;
       selectedIds = [];
     };
   }}>
@@ -204,6 +209,24 @@
     <input type="hidden" name="id" value={id} />
   {/each}
 </form>
+
+<ConfirmationDialog
+  bind:open={isDeleteDialogOpen}
+  title="Delete {selectedIds.length} Meta{selectedIds.length !== 1 ? 's' : ''}?"
+  description="This action cannot be undone. The following metas will be permanently removed from your personal map:"
+  confirmText="Delete metas"
+  items={data.metaList
+    .filter((meta) => selectedIds.includes(meta.metaId))
+    .map((meta) => ({
+      id: meta.metaId,
+      name: `${meta.countries?.[0] || 'Unknown country'} - ${meta.name}`,
+      detail: meta.usedInMapName
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))}
+  warningTitle="This is a permanent removal"
+  warningDescription="The metas will be removed from your personal map but will remain available in the original map."
+  onConfirm={handleDeleteConfirm}
+  onCancel={handleDeleteCancel} />
 
 <style>
   :global(.prose ul li) {

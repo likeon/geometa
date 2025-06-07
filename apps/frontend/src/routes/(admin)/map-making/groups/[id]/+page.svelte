@@ -17,6 +17,7 @@
   import { Label } from '$lib/components/ui/label';
   import * as Select from '$lib/components/ui/select';
   import Tooltip from '$lib/components/Tooltip.svelte';
+  import ConfirmationDialog from '$lib/components/ConfirmationDialog.svelte';
 
   let { data } = $props();
 
@@ -91,6 +92,15 @@
 
   let selectedIds: number[] = $state([]);
   let isDeleteDialogOpen = $state(false);
+  let deleteFormElement: HTMLFormElement;
+
+  function handleDeleteConfirm() {
+    deleteFormElement.requestSubmit();
+  }
+
+  function handleDeleteCancel() {
+    // Dialog will close automatically
+  }
 </script>
 
 <svelte:head>
@@ -486,84 +496,40 @@
   </Dialog.Content>
 </Dialog.Root>
 
-<Dialog.Root bind:open={isDeleteDialogOpen}>
-  <Dialog.Content>
-    <Dialog.Header>
-      <Dialog.Title
-        >Delete {selectedIds.length} Meta{selectedIds.length !== 1 ? 's' : ''}?</Dialog.Title>
-      <Dialog.Description>
-        This action cannot be undone. The following metas will be permanently deleted:
-      </Dialog.Description>
-    </Dialog.Header>
+<ConfirmationDialog
+  bind:open={isDeleteDialogOpen}
+  title="Delete {selectedIds.length} Meta{selectedIds.length !== 1 ? 's' : ''}?"
+  description="This action cannot be undone. The following metas will be permanently deleted:"
+  confirmText="Delete metas"
+  items={metas
+    .filter((meta) => selectedIds.includes(meta.id))
+    .map((meta) => ({
+      id: meta.id,
+      name: meta.tagName,
+      count: meta.locationsCount?.total ?? 0
+    }))}
+  warningDescription="All associated data with the metas will be lost."
+  onConfirm={handleDeleteConfirm}
+  onCancel={handleDeleteCancel} />
 
-    <div class="space-y-4 py-4">
-      <div class="rounded-md bg-destructive/10 border border-destructive/20 p-4">
-        <div class="flex items-start space-x-2">
-          <Icon
-            icon="material-symbols:warning-rounded"
-            width="1.25rem"
-            height="1.25rem"
-            class="text-destructive mt-0.5" />
-          <div class="space-y-1">
-            <p class="text-sm font-medium text-destructive">This is a permanent deletion</p>
-            <p class="text-sm text-muted-foreground">
-              All associated data with the metas will be lost.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div class="space-y-2">
-        <p class="text-sm font-medium">Metas to be deleted:</p>
-        <div class="border rounded-md p-3 max-h-[200px] overflow-y-auto space-y-1">
-          {#each metas.filter((meta) => selectedIds.includes(meta.id)) as meta (meta.id)}
-            <div class="flex items-center justify-between text-sm">
-              <span class="font-mono">{meta.tagName}</span>
-              <span class="text-xs text-muted-foreground"
-                >{meta.locationsCount?.total ?? 0} locations</span>
-            </div>
-          {/each}
-        </div>
-      </div>
-
-      <div class="rounded-md bg-muted p-3">
-        <p class="text-sm text-muted-foreground">
-          <strong>Total:</strong>
-          {selectedIds.length} meta{selectedIds.length !== 1 ? 's' : ''} will be deleted
-        </p>
-      </div>
-    </div>
-
-    <Dialog.Footer>
-      <Button
-        type="button"
-        variant="outline"
-        onclick={() => {
-          isDeleteDialogOpen = false;
-        }}>
-        Cancel
-      </Button>
-      <form
-        method="post"
-        action="?/deleteMetas"
-        use:enhance={() => {
-          return async ({ update }) => {
-            await update();
-            isDeleteDialogOpen = false;
-            selectedIds = [];
-            toast.push('Metas deleted successfully', {
-              duration: 3000
-            });
-          };
-        }}>
-        {#each selectedIds as id (id)}
-          <input type="hidden" name="id" value={id} />
-        {/each}
-        <Button type="submit" variant="destructive">Delete metas</Button>
-      </form>
-    </Dialog.Footer>
-  </Dialog.Content>
-</Dialog.Root>
+<form
+  bind:this={deleteFormElement}
+  method="post"
+  action="?/deleteMetas"
+  use:enhance={() => {
+    return async ({ update }) => {
+      await update();
+      isDeleteDialogOpen = false;
+      selectedIds = [];
+      toast.push('Metas deleted successfully', {
+        duration: 3000
+      });
+    };
+  }}>
+  {#each selectedIds as id (id)}
+    <input type="hidden" name="id" value={id} />
+  {/each}
+</form>
 
 <MetaEditDialog
   bind:isMetaDialogOpen

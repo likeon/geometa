@@ -94,7 +94,7 @@ export const load = async ({ params, locals }) => {
     locals.db.query.mapGroups.findFirst({
       with: {
         metas: {
-          orderBy: [asc(metas.id)],
+          orderBy: [asc(metas.tagName)],
           with: {
             metaLevels: { with: { level: true } },
             images: { orderBy: [asc(metaImages.order), asc(metaImages.id)] },
