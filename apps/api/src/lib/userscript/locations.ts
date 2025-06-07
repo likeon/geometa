@@ -30,6 +30,9 @@ export const locationSelect = db
     mapName: originalMaps.name,
     mapAuthors: originalMaps.authors,
     mapGeoguessrId: originalMaps.geoguessrId,
+    // For logging purposes
+    mapId: maps.id,
+    syncedMetaId: syncedMetas.metaId,
   })
   .from(syncedMetas)
   .innerJoin(

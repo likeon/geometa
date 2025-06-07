@@ -4,8 +4,9 @@ drizzle-generate:
 drizzle-migrate:
   bunx drizzle-kit migrate
 
+database := "geometa"
 db-psql:
-  psql -h localhost -U postgres geometa
+  psql -h localhost -U postgres {{database}}
 
 alias db-shell := db-psql
 

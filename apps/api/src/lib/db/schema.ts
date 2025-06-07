@@ -255,9 +255,7 @@ export const metaImages = pgTable(
     image_url: text('image_url').notNull(),
     order: integer('order').notNull().default(0),
   },
-  (t) => ([
-    uniqueIndex('meta_image_unique').on(t.metaId, t.image_url),
-  ]),
+  (t) => [uniqueIndex('meta_image_unique').on(t.metaId, t.image_url)],
 );
 export const metaImagesRelations = relations(metaImages, ({ one }) => ({
   meta: one(metas, { fields: [metaImages.metaId], references: [metas.id] }),
@@ -416,6 +414,22 @@ export const syncedMapMetas = pgTable(
       .references(() => syncedMetas.metaId, { onDelete: 'cascade' }),
   },
   (t) => [primaryKey({ columns: [t.mapId, t.syncedMetaId] })],
+);
+
+// Location request logs for usage analytics (TimescaleDB hypertable)
+export const locationRequestLogs = pgTable(
+  'location_request_logs',
+  {
+    timestamp: timestamp('timestamp', { mode: 'date', withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    mapId: bigint('map_id', { mode: 'number' }).notNull(),
+    panoId: text('pano_id').notNull(),
+    syncedMetaId: bigint('synced_meta_id', { mode: 'number' }),
+  },
+  (t) => [
+    index('location_request_logs_meta_idx').on(t.syncedMetaId, t.timestamp),
+  ],
 );
 
 // --------------

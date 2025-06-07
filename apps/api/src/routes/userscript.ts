@@ -1,4 +1,9 @@
-import { mapGroupPermissions, maps, users } from '@api/lib/db/schema';
+import {
+  locationRequestLogs,
+  mapGroupPermissions,
+  maps,
+  users,
+} from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import {
   locationSelect,
@@ -38,15 +43,12 @@ export const userscriptRouter = new Elysia({
       userscriptVersion: userscriptVersion,
     };
   })
-  .get(
-    '/announcement/',
-    async () => {
-      return {
-        timestamp: 1748891186,
-        htmlMessage : `🎉 We're nominated for the 2025 GeoGuessr Awards! If you enjoy LearnableMeta, <a href="https://www.geoguessr.com/community/awards/2025" target="_blank">vote for us here!</a> Thank you for the support!`
-      };
-    },
-  )
+  .get('/announcement/', async () => {
+    return {
+      timestamp: 1748891186,
+      htmlMessage: `🎉 We're nominated for the 2025 GeoGuessr Awards! If you enjoy LearnableMeta, <a href="https://www.geoguessr.com/community/awards/2025" target="_blank">vote for us here!</a> Thank you for the support!`,
+    };
+  })
   .get(
     '/location/',
     async ({ query, set }) => {
@@ -56,11 +58,28 @@ export const userscriptRouter = new Elysia({
         return ['NOT_FOUND'];
       }
 
+      // shouldn't really be needed, but we hit a bug in prod where each api endpoint returns 404 with correct response data
+      // seems to be fixed now, but userscript relies on response status of this api
+      // just keep to be safe
       set.status = 200;
 
       const [meta] = metaResult;
       // hack for now, should country be marked as not null in schema since we will always have it?
       const country = meta.country || '';
+
+      // Log the location request in the background
+      setImmediate(async () => {
+        try {
+          await db.insert(locationRequestLogs).values({
+            mapId: meta.mapId,
+            panoId: query.panoId,
+            syncedMetaId: meta.syncedMetaId,
+          });
+        } catch (error) {
+          // Don't fail the request if logging fails
+          console.error('Failed to log location request:', error);
+        }
+      });
 
       let footer = generateFooter(
         meta.noteFromPlonkit,
