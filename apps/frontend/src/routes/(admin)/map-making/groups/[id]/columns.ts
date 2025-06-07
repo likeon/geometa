@@ -63,6 +63,23 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
         sort: column.getIsSorted()
       }),
     accessorFn: (row) => row.locationsCount?.total ?? 0,
+    filterFn: (row, columnId, filterValue) => {
+      const filters = Array.isArray(filterValue)
+        ? filterValue
+        : filterValue != null
+          ? [filterValue]
+          : [];
+
+      if (filters.length === 0) return true;
+
+      const count = row.original.locationsCount?.total ?? 0;
+
+      return filters.some((f) => {
+        if (f === 'has_locations') return count > 0;
+        if (f === 'no_locations') return count === 0;
+        return true;
+      });
+    },
     meta: {
       class: 'w-24 min-w-16 max-w-28 pl-2 xl:w-32 xl:max-w-40'
     }

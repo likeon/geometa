@@ -268,6 +268,14 @@
         columnId: 'levels',
         title: 'Levels',
         options: getLevelOptions
+      },
+      {
+        columnId: 'locationsCount',
+        title: 'Locations',
+        options: () => [
+          { label: 'With locations', value: 'has_locations' },
+          { label: 'No locations', value: 'no_locations' }
+        ]
       }
     ]}
     massAction={{
