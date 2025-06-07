@@ -38,10 +38,14 @@ export type ImageUploadSchema = typeof imageUploadSchema;
 
 const imageOrderUpdateSchema = z.object({
   metaId: z.number(),
-  updates: z.array(z.object({
-    imageId: z.number(),
-    order: z.number()
-  })).min(1, 'At least one image update is required')
+  updates: z
+    .array(
+      z.object({
+        imageId: z.number(),
+        order: z.number()
+      })
+    )
+    .min(1, 'At least one image update is required')
 });
 export type ImageOrderUpdateSchema = typeof imageOrderUpdateSchema;
 

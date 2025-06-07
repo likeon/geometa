@@ -167,7 +167,11 @@
         {#if data.group.hasUnsycnedData}
           <Tooltip
             content="People playing your map will only see changes after you synchronize the changes!">
-            <Button variant="default" class="ml-3 animate-pulse" type="submit" disabled={syncingUserScript}>
+            <Button
+              variant="default"
+              class="ml-3 animate-pulse"
+              type="submit"
+              disabled={syncingUserScript}>
               {@render userScriptSyncButtonContent()}
             </Button>
           </Tooltip>
