@@ -159,7 +159,6 @@ export const actions = {
     if (!form.valid) {
       return fail(400, { form });
     }
-    console.log(form.data);
     await ensurePermissions(locals.db, locals.user?.id, form.data.mapGroupId);
 
     const { id, levels, ...dataNoId } = form.data;

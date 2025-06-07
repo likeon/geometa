@@ -76,7 +76,6 @@
       return;
     }
     if (meta) {
-      console.log(meta);
       formMetaData.update(
         ($formMetaData) => {
           $formMetaData.id = meta.id;

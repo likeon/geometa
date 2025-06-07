@@ -38,7 +38,6 @@ export const actions = {
     if (isNaN(levelId)) {
       error(400, 'Invalid ID');
     }
-    console.log('HERE');
 
     const level = await locals.db.query.levels.findFirst({ where: eq(levels.id, levelId) });
     await ensurePermissions(locals.db, locals.user?.id, level?.mapGroupId);

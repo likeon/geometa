@@ -24,7 +24,6 @@
   const form = superForm(data, {
     onResult({ result }) {
       if (result.type == 'success') {
-        console.log(result.data?.form.message.numberOfLocations);
         numberOfLocationsUploaded = result.data?.form.message.numberOfLocations || 0;
         isUploadDialogOpen = false;
       }

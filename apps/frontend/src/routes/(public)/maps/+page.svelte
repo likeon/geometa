@@ -29,7 +29,6 @@
   $effect(() => {
     data.allMaps.then((maps) => {
       allMaps = maps;
-      console.log(maps[0]);
     });
   });
 
