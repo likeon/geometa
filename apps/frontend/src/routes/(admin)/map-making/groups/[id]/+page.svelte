@@ -157,7 +157,7 @@
         {#if data.group.hasUnsycnedData}
           <Tooltip
             content="People playing your map will only see changes after you synchronize the changes!">
-            <Button variant="default" class="ml-3 animate-pulse" type="submit">
+            <Button variant="default" class="ml-3 animate-pulse" type="submit" disabled={syncingUserScript}>
               {@render userScriptSyncButtonContent()}
             </Button>
           </Tooltip>
@@ -166,7 +166,8 @@
             <Button
               variant="ghost"
               class="ml-3 opacity-20 hover:opacity-100 transition-opacity"
-              type="submit">
+              type="submit"
+              disabled={syncingUserScript}>
               {@render userScriptSyncButtonContent()}
             </Button>
           </Tooltip>
@@ -477,7 +478,7 @@
           }}>
           Cancel
         </Button>
-        <Button type="submit" disabled={!selectedGroupId}>
+        <Button type="submit" disabled={!selectedGroupId || sharingMetas}>
           {@render sharingMetasButtonContent()}
         </Button>
       </Dialog.Footer>
