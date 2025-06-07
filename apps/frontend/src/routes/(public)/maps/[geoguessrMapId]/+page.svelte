@@ -255,7 +255,8 @@
                     <Table.Head class="w-[25px]">
                       <Checkbox
                         checked={selectAll}
-                        onCheckedChange={(checked) => toggleAll(!!checked)} />
+                        onCheckedChange={(checked) => toggleAll(!!checked)}
+                        class="cursor-pointer" />
                     </Table.Head>
                     <Table.Head>Select all ({filteredMetaList.length})</Table.Head>
                   </Table.Row>
@@ -273,17 +274,21 @@
                 {:else}
                   {#each filteredMetaList as meta (meta.id)}
                     <Table.Row
-                      class={`cursor-pointer ${selectedMeta.id === meta.id ? 'bg-accent' : ''}`}>
+                      class={`${selectedMeta.id === meta.id ? 'bg-accent' : ''}`}>
                       {#if data.isMapShared}
-                        <Table.Cell class="w-[40px]">
+                        <Table.Cell 
+                          class="w-[40px] cursor-pointer hover:bg-muted/50"
+                          onclick={(e) => {
+                            e.stopPropagation();
+                            toggleMeta(meta.id, !selectedMetaIds.has(meta.id));
+                          }}>
                           <Checkbox
                             checked={selectedMetaIds.has(meta.id)}
-                            onCheckedChange={(checked) => toggleMeta(meta.id, !!checked)}
-                            onclick={(e) => e.stopPropagation()} />
+                            class="pointer-events-none" />
                         </Table.Cell>
                       {/if}
                       <Table.Cell
-                        class="font-medium py-2 px-2"
+                        class="font-medium py-2 px-2 cursor-pointer hover:bg-muted/20"
                         onclick={() => selectMetaAndScroll(meta)}>
                         <div class="flex items-center justify-between w-full">
                           <span
