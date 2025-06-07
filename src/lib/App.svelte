@@ -38,35 +38,49 @@
   let header: HTMLDivElement;
 
   onMount(() => {
-    const urlParams = new URLSearchParams({
-      panoId,
-      mapId,
-      userscriptVersion,
-      source
-    }).toString();
-    const url = `https://learnablemeta.com/api/userscript/location?${urlParams}`;
+    const cacheKey = `${mapId}_${panoId}`;
 
-    GM_xmlhttpRequest({
-      method: 'GET',
-      url: url,
-      onload: (response) => {
-        if (response.status === 200) {
-          try {
-            geoInfo = JSON.parse(response.responseText);
-          } catch (e) {
-            error = 'Failed to parse response';
+    const cachedData = window.geometaMetaCache?.get(cacheKey);
+    if (cachedData) {
+      geoInfo = cachedData;
+    } else {
+      const urlParams = new URLSearchParams({
+        panoId,
+        mapId,
+        userscriptVersion,
+        source
+      }).toString();
+      const url = `https://learnablemeta.com/api/userscript/location?${urlParams}`;
+
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url: url,
+        onload: (response) => {
+          if (response.status === 200) {
+            try {
+              const data = JSON.parse(response.responseText);
+              geoInfo = data;
+
+              if (!window.geometaMetaCache) {
+                window.geometaMetaCache = new Map();
+              }
+              window.geometaMetaCache.set(cacheKey, data);
+            } catch (e) {
+              error = 'Failed to parse response';
+            }
+          } else if (response.status === 404) {
+            error = 'Meta for this location not found';
+          } else {
+            error = `HTTP error! status: ${response.status}`;
           }
-        } else if (response.status === 404) {
-          error = 'Meta for this location not found';
-        } else {
-          error = `HTTP error! status: ${response.status}`;
+        },
+        onerror: (e) => {
+          error = 'An error occurred while fetching data';
+          console.error('Error:', e);
         }
-      },
-      onerror: (e) => {
-        error = 'An error occurred while fetching data';
-        console.error('Error:', e);
-      }
-    });
+      });
+    }
+
 
     setContainerPosition(container);
     setContainerDimensions(container);
@@ -88,8 +102,6 @@
       document.removeEventListener('pointermove', (event) => onPointerMove(event, container));
       document.removeEventListener('pointerup', (event) => onPointerUp(event, container));
     };
-
-
   });
 
   function confirmNavigation(event: any) {
@@ -231,7 +243,7 @@
               screen.
             </li>
             <li><strong>Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li>
-            <li><strong>View Map metalist:</strong> Click the list icon to see all the metas included in the map you
+            <li><strong>View Map meta list:</strong> Click the list icon to see all the metas included in the map you
               are currently playing.
             </li>
             <li><strong>Join the Community:</strong> Click the Discord icon to share feedback, suggest improvements, or
@@ -551,5 +563,57 @@
 
   .outdated strong {
     color: red !important;
+  }
+
+  :global(.geometa-meta-btn) {
+    background: #188bd2;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-size: 11px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: background-color 0.2s ease;
+    font-weight: bold;
+    z-index: 1000;
+    pointer-events: auto;
+    display: inline-block;
+  }
+
+  :global(.result-list_listItemWrapper___XCGn) {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+  }
+
+  :global(.geometa-meta-btn:hover) {
+    background: #0056b3;
+  }
+
+  :global(.geometa-pin-question) {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 16px;
+    height: 16px;
+    background: #188bd2;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10000;
+    transition: background-color 0.2s ease;
+    border: 1px solid white;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+  }
+
+  :global(.geometa-pin-question:hover) {
+    background: #0056b3;
+    transform: scale(1.1);
   }
 </style>
