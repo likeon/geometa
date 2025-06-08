@@ -1,10 +1,10 @@
 <script>
   import * as Tooltip from '$lib/components/ui/tooltip/index';
 
-  let { children, content, side = 'top', delayDuration = 0, ...restProps } = $props();
+  let { children, content, side = 'top', delayDuration = 0, disableCloseOnTriggerClick = false, ...restProps } = $props();
 </script>
 
-<Tooltip.Root {delayDuration}>
+<Tooltip.Root {delayDuration} {disableCloseOnTriggerClick}>
   <Tooltip.Trigger>
     {@render children()}
   </Tooltip.Trigger>

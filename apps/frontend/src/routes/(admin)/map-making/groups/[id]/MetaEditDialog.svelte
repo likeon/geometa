@@ -19,6 +19,7 @@
   } from '$routes/(admin)/map-making/groups/[id]/+page.server';
   import { Button } from '$lib/components/ui/button/index';
   import Icon from '@iconify/svelte';
+  import Tooltip from '$lib/components/Tooltip.svelte';
 
   let {
     isMetaDialogOpen = $bindable(),
@@ -156,6 +157,16 @@
                 savedForm = $formMetaData;
               }
             }}>Images</Tabs.Trigger>
+        {:else}
+          <Tooltip
+            content="Meta must be saved first before adding images"
+            side="right"
+            delayDuration={100}
+            disableCloseOnTriggerClick={true}>
+            <Tabs.Trigger value="images" disabled class="!pointer-events-auto cursor-not-allowed">
+              Images
+            </Tabs.Trigger>
+          </Tooltip>
         {/if}
       </Tabs.List>
       <Tabs.Content value="info" class="h-[68vh] max-h-[650px] overflow-y-auto flex-none">
