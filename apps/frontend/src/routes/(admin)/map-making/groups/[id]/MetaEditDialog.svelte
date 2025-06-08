@@ -60,7 +60,7 @@
   let savedForm: MetaFormDataType | null = null;
 
   const currentIndex = $derived(selectedIds.findIndex((id) => id === selectedMetaId));
-  const canNavigate = $derived(selectedIds.length > 1);
+  const canNavigate = $derived(selectedIds.length > 1 && selectedMetaId !== -1);
 
   function navigatePrevious() {
     if (canNavigate) {
@@ -131,15 +131,15 @@
       <Dialog.Title class="flex-1">
         {selectedMeta ? `Edit Meta: ${selectedMeta.tagName}` : 'Add Meta'}
       </Dialog.Title>
-      {#if selectedIds.length > 1}
+      {#if canNavigate}
         <div class="flex items-center gap-2 mr-4">
-          <Button variant="outline" size="sm" onclick={navigatePrevious} disabled={!canNavigate}>
+          <Button variant="outline" size="sm" onclick={navigatePrevious}>
             <Icon icon="material-symbols:arrow-back" width="1rem" height="1rem" />
           </Button>
           <span class="text-sm text-muted-foreground">
             {currentIndex + 1} / {selectedIds.length}
           </span>
-          <Button variant="outline" size="sm" onclick={navigateNext} disabled={!canNavigate}>
+          <Button variant="outline" size="sm" onclick={navigateNext}>
             <Icon icon="material-symbols:arrow-forward" width="1rem" height="1rem" />
           </Button>
         </div>
