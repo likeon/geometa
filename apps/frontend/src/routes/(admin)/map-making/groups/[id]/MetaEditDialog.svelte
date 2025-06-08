@@ -169,7 +169,7 @@
           </Tooltip>
         {/if}
       </Tabs.List>
-      <Tabs.Content value="info" class="h-[68vh] max-h-[650px] overflow-y-auto flex-none">
+      <Tabs.Content value="info" class="h-[68vh] max-h-[650px] overflow-y-auto flex-none p-1">
         <form method="POST" use:enhanceMeta action="?/updateMeta">
           <Input type="hidden" name="id" bind:value={$formMetaData.id} />
           <Input type="hidden" name="mapGroupId" bind:value={$formMetaData.mapGroupId} />
