@@ -48,24 +48,24 @@
       <span class="sr-only">Toggle Menu</span>
     </Sheet.Trigger>
     <Sheet.Content side="left" class="pr-0">
-      <Sheet.Header class="pl-0">
+      <Sheet.Header class="pl-0 landscape:py-2">
         <a
           href="/"
           class="flex items-center"
           onclick={() => {
             open = false;
           }}>
-          <enhanced:img src={logo} class="pl-1.5 h-6 w-auto ml-1" alt="Logo" />
-          <span class="font-bold">LearnableMeta</span>
+          <enhanced:img src={logo} class="pl-1.5 h-6 w-auto ml-1 landscape:h-5" alt="Logo" />
+          <span class="font-bold landscape:text-sm">LearnableMeta</span>
         </a>
       </Sheet.Header>
       <ScrollArea
         orientation="both"
-        class="h-[calc(100vh-4.5rem-env(safe-area-inset-bottom))] pb-16">
-        <div class="flex flex-col space-y-3">
+        class="h-[calc(100vh-4.5rem-env(safe-area-inset-bottom))] landscape:h-[calc(100vh-3rem-env(safe-area-inset-bottom))] pb-16 landscape:pb-8">
+        <div class="flex flex-col space-y-3 landscape:space-y-2">
           {#each navLinks as navItem, index (navItem + index.toString())}
             {#if navItem.url}
-              <MobileLink href={navItem.url} bind:open class="text-foreground">
+              <MobileLink href={navItem.url} bind:open class="text-foreground landscape:text-sm landscape:py-2">
                 {navItem.name}
               </MobileLink>
             {/if}
