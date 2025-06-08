@@ -117,95 +117,94 @@
   }
 </script>
 
-<div
-  class="grid grid-cols-2 gap-4"
-  use:dndzone={{
-    items,
-    flipDurationMs: 200,
-    dropTargetStyle: {
-      outline: '2px dashed #3b82f6',
-      'outline-offset': '4px',
-      'background-color': 'rgba(59, 130, 246, 0.1)'
-    }
-  }}
-  onconsider={handleDndConsider}
-  onfinalize={handleDndFinalize}>
-  {#each items as image (image.id)}
-    <div
-      class="relative group min-h-[200px] transition-transform duration-200 {isDragging
-        ? 'cursor-grabbing'
-        : 'cursor-grab'}"
-      animate:flip={{ duration: 200 }}>
-      <form
-        method="post"
-        action="?/deleteMetaImage"
-        use:enhance={() => {
-          return async ({ result }) => {
-            await invalidateAll();
-            await applyAction(result);
-          };
-        }}>
-        <Input type="hidden" name="imageId" value={parseInt(image.id)} />
-        <img src={image.image_url} alt="#" class="w-full h-auto rounded-lg" />
+<div class="h-full flex flex-col">
+  <div class="border-b pb-2 mb-2">
+    <form method="post" action="?/uploadMetaImages" enctype="multipart/form-data" use:imageEnhance>
+      <Input type="hidden" name="metaId" value={selectedMeta.id} />
+
+      <div class="flex gap-2 items-center h-12">
+        <!-- svelte-ignore a11y_no_static_element_interactions -->
         <div
-          class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
-          <Button type="submit" variant="secondary">Delete</Button>
+          class="flex-1 border-2 border-dashed rounded p-2 text-center transition-colors border-border bg-muted hover:bg-accent {isDragging
+            ? 'border-primary bg-primary/10'
+            : ''}"
+          ondragover={handleDragOver}
+          ondragleave={handleDragLeave}
+          ondrop={handleDrop}>
+          <p class="text-muted-foreground text-xs">
+            {#if isUploading}
+              <LoadingSmall />
+            {:else}
+              Drag & Drop images here
+            {/if}
+          </p>
         </div>
-      </form>
+
+        <span class="text-xs text-muted-foreground">or</span>
+
+        <input
+          accept="image/png, image/jpeg, image/webp"
+          name="file"
+          type="file"
+          bind:files={$file}
+          onchange={handleFileUpload}
+          class="text-xs file:py-1 file:px-2 file:rounded file:border-0 file:bg-secondary file:text-secondary-foreground hover:file:bg-accent" />
+      </div>
+
+      {#if $imageErrors.file}
+        <div class="text-destructive text-xs mt-1">{$imageErrors.file}</div>
+      {/if}
+    </form>
+  </div>
+
+  <div class="flex-1 overflow-y-auto min-h-0">
+    <div
+      class="grid grid-cols-2 gap-2"
+      use:dndzone={{
+        items,
+        flipDurationMs: 200,
+        dropTargetStyle: {
+          outline: '2px dashed #3b82f6',
+          'outline-offset': '4px',
+          'background-color': 'rgba(59, 130, 246, 0.1)'
+        }
+      }}
+      onconsider={handleDndConsider}
+      onfinalize={handleDndFinalize}>
+      {#each items as image (image.id)}
+        <div
+          class="relative group transition-transform duration-200 {isDragging
+            ? 'cursor-grabbing'
+            : 'cursor-grab'}"
+          animate:flip={{ duration: 200 }}>
+          <form
+            method="post"
+            action="?/deleteMetaImage"
+            use:enhance={() => {
+              return async ({ result }) => {
+                await invalidateAll();
+                await applyAction(result);
+              };
+            }}>
+            <Input type="hidden" name="imageId" value={parseInt(image.id)} />
+            <img
+              src={image.image_url}
+              alt="#"
+              class="w-full aspect-square object-contain bg-gray-100 rounded-lg" />
+            <div
+              class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg">
+              <Button type="submit" variant="secondary" size="sm">Delete</Button>
+            </div>
+          </form>
+        </div>
+      {/each}
     </div>
-  {/each}
+  </div>
 </div>
 
 <form method="post" action="?/updateImageOrder" style="display: none;" use:orderEnhance></form>
 
-<form
-  class="flex flex-col space-y-6"
-  method="post"
-  action="?/uploadMetaImages"
-  enctype="multipart/form-data"
-  use:imageEnhance>
-  <Input type="hidden" name="metaId" value={selectedMeta.id} />
-
-  <label>
-    Upload an image:
-    <input
-      accept="image/png, image/jpeg, image/webp"
-      name="file"
-      type="file"
-      bind:files={$file}
-      onchange={handleFileUpload} />
-    {#if $imageErrors.file}
-      <div class="invalid">{$imageErrors.file}</div>
-    {/if}
-  </label>
-
-  {#if isUploading}
-    <div class="mx-auto"><LoadingSmall /></div>
-  {/if}
-
-  <!-- svelte-ignore a11y_no_static_element_interactions -->
-  <div
-    class="drop-area {isDragging ? 'dragging' : ''}"
-    ondragover={handleDragOver}
-    ondragleave={handleDragLeave}
-    ondrop={handleDrop}>
-    <p>Drag & Drop your image here or click above to browse</p>
-  </div>
-</form>
-
 <style>
-  .drop-area {
-    border: 2px dashed #cccccc;
-    padding: 20px;
-    text-align: center;
-    transition: background-color 0.2s;
-  }
-
-  img {
-    max-width: 100%;
-    height: auto;
-  }
-
   /* Custom drag styles for svelte-dnd-action */
   :global(.dnd-action-dragged-el) {
     opacity: 0.9;

@@ -17,6 +17,8 @@
     ImageOrderUpdateSchema,
     ImageUploadSchema
   } from '$routes/(admin)/map-making/groups/[id]/+page.server';
+  import { Button } from '$lib/components/ui/button/index';
+  import Icon from '@iconify/svelte';
 
   let {
     isMetaDialogOpen = $bindable(),
@@ -25,7 +27,9 @@
     groupId,
     selectedMeta,
     imageUploadForm,
-    imageOrderUpdateForm
+    imageOrderUpdateForm,
+    selectedIds = [],
+    selectedMetaId = $bindable()
   }: {
     isMetaDialogOpen: boolean;
     metaForm: SuperValidated<Infer<InsertMetasSchema>>;
@@ -34,6 +38,8 @@
     selectedMeta: PageData['group']['metas'][number] | null;
     imageUploadForm: SuperValidated<Infer<ImageUploadSchema>>;
     imageOrderUpdateForm: SuperValidated<Infer<ImageOrderUpdateSchema>>;
+    selectedIds?: number[];
+    selectedMetaId?: number;
   } = $props();
 
   const formMeta = superForm(metaForm, {
@@ -52,6 +58,23 @@
   const cartaFooter = new Carta();
   type MetaFormDataType = Infer<InsertMetasSchema>;
   let savedForm: MetaFormDataType | null = null;
+
+  const currentIndex = $derived(selectedIds.findIndex((id) => id === selectedMetaId));
+  const canNavigate = $derived(selectedIds.length > 1);
+
+  function navigatePrevious() {
+    if (canNavigate) {
+      const prevIndex = currentIndex === 0 ? selectedIds.length - 1 : currentIndex - 1;
+      selectedMetaId = selectedIds[prevIndex];
+    }
+  }
+
+  function navigateNext() {
+    if (canNavigate) {
+      const nextIndex = currentIndex === selectedIds.length - 1 ? 0 : currentIndex + 1;
+      selectedMetaId = selectedIds[nextIndex];
+    }
+  }
 
   function nullifyForm() {
     formMetaData.update(
@@ -103,7 +126,25 @@
 </script>
 
 <Dialog.Root bind:open={isMetaDialogOpen}>
-  <Dialog.Content class="sm:max-w-3xl w-full">
+  <Dialog.Content class="sm:max-w-3xl w-full max-h-[500px]:max-w-[90vw] max-h-[400px]:max-w-[95vw]">
+    <Dialog.Header class="flex flex-row items-center space-y-0 pr-6">
+      <Dialog.Title class="flex-1">
+        {selectedMeta ? `Edit Meta: ${selectedMeta.tagName}` : 'Add Meta'}
+      </Dialog.Title>
+      {#if selectedIds.length > 1}
+        <div class="flex items-center gap-2 mr-4">
+          <Button variant="outline" size="sm" onclick={navigatePrevious} disabled={!canNavigate}>
+            <Icon icon="material-symbols:arrow-back" width="1rem" height="1rem" />
+          </Button>
+          <span class="text-sm text-muted-foreground">
+            {currentIndex + 1} / {selectedIds.length}
+          </span>
+          <Button variant="outline" size="sm" onclick={navigateNext} disabled={!canNavigate}>
+            <Icon icon="material-symbols:arrow-forward" width="1rem" height="1rem" />
+          </Button>
+        </div>
+      {/if}
+    </Dialog.Header>
     <Tabs.Root value="info" class="w-full max-w-3xl">
       <Tabs.List>
         <Tabs.Trigger value="info">Info</Tabs.Trigger>
@@ -117,7 +158,7 @@
             }}>Images</Tabs.Trigger>
         {/if}
       </Tabs.List>
-      <Tabs.Content value="info">
+      <Tabs.Content value="info" class="h-[68vh] max-h-[650px] overflow-y-auto flex-none">
         <form method="POST" use:enhanceMeta action="?/updateMeta">
           <Input type="hidden" name="id" bind:value={$formMetaData.id} />
           <Input type="hidden" name="mapGroupId" bind:value={$formMetaData.mapGroupId} />
@@ -154,12 +195,14 @@ Czechia - Arrow Signs" />
                   label="Note"
                   tooltipContent="This note is displayed in the meta info and uses a Markdown-style text editor.
           Click 'Preview' to see how it will look." />
-                <MarkdownEditor
-                  carta={cartaMeta}
-                  mode="tabs"
-                  theme="test"
-                  bind:value={$formMetaData.note}
-                  {...props} />
+                <div class="carta-note-editor">
+                  <MarkdownEditor
+                    carta={cartaMeta}
+                    mode="tabs"
+                    theme="test"
+                    bind:value={$formMetaData.note}
+                    {...props} />
+                </div>
               {/snippet}
             </Form.Control>
             <Form.FieldErrors />
@@ -186,12 +229,14 @@ Czechia - Arrow Signs" />
                 <FormLabelWithTooltip
                   label="Footer"
                   tooltipContent="This footer will appear below the meta note. If a footer is set for the map, this meta footer will still take priority and be displayed instead." />
-                <MarkdownEditor
-                  carta={cartaFooter}
-                  mode="tabs"
-                  theme="test"
-                  bind:value={$formMetaData.footer}
-                  {...props} />
+                <div class="carta-footer-editor">
+                  <MarkdownEditor
+                    carta={cartaFooter}
+                    mode="tabs"
+                    theme="test"
+                    bind:value={$formMetaData.footer}
+                    {...props} />
+                </div>
               {/snippet}
             </Form.Control>
             <Form.FieldErrors />
@@ -214,7 +259,7 @@ Czechia - Arrow Signs" />
         </form>
       </Tabs.Content>
       {#if selectedMeta}
-        <Tabs.Content value="images">
+        <Tabs.Content value="images" class="h-[68vh] max-h-[650px] overflow-y-auto flex-none">
           <MetaImages {selectedMeta} {imageUploadForm} orderData={imageOrderUpdateForm}
           ></MetaImages>
         </Tabs.Content>
@@ -222,3 +267,45 @@ Czechia - Arrow Signs" />
     </Tabs.Root>
   </Dialog.Content>
 </Dialog.Root>
+
+<style>
+  :global(.carta-note-editor .carta-input),
+  :global(.carta-note-editor .carta-renderer) {
+    height: 17vh !important;
+    max-height: 160px !important;
+    overflow-y: auto !important;
+  }
+
+  :global(.carta-footer-editor .carta-input),
+  :global(.carta-footer-editor .carta-renderer) {
+    height: 5.6vh !important;
+    max-height: 50px !important;
+    overflow-y: auto !important;
+  }
+
+  /* Minimum heights for very small screens */
+  @media (max-height: 600px) {
+    :global(.carta-note-editor .carta-input),
+    :global(.carta-note-editor .carta-renderer) {
+      height: 120px !important;
+    }
+
+    :global(.carta-footer-editor .carta-input),
+    :global(.carta-footer-editor .carta-renderer) {
+      height: 40px !important;
+    }
+  }
+
+  /* Maximum heights for very large screens */
+  @media (min-height: 1200px) {
+    :global(.carta-note-editor .carta-input),
+    :global(.carta-note-editor .carta-renderer) {
+      height: 200px !important;
+    }
+
+    :global(.carta-footer-editor .carta-input),
+    :global(.carta-footer-editor .carta-renderer) {
+      height: 60px !important;
+    }
+  }
+</style>

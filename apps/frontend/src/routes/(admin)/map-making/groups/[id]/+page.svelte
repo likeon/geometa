@@ -41,6 +41,7 @@
     const meta = metas.find((meta) => meta.id == selectedMetaId);
     return meta != undefined ? meta : null;
   });
+  let metaIds = $derived(metas.map(m => m.id));
 
   let numberOfLocationsUploaded = $state(0);
 
@@ -542,7 +543,9 @@
   {selectedMeta}
   groupId={data.group.id}
   imageUploadForm={data.imageUploadForm}
-  imageOrderUpdateForm={data.imageOrderUpdateForm} />
+  imageOrderUpdateForm={data.imageOrderUpdateForm}
+  selectedIds={selectedIds.length > 0 ? selectedIds : metaIds}
+  bind:selectedMetaId />
 
 <MapUploadDialog
   bind:isUploadDialogOpen={isMapUploadDialogOpen}
