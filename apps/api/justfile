@@ -16,3 +16,4 @@ db-dump:
 
 db-reset:
   psql -h localhost -U postgres postgres -f utils/db/reset.sql
+
