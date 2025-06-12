@@ -7,6 +7,7 @@ import { initLocationsUpload } from './lib/locationsUpload';
 
 function changelog() {
   return [
+    {'0.88': 'Updated framework version for bug-fixes'},
     {'0.87': 'Added ability to view metas on breakdown screen'},
     {'0.86': 'Changed look of announcement closing button'},
     {'0.85': 'Another fix for multiple instances of upload button'},
