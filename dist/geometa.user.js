@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.87
+// @version      0.88
 // @author       monkey
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
 // @downloadURL  https://github.com/likeon/geometa/raw/main/dist/geometa.user.js
 // @updateURL    https://github.com/likeon/geometa/raw/main/dist/geometa.user.js
 // @match        *://*.geoguessr.com/*
-// @require      https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/b0c7492f4f346d4acb594a2015d592616a665096/geoguessr-event-framework.js
+// @require      https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/5e449d6b64c828fce5d2915772d61c7f95263e34/geoguessr-event-framework.js
 // @connect      learnablemeta.com
 // @grant        GM_addStyle
 // @grant        GM_getValue
@@ -4307,6 +4307,7 @@
   }
   function changelog() {
     return [
+      { "0.88": "Updated framework version for bug-fixes" },
       { "0.87": "Added ability to view metas on breakdown screen" },
       { "0.86": "Changed look of announcement closing button" },
       { "0.85": "Another fix for multiple instances of upload button" },

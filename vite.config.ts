@@ -10,7 +10,7 @@ export default defineConfig({
       entry: 'src/main.ts',
       userscript: {
         icon: 'https://learnablemeta.com/favicon.png',
-        version: '0.87',
+        version: '0.88',
         namespace: 'geometa',
         name: 'GeoGuessr Learnable Meta',
         description: 'UserScript for GeoGuessr Learnable Meta maps',
@@ -20,7 +20,7 @@ export default defineConfig({
         downloadURL: 'https://github.com/likeon/geometa/raw/main/dist/geometa.user.js',
         'run-at': 'document-start',
         require: [
-          'https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/b0c7492f4f346d4acb594a2015d592616a665096/geoguessr-event-framework.js'
+          'https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/5e449d6b64c828fce5d2915772d61c7f95263e34/geoguessr-event-framework.js'
         ]
       }
     })
