@@ -85,7 +85,7 @@ fi
 mkdir -p "$PROJECT_LOCAL_DATA_PATH"
 mkdir -p "$PROJECT_LOCAL_DATA_PATH/postgres"
 #chmod 776 "$PROJECT_LOCAL_DATA_PATH" "$PROJECT_LOCAL_DATA_PATH/postgres"
-cat <<EOF | kind create cluster ${KIND_CLUSTER_OPTS} --config=-
+cat <<EOF | systemd-run --scope --user kind create cluster ${KIND_CLUSTER_OPTS} --config=-
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 containerdConfigPatches:
