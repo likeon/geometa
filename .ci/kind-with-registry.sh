@@ -85,7 +85,17 @@ fi
 mkdir -p "$PROJECT_LOCAL_DATA_PATH"
 mkdir -p "$PROJECT_LOCAL_DATA_PATH/postgres"
 #chmod 776 "$PROJECT_LOCAL_DATA_PATH" "$PROJECT_LOCAL_DATA_PATH/postgres"
-cat <<EOF | systemd-run --scope --user kind create cluster ${KIND_CLUSTER_OPTS} --config=-
+# Detect if running on Fedora
+IS_FEDORA=false
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    if [[ "$ID" == "fedora" ]]; then
+        IS_FEDORA=true
+    fi
+fi
+
+# Create the kind cluster configuration
+KIND_CONFIG=$(cat <<EOF
 kind: Cluster
 apiVersion: kind.x-k8s.io/v1alpha4
 containerdConfigPatches:
@@ -101,6 +111,14 @@ nodes:
       - hostPath: "$HOME/.docker/config.json"
         containerPath: /var/lib/kubelet/config.json
 EOF
+)
+
+# Run kind create cluster with or without systemd-run based on OS
+if [ "$IS_FEDORA" = true ]; then
+    echo "$KIND_CONFIG" | systemd-run --scope --user kind create cluster ${KIND_CLUSTER_OPTS} --config=-
+else
+    echo "$KIND_CONFIG" | kind create cluster ${KIND_CLUSTER_OPTS} --config=-
+fi
 
 cat <<EOF | kubectl apply -f -
 apiVersion: v1
