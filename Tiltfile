@@ -15,5 +15,5 @@ local_resource(
     serve_dir='./apps/api',
     serve_cmd='bun run dev',
     resource_deps=['postgres-server'],
-    links=['http://localhost:3000/api/swagger'],
+    links=['http://localhost:3000/api/docs'],
 )
