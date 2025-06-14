@@ -7,8 +7,10 @@ function createDbInstance() {
   let databaseURL: string;
   if (process.env.DATABASE_URL) {
     databaseURL = process.env.DATABASE_URL;
-  } else {
+  } else if (process.env.DATABASE_PASSWORD) {
     databaseURL = `postgresql://geometa:${process.env.DATABASE_PASSWORD}@postgres/geometa?sslmode=require`;
+  } else {
+    databaseURL = 'postgresql://postgres:postgres@localhost/geometa';
   }
   const client = new SQL(databaseURL, { max: 5 });
   return drizzle(client, {
