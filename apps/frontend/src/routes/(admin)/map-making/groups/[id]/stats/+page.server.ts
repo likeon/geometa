@@ -44,6 +44,7 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
       response.data?.map((meta: any) => ({
         metaId: meta.metaId,
         metaName: meta.metaName,
+        metaTag: meta.metaTag,
         totalCount: meta.totalCount,
         personalMapCount: meta.data.reduce(
           (sum: number, day: any) => sum + day.personalMapCount,
@@ -53,9 +54,31 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
         dailyData: meta.data // Include the daily breakdown for charts
       })) || [];
 
+    // Calculate combined stats across all metas
+    const combinedDailyStats: Record<string, { personalMapCount: number; regularMapCount: number }> = {};
+    
+    response.data?.forEach((meta: any) => {
+      meta.data.forEach((day: any) => {
+        if (!combinedDailyStats[day.day]) {
+          combinedDailyStats[day.day] = { personalMapCount: 0, regularMapCount: 0 };
+        }
+        combinedDailyStats[day.day].personalMapCount += day.personalMapCount;
+        combinedDailyStats[day.day].regularMapCount += day.regularMapCount;
+      });
+    });
+
+    const combinedStats = Object.entries(combinedDailyStats)
+      .map(([day, counts]) => ({
+        day,
+        personalMapCount: counts.personalMapCount,
+        regularMapCount: counts.regularMapCount
+      }))
+      .sort((a, b) => new Date(a.day).getTime() - new Date(b.day).getTime());
+
     return {
       group,
       summaryData,
+      combinedStats,
       selectedPeriod: validDays.toString()
     };
   } catch (err) {
@@ -63,6 +86,7 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
     return {
       group,
       summaryData: [],
+      combinedStats: [],
       error: err instanceof Error ? err.message : 'Unknown error',
       selectedPeriod: validDays.toString()
     };

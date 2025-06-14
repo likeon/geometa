@@ -13,6 +13,7 @@
 
   let selectedPeriod = $state(data.selectedPeriod || '30');
   let summaryData = $state(data.summaryData);
+  let combinedStats = $state(data.combinedStats);
   let error = $state(data.error);
   let selectedMeta = $state<any>(null);
   let dialogOpen = $state(false);
@@ -39,6 +40,7 @@
   $effect(() => {
     selectedPeriod = data.selectedPeriod || '30';
     summaryData = data.summaryData;
+    combinedStats = data.combinedStats;
     error = data.error;
   });
 
@@ -57,6 +59,15 @@
   // Transform daily data for chart
   let chartData = $derived(
     selectedMeta?.dailyData?.map((day: any) => ({
+      date: new Date(day.day).toLocaleDateString(),
+      personalMapCount: day.personalMapCount,
+      regularMapCount: day.regularMapCount
+    })) || []
+  );
+
+  // Transform combined stats for chart
+  let combinedChartData = $derived(
+    combinedStats?.map((day: any) => ({
       date: new Date(day.day).toLocaleDateString(),
       personalMapCount: day.personalMapCount,
       regularMapCount: day.regularMapCount
@@ -92,6 +103,36 @@
   {#if error}
     <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
       <p class="text-red-800 text-sm">Error loading stats: {error}</p>
+    </div>
+  {/if}
+
+  {#if combinedChartData.length > 0}
+    <div class="mb-6 p-4 border rounded-lg">
+      <h2 class="text-lg font-semibold mb-3">Combined Daily Usage</h2>
+      <div class="h-64">
+        <Chart.Container config={chartConfig} class="pl-8 h-full w-full">
+          <BarChart
+            data={combinedChartData}
+            x="date"
+            seriesLayout="stack"
+            series={[
+              {
+                key: 'personalMapCount',
+                label: chartConfig.personalMapCount.label,
+                color: chartConfig.personalMapCount.color
+              },
+              {
+                key: 'regularMapCount',
+                label: chartConfig.regularMapCount.label,
+                color: chartConfig.regularMapCount.color
+              }
+            ]}>
+            {#snippet tooltip()}
+              <Chart.Tooltip />
+            {/snippet}
+          </BarChart>
+        </Chart.Container>
+      </div>
     </div>
   {/if}
 

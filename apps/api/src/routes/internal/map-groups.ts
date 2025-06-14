@@ -2,6 +2,7 @@ import {
   locationRequestLogs,
   mapGroups,
   maps,
+  metas,
   syncedMetas,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
@@ -43,6 +44,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         .select({
           syncedMetaId: locationRequestLogs.syncedMetaId,
           metaName: syncedMetas.name,
+          metaTag: metas.tagName,
           day: sql<string>`DATE(${locationRequestLogs.timestamp})`.as('day'),
           // Cast COUNT() to int because PostgreSQL COUNT() returns bigint,
           // which Drizzle serializes as string. ::int ensures JavaScript number.
@@ -61,6 +63,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
           syncedMetas,
           eq(syncedMetas.metaId, locationRequestLogs.syncedMetaId),
         )
+        .innerJoin(metas, eq(metas.id, syncedMetas.metaId))
         .where(
           and(
             eq(syncedMetas.mapGroupId, mapGroupId),
@@ -71,6 +74,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         .groupBy(
           locationRequestLogs.syncedMetaId,
           syncedMetas.name,
+          metas.tagName,
           sql`DATE(${locationRequestLogs.timestamp})`,
         )
         .orderBy(
@@ -83,6 +87,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         {
           metaId: number;
           metaName: string;
+          metaTag: string;
           totalCount: number;
           data: Array<{
             day: string;
@@ -100,6 +105,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
           meta = {
             metaId: metaId,
             metaName: row.metaName,
+            metaTag: row.metaTag,
             totalCount: 0,
             data: [],
           };

@@ -5,6 +5,7 @@ import BaseTableHeader from '$lib/components/BaseTable/BaseTableHeader.svelte';
 type StatsData = {
   metaId: number;
   metaName: string;
+  metaTag: string;
   totalCount: number;
   personalMapCount: number;
   regularMapCount: number;
@@ -16,6 +17,15 @@ export const columns: ColumnDef<StatsData>[] = [
     header: ({ column }) =>
       renderComponent(BaseTableHeader, {
         name: 'Meta Name',
+        onclick: column.getToggleSortingHandler(),
+        sort: column.getIsSorted()
+      })
+  },
+  {
+    accessorKey: 'metaTag',
+    header: ({ column }) =>
+      renderComponent(BaseTableHeader, {
+        name: 'Tag',
         onclick: column.getToggleSortingHandler(),
         sort: column.getIsSorted()
       })
