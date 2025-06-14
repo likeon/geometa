@@ -413,7 +413,11 @@ export const syncedMapMetas = pgTable(
       .notNull()
       .references(() => syncedMetas.metaId, { onDelete: 'cascade' }),
   },
-  (t) => [primaryKey({ columns: [t.mapId, t.syncedMetaId] })],
+  (t) => [
+    primaryKey({ columns: [t.mapId, t.syncedMetaId] }),
+    // created via raw sql with include on map_id
+    // index('smm_meta_id_inc_map_idx').on(t.syncedMetaId),
+  ],
 );
 
 // Location request logs for usage analytics (TimescaleDB hypertable)

@@ -1,17 +1,31 @@
 import {
-  cacheTable,
   maps,
   syncedLocations,
   syncedMapMetas,
   syncedMetas,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
-import { and, desc, eq, getTableColumns, sql } from 'drizzle-orm';
+import { and, eq, getTableColumns, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { pick } from 'remeda';
 
 const originalSyncedMapMetas = alias(syncedMapMetas, 'osmm');
 const originalMaps = alias(maps, 'om');
+
+const originalMap = db
+  .select(pick(originalMaps, ['footerHtml', 'name', 'authors', 'geoguessrId']))
+  .from(originalSyncedMapMetas)
+  .innerJoin(originalMaps, eq(originalMaps.id, originalSyncedMapMetas.mapId))
+  .where(
+    and(
+      eq(maps.isPersonal, true),
+      eq(originalSyncedMapMetas.syncedMetaId, syncedMapMetas.syncedMetaId),
+    ),
+  )
+  .orderBy(sql`${originalMaps.numberOfGamesPlayed} DESC NULLS LAST`)
+  .limit(1)
+  .as('originalMap');
+
 export const locationSelect = db
   .select({
     ...pick(getTableColumns(syncedMetas), [
@@ -24,12 +38,12 @@ export const locationSelect = db
     country: syncedLocations.country,
     isPersonalMap: maps.isPersonal,
     mapFooter:
-      sql<string>`coalesce(${originalMaps.footerHtml}, ${maps.footerHtml})`.as(
+      sql<string>`coalesce(${originalMap.footerHtml}, ${maps.footerHtml})`.as(
         'mapFooter',
       ),
-    mapName: originalMaps.name,
-    mapAuthors: originalMaps.authors,
-    mapGeoguessrId: originalMaps.geoguessrId,
+    mapName: originalMap.name,
+    mapAuthors: originalMap.authors,
+    mapGeoguessrId: originalMap.geoguessrId,
     // For logging purposes
     mapId: maps.id,
     syncedMetaId: syncedMetas.metaId,
@@ -44,31 +58,15 @@ export const locationSelect = db
     syncedLocations,
     eq(syncedLocations.syncedMetaId, syncedMetas.metaId),
   )
-  .leftJoin(
-    originalSyncedMapMetas,
-    and(
-      eq(maps.isPersonal, true),
-      eq(originalSyncedMapMetas.syncedMetaId, syncedMapMetas.syncedMetaId),
-    ),
-  )
-  .leftJoin(originalMaps, eq(originalMaps.id, originalSyncedMapMetas.mapId))
+  .leftJoinLateral(originalMap, sql`true`)
   .where(
     and(
       eq(maps.geoguessrId, sql.placeholder('mapId')),
       eq(syncedLocations.panoId, sql.placeholder('panoId')),
     ),
   )
-  // prefer most played original map
-  .orderBy(sql`${originalMaps.numberOfGamesPlayed} DESC NULLS LAST`)
   .limit(1)
   .prepare('userscript_get_location');
-
-export const legacyLocationSelect = db
-  .select({ value: cacheTable.value })
-  .from(cacheTable)
-  .where(eq(cacheTable.key, sql.placeholder('key')))
-  .limit(1)
-  .prepare('userscript_legacy_get_location');
 
 export const mapLocationsExportSelect = db
   .select(
