@@ -1,6 +1,6 @@
 import {
+  locationMetas,
   locationRequestLogs,
-  mapGroupLocations,
   mapGroups,
   maps,
   metas,
@@ -139,11 +139,11 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     '/:id/download-locations',
     async ({ params: { id: groupId }, body, userId, set }) => {
       await ensurePermissions(userId, groupId);
-      
+
       const group = await db.query.mapGroups.findFirst({
         where: eq(mapGroups.id, groupId),
       });
-      
+
       if (!group) {
         set.status = 404;
         return { error: 'Map group not found' };
@@ -153,16 +153,16 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       let whereClause;
       if (body.metaIds && body.metaIds.length > 0) {
         whereClause = and(
-          eq(mapGroupLocations.mapGroupId, groupId),
-          inArray(mapGroupLocations.extraTag, body.metaIds)
+          eq(locationMetas.mapGroupId, groupId),
+          inArray(locationMetas.metaId, body.metaIds)
         );
       } else {
-        whereClause = eq(mapGroupLocations.mapGroupId, groupId);
+        whereClause = eq(locationMetas.mapGroupId, groupId);
       }
 
       const locations = await db
         .select()
-        .from(mapGroupLocations)
+        .from(locationMetas)
         .where(whereClause);
 
       const coordinates = locations.map((location) => ({
@@ -182,8 +182,8 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       }));
 
       const mapData = {
-        name: body.metaIds && body.metaIds.length > 0 
-          ? `${group.name}_selected_metas` 
+        name: body.metaIds && body.metaIds.length > 0
+          ? `${group.name}_selected_metas`
           : group.name,
         customCoordinates: coordinates,
         extra: {
@@ -194,13 +194,13 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
 
       set.headers['Content-Type'] = 'application/json';
       set.headers['Content-Disposition'] = `attachment; filename="${mapData.name}.json"`;
-      
+
       return mapData;
     },
     {
       params: t.Object({ id: t.Integer() }),
       body: t.Object({
-        metaIds: t.Optional(t.Array(t.String())),
+        metaIds: t.Optional(t.Array(t.Integer())),
       }),
       userId: true,
       response: {
@@ -212,13 +212,13 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
             heading: t.Number(),
             pitch: t.Number(),
             zoom: t.Number(),
-            panoId: t.String(),
+            panoId: t.Union([t.String(), t.Null()]),
             countryCode: t.Union([t.String(), t.Null()]),
             stateCode: t.Union([t.String(), t.Null()]),
             extra: t.Object({
+              panoId: t.Union([t.String(), t.Null()]),
               tags: t.Array(t.String()),
               panoDate: t.Union([t.String(), t.Null()]),
-              panoId: t.Union([t.String(), t.Null()]),
             }),
           })),
           extra: t.Object({
@@ -234,11 +234,11 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     '/:id/download-metas',
     async ({ params: { id: groupId }, body, userId, set }) => {
       await ensurePermissions(userId, groupId);
-      
+
       const group = await db.query.mapGroups.findFirst({
         where: eq(mapGroups.id, groupId),
       });
-      
+
       if (!group) {
         set.status = 404;
         return { error: 'Map group not found' };
@@ -249,7 +249,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       if (body.metaIds && body.metaIds.length > 0) {
         whereClause = and(
           eq(metas.mapGroupId, groupId),
-          inArray(metas.tagName, body.metaIds)
+          inArray(metas.id, body.metaIds)
         );
       } else {
         whereClause = eq(metas.mapGroupId, groupId);
@@ -273,13 +273,13 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         images: meta.images.map((image) => image.image_url),
       }));
 
-      const fileName = body.metaIds && body.metaIds.length > 0 
-        ? `${group.name}_selected_metas` 
+      const fileName = body.metaIds && body.metaIds.length > 0
+        ? `${group.name}_selected_metas`
         : `${group.name}_metas`;
 
       set.headers['Content-Type'] = 'application/json';
       set.headers['Content-Disposition'] = `attachment; filename="${fileName}.json"`;
-      
+
       return {
         name: fileName,
         metas: result
@@ -288,7 +288,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     {
       params: t.Object({ id: t.Integer() }),
       body: t.Object({
-        metaIds: t.Optional(t.Array(t.String())),
+        metaIds: t.Optional(t.Array(t.Integer())),
       }),
       userId: true,
       response: {

@@ -12,12 +12,8 @@
   import MetaEditDialog from '$routes/(admin)/map-making/groups/[id]/MetaEditDialog.svelte';
   import MapUploadDialog from '$routes/(admin)/map-making/groups/[id]/MapUploadDialog.svelte';
   import MetasUploadDialog from '$routes/(admin)/map-making/groups/[id]/MetasUploadDialog.svelte';
-  import * as Dialog from '$lib/components/ui/dialog';
-  import { Checkbox } from '$lib/components/ui/checkbox';
-  import { Label } from '$lib/components/ui/label';
-  import * as Select from '$lib/components/ui/select';
+  import MassActionDialogs from '$routes/(admin)/map-making/groups/[id]/MassActionDialogs.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
-  import ConfirmationDialog from '$lib/components/ConfirmationDialog.svelte';
 
   let { data } = $props();
 
@@ -35,6 +31,8 @@
   let isMetaDialogOpen = $state(false);
   let isMapUploadDialogOpen = $state(false);
   let isMetasUploadDialogOpen = $state(false);
+  let isDownloadLocationsDialogOpen = $state(false);
+  let isDownloadMetasDialogOpen = $state(false);
   let metas = $derived(data.group.metas);
   let selectedMetaId = $state(-1);
   let selectedMeta = $derived.by(() => {
@@ -93,18 +91,36 @@
 
   let selectedIds: number[] = $state([]);
   let isDeleteDialogOpen = $state(false);
-  let deleteFormElement: HTMLFormElement;
-
-  function handleDeleteConfirm() {
-    deleteFormElement.requestSubmit();
-  }
 
   function handleDeleteCancel() {
     // Dialog will close automatically
   }
 
-  let downloadFormElement: HTMLFormElement;
-  let downloadMetasFormElement: HTMLFormElement;
+  function handleDownload(endpoint: string, type: string) {
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/map-making/groups/${data.group.id}/${endpoint}`;
+
+    selectedIds.forEach((id) => {
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'metaIds';
+      input.value = id.toString();
+      form.appendChild(input);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    const downloadType = type ? `${type} for ` : '';
+    toast.push(
+      `Downloading ${downloadType}${selectedIds.length} selected meta${selectedIds.length !== 1 ? 's' : ''}`,
+      {
+        duration: 3000
+      }
+    );
+  }
 </script>
 
 <svelte:head>
@@ -118,16 +134,6 @@
     </div>
   {:else}
     Sync UserScript
-  {/if}
-{/snippet}
-
-{#snippet sharingMetasButtonContent()}
-  {#if sharingMetas}
-    <div class="h-6 w-28 flex items-center justify-center">
-      <LoadingSmall />
-    </div>
-  {:else}
-    Share to Group
   {/if}
 {/snippet}
 
@@ -303,14 +309,14 @@
           buttonText: 'Download Locations',
           icon: '⬇️',
           handler: () => {
-            downloadFormElement.requestSubmit();
+            isDownloadLocationsDialogOpen = true;
           }
         },
         {
           buttonText: 'Download Metas',
           icon: '📄',
           handler: () => {
-            downloadMetasFormElement.requestSubmit();
+            isDownloadMetasDialogOpen = true;
           }
         },
         {
@@ -350,280 +356,6 @@
   {/if}
 </div>
 
-<!-- Dialog for adding levels -->
-<Dialog.Root bind:open={isAddLevelsDialogOpen}>
-  <Dialog.Content>
-    <Dialog.Header>
-      <Dialog.Title>Add Levels to {selectedIds.length} Metas</Dialog.Title>
-      <Dialog.Description>
-        Select which levels you want to add to the selected metas.
-      </Dialog.Description>
-    </Dialog.Header>
-
-    <form
-      method="post"
-      action="?/addLevels"
-      use:enhance={() => {
-        return async ({ update }) => {
-          await update();
-          isAddLevelsDialogOpen = false;
-          selectedLevelIds = new Set();
-          toast.push('Levels added successfully!', {
-            duration: 3000
-          });
-        };
-      }}>
-      <div class="space-y-4 py-4">
-        <!-- Level checkboxes -->
-        <div class="space-y-2">
-          <Label>Available Levels</Label>
-          <div class="border rounded-md p-4 space-y-2 max-h-[300px] overflow-y-auto">
-            {#each levelChoices as level (level.value)}
-              <div class="flex items-center space-x-2">
-                <Checkbox
-                  id={`level-${level.value}`}
-                  checked={selectedLevelIds.has(level.value)}
-                  onCheckedChange={() => toggleLevel(level.value)} />
-                <Label for={`level-${level.value}`} class="text-sm font-normal cursor-pointer">
-                  {level.name}
-                </Label>
-              </div>
-            {/each}
-          </div>
-        </div>
-
-        {#each selectedIds as id (id)}
-          <input type="hidden" name="metaIds" value={id} />
-        {/each}
-
-        {#each selectedLevelIds as levelId (levelId)}
-          <input type="hidden" name="levelIds" value={levelId} />
-        {/each}
-
-        <div class="rounded-md bg-muted p-3">
-          <p class="text-sm font-medium mb-1">Selected metas:</p>
-          <p class="text-sm text-muted-foreground">
-            {#if selectedIds}
-              {@const displayMetas = metas
-                .filter((meta) => selectedIds.includes(meta.id))
-                .map((meta) => meta.tagName)}
-              {displayMetas.slice(0, 5).join(', ')}
-              {#if displayMetas.length > 5}
-                ... and {displayMetas.length - 5} more
-              {/if}
-            {/if}
-          </p>
-        </div>
-      </div>
-
-      <Dialog.Footer>
-        <Button
-          type="button"
-          variant="outline"
-          onclick={() => {
-            isAddLevelsDialogOpen = false;
-            selectedLevelIds = new Set();
-          }}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={selectedLevelIds.size === 0}>
-          Add {selectedLevelIds.size} Level{selectedLevelIds.size !== 1 ? 's' : ''}
-        </Button>
-      </Dialog.Footer>
-    </form>
-  </Dialog.Content>
-</Dialog.Root>
-
-<!-- Dialog for sharing metas -->
-<Dialog.Root bind:open={isShareDialogOpen}>
-  <Dialog.Content>
-    <Dialog.Header>
-      <Dialog.Title>Share {selectedIds.length} Metas</Dialog.Title>
-      <Dialog.Description>
-        Select which group you want to share the selected metas to.
-      </Dialog.Description>
-    </Dialog.Header>
-
-    <form
-      method="post"
-      action="?/shareMetas"
-      use:enhance={() => {
-        sharingMetas = true;
-        return async ({ update }) => {
-          sharingMetas = false;
-          await update();
-          isShareDialogOpen = false;
-          selectedGroupId = '';
-          selectedIds = [];
-          toast.push('Metas shared successfully!', {
-            duration: 3000
-          });
-        };
-      }}>
-      <div class="space-y-4 py-4">
-        <div class="space-y-2">
-          <Label for="target-group">Target Group</Label>
-          <Select.Root type="single" bind:value={selectedGroupId}>
-            <Select.Trigger id="target-group">
-              {groupChoices.find((g) => g.value.toString() === selectedGroupId)?.name ??
-                'Select Group'}
-            </Select.Trigger>
-            <Select.Content>
-              {#each groupChoices as group (group.value)}
-                <Select.Item value={String(group.value)}>{group.name}</Select.Item>
-              {/each}
-            </Select.Content>
-          </Select.Root>
-        </div>
-
-        {#each selectedIds as id (id)}
-          <input type="hidden" name="metaIds" value={id} />
-        {/each}
-
-        {#if selectedGroupId}
-          <input type="hidden" name="targetGroupId" value={selectedGroupId} />
-        {/if}
-
-        <div class="rounded-md bg-muted p-3">
-          <p class="text-sm font-medium mb-1">Selected metas:</p>
-          <p class="text-sm text-muted-foreground">
-            {#if selectedIds}
-              {@const displayMetas = metas
-                .filter((meta) => selectedIds.includes(meta.id))
-                .map((meta) => meta.tagName)}
-              {displayMetas.slice(0, 5).join(', ')}
-              {#if displayMetas.length > 5}
-                ... and {displayMetas.length - 5} more
-              {/if}
-            {/if}
-          </p>
-        </div>
-      </div>
-
-      <Dialog.Footer>
-        <Button
-          type="button"
-          variant="outline"
-          onclick={() => {
-            isShareDialogOpen = false;
-            selectedGroupId = '';
-          }}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={!selectedGroupId || sharingMetas}>
-          {@render sharingMetasButtonContent()}
-        </Button>
-      </Dialog.Footer>
-    </form>
-  </Dialog.Content>
-</Dialog.Root>
-
-<ConfirmationDialog
-  bind:open={isDeleteDialogOpen}
-  title="Delete {selectedIds.length} Meta{selectedIds.length !== 1 ? 's' : ''}?"
-  description="This action cannot be undone. The following metas will be permanently deleted:"
-  confirmText="Delete metas"
-  items={metas
-    .filter((meta) => selectedIds.includes(meta.id))
-    .map((meta) => ({
-      id: meta.id,
-      name: meta.tagName,
-      count: meta.locationsCount?.total ?? 0
-    }))}
-  warningDescription="All associated data with the metas will be lost."
-  onConfirm={handleDeleteConfirm}
-  onCancel={handleDeleteCancel} />
-
-<form
-  bind:this={deleteFormElement}
-  method="post"
-  action="?/deleteMetas"
-  use:enhance={() => {
-    return async ({ update }) => {
-      await update();
-      isDeleteDialogOpen = false;
-      selectedIds = [];
-      toast.push('Metas deleted successfully', {
-        duration: 3000
-      });
-    };
-  }}>
-  {#each selectedIds as id (id)}
-    <input type="hidden" name="id" value={id} />
-  {/each}
-</form>
-
-<form
-  bind:this={downloadFormElement}
-  method="post"
-  action="download"
-  use:enhance={({ cancel }) => {
-    cancel();
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = `/map-making/groups/${data.group.id}/download`;
-
-    metas
-      .filter((meta) => selectedIds.includes(meta.id))
-      .forEach((meta) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'metaIds';
-        input.value = meta.tagName;
-        form.appendChild(input);
-      });
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-
-    toast.push(
-      `Downloading locations for ${selectedIds.length} selected meta${selectedIds.length !== 1 ? 's' : ''}`,
-      {
-        duration: 3000
-      }
-    );
-  }}>
-  {#each metas.filter((meta) => selectedIds.includes(meta.id)) as meta (meta.id)}
-    <input type="hidden" name="metaIds" value={meta.tagName} />
-  {/each}
-</form>
-
-<form
-  bind:this={downloadMetasFormElement}
-  method="post"
-  action="download-metas"
-  use:enhance={({ cancel }) => {
-    cancel();
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = `/map-making/groups/${data.group.id}/download-metas`;
-
-    metas
-      .filter((meta) => selectedIds.includes(meta.id))
-      .forEach((meta) => {
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = 'metaIds';
-        input.value = meta.tagName;
-        form.appendChild(input);
-      });
-
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-
-    toast.push(
-      `Downloading ${selectedIds.length} selected meta${selectedIds.length !== 1 ? 's' : ''}`,
-      {
-        duration: 3000
-      }
-    );
-  }}>
-  {#each metas.filter((meta) => selectedIds.includes(meta.id)) as meta (meta.id)}
-    <input type="hidden" name="metaIds" value={meta.tagName} />
-  {/each}
-</form>
 
 <MetaEditDialog
   bind:isMetaDialogOpen
@@ -642,5 +374,22 @@
   data={data.mapUploadForm} />
 
 <MetasUploadDialog bind:isUploadDialogOpen={isMetasUploadDialogOpen} data={data.metasUploadForm} />
+
+<MassActionDialogs
+  bind:isAddLevelsDialogOpen
+  bind:isShareDialogOpen
+  bind:isDeleteDialogOpen
+  bind:isDownloadLocationsDialogOpen
+  bind:isDownloadMetasDialogOpen
+  {selectedIds}
+  {metas}
+  {levelChoices}
+  {groupChoices}
+  bind:selectedLevelIds
+  bind:selectedGroupId
+  bind:sharingMetas
+  {toggleLevel}
+  {handleDeleteCancel}
+  {handleDownload} />
 
 <SvelteToast />

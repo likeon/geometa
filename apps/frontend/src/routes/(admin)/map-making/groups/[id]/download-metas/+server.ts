@@ -29,8 +29,8 @@ export async function POST(event) {
   const formData = await event.request.formData();
   const metaIds = formData
     .getAll('metaIds')
-    .map((id) => id.toString())
-    .filter(Boolean);
+    .map((id) => parseInt(id.toString(), 10))
+    .filter((id) => !isNaN(id));
 
   const { data, error: apiError } = await api.internal['map-groups']({ id: groupId })[
     'download-metas'
