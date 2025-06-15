@@ -104,6 +104,7 @@
   }
 
   let downloadFormElement: HTMLFormElement;
+  let downloadMetasFormElement: HTMLFormElement;
 </script>
 
 <svelte:head>
@@ -303,6 +304,13 @@
           icon: '⬇️',
           handler: () => {
             downloadFormElement.requestSubmit();
+          }
+        },
+        {
+          buttonText: 'Download Metas',
+          icon: '📄',
+          handler: () => {
+            downloadMetasFormElement.requestSubmit();
           }
         },
         {
@@ -571,6 +579,42 @@
 
     toast.push(
       `Downloading locations for ${selectedIds.length} selected meta${selectedIds.length !== 1 ? 's' : ''}`,
+      {
+        duration: 3000
+      }
+    );
+  }}>
+  {#each metas.filter((meta) => selectedIds.includes(meta.id)) as meta (meta.id)}
+    <input type="hidden" name="metaIds" value={meta.tagName} />
+  {/each}
+</form>
+
+<form
+  bind:this={downloadMetasFormElement}
+  method="post"
+  action="download-metas"
+  use:enhance={({ cancel }) => {
+    cancel();
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/map-making/groups/${data.group.id}/download-metas`;
+
+    metas
+      .filter((meta) => selectedIds.includes(meta.id))
+      .forEach((meta) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'metaIds';
+        input.value = meta.tagName;
+        form.appendChild(input);
+      });
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    toast.push(
+      `Downloading ${selectedIds.length} selected meta${selectedIds.length !== 1 ? 's' : ''}`,
       {
         duration: 3000
       }

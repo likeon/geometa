@@ -229,4 +229,81 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         404: t.Object({ error: t.String() }),
       },
     },
+  )
+  .post(
+    '/:id/download-metas',
+    async ({ params: { id: groupId }, body, userId, set }) => {
+      await ensurePermissions(userId, groupId);
+      
+      const group = await db.query.mapGroups.findFirst({
+        where: eq(mapGroups.id, groupId),
+      });
+      
+      if (!group) {
+        set.status = 404;
+        return { error: 'Map group not found' };
+      }
+
+      // If no meta IDs provided, return all metas for the group
+      let whereClause;
+      if (body.metaIds && body.metaIds.length > 0) {
+        whereClause = and(
+          eq(metas.mapGroupId, groupId),
+          inArray(metas.tagName, body.metaIds)
+        );
+      } else {
+        whereClause = eq(metas.mapGroupId, groupId);
+      }
+
+      const selectedMetas = await db.query.metas.findMany({
+        where: whereClause,
+        orderBy: [sql`${metas.id} ASC`],
+        with: {
+          metaLevels: { with: { level: true } },
+          images: true,
+        },
+      });
+
+      const result = selectedMetas.map((meta) => ({
+        tagName: meta.tagName,
+        metaName: meta.name,
+        note: meta.note,
+        footer: meta.footer,
+        levels: meta.metaLevels.map((metaLevel) => metaLevel.level.name),
+        images: meta.images.map((image) => image.image_url),
+      }));
+
+      const fileName = body.metaIds && body.metaIds.length > 0 
+        ? `${group.name}_selected_metas` 
+        : `${group.name}_metas`;
+
+      set.headers['Content-Type'] = 'application/json';
+      set.headers['Content-Disposition'] = `attachment; filename="${fileName}.json"`;
+      
+      return {
+        name: fileName,
+        metas: result
+      };
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      body: t.Object({
+        metaIds: t.Optional(t.Array(t.String())),
+      }),
+      userId: true,
+      response: {
+        200: t.Object({
+          name: t.String(),
+          metas: t.Array(t.Object({
+            tagName: t.String(),
+            metaName: t.String(),
+            note: t.String(),
+            footer: t.String(),
+            levels: t.Array(t.String()),
+            images: t.Array(t.String()),
+          })),
+        }),
+        404: t.Object({ error: t.String() }),
+      },
+    },
   );
