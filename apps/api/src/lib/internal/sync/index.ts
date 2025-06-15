@@ -78,23 +78,21 @@ export async function syncMapGroup(group: {
         ${syncedMetas.metaId} NOT IN (SELECT id FROM ${metas} WHERE ${metas.mapGroupId} = ${group.id})`,
     );
 
-
     // remove locations that changed tag name
 
     await tx.execute(sql`
-  DELETE FROM synced_locations sl
-  USING synced_metas sm,
-        map_group_locations mgl,
-        metas m
-  WHERE sl.synced_meta_id = sm.meta_id
-    AND sm.map_group_id = ${group.id}
-    AND mgl.map_group_id = sm.map_group_id
-    AND mgl.pano_id = sl.pano_id
-    AND m.map_group_id = sm.map_group_id
-    AND m.id = sl.synced_meta_id
-    AND mgl.extra_tag != m.tag_name
-`);
-
+      DELETE FROM synced_locations sl
+      USING synced_metas sm,
+            map_group_locations mgl,
+            metas m
+      WHERE sl.synced_meta_id = sm.meta_id
+        AND sm.map_group_id = ${group.id}
+        AND mgl.map_group_id = sm.map_group_id
+        AND mgl.pano_id = sl.pano_id
+        AND m.map_group_id = sm.map_group_id
+        AND m.id = sl.synced_meta_id
+        AND mgl.extra_tag != m.tag_name
+    `);
 
     // locations
     await tx.execute(sql`
@@ -133,10 +131,20 @@ export async function syncMapGroup(group: {
       WHEN NOT MATCHED BY TARGET THEN
         INSERT (synced_meta_id, lat, lng, heading, pitch, zoom, pano_id, extra_tag, extra_pano_id, extra_pano_date, country)
         VALUES (l.synced_meta_id, l.lat, l.lng, l.heading, l.pitch, l.zoom, l.pano_id, l.extra_tag, l.extra_pano_id, l.extra_pano_date, get_country_from_tag_name(l.extra_tag))
-      WHEN NOT MATCHED BY SOURCE AND sl.synced_meta_id NOT IN (SELECT sm.meta_id FROM synced_metas sm) THEN
-        DELETE
       ;
   `);
+    await tx.execute(sql`
+      DELETE FROM synced_locations sl
+      USING synced_metas sm
+      WHERE sm.meta_id      = sl.synced_meta_id
+        AND sm.map_group_id = ${group.id}
+        AND NOT EXISTS (
+          SELECT 1
+          FROM   map_group_locations mgl
+          WHERE  mgl.map_group_id = sm.map_group_id
+            AND  mgl.pano_id = sl.pano_id
+        );
+    `);
 
     // map-meta association
     await tx.execute(sql`
