@@ -1,52 +1,52 @@
-import { eq } from 'drizzle-orm';
-import { mapGroupLocations, mapGroups } from '$lib/db/schema';
-import { ensurePermissions } from '$lib/utils';
+import { api, internalHeaders } from '$lib/api';
 import { getGroupId } from '../utils';
+import { error } from '@sveltejs/kit';
 
 export async function GET(event) {
   const groupId = getGroupId(event.params);
-  await ensurePermissions(event.locals.db, event.locals.user?.id, groupId);
 
-  const group = await event.locals.db.query.mapGroups.findFirst({
-    where: eq(mapGroups.id, groupId)
-  });
+  const { data, error: apiError } = await api.internal['map-groups']({ id: groupId })[
+    'download-locations'
+  ].post({}, internalHeaders(event.locals));
 
-  const locations = await event.locals.db
-    .select()
-    .from(mapGroupLocations)
-    .where(eq(mapGroupLocations.mapGroupId, groupId));
-  const coordinates = locations.map((location) => ({
-    lat: location.lat,
-    lng: location.lng,
-    heading: location.heading,
-    pitch: location.pitch,
-    zoom: location.zoom,
-    panoId: location.panoId,
-    countryCode: null,
-    stateCode: null,
-    extra: {
-      tags: [location.extraTag],
-      panoDate: location.extraPanoDate,
-      panoId: location.extraPanoId
-    }
-  }));
+  if (apiError) {
+    console.error('Download API Error:', apiError);
+    error(500, 'Failed to download locations');
+  }
 
-  const mapData = {
-    name: group!.name,
-    customCoordinates: coordinates,
-    extra: {
-      tags: {},
-      infoCoordinates: []
-    }
-  };
-  const jsonString = JSON.stringify(mapData);
-
-  const headers = new Headers({
-    'Content-Type': 'application/json',
-    'Content-Disposition': `attachment; filename="${group!.name}.json"`
-  });
+  const jsonString = JSON.stringify(data);
 
   return new Response(jsonString, {
-    headers
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Disposition': `attachment; filename="${data!.name}.json"`
+    }
+  });
+}
+
+export async function POST(event) {
+  const groupId = getGroupId(event.params);
+  const formData = await event.request.formData();
+  const metaIds = formData
+    .getAll('metaIds')
+    .map((id) => id.toString())
+    .filter(Boolean);
+
+  const { data, error: apiError } = await api.internal['map-groups']({ id: groupId })[
+    'download-locations'
+  ].post({ metaIds: metaIds.length > 0 ? metaIds : undefined }, internalHeaders(event.locals));
+
+  if (apiError) {
+    console.error('Download API Error:', apiError);
+    error(500, 'Failed to download locations');
+  }
+
+  const jsonString = JSON.stringify(data);
+
+  return new Response(jsonString, {
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Disposition': `attachment; filename="${data.name}.json"`
+    }
   });
 }

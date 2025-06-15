@@ -1,5 +1,6 @@
 import {
   locationRequestLogs,
+  mapGroupLocations,
   mapGroups,
   maps,
   metas,
@@ -9,7 +10,7 @@ import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { syncMapGroup } from '@api/lib/internal/sync';
-import { and, eq, gte, isNotNull, sql } from 'drizzle-orm';
+import { and, eq, gte, inArray, isNotNull, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
@@ -132,5 +133,100 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         days: t.Number({ minimum: 30, maximum: 365, default: 30 }),
       }),
       userId: true,
+    },
+  )
+  .post(
+    '/:id/download-locations',
+    async ({ params: { id: groupId }, body, userId, set }) => {
+      await ensurePermissions(userId, groupId);
+      
+      const group = await db.query.mapGroups.findFirst({
+        where: eq(mapGroups.id, groupId),
+      });
+      
+      if (!group) {
+        set.status = 404;
+        return { error: 'Map group not found' };
+      }
+
+      // If no meta IDs provided, return all locations for the group
+      let whereClause;
+      if (body.metaIds && body.metaIds.length > 0) {
+        whereClause = and(
+          eq(mapGroupLocations.mapGroupId, groupId),
+          inArray(mapGroupLocations.extraTag, body.metaIds)
+        );
+      } else {
+        whereClause = eq(mapGroupLocations.mapGroupId, groupId);
+      }
+
+      const locations = await db
+        .select()
+        .from(mapGroupLocations)
+        .where(whereClause);
+
+      const coordinates = locations.map((location) => ({
+        lat: location.lat,
+        lng: location.lng,
+        heading: location.heading,
+        pitch: location.pitch,
+        zoom: location.zoom,
+        panoId: location.panoId,
+        countryCode: null,
+        stateCode: null,
+        extra: {
+          tags: [location.extraTag],
+          panoDate: location.extraPanoDate,
+          panoId: location.extraPanoId,
+        },
+      }));
+
+      const mapData = {
+        name: body.metaIds && body.metaIds.length > 0 
+          ? `${group.name}_selected_metas` 
+          : group.name,
+        customCoordinates: coordinates,
+        extra: {
+          tags: {},
+          infoCoordinates: [],
+        },
+      };
+
+      set.headers['Content-Type'] = 'application/json';
+      set.headers['Content-Disposition'] = `attachment; filename="${mapData.name}.json"`;
+      
+      return mapData;
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      body: t.Object({
+        metaIds: t.Optional(t.Array(t.String())),
+      }),
+      userId: true,
+      response: {
+        200: t.Object({
+          name: t.String(),
+          customCoordinates: t.Array(t.Object({
+            lat: t.Number(),
+            lng: t.Number(),
+            heading: t.Number(),
+            pitch: t.Number(),
+            zoom: t.Number(),
+            panoId: t.String(),
+            countryCode: t.Union([t.String(), t.Null()]),
+            stateCode: t.Union([t.String(), t.Null()]),
+            extra: t.Object({
+              tags: t.Array(t.String()),
+              panoDate: t.Union([t.String(), t.Null()]),
+              panoId: t.Union([t.String(), t.Null()]),
+            }),
+          })),
+          extra: t.Object({
+            tags: t.Object({}),
+            infoCoordinates: t.Array(t.Any()),
+          }),
+        }),
+        404: t.Object({ error: t.String() }),
+      },
     },
   );

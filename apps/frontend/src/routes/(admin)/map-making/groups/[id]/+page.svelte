@@ -41,7 +41,7 @@
     const meta = metas.find((meta) => meta.id == selectedMetaId);
     return meta != undefined ? meta : null;
   });
-  let metaIds = $derived(metas.map(m => m.id));
+  let metaIds = $derived(metas.map((m) => m.id));
 
   let numberOfLocationsUploaded = $state(0);
 
@@ -102,6 +102,8 @@
   function handleDeleteCancel() {
     // Dialog will close automatically
   }
+
+  let downloadFormElement: HTMLFormElement;
 </script>
 
 <svelte:head>
@@ -296,6 +298,13 @@
     ]}
     massAction={{
       dropdownItems: [
+        {
+          buttonText: 'Download Locations',
+          icon: '⬇️',
+          handler: () => {
+            downloadFormElement.requestSubmit();
+          }
+        },
         {
           buttonText: 'Add Levels',
           icon: '➕',
@@ -533,6 +542,42 @@
   }}>
   {#each selectedIds as id (id)}
     <input type="hidden" name="id" value={id} />
+  {/each}
+</form>
+
+<form
+  bind:this={downloadFormElement}
+  method="post"
+  action="download"
+  use:enhance={({ cancel }) => {
+    cancel();
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = `/map-making/groups/${data.group.id}/download`;
+
+    metas
+      .filter((meta) => selectedIds.includes(meta.id))
+      .forEach((meta) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = 'metaIds';
+        input.value = meta.tagName;
+        form.appendChild(input);
+      });
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    toast.push(
+      `Downloading locations for ${selectedIds.length} selected meta${selectedIds.length !== 1 ? 's' : ''}`,
+      {
+        duration: 3000
+      }
+    );
+  }}>
+  {#each metas.filter((meta) => selectedIds.includes(meta.id)) as meta (meta.id)}
+    <input type="hidden" name="metaIds" value={meta.tagName} />
   {/each}
 </form>
 
