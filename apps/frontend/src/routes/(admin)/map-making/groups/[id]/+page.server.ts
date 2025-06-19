@@ -394,7 +394,8 @@ export const actions = {
           .insert(metas)
           .values({
             ...cleanedMeta,
-            mapGroupId: targetGroupId
+            mapGroupId: targetGroupId,
+            modifiedAt: currentTimestamp
           })
           .onConflictDoNothing()
           .returning({ insertedId: metas.id });
@@ -498,11 +499,13 @@ export const actions = {
     await ensurePermissions(locals.db, locals.user!.id, mapGroupIdToCopy);
     const { id, mapGroupId, ...cleanedMeta } = meta;
     void id;
+    const currentTimestamp = Math.floor(Date.now() / 1000);
     const insertResult = await locals.db
       .insert(metas)
       .values({
         ...cleanedMeta,
-        mapGroupId: mapGroupIdToCopy
+        mapGroupId: mapGroupIdToCopy,
+        modifiedAt: currentTimestamp
       })
       .onConflictDoNothing()
       .returning({ insertedId: metas.id });
@@ -545,7 +548,6 @@ export const actions = {
           eq(mapGroupLocations.extraTag, meta!.tagName)
         )
       );
-    const currentTimestamp = Math.floor(Date.now() / 1000);
     const insertLocations = sourceLocations.map((location) => ({
       ...location,
       mapGroupId: mapGroupIdToCopy,
