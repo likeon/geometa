@@ -28,7 +28,7 @@
     "unified": "^11.0.5"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.4",
+    "@biomejs/biome": "2.0.5",
     "bun-types": "latest",
     "drizzle-kit": "^0.31.1"
   }
