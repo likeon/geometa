@@ -27,6 +27,10 @@ export const load = async ({ locals, params }) => {
           locationsCount:
             sql`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`.as(
               'locations_count'
+            ),
+          metasCount:
+            sql`(select count(distinct ml.meta_id) from map_locations_view ml where ml.map_id = ${maps.id})`.as(
+              'metas_count'
             )
         },
         with: {

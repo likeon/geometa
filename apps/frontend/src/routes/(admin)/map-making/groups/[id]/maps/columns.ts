@@ -40,11 +40,28 @@ export const columns: ColumnDef<PageData['group']['maps'][number]>[] = [
     }
   },
   {
+    accessorKey: 'metaCount',
+    header: ({ column }) =>
+      renderComponent(BaseTableHeader, {
+        name: 'Metas',
+        onclick: column.getToggleSortingHandler(),
+        sort: column.getIsSorted()
+      }),
+    sortingFn: (rowA, rowB) => {
+      const a = rowA.original.metasCount as number;
+      const b = rowB.original.metasCount as number;
+      return a > b ? 1 : a < b ? -1 : 0;
+    },
+    cell: ({ row }) => {
+      return row.original.metasCount;
+    }
+  },
+  {
     accessorKey: 'geoguessrLink',
-    header: 'Geoguessr',
+    header: 'Geo Map-Maker',
     cell: ({ row }) =>
       renderComponent(BaseTableLink, {
-        link: `https://www.geoguessr.com/maps/${row.original.geoguessrId}`
+        link: `https://www.geoguessr.com/map-maker/${row.original.geoguessrId}`
       })
   },
   {
