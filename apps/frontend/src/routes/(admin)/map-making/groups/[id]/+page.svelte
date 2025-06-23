@@ -73,9 +73,13 @@
 
   // Dynamic filter options for levels
   const getLevelOptions = (metaList: typeof metas) => {
-    return Array.from(new Set(metaList.flatMap((row) => row.metaLevels.map((m) => m.level.name))))
+    const levelOptions = Array.from(
+      new Set(metaList.flatMap((row) => row.metaLevels.map((m) => m.level.name)))
+    )
       .sort((a, b) => a.localeCompare(b))
       .map((name) => ({ label: name, value: name }));
+
+    return [{ label: 'No Levels', value: '__FILTER_NO_LEVELS__' }, ...levelOptions];
   };
 
   // Toggle level selection
@@ -355,7 +359,6 @@
     </div>
   {/if}
 </div>
-
 
 <MetaEditDialog
   bind:isMetaDialogOpen

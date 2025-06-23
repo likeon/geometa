@@ -103,12 +103,15 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
 
       const joined: string = row.getValue<string>(columnId) ?? '';
 
-      return filters.some((f) =>
-        joined
+      return filters.some((f) => {
+        // Handle special case for metas with no levels
+        if (f === '__FILTER_NO_LEVELS__') return joined.trim().length === 0;
+        
+        return joined
           .toLowerCase()
           .split(/\s*,\s*/)
-          .includes(f.toLowerCase())
-      );
+          .includes(f.toLowerCase());
+      });
     },
     meta: {
       class: 'w-40 min-w-[96px] max-w-[160px] truncate xl:w-64 xl:max-w-[240px]'
