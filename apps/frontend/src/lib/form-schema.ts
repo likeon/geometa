@@ -12,12 +12,18 @@ export type InsertMetasSchema = typeof insertMetasSchema;
 export const insertMetasSchema = z.object({
   id: z.number().optional(),
   mapGroupId: z.number().default(-1),
-  tagName: z.string().min(1, 'Tag cannot be empty'),
-  name: z.string().min(1, 'Name cannot be empty'),
-  note: z.string(),
-  noteFromPlonkit: z.boolean(),
-  levels: z.array(z.number()),
+  tagName: z.string().min(1, 'Tag cannot be empty').default(''),
+  name: z.string().min(1, 'Name cannot be empty').default(''),
+  note: z.string().default(''),
+  noteFromPlonkit: z.boolean().default(false),
+  levels: z.array(z.number()).default([]),
   footer: z.string().optional().default('')
+});
+
+// Schema for generating defaults without validation constraints
+export const insertMetasDefaultSchema = insertMetasSchema.extend({
+  tagName: z.string().default(''),
+  name: z.string().default('')
 });
 
 export type MapUploadSchema = typeof mapUploadSchema;

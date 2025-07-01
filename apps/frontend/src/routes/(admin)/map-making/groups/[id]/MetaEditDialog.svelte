@@ -8,11 +8,12 @@
   import * as Tabs from '$lib/components/ui/tabs/index';
   import { Carta, MarkdownEditor } from 'carta-md';
   import 'carta-md/default.css';
-  import { insertMetasSchema, type InsertMetasSchema } from '$lib/form-schema';
+  import { insertMetasSchema, insertMetasDefaultSchema, type InsertMetasSchema } from '$lib/form-schema';
   import { Checkbox } from '$lib/components/ui/checkbox';
   import FormLabelWithTooltip from '$lib/components/FormLabelWithTooltip.svelte';
   import MetaImages from '$routes/(admin)/map-making/groups/[id]/MetaImages.svelte';
   import MultiSelect from '$lib/components/MultiSelect.svelte';
+  import ConfirmationDialog from '$lib/components/ConfirmationDialog.svelte';
   import type {
     ImageOrderUpdateSchema,
     ImageUploadSchema
@@ -43,91 +44,125 @@
     selectedMetaId?: number;
   } = $props();
 
+  let saveWithoutClose = $state(false);
+
   const formMeta = superForm(metaForm, {
     validators: zodClient(insertMetasSchema),
-    resetForm: true,
+    resetForm: false,
     dataType: 'json',
     onResult({ result }) {
       if (result.type === 'success') {
-        isMetaDialogOpen = false;
+        if (saveWithoutClose) {
+          saveWithoutClose = false;
+        } else {
+          isMetaDialogOpen = false;
+        }
       }
     }
   });
 
-  const { form: formMetaData, enhance: enhanceMeta, isTainted: isTaintedMeta } = formMeta;
+  const { form: formMetaData, enhance: enhanceMeta, isTainted: isTaintedMeta, reset, submit, submitting } = formMeta;
   const cartaMeta = new Carta();
   const cartaFooter = new Carta();
   type MetaFormDataType = Infer<InsertMetasSchema>;
   let savedForm: MetaFormDataType | null = null;
+  let currentTab = $state('info');
+
+  // Confirmation dialog state
+  let showConfirmDialog = $state(false);
+  let confirmCallback: (() => void) | null = null;
 
   const currentIndex = $derived(selectedIds.findIndex((id) => id === selectedMetaId));
   const canNavigate = $derived(selectedIds.length > 1 && selectedMetaId !== -1);
 
   function navigatePrevious() {
-    if (canNavigate) {
+    if (!canNavigate) return;
+
+    checkTaintAndConfirm(() => {
       const prevIndex = currentIndex === 0 ? selectedIds.length - 1 : currentIndex - 1;
       selectedMetaId = selectedIds[prevIndex];
-    }
+    });
   }
 
   function navigateNext() {
-    if (canNavigate) {
+    if (!canNavigate) return;
+
+    checkTaintAndConfirm(() => {
       const nextIndex = currentIndex === selectedIds.length - 1 ? 0 : currentIndex + 1;
       selectedMetaId = selectedIds[nextIndex];
+    });
+  }
+
+  function getDefaultFormData() {
+    return insertMetasDefaultSchema.parse({
+      mapGroupId: groupId
+    });
+  }
+
+  function checkTaintAndConfirm(callback: () => void) {
+    if (isTaintedMeta()) {
+      confirmCallback = () => {
+        reset({ keepMessage: true });
+        savedForm = null;
+        currentTab = 'info';
+        callback();
+      };
+      showConfirmDialog = true;
+    } else {
+      currentTab = 'info';
+      callback();
     }
   }
 
-  function nullifyForm() {
-    formMetaData.update(
-      ($formMetaData) => {
-        $formMetaData.id = undefined;
-        $formMetaData.mapGroupId = groupId;
-        $formMetaData.tagName = '';
-        $formMetaData.name = '';
-        $formMetaData.note = '';
-        $formMetaData.footer = '';
-        $formMetaData.levels = [];
-        $formMetaData.noteFromPlonkit = false;
-        return $formMetaData;
-      },
-      { taint: false }
-    );
+
+  function handleTabChange(newTab: string) {
+    if (currentTab === 'info' && newTab === 'images' && isTaintedMeta()) {
+      savedForm = $formMetaData;
+    }
+    currentTab = newTab;
   }
 
+
   function fillForm(meta: PageData['group']['metas'][number] | null) {
+
     if (savedForm) {
       $formMetaData = savedForm;
       return;
     }
-    if (meta) {
-      formMetaData.update(
-        ($formMetaData) => {
-          $formMetaData.id = meta.id;
-          $formMetaData.mapGroupId = meta.mapGroupId;
-          $formMetaData.tagName = meta.tagName;
-          $formMetaData.name = meta.name;
-          $formMetaData.note = meta.note;
-          $formMetaData.footer = meta.footer;
-          $formMetaData.levels = meta.metaLevels.map((item) => item.levelId);
-          $formMetaData.noteFromPlonkit = meta.noteFromPlonkit;
-          return $formMetaData;
-        },
-        { taint: false }
-      );
-    } else {
-      nullifyForm();
-    }
+
+    const formData = meta ? {
+      id: meta.id,
+      mapGroupId: meta.mapGroupId,
+      tagName: meta.tagName,
+      name: meta.name,
+      note: meta.note,
+      footer: meta.footer,
+      levels: meta.metaLevels.map((item) => item.levelId),
+      noteFromPlonkit: meta.noteFromPlonkit
+    } : getDefaultFormData();
+
+    setTimeout(() => {
+      formMetaData.update(() => formData, { taint: false });
+    }, 0);
   }
 
   $effect(() => {
     if (isMetaDialogOpen) {
+      savedForm = null;
+      currentTab = 'info';
       fillForm(selectedMeta);
     }
   });
 </script>
 
 <Dialog.Root bind:open={isMetaDialogOpen}>
-  <Dialog.Content class="sm:max-w-3xl w-full max-h-[500px]:max-w-[90vw] max-h-[400px]:max-w-[95vw]">
+  <Dialog.Content
+    class="sm:max-w-3xl w-full max-h-[500px]:max-w-[90vw] max-h-[400px]:max-w-[95vw]"
+    onBeforeClose={() => {
+      checkTaintAndConfirm(() => {
+        isMetaDialogOpen = false;
+      });
+    }}>
     <Dialog.Header class="flex flex-row items-center space-y-0 pr-6">
       <Dialog.Title class="flex-1">
         {selectedMeta ? `Edit Meta: ${selectedMeta.tagName}` : 'Add Meta'}
@@ -146,17 +181,11 @@
         </div>
       {/if}
     </Dialog.Header>
-    <Tabs.Root value="info" class="w-full max-w-3xl">
+    <Tabs.Root bind:value={currentTab} class="w-full max-w-3xl">
       <Tabs.List>
-        <Tabs.Trigger value="info">Info</Tabs.Trigger>
+        <Tabs.Trigger value="info" onclick={() => handleTabChange('info')}>Info</Tabs.Trigger>
         {#if selectedMeta?.id}
-          <Tabs.Trigger
-            value="images"
-            onclick={() => {
-              if (isTaintedMeta()) {
-                savedForm = $formMetaData;
-              }
-            }}>Images</Tabs.Trigger>
+          <Tabs.Trigger value="images" onclick={() => handleTabChange('images')}>Images</Tabs.Trigger>
         {:else}
           <Tooltip
             content="Meta must be saved first before adding images"
@@ -266,7 +295,21 @@ Czechia - Arrow Signs" />
             </Form.Control>
             <Form.FieldErrors />
           </Form.Field>
-          <Form.Button>Save meta</Form.Button>
+          <div class="flex gap-2">
+            <Button
+              type="button"
+              onclick={() => {
+                saveWithoutClose = true;
+                submit();
+              }}
+              variant="outline"
+              disabled={$submitting}>
+              {$submitting && saveWithoutClose ? 'Saving...' : 'Save'}
+            </Button>
+            <Form.Button disabled={$submitting}>
+              {$submitting && !saveWithoutClose ? 'Saving...' : 'Save & Close'}
+            </Form.Button>
+          </div>
         </form>
       </Tabs.Content>
       {#if selectedMeta}
@@ -278,6 +321,25 @@ Czechia - Arrow Signs" />
     </Tabs.Root>
   </Dialog.Content>
 </Dialog.Root>
+
+<ConfirmationDialog
+  bind:open={showConfirmDialog}
+  title="Unsaved Changes"
+  description="You have unsaved changes. Are you sure you want to continue?"
+  confirmText="Continue"
+  cancelText="Cancel"
+  variant="destructive"
+  showWarning={false}
+  onConfirm={() => {
+    if (confirmCallback) {
+      confirmCallback();
+      confirmCallback = null;
+    }
+  }}
+  onCancel={() => {
+    confirmCallback = null;
+  }}
+/>
 
 <style>
   :global(.carta-note-editor .carta-input),
