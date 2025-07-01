@@ -1,5 +1,6 @@
 <script lang="ts">
   import { applyAction, enhance } from '$app/forms';
+  import { browser } from '$app/environment';
   import { SvelteToast } from '@zerodevx/svelte-toast';
   import { toast } from '@zerodevx/svelte-toast';
   import DashNavBar from '$lib/components/DashNavBar.svelte';
@@ -178,89 +179,93 @@
             update();
           };
         }}>
-        {#if data.group.hasUnsycnedData}
-          <Tooltip
-            content="People playing your map will only see changes after you synchronize the changes!">
-            <Button
-              variant="default"
-              class="ml-3 animate-pulse"
-              type="submit"
-              disabled={syncingUserScript}>
-              {@render userScriptSyncButtonContent()}
-            </Button>
-          </Tooltip>
-        {:else}
-          <Tooltip content="You have not made any changes since last time you synchronized it.">
-            <Button
-              variant="ghost"
-              class="ml-3 opacity-20 hover:opacity-100 transition-opacity"
-              type="submit"
-              disabled={syncingUserScript}>
-              {@render userScriptSyncButtonContent()}
-            </Button>
-          </Tooltip>
+        {#if browser}
+          {#if data.group.hasUnsycnedData}
+              <Tooltip
+                content="People playing your map will only see changes after you synchronize the changes!">
+                <Button
+                  variant="default"
+                  class="ml-3 animate-pulse"
+                  type="submit"
+                  disabled={syncingUserScript}>
+                  {@render userScriptSyncButtonContent()}
+                </Button>
+              </Tooltip>
+            {:else}
+              <Tooltip content="You have not made any changes since last time you synchronized it.">
+                <Button
+                  variant="ghost"
+                  class="ml-3 opacity-20 hover:opacity-100 transition-opacity"
+                  type="submit"
+                  disabled={syncingUserScript}>
+                  {@render userScriptSyncButtonContent()}
+                </Button>
+              </Tooltip>
+          {/if}
         {/if}
       </form>
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger>
-          <Button variant="outline" class="ml-2">
-            <Icon icon="material-symbols:more-vert" width="1rem" height="1rem" />
-          </Button>
-        </DropdownMenu.Trigger>
+      {#if browser}
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger>
+            <Button variant="outline" class="ml-2">
+              <Icon icon="material-symbols:more-vert" width="1rem" height="1rem" />
+            </Button>
+          </DropdownMenu.Trigger>
 
-        <DropdownMenu.Content>
-          <DropdownMenu.Item
-            onclick={() => (window.location.href = `/map-making/groups/${data.group.id}/download`)}>
-            <div class="flex items-center gap-2">
-              <Icon
-                icon="material-symbols:globe"
-                width="1rem"
-                height="1rem"
-                class="text-gray-800 dark:text-gray-300" />
-              <Icon
-                icon="material-symbols:download-rounded"
-                width="1rem"
-                height="1rem"
-                class="text-gray-800 dark:text-gray-300" />
-              <span>Download map group JSON</span>
-            </div>
-          </DropdownMenu.Item>
+          <DropdownMenu.Content>
+            <DropdownMenu.Item
+              onclick={() => (window.location.href = `/map-making/groups/${data.group.id}/download`)}>
+              <div class="flex items-center gap-2">
+                <Icon
+                  icon="material-symbols:globe"
+                  width="1rem"
+                  height="1rem"
+                  class="text-gray-800 dark:text-gray-300" />
+                <Icon
+                  icon="material-symbols:download-rounded"
+                  width="1rem"
+                  height="1rem"
+                  class="text-gray-800 dark:text-gray-300" />
+                <span>Download map group JSON</span>
+              </div>
+            </DropdownMenu.Item>
 
-          <DropdownMenu.Item onclick={() => (isMetasUploadDialogOpen = true)}>
-            <div class="flex items-center gap-2">
-              <Icon
-                icon="mi:document"
-                width="1rem"
-                height="1rem"
-                class="text-gray-800 dark:text-gray-300" />
-              <Icon
-                icon="material-symbols:upload-rounded"
-                width="1rem"
-                height="1rem"
-                class="text-gray-800 dark:text-gray-300" />
-              <span>Upload metas</span>
-            </div>
-          </DropdownMenu.Item>
+            <DropdownMenu.Item onclick={() => (isMetasUploadDialogOpen = true)}>
+              <div class="flex items-center gap-2">
+                <Icon
+                  icon="mi:document"
+                  width="1rem"
+                  height="1rem"
+                  class="text-gray-800 dark:text-gray-300" />
+                <Icon
+                  icon="material-symbols:upload-rounded"
+                  width="1rem"
+                  height="1rem"
+                  class="text-gray-800 dark:text-gray-300" />
+                <span>Upload metas</span>
+              </div>
+            </DropdownMenu.Item>
 
-          <DropdownMenu.Item
-            onclick={() =>
-              (window.location.href = `/map-making/groups/${data.group.id}/download-metas`)}>
-            <div class="flex items-center gap-2">
-              <Icon
-                icon="mi:document"
-                width="1rem"
-                height="1rem"
-                class="text-gray-800 dark:text-gray-300" />
-              <Icon
-                icon="material-symbols:download-rounded"
-                width="1rem"
-                height="1rem"
-                class="text-gray-800 dark:text-gray-300" />
-              <span>Download metas</span>
-            </div>
-          </DropdownMenu.Item>
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
+            <DropdownMenu.Item
+              onclick={() =>
+                (window.location.href = `/map-making/groups/${data.group.id}/download-metas`)}>
+              <div class="flex items-center gap-2">
+                <Icon
+                  icon="mi:document"
+                  width="1rem"
+                  height="1rem"
+                  class="text-gray-800 dark:text-gray-300" />
+                <Icon
+                  icon="material-symbols:download-rounded"
+                  width="1rem"
+                  height="1rem"
+                  class="text-gray-800 dark:text-gray-300" />
+                <span>Download metas</span>
+              </div>
+            </DropdownMenu.Item>
+          </DropdownMenu.Content>
+        </DropdownMenu.Root>
+      {/if}
     </div>
   </div>
 
