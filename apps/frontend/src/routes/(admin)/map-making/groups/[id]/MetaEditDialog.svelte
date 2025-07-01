@@ -146,13 +146,22 @@
     }, 0);
   }
 
+
+  // Effect for dialog opening only
   $effect(() => {
     if (isMetaDialogOpen) {
       savedForm = null;
       currentTab = 'info';
+    }
+  });
+
+  // Effect for meta changes only (when dialog is already open)  
+  $effect(() => {
+    if (isMetaDialogOpen) {
       fillForm(selectedMeta);
     }
   });
+
 </script>
 
 <Dialog.Root bind:open={isMetaDialogOpen}>
