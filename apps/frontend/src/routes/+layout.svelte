@@ -1,7 +1,6 @@
 <script>
   import '../app.css';
   import NavBar from '$lib/components/NavBar.svelte';
-  import { dev } from '$app/environment';
   import Footer from '$lib/components/Footer.svelte';
   import { page } from '$app/state';
   import { env } from '$env/dynamic/public';
@@ -9,23 +8,17 @@
   import { ModeWatcher } from 'mode-watcher';
   import { updated } from '$app/state';
   import * as Tooltip from '$lib/components/ui/tooltip/index';
-  import AnnouncementBanner from '$lib/components/AnnouncementBanner.svelte';
+  // import AnnouncementBanner from '$lib/components/AnnouncementBanner.svelte';
 
   let { children } = $props();
   let admin = $derived(page.url.pathname.startsWith('/map-making'));
   const underMaintenance = !building && env.PUBLIC_DASHBOARD_MAINTENANCE === 'true';
 </script>
 
-<svelte:head>
-  {#if !dev && !admin}
-    <script async data-id="101468249" src="//static.getclicky.com/js"></script>
-  {/if}
-</svelte:head>
-
 <ModeWatcher />
 <Tooltip.Provider>
   <div class="app" data-sveltekit-reload={updated.current}>
-    <AnnouncementBanner />
+    <!-- <AnnouncementBanner /> -->
     <NavBar />
     <main>
       {#if underMaintenance && admin}

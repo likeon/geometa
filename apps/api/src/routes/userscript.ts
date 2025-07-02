@@ -3,32 +3,32 @@ import {
   mapGroupPermissions,
   maps,
   users,
-} from '@api/lib/db/schema';
-import { db } from '@api/lib/drizzle';
+} from "@api/lib/db/schema";
+import { db } from "@api/lib/drizzle";
 import {
   locationSelect,
   mapLocationsExportSelect,
-} from '@api/lib/userscript/locations';
-import { generateFooter } from '@api/lib/userscript/utils';
-import { eq, sql } from 'drizzle-orm';
-import { Elysia, t } from 'elysia';
+} from "@api/lib/userscript/locations";
+import { generateFooter } from "@api/lib/userscript/utils";
+import { eq, sql } from "drizzle-orm";
+import { Elysia, t } from "elysia";
 
-const userscriptVersion = '0.88';
+const userscriptVersion = "0.88";
 
 const mapInfoQuery = db.query.maps
   .findFirst({
-    where: eq(maps.geoguessrId, sql.placeholder('geoguessrId')),
+    where: eq(maps.geoguessrId, sql.placeholder("geoguessrId")),
     columns: {
       isPersonal: true,
     },
   })
-  .prepare('userscript_get_map_info');
+  .prepare("userscript_get_map_info");
 
 export const userscriptRouter = new Elysia({
-  prefix: '/userscript',
-  detail: { tags: ['userscript'] },
+  prefix: "/userscript",
+  detail: { tags: ["userscript"] },
 })
-  .get('/map/:geoguessrId', async ({ params: { geoguessrId }, status }) => {
+  .get("/map/:geoguessrId", async ({ params: { geoguessrId }, status }) => {
     const map = await mapInfoQuery.execute({ geoguessrId });
     if (!map) {
       return status(404, {
@@ -43,19 +43,16 @@ export const userscriptRouter = new Elysia({
       userscriptVersion: userscriptVersion,
     };
   })
-  .get('/announcement/', async () => {
-    return {
-      timestamp: 1748891186,
-      htmlMessage: `🎉 We're nominated for the 2025 GeoGuessr Awards! If you enjoy LearnableMeta, <a href="https://www.geoguessr.com/community/awards/2025" target="_blank">vote for us here!</a> Thank you for the support!`,
-    };
+  .get("/announcement/", async () => {
+    return;
   })
   .get(
-    '/location/',
+    "/location/",
     async ({ query, set }) => {
       const metaResult = await locationSelect.execute(query);
       if (!metaResult.length) {
         set.status = 404;
-        return ['NOT_FOUND'];
+        return ["NOT_FOUND"];
       }
 
       // shouldn't really be needed, but we hit a bug in prod where each api endpoint returns 404 with correct response data
@@ -65,7 +62,7 @@ export const userscriptRouter = new Elysia({
 
       const [meta] = metaResult;
       // hack for now, should country be marked as not null in schema since we will always have it?
-      const country = meta.country || '';
+      const country = meta.country || "";
 
       // Log the location request in the background
       setImmediate(async () => {
@@ -77,7 +74,7 @@ export const userscriptRouter = new Elysia({
           });
         } catch (error) {
           // Don't fail the request if logging fails
-          console.error('Failed to log location request:', error);
+          console.error("Failed to log location request:", error);
         }
       });
 
@@ -110,11 +107,11 @@ export const userscriptRouter = new Elysia({
     const auth = headers.authorization;
 
     return {
-      bearer: auth?.startsWith('Bearer ') ? auth.slice(7) : null,
+      bearer: auth?.startsWith("Bearer ") ? auth.slice(7) : null,
     };
   })
   .get(
-    '/map/:geoguessrId/locations',
+    "/map/:geoguessrId/locations",
     async ({ params: { geoguessrId }, status, bearer }) => {
       if (!bearer) {
         return status(401);
@@ -142,7 +139,7 @@ export const userscriptRouter = new Elysia({
             ),'{}'::text[]
             )
             END
-          `.as('user_api_tokens'),
+          `.as("user_api_tokens"),
         })
         .from(maps)
         .leftJoin(users, eq(users.id, maps.userId))
