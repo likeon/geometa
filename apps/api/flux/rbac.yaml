@@ -3,9 +3,9 @@ kind: RoleBinding
 metadata:
   name: api-allow-token-review
 subjects:
-- kind: ServiceAccount
-  name: api
+  - kind: ServiceAccount
+    name: api
 roleRef:
-  kind: Role
+  kind: ClusterRole
   name: token-reviewer
   apiGroup: rbac.authorization.k8s.io
