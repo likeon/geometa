@@ -1,11 +1,11 @@
-import { prod } from '@api/lib/utils/env';
-import bearer from '@elysiajs/bearer';
-import { Elysia } from 'elysia';
+import { prod } from "@api/lib/utils/env";
+import bearer from "@elysiajs/bearer";
+import { Elysia } from "elysia";
 
 const frontendToken = process.env.FRONTEND_API_TOKEN;
 
-export function auth() {
-  return new Elysia({ name: 'geometa-auth' })
+export function auth(jwt?: boolean) {
+  return new Elysia({ name: "geometa-auth" })
     .use(bearer())
     .onBeforeHandle(({ bearer, status }) => {
       if (prod) {
@@ -21,7 +21,7 @@ export function auth() {
     .macro({
       userId: {
         async resolve({ status, request: { headers } }) {
-          const userId = headers.get('x-api-user-id');
+          const userId = headers.get("x-api-user-id");
           if (!userId) {
             return status(401);
           }
@@ -30,5 +30,5 @@ export function auth() {
         },
       },
     })
-    .as('global');
+    .as("global");
 }
