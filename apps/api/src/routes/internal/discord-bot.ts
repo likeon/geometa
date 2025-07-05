@@ -24,7 +24,6 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
         });
       }
       if (map.isPublished) {
-        console.debug(map);
         return status(400, {
           errors: ['Already published'],
         });

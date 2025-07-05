@@ -6,3 +6,4 @@ resources:
   - cronjobs.yaml
   - ingres.yaml
   - image-update.yaml
+  - sa.yaml
