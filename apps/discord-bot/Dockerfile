@@ -5,5 +5,5 @@ COPY . .
 RUN cargo install --path .
 
 FROM alpine:latest
-COPY --from=builder /app/target/release/discord_bot /usr/local/bin/discord_bot
-CMD ["discord_bot"]
+COPY --from=builder /app/target/release/discord-bot /usr/local/bin/discord-bot
+CMD ["discord-bot"]
