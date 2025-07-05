@@ -5,3 +5,4 @@ resources:
   - secrets.enc.yaml
   - image-update.yaml
   - sa.yaml
+  - rbac.yaml
