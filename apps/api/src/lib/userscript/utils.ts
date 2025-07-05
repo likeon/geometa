@@ -1,6 +1,7 @@
 import {
   countryNames,
-  plonkitCreditFooter, plonkitFooter,
+  plonkitCreditFooter,
+  plonkitFooter,
 } from '@api/lib/userscript/constants';
 
 export function getPlonkitCountrySlug(countryName: string) {
@@ -26,7 +27,7 @@ const countries = new Map(
   }),
 );
 
-function getCountryOrDefaultFooter(countryName: string,credit = false) {
+function getCountryOrDefaultFooter(countryName: string, credit = false) {
   const normalizedCountryName = countryName.toLocaleLowerCase().trim();
   const countryData = countries.get(normalizedCountryName);
   if (credit) {

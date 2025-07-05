@@ -154,7 +154,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       if (body.metaIds && body.metaIds.length > 0) {
         whereClause = and(
           eq(locationMetas.mapGroupId, groupId),
-          inArray(locationMetas.metaId, body.metaIds)
+          inArray(locationMetas.metaId, body.metaIds),
         );
       } else {
         whereClause = eq(locationMetas.mapGroupId, groupId);
@@ -182,9 +182,10 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       }));
 
       const mapData = {
-        name: body.metaIds && body.metaIds.length > 0
-          ? `${group.name}_selected_metas`
-          : group.name,
+        name:
+          body.metaIds && body.metaIds.length > 0
+            ? `${group.name}_selected_metas`
+            : group.name,
         customCoordinates: coordinates,
         extra: {
           tags: {},
@@ -193,7 +194,8 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       };
 
       set.headers['Content-Type'] = 'application/json';
-      set.headers['Content-Disposition'] = `attachment; filename="${mapData.name}.json"`;
+      set.headers['Content-Disposition'] =
+        `attachment; filename="${mapData.name}.json"`;
 
       return mapData;
     },
@@ -206,21 +208,23 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       response: {
         200: t.Object({
           name: t.String(),
-          customCoordinates: t.Array(t.Object({
-            lat: t.Number(),
-            lng: t.Number(),
-            heading: t.Number(),
-            pitch: t.Number(),
-            zoom: t.Number(),
-            panoId: t.Union([t.String(), t.Null()]),
-            countryCode: t.Union([t.String(), t.Null()]),
-            stateCode: t.Union([t.String(), t.Null()]),
-            extra: t.Object({
+          customCoordinates: t.Array(
+            t.Object({
+              lat: t.Number(),
+              lng: t.Number(),
+              heading: t.Number(),
+              pitch: t.Number(),
+              zoom: t.Number(),
               panoId: t.Union([t.String(), t.Null()]),
-              tags: t.Array(t.String()),
-              panoDate: t.Union([t.String(), t.Null()]),
+              countryCode: t.Union([t.String(), t.Null()]),
+              stateCode: t.Union([t.String(), t.Null()]),
+              extra: t.Object({
+                panoId: t.Union([t.String(), t.Null()]),
+                tags: t.Array(t.String()),
+                panoDate: t.Union([t.String(), t.Null()]),
+              }),
             }),
-          })),
+          ),
           extra: t.Object({
             tags: t.Object({}),
             infoCoordinates: t.Array(t.Any()),
@@ -249,7 +253,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       if (body.metaIds && body.metaIds.length > 0) {
         whereClause = and(
           eq(metas.mapGroupId, groupId),
-          inArray(metas.id, body.metaIds)
+          inArray(metas.id, body.metaIds),
         );
       } else {
         whereClause = eq(metas.mapGroupId, groupId);
@@ -273,16 +277,18 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         images: meta.images.map((image) => image.image_url),
       }));
 
-      const fileName = body.metaIds && body.metaIds.length > 0
-        ? `${group.name}_selected_metas`
-        : `${group.name}_metas`;
+      const fileName =
+        body.metaIds && body.metaIds.length > 0
+          ? `${group.name}_selected_metas`
+          : `${group.name}_metas`;
 
       set.headers['Content-Type'] = 'application/json';
-      set.headers['Content-Disposition'] = `attachment; filename="${fileName}.json"`;
+      set.headers['Content-Disposition'] =
+        `attachment; filename="${fileName}.json"`;
 
       return {
         name: fileName,
-        metas: result
+        metas: result,
       };
     },
     {
@@ -294,14 +300,16 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       response: {
         200: t.Object({
           name: t.String(),
-          metas: t.Array(t.Object({
-            tagName: t.String(),
-            metaName: t.String(),
-            note: t.String(),
-            footer: t.String(),
-            levels: t.Array(t.String()),
-            images: t.Array(t.String()),
-          })),
+          metas: t.Array(
+            t.Object({
+              tagName: t.String(),
+              metaName: t.String(),
+              note: t.String(),
+              footer: t.String(),
+              levels: t.Array(t.String()),
+              images: t.Array(t.String()),
+            }),
+          ),
         }),
         404: t.Object({ error: t.String() }),
       },

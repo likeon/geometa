@@ -9,11 +9,11 @@ import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensureMapAccess } from '@api/lib/internal/permissions';
 import { geoguessrGetMapInfo } from '@api/lib/internal/utils';
-import { and, eq, inArray, sql, getTableColumns } from 'drizzle-orm';
+import { generateFooter } from '@api/lib/userscript/utils';
+import { and, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { Elysia, t } from 'elysia';
 import { pick } from 'remeda';
-import { generateFooter } from '@api/lib/userscript/utils';
 
 export const personalMapsRouter = new Elysia({ prefix: '/personal' })
   .use(auth())
@@ -163,7 +163,10 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
           usedInMapName: originalMaps.name,
           usedInMapAuthors: originalMaps.authors,
           usedInMapGeoguessrId: originalMaps.geoguessrId,
-          usedInMapFooter: sql<string>`coalesce(${originalMaps.footerHtml}, '')`.as('usedInMapFooter'),
+          usedInMapFooter:
+            sql<string>`coalesce(${originalMaps.footerHtml}, '')`.as(
+              'usedInMapFooter',
+            ),
         })
         .from(syncedMapMetas)
         .innerJoin(
@@ -173,7 +176,10 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
         .leftJoin(
           originalSyncedMapMetas,
           and(
-            eq(originalSyncedMapMetas.syncedMetaId, syncedMapMetas.syncedMetaId),
+            eq(
+              originalSyncedMapMetas.syncedMetaId,
+              syncedMapMetas.syncedMetaId,
+            ),
             sql`${originalSyncedMapMetas.mapId} = (
               SELECT smm2.map_id
               FROM ${syncedMapMetas} smm2
@@ -182,16 +188,19 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
                 AND m2.is_personal = FALSE
               ORDER BY m2.number_of_games_played DESC NULLS LAST
               LIMIT 1
-            )`
+            )`,
           ),
         )
-        .leftJoin(originalMaps, eq(originalMaps.id, originalSyncedMapMetas.mapId))
+        .leftJoin(
+          originalMaps,
+          eq(originalMaps.id, originalSyncedMapMetas.mapId),
+        )
         .where(eq(syncedMapMetas.mapId, mapId));
 
       // Generate footer for each meta (same logic as userscript endpoint)
       const metasWithFooter = metas.map((meta) => {
         const country = meta.countries?.[0] || '';
-        let footer = generateFooter(
+        const footer = generateFooter(
           meta.noteFromPlonkit,
           country,
           meta.footer,

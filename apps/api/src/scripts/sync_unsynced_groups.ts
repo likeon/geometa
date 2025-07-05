@@ -1,5 +1,5 @@
-import { db } from '@api/lib/drizzle';
 import { mapGroups } from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
 import { syncMapGroup } from '@api/lib/internal/sync';
 import { isNull } from 'drizzle-orm';
 
