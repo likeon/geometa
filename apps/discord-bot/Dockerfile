@@ -5,4 +5,4 @@ RUN cargo install --path .
 
 FROM gcr.io/distroless/cc-debian12:debug
 COPY --from=builder /app/target/release/discord-bot /usr/local/bin/discord-bot
-CMD ["discord-bot"]
+CMD ["/usr/local/bin/discord-bot"]
