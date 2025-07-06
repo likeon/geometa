@@ -8,11 +8,11 @@ use serde::{Deserialize, Serialize};
 const TOKEN_PATH: &str = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
 trait AuthExt {
-    async fn with_k8s_auth(self) -> Result<RequestBuilder, Box<dyn std::error::Error>>;
+    async fn with_k8s_auth(self) -> Result<RequestBuilder, Box<dyn std::error::Error + Send + Sync>>;
 }
 
 impl AuthExt for RequestBuilder {
-    async fn with_k8s_auth(self) -> Result<RequestBuilder, Box<dyn std::error::Error>> {
+    async fn with_k8s_auth(self) -> Result<RequestBuilder, Box<dyn std::error::Error + Send + Sync>> {
         let token = tokio::fs::read_to_string(TOKEN_PATH).await?;
         Ok(self.bearer_auth(token.trim()))
     }
@@ -37,14 +37,14 @@ impl Requester {
         }
     }
 
-    async fn request(&self, method: Method, path: &str) -> RequestBuilder {
+    async fn request(&self, method: Method, path: &str) -> Result<RequestBuilder, Box<dyn std::error::Error + Send + Sync>> {
         let url = format!("{}/{}", self.base_path, path);
         let builder = self.reqwest_client.request(method, url);
 
         if self.requires_jwt {
-            builder.with_k8s_auth().await.unwrap()
+            builder.with_k8s_auth().await
         } else {
-            builder
+            Ok(builder)
         }
     }
 }
@@ -63,7 +63,7 @@ impl Client {
         let path = format!("internal/discord-bot/maps/{geoguessr_map_id}/publish");
         let response = REQUESTER
             .request(Method::POST, &path)
-            .await
+            .await?
             .json(&payload)
             .send()
             .await?;
@@ -114,10 +114,17 @@ pub enum PublishMapError {
     MapNotFound,
     ValidationError(Vec<String>),
     Unknown(String, Option<reqwest::Error>),
+    AuthError(String),
 }
 
 impl From<reqwest::Error> for PublishMapError {
     fn from(error: reqwest::Error) -> Self {
         PublishMapError::Unknown(error.to_string(), Some(error))
+    }
+}
+
+impl From<Box<dyn std::error::Error + Send + Sync>> for PublishMapError {
+    fn from(error: Box<dyn std::error::Error + Send + Sync>) -> Self {
+        PublishMapError::AuthError(error.to_string())
     }
 }

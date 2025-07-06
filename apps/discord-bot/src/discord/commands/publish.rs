@@ -39,6 +39,11 @@ pub async fn publish(
             }
             ctx.say("Unexpected error occured").await?;
         }
+        Err(PublishMapError::AuthError(message)) => {
+            error!("Authentication error: {message}");
+            ctx.say("Authentication error - please contact an administrator")
+                .await?;
+        }
     }
 
     Ok(())
