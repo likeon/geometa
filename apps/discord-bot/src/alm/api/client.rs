@@ -31,8 +31,8 @@ impl Requester {
             Err(_) => ("localhost:3000".to_string(), false),
         };
         Requester {
-            base_path: format!("http://{}/api", api_host),
-            requires_jwt: requires_jwt,
+            base_path: format!("http://{api_host}/api"),
+            requires_jwt,
             reqwest_client: ReqwestClient::new(),
         }
     }
@@ -60,7 +60,7 @@ impl Client {
             discord_thread_author_id: discord_thread_author_id.to_string(),
         };
 
-        let path = format!("internal/discord-bot/maps/{}/publish", geoguessr_map_id);
+        let path = format!("internal/discord-bot/maps/{geoguessr_map_id}/publish");
         let response = REQUESTER
             .request(Method::POST, &path)
             .await
@@ -91,7 +91,7 @@ impl Client {
                     response.text().await?
                 );
                 Err(PublishMapError::Unknown(
-                    format!("Unexpected status: {}", status),
+                    format!("Unexpected status: {status}"),
                     None,
                 ))
             }

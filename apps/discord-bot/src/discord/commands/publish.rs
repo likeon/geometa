@@ -29,13 +29,13 @@ pub async fn publish(
         }
         Err(PublishMapError::ValidationError(errors)) => {
             let error_list = errors.join("\n• ");
-            ctx.say(format!("Map validation failed:\n• {}", error_list))
+            ctx.say(format!("Map validation failed:\n• {error_list}"))
                 .await?;
         }
         Err(PublishMapError::Unknown(message, maybe_reqwest_error)) => {
-            error!("publish_map error: {}", message);
+            error!("publish_map error: {message}");
             if let Some(reqwest_error) = maybe_reqwest_error {
-                error!("{:#?}", reqwest_error);
+                error!("{reqwest_error:#?}");
             }
             ctx.say("Unexpected error occured").await?;
         }

@@ -47,7 +47,7 @@ impl FromStr for GeoGuessrMap {
         }
 
         Err(ParseError {
-            message: format!("Could not extract valid GeoGuessr map ID"),
+            message: "Could not extract valid GeoGuessr map ID".to_string(),
         })
     }
 }

@@ -24,7 +24,7 @@ pub async fn get_user_roles(
         .map(|role| role.name.clone())
         .collect();
 
-    debug!("user roles: {:?}", roles);
+    debug!("user roles: {roles:?}");
 
     Ok(roles)
 }
