@@ -6,7 +6,7 @@ import { eq } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
-  .use(auth())
+  .use(auth(true))
   .post(
     'maps/:geoguessrId/publish',
     async ({ params: { geoguessrId }, body, status }) => {
