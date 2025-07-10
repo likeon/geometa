@@ -4,18 +4,28 @@ import { Elysia } from 'elysia';
 import * as jose from 'jose';
 import memoizeOne from 'memoize-one';
 
-const k8sCaCert = await Bun.file('/var/run/secrets/kubernetes.io/serviceaccount/ca.crt').text();
+const getJWKS = memoizeOne(async () => {
+  const ca = await Bun.file('/var/run/secrets/kubernetes.io/serviceaccount/ca.crt').text();
 
-const getJWKS = memoizeOne(() => jose.createRemoteJWKSet(new URL('https://kubernetes.default.svc/openid/v1/jwks'), {
-  [jose.customFetch]: async (url, options) => {
-    return fetch(url, {
-      ...options,
-      tls: {
-        ca: k8sCaCert
-      }
-    });
-  }
-}));
+  return jose.createRemoteJWKSet(
+    new URL('https://kubernetes.default.svc/openid/v1/jwks'),
+    {
+      [jose.customFetch]: async (url: URL | string, options?: RequestInit) =>
+        {
+          const bearer = await Bun.file("/var/run/secrets/kubernetes.io/serviceaccount/token").text();
+          return fetch(url, {
+          ...options,
+          headers: {
+            ...options?.headers,
+            Authorization: `Bearer ${bearer}`,
+          },
+          tls: {
+            ca,
+          },
+        })},
+    }
+  );
+});
 const frontendToken = process.env.FRONTEND_API_TOKEN;
 
 export function auth(jwt?: boolean) {
@@ -28,13 +38,19 @@ export function auth(jwt?: boolean) {
         }
 
         if (jwt) {
-          // JWT validation via jose
+          const jwks = await getJWKS();
           try {
-            const jwks = getJWKS();
-            const { payload } = await jose.jwtVerify(bearer, jwks);
-            // JWT is valid, continue processing
+            await jose.jwtVerify(bearer, jwks, {
+              // todo: verify issuer as well
+              // currently it's node ip - requires k8s config changes to advertise kubernetes.default.svc
+              audience: 'api',
+            });
           } catch (error) {
-            return status(403);
+            if (error instanceof jose.errors.JWTClaimValidationFailed) {
+              return status(403);
+            } else {
+              throw error;
+            }
           }
         } else {
           // Regular token validation
