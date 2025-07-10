@@ -85,12 +85,15 @@ fi
 mkdir -p "$PROJECT_LOCAL_DATA_PATH"
 mkdir -p "$PROJECT_LOCAL_DATA_PATH/postgres"
 #chmod 776 "$PROJECT_LOCAL_DATA_PATH" "$PROJECT_LOCAL_DATA_PATH/postgres"
-# Detect if running on Fedora
-IS_FEDORA=false
-if [ -f /etc/os-release ]; then
-    . /etc/os-release
-    if [[ "$ID" == "fedora" ]]; then
-        IS_FEDORA=true
+# Detect if systemd-run with delegation is needed
+# This is required on systems where Docker/Podman runs in a systemd scope that needs delegation
+NEEDS_SYSTEMD_RUN=false
+
+# Check if systemd-run is available and if we can test delegation
+if command -v systemd-run >/dev/null 2>&1; then
+    # Try to run a simple command with systemd-run to see if it works
+    if systemd-run --scope --user -p "Delegate=yes" true 2>/dev/null; then
+      NEEDS_SYSTEMD_RUN=true
     fi
 fi
 
@@ -113,9 +116,9 @@ nodes:
 EOF
 )
 
-# Run kind create cluster with or without systemd-run based on OS
-if [ "$IS_FEDORA" = true ]; then
-    echo "$KIND_CONFIG" | systemd-run --scope --user kind create cluster ${KIND_CLUSTER_OPTS} --config=-
+# Run kind create cluster with or without systemd-run based on system requirements
+if [ "$NEEDS_SYSTEMD_RUN" = true ]; then
+    echo "$KIND_CONFIG" | systemd-run --scope --user -p "Delegate=yes" kind create cluster ${KIND_CLUSTER_OPTS} --config=-
 else
     echo "$KIND_CONFIG" | kind create cluster ${KIND_CLUSTER_OPTS} --config=-
 fi

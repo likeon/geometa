@@ -4,9 +4,18 @@ import { Elysia } from 'elysia';
 import * as jose from 'jose';
 import memoizeOne from 'memoize-one';
 
-const getJWKS = memoizeOne(() =>
-  jose.createRemoteJWKSet(new URL('https://kubernetes.default.svc/openid/v1/jwks'))
-);
+const k8sCaCert = await Bun.file('/var/run/secrets/kubernetes.io/serviceaccount/ca.crt').text();
+
+const getJWKS = memoizeOne(() => jose.createRemoteJWKSet(new URL('https://kubernetes.default.svc/openid/v1/jwks'), {
+  [jose.customFetch]: async (url, options) => {
+    return fetch(url, {
+      ...options,
+      tls: {
+        ca: k8sCaCert
+      }
+    });
+  }
+}));
 const frontendToken = process.env.FRONTEND_API_TOKEN;
 
 export function auth(jwt?: boolean) {
