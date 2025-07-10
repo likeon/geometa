@@ -30,7 +30,13 @@ const getJWKS = memoizeOne(async () => {
 const frontendToken = process.env.FRONTEND_API_TOKEN;
 
 export function auth(jwt?: boolean) {
-  return new Elysia({ name: 'geometa-auth' })
+  let nameSuffix: string;
+  if (jwt) {
+    nameSuffix = 'jwt'
+  } else {
+    nameSuffix = 'static'
+  }
+  return new Elysia({ name: `geometa-auth-${nameSuffix}` })
     .use(bearer())
     .onBeforeHandle(async ({ bearer, status }) => {
       if (prod) {
@@ -74,5 +80,4 @@ export function auth(jwt?: boolean) {
         },
       },
     })
-    .as('global');
 }
