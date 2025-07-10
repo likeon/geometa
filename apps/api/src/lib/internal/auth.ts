@@ -3,6 +3,7 @@ import bearer from '@elysiajs/bearer';
 import { Elysia } from 'elysia';
 import * as jose from 'jose';
 import memoizeOne from 'memoize-one';
+import * as Sentry from '@sentry/bun';
 
 const getJWKS = memoizeOne(async () => {
   const ca = await Bun.file('/var/run/secrets/kubernetes.io/serviceaccount/ca.crt').text();
@@ -47,7 +48,8 @@ export function auth(jwt?: boolean) {
             });
           } catch (error) {
             if (error instanceof jose.errors.JWTClaimValidationFailed) {
-              return status(403);
+              Sentry.captureException(error);
+              return status(403, ["JWT validation failed"]);
             } else {
               throw error;
             }
