@@ -17,7 +17,7 @@ spec:
   chart:
     spec:
       chart: hcloud-cloud-controller-manager
-      version: 1.24.0
+      version: 1.26.0
       sourceRef:
         kind: HelmRepository
         name: hcloud
@@ -34,7 +34,7 @@ spec:
   chart:
     spec:
       chart: hcloud-csi
-      version: 2.13.0
+      version: 2.16.0
       sourceRef:
         kind: HelmRepository
         name: hcloud
