@@ -41,6 +41,11 @@
       "matchUpdateTypes": ["major"],
       "groupName": "api – major",
       "groupSlug": "api-major"
+    },
+    "flux": {
+      "fileMatch": ["cluster/.+\\.yaml$"],
+      "groupName": "k8s",
+      "groupSlug": "k8s"
     }
   ]
 }
