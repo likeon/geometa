@@ -3,9 +3,31 @@
 
   /* keep the nice defaults from config:base **but** immediately cancel
      every implicit grouping it adds (monorepos, test-libs, etc.).
-     The “catch-all” rule must come first so later rules can re-enable
+     The "catch-all" rule must come first so later rules can re-enable
      grouping where we want it. */
   "extends": ["config:base"],
+
+  /* Regex managers for Flux Helm resources */
+  "regexManagers": [
+    {
+      /* Match HelmRelease resources to update chart versions */
+      "fileMatch": ["^cluster/.+\\.ya?ml$"],
+      "matchStrings": [
+        /* Match HelmRelease spec.chart.spec.version field */
+        "apiVersion: helm\\.toolkit\\.fluxcd\\.io/v2.*\\nkind: HelmRelease\\n(?:.*\\n)*?\\s+chart:\\n\\s+spec:\\n(?:.*\\n)*?\\s+chart: (?<depName>\\S+)\\n(?:.*\\n)*?\\s+version: ['\"]?(?<currentValue>[^'\"\\s]+)['\"]?"
+      ],
+      "datasourceTemplate": "helm"
+    },
+    {
+      /* Match OCIRepository resources with semver constraints */
+      "fileMatch": ["^cluster/.+\\.ya?ml$"],
+      "matchStrings": [
+        "apiVersion: source\\.toolkit\\.fluxcd\\.io/v1.*\\nkind: OCIRepository\\n(?:.*\\n)*?\\s+url: (?<registryUrl>oci://[^\\s]+)/(?<depName>[^\\s]+)\\n(?:.*\\n)*?\\s+semver: ['\"]?(?<currentValue>[^'\"\\s]+)['\"]?"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "semver"
+    }
+  ],
   "packageRules": [
     /* 0️⃣  turn off every grouping the presets might introduce */
     {
@@ -42,10 +64,13 @@
       "groupName": "api – major",
       "groupSlug": "api-major"
     },
-    "flux": {
-      "fileMatch": ["cluster/.+\\.yaml$"],
-      "groupName": "k8s",
-      "groupSlug": "k8s"
+
+    /* 5️⃣  Helm charts ― all updates grouped */
+    {
+      "matchDatasources": ["helm", "docker"],
+      "matchPaths": ["cluster/**"],
+      "groupName": "helm charts",
+      "groupSlug": "helm-charts"
     }
   ]
 }
