@@ -15,8 +15,8 @@ sops:
             amZaY2YwYzB6dGhPdjBiMFNSV1JZQjQKFNftwKhrummgOvn4IYakkcZzJM3nkxck
             9mikHV3gMBtOb5e8Y4IY9H6KPo8tq/HpfV85MY2/TrzFZxAxmbCX0w==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-06-14T21:03:12Z"
-    mac: ENC[AES256_GCM,data:tJ6Iydak87eoBBmu7cT6Voq8s0YWQetoAXTuOT1w83oRpRZrPHjO3NF8lFnSxtm7rCAWfF0yXSNHF5urFnDLtFUclbPBThrIhifsXQdWBN3ep8TVF/yuN45AQCix06rxls8SGbc1Kwffp3HFrGj/ax2li9hiaKmaFP9NyjxyNxk=,iv:69ZkhkfOsJ6bbJy0A9YYcCqBinTekH2rSPCM1UgdOJI=,tag:gzewG73fzhXnkVySIUawFQ==,type:str]
+    lastmodified: "2025-07-12T21:27:11Z"
+    mac: ENC[AES256_GCM,data:1LaZtcJmkgQ/CtmRe8CC0zvJEaxRTvRboibqm95EP5URi3DdHGpnJN08uWrBw7cJguYa8kVoZd2/NI7DFSJWlxAbQ4ud1fh43doIMnqJp9e3c3I9aoVtOY0k1VDgxVGLywxKWwR7z9Sa+YdPxltqiafDylGbCBUkeIAoNPuAj0k=,iv:ev7J8Vg/BVYbgR3PFINdopaqQf1L/ylgRurkvwcIPTg=,tag:lVqxtozWtGznVkuV8CZKlg==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.10.2
 ---
@@ -27,7 +27,7 @@ metadata:
         app: cloudflared
     name: cloudflared
 spec:
-    replicas: 6
+    replicas: 3
     selector:
         matchLabels:
             pod: cloudflared
@@ -83,7 +83,7 @@ sops:
             amZaY2YwYzB6dGhPdjBiMFNSV1JZQjQKFNftwKhrummgOvn4IYakkcZzJM3nkxck
             9mikHV3gMBtOb5e8Y4IY9H6KPo8tq/HpfV85MY2/TrzFZxAxmbCX0w==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-06-14T21:03:12Z"
-    mac: ENC[AES256_GCM,data:tJ6Iydak87eoBBmu7cT6Voq8s0YWQetoAXTuOT1w83oRpRZrPHjO3NF8lFnSxtm7rCAWfF0yXSNHF5urFnDLtFUclbPBThrIhifsXQdWBN3ep8TVF/yuN45AQCix06rxls8SGbc1Kwffp3HFrGj/ax2li9hiaKmaFP9NyjxyNxk=,iv:69ZkhkfOsJ6bbJy0A9YYcCqBinTekH2rSPCM1UgdOJI=,tag:gzewG73fzhXnkVySIUawFQ==,type:str]
+    lastmodified: "2025-07-12T21:27:11Z"
+    mac: ENC[AES256_GCM,data:1LaZtcJmkgQ/CtmRe8CC0zvJEaxRTvRboibqm95EP5URi3DdHGpnJN08uWrBw7cJguYa8kVoZd2/NI7DFSJWlxAbQ4ud1fh43doIMnqJp9e3c3I9aoVtOY0k1VDgxVGLywxKWwR7z9Sa+YdPxltqiafDylGbCBUkeIAoNPuAj0k=,iv:ev7J8Vg/BVYbgR3PFINdopaqQf1L/ylgRurkvwcIPTg=,tag:lVqxtozWtGznVkuV8CZKlg==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.10.2
