@@ -5,7 +5,7 @@ set -e
 # Function to be executed when the script is started
 start_sequence() {
     echo "Starting script..."
-    bash ./.ci/kind-with-registry.sh
+    bash ./.dev/kind-with-registry.sh
     tilt up
 }
 

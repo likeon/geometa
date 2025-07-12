@@ -1,6 +1,6 @@
 load('ext://uibutton', 'cmd_button', 'text_input')
 
-k8s_yaml('.ci/postgres.yaml')
+k8s_yaml('.dev/postgres.yaml')
 k8s_resource('postgres-server', port_forwards=5432)
 
 local_resource(

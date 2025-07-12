@@ -2,7 +2,7 @@ default:
   just run
 
 run:
-  .ci/tilt-with-cluster.sh
+  .dev/tilt-with-cluster.sh
 
 install:
   mise upgrade

@@ -1,4 +1,0 @@
-- pg jobs node
-	- https://worker.graphile.org/
-- [reverse proxy](https://www.envoyproxy.io/)
-- 

@@ -1,2 +1,0 @@
-- unlogged tables
-- stored procedures
