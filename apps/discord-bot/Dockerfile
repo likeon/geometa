@@ -1,4 +1,4 @@
-FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
+FROM docker.io/lukemathwalker/cargo-chef:latest-rust-1 AS chef
 WORKDIR /app
 
 FROM chef AS planner
@@ -13,8 +13,9 @@ RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
 RUN cargo build --release --bin discord-bot
 
-FROM gcr.io/distroless/cc-debian12:debug AS runtime
+FROM gcr.io/distroless/cc-debian12 AS runtime
 WORKDIR /app
-COPY --from=builder /app/target/release/discord-bot /usr/local/bin/discord-bot
+USER 1000
+COPY --from=builder --chown=1000:1000 /app/target/release/discord-bot /usr/local/bin/discord-bot
 ENTRYPOINT []
 CMD ["/usr/local/bin/discord-bot"]
