@@ -12,7 +12,12 @@ COPY package.json bun.lock ./
 RUN bun install --frozen-lockfile --production
 COPY . .
 RUN bun run build
+
 COPY src/lib/db/migrations ./migrations
+
+RUN chown -R bun:bun /app
+
+USER bun
 
 ENV NODE_ENV=production
 CMD ["./server"]
