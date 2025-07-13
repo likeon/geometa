@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      imagePullSecrets:
+        - name: registries
+      containers:
+        - name: frontend
+          image: ghcr.io/likeon/geometa-frontend:k8s-801fcf77-1752348789 # {"$imagepolicy": "geometa-prod:frontend"}
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            failureThreshold: 2
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            failureThreshold: 5
+            initialDelaySeconds: 1
+            periodSeconds: 1
+          resources:
+            requests:
+              memory: 100Mi
+              cpu: 100m
+            limits:
+              memory: "700Mi"
+              cpu: "1"
+          ports:
+            - containerPort: 3000
+          env:
+            - name: BODY_SIZE_LIMIT
+              value: 200M
+            - name: PUBLIC_DASHBOARD_MAINTENANCE
+              value: "false"
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: geometa.postgres.credentials.postgresql.acid.zalan.do
+                  key: password
+            - name: CRONJOBS_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: frontend
+                  key: CRONJOBS_API_TOKEN
+            - name: DISCORD_SECRET_ID
+              valueFrom:
+                secretKeyRef:
+                  name: frontend
+                  key: DISCORD_SECRET_ID
+            - name: DISCORD_APPLICATION_ID
+              value: '1292091771643498610'
+            - name: LOGIN_RETURN_URL
+              value: https://learnablemeta.com/login/callback
+            - name: SENTRY_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: sentry
+                  key: SENTRY_AUTH_TOKEN
+            - name: NFCA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: frontend
+                  key: NFCA_TOKEN
+            - name: FRONTEND_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: frontend
+                  key: FRONTEND_API_TOKEN
+            - name: API_HOST
+              value: api
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+spec:
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 3000
+      name: http

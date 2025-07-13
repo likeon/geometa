@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 6
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/likeon/geometa-api:k8s-fe7d1a93-1752410900 # {"$imagepolicy": "geometa-prod:api"}
+          imagePullPolicy: Always
+          livenessProbe:
+            httpGet:
+              path: /api/health-check
+              port: 3000
+            failureThreshold: 2
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /api/health-check
+              port: 3000
+            failureThreshold: 5
+            initialDelaySeconds: 1
+            periodSeconds: 1
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              memory: 100Mi
+              cpu: 100m
+            limits:
+              memory: "300Mi"
+              cpu: 800m
+          env:
+            - name: DATABASE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: geometa.postgres.credentials.postgresql.acid.zalan.do
+                  key: password
+            - name: FRONTEND_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: FRONTEND_API_TOKEN
+            - name: SENTRY_DSN
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: SENTRY_DSN
+            - name: NFCA_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: NFCA_TOKEN
+            - name: IMAGES_S3_URL
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: IMAGES_S3_URL
+            - name: IMAGES_S3_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: IMAGES_S3_ACCESS_KEY
+            - name: IMAGES_S3_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: api
+                  key: IMAGES_S3_SECRET_KEY
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+      imagePullSecrets:
+        - name: registries
+      serviceAccountName: api
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+  annotations:
+    tailscale.com/expose: "true"
+spec:
+  selector:
+    app: api
+  ports:
+    - port: 80
+      targetPort: 3000
+      name: http

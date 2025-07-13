@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-proxy
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: image-proxy
+  template:
+    metadata:
+      labels:
+        app: image-proxy
+    spec:
+      containers:
+        - name: image-proxy
+          image: caddy:2.7.4
+          command: ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: image-proxy-config-volume
+              mountPath: /etc/caddy/Caddyfile
+              subPath: Caddyfile
+              readOnly: true
+      volumes:
+        - name: image-proxy-config-volume
+          secret:
+            secretName: image-proxy-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-proxy
+spec:
+  type: ClusterIP
+  selector:
+    app: image-proxy
+  ports:
+    - port: 80
+      targetPort: 80

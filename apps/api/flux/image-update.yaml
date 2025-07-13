@@ -1,0 +1,60 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: api
+spec:
+  image: ghcr.io/likeon/geometa-api
+  interval: 5m
+  provider: generic
+  secretRef:
+    name: registries
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: api
+spec:
+  imageRepositoryRef:
+    name: api
+  filterTags:
+    pattern: '^k8s-.+?-(?P<ts>[\d]+)$'
+    extract: "$ts"
+  policy:
+    numerical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageUpdateAutomation
+metadata:
+  name: api
+spec:
+  interval: 30m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  git:
+    commit:
+      author:
+        email: fluxcdbot@users.noreply.github.com
+        name: fluxcdbot
+      messageTemplate: "api: automated image update"
+    push:
+      branch: k8s
+  update:
+    path: ./apps/api/flux
+    strategy: Setters
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta2
+kind: Receiver
+metadata:
+  name: api-update-receiver
+spec:
+  type: generic
+  secretRef:
+    name: api-update-webhook-token
+  events: ["workflow_dispatch"]
+  resources:
+    - apiVersion: image.toolkit.fluxcd.io/v1beta2
+      kind: ImageRepository
+      name: api

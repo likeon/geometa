@@ -1,0 +1,60 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: discord-bot
+spec:
+  image: ghcr.io/likeon/geometa-discord-bot
+  interval: 5m
+  provider: generic
+  secretRef:
+    name: registries
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: discord-bot
+spec:
+  imageRepositoryRef:
+    name: discord-bot
+  filterTags:
+    pattern: '^k8s-.+?-(?P<ts>[\d]+)$'
+    extract: "$ts"
+  policy:
+    numerical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageUpdateAutomation
+metadata:
+  name: discord-bot
+spec:
+  interval: 30m
+  sourceRef:
+    kind: GitRepository
+    name: flux-system
+    namespace: flux-system
+  git:
+    commit:
+      author:
+        email: fluxcdbot@users.noreply.github.com
+        name: fluxcdbot
+      messageTemplate: "discord-bot: automated image update"
+    push:
+      branch: k8s
+  update:
+    path: ./apps/discord-bot/flux
+    strategy: Setters
+---
+apiVersion: notification.toolkit.fluxcd.io/v1beta2
+kind: Receiver
+metadata:
+  name: discord-bot-update-receiver
+spec:
+  type: generic
+  secretRef:
+    name: discord-bot-update-webhook-token
+  events: ["workflow_dispatch"]
+  resources:
+    - apiVersion: image.toolkit.fluxcd.io/v1beta2
+      kind: ImageRepository
+      name: discord-bot
