@@ -22,3 +22,9 @@ flux-switch-branch BRANCH_NAME:
     --type merge \
     --patch '{"spec":{"ref":{"branch":"{{BRANCH_NAME}}"}}}'
   flux reconcile source git flux-system --namespace flux-system
+
+flux-reconcile:
+  flux reconcile source git flux-system
+
+flux-events:
+  flux events
