@@ -70,44 +70,6 @@ export function delay(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export async function cloudflareKvBulkPut(data: any[]) {
-  console.log('In KvBultPut function');
-  const url = `https://api.cloudflare.com/client/v4/accounts/a38064a092904c941dedaf866ea6977e/storage/kv/namespaces/${env.CLOUDFLARE_KV_NAMESPACE_ID}/bulk`;
-
-  if (!env.CLOUDFLARE_KV_NAMESPACE_ID || !env.CLOUDFLARE_BEARER) {
-    throw new Error('Set Cloudflare variables');
-  }
-
-  const headers = {
-    Authorization: `Bearer ${env.CLOUDFLARE_BEARER}`,
-    'Content-Type': 'application/json'
-  };
-  let count = 0;
-  const chunks = chunkArray(data, 10000);
-  for (const chunk of chunks) {
-    try {
-      const response = await fetch(url, {
-        method: 'PUT',
-        headers: headers,
-        body: JSON.stringify(chunk)
-      });
-
-      if (!response.ok) {
-        console.log('here1');
-        console.log(response.status);
-        throw new Error(`Request failed with status ${response.status}`);
-      }
-
-      console.log('request was good ' + count);
-      count++;
-    } catch (error) {
-      console.log('here2');
-      console.log(error);
-      throw new Error(`There was an error: ${error}`);
-    }
-  }
-}
-
 export async function ensurePermissions(
   db: DB,
   userId: string | undefined,
