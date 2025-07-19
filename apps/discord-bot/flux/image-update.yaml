@@ -17,7 +17,7 @@ spec:
   imageRepositoryRef:
     name: discord-bot
   filterTags:
-    pattern: '^k8s-.+?-(?P<ts>[\d]+)$'
+    pattern: '^main-.+?-(?P<ts>[\d]+)$'
     extract: "$ts"
   policy:
     numerical:
@@ -40,7 +40,7 @@ spec:
         name: fluxcdbot
       messageTemplate: "discord-bot: automated image update"
     push:
-      branch: k8s
+      branch: main
   update:
     path: ./apps/discord-bot/flux
     strategy: Setters

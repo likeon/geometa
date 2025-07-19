@@ -17,7 +17,7 @@ spec:
   imageRepositoryRef:
     name: frontend
   filterTags:
-    pattern: '^k8s-.+?-(?P<ts>[\d]+)$'
+    pattern: '^main-.+?-(?P<ts>[\d]+)$'
     extract: '$ts'
   policy:
     numerical:
@@ -40,7 +40,7 @@ spec:
         name: fluxcdbot
       messageTemplate: 'frontend: automated image update'
     push:
-      branch: k8s
+      branch: main
   update:
     path: ./apps/frontend/flux
     strategy: Setters
