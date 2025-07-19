@@ -45,7 +45,7 @@ jobs:
           file: apps/discord-bot/Dockerfile
           push: true
           tags: |
-            ghcr.io/geometa-discord-bot:${{ steps.prep.outputs.BUILD_ID }}
+            ghcr.io/likeon/geometa-discord-bot:${{ steps.prep.outputs.BUILD_ID }}
           cache-from: type=gha,scope=${{ github.workflow }}
           cache-to: type=gha,scope=${{ github.workflow }},mode=max
 

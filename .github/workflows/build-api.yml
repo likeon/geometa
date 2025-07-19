@@ -45,7 +45,7 @@ jobs:
           file: apps/api/Dockerfile
           push: true
           tags: |
-            ghcr.io/geometa-api:${{ steps.prep.outputs.BUILD_ID }}
+            ghcr.io/likeon/geometa-api:${{ steps.prep.outputs.BUILD_ID }}
           cache-from: type=gha,scope=${{ github.workflow }}
           cache-to: type=gha,scope=${{ github.workflow }},mode=max
 
