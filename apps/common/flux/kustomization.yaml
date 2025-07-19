@@ -7,4 +7,5 @@ resources:
   - postgres-s3-secrets.enc.yaml
   - postgres.yaml
   - image-proxy.yaml
+  - image-proxy-secrets.enc.yaml
   - rbac.yaml

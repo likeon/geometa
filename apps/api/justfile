@@ -17,3 +17,5 @@ db-dump:
 db-reset:
   psql -h localhost -U postgres postgres -f utils/db/reset.sql
 
+build TAG:
+  buildah bud --platform linux/arm64 -t {{TAG}}

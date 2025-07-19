@@ -1,0 +1,2 @@
+build TAG:
+  buildah bud --platform linux/arm64 -t {{TAG}}
