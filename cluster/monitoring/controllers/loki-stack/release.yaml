@@ -1,0 +1,126 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: loki
+spec:
+  interval: 5m
+  dependsOn:
+    - name: kube-prometheus-stack
+  chart:
+    spec:
+      version: "6.x"
+      chart: loki
+      sourceRef:
+        kind: HelmRepository
+        name: grafana-charts
+      interval: 60m
+  values:
+    chunksCache:
+      enabled: false
+    resultsCache:
+      enabled: false
+    test:
+      enabled: false
+    # following https://github.com/fluxcd/flux2-monitoring-example/pull/23/files#diff-5e041afacf25eb055565b4a1c32d5b81201ddce29c84adf13a6ae88463e0832b
+    extraObjects:
+      - apiVersion: v1
+        kind: ConfigMap
+        metadata:
+          name: loki-datasource
+          labels:
+            app: loki
+            chart: loki
+            release: loki
+            grafana_datasource: "1"
+            app.kubernetes.io/part-of: kube-prometheus-stack
+        data:
+          loki-datasource.yaml: |-
+            apiVersion: 1
+            datasources:
+            - name: Loki
+              type: loki
+              access: proxy
+              url: http://loki:{{ .Values.loki.server.http_listen_port }}
+              version: 1
+              isDefault: false
+    loki:
+      auth_enabled: false
+      serviceMonitor:
+        enabled: true
+        labels:
+          app.kubernetes.io/part-of: kube-prometheus-stack
+      limits_config:
+        allow_structured_metadata: true
+        retention_period: 31d
+        retention_stream:
+          - selector: '{namespace="geometa-prod"}'
+            priority: 1
+            period: 365d
+        volume_enabled: true
+      # https://grafana.com/docs/loki/latest/setup/install/helm/install-monolithic/
+      commonConfig:
+        replication_factor: 1
+      storage:
+        bucketNames:
+          chunks: ${AWS_BUCKET}
+          ruler: ${AWS_BUCKET}
+          admin: ${AWS_BUCKET}
+        type: s3
+        s3:
+          bucketnames: ${AWS_BUCKET}
+          endpoint: ${AWS_ENDPOINT}
+          region: ${AWS_REGION}
+          s3ForcePathStyle: true
+          insecure: false
+          accessKeyId: ${AWS_ACCESS_KEY_ID}
+          secretAccessKey: ${AWS_SECRET_ACCESS_KEY}
+      schemaConfig:
+        configs:
+          - from: "2024-04-01"
+            store: tsdb
+            object_store: s3
+            schema: v13
+            index:
+              prefix: loki_index_
+              period: 24h
+      pattern_ingester:
+        enabled: true
+      ruler:
+        enable_api: true
+      configStorageType: Secret
+    lokiCanary:
+      enabled: false
+    deploymentMode: SingleBinary
+    singleBinary:
+      replicas: 1
+      terminationGracePeriodSeconds: 300 # just in case idk if really needed
+      extraArgs:
+        - -config.expand-env=true
+      extraEnvFrom:
+        - secretRef:
+            name: loki-s3-secret
+    # Zero out replica counts of other deployment modes
+    backend:
+      replicas: 0
+    read:
+      replicas: 0
+    write:
+      replicas: 0
+    ingester:
+      replicas: 0
+    querier:
+      replicas: 0
+    queryFrontend:
+      replicas: 0
+    queryScheduler:
+      replicas: 0
+    distributor:
+      replicas: 0
+    compactor:
+      replicas: 0
+    indexGateway:
+      replicas: 0
+    bloomCompactor:
+      replicas: 0
+    bloomGateway:
+      replicas: 0

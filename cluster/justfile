@@ -1,0 +1,30 @@
+default:
+  just --list
+
+talos-secrets-encrypt:
+  #!/usr/bin/env bash
+  cd talos
+  sops -e controlplane.yaml > controlplane.enc.yaml
+  sops -e worker.yaml > worker.enc.yaml
+  sops -e kubeconfig > kubeconfig.enc
+  sops -e talosconfig > talosconfig.enc
+
+talos-secrets-decrypt:
+  #!/usr/bin/env bash
+  cd talos
+  sops -d controlplane.enc.yaml > controlplane.yaml
+  sops -d worker.enc.yaml > worker.yaml
+  sops -d kubeconfig.enc > kubeconfig
+  sops -d talosconfig.enc > talosconfig
+
+flux-switch-branch BRANCH_NAME:
+  kubectl -n flux-system patch gitrepository flux-system \
+    --type merge \
+    --patch '{"spec":{"ref":{"branch":"{{BRANCH_NAME}}"}}}'
+  flux reconcile source git flux-system --namespace flux-system
+
+flux-reconcile:
+  flux reconcile source git flux-system
+
+flux-events:
+  flux events

@@ -1,0 +1,9 @@
+cluster:
+  network:
+    cni:
+      name: none
+  proxy:
+    extraArgs:
+      metrics-bind-address: "0.0.0.0:10249"
+  allowSchedulingOnControlPlanes: true
+---

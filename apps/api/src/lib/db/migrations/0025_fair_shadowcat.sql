@@ -1,0 +1,1 @@
+ALTER TABLE "synced_metas" ALTER COLUMN "images" SET NOT NULL;

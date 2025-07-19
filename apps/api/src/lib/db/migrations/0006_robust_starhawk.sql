@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS "map_group_locations_map_group_tag_idx" ON "map_group_locations" USING btree ("map_group_id","extra_tag");

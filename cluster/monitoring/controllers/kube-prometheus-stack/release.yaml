@@ -1,0 +1,60 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: kube-prometheus-stack
+spec:
+  interval: 1h
+  chartRef:
+    kind: OCIRepository
+    name: kube-prometheus-stack
+  install:
+    crds: Create
+  upgrade:
+    crds: CreateReplace
+  driftDetection:
+    mode: enabled
+    ignore:
+      # Ignore "validated" annotation which is not inserted during install
+      - paths: [ "/metadata/annotations/prometheus-operator-validated" ]
+        target:
+          kind: PrometheusRule
+  valuesFrom:
+  - kind: ConfigMap
+    name: flux-kube-state-metrics-config
+    valuesKey: kube-state-metrics-config.yaml
+  # https://github.com/prometheus-community/helm-charts/blob/main/charts/kube-prometheus-stack/values.yaml
+  values:
+    alertmanager:
+      enabled: false
+    prometheus:
+      prometheusSpec:
+        retention: 30d
+        resources:
+          requests:
+            cpu: 200m
+            memory: 200Mi
+        podMonitorNamespaceSelector: { }
+        podMonitorSelector:
+          matchLabels:
+            app.kubernetes.io/component: monitoring
+    grafana:
+      defaultDashboardsEnabled: true
+      adminPassword: flux
+      grafana.ini:
+        auth.anonymous:
+          enabled: true
+          org_role: Admin
+#        auth:
+#          disable_login_form: true
+      persistence:
+         enabled: true
+         type: sts
+         accessModes:
+           - ReadWriteOnce
+         size: 2Gi
+         finalizers:
+           - kubernetes.io/pvc-protection
+      service:
+        annotations:
+          tailscale.com/expose: "true"
+          tailscale.com/hostname: "geometa-grafana"

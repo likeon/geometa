@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: registry
+spec:
+  type: ClusterIP
+  clusterIP: 10.107.139.75
+  selector:
+    app: registry
+  ports:
+    - port: 80
+      targetPort: 5000

@@ -1,0 +1,53 @@
+kind: "postgresql"
+apiVersion: "acid.zalan.do/v1"
+
+metadata:
+  name: "postgres"
+  labels:
+    team: acid
+
+spec:
+  teamId: "acid"
+  postgresql:
+    version: "17"
+    parameters:
+      max_connections: "100"
+      shared_buffers: "2GB"
+      effective_cache_size: "3GB"
+      maintenance_work_mem: "256MB"
+      checkpoint_completion_target: "0.9"
+      wal_buffers: "16MB"
+      default_statistics_target: "100"
+      random_page_cost: "1.1"
+      effective_io_concurrency: "64"
+      work_mem: "8MB"
+#      max_worker_processes: "2"
+#      max_parallel_workers_per_gather: "1"
+#      max_parallel_workers: "2"
+#      max_parallel_maintenance_workers: "1"
+      jit: "off"
+      track_io_timing: "on"
+      autovacuum_max_workers: "2"
+      autovacuum_vacuum_cost_limit: "2000"
+      autovacuum_vacuum_cost_delay: "10ms"
+      checkpoint_timeout: "30min"
+      temp_file_limit: "1GB"
+      wal_compression: "lz4"
+  masterServiceAnnotations:
+    tailscale.com/expose: "true"
+  numberOfInstances: 3
+  volume:
+    size: "10Gi"
+  users:
+    geometa: []
+  databases:
+    geometa: geometa
+  enableLogicalBackup: true
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 1Gi
+    limits:
+      cpu: "2"
+      memory: 4Gi

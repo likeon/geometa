@@ -1,0 +1,1 @@
+ALTER TABLE "maps" ADD COLUMN "is_blackout" boolean DEFAULT false NOT NULL;

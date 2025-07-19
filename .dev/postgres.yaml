@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres-server
+spec:
+  selector:
+    matchLabels:
+      app: postgres-server
+  template:
+    metadata:
+      labels:
+        app: postgres-server
+    spec:
+      securityContext:
+        fsGroup: 1000
+      containers:
+        - name: postgres-server
+          image: timescale/timescaledb:latest-pg17
+          env:
+            - name: POSTGRES_PASSWORD
+              value: postgres
+            - name: POSTGRES_DB
+              value: geometa
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: psql-data-disk
+      volumes:
+        - name: psql-data-disk
+          hostPath:
+            path: /data/postgres
+  strategy:
+    type: Recreate
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-svc
+spec:
+  selector:
+    app: postgres-server
+  ports:
+    - port: 5432

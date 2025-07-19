@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discord-bot
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: discord-bot
+  template:
+    metadata:
+      labels:
+        app: discord-bot
+    spec:
+      imagePullSecrets:
+        - name: registries
+      volumes:
+        - name: sa-token
+          projected:
+            sources:
+              - serviceAccountToken:
+                  path: token
+                  audience: "api"
+      containers:
+        - name: discord-bot
+          image: ghcr.io/likeon/geometa-discord-bot:k8s-f18130da-1752356533 # {"$imagepolicy": "geometa-prod:discord-bot"}
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: 100Mi
+              cpu: 100m
+            limits:
+              memory: 100Mi
+              cpu: 100m
+          env:
+            - name: DISCORD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: discord-bot
+                  key: DISCORD_TOKEN
+            - name: API_HOST
+              value: api
+          volumeMounts:
+            - name: sa-token
+              mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+              readOnly: true
+      serviceAccountName: discord-bot

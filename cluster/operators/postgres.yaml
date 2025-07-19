@@ -1,0 +1,54 @@
+apiVersion: source.toolkit.fluxcd.io/v1beta2
+kind: HelmRepository
+metadata:
+  name: postgres-operator-charts
+  namespace: kube-system
+spec:
+  interval: 24h
+  url: https://opensource.zalando.com/postgres-operator/charts/postgres-operator
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: postgres-operator
+  namespace: kube-system
+spec:
+  releaseName: postgres-operator
+  chart:
+    spec:
+      chart: postgres-operator
+      version: 1.14.0
+      sourceRef:
+        kind: HelmRepository
+        name: postgres-operator-charts
+        namespace: kube-system
+  interval: 1h0m0s
+  values:
+    configKubernetes:
+      enable_persistent_volume_claim_deletion: false
+    configLogicalBackup:
+      logical_backup_docker_image: ghcr.io/zalando/postgres-operator/logical-backup:v1.14.0
+      logical_backup_provider: s3
+      # S3 bucket prefix to use
+      logical_backup_s3_bucket_prefix: "spilo"
+      # S3 server side encryption
+      logical_backup_s3_sse: ""
+      # S3 retention time for stored backups for example "2 week" or "7 days"
+      logical_backup_s3_retention_time: "31 days"
+      # backup schedule in the cron format
+      logical_backup_schedule: "0 */2 * * *" # every 2 hours
+      # secret to be used as reference for env variables in cronjob
+      logical_backup_cronjob_environment_secret: "postgres-s3"
+  valuesFrom:
+    - kind: Secret
+      name: postgres-backup
+      valuesKey: logical_backup_s3_bucket
+      targetPath: configLogicalBackup.logical_backup_s3_bucket
+    - kind: Secret
+      name: postgres-backup
+      valuesKey: logical_backup_s3_region
+      targetPath: configLogicalBackup.logical_backup_s3_region
+    - kind: Secret
+      name: postgres-backup
+      valuesKey: logical_backup_s3_endpoint
+      targetPath: configLogicalBackup.logical_backup_s3_endpoint

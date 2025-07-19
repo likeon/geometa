@@ -1,0 +1,21 @@
+drizzle-generate:
+  bunx drizzle-kit generate
+
+drizzle-migrate:
+  bunx drizzle-kit migrate
+
+database := "geometa"
+db-psql:
+  psql -h localhost -U postgres {{database}}
+
+alias db-shell := db-psql
+
+environment := "local"
+db-dump:
+  ./utils/db/backup.sh {{environment}}
+
+db-reset:
+  psql -h localhost -U postgres postgres -f utils/db/reset.sql
+
+build TAG:
+  buildah bud --platform linux/arm64 -t {{TAG}}

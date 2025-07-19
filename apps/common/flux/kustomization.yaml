@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - registry.enc.yaml
+  - cloudflared.enc.yaml
+  - sentry.enc.yaml
+  - postgres-s3-secrets.enc.yaml
+  - postgres.yaml
+  - image-proxy.yaml
+  - image-proxy-secrets.enc.yaml
+  - rbac.yaml

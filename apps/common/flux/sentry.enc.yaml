@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: sentry
+stringData:
+    SENTRY_AUTH_TOKEN: ENC[AES256_GCM,data:Sk2cESjoWF0xIVfSnGAJ0r3nrOI7ukplG6jHpznK24UP/tpV6b1BUyNO4UHRoQ+mbVn0Vq92X/gaC5mtqjrXboxAF7Lhrv88iK/8Ys989JCZ2fK4M6N02PhMeJ0e74Zk4okUQjOu/2qGAkQYgZL6K8guDpoX9FDZBmNgHbLFUhKuVvmQWqUfHIZ40JS7l0KdiQyRN//bFRglYMVdw7LRuI0w+WZ3hn2b2hD12cQVBBBCFkOj4mYaPRmR3nSbfk4=,iv:viGdjypzzXloBBJ4r+h7zlDfKMJiuVHJHld7FcMGSI0=,tag:hxP5EsFRpHR/Gg+qVt8OUA==,type:str]
+sops:
+    age:
+        - recipient: age1nmyhrpnparuwdkny03zxc52gn488qumxw865ss3vavkqxvauhfwq0e7y34
+          enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBlejJlVG9oeExGOUZaTHN4
+            blJDRWFCS21kbzYyNTFrUmIycHYwejM2WjNJCmEvVExtMjJGU1cyWUV4d2tzcWx5
+            dldqdG1mOXgzZ3I0V3Q3bzQ3WGwvVEEKLS0tIFRMdEpDZm1rNnFFMXg3ZDFzT2o1
+            d1Blc2V5bks5bWZpK25FZTNwNVFZZkEK/d84snD/nZAvGsMu7du+w1Fini+WXE6H
+            M5ojFolnwsuw4iyvwhNK1j7UodkSiMREXn7CVoSCu4Iff29TJDd3Yg==
+            -----END AGE ENCRYPTED FILE-----
+    lastmodified: "2025-05-14T10:49:34Z"
+    mac: ENC[AES256_GCM,data:nnxP/Dj5of2+jT5GYzJTVqIzBL+gYvCwC8AJhbN2k2nIf6WWeUeC07UG+AnKJS6kCOtsgwWFlFB9BudlSzeZVn8aYDbB9frUb0K56erheAUolGNi7QOjG0w02/0yhyxST9muLqqjyuT16463PgwAzoMSWtg8QKTVIFS8DPmVnuI=,iv:lzDUIJLmfBDiqGj0ZEiMhbMc5KCDgLqIfdCp7SkV9PM=,tag:L9XhP7my9bMFyKv9Z40TnA==,type:str]
+    encrypted_regex: ^(data|stringData)$
+    version: 3.10.2
