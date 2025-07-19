@@ -11,7 +11,7 @@
   "flux": {
     "fileMatch": ["^cluster/.+\\.ya?ml$"]
   },
-  
+
   /* Enable helm-values manager for processing Helm values in HelmRelease resources */
   "helm-values": {
     "fileMatch": ["^cluster/.+\\.ya?ml$"]
@@ -51,6 +51,20 @@
       "matchUpdateTypes": ["major"],
       "groupName": "api – major",
       "groupSlug": "api-major"
+    },
+    /* 3️⃣  userscript ― non-major */
+    {
+      "matchPaths": ["userscript//**"],
+      "matchUpdateTypes": ["patch", "minor"],
+      "groupName": "userscript – non-major",
+      "groupSlug": "userscript-minor-patch"
+    },
+    /* 4️⃣  userscript ― major */
+    {
+      "matchPaths": ["userscript/**"],
+      "matchUpdateTypes": ["major"],
+      "groupName": "userscript – major",
+      "groupSlug": "userscript-major"
     },
 
     /* 5️⃣  Helm charts ― all updates grouped */
