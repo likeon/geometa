@@ -2,7 +2,7 @@ name: Build discord-bot
 
 on:
   push:
-    branches: [k8s]
+    branches: [main]
     paths:
       - apps/discord-bot/**
       - "!apps/discord-bot/flux/**"

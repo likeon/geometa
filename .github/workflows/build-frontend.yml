@@ -2,7 +2,7 @@ name: Build frontend
 
 on:
   push:
-    branches: [k8s]
+    branches: [main]
     paths:
       - apps/frontend/**
       - "!apps/frontend/flux/**"

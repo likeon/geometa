@@ -2,7 +2,7 @@ name: Build api
 
 on:
   push:
-    branches: [k8s]
+    branches: [main]
     paths:
       - apps/api/**
       - "!apps/api/flux/**"
