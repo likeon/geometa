@@ -3,7 +3,7 @@
 @variant dark (&:where(.dark, .dark *));
 
 @layer base {
-  a:not(button):not([role="button"]):not([data-slot="button"]) {
+  a:not(button):not([role='button']):not([data-slot='button']) {
     color: var(--link-color);
     @apply hover:underline;
   }
@@ -59,7 +59,6 @@ html.dark .carta-wrapper {
   @apply border-gray-500 border-2;
 }
 
-
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
@@ -88,6 +87,8 @@ html.dark .carta-wrapper {
   --foreground: hsl(240 10% 3.9%);
   --link-color: hsl(220.3 82.9% 62.7%); /* blue-600 */
   --card: hsl(0 0% 100%);
+  --card-learning: #443216;
+  --card-learned: #1f3324;
   --card-foreground: hsl(240 10% 3.9%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(240 10% 3.9%);
@@ -120,6 +121,8 @@ html.dark .carta-wrapper {
   --foreground: hsl(0 0% 95%);
   --link-color: hsl(217.1 92.7% 67.6%); /* blue-400 */
   --card: hsl(24 9.8% 10%);
+  --card-learning: #443216;
+  --card-learned: #1f3324;
   --card-foreground: hsl(0 0% 95%);
   --popover: hsl(0 0% 9%);
   --popover-foreground: hsl(0 0% 95%);
@@ -147,8 +150,6 @@ html.dark .carta-wrapper {
 }
 
 @theme inline {
-
-
   /* Radius (for rounded-*) */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -164,6 +165,8 @@ html.dark .carta-wrapper {
   --color-popover-foreground: var(--popover-foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-card-learning: var(--card-learning);
+  --color-card-learned: var(--card-learned);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-primary: var(--primary);
@@ -195,7 +198,8 @@ html.dark .carta-wrapper {
     @apply bg-background text-foreground;
   }
 
-  input, textarea {
+  input,
+  textarea {
     caret-color: hsl(var(--foreground));
   }
 
@@ -218,7 +222,6 @@ html.dark .carta-wrapper {
     @apply text-base font-medium mb-1;
   }
 }
-
 
 @utility container {
   margin-inline: auto;
