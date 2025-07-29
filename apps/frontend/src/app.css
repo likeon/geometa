@@ -87,8 +87,8 @@ html.dark .carta-wrapper {
   --foreground: hsl(240 10% 3.9%);
   --link-color: hsl(220.3 82.9% 62.7%); /* blue-600 */
   --card: hsl(0 0% 100%);
-  --card-learning: #443216;
-  --card-learned: #1f3324;
+  --card-learning: #ffcc7ab7;
+  --card-learned: #75c98ab4;
   --card-foreground: hsl(240 10% 3.9%);
   --popover: hsl(0 0% 100%);
   --popover-foreground: hsl(240 10% 3.9%);

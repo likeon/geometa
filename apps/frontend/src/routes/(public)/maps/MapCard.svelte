@@ -140,7 +140,7 @@
         Meta List
       </Button>
       <Select type="single" value={selected} onValueChange={handleLearningStateChange}>
-        <SelectTrigger>
+        <SelectTrigger class="bg-white dark:dark:bg-input/30">
           {#if selected !== 'none'}
             {learnStateEmoji[selected]}
           {/if}
