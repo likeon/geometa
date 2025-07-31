@@ -708,6 +708,25 @@ export const actions = {
       return setError(form, 'file', 'Validation failed');
     }
 
+    // Check for duplicate tagNames
+    const tagNameCounts = new Map<string, number>();
+    for (const item of validationResult.data!) {
+      const count = tagNameCounts.get(item.tagName) || 0;
+      tagNameCounts.set(item.tagName, count + 1);
+    }
+
+    const duplicates = Array.from(tagNameCounts.entries())
+      .filter(([_, count]) => count > 1)
+      .map(([tagName, count]) => `${tagName} (${count} times)`);
+
+    if (duplicates.length > 0) {
+      return setError(
+        form,
+        'file',
+        `Duplicate tagNames found: ${duplicates.join(', ')}. Each tagName must be unique.`
+      );
+    }
+
     try {
       await uploadMetas(locals.db, groupId, validationResult, form.data.partialUpload);
     } catch (error) {
