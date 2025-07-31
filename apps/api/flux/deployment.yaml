@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: api
 spec:
-  replicas: 6
+  replicas: 3
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -19,7 +19,6 @@ spec:
       containers:
         - name: api
           image: ghcr.io/likeon/geometa-api:main-5db8818d-1753907458 # {"$imagepolicy": "geometa-prod:api"}
-          imagePullPolicy: Always
           livenessProbe:
             httpGet:
               path: /api/health-check
@@ -33,7 +32,7 @@ spec:
               port: 3000
             failureThreshold: 5
             initialDelaySeconds: 1
-            periodSeconds: 1
+            periodSeconds: 2
           ports:
             - containerPort: 3000
           resources:
@@ -41,8 +40,8 @@ spec:
               memory: 100Mi
               cpu: 100m
             limits:
-              memory: "300Mi"
-              cpu: 800m
+              memory: "800Mi"
+              cpu: 1500m
           env:
             - name: DATABASE_PASSWORD
               valueFrom:
