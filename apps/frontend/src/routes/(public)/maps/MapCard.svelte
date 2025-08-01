@@ -11,12 +11,51 @@
   import type { Component } from 'svelte';
   import { Badge } from '$lib/components/ui/badge';
   import Tooltip from '$lib/components/Tooltip.svelte';
+  import { LocalStorage } from '$lib/storage.svelte';
+  import { Select } from '$lib/components/ui/select';
+  import SelectTrigger from '$lib/components/ui/select/select-trigger.svelte';
+  import SelectItem from '$lib/components/ui/select/select-item.svelte';
+  import SelectContent from '$lib/components/ui/select/select-content.svelte';
 
   let {
     map
   }: {
     map: Awaited<PageData['allMaps']>[number];
   } = $props();
+  type LearnState = 'none' | 'learning' | 'learned';
+
+  const LearnStates: Record<LearnState, string> = {
+    none: '❌ None',
+    learning: '🟧 Learning',
+    learned: '✅ Learned'
+  };
+
+  const learnStateEmoji: Record<LearnState, string> = {
+    none: '',
+    learning: '🟧',
+    learned: '✅'
+  };
+
+  const learningMap = new LocalStorage('learning-store', {} as Record<string, LearnState>);
+  const mapKey = map.id.toString();
+  let selected: LearnState = $state(learningMap.current[mapKey] ?? 'none');
+
+  function handleLearningStateChange(value: string) {
+    if (!['none', 'learning', 'learned'].includes(value)) return;
+    selected = value as LearnState;
+    learningMap.current[mapKey] = value;
+  }
+
+  const cardClass = $derived.by(() => {
+    switch (selected) {
+      case 'learning':
+        return 'bg-card-learning';
+      case 'learned':
+        return 'bg-card-learned';
+      default:
+        return 'bg-card';
+    }
+  });
 
   const difficulties: Record<
     number,
@@ -44,7 +83,7 @@
   };
 </script>
 
-<Card.Root class="flex flex-col">
+<Card.Root class="flex flex-col {cardClass}">
   <Card.Header>
     <div class="flex flex-row pb-2">
       {#if map.isShared}
@@ -100,6 +139,19 @@
         <CliListIcon class="inline-block mr-1" />
         Meta List
       </Button>
+      <Select type="single" value={selected} onValueChange={handleLearningStateChange}>
+        <SelectTrigger class="bg-white dark:dark:bg-input/30">
+          {#if selected !== 'none'}
+            {learnStateEmoji[selected]}
+          {/if}
+        </SelectTrigger>
+
+        <SelectContent>
+          {#each Object.entries(LearnStates) as [value, label]}
+            <SelectItem {value}>{label}</SelectItem>
+          {/each}
+        </SelectContent>
+      </Select>
     </div>
   </Card.Content>
 </Card.Root>
