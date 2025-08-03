@@ -39,7 +39,7 @@ const api = new Elysia({ prefix: '/api' })
     }
   });
 
-const app = new Elysia()
+const app = new Elysia({serve: {idleTimeout: 60}})
   // works around https://github.com/elysiajs/elysia/issues/1071
   // says it's fixed, but it's not
   .use(
