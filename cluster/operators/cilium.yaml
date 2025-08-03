@@ -49,13 +49,47 @@ spec:
         enabled: false
       hostRoot: /sys/fs/cgroup
     kubeProxyReplacement: false
+    # Enable Prometheus metrics for Cilium agent
+    prometheus:
+      enabled: true
+      serviceMonitor:
+        enabled: true
+        labels:
+          release: kube-prometheus-stack
+    # Enable Prometheus metrics for Cilium operator
+    operator:
+      prometheus:
+        enabled: true
+        serviceMonitor:
+          enabled: true
+          labels:
+            release: kube-prometheus-stack
     hubble:
+      enabled: true
+      # Enable Hubble metrics
+      metrics:
+        enabled:
+          - dns
+          - drop
+          - tcp
+          - flow
+          - icmp
+          - "httpV2:exemplars=true;labelsContext=source_ip,source_namespace,source_workload,destination_ip,destination_namespace,destination_workload,traffic_direction"
+        enableOpenMetrics: true
+        serviceMonitor:
+          enabled: true
+          labels:
+            release: kube-prometheus-stack
       relay:
         enabled: true
+        prometheus:
+          enabled: true
+          serviceMonitor:
+            enabled: true
+            labels:
+              release: kube-prometheus-stack
       ui:
         enabled: true
         annotations:
           tailscale.com/expose: "true"
           tailscale.com/hostname: "geometa-hubble"
-        metrics:
-          enabled: "{dns,drop,tcp,flow,http}"
