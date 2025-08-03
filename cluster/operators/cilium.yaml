@@ -57,3 +57,5 @@ spec:
         annotations:
           tailscale.com/expose: "true"
           tailscale.com/hostname: "geometa-hubble"
+        metrics:
+          enabled: "{dns,drop,tcp,flow,http}"
