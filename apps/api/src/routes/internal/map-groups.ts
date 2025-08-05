@@ -150,7 +150,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       }
 
       // If no meta IDs provided, return all locations for the group
-      let whereClause;
+      let whereClause: ReturnType<typeof and> | ReturnType<typeof eq>;
       if (body.metaIds && body.metaIds.length > 0) {
         whereClause = and(
           eq(locationMetas.mapGroupId, groupId),
@@ -249,7 +249,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       }
 
       // If no meta IDs provided, return all metas for the group
-      let whereClause;
+      let whereClause: ReturnType<typeof and> | ReturnType<typeof eq>;
       if (body.metaIds && body.metaIds.length > 0) {
         whereClause = and(
           eq(metas.mapGroupId, groupId),

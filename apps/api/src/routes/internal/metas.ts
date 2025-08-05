@@ -38,7 +38,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
             quality: 70,
           })
           .toBuffer();
-      } catch (e) {
+      } catch (_e) {
         return status(400, undefined);
       }
 

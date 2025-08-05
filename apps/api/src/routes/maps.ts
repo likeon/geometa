@@ -1,6 +1,6 @@
-import { mapRegions, maps, regions } from '@api/lib/db/schema';
+import { maps, } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
-import { and, eq, exists, ilike, or, sql } from 'drizzle-orm';
+import { and, eq, ilike, or, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import { pick } from 'remeda';
 

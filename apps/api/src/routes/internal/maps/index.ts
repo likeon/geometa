@@ -167,7 +167,7 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
         .limit(1);
 
       const wasMapSynced = syncedMapQuery.length > 0;
-      let metas;
+      let metas: Awaited<ReturnType<typeof syncedMetasPersonalStatement.execute | typeof syncedMetasStatement.execute | typeof metasFromMapStatement.execute>>;
 
       if (wasMapSynced && syncedMapQuery[0].isPersonal) {
         metas = await syncedMetasPersonalStatement.execute({ mapId });

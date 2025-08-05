@@ -42,7 +42,7 @@ export async function geoguessrGetMapInfo(geoguessrId: string) {
   }
 
   const mapInfo = data[0];
-  if (mapInfo.id != geoguessrId) {
+  if (mapInfo.id !== geoguessrId) {
     // found map id doesn't match the requested id
     // probably in cases where not an actual map id was provided
     // treat it the same as map not found

@@ -28,7 +28,7 @@ async function processImage(metaImage: typeof metaImages.$inferSelect) {
 
   let imageBuffer: ArrayBuffer;
   let newFileName: string;
-  let finalImageUrlForS3 = '';
+  let _finalImageUrlForS3 = '';
 
   const imagePathAndNameWithOldExt = originalImageUrl.substring(
     STATIC_DOMAIN_PREFIX.length,
@@ -51,7 +51,7 @@ async function processImage(metaImage: typeof metaImages.$inferSelect) {
     }
     imageBuffer = await response.arrayBuffer();
     newFileName = `${imageNameWithoutExtension}.avif`;
-    finalImageUrlForS3 = transformedImageUrl;
+    _finalImageUrlForS3 = transformedImageUrl;
     console.log(
       `Successfully downloaded transformed image. New file name: ${newFileName}`,
     );
@@ -69,7 +69,7 @@ async function processImage(metaImage: typeof metaImages.$inferSelect) {
       }
       imageBuffer = await response.arrayBuffer();
       newFileName = imagePathAndNameWithOldExt; // Use the full original path and name with its extension
-      finalImageUrlForS3 = originalImageUrl;
+      _finalImageUrlForS3 = originalImageUrl;
       console.log(
         `Successfully downloaded original image. New file name: ${newFileName}`,
       );

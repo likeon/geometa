@@ -1,4 +1,4 @@
-import { maps, users } from '@api/lib/db/schema';
+import { maps, } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensurePermissions } from '@api/lib/internal/permissions';
@@ -29,7 +29,13 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
         });
       }
 
-      ensurePermissions(body.discord_thread_author_id, map.mapGroupId!);
+      if (!map.mapGroupId) {
+        return status(400, {
+          errors: ['Map does not belong to a group'],
+        });
+      }
+
+      ensurePermissions(body.discord_thread_author_id, map.mapGroupId);
 
       const errors: string[] = [];
       if (!map.authors?.trim()) {
