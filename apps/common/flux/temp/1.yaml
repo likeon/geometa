@@ -1,0 +1,25 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: read-kubernetes-endpoint
+  namespace: default
+rules:
+  - apiGroups: [""]
+    resources: ["endpoints"]
+    resourceNames: ["kubernetes"]
+    verbs: ["get"]
+---
+# Bind it to the operator's service account (adjust namespace/name)
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: bind-read-kubernetes-endpoint
+  namespace: default
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: read-kubernetes-endpoint
+subjects:
+  - kind: ServiceAccount
+    name: postgres-operator          # <== replace with actual SA name
+    namespace: kube-system

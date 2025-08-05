@@ -15,8 +15,8 @@ sops:
             amZaY2YwYzB6dGhPdjBiMFNSV1JZQjQKFNftwKhrummgOvn4IYakkcZzJM3nkxck
             9mikHV3gMBtOb5e8Y4IY9H6KPo8tq/HpfV85MY2/TrzFZxAxmbCX0w==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-07-12T21:27:11Z"
-    mac: ENC[AES256_GCM,data:1LaZtcJmkgQ/CtmRe8CC0zvJEaxRTvRboibqm95EP5URi3DdHGpnJN08uWrBw7cJguYa8kVoZd2/NI7DFSJWlxAbQ4ud1fh43doIMnqJp9e3c3I9aoVtOY0k1VDgxVGLywxKWwR7z9Sa+YdPxltqiafDylGbCBUkeIAoNPuAj0k=,iv:ev7J8Vg/BVYbgR3PFINdopaqQf1L/ylgRurkvwcIPTg=,tag:lVqxtozWtGznVkuV8CZKlg==,type:str]
+    lastmodified: "2025-08-03T19:57:24Z"
+    mac: ENC[AES256_GCM,data:UdcH9A03ATKj8y/yEsfaljlSrHdqMLYuCkpt5iEOK0UcKAfGhUR7ApsK/Kpu12Wa2gAjMdNTM2Ej0pKvRPfVG9MDPGFUROTEOeGDiku75e7lfx0L/tntHHCECKJaqv8gsh5kOZrn7kVD45c00+4FcLdoEcCL+AK4OgX3Xe0Ayt0=,iv:pZMqsqYKYgPDsRsxUEaVmnGgc7wXsgrEBgg5amgg0Cs=,tag:jUvE5SFfDnSFg+tWS+JP+w==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.10.2
 ---
@@ -33,7 +33,6 @@ spec:
             pod: cloudflared
     template:
         metadata:
-            creationTimestamp: null
             labels:
                 pod: cloudflared
         spec:
@@ -83,7 +82,7 @@ sops:
             amZaY2YwYzB6dGhPdjBiMFNSV1JZQjQKFNftwKhrummgOvn4IYakkcZzJM3nkxck
             9mikHV3gMBtOb5e8Y4IY9H6KPo8tq/HpfV85MY2/TrzFZxAxmbCX0w==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-07-12T21:27:11Z"
-    mac: ENC[AES256_GCM,data:1LaZtcJmkgQ/CtmRe8CC0zvJEaxRTvRboibqm95EP5URi3DdHGpnJN08uWrBw7cJguYa8kVoZd2/NI7DFSJWlxAbQ4ud1fh43doIMnqJp9e3c3I9aoVtOY0k1VDgxVGLywxKWwR7z9Sa+YdPxltqiafDylGbCBUkeIAoNPuAj0k=,iv:ev7J8Vg/BVYbgR3PFINdopaqQf1L/ylgRurkvwcIPTg=,tag:lVqxtozWtGznVkuV8CZKlg==,type:str]
+    lastmodified: "2025-08-03T19:57:24Z"
+    mac: ENC[AES256_GCM,data:UdcH9A03ATKj8y/yEsfaljlSrHdqMLYuCkpt5iEOK0UcKAfGhUR7ApsK/Kpu12Wa2gAjMdNTM2Ej0pKvRPfVG9MDPGFUROTEOeGDiku75e7lfx0L/tntHHCECKJaqv8gsh5kOZrn7kVD45c00+4FcLdoEcCL+AK4OgX3Xe0Ayt0=,iv:pZMqsqYKYgPDsRsxUEaVmnGgc7wXsgrEBgg5amgg0Cs=,tag:jUvE5SFfDnSFg+tWS+JP+w==,type:str]
     encrypted_regex: ^(data|stringData)$
     version: 3.10.2

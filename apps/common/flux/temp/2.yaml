@@ -1,0 +1,36 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: patroni-access
+  namespace: geometa-prod          # ⬅ your Postgres namespace
+rules:
+  # Patroni DCS objects
+  - apiGroups: [""]
+    resources: ["configmaps", "endpoints"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  # cluster state + members
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+  # leader‐election objects in ≥K8s 1.32
+  - apiGroups: ["coordination.k8s.io"]
+    resources: ["leases"]
+    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  # events for troubleshooting (optional)
+  - apiGroups: [""]
+    resources: ["events"]
+    verbs: ["create"]
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: patroni-access
+  namespace: geometa-prod
+roleRef:
+  kind: Role
+  name: patroni-access
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+  - kind: ServiceAccount
+    name: postgres-pod             # ⬅ from the StatefulSet spec
+    namespace: geometa-prod
