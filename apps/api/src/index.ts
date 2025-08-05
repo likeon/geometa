@@ -6,6 +6,7 @@ import serverTiming from '@elysiajs/server-timing';
 import swagger from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
 import { internalRouter } from './routes/internal';
+import { mapsRouter } from './routes/maps';
 import { userscriptRouter } from './routes/userscript';
 
 const swaggerExclude = [/^\/api\/health-check/];
@@ -32,6 +33,7 @@ const api = new Elysia({ prefix: '/api' })
   })
   .use(userscriptRouter)
   .use(internalRouter)
+  .use(mapsRouter)
   .onError(({ set, code }) => {
     if (code === 'INTERNAL_SERVER_ERROR' || code === 'UNKNOWN') {
       set.status = 500;
@@ -39,7 +41,7 @@ const api = new Elysia({ prefix: '/api' })
     }
   });
 
-const app = new Elysia({serve: {idleTimeout: 60}})
+const app = new Elysia({ serve: { idleTimeout: 60 } })
   // works around https://github.com/elysiajs/elysia/issues/1071
   // says it's fixed, but it's not
   .use(

@@ -1,7 +1,7 @@
 import {
+  eq,
   type InferModelFromColumns,
   type InferSelectModel,
-  eq,
   relations,
   sql,
 } from 'drizzle-orm';
