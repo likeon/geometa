@@ -32,7 +32,7 @@
     locationsCount: number;
   };
 
-  let selectedMeta: Meta = $state(data.metaList[0]);
+  let selectedMeta: Meta | undefined = $state(data.metaList.length > 0 ? data.metaList[0] : undefined);
   let rightPanelRef: HTMLDivElement | undefined = $state();
   let selectedMetaIds = new SvelteSet<number>();
   let selectAll = $state(false);
@@ -44,7 +44,7 @@
   );
 
   let currentMetaIndex = $derived(
-    filteredMetaList.findIndex((meta) => meta.id === selectedMeta.id)
+    selectedMeta ? filteredMetaList.findIndex((meta) => meta.id === selectedMeta!.id) : -1
   );
 
   let visibleSelectedMetaIds = $derived.by(() => {
@@ -357,7 +357,7 @@
           <div class="space-y-2 max-h-[80px] overflow-y-auto">
             {#each filteredMetaList as meta (meta.id)}
               <div
-                class="flex items-center space-x-3 p-3 rounded-lg border {selectedMeta.id ===
+                class="flex items-center space-x-3 p-3 rounded-lg border {selectedMeta?.id ===
                 meta.id
                   ? 'bg-accent border-accent-foreground/20'
                   : 'hover:bg-muted/50'}"
@@ -398,96 +398,108 @@
       {/if}
 
       <!-- Mobile Meta Detail -->
-      <div
-        class="bg-background shadow-lg rounded-lg p-4 space-y-4"
-        ontouchstart={handleTouchStart}
-        ontouchend={handleTouchEnd}>
-        <div class="flex items-center justify-between">
-          <h2 class="text-xl font-bold tracking-tight">{selectedMeta.name}</h2>
-          <div class="flex items-center gap-2 shrink-0">
-            <Tooltip
-              content="This meta has {selectedMeta.locationsCount} location{selectedMeta.locationsCount !==
-              1
-                ? 's'
-                : ''}">
-              <div class="flex items-center gap-1 text-sm text-muted-foreground cursor-help">
-                <Icon icon="material-symbols:location-on" class="h-4 w-4" />
-                <span>{selectedMeta.locationsCount}</span>
-              </div>
-            </Tooltip>
-            {#if filteredMetaList.length > 1}
-              <div class="flex items-center gap-1 ml-2">
-                <Button variant="ghost" size="sm" onclick={navigateToPrevious} class="p-1 h-8 w-8">
-                  <ChevronLeft class="h-4 w-4" />
-                </Button>
-                <Button variant="ghost" size="sm" onclick={navigateToNext} class="p-1 h-8 w-8">
-                  <ChevronRight class="h-4 w-4" />
-                </Button>
-              </div>
-            {/if}
-          </div>
-        </div>
-
-        {#if filteredMetaList.length > 1}
-          <div class="text-xs text-muted-foreground text-center">
-            {currentMetaIndex + 1} of {filteredMetaList.length} metas
-          </div>
-        {/if}
-
-        {#if selectedMeta.note || selectedMeta.footer !== ''}
-          <div class="prose prose-sm dark:prose-invert max-w-none">
-            <div class="rounded-lg border bg-muted/50 p-4 space-y-3">
-              {#if selectedMeta.note}
-                <div>
-                  {@html selectedMeta.note}
+      {#if selectedMeta}
+        <div
+          class="bg-background shadow-lg rounded-lg p-4 space-y-4"
+          ontouchstart={handleTouchStart}
+          ontouchend={handleTouchEnd}>
+          <div class="flex items-center justify-between">
+            <h2 class="text-xl font-bold tracking-tight">{selectedMeta.name}</h2>
+            <div class="flex items-center gap-2 shrink-0">
+              <Tooltip
+                content="This meta has {selectedMeta.locationsCount} location{selectedMeta.locationsCount !==
+                1
+                  ? 's'
+                  : ''}">
+                <div class="flex items-center gap-1 text-sm text-muted-foreground cursor-help">
+                  <Icon icon="material-symbols:location-on" class="h-4 w-4" />
+                  <span>{selectedMeta.locationsCount}</span>
                 </div>
-              {/if}
-              {#if selectedMeta.footer !== ''}
-                <div class="text-sm text-muted-foreground border-t pt-3">
-                  {@html selectedMeta.footer}
+              </Tooltip>
+              {#if filteredMetaList.length > 1}
+                <div class="flex items-center gap-1 ml-2">
+                  <Button variant="ghost" size="sm" onclick={navigateToPrevious} class="p-1 h-8 w-8">
+                    <ChevronLeft class="h-4 w-4" />
+                  </Button>
+                  <Button variant="ghost" size="sm" onclick={navigateToNext} class="p-1 h-8 w-8">
+                    <ChevronRight class="h-4 w-4" />
+                  </Button>
                 </div>
               {/if}
             </div>
           </div>
-        {/if}
 
-        <div class="space-y-3">
-          <div class="flex items-center gap-2">
-            <Icon icon="material-symbols:image" class="h-4 w-4 text-muted-foreground" />
-            <h3 class="font-semibold">Images</h3>
-            {#if selectedMeta.images.length > 0}
-              <span class="text-sm text-muted-foreground">({selectedMeta.images.length})</span>
-            {/if}
-          </div>
-
-          {#if selectedMeta.images.length > 0}
-            <div class="space-y-3">
-              {#each selectedMeta.images as url (url)}
-                <div class="group relative overflow-hidden rounded-lg border bg-muted">
-                  <img
-                    src={url}
-                    alt="Meta location"
-                    class="w-full h-auto max-h-[250px] object-contain" />
-                  <a
-                    href={url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 hover:bg-black/70 text-white p-2 rounded-md">
-                    <Icon icon="material-symbols:open-in-new" class="h-4 w-4" />
-                  </a>
-                </div>
-              {/each}
-            </div>
-          {:else}
-            <div class="text-center py-8 text-muted-foreground">
-              <Icon
-                icon="material-symbols:image-not-supported-outline"
-                class="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p class="text-sm">No images available</p>
+          {#if filteredMetaList.length > 1}
+            <div class="text-xs text-muted-foreground text-center">
+              {currentMetaIndex + 1} of {filteredMetaList.length} metas
             </div>
           {/if}
+
+          {#if selectedMeta.note || selectedMeta.footer !== ''}
+            <div class="prose prose-sm dark:prose-invert max-w-none">
+              <div class="rounded-lg border bg-muted/50 p-4 space-y-3">
+                {#if selectedMeta.note}
+                  <div>
+                    {@html selectedMeta.note}
+                  </div>
+                {/if}
+                {#if selectedMeta.footer !== ''}
+                  <div class="text-sm text-muted-foreground border-t pt-3">
+                    {@html selectedMeta.footer}
+                  </div>
+                {/if}
+              </div>
+            </div>
+          {/if}
+
+          <div class="space-y-3">
+            <div class="flex items-center gap-2">
+              <Icon icon="material-symbols:image" class="h-4 w-4 text-muted-foreground" />
+              <h3 class="font-semibold">Images</h3>
+              {#if selectedMeta.images.length > 0}
+                <span class="text-sm text-muted-foreground">({selectedMeta.images.length})</span>
+              {/if}
+            </div>
+
+            {#if selectedMeta.images.length > 0}
+              <div class="space-y-3">
+                {#each selectedMeta.images as url (url)}
+                  <div class="group relative overflow-hidden rounded-lg border bg-muted">
+                    <img
+                      src={url}
+                      alt="Meta location"
+                      class="w-full h-auto max-h-[250px] object-contain" />
+                    <a
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 hover:bg-black/70 text-white p-2 rounded-md">
+                      <Icon icon="material-symbols:open-in-new" class="h-4 w-4" />
+                    </a>
+                  </div>
+                {/each}
+              </div>
+            {:else}
+              <div class="text-center py-8 text-muted-foreground">
+                <Icon
+                  icon="material-symbols:image-not-supported-outline"
+                  class="h-8 w-8 mx-auto mb-2 opacity-50" />
+                <p class="text-sm">No images available</p>
+              </div>
+            {/if}
+          </div>
         </div>
-      </div>
+      {:else}
+        <div class="bg-background shadow-lg rounded-lg p-4 space-y-4">
+          <div class="text-center py-8 text-muted-foreground">
+            <Icon
+              icon="material-symbols:info-outline"
+              class="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <h3 class="font-semibold mb-2">No metadata available</h3>
+            <p class="text-sm">This map doesn't have any location metadata.</p>
+          </div>
+        </div>
+      {/if}
     </div>
   </div>
 
@@ -629,7 +641,7 @@
                     </Table.Row>
                   {:else}
                     {#each filteredMetaList as meta (meta.id)}
-                      <Table.Row class={`${selectedMeta.id === meta.id ? 'bg-accent' : ''}`}>
+                      <Table.Row class={`${selectedMeta?.id === meta.id ? 'bg-accent' : ''}`}>
                         {#if data.isMapShared}
                           <Table.Cell
                             class="w-[40px] cursor-pointer hover:bg-muted/50"
@@ -647,7 +659,7 @@
                           onclick={() => selectMetaAndScroll(meta)}>
                           <div class="flex items-center justify-between w-full">
                             <span
-                              class={`whitespace-normal break-words ${selectedMeta.id === meta.id ? 'font-semibold' : ''}`}>
+                              class={`whitespace-normal break-words ${selectedMeta?.id === meta.id ? 'font-semibold' : ''}`}>
                               {meta.name}
                             </span>
                             <div
@@ -706,110 +718,123 @@
           <!-- Meta Content Section -->
           <div class="flex-1 overflow-y-auto p-6">
             <div class="max-w-4xl mx-auto space-y-6">
-              <!-- Meta Title -->
-              <div class="flex items-center justify-between">
-                <div class="min-w-0">
-                  <h2 class="text-2xl font-bold tracking-tight">{selectedMeta.name}</h2>
-                  {#if filteredMetaList.length > 1}
-                    <div class="text-sm text-muted-foreground">
-                      {currentMetaIndex + 1} of {filteredMetaList.length} metas
-                    </div>
-                  {/if}
-                </div>
-                <div class="flex items-center gap-3 shrink-0">
-                  <Tooltip
-                    content="This meta has {selectedMeta.locationsCount} location{selectedMeta.locationsCount !==
-                    1
-                      ? 's'
-                      : ''}">
-                    <div class="flex items-center gap-1 text-sm text-muted-foreground cursor-help">
-                      <Icon icon="material-symbols:location-on" class="h-4 w-4" />
-                      <span>{selectedMeta.locationsCount}</span>
-                    </div>
-                  </Tooltip>
-                  {#if filteredMetaList.length > 1}
-                    <div class="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onclick={navigateToPrevious}
-                        class="p-2 h-10 w-10">
-                        <ChevronLeft class="h-5 w-5" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onclick={navigateToNext}
-                        class="p-2 h-10 w-10">
-                        <ChevronRight class="h-5 w-5" />
-                      </Button>
-                    </div>
-                  {/if}
-                </div>
-              </div>
-
-              <!-- Meta Description -->
-              {#if selectedMeta.note || selectedMeta.footer !== ''}
-                <div class="prose prose-sm dark:prose-invert max-w-none">
-                  <div class="rounded-lg border bg-muted/50 p-4 space-y-3">
-                    {#if selectedMeta.note}
-                      <div>
-                        {@html selectedMeta.note}
+              {#if selectedMeta}
+                <!-- Meta Title -->
+                <div class="flex items-center justify-between">
+                  <div class="min-w-0">
+                    <h2 class="text-2xl font-bold tracking-tight">{selectedMeta.name}</h2>
+                    {#if filteredMetaList.length > 1}
+                      <div class="text-sm text-muted-foreground">
+                        {currentMetaIndex + 1} of {filteredMetaList.length} metas
                       </div>
                     {/if}
-                    {#if selectedMeta.footer !== ''}
-                      <div class="text-sm text-muted-foreground border-t pt-3">
-                        {@html selectedMeta.footer}
+                  </div>
+                  <div class="flex items-center gap-3 shrink-0">
+                    <Tooltip
+                      content="This meta has {selectedMeta.locationsCount} location{selectedMeta.locationsCount !==
+                      1
+                        ? 's'
+                        : ''}">
+                      <div class="flex items-center gap-1 text-sm text-muted-foreground cursor-help">
+                        <Icon icon="material-symbols:location-on" class="h-4 w-4" />
+                        <span>{selectedMeta.locationsCount}</span>
+                      </div>
+                    </Tooltip>
+                    {#if filteredMetaList.length > 1}
+                      <div class="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onclick={navigateToPrevious}
+                          class="p-2 h-10 w-10">
+                          <ChevronLeft class="h-5 w-5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onclick={navigateToNext}
+                          class="p-2 h-10 w-10">
+                          <ChevronRight class="h-5 w-5" />
+                        </Button>
                       </div>
                     {/if}
                   </div>
                 </div>
-              {/if}
 
-              <!-- Images Section -->
-              <div class="space-y-4">
-                <div class="flex items-center gap-2">
-                  <Icon icon="material-symbols:image" class="h-5 w-5 text-muted-foreground" />
-                  <h3 class="text-lg font-semibold">Images</h3>
-                  {#if selectedMeta.images.length > 0}
-                    <span class="text-sm text-muted-foreground"
-                      >({selectedMeta.images.length})</span>
-                  {/if}
-                </div>
-
-                {#if selectedMeta.images.length > 0}
-                  <div
-                    class="grid gap-4 {selectedMeta.images.length === 1
-                      ? 'grid-cols-1 max-w-2xl mx-auto'
-                      : 'grid-cols-1 md:grid-cols-2'}">
-                    {#each selectedMeta.images as url (url)}
-                      <div class="group relative overflow-hidden rounded-lg border bg-muted">
-                        <img
-                          src={url}
-                          alt="Meta location"
-                          class="w-full h-auto max-h-[300px] object-contain transition-transform group-hover:scale-[1.02]" />
-                        <div
-                          class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors">
+                <!-- Meta Description -->
+                {#if selectedMeta.note || selectedMeta.footer !== ''}
+                  <div class="prose prose-sm dark:prose-invert max-w-none">
+                    <div class="rounded-lg border bg-muted/50 p-4 space-y-3">
+                      {#if selectedMeta.note}
+                        <div>
+                          {@html selectedMeta.note}
                         </div>
-                        <a
-                          href={url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 hover:bg-black/70 text-white p-2 rounded-md">
-                          <Icon icon="material-symbols:open-in-new" class="h-4 w-4" />
-                        </a>
-                      </div>
-                    {/each}
-                  </div>
-                {:else}
-                  <div class="text-center py-12 text-muted-foreground">
-                    <Icon
-                      icon="material-symbols:image-not-supported-outline"
-                      class="h-12 w-12 mx-auto mb-3 opacity-50" />
-                    <p>No images available for this location</p>
+                      {/if}
+                      {#if selectedMeta.footer !== ''}
+                        <div class="text-sm text-muted-foreground border-t pt-3">
+                          {@html selectedMeta.footer}
+                        </div>
+                      {/if}
+                    </div>
                   </div>
                 {/if}
-              </div>
+
+                <!-- Images Section -->
+                <div class="space-y-4">
+                  <div class="flex items-center gap-2">
+                    <Icon icon="material-symbols:image" class="h-5 w-5 text-muted-foreground" />
+                    <h3 class="text-lg font-semibold">Images</h3>
+                    {#if selectedMeta.images.length > 0}
+                      <span class="text-sm text-muted-foreground"
+                        >({selectedMeta.images.length})</span>
+                    {/if}
+                  </div>
+
+                  {#if selectedMeta.images.length > 0}
+                    <div
+                      class="grid gap-4 {selectedMeta.images.length === 1
+                        ? 'grid-cols-1 max-w-2xl mx-auto'
+                        : 'grid-cols-1 md:grid-cols-2'}">
+                      {#each selectedMeta.images as url (url)}
+                        <div class="group relative overflow-hidden rounded-lg border bg-muted">
+                          <img
+                            src={url}
+                            alt="Meta location"
+                            class="w-full h-auto max-h-[300px] object-contain transition-transform group-hover:scale-[1.02]" />
+                          <div
+                            class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors">
+                          </div>
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 hover:bg-black/70 text-white p-2 rounded-md">
+                            <Icon icon="material-symbols:open-in-new" class="h-4 w-4" />
+                          </a>
+                        </div>
+                      {/each}
+                    </div>
+                  {:else}
+                    <div class="text-center py-12 text-muted-foreground">
+                      <Icon
+                        icon="material-symbols:image-not-supported-outline"
+                        class="h-12 w-12 mx-auto mb-3 opacity-50" />
+                      <p>No images available for this location</p>
+                    </div>
+                  {/if}
+                </div>
+              {:else}
+                <!-- No Meta Available -->
+                <div class="text-center py-16 text-muted-foreground">
+                  <Icon
+                    icon="material-symbols:info-outline"
+                    class="h-16 w-16 mx-auto mb-4 opacity-50" />
+                  <h3 class="text-lg font-semibold mb-2">No metadata available</h3>
+                  <p class="text-sm max-w-md mx-auto">
+                    This map doesn't have any location metadata associated with it yet.
+                  </p>
+                </div>
+              {/if}
             </div>
           </div>
         </div>
