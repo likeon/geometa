@@ -42,6 +42,7 @@ export async function updateCache(data: DbData) {
         value: sql`excluded.value`
       }
     });
+  getDb().execute('REINDEX TABLE cache');
 }
 
 export async function getData() {
