@@ -908,13 +908,23 @@
 </Dialog.Root>
 
 <style>
-  :global(.note ul li) {
+  :global(.prose ul) {
     list-style-type: disc;
-    margin-left: 1rem;
+    padding-left: 1.5rem;
   }
 
-  :global(.note ol li) {
+  :global(.prose ul li) {
+    list-style-type: disc;
+    margin-bottom: 0.25rem;
+  }
+
+  :global(.prose ol) {
     list-style-type: decimal;
-    margin-left: 1rem;
+    padding-left: 1.5rem;
+  }
+
+  :global(.prose ol li) {
+    list-style-type: decimal;
+    margin-bottom: 0.25rem;
   }
 </style>
