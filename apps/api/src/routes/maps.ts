@@ -19,8 +19,7 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
 
       // Find by geoguessrId
       if (geoguessrId) {
-        const searchCondition = eq(maps.geoguessrId, geoguessrId);
-        conditions.push(searchCondition);
+        conditions.push(eq(maps.geoguessrId, geoguessrId));
       }
 
       // Search filter (name or description)
