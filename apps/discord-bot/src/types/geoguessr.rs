@@ -37,13 +37,14 @@ impl FromStr for GeoGuessrMap {
         let trimmed = s.trim();
 
         if let Some(captures) = MAP_REGEX.captures(trimmed)
-            && let Some(id_match) = captures.get(1) {
-                let id = id_match.as_str();
+            && let Some(id_match) = captures.get(1)
+        {
+            let id = id_match.as_str();
 
-                if Self::validate_id(id) {
-                    return Ok(GeoGuessrMap { id: id.to_string() });
-                }
+            if Self::validate_id(id) {
+                return Ok(GeoGuessrMap { id: id.to_string() });
             }
+        }
 
         Err(ParseError {
             message: "Could not extract valid GeoGuessr map ID".to_string(),

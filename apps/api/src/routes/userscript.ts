@@ -1,9 +1,4 @@
-import {
-  locationRequestLogs,
-  mapGroupPermissions,
-  maps,
-  users,
-} from '@api/lib/db/schema';
+import { mapGroupPermissions, maps, users } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import {
   locationSelect,
