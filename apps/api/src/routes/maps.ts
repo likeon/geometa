@@ -9,13 +9,23 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
   .get(
     '/',
     async ({ query }) => {
-      const { q, region, isShared } = query;
+      const { q, geoguessrId, region, isShared } = query;
 
       // Build filter conditions
       const conditions = [
         eq(maps.isPersonal, false), // Only non-personal maps
         eq(maps.isPublished, true), // Only published maps
       ];
+
+      // Find by geoguessrId
+      if (geoguessrId) {
+        const searchCondition = or(
+          eq(maps.geoguessrId, geoguessrId),
+        );
+        if (searchCondition) {
+          conditions.push(searchCondition);
+        }
+      }
 
       // Search filter (name or description)
       if (q) {
@@ -83,6 +93,7 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
     {
       query: t.Object({
         q: t.Optional(t.String()),
+        geoguessrId: t.Optional(t.String()),
         region: t.Optional(t.String()),
         isShared: t.Optional(t.Boolean()),
       }),
