@@ -32,7 +32,9 @@
     locationsCount: number;
   };
 
-  let selectedMeta: Meta | undefined = $state(data.metaList.length > 0 ? data.metaList[0] : undefined);
+  let selectedMeta: Meta | undefined = $state(
+    data.metaList.length > 0 ? data.metaList[0] : undefined
+  );
   let rightPanelRef: HTMLDivElement | undefined = $state();
   let selectedMetaIds = new SvelteSet<number>();
   let selectAll = $state(false);
@@ -418,7 +420,11 @@
               </Tooltip>
               {#if filteredMetaList.length > 1}
                 <div class="flex items-center gap-1 ml-2">
-                  <Button variant="ghost" size="sm" onclick={navigateToPrevious} class="p-1 h-8 w-8">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onclick={navigateToPrevious}
+                    class="p-1 h-8 w-8">
                     <ChevronLeft class="h-4 w-4" />
                   </Button>
                   <Button variant="ghost" size="sm" onclick={navigateToNext} class="p-1 h-8 w-8">
@@ -492,9 +498,7 @@
       {:else}
         <div class="bg-background shadow-lg rounded-lg p-4 space-y-4">
           <div class="text-center py-8 text-muted-foreground">
-            <Icon
-              icon="material-symbols:info-outline"
-              class="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <Icon icon="material-symbols:info-outline" class="h-8 w-8 mx-auto mb-2 opacity-50" />
             <h3 class="font-semibold mb-2">No metadata available</h3>
             <p class="text-sm">This map doesn't have any location metadata.</p>
           </div>
@@ -735,7 +739,8 @@
                       1
                         ? 's'
                         : ''}">
-                      <div class="flex items-center gap-1 text-sm text-muted-foreground cursor-help">
+                      <div
+                        class="flex items-center gap-1 text-sm text-muted-foreground cursor-help">
                         <Icon icon="material-symbols:location-on" class="h-4 w-4" />
                         <span>{selectedMeta.locationsCount}</span>
                       </div>

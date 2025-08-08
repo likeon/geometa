@@ -10,7 +10,8 @@
 
 <div
   class="bg-linear-to-r from-emerald-200/40 via-rose-200/30 to-blue-200/60 dark:from-gray-800 dark:via-gray-900 dark:to-black relative isolate overflow-hidden">
-  <div class="mx-auto max-w-6xl lg:max-w-7xl xl:max-w-screen-xl 2xl:max-w-screen-2xl px-4 pb-24 pt-10 sm:px-6 lg:px-8 lg:py-10">
+  <div
+    class="mx-auto max-w-6xl lg:max-w-7xl xl:max-w-screen-xl 2xl:max-w-screen-2xl px-4 pb-24 pt-10 sm:px-6 lg:px-8 lg:py-10">
     <div class="lg:grid lg:grid-cols-12 lg:gap-6 xl:gap-8 2xl:gap-12 lg:items-center">
       <div class="lg:col-span-5 xl:col-span-4 2xl:col-span-4">
         <h1

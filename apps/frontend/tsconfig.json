@@ -18,8 +18,8 @@
         "enabled": true, // enables this plugin
         "assumeIsSvelteProject": true // if true, skip detection and always assume it's a Svelte project
       }
-    ],
-  },
+    ]
+  }
   // Path aliases are handled by https://kit.svelte.dev/docs/configuration#alias
   // except $lib which is handled by https://kit.svelte.dev/docs/configuration#files
   //

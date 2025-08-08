@@ -106,6 +106,7 @@ export type InsertMapsSchema = typeof insertMapsSchema;
 
 export const insertLevelsSchema = z.object({
   name: z.string().min(1, 'Name cannot be empty').default(''),
-  id: z.number().optional()
+  id: z.number().optional(),
+  mapGroupId: z.number()
 });
 export type InsertLevelsSchema = typeof insertLevelsSchema;

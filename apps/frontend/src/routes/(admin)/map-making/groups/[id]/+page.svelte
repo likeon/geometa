@@ -181,26 +181,26 @@
         }}>
         {#if browser}
           {#if data.group.hasUnsycnedData}
-              <Tooltip
-                content="People playing your map will only see changes after you synchronize the changes!">
-                <Button
-                  variant="default"
-                  class="ml-3 animate-pulse"
-                  type="submit"
-                  disabled={syncingUserScript}>
-                  {@render userScriptSyncButtonContent()}
-                </Button>
-              </Tooltip>
-            {:else}
-              <Tooltip content="You have not made any changes since last time you synchronized it.">
-                <Button
-                  variant="ghost"
-                  class="ml-3 opacity-20 hover:opacity-100 transition-opacity"
-                  type="submit"
-                  disabled={syncingUserScript}>
-                  {@render userScriptSyncButtonContent()}
-                </Button>
-              </Tooltip>
+            <Tooltip
+              content="People playing your map will only see changes after you synchronize the changes!">
+              <Button
+                variant="default"
+                class="ml-3 animate-pulse"
+                type="submit"
+                disabled={syncingUserScript}>
+                {@render userScriptSyncButtonContent()}
+              </Button>
+            </Tooltip>
+          {:else}
+            <Tooltip content="You have not made any changes since last time you synchronized it.">
+              <Button
+                variant="ghost"
+                class="ml-3 opacity-20 hover:opacity-100 transition-opacity"
+                type="submit"
+                disabled={syncingUserScript}>
+                {@render userScriptSyncButtonContent()}
+              </Button>
+            </Tooltip>
           {/if}
         {/if}
       </form>
@@ -214,7 +214,8 @@
 
           <DropdownMenu.Content>
             <DropdownMenu.Item
-              onclick={() => (window.location.href = `/map-making/groups/${data.group.id}/download`)}>
+              onclick={() =>
+                (window.location.href = `/map-making/groups/${data.group.id}/download`)}>
               <div class="flex items-center gap-2">
                 <Icon
                   icon="material-symbols:globe"

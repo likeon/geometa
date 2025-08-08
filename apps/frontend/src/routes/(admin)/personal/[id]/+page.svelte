@@ -220,7 +220,7 @@
     .map((meta) => ({
       id: meta.metaId,
       name: `${meta.countries?.[0] || 'Unknown country'} - ${meta.name}`,
-      detail: meta.usedInMapName
+      detail: meta.usedInMapName ?? undefined
     }))
     .sort((a, b) => a.name.localeCompare(b.name))}
   warningTitle="This is a permanent removal"

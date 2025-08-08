@@ -43,8 +43,7 @@
             size="icon"
             class="size-8 px-0"
             href="https://discord.gg/AcXEWznYZe"
-            target="_blank"
-          >
+            target="_blank">
             <DiscordFillIcon class="size-5 flex-shrink-0" />
           </Button>
           <Button variant="dark-ghost" size="icon" class="size-8 px-0" href="/personal">

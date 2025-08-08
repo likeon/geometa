@@ -577,7 +577,10 @@ export const actions = {
           } else if (issue.code === 'too_big') {
             message = 'Location has more than one tag';
           }
-        } else if (issue.path.includes('panoId') && issue.message === 'Expected string, received null') {
+        } else if (
+          issue.path.includes('panoId') &&
+          issue.message === 'Expected string, received null'
+        ) {
           message = "Location doesn't have panoId";
         }
         return `${issue.path.join(' > ')}: ${message}`;

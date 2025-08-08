@@ -92,10 +92,10 @@
       {#if !isPartialUpload}
         <div class="rounded-md bg-destructive/10 border border-destructive/20 p-3">
           <div class="flex items-start space-x-2">
-            <Icon 
-              icon="material-symbols:warning-rounded" 
-              width="1rem" 
-              height="1rem" 
+            <Icon
+              icon="material-symbols:warning-rounded"
+              width="1rem"
+              height="1rem"
               class="text-destructive mt-0.5" />
             <div class="space-y-1">
               <p class="text-sm font-medium text-destructive">Full replacement mode</p>
@@ -106,15 +106,18 @@
           </div>
         </div>
       {:else}
-        <div class="rounded-md bg-blue-50 border border-blue-200 p-3 dark:bg-blue-950/20 dark:border-blue-900/30">
+        <div
+          class="rounded-md bg-blue-50 border border-blue-200 p-3 dark:bg-blue-950/20 dark:border-blue-900/30">
           <div class="flex items-start space-x-2">
-            <Icon 
-              icon="material-symbols:info-rounded" 
-              width="1rem" 
-              height="1rem" 
+            <Icon
+              icon="material-symbols:info-rounded"
+              width="1rem"
+              height="1rem"
               class="text-blue-600 mt-0.5 dark:text-blue-400" />
             <div class="space-y-1">
-              <p class="text-sm font-medium text-blue-800 dark:text-blue-200">Partial upload mode</p>
+              <p class="text-sm font-medium text-blue-800 dark:text-blue-200">
+                Partial upload mode
+              </p>
               <p class="text-xs text-muted-foreground">
                 New locations will be added and existing ones updated. No locations will be removed.
               </p>
@@ -124,13 +127,8 @@
       {/if}
 
       <!-- File Upload Section -->
-      <form
-        method="post"
-        action="?/uploadMapJson"
-        enctype="multipart/form-data"
-        use:enhance>
-        
-        <Form.Field form={form} name="partialUpload">
+      <form method="post" action="?/uploadMapJson" enctype="multipart/form-data" use:enhance>
+        <Form.Field {form} name="partialUpload">
           <Form.Control>
             {#snippet children({ props })}
               <div class="flex items-center space-x-2">
@@ -144,7 +142,7 @@
           <Form.FieldErrors />
         </Form.Field>
 
-        <Form.Field form={form} name="file">
+        <Form.Field {form} name="file">
           <Form.Control>
             {#snippet children({ props })}
               <div class="space-y-2">
@@ -168,15 +166,19 @@
         <div class="rounded-md bg-muted p-3">
           <p class="text-sm font-medium mb-2">Alternative methods:</p>
           <p class="text-xs text-muted-foreground">
-            You can also paste locations directly from your clipboard (Ctrl+V) after copying them from 
-            <a href="https://map-making.app/" target="_blank" class="underline hover:text-primary">map-making.app</a>.
+            You can also paste locations directly from your clipboard (Ctrl+V) after copying them
+            from
+            <a href="https://map-making.app/" target="_blank" class="underline hover:text-primary"
+              >map-making.app</a
+            >.
           </p>
         </div>
 
         <div class="rounded-md bg-muted p-3">
           <p class="text-sm font-medium mb-2">Tag format requirements:</p>
           <p class="text-xs text-muted-foreground mb-2">
-            Each location must have exactly one tag in <code class="bg-background px-1 rounded">CountryName-Your Meta Name</code> format.
+            Each location must have exactly one tag in <code class="bg-background px-1 rounded"
+              >CountryName-Your Meta Name</code> format.
           </p>
           <div class="text-xs text-muted-foreground space-y-1">
             <p class="font-medium">Examples:</p>
@@ -191,10 +193,7 @@
     </div>
 
     <Dialog.Footer>
-      <Button 
-        type="button" 
-        variant="outline" 
-        onclick={() => (isUploadDialogOpen = false)}>
+      <Button type="button" variant="outline" onclick={() => (isUploadDialogOpen = false)}>
         Cancel
       </Button>
     </Dialog.Footer>

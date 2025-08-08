@@ -87,10 +87,10 @@
       {#if !isPartialUpload}
         <div class="rounded-md bg-destructive/10 border border-destructive/20 p-3">
           <div class="flex items-start space-x-2">
-            <Icon 
-              icon="material-symbols:warning-rounded" 
-              width="1rem" 
-              height="1rem" 
+            <Icon
+              icon="material-symbols:warning-rounded"
+              width="1rem"
+              height="1rem"
               class="text-destructive mt-0.5" />
             <div class="space-y-1">
               <p class="text-sm font-medium text-destructive">Full replacement mode</p>
@@ -101,15 +101,18 @@
           </div>
         </div>
       {:else}
-        <div class="rounded-md bg-blue-50 border border-blue-200 p-3 dark:bg-blue-950/20 dark:border-blue-900/30">
+        <div
+          class="rounded-md bg-blue-50 border border-blue-200 p-3 dark:bg-blue-950/20 dark:border-blue-900/30">
           <div class="flex items-start space-x-2">
-            <Icon 
-              icon="material-symbols:info-rounded" 
-              width="1rem" 
-              height="1rem" 
+            <Icon
+              icon="material-symbols:info-rounded"
+              width="1rem"
+              height="1rem"
               class="text-blue-600 mt-0.5 dark:text-blue-400" />
             <div class="space-y-1">
-              <p class="text-sm font-medium text-blue-800 dark:text-blue-200">Partial upload mode</p>
+              <p class="text-sm font-medium text-blue-800 dark:text-blue-200">
+                Partial upload mode
+              </p>
               <p class="text-xs text-muted-foreground">
                 New metas will be added and existing ones updated. No metas will be removed.
               </p>
@@ -119,13 +122,8 @@
       {/if}
 
       <!-- File Upload Section -->
-      <form
-        method="post"
-        action="?/uploadMetas"
-        enctype="multipart/form-data"
-        use:enhance>
-        
-        <Form.Field form={form} name="partialUpload">
+      <form method="post" action="?/uploadMetas" enctype="multipart/form-data" use:enhance>
+        <Form.Field {form} name="partialUpload">
           <Form.Control>
             {#snippet children({ props })}
               <div class="flex items-center space-x-2">
@@ -139,7 +137,7 @@
           <Form.FieldErrors />
         </Form.Field>
 
-        <Form.Field form={form} name="file">
+        <Form.Field {form} name="file">
           <Form.Control>
             {#snippet children({ props })}
               <div class="space-y-2">
@@ -170,17 +168,18 @@
         <div class="rounded-md bg-muted p-3">
           <p class="text-sm font-medium mb-2">Need help?</p>
           <p class="text-xs text-muted-foreground">
-            Check the <a href="/map-making/docs/meta-uploads" target="_blank" class="underline hover:text-primary">documentation</a> for detailed format requirements and examples.
+            Check the <a
+              href="/map-making/docs/meta-uploads"
+              target="_blank"
+              class="underline hover:text-primary">documentation</a> for detailed format requirements
+            and examples.
           </p>
         </div>
       </div>
     </div>
 
     <Dialog.Footer>
-      <Button 
-        type="button" 
-        variant="outline" 
-        onclick={() => (isUploadDialogOpen = false)}>
+      <Button type="button" variant="outline" onclick={() => (isUploadDialogOpen = false)}>
         Cancel
       </Button>
     </Dialog.Footer>
