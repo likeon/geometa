@@ -26,7 +26,7 @@ local_resource(
     serve_dir='./apps/api',
     serve_cmd='bun run dev',
     serve_env={
-        'API_PORT': api_port,
+        'SERVER_PORT': api_port,
         'DATABASE_URL': 'postgres://postgres:postgres@localhost:{}/geometa'.format(postgres_port),
     },
     resource_deps=['postgres-server'],
