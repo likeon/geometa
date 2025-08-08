@@ -1,4 +1,4 @@
-import { maps, } from '@api/lib/db/schema';
+import { maps } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { and, eq, ilike, or, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';

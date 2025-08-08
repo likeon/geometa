@@ -8,11 +8,15 @@ use serde::{Deserialize, Serialize};
 const TOKEN_PATH: &str = "/var/run/secrets/kubernetes.io/serviceaccount/token";
 
 trait AuthExt {
-    async fn with_k8s_auth(self) -> Result<RequestBuilder, Box<dyn std::error::Error + Send + Sync>>;
+    async fn with_k8s_auth(
+        self,
+    ) -> Result<RequestBuilder, Box<dyn std::error::Error + Send + Sync>>;
 }
 
 impl AuthExt for RequestBuilder {
-    async fn with_k8s_auth(self) -> Result<RequestBuilder, Box<dyn std::error::Error + Send + Sync>> {
+    async fn with_k8s_auth(
+        self,
+    ) -> Result<RequestBuilder, Box<dyn std::error::Error + Send + Sync>> {
         let token = tokio::fs::read_to_string(TOKEN_PATH).await?;
         Ok(self.bearer_auth(token.trim()))
     }
@@ -37,7 +41,11 @@ impl Requester {
         }
     }
 
-    async fn request(&self, method: Method, path: &str) -> Result<RequestBuilder, Box<dyn std::error::Error + Send + Sync>> {
+    async fn request(
+        &self,
+        method: Method,
+        path: &str,
+    ) -> Result<RequestBuilder, Box<dyn std::error::Error + Send + Sync>> {
         let url = format!("{}/{}", self.base_path, path);
         let builder = self.reqwest_client.request(method, url);
 
