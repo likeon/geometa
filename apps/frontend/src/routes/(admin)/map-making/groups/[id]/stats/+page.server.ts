@@ -55,8 +55,11 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
       })) || [];
 
     // Calculate combined stats across all metas
-    const combinedDailyStats: Record<string, { personalMapCount: number; regularMapCount: number }> = {};
-    
+    const combinedDailyStats: Record<
+      string,
+      { personalMapCount: number; regularMapCount: number }
+    > = {};
+
     response.data?.forEach((meta: any) => {
       meta.data.forEach((day: any) => {
         if (!combinedDailyStats[day.day]) {

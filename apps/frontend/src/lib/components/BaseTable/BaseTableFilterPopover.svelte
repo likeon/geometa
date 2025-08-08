@@ -38,7 +38,7 @@
         {#if selected().size > 0}
           <Icon icon="mdi:plus-circle-outline" class="mr-1 w-4 h-4" />{title}:
           <div class="flex space-x-1">
-            {#each options.filter((o) => selected().has(o.value)) as opt (opt.value)}
+            {#each options.filter( (o: { label: string; value: string }) => selected().has(o.value) ) as opt (opt.value)}
               <Badge variant="secondary" class="rounded-sm px-1 font-normal">
                 {opt.label}
               </Badge>

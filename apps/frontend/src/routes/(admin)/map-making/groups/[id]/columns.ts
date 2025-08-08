@@ -106,7 +106,7 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
       return filters.some((f) => {
         // Handle special case for metas with no levels
         if (f === '__FILTER_NO_LEVELS__') return joined.trim().length === 0;
-        
+
         return joined
           .toLowerCase()
           .split(/\s*,\s*/)

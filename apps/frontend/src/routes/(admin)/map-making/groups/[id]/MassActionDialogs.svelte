@@ -8,6 +8,9 @@
     name: string;
     note: string;
     footer: string;
+    locationsCount?: {
+      total: number;
+    } | null;
   }
   import * as Dialog from '$lib/components/ui/dialog';
   import * as Select from '$lib/components/ui/select';
@@ -24,18 +27,18 @@
     isDeleteDialogOpen = $bindable(),
     isDownloadLocationsDialogOpen = $bindable(),
     isDownloadMetasDialogOpen = $bindable(),
-    
+
     // Data
     selectedIds,
     metas,
     levelChoices,
     groupChoices,
-    
+
     // State
     selectedLevelIds = $bindable(),
     selectedGroupId = $bindable(),
     sharingMetas = $bindable(),
-    
+
     // Functions
     toggleLevel,
     handleDeleteCancel,
@@ -151,12 +154,7 @@
       </div>
 
       <Dialog.Footer>
-        <Button
-          type="button"
-          variant="outline"
-          onclick={handleAddLevelsCancel}>
-          Cancel
-        </Button>
+        <Button type="button" variant="outline" onclick={handleAddLevelsCancel}>Cancel</Button>
         <Button type="submit" disabled={selectedLevelIds.size === 0}>
           Add {selectedLevelIds.size} Level{selectedLevelIds.size !== 1 ? 's' : ''}
         </Button>
@@ -232,12 +230,7 @@
       </div>
 
       <Dialog.Footer>
-        <Button
-          type="button"
-          variant="outline"
-          onclick={handleShareCancel}>
-          Cancel
-        </Button>
+        <Button type="button" variant="outline" onclick={handleShareCancel}>Cancel</Button>
         <Button type="submit" disabled={!selectedGroupId || sharingMetas}>
           {#if sharingMetas}
             <div class="h-6 w-28 flex items-center justify-center">
@@ -258,7 +251,9 @@
     <Dialog.Header>
       <Dialog.Title>Download Locations</Dialog.Title>
       <Dialog.Description>
-        Download location data for {selectedIds.length} selected meta{selectedIds.length !== 1 ? 's' : ''}.
+        Download location data for {selectedIds.length} selected meta{selectedIds.length !== 1
+          ? 's'
+          : ''}.
       </Dialog.Description>
     </Dialog.Header>
 
@@ -277,7 +272,7 @@
           {/if}
         </p>
       </div>
-      
+
       <p class="text-sm text-muted-foreground">
         This will download a JSON file containing all location data for the selected metas.
       </p>
@@ -287,12 +282,10 @@
       <Button
         type="button"
         variant="outline"
-        onclick={() => isDownloadLocationsDialogOpen = false}>
+        onclick={() => (isDownloadLocationsDialogOpen = false)}>
         Cancel
       </Button>
-      <Button onclick={handleDownloadLocations}>
-        Download Locations
-      </Button>
+      <Button onclick={handleDownloadLocations}>Download Locations</Button>
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>
@@ -303,7 +296,9 @@
     <Dialog.Header>
       <Dialog.Title>Download Meta Data</Dialog.Title>
       <Dialog.Description>
-        Download meta information for {selectedIds.length} selected meta{selectedIds.length !== 1 ? 's' : ''}.
+        Download meta information for {selectedIds.length} selected meta{selectedIds.length !== 1
+          ? 's'
+          : ''}.
       </Dialog.Description>
     </Dialog.Header>
 
@@ -322,22 +317,18 @@
           {/if}
         </p>
       </div>
-      
+
       <p class="text-sm text-muted-foreground">
-        This will download a JSON file containing meta information (names, notes, levels, images) for the selected metas.
+        This will download a JSON file containing meta information (names, notes, levels, images)
+        for the selected metas.
       </p>
     </div>
 
     <Dialog.Footer>
-      <Button
-        type="button"
-        variant="outline"
-        onclick={() => isDownloadMetasDialogOpen = false}>
+      <Button type="button" variant="outline" onclick={() => (isDownloadMetasDialogOpen = false)}>
         Cancel
       </Button>
-      <Button onclick={handleDownloadMetas}>
-        Download Meta Data
-      </Button>
+      <Button onclick={handleDownloadMetas}>Download Meta Data</Button>
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>

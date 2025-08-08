@@ -3,7 +3,7 @@
 @variant dark (&:where(.dark, .dark *));
 
 @layer base {
-  a:not(button):not([role="button"]):not([data-slot="button"]) {
+  a:not(button):not([role='button']):not([data-slot='button']) {
     color: var(--link-color);
     @apply hover:underline;
   }
@@ -58,7 +58,6 @@ html.dark .shiki span {
 html.dark .carta-wrapper {
   @apply border-gray-500 border-2;
 }
-
 
 /*
   The default border color has changed to `currentcolor` in Tailwind CSS v4,
@@ -147,8 +146,6 @@ html.dark .carta-wrapper {
 }
 
 @theme inline {
-
-
   /* Radius (for rounded-*) */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -195,7 +192,8 @@ html.dark .carta-wrapper {
     @apply bg-background text-foreground;
   }
 
-  input, textarea {
+  input,
+  textarea {
     caret-color: hsl(var(--foreground));
   }
 
@@ -218,7 +216,6 @@ html.dark .carta-wrapper {
     @apply text-base font-medium mb-1;
   }
 }
-
 
 @utility container {
   margin-inline: auto;

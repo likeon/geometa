@@ -65,7 +65,10 @@
         <div class="flex flex-col space-y-3 landscape:space-y-2">
           {#each navLinks as navItem, index (navItem + index.toString())}
             {#if navItem.url}
-              <MobileLink href={navItem.url} bind:open class="text-foreground landscape:text-sm landscape:py-2">
+              <MobileLink
+                href={navItem.url}
+                bind:open
+                class="text-foreground landscape:text-sm landscape:py-2">
                 {navItem.name}
               </MobileLink>
             {/if}

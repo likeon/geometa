@@ -1,7 +1,14 @@
-<script>
+<script lang="ts">
   import * as Tooltip from '$lib/components/ui/tooltip/index';
 
-  let { children, content, side = 'top', delayDuration = 0, disableCloseOnTriggerClick = false, ...restProps } = $props();
+  let {
+    children,
+    content,
+    side = 'top' as 'left' | 'right' | 'top' | 'bottom',
+    delayDuration = 0,
+    disableCloseOnTriggerClick = false,
+    ...restProps
+  } = $props();
 </script>
 
 <Tooltip.Root {delayDuration} {disableCloseOnTriggerClick}>

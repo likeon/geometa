@@ -8,7 +8,11 @@
   import * as Tabs from '$lib/components/ui/tabs/index';
   import { Carta, MarkdownEditor } from 'carta-md';
   import 'carta-md/default.css';
-  import { insertMetasSchema, insertMetasDefaultSchema, type InsertMetasSchema } from '$lib/form-schema';
+  import {
+    insertMetasSchema,
+    insertMetasDefaultSchema,
+    type InsertMetasSchema
+  } from '$lib/form-schema';
   import { Checkbox } from '$lib/components/ui/checkbox';
   import FormLabelWithTooltip from '$lib/components/FormLabelWithTooltip.svelte';
   import MetaImages from '$routes/(admin)/map-making/groups/[id]/MetaImages.svelte';
@@ -61,7 +65,14 @@
     }
   });
 
-  const { form: formMetaData, enhance: enhanceMeta, isTainted: isTaintedMeta, reset, submit, submitting } = formMeta;
+  const {
+    form: formMetaData,
+    enhance: enhanceMeta,
+    isTainted: isTaintedMeta,
+    reset,
+    submit,
+    submitting
+  } = formMeta;
   const cartaMeta = new Carta();
   const cartaFooter = new Carta();
   type MetaFormDataType = Infer<InsertMetasSchema>;
@@ -114,7 +125,6 @@
     }
   }
 
-
   function handleTabChange(newTab: string) {
     if (currentTab === 'info' && newTab === 'images' && isTaintedMeta()) {
       savedForm = $formMetaData;
@@ -122,30 +132,29 @@
     currentTab = newTab;
   }
 
-
   function fillForm(meta: PageData['group']['metas'][number] | null) {
-
     if (savedForm) {
       $formMetaData = savedForm;
       return;
     }
 
-    const formData = meta ? {
-      id: meta.id,
-      mapGroupId: meta.mapGroupId,
-      tagName: meta.tagName,
-      name: meta.name,
-      note: meta.note,
-      footer: meta.footer,
-      levels: meta.metaLevels.map((item) => item.levelId),
-      noteFromPlonkit: meta.noteFromPlonkit
-    } : getDefaultFormData();
+    const formData = meta
+      ? {
+          id: meta.id,
+          mapGroupId: meta.mapGroupId,
+          tagName: meta.tagName,
+          name: meta.name,
+          note: meta.note,
+          footer: meta.footer,
+          levels: meta.metaLevels.map((item) => item.levelId),
+          noteFromPlonkit: meta.noteFromPlonkit
+        }
+      : getDefaultFormData();
 
     setTimeout(() => {
       formMetaData.update(() => formData, { taint: false });
     }, 0);
   }
-
 
   // Effect for dialog opening only
   $effect(() => {
@@ -155,13 +164,12 @@
     }
   });
 
-  // Effect for meta changes only (when dialog is already open)  
+  // Effect for meta changes only (when dialog is already open)
   $effect(() => {
     if (isMetaDialogOpen) {
       fillForm(selectedMeta);
     }
   });
-
 </script>
 
 <Dialog.Root bind:open={isMetaDialogOpen}>
@@ -194,7 +202,8 @@
       <Tabs.List>
         <Tabs.Trigger value="info" onclick={() => handleTabChange('info')}>Info</Tabs.Trigger>
         {#if selectedMeta?.id}
-          <Tabs.Trigger value="images" onclick={() => handleTabChange('images')}>Images</Tabs.Trigger>
+          <Tabs.Trigger value="images" onclick={() => handleTabChange('images')}
+            >Images</Tabs.Trigger>
         {:else}
           <Tooltip
             content="Meta must be saved first before adding images"
@@ -347,8 +356,7 @@ Czechia - Arrow Signs" />
   }}
   onCancel={() => {
     confirmCallback = null;
-  }}
-/>
+  }} />
 
 <style>
   :global(.carta-note-editor .carta-input),
