@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/likeon/geometa-api:main-948993ff-1754684682 # {"$imagepolicy": "geometa-prod:api"}
+          image: ghcr.io/likeon/geometa-api:main-a499103e-1754685700 # {"$imagepolicy": "geometa-prod:api"}
           livenessProbe:
             httpGet:
               path: /api/health-check
