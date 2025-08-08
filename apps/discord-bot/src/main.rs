@@ -1,5 +1,5 @@
-use poise::serenity_prelude::{self as serenity};
 use log::{info, warn};
+use poise::serenity_prelude::{self as serenity};
 use tokio::signal;
 
 struct Data {} // User data, which is stored and accessible in all command invocations
@@ -62,7 +62,7 @@ async fn setup_shutdown_handler() {
     {
         let mut sigterm = signal::unix::signal(signal::unix::SignalKind::terminate())
             .expect("Failed to create SIGTERM handler");
-        
+
         tokio::select! {
             _ = sigterm.recv() => {
                 info!("Received SIGTERM");

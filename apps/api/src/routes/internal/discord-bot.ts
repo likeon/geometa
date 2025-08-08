@@ -1,4 +1,4 @@
-import { maps, } from '@api/lib/db/schema';
+import { maps } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensurePermissions } from '@api/lib/internal/permissions';
