@@ -20,5 +20,9 @@ export default defineConfig({
       autoInstall: true
     }),
     sveltekit()
-  ]
+  ],
+  server: {
+    port: parseInt(process.env.PORT || process.env.FRONTEND_PORT || '5173'),
+    host: true
+  }
 });

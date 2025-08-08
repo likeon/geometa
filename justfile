@@ -1,8 +1,6 @@
-default:
-  just run
+import ".tilt/scripts/justfile"
 
-run:
-  .dev/tilt-with-cluster.sh
+default: run
 
 install:
   mise upgrade

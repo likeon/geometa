@@ -58,5 +58,9 @@ const app = new Elysia({ serve: { idleTimeout: 60 } })
     }),
   )
   .use(api)
-  .listen(3000);
+  .listen(parseInt(process.env.API_PORT || '3000'));
+
+console.log(`🚀 API server running on http://localhost:${process.env.API_PORT || '3000'}`);
+console.log(`📖 Documentation: http://localhost:${process.env.API_PORT || '3000'}/api/docs`);
+
 export type App = typeof app;
