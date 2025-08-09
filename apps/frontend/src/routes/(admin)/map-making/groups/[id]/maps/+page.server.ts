@@ -150,6 +150,7 @@ export const actions = {
           .where(eq(maps.id, id));
         mapId = id;
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.code === '23505' && error.constraint_name === 'maps_geoguessr_id_unique') {
         return setError(

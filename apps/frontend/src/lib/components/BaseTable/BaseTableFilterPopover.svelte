@@ -5,6 +5,7 @@
   import Icon from '@iconify/svelte';
 
   const { table, columnId, title, options } = $props<{
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     table: any;
     columnId: string;
     title: string;

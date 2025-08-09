@@ -1,7 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
   import logo from '$lib/assets/logo.png?enhanced';
-  import DiscordFillIcon from '~icons/mingcute/discord-fill';
 
   type NavLink = {
     url: string;

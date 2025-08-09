@@ -23,6 +23,7 @@
   let selectedDifficulties = $state(difficultyMap.map((d) => d.value));
   let sharedFilter = $state(false);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let allMaps = $state<any[]>([]);
 
   // Load maps once
@@ -152,7 +153,7 @@
       </div>
     {:else}
       <div class="grid grid-cols-1 gap-2 xl:grid-cols-3">
-        {#each filteredMaps as map}
+        {#each filteredMaps as map (map.id)}
           <MapCard {map} />
         {/each}
       </div>

@@ -41,15 +41,18 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
 
     // Also create summary data grouped by meta with daily data
     const summaryData =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       response.data?.map((meta: any) => ({
         metaId: meta.metaId,
         metaName: meta.metaName,
         metaTag: meta.metaTag,
         totalCount: meta.totalCount,
         personalMapCount: meta.data.reduce(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (sum: number, day: any) => sum + day.personalMapCount,
           0
         ),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         regularMapCount: meta.data.reduce((sum: number, day: any) => sum + day.regularMapCount, 0),
         dailyData: meta.data // Include the daily breakdown for charts
       })) || [];
@@ -60,7 +63,9 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
       { personalMapCount: number; regularMapCount: number }
     > = {};
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     response.data?.forEach((meta: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       meta.data.forEach((day: any) => {
         if (!combinedDailyStats[day.day]) {
           combinedDailyStats[day.day] = { personalMapCount: 0, regularMapCount: 0 };

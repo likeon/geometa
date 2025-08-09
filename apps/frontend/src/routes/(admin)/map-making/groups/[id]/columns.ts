@@ -89,6 +89,7 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
     header: () => renderComponent(BaseTableHeader, { name: 'Levels' }),
     accessorFn: (row) =>
       row.metaLevels
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .map((m: { level: { name: any } }) => m.level.name)
         .sort()
         .join(', '),
