@@ -5,6 +5,9 @@
 
 set -e
 
+# Trap SIGINT (Ctrl+C) to exit cleanly
+trap 'echo -e "\n❌ Commit cancelled by user"; exit 130' INT
+
 # Find the repository root and githooks directory
 REPO_ROOT="$(git rev-parse --show-toplevel)"
 GITHOOKS_DIR="$REPO_ROOT/.githooks"

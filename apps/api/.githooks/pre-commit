@@ -5,6 +5,9 @@
 
 set -e
 
+# Trap SIGINT (Ctrl+C) to exit cleanly
+trap 'echo -e "\n\033[0;31m✗ Commit cancelled by user\033[0m"; exit 130' INT
+
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
