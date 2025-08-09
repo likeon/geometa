@@ -15,6 +15,7 @@
   let summaryData = $state(data.summaryData);
   let combinedStats = $state(data.combinedStats);
   let error = $state(data.error);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let selectedMeta = $state<any>(null);
   let dialogOpen = $state(false);
 
@@ -31,6 +32,7 @@
     goto(url.toString());
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function handleRowClick(row: any) {
     selectedMeta = row;
     dialogOpen = true;
@@ -58,6 +60,7 @@
 
   // Transform daily data for chart
   let chartData = $derived(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     selectedMeta?.dailyData?.map((day: any) => ({
       date: new Date(day.day).toLocaleDateString(),
       personalMapCount: day.personalMapCount,
@@ -67,6 +70,7 @@
 
   // Transform combined stats for chart
   let combinedChartData = $derived(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     combinedStats?.map((day: any) => ({
       date: new Date(day.day).toLocaleDateString(),
       personalMapCount: day.personalMapCount,

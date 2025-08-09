@@ -19,6 +19,7 @@ export const load = async ({ params, locals }) => {
     switch (apiError.status) {
       case 404:
         error(404, 'Map not found');
+        break;
       default:
         error(500, 'Something went wrong.');
     }

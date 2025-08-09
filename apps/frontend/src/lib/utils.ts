@@ -93,6 +93,7 @@ export async function ensurePermissions(
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function isDeepEqual(obj1: any, obj2: any): boolean {
   if (obj1 === obj2) return true;
 

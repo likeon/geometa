@@ -1,3 +1,4 @@
+<!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
 <script lang="ts" generics="TData extends Record<string, any>, TValue">
   import {
     type ColumnDef,

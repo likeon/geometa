@@ -56,7 +56,6 @@ export function createSvelteTable<TData extends RowData>(options: TableOptions<T
       return mergeObjects(prev, options, {
         state: mergeObjects(state, options.state || {}),
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         onStateChange: (updater: any) => {
           if (updater instanceof Function) state = updater(state);
           else state = mergeObjects(state, updater);
@@ -87,7 +86,6 @@ type Intersection<T extends readonly unknown[]> = (T extends [infer H, ...infer 
  *
  * Proxy-based to avoid known WebKit recursion issue.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function mergeObjects<Sources extends readonly MaybeThunk<any>[]>(
   ...sources: Sources
 ): Intersection<{ [K in keyof Sources]: Sources[K] }> {
@@ -132,7 +130,6 @@ export function mergeObjects<Sources extends readonly MaybeThunk<any>[]>(
       return {
         configurable: true,
         enumerable: true,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         value: (src as any)[key],
         writable: true
       };
