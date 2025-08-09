@@ -20,7 +20,15 @@
     /* 0️⃣  turn off every grouping the presets might introduce */
     {
       "matchPackagePatterns": ["*"],
-      "groupName": null         // “null” = no grouping
+      "groupName": null         // "null" = no grouping
+    },
+
+    /* 🔧 Elysia packages - group all updates across api and frontend */
+    {
+      "matchPackagePatterns": ["^elysia$", "^@elysiajs/"],
+      "matchPaths": ["apps/api/**", "apps/frontend/**"],
+      "groupName": "elysia ecosystem",
+      "groupSlug": "elysia-updates"
     },
 
     /* 1️⃣  frontend ― non-major (patch+minor) together */
