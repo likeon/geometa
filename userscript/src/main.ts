@@ -7,15 +7,21 @@ import { initLocationsUpload } from './lib/locationsUpload';
 
 function changelog() {
   return [
-    {'0.88': 'Updated framework version for bug-fixes'},
-    {'0.87': 'Added ability to view metas on breakdown screen'},
-    {'0.86': 'Changed look of announcement closing button'},
-    {'0.85': 'Another fix for multiple instances of upload button'},
-    {'0.84': 'Fixed multiple instances of upload button, adjusted styles'},
-    {'0.83': 'Added uploading locations and announcements system'},
-    {'0.82': 'Changed position of LearnableMeta map label for new Geoguessr UI'},
-    { '0.81': 'Fixed live challenge support. Added information about userscript version and source of a call (map, challenge, liveChallenge) to location info request to help us with debugging issues.' },
-    { '0.80': 'Adjusted window dragging to work on mobile. Improved selection mechanism of elements with dynamic class names. Removed special handling of challenges.' },
+    { '0.88': 'Updated framework version for bug-fixes' },
+    { '0.87': 'Added ability to view metas on breakdown screen' },
+    { '0.86': 'Changed look of announcement closing button' },
+    { '0.85': 'Another fix for multiple instances of upload button' },
+    { '0.84': 'Fixed multiple instances of upload button, adjusted styles' },
+    { '0.83': 'Added uploading locations and announcements system' },
+    { '0.82': 'Changed position of LearnableMeta map label for new Geoguessr UI' },
+    {
+      '0.81':
+        'Fixed live challenge support. Added information about userscript version and source of a call (map, challenge, liveChallenge) to location info request to help us with debugging issues.'
+    },
+    {
+      '0.80':
+        'Adjusted window dragging to work on mobile. Improved selection mechanism of elements with dynamic class names. Removed special handling of challenges.'
+    },
     { '0.79': 'Fixed ALM meta list panel when switching to non-ALM map' },
     { '0.78': 'Added info window with version check' },
     { '0.77': 'Added custom footer to the note and clicking on link warning' },
@@ -23,7 +29,10 @@ function changelog() {
     { '0.75': 'Added basic logging to help with debugging issues' },
     { '0.74': 'Fixed window appearance when for some reason a negative position value is saved' },
     { '0.73': 'Fixed live challenge support and updated framework to newest version' },
-    { '0.72': 'Adjusted images to fit vertically to the container to avoid scrolling and added magnifying glass effect on mouse hover' },
+    {
+      '0.72':
+        'Adjusted images to fit vertically to the container to avoid scrolling and added magnifying glass effect on mouse hover'
+    },
     { '0.71': 'Added beta support for live challenges' },
     { '0.70': 'Fixed carousel controls jumping and colored the note links' },
     { '0.69': 'Display multiple images with carousel' },

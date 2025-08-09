@@ -1,5 +1,11 @@
-import { mount } from "svelte";
-import { getChallengeId, getChallengeInfo, getMapInfo, logInfo, waitForElement } from "./utils/main";
+import { mount } from 'svelte';
+import {
+  getChallengeId,
+  getChallengeInfo,
+  getMapInfo,
+  logInfo,
+  waitForElement
+} from './utils/main';
 import App from './App.svelte';
 
 export function initLiveChallenge() {

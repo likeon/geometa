@@ -1,6 +1,5 @@
 import { GM_xmlhttpRequest, unsafeWindow, GM_info } from '$';
 
-
 /**
  * Waits and returns an element with the specified selector.
  * Supports dynamic selectors like [class*=map-block_mapImageContainer].
@@ -15,8 +14,7 @@ export function waitForElement(selector: string): Promise<Element | null> {
         resolve(existingElement);
         return;
       }
-    } catch {
-    }
+    } catch {}
 
     const observer = new MutationObserver(() => {
       try {
@@ -27,8 +25,7 @@ export function waitForElement(selector: string): Promise<Element | null> {
           resolve(element);
           return;
         }
-      } catch {
-      }
+      } catch {}
     });
 
     const handleUrlChange = () => {
@@ -123,7 +120,6 @@ export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
   return mapInfo;
 }
 
-
 export function getLatestVersionInfo() {
   return unsafeWindow.localStorage.getItem('geometa:latest-version');
 }
@@ -179,7 +175,6 @@ export function decodePanoId(encoded: string) {
 export function logInfo(name: string, data?: any) {
   console.log(`ALM: ${name}`, data);
 }
-
 
 export function extractMapIdFromUrl(url: string) {
   const match = url.match(/\/maps\/([^\/]+)/);

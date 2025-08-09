@@ -44,15 +44,25 @@ export async function getAnnouncement(): Promise<Announcement | null> {
           try {
             if (response.responseText && response.responseText.trim().toLowerCase() !== 'null') {
               const parsedData = JSON.parse(response.responseText);
-              if (parsedData && typeof parsedData.timestamp === 'number' && typeof parsedData.htmlMessage === 'string') {
+              if (
+                parsedData &&
+                typeof parsedData.timestamp === 'number' &&
+                typeof parsedData.htmlMessage === 'string'
+              ) {
                 announcementToCache = parsedData as Announcement;
               }
             }
           } catch (parseError) {
-            console.error('Failed to parse announcement JSON from API:', parseError, response.responseText);
+            console.error(
+              'Failed to parse announcement JSON from API:',
+              parseError,
+              response.responseText
+            );
           }
         } else {
-          console.error(`Error fetching announcement from API: ${response.status} ${response.statusText}`);
+          console.error(
+            `Error fetching announcement from API: ${response.status} ${response.statusText}`
+          );
         }
 
         const itemToCache: CachedItem = {
@@ -61,7 +71,11 @@ export async function getAnnouncement(): Promise<Announcement | null> {
         };
         try {
           localStorage.setItem(ANNOUNCEMENT_CACHE_KEY, JSON.stringify(itemToCache));
-          console.log(announcementToCache ? 'Fetched announcement cached.' : 'Fetched \'no announcement\' state cached.');
+          console.log(
+            announcementToCache
+              ? 'Fetched announcement cached.'
+              : "Fetched 'no announcement' state cached."
+          );
         } catch (e) {
           console.warn('Error writing announcement state to localStorage cache:', e);
         }
@@ -79,7 +93,6 @@ export async function getAnnouncement(): Promise<Announcement | null> {
   });
 }
 
-
 const LAST_DISMISSED_ANNOUNCEMENT_TIMESTAMP_KEY = 'geometa:last-dismissed-announcement';
 
 export function getLastDismissedAnnouncementTimestamp(): number | null {
@@ -91,20 +104,28 @@ export function getLastDismissedAnnouncementTimestamp(): number | null {
     }
     return null;
   } catch (e) {
-    console.warn('LocalStorage Error: Could not retrieve last dismissed announcement timestamp.', e);
+    console.warn(
+      'LocalStorage Error: Could not retrieve last dismissed announcement timestamp.',
+      e
+    );
     return null;
   }
 }
 
-
 export function markAnnouncementAsDismissed(announcementTimestamp: number): void {
   if (isNaN(announcementTimestamp)) {
-    console.error('Invalid timestamp provided to markAnnouncementAsDismissed. Must be a number.', announcementTimestamp);
+    console.error(
+      'Invalid timestamp provided to markAnnouncementAsDismissed. Must be a number.',
+      announcementTimestamp
+    );
     return;
   }
 
   try {
-    localStorage.setItem(LAST_DISMISSED_ANNOUNCEMENT_TIMESTAMP_KEY, announcementTimestamp.toString());
+    localStorage.setItem(
+      LAST_DISMISSED_ANNOUNCEMENT_TIMESTAMP_KEY,
+      announcementTimestamp.toString()
+    );
   } catch (e) {
     console.warn('LocalStorage Error: Could not save last dismissed announcement timestamp.', e);
   }

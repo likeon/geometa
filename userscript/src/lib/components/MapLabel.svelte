@@ -26,7 +26,7 @@
     align-items: center;
     gap: 8px;
     text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
-}
+  }
 
   p {
     font-size: 14px;
@@ -37,7 +37,7 @@
     padding: 6px 12px;
     font-size: 12px;
     color: #fff;
-    background-color: #4CAF50;
+    background-color: #4caf50;
     border: none;
     border-radius: 4px;
     cursor: pointer;

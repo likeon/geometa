@@ -1,10 +1,6 @@
 import { GM_xmlhttpRequest } from '$'; // Keep this if used in other parts of the file, not directly here
 
-
-async function geoguessrAPIFetch(
-  url: string,
-  options: RequestInit = {}
-): Promise<Response> {
+async function geoguessrAPIFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const { method = 'GET', headers: initialHeaders, body, ...restOptions } = options;
 
   const effectiveHeaders = new Headers(initialHeaders);
@@ -19,7 +15,7 @@ async function geoguessrAPIFetch(
 
   if (!response.ok) {
     let errorPayload: any = null;
-    let errorMessage = `Request to ${url.substring(0,100)}... failed with status ${response.status}: ${response.statusText}`;
+    let errorMessage = `Request to ${url.substring(0, 100)}... failed with status ${response.status}: ${response.statusText}`;
 
     try {
       const contentType = response.headers.get('content-type');
@@ -28,26 +24,29 @@ async function geoguessrAPIFetch(
         if (errorPayload && errorPayload.message) {
           errorMessage = `API Error (${response.status}): ${errorPayload.message}`;
         } else if (errorPayload) {
-          errorMessage = `API Error (${response.status}) for ${url.substring(0,50)}...: ${JSON.stringify(errorPayload).substring(0, 100)}...`;
+          errorMessage = `API Error (${response.status}) for ${url.substring(0, 50)}...: ${JSON.stringify(errorPayload).substring(0, 100)}...`;
         }
       } else {
         const errorText = await response.text();
         errorPayload = errorText;
         if (errorText) {
-          errorMessage = `API Error (${response.status}) for ${url.substring(0,50)}...: ${errorText.substring(0, 100)}...`;
+          errorMessage = `API Error (${response.status}) for ${url.substring(0, 50)}...: ${errorText.substring(0, 100)}...`;
         }
       }
     } catch (e) {
-      console.warn("Could not parse error response body from Geoguessr API:", e);
+      console.warn('Could not parse error response body from Geoguessr API:', e);
     }
-    console.error(`geoguessrAPIFetch Error (Status: ${response.status}) for URL ${url}:`, errorMessage, "Full Payload:", errorPayload);
+    console.error(
+      `geoguessrAPIFetch Error (Status: ${response.status}) for URL ${url}:`,
+      errorMessage,
+      'Full Payload:',
+      errorPayload
+    );
     throw new Error(errorMessage);
   }
 
   return response;
 }
-
-
 
 export async function uploadLocations(geoguessrId: string, apiKey: string): Promise<void> {
   const geoguessrDraftApiUrl = `https://www.geoguessr.com/api/v4/user-maps/drafts/${geoguessrId}`;
@@ -57,7 +56,7 @@ export async function uploadLocations(geoguessrId: string, apiKey: string): Prom
     const response = await geoguessrAPIFetch(geoguessrDraftApiUrl);
     geoguessrMapDetails = await response.json();
   } catch (error) {
-    const errorMessage = (error instanceof Error) ? error.message : String(error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error('Failed to fetch Geoguessr map info:', error);
     throw new Error(`Geoguessr Error: Could not fetch map details. ${errorMessage}`);
   }
@@ -68,13 +67,14 @@ export async function uploadLocations(geoguessrId: string, apiKey: string): Prom
   try {
     locationsToUpload = await fetchMapLocationsGM(geoguessrId, apiKey);
   } catch (error) {
-    const errorMessage = (error instanceof Error) ? error.message : String(error);
-    console.error("Failed to fetch map locations from backend:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('Failed to fetch map locations from backend:', error);
     throw new Error(`LearnableMeta Error: ${errorMessage}`);
   }
 
   if (!locationsToUpload || locationsToUpload.length === 0) {
-    const errorMessage = 'Cannot publish an empty map. Please add locations via LearnableMeta first.';
+    const errorMessage =
+      'Cannot publish an empty map. Please add locations via LearnableMeta first.';
     console.warn(errorMessage);
     throw new Error(errorMessage);
   }
@@ -91,10 +91,10 @@ export async function uploadLocations(geoguessrId: string, apiKey: string): Prom
   try {
     await geoguessrAPIFetch(geoguessrDraftApiUrl, {
       method: 'PUT',
-      body: JSON.stringify(mapDataToUpload),
+      body: JSON.stringify(mapDataToUpload)
     });
   } catch (error) {
-    const errorMessage = (error instanceof Error) ? error.message : String(error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error('Failed to update Geoguessr map draft:', error);
     throw new Error(`Geoguessr Error: Could not update map draft. ${errorMessage}`);
   }
@@ -103,10 +103,10 @@ export async function uploadLocations(geoguessrId: string, apiKey: string): Prom
     console.log('Publishing Geoguessr map...');
     await geoguessrAPIFetch(`${geoguessrDraftApiUrl}/publish`, {
       method: 'PUT',
-      body: JSON.stringify({}),
+      body: JSON.stringify({})
     });
   } catch (error) {
-    const errorMessage = (error instanceof Error) ? error.message : String(error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
     console.error('Failed to publish Geoguessr map:', error);
     throw new Error(`Geoguessr Error: Could not publish map. ${errorMessage}`);
   }
@@ -120,7 +120,7 @@ function fetchMapLocationsGM(geoguessrId: string, apiToken: string): Promise<[]>
       method: 'GET',
       url: apiUrl,
       headers: {
-        'Authorization': `Bearer ${apiToken}`,
+        Authorization: `Bearer ${apiToken}`,
         'Content-Type': 'application/json'
       },
       timeout: 15000, // Add a timeout (e.g., 15 seconds)
@@ -135,8 +135,16 @@ function fetchMapLocationsGM(geoguessrId: string, apiToken: string): Promise<[]>
               reject(new Error('Received invalid location data structure from backend.'));
             }
           } catch (parseError: any) {
-            console.error('Error parsing JSON response from backend:', parseError, response.responseText);
-            reject(new Error(`Backend Error: Failed to parse location data: ${parseError.message.substring(0,100)}`));
+            console.error(
+              'Error parsing JSON response from backend:',
+              parseError,
+              response.responseText
+            );
+            reject(
+              new Error(
+                `Backend Error: Failed to parse location data: ${parseError.message.substring(0, 100)}`
+              )
+            );
           }
         } else {
           let errorMessage = `Backend Error (${response.status}): ${response.statusText || 'Failed to fetch locations'}`;
@@ -146,15 +154,18 @@ function fetchMapLocationsGM(geoguessrId: string, apiToken: string): Promise<[]>
             if (parsedJsonError && parsedJsonError.message) {
               errorMessage = `Backend Error (${response.status}): ${parsedJsonError.message}`;
             } else if (parsedJsonError) {
-              errorMessage = `Backend Error (${response.status}): ${JSON.stringify(parsedJsonError).substring(0,100)}...`;
+              errorMessage = `Backend Error (${response.status}): ${JSON.stringify(parsedJsonError).substring(0, 100)}...`;
             }
             rawErrorResponse = parsedJsonError;
           } catch (e) {
             if (response.responseText) {
-              errorMessage = `Backend Error (${response.status}): ${response.responseText.substring(0,100)}...`;
+              errorMessage = `Backend Error (${response.status}): ${response.responseText.substring(0, 100)}...`;
             }
           }
-          console.error(`Error fetching map locations from backend (Status: ${response.status}):`, rawErrorResponse);
+          console.error(
+            `Error fetching map locations from backend (Status: ${response.status}):`,
+            rawErrorResponse
+          );
           reject(new Error(errorMessage));
         }
       },

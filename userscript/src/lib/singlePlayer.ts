@@ -20,7 +20,6 @@ type GGEvent = {
   };
 };
 
-
 declare global {
   interface Window {
     geometaMetaCache?: Map<string, any>;
@@ -29,7 +28,6 @@ declare global {
 
 let currentObserver: MutationObserver | null = null;
 let currentPinObserver: MutationObserver | null = null;
-
 
 function clearMetaCache() {
   if (window.geometaMetaCache) {
@@ -69,14 +67,14 @@ export function initSinglePlayer() {
             panoId: lastRound.location.panoId,
             mapId: event.detail.map.id,
             userscriptVersion: mapInfo.userscriptVersion,
-            source: (window.location.href.includes('challenge') ? 'challenge' : 'map')
+            source: window.location.href.includes('challenge') ? 'challenge' : 'map'
           }
         });
       });
     });
     GeoGuessrEventFramework.events.addEventListener('game_end', async (event: GGEvent) => {
       console.log('game ended');
-      const panoIds = event.detail.rounds.map(round => round.location.panoId);
+      const panoIds = event.detail.rounds.map((round) => round.location.panoId);
       console.log('All round pano IDs:', panoIds);
 
       const mapInfo = await getMapInfo(event.detail.map.id, false);
@@ -85,9 +83,11 @@ export function initSinglePlayer() {
         return;
       }
 
-
-      const roundData = { rounds: event.detail.rounds, mapId: event.detail.map.id, userscriptVersion: mapInfo.userscriptVersion };
-
+      const roundData = {
+        rounds: event.detail.rounds,
+        mapId: event.detail.map.id,
+        userscriptVersion: mapInfo.userscriptVersion
+      };
 
       waitForElement('.result-list_listWrapper__7SmiM').then((listWrapper) => {
         if (!listWrapper) {
@@ -95,7 +95,6 @@ export function initSinglePlayer() {
         }
         addMetaButtonsToRounds(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
       });
-
 
       if (currentObserver) {
         currentObserver.disconnect();
@@ -116,7 +115,6 @@ export function initSinglePlayer() {
       addClickableIconsToPins(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
     });
 
-
     window.addEventListener('urlchange', () => {
       clearMetaCache();
       if (currentObserver) {
@@ -131,26 +129,26 @@ export function initSinglePlayer() {
   });
 }
 
-function addMetaButtonsToRounds(rounds: GGEvent['detail']['rounds'], mapId: string, userscriptVersion: string) {
+function addMetaButtonsToRounds(
+  rounds: GGEvent['detail']['rounds'],
+  mapId: string,
+  userscriptVersion: string
+) {
   const roundItems = document.querySelectorAll('.result-list_listItemWrapper___XCGn');
 
   rounds.forEach((round, index) => {
     const roundItem = roundItems[index];
     if (!roundItem) return;
 
-
     const roundNumber = roundItem.querySelector('.result-list_roundNumber__RlIKm')?.textContent;
     if (roundNumber === 'Total') return;
 
-
     if (roundItem.querySelector('.geometa-meta-btn')) return;
-
 
     const metaButton = document.createElement('button');
     metaButton.className = 'geometa-meta-btn';
     metaButton.textContent = 'Show meta';
     metaButton.title = 'View meta for this round';
-
 
     metaButton.addEventListener('click', (e) => {
       e.preventDefault();
@@ -158,13 +156,16 @@ function addMetaButtonsToRounds(rounds: GGEvent['detail']['rounds'], mapId: stri
       showMetaForRound(round.location.panoId, mapId, userscriptVersion, index + 1);
     });
 
-
     roundItem.appendChild(metaButton);
   });
 }
 
-function showMetaForRound(panoId: string, mapId: string, userscriptVersion: string, roundNumber: number) {
-
+function showMetaForRound(
+  panoId: string,
+  mapId: string,
+  userscriptVersion: string,
+  roundNumber: number
+) {
   let element = document.getElementById('geometa-summary');
 
   if (element) {
@@ -184,33 +185,33 @@ function showMetaForRound(panoId: string, mapId: string, userscriptVersion: stri
       panoId,
       mapId,
       userscriptVersion,
-      source: (window.location.href.includes('challenge') ? 'challenge' : 'map')
+      source: window.location.href.includes('challenge') ? 'challenge' : 'map'
     }
   });
 }
 
-function addClickableIconsToPins(rounds: GGEvent['detail']['rounds'], mapId: string, userscriptVersion: string) {
+function addClickableIconsToPins(
+  rounds: GGEvent['detail']['rounds'],
+  mapId: string,
+  userscriptVersion: string
+) {
   if (currentPinObserver) {
     currentPinObserver.disconnect();
   }
 
   currentPinObserver = new MutationObserver(() => {
     const pins = document.querySelectorAll('[class*="map-pin_mapPin"]');
-    pins.forEach(pin => {
-
+    pins.forEach((pin) => {
       const pinText = pin.textContent?.trim();
       const roundNumber = parseInt(pinText || '');
 
       if (roundNumber >= 1 && roundNumber <= 5 && !pin.hasAttribute('data-geometa-pin-processed')) {
-
         pin.setAttribute('data-geometa-pin-processed', 'true');
-
 
         const questionIcon = document.createElement('div');
         questionIcon.className = 'geometa-pin-question';
         questionIcon.innerHTML = '?';
         questionIcon.title = `View meta for round ${roundNumber}`;
-
 
         questionIcon.addEventListener('click', (e) => {
           e.preventDefault();
@@ -222,12 +223,10 @@ function addClickableIconsToPins(rounds: GGEvent['detail']['rounds'], mapId: str
           }
         });
 
-
         const pinElement = pin as HTMLElement;
         if (pinElement.style.position === '' || pinElement.style.position === 'static') {
           pinElement.style.position = 'relative';
         }
-
 
         pinElement.appendChild(questionIcon);
       }
