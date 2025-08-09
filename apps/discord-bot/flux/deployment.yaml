@@ -25,7 +25,7 @@ spec:
                   audience: "api"
       containers:
         - name: discord-bot
-          image: ghcr.io/likeon/geometa-discord-bot:main-948993ff-1754684682 # {"$imagepolicy": "geometa-prod:discord-bot"}
+          image: ghcr.io/likeon/geometa-discord-bot:main-004ba927-1754775331 # {"$imagepolicy": "geometa-prod:discord-bot"}
           imagePullPolicy: Always
           resources:
             requests:
