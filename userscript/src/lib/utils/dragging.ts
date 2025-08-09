@@ -13,7 +13,7 @@ function getSavedPosition(key: string) {
     // somehow people manage to drag the window out of the screen
     return null;
   }
-  return value
+  return value;
 }
 
 export function setContainerPosition(container: HTMLDivElement) {

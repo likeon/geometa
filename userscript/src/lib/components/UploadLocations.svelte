@@ -7,17 +7,24 @@
   let { mapId }: { mapId: string } = $props();
 
   const API_KEY_STORAGE_NAME = 'learnableMeta_apiKey';
-  const URL_TO_GENERATE_TOKEN = "https://learnablemeta.com/profile/token"
+  const URL_TO_GENERATE_TOKEN = 'https://learnablemeta.com/profile/token';
 
   let showApiKeyModal = $state(false);
   let apiKeyInput = $state('');
   let currentApiKey = $state<string | null>(null);
   let isLoading = $state(false);
 
-  let toastState = $state<{ message: string; type: 'success' | 'error' | 'info' | 'warning' } | null>(null);
+  let toastState = $state<{
+    message: string;
+    type: 'success' | 'error' | 'info' | 'warning';
+  } | null>(null);
   let toastTimer = $state<number | undefined>(undefined);
 
-  function showCustomToast(message: string, type: 'success' | 'error' | 'info' | 'warning' = 'info', duration: number = 3000) {
+  function showCustomToast(
+    message: string,
+    type: 'success' | 'error' | 'info' | 'warning' = 'info',
+    duration: number = 3000
+  ) {
     clearTimeout(toastTimer);
 
     const displayToast = () => {
@@ -47,7 +54,11 @@
       return GM_getValue(API_KEY_STORAGE_NAME, null);
     } catch (e) {
       console.warn('GM_getValue is not available. API key functionality might be limited.', e);
-      showCustomToast('Userscript storage (GM_getValue) is not available. Please ensure Tampermonkey/Violentmonkey is correctly configured.', 'error', 0);
+      showCustomToast(
+        'Userscript storage (GM_getValue) is not available. Please ensure Tampermonkey/Violentmonkey is correctly configured.',
+        'error',
+        0
+      );
       return null;
     }
   }
@@ -57,7 +68,11 @@
       GM_setValue(API_KEY_STORAGE_NAME, key);
     } catch (e) {
       console.warn('GM_setValue is not available. API key functionality might be limited.', e);
-      showCustomToast('Userscript storage (GM_setValue) is not available. Please ensure Tampermonkey/Violentmonkey is correctly configured.', 'error', 0);
+      showCustomToast(
+        'Userscript storage (GM_setValue) is not available. Please ensure Tampermonkey/Violentmonkey is correctly configured.',
+        'error',
+        0
+      );
     }
   }
 
@@ -116,7 +131,12 @@
         toastMessage = error.message;
       }
 
-      if (toastMessage.includes('401') || toastMessage.includes('403') || toastMessage.toLowerCase().includes('unauthorized') || toastMessage.toLowerCase().includes('invalid token')) {
+      if (
+        toastMessage.includes('401') ||
+        toastMessage.includes('403') ||
+        toastMessage.toLowerCase().includes('unauthorized') ||
+        toastMessage.toLowerCase().includes('invalid token')
+      ) {
         showCustomToast(`Upload failed: ${toastMessage}. Please check your API Key.`, 'error', 0);
       } else {
         showCustomToast(`Upload failed: ${toastMessage}`, 'error', 0);
@@ -148,8 +168,7 @@
   <button
     class="button_button__aR6_e button_sizeSmall__MB_qj custom-yellow-button"
     onclick={handleUploadClick}
-    disabled={isLoading}
-  >
+    disabled={isLoading}>
     {isLoading ? 'Uploading...' : 'LearnableMeta - Upload'}
   </button>
 </div>
@@ -162,9 +181,7 @@
       <p>
         You can generate your API token by visiting
 
-        <a href={URL_TO_GENERATE_TOKEN} target="_blank" rel="noopener noreferrer">
-          profile page
-        </a>
+        <a href={URL_TO_GENERATE_TOKEN} target="_blank" rel="noopener noreferrer"> profile page </a>
         on LearnableMeta and generating it there.
       </p>
       <input
@@ -172,14 +189,15 @@
         bind:value={apiKeyInput}
         placeholder="Paste your API key here"
         aria-label="API Key Input"
-        class="modal-input"
-      />
+        class="modal-input" />
       <div class="modal-actions">
-        <button onclick={handleSaveApiKey} class="modal-button modal-button-save">Save & Upload</button>
+        <button onclick={handleSaveApiKey} class="modal-button modal-button-save"
+          >Save & Upload</button>
         <button onclick={handleCancelModal} class="modal-button modal-button-cancel">Cancel</button>
       </div>
-      <p class="modal-note">Your API key will be stored securely in your browser's userscript storage for future
-        use.</p>
+      <p class="modal-note">
+        Your API key will be stored securely in your browser's userscript storage for future use.
+      </p>
     </div>
   </div>
 {/if}
@@ -188,8 +206,7 @@
   <ToastNotification
     message={toastState.message}
     type={toastState.type}
-    onClose={hideCustomToast}
-  />
+    onClose={hideCustomToast} />
 {/if}
 
 <style>
@@ -218,8 +235,7 @@
 
   .custom-yellow-button:active:not(:disabled) {
     background: linear-gradient(180deg, #eab308 0%, #d39e00 100%);
-    box-shadow:
-      0 2px 4px rgba(0, 0, 0, 0.2) inset;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) inset;
     transform: translateY(1px);
   }
 

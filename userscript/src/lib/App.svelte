@@ -3,10 +3,20 @@
   import { GM_xmlhttpRequest } from '$';
   import Spinner from './components/Spinner.svelte';
   import CountryFlag from './components/CountryFlag.svelte';
-  import { onPointerDown, onPointerMove, onPointerUp, setContainerPosition } from './utils/dragging';
+  import {
+    onPointerDown,
+    onPointerMove,
+    onPointerUp,
+    setContainerPosition
+  } from './utils/dragging';
   import { saveContainerDimensions, setContainerDimensions } from './utils/resizing';
   import Carousel from './components/Carousel.svelte';
-  import { checkIfOutdated, getLatestVersionInfo, markHelpMessageAsRead, wasHelpMessageRead } from './utils/main';
+  import {
+    checkIfOutdated,
+    getLatestVersionInfo,
+    markHelpMessageAsRead,
+    wasHelpMessageRead
+  } from './utils/main';
   import {
     getAnnouncement,
     getLastDismissedAnnouncementTimestamp,
@@ -17,8 +27,8 @@
     panoId: string;
     mapId: string;
     userscriptVersion: string;
-    source: 'map' | 'challenge' | 'liveChallenge',
-    roundNumber: number,
+    source: 'map' | 'challenge' | 'liveChallenge';
+    roundNumber: number;
   }
 
   let { panoId, mapId, userscriptVersion, source, roundNumber }: Props = $props();
@@ -80,7 +90,6 @@
         }
       });
     }
-
 
     setContainerPosition(container);
     setContainerDimensions(container);
@@ -149,36 +158,40 @@
         link.removeEventListener('click', confirmNavigation);
         link.addEventListener('click', confirmNavigation);
       });
-
     }
   });
 
   let lastDismissedTimestamp = $state(getLastDismissedAnnouncementTimestamp());
-
 </script>
 
 <div class="geometa-container" bind:this={container}>
-
   {#await getAnnouncement() then announcement}
-    {#if roundNumber >= 4 && announcement && (!lastDismissedTimestamp || announcement.timestamp > lastDismissedTimestamp) }
+    {#if roundNumber >= 4 && announcement && (!lastDismissedTimestamp || announcement.timestamp > lastDismissedTimestamp)}
       <div class="announcement">
         <div>
           {@html announcement.htmlMessage}
         </div>
-        <button class="vote-close-btn"
-                onclick={() =>  {markAnnouncementAsDismissed(announcement.timestamp);lastDismissedTimestamp = announcement.timestamp }}
-                aria-label="Dismiss announcement">Dismiss
+        <button
+          class="vote-close-btn"
+          onclick={() => {
+            markAnnouncementAsDismissed(announcement.timestamp);
+            lastDismissedTimestamp = announcement.timestamp;
+          }}
+          aria-label="Dismiss announcement"
+          >Dismiss
         </button>
       </div>
     {/if}
   {/await}
 
-
   <!-- svelte-ignore a11y_no_static_element_interactions -->
   <div class="flex header" bind:this={header}>
     <h2>Learnable Meta</h2>
     <div class="icons">
-      <a href={"https://learnablemeta.com/maps/" + mapId } target="_blank" aria-label="List of map metas">
+      <a
+        href={'https://learnablemeta.com/maps/' + mapId}
+        target="_blank"
+        aria-label="List of map metas">
         <span class="skill-icons--list"></span>
       </a>
       <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website">
@@ -187,7 +200,10 @@
       <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord">
         <span class="skill-icons--discord"></span>
       </a>
-      <button onclick={togglePopup} aria-label="More information" style="background: none; border: none; padding: 0;">
+      <button
+        onclick={togglePopup}
+        aria-label="More information"
+        style="background: none; border: none; padding: 0;">
         <span class={helpClass}></span>
       </button>
     </div>
@@ -233,21 +249,28 @@
       <div class="modal">
         <div class="help-message">
           {#if checkIfOutdated()}
-            <p class="outdated"><strong>Your script version is out of date - please install the latest
-              version ({getLatestVersionInfo()})!
-            </strong></p>
+            <p class="outdated">
+              <strong
+                >Your script version is out of date - please install the latest version ({getLatestVersionInfo()})!
+              </strong>
+            </p>
           {/if}
           <p>Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p>
           <ul>
-            <li><strong>Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere on your
-              screen.
+            <li>
+              <strong>Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere
+              on your screen.
             </li>
-            <li><strong>Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li>
-            <li><strong>View Map meta list:</strong> Click the list icon to see all the metas included in the map you
-              are currently playing.
+            <li>
+              <strong>Resize:</strong> Use the bottom-right corner to resize the note to your liking.
             </li>
-            <li><strong>Join the Community:</strong> Click the Discord icon to share feedback, suggest improvements, or
-              just say hi!
+            <li>
+              <strong>View Map meta list:</strong> Click the list icon to see all the metas included
+              in the map you are currently playing.
+            </li>
+            <li>
+              <strong>Join the Community:</strong> Click the Discord icon to share feedback, suggest
+              improvements, or just say hi!
             </li>
             <li>
               <strong>Outdated Script:</strong> The question mark icon will blink if the script is outdated.
@@ -334,7 +357,10 @@
     line-height: 1;
     margin-left: 5px;
     text-transform: none;
-    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease,
+      border-color 0.2s ease;
   }
 
   .vote-close-btn:hover,
@@ -344,7 +370,6 @@
     border-color: #003366;
     outline: none;
   }
-
 
   a {
     color: #188bd2;
@@ -395,7 +420,6 @@
     cursor: pointer; /* Makes it clear that the icon is clickable */
   }
 
-
   .icons {
     display: inline-block;
     vertical-align: middle;
@@ -428,7 +452,6 @@
     user-select: none; /* Prevent text selection while dragging */
   }
 
-
   :global(.geometa-note a) {
     color: #188bd2;
   }
@@ -446,7 +469,6 @@
     list-style-type: decimal;
     margin-left: 1rem;
   }
-
 
   .modal-backdrop {
     position: fixed;
@@ -515,14 +537,15 @@
     border-radius: 5px;
     cursor: pointer;
     font-size: 15px;
-    transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+    transition:
+      background-color 0.2s ease-in-out,
+      color 0.2s ease-in-out;
   }
 
   .close-btn:hover {
     background: #d3d3d3;
     color: var(--ds-color-purple-100);
   }
-
 
   button {
     cursor: pointer;
@@ -546,7 +569,6 @@
       font-weight: bold;
     }
   }
-
 
   @keyframes blink-animation {
     0% {
@@ -609,7 +631,7 @@
     z-index: 10000;
     transition: background-color 0.2s ease;
     border: 1px solid white;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
 
   :global(.geometa-pin-question:hover) {

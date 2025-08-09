@@ -2,12 +2,10 @@ import { getMapInfo } from './utils/main';
 import UploadLocations from './components/UploadLocations.svelte';
 import { mount } from 'svelte';
 
-
 export function extractMapIdFromMapMakerUrl(url: string) {
   const match = url.match(/\/map-maker\/([^\/]+)/);
   return match ? match[1] : null;
 }
-
 
 export function initLocationsUpload() {
   addLocationsUploadButtons();
@@ -36,14 +34,16 @@ async function addLocationsUploadButtons() {
 
   if (container) {
     const existingElement = container.querySelector('#' + targetId);
-    if (existingElement) { return; }
+    if (existingElement) {
+      return;
+    }
     const target = document.createElement('div');
     target.id = targetId;
     container.insertBefore(target, container.lastElementChild);
     mount(UploadLocations, {
       target,
       props: {
-        mapId,
+        mapId
       }
     });
   }

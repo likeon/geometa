@@ -7,11 +7,7 @@
     onClose: () => void;
   }
 
-  let {
-    message,
-    type = 'info',
-    onClose,
-  }: ToastProps = $props();
+  let { message, type = 'info', onClose }: ToastProps = $props();
 </script>
 
 <div
@@ -20,10 +16,9 @@
   in:fade={{ duration: 200, delay: 50 }}
   out:fade={{ duration: 300 }}
   style:position="absolute"
-  style:top= '100%'
-  style:transform='translateX(-75%) translateY(-10px)'
-  style:margin-top='10px'
->
+  style:top="100%"
+  style:transform="translateX(-75%) translateY(-10px)"
+  style:margin-top="10px">
   <span class="toast-message">{message}</span>
   <button class="toast-close-button" onclick={onClose} aria-label="Close">×</button>
 </div>
