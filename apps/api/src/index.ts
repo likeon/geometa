@@ -56,3 +56,11 @@ const app = new Elysia({ prefix: '/api', serve: { idleTimeout: 60 } })
   .listen(parseInt(process.env.SERVER_PORT || '3000'));
 
 export type App = typeof app;
+
+const gracefulShutdown = async () => {
+  await app.stop();
+  process.exit(0);
+};
+
+process.on('SIGTERM', gracefulShutdown);
+process.on('SIGINT', gracefulShutdown);
