@@ -24,29 +24,16 @@ if (prod) {
   });
 }
 
-const api = new Elysia({ prefix: '/api' })
+const app = new Elysia({ prefix: '/api', serve: { idleTimeout: 60 } })
   .use(sentry())
   .use(logger())
   .use(serverTiming())
   .get('/health-check', () => {
     return 'ok';
   })
-  .use(userscriptRouter)
-  .use(internalRouter)
-  .use(mapsRouter)
-  .onError(({ set, code }) => {
-    if (code === 'INTERNAL_SERVER_ERROR' || code === 'UNKNOWN') {
-      set.status = 500;
-      return { message: 'Internal Server Error' };
-    }
-  });
-
-const app = new Elysia({ serve: { idleTimeout: 60 } })
-  // works around https://github.com/elysiajs/elysia/issues/1071
-  // says it's fixed, but it's not
   .use(
     swagger({
-      path: '/api/docs',
+      path: '/docs',
       exclude: swaggerExclude,
       documentation: {
         info: { title: 'Learnable Meta API', version: '1' },
@@ -57,7 +44,15 @@ const app = new Elysia({ serve: { idleTimeout: 60 } })
       },
     }),
   )
-  .use(api)
+  .use(userscriptRouter)
+  .use(internalRouter)
+  .use(mapsRouter)
+  .onError(({ set, code }) => {
+    if (code === 'INTERNAL_SERVER_ERROR' || code === 'UNKNOWN') {
+      set.status = 500;
+      return { message: 'Internal Server Error' };
+    }
+  })
   .listen(parseInt(process.env.SERVER_PORT || '3000'));
 
 export type App = typeof app;
