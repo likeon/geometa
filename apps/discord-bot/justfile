@@ -1,2 +1,6 @@
 build TAG:
   buildah bud --platform linux/arm64 -t {{TAG}}
+
+fix:
+  cargo clippy --fix --all-targets --all-features --allow-dirty -- --allow=clippy::all
+  cargo fmt
