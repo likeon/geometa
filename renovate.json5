@@ -31,6 +31,13 @@
       "groupSlug": "elysia-updates"
     },
 
+    /* 🤖 Discord bot - group all updates */
+    {
+      "matchPaths": ["apps/discord-bot/**"],
+      "groupName": "discord-bot",
+      "groupSlug": "discord-bot-updates"
+    },
+
     /* 1️⃣  frontend ― non-major (patch+minor) together */
     {
       "matchPaths": ["apps/frontend/**"],   // anything under apps/frontend
