@@ -59,7 +59,7 @@ spec:
         volume_enabled: true
       # https://grafana.com/docs/loki/latest/setup/install/helm/install-monolithic/
       commonConfig:
-        replication_factor: 1
+        replication_factor: 3
       storage:
         bucketNames:
           chunks: ${AWS_BUCKET}
@@ -92,7 +92,7 @@ spec:
       enabled: false
     deploymentMode: SingleBinary
     singleBinary:
-      replicas: 1
+      replicas: 3
       terminationGracePeriodSeconds: 300 # just in case idk if really needed
       extraArgs:
         - -config.expand-env=true
