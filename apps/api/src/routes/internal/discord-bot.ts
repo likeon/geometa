@@ -10,7 +10,7 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
   .post(
     'maps/:geoguessrId/publish',
     async ({ params: { geoguessrId }, body, status }) => {
-      const map = await db.query.maps.findFirst({
+      const map = await db.$primary.query.maps.findFirst({
         where: eq(maps.geoguessrId, geoguessrId),
         with: { mapRegions: true },
       });

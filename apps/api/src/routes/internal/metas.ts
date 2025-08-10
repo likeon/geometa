@@ -18,7 +18,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
   .post(
     '/:id/images',
     async ({ body, userId, params, status }) => {
-      const meta = await db.query.metas.findFirst({
+      const meta = await db.$primary.query.metas.findFirst({
         where: eq(metas.id, params.id),
       });
       if (!meta) {
@@ -83,7 +83,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
   .get(
     '/:id/images',
     async ({ userId, params, status }) => {
-      const meta = await db.query.metas.findFirst({
+      const meta = await db.$primary.query.metas.findFirst({
         where: eq(metas.id, params.id),
       });
       if (!meta) {
@@ -122,7 +122,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
   .put(
     '/:id/images/order',
     async ({ body, userId, params, status }) => {
-      const meta = await db.query.metas.findFirst({
+      const meta = await db.$primary.query.metas.findFirst({
         where: eq(metas.id, params.id),
       });
 
@@ -133,7 +133,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       await ensurePermissions(userId, meta.mapGroupId);
 
       try {
-        await db.transaction(async (tx) => {
+        await db.$primary.transaction(async (tx) => {
           for (const item of body.updates) {
             const result = await tx
               .update(metaImages)

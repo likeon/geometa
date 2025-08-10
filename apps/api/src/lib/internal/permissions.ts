@@ -7,10 +7,10 @@ class PermissionsDeniedError extends Error {}
 
 export async function ensureMapAccess(userId: string, mapId: number) {
   const [map, superadminUser] = await Promise.all([
-    db.query.maps.findFirst({
+    db.$primary.query.maps.findFirst({
       where: and(eq(maps.id, mapId), eq(maps.userId, userId)),
     }),
-    db.query.users.findFirst({
+    db.$primary.query.users.findFirst({
       where: and(eq(users.id, userId), eq(users.isSuperadmin, true)),
     }),
   ]);
@@ -22,13 +22,13 @@ export async function ensureMapAccess(userId: string, mapId: number) {
 
 export async function ensurePermissions(userId: string, groupId: number) {
   const [permission, superadminUser] = await Promise.all([
-    db.query.mapGroupPermissions.findFirst({
+    db.$primary.query.mapGroupPermissions.findFirst({
       where: and(
         eq(mapGroupPermissions.userId, userId),
         eq(mapGroupPermissions.mapGroupId, groupId),
       ),
     }),
-    db.query.users.findFirst({
+    db.$primary.query.users.findFirst({
       where: and(eq(users.id, userId), eq(users.isSuperadmin, true)),
     }),
   ]);

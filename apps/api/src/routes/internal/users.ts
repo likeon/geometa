@@ -10,7 +10,7 @@ export const usersRouter = new Elysia({ prefix: '/users' })
   .get(
     '/profile',
     async ({ userId }) => {
-      const user = await db.query.users.findFirst({
+      const user = await db.$primary.query.users.findFirst({
         where: eq(users.id, userId),
       });
       assertNotNullish(user);

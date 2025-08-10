@@ -152,7 +152,7 @@ export const metasFromMapStatement = db
 export const mapsRouter = new Elysia({ prefix: '/maps' })
   .use(auth())
   .get('/', async () => {
-    return db.select().from(maps);
+    return db.$primary.select().from(maps);
   })
   .get(
     '/metas/:mapId',
@@ -220,7 +220,7 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
   .get(
     '/:geoguessrId',
     async ({ params: { geoguessrId }, status }) => {
-      const map = await db.query.maps.findFirst({
+      const map = await db.$primary.query.maps.findFirst({
         where: eq(maps.geoguessrId, geoguessrId),
       });
       if (!map) {

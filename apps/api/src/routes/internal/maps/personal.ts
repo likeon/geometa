@@ -65,7 +65,7 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
     '',
     async ({ userId, body, status }) => {
       const { name, geoguessrId } = body;
-      const user = await db.query.users.findFirst({
+      const user = await db.$primary.query.users.findFirst({
         where: eq(users.id, userId),
       });
       if (!user) {
@@ -118,7 +118,7 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
       await ensureMapAccess(userId, mapId);
 
       // Fetch map details
-      const map = await db.query.maps.findFirst({
+      const map = await db.$primary.query.maps.findFirst({
         columns: {
           geoguessrId: true,
           name: true,
@@ -230,7 +230,7 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
       await ensureMapAccess(userId, mapId);
       const { name, geoguessrId } = body;
 
-      const user = await db.query.users.findFirst({
+      const user = await db.$primary.query.users.findFirst({
         where: eq(users.id, userId),
       });
       if (!user) {

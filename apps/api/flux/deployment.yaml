@@ -41,7 +41,7 @@ spec:
               cpu: 100m
             limits:
               memory: "800Mi"
-              cpu: 1500m
+              cpu: 2000m
           env:
             - name: DATABASE_PASSWORD
               valueFrom:

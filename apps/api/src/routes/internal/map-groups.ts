@@ -19,7 +19,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     '/:id/sync',
     async ({ params: { id: groupId }, userId, status }) => {
       await ensurePermissions(userId, groupId);
-      const group = await db.query.mapGroups.findFirst({
+      const group = await db.$primary.query.mapGroups.findFirst({
         where: eq(mapGroups.id, groupId),
       });
       if (!group) {
@@ -140,7 +140,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     async ({ params: { id: groupId }, body, userId, set }) => {
       await ensurePermissions(userId, groupId);
 
-      const group = await db.query.mapGroups.findFirst({
+      const group = await db.$primary.query.mapGroups.findFirst({
         where: eq(mapGroups.id, groupId),
       });
 
@@ -239,7 +239,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     async ({ params: { id: groupId }, body, userId, set }) => {
       await ensurePermissions(userId, groupId);
 
-      const group = await db.query.mapGroups.findFirst({
+      const group = await db.$primary.query.mapGroups.findFirst({
         where: eq(mapGroups.id, groupId),
       });
 
@@ -259,7 +259,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         whereClause = eq(metas.mapGroupId, groupId);
       }
 
-      const selectedMetas = await db.query.metas.findMany({
+      const selectedMetas = await db.$primary.query.metas.findMany({
         where: whereClause,
         orderBy: [sql`${metas.id} ASC`],
         with: {

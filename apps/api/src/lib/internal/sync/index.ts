@@ -31,7 +31,7 @@ export async function syncMapGroup(group: {
   syncedAt: number | null;
 }) {
   const currentTimestamp = Math.floor(Date.now() / 1000);
-  await db.transaction(async (tx) => {
+  await db.$primary.transaction(async (tx) => {
     // metas
     const metasToSync = await metasSelectStatement.execute({
       mapGroupId: group.id,
