@@ -419,22 +419,6 @@ export const syncedMapMetas = pgTable(
   ],
 );
 
-// Location request logs for usage analytics (TimescaleDB hypertable)
-export const locationRequestLogs = pgTable(
-  'location_request_logs',
-  {
-    timestamp: timestamp('timestamp', { mode: 'date', withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    mapId: bigint('map_id', { mode: 'number' }).notNull(),
-    panoId: text('pano_id').notNull(),
-    syncedMetaId: bigint('synced_meta_id', { mode: 'number' }),
-  },
-  (t) => [
-    index('location_request_logs_meta_idx').on(t.syncedMetaId, t.timestamp),
-  ],
-);
-
 // --------------
 // VIEWS
 // --------------

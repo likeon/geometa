@@ -32,6 +32,7 @@
   "devDependencies": {
     "@biomejs/biome": "2.1.4",
     "bun-types": "latest",
-    "drizzle-kit": "^0.31.1"
+    "drizzle-kit": "^0.31.1",
+    "postgres": "^3.4.7"
   }
 }

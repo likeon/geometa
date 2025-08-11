@@ -26,6 +26,7 @@
         "@biomejs/biome": "2.1.4",
         "bun-types": "latest",
         "drizzle-kit": "^0.31.1",
+        "postgres": "^3.4.7",
       },
     },
   },
@@ -441,6 +442,8 @@
     "pg-protocol": ["pg-protocol@1.10.0", "", {}, "sha512-IpdytjudNuLv8nhlHs/UrVBhU0e78J0oIS/0AVdTbWxSOkFUVdsHC/NrorO6nXsQNDTT1kzDSOMJubBQviX18Q=="],
 
     "pg-types": ["pg-types@2.2.0", "", { "dependencies": { "pg-int8": "1.0.1", "postgres-array": "~2.0.0", "postgres-bytea": "~1.0.0", "postgres-date": "~1.0.4", "postgres-interval": "^1.1.0" } }, "sha512-qTAAlrEsl8s4OiEQY69wDvcMIdQN6wdz5ojQiOy6YRMuynxenON0O5oCpJI6lshc6scgAY8qvJ2On/p+CXY0GA=="],
+
+    "postgres": ["postgres@3.4.7", "", {}, "sha512-Jtc2612XINuBjIl/QTWsV5UvE8UHuNblcO3vVADSrKsrc6RqGX6lOW1cEo3CM2v0XG4Nat8nI+YM7/f26VxXLw=="],
 
     "postgres-array": ["postgres-array@2.0.0", "", {}, "sha512-VpZrUqU5A69eQyW2c5CA1jtLecCsN2U/bD6VilrFDWq5+5UIEVO7nazS3TEcHf1zuPYO/sqGvUvW62g86RXZuA=="],
 

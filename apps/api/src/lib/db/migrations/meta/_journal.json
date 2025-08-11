@@ -225,6 +225,13 @@
       "when": 1749985508170,
       "tag": "0031_majestic_imperial_guard",
       "breakpoints": true
+    },
+    {
+      "idx": 32,
+      "version": "7",
+      "when": 1754948970069,
+      "tag": "0032_giant_salo",
+      "breakpoints": true
     }
   ]
 }

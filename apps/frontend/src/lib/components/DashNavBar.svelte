@@ -83,7 +83,7 @@
     {@render navItem({
       name: 'Stats',
       slug: 'stats',
-      tooltipText: 'View usage stats.'
+      tooltipText: 'View usage stats. (Temporarily unavailable - will be added back soon)'
     })}
     {@render navItem({
       name: 'Settings',

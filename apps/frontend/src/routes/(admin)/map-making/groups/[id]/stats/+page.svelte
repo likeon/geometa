@@ -14,7 +14,7 @@
   let selectedPeriod = $state(data.selectedPeriod || '30');
   let summaryData = $state(data.summaryData);
   let combinedStats = $state(data.combinedStats);
-  let error = $state(data.error);
+  let statsUnavailable = $state(data.statsUnavailable);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let selectedMeta = $state<any>(null);
   let dialogOpen = $state(false);
@@ -43,7 +43,7 @@
     selectedPeriod = data.selectedPeriod || '30';
     summaryData = data.summaryData;
     combinedStats = data.combinedStats;
-    error = data.error;
+    statsUnavailable = data.statsUnavailable;
   });
 
   // Chart configuration
@@ -104,13 +104,14 @@
     </div>
   </div>
 
-  {#if error}
-    <div class="bg-red-50 border border-red-200 rounded-md p-4 mb-4">
-      <p class="text-red-800 text-sm">Error loading stats: {error}</p>
+  {#if statsUnavailable}
+    <div class="bg-blue-50 border border-blue-200 rounded-md p-8 text-center">
+      <h2 class="text-lg font-semibold text-blue-900 mb-2">Statistics Temporarily Unavailable</h2>
+      <p class="text-blue-800">
+        Statistics are temporarily unavailable but will be added back soon.
+      </p>
     </div>
-  {/if}
-
-  {#if combinedChartData.length > 0}
+  {:else if combinedChartData.length > 0}
     <div class="mb-6 p-4 border rounded-lg">
       <h2 class="text-lg font-semibold mb-3">Combined Daily Usage</h2>
       <div class="h-64">
@@ -140,19 +141,21 @@
     </div>
   {/if}
 
-  {#if summaryData.length === 0}
-    <div class="text-center py-8">
-      <p class="text-muted-foreground">No data found for the selected period.</p>
-    </div>
-  {:else}
-    <VirtualizedTable
-      data={summaryData}
-      {columns}
-      initialSorting={[{ id: 'totalCount', desc: true }]}
-      searchColumnId="metaName"
-      searchPlaceholder="Filter by meta name"
-      getRowId={(row) => row.metaId}
-      onRowClick={handleRowClick} />
+  {#if !statsUnavailable}
+    {#if summaryData.length === 0}
+      <div class="text-center py-8">
+        <p class="text-muted-foreground">No data found for the selected period.</p>
+      </div>
+    {:else}
+      <VirtualizedTable
+        data={summaryData}
+        {columns}
+        initialSorting={[{ id: 'totalCount', desc: true }]}
+        searchColumnId="metaName"
+        searchPlaceholder="Filter by meta name"
+        getRowId={(row) => row.metaId}
+        onRowClick={handleRowClick} />
+    {/if}
   {/if}
 </div>
 
