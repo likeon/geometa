@@ -1,6 +1,6 @@
 <script>
-  import Icon from '@iconify/svelte';
   import geoPin from '$lib/assets/GeoGuessr-Pin.png?enhanced';
+  import { IconList, IconListItem, IconListItemComplex } from '$lib/components/ui/icon-list';
 </script>
 
 <svelte:head>
@@ -44,30 +44,29 @@
         about it, don't worry—it's easy to set up.
       </p>
       <h4 class="mt-4 mb-[-20px]">Here's how to do it</h4>
-      <ul role="list" class="mt-8 max-w-xl space-y-4 text-sidebar-foreground">
-        <li>
-          <div class="flex gap-x-3">
-            <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
-            <span
-              ><strong class="font-semibold text-foreground">Install the Browser Extension.</strong>
-              First, you need to install a userscript manager extension for your browser. Tampermonkey
-              is available for
-              <a
-                href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo"
-                target="_blank">Chrome</a
-              >* or
-              <a href="https://addons.mozilla.org/firefox/addon/tampermonkey" target="_blank"
-                >Firefox</a
-              >.</span>
-          </div>
-          <p class="text-muted-foreground ml-9 italic">
-            * - Chrome: <a
-              href="https://www.tampermonkey.net/faq.php?locale=en#Q209"
-              target="_blank">Enable developer mode</a> in extensions to ensure Tampermonkey works properly
-          </p>
-        </li>
-        <li class="flex gap-x-3">
-          <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
+      <IconList>
+        <IconListItemComplex>
+          {#snippet subContent()}
+            <p class="text-muted-foreground ml-9 italic">
+              * - Chrome: <a
+                href="https://www.tampermonkey.net/faq.php?locale=en#Q209"
+                target="_blank">Enable developer mode</a> in extensions to ensure Tampermonkey works
+              properly
+            </p>
+          {/snippet}
+          <span
+            ><strong class="font-semibold text-foreground">Install the Browser Extension.</strong>
+            First, you need to install a userscript manager extension for your browser. Tampermonkey
+            is available for
+            <a
+              href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo"
+              target="_blank">Chrome</a
+            >* or
+            <a href="https://addons.mozilla.org/firefox/addon/tampermonkey" target="_blank"
+              >Firefox</a
+            >.</span>
+        </IconListItemComplex>
+        <IconListItem>
           <span
             ><strong class="font-semibold text-foreground">Install the Userscript.</strong>
             Once you have the extension installed, you can install the userscript by clicking
@@ -83,17 +82,16 @@
               >.
             </p>
           </span>
-        </li>
+        </IconListItem>
 
-        <li class="flex gap-x-3">
-          <Icon icon="icon-park-solid:check-one" class="h-6 w-6 shrink-0" color="green" />
+        <IconListItem>
           <span
             ><strong class="font-semibold text-foreground">Play one of our maps.</strong>
             Guess a location on
             <a href="/maps">our maps</a>. On the results screen, a note will be displayed showing
             the meta that was in the round, in case you missed it.</span>
-        </li>
-      </ul>
+        </IconListItem>
+      </IconList>
 
       <p class="font-semibold">
         Feel free to join our <a href="https://discord.gg/AcXEWznYZe" target="_blank"

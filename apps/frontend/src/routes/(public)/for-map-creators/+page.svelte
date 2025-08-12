@@ -2,6 +2,7 @@
   import video from '$lib/assets/showcase.webm';
   import Icon from '@iconify/svelte';
   import { Button } from '$lib/components/ui/button';
+  import { IconList, IconListItem } from '$lib/components/ui/icon-list';
 </script>
 
 <svelte:head>
@@ -50,26 +51,22 @@
   <p class="mt-3">
     We built a platform that easily allows you to share helpful insights with the users of your map.
   </p>
-  <ul role="list" class="mt-8 max-w-xl space-y-4 text-muted-foreground">
-    <li>
-      <div class="flex gap-x-3">
-        <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
-        <span
-          ><strong class="font-semibold text-foreground">Adjust your map.</strong>
-          First, you need to tag your locations in the map-making app. Only one tag per location in
-          <span class="italic">CountryName-Any tag name</span> format.</span>
-      </div>
-    </li>
-    <li class="flex gap-x-3">
-      <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
+  <IconList class="text-muted-foreground">
+    <IconListItem>
+      <span
+        ><strong class="font-semibold text-foreground">Adjust your map.</strong>
+        First, you need to tag your locations in the map-making app. Only one tag per location in
+        <span class="italic">CountryName-Any tag name</span> format.</span>
+    </IconListItem>
+    <IconListItem>
       <span
         ><strong class="font-semibold text-foreground"
           >Upload map JSON and enter tag descriptions.</strong>
         Upload the map into our platform and fill-out the notes for each tag. What you entered is going
         to be shown to the users after a guess on location that uses this tag.
       </span>
-    </li>
-  </ul>
+    </IconListItem>
+  </IconList>
   <div class="mt-3 w-full flex justify-center">
     <Button href="/map-making"
       ><Icon icon="gis:poi-map" color="white" class="mr-3 h-4 w-4" />Open Creator Dashboard</Button>

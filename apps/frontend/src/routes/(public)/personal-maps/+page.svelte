@@ -1,5 +1,5 @@
 <script>
-  import Icon from '@iconify/svelte';
+  import { IconList, IconListItem, IconListItemComplex } from '$lib/components/ui/icon-list';
 </script>
 
 <svelte:head>
@@ -35,54 +35,48 @@
       </ul>
 
       <h2 class="mt-4 mb-[-20px]">Here's how to do it</h2>
-      <ul role="list" class="mt-8 max-w-xl space-y-4 text-sidebar-foreground">
-        <li>
-          <div class="flex gap-x-3">
-            <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
-            <span
-              ><strong class="font-semibold text-foreground">Create a GeoGuessr map.</strong>
-              First, you’ll need to create a GeoGuessr map. You can do that
-              <a href="https://www.geoguessr.com/map-maker" target="_blank">here</a>.
-            </span>
-          </div>
-        </li>
-        <li class="flex gap-x-3">
-          <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
+      <IconList>
+        <IconListItem>
+          <span
+            ><strong class="font-semibold text-foreground">Create a GeoGuessr map.</strong>
+            First, you'll need to create a GeoGuessr map. You can do that
+            <a href="https://www.geoguessr.com/map-maker" target="_blank">here</a>.
+          </span>
+        </IconListItem>
+        <IconListItem>
           <span
             ><strong class="font-semibold text-foreground">Create a personal map.</strong>
-            After creating your GeoGuessr map, copy the map ID from the URL. It’s the long string of
+            After creating your GeoGuessr map, copy the map ID from the URL. It's the long string of
             letters and numbers at the end of the address bar (e.g., after geoguessr.com/map-maker/)
             and use it to create a personal map in our
             <a href="/personal" target="_blank">portal</a>.
           </span>
-        </li>
+        </IconListItem>
 
-        <li class="flex gap-x-3">
-          <Icon icon="icon-park-solid:check-one" class="h-6 w-6 shrink-0" color="green" />
+        <IconListItem>
           <span
             ><strong class="font-semibold text-foreground"
               >Choose metas from community maps.</strong>
             Find <a href="/maps">maps</a> with the "shared" tag and select as many metas as you want.
             You can use the filter in the top right corner to show only maps with shared metas. Then,
             add them to your map.</span>
-        </li>
-        <li>
-          <div class="flex gap-x-3">
-            <Icon icon="icon-park-solid:check-one" color="green" class="h-6 w-6 shrink-0" />
-            <span
-              ><strong class="font-semibold text-foreground">Upload locations to your map.</strong>
-              Once you’ve added metas in the portal, it’s time to make your map playable. Go to the
-              <a href="https://www.geoguessr.com/me/maps" target="_blank">Your Maps</a> section on GeoGuessr,
-              select the map you used to create your personal version, and use our userscript to upload
-              locations with a single click.
-            </span>
-          </div>
-          <p class="text-muted-foreground ml-9 italic">
-            * When you upload locations for the first time, you’ll need an API key from our portal.
-            Just click the link that shows up when prompted to get it.
-          </p>
-        </li>
-      </ul>
+        </IconListItem>
+        <IconListItemComplex>
+          {#snippet subContent()}
+            <p class="text-muted-foreground ml-9 italic">
+              * When you upload locations for the first time, you'll need an API key from our
+              portal. Just click the link that shows up when prompted to get it.
+            </p>
+          {/snippet}
+          <span
+            ><strong class="font-semibold text-foreground">Upload locations to your map.</strong>
+            Once you've added metas in the portal, it's time to make your map playable. Go to the
+            <a href="https://www.geoguessr.com/me/maps" target="_blank">Your Maps</a> section on GeoGuessr,
+            select the map you used to create your personal version, and use our userscript to upload
+            locations with a single click.
+          </span>
+        </IconListItemComplex>
+      </IconList>
 
       <p class="font-semibold">
         Feel free to join our
