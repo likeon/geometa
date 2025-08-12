@@ -29,6 +29,9 @@ spec:
       checkpoint_timeout: "30min"
       temp_file_limit: "1GB"
       wal_compression: "lz4"
+      idle_in_transaction_session_timeout: "120000"  # 2 minutes - kills transactions idle for too long
+      statement_timeout: "120000"                    # 2 minutes - kills queries running too long
+      lock_timeout: "10000"                          # 10 seconds - fails fast when waiting for locks
   masterServiceAnnotations:
     tailscale.com/expose: "true"
   numberOfInstances: 3
