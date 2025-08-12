@@ -250,14 +250,12 @@ Czechia - Arrow Signs" />
                   label="Note"
                   tooltipContent="This note is displayed in the meta info and uses a Markdown-style text editor.
           Click 'Preview' to see how it will look." />
-                <div class="custom-note-editor">
-                  <MarkdownEditor
-                    bind:value={$formMetaData.note}
-                    height="15.3vh"
-                    minHeight="108px"
-                    maxHeight="144px"
-                    {...props} />
-                </div>
+                <MarkdownEditor
+                  bind:value={$formMetaData.note}
+                  height="15.3vh"
+                  minHeight="108px"
+                  maxHeight="144px"
+                  {...props} />
               {/snippet}
             </Form.Control>
             <Form.FieldErrors />
@@ -284,14 +282,12 @@ Czechia - Arrow Signs" />
                 <FormLabelWithTooltip
                   label="Footer"
                   tooltipContent="This footer will appear below the meta note. If a footer is set for the map, this meta footer will still take priority and be displayed instead." />
-                <div class="custom-footer-editor">
-                  <MarkdownEditor
-                    bind:value={$formMetaData.footer}
-                    height="5.6vh"
-                    minHeight="40px"
-                    maxHeight="50px"
-                    {...props} />
-                </div>
+                <MarkdownEditor
+                  bind:value={$formMetaData.footer}
+                  height="5.6vh"
+                  minHeight="40px"
+                  maxHeight="50px"
+                  {...props} />
               {/snippet}
             </Form.Control>
             <Form.FieldErrors />
