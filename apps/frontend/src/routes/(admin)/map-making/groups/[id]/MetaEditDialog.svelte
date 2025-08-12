@@ -6,8 +6,7 @@
   import * as Dialog from '$lib/components/ui/dialog/index';
   import type { PageData } from './$types';
   import * as Tabs from '$lib/components/ui/tabs/index';
-  import { Carta, MarkdownEditor } from 'carta-md';
-  import 'carta-md/default.css';
+  import MarkdownEditor from '$lib/components/MarkdownEditor.svelte';
   import {
     insertMetasSchema,
     insertMetasDefaultSchema,
@@ -73,8 +72,6 @@
     submit,
     submitting
   } = formMeta;
-  const cartaMeta = new Carta();
-  const cartaFooter = new Carta();
   type MetaFormDataType = Infer<InsertMetasSchema>;
   let savedForm: MetaFormDataType | null = null;
   let currentTab = $state('info');
@@ -253,12 +250,12 @@ Czechia - Arrow Signs" />
                   label="Note"
                   tooltipContent="This note is displayed in the meta info and uses a Markdown-style text editor.
           Click 'Preview' to see how it will look." />
-                <div class="carta-note-editor">
+                <div class="custom-note-editor">
                   <MarkdownEditor
-                    carta={cartaMeta}
-                    mode="tabs"
-                    theme="test"
                     bind:value={$formMetaData.note}
+                    height="15.3vh"
+                    minHeight="108px"
+                    maxHeight="144px"
                     {...props} />
                 </div>
               {/snippet}
@@ -287,12 +284,12 @@ Czechia - Arrow Signs" />
                 <FormLabelWithTooltip
                   label="Footer"
                   tooltipContent="This footer will appear below the meta note. If a footer is set for the map, this meta footer will still take priority and be displayed instead." />
-                <div class="carta-footer-editor">
+                <div class="custom-footer-editor">
                   <MarkdownEditor
-                    carta={cartaFooter}
-                    mode="tabs"
-                    theme="test"
                     bind:value={$formMetaData.footer}
+                    height="5.6vh"
+                    minHeight="40px"
+                    maxHeight="50px"
                     {...props} />
                 </div>
               {/snippet}
@@ -358,44 +355,3 @@ Czechia - Arrow Signs" />
     confirmCallback = null;
   }} />
 
-<style>
-  :global(.carta-note-editor .carta-input),
-  :global(.carta-note-editor .carta-renderer) {
-    height: 17vh !important;
-    max-height: 160px !important;
-    overflow-y: auto !important;
-  }
-
-  :global(.carta-footer-editor .carta-input),
-  :global(.carta-footer-editor .carta-renderer) {
-    height: 5.6vh !important;
-    max-height: 50px !important;
-    overflow-y: auto !important;
-  }
-
-  /* Minimum heights for very small screens */
-  @media (max-height: 600px) {
-    :global(.carta-note-editor .carta-input),
-    :global(.carta-note-editor .carta-renderer) {
-      height: 120px !important;
-    }
-
-    :global(.carta-footer-editor .carta-input),
-    :global(.carta-footer-editor .carta-renderer) {
-      height: 40px !important;
-    }
-  }
-
-  /* Maximum heights for very large screens */
-  @media (min-height: 1200px) {
-    :global(.carta-note-editor .carta-input),
-    :global(.carta-note-editor .carta-renderer) {
-      height: 200px !important;
-    }
-
-    :global(.carta-footer-editor .carta-input),
-    :global(.carta-footer-editor .carta-renderer) {
-      height: 60px !important;
-    }
-  }
-</style>

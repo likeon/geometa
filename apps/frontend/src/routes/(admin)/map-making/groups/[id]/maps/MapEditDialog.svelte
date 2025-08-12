@@ -9,8 +9,7 @@
   import { Checkbox } from '$lib/components/ui/checkbox';
   import * as RadioGroup from '$lib/components/ui/radio-group';
   import FilterManager from './FilterManager.svelte';
-  import { Carta, MarkdownEditor } from 'carta-md';
-  import 'carta-md/default.css';
+  import MarkdownEditor from '$lib/components/MarkdownEditor.svelte';
   import { insertMapsSchema, type InsertMapsSchema } from '$lib/form-schema';
   import FormLabelWithTooltip from '$lib/components/FormLabelWithTooltip.svelte';
   import MultiSelect from '$lib/components/MultiSelect.svelte';
@@ -45,7 +44,6 @@
   });
 
   const { form: formMapData, enhance: enhanceMap, errors: errorsMap } = formMap;
-  const carta = new Carta();
 
   function nullifyForm() {
     formMapData.update(
@@ -191,10 +189,8 @@
               label="Footer"
               tooltipContent="This footer will appear below the meta note. However, if a footer is already set for the meta itself or if the meta is marked as Plonkit, that footer will take priority and be displayed instead." />
             <MarkdownEditor
-              {carta}
-              mode="tabs"
-              theme="test"
               bind:value={$formMapData.footer}
+              height="120px"
               {...props} />
           {/snippet}
         </Form.Control>
