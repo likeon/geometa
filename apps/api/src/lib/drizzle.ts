@@ -4,6 +4,8 @@ import { drizzle } from 'drizzle-orm/bun-sql';
 import { withReplicas } from 'drizzle-orm/pg-core';
 import * as schema from './db/schema';
 
+const poolSize = 10;
+
 function createDbInstance() {
   // without replica db has different type
   // so have to specify main db as replica for local development
@@ -19,11 +21,11 @@ function createDbInstance() {
     databaseURL = 'postgresql://postgres:postgres@localhost/geometa';
     replicaURL = databaseURL;
   }
-  const leader = drizzle(new SQL(databaseURL, { max: 5 }), {
+  const leader = drizzle(new SQL(databaseURL, { max: poolSize }), {
     schema,
     logger: process.env.DRIZZLE_LOGGER === 'true',
   });
-  const replica = drizzle(new SQL(replicaURL, { max: 5 }), {
+  const replica = drizzle(new SQL(replicaURL, { max: poolSize }), {
     schema,
     logger: process.env.DRIZZLE_LOGGER === 'true',
   });

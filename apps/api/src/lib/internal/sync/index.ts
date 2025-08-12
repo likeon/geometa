@@ -73,7 +73,7 @@ export async function syncMapGroup(group: {
         ;
     `);
     }
-    tx.delete(syncedMetas).where(
+    await tx.delete(syncedMetas).where(
       sql`${syncedMetas.mapGroupId} = ${group.id} AND
         ${syncedMetas.metaId} NOT IN (SELECT id FROM ${metas} WHERE ${metas.mapGroupId} = ${group.id})`,
     );

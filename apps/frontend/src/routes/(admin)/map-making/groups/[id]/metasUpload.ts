@@ -92,8 +92,7 @@ export async function uploadMetas(
         for (const level of value) {
           const levelId = levelIdByName.get(level);
           if (!levelId) {
-            tx.rollback();
-            // return setError(form, 'file', `Level with name="${level}" not found`);
+            throw new Error(`Level with name="${level}" not found`);
           }
           metaLevelsInsertValues.push({ metaId: metaId!, levelId: levelId! });
         }

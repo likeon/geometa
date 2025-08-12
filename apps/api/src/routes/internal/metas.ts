@@ -47,18 +47,20 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
         avifFile.buffer as ArrayBuffer,
         `${meta.mapGroupId}/${imageName}`,
       );
-      await db
-        .insert(metaImages)
-        .values({ metaId: params.id, image_url: imageUrl })
-        .returning({
-          id: metaImages.id,
-          metaId: metaImages.metaId,
-          image_url: metaImages.image_url,
-        });
-      await db
-        .update(metas)
-        .set({ modifiedAt: Math.floor(Date.now() / 1000) })
-        .where(eq(metas.id, params.id));
+      await db.$primary.transaction(async (tx) => {
+        await tx
+          .insert(metaImages)
+          .values({ metaId: params.id, image_url: imageUrl })
+          .returning({
+            id: metaImages.id,
+            metaId: metaImages.metaId,
+            image_url: metaImages.image_url,
+          });
+        await tx
+          .update(metas)
+          .set({ modifiedAt: Math.floor(Date.now() / 1000) })
+          .where(eq(metas.id, params.id));
+      });
       return {
         imageUrl: imageUrl,
       };
@@ -154,12 +156,12 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
               throw err;
             }
           }
-        });
 
-        await db
-          .update(metas)
-          .set({ modifiedAt: Math.floor(Date.now() / 1000) })
-          .where(eq(metas.id, params.id));
+          await tx
+            .update(metas)
+            .set({ modifiedAt: Math.floor(Date.now() / 1000) })
+            .where(eq(metas.id, params.id));
+        });
 
         return status(200, { message: 'Image order updated successfully.' });
       } catch (e: any) {
