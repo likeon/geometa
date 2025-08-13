@@ -670,14 +670,16 @@ export const actions = {
         }
 
         // Step 3: Insert tags into metas table
-        const metaInsertValues = Array.from(usedTags).map((tagName) => ({
-          mapGroupId: groupId,
-          tagName: tagName,
-          name: '',
-          note: '',
-          modifiedAt: currentTimestamp
-        }));
-        await trx.insert(metas).values(metaInsertValues).onConflictDoNothing();
+        if (usedTags.size > 0) {
+          const metaInsertValues = Array.from(usedTags).map((tagName) => ({
+            mapGroupId: groupId,
+            tagName: tagName,
+            name: '',
+            note: '',
+            modifiedAt: currentTimestamp
+          }));
+          await trx.insert(metas).values(metaInsertValues).onConflictDoNothing();
+        }
       });
       return message(form, { numberOfLocations: upsertValues.length });
     } catch (error) {
