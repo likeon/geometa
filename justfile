@@ -4,5 +4,5 @@ default: run
 
 install:
   mise upgrade
-  cd apps/frontend && ni
-  cd apps/api && ni
+  cd apps/frontend && npm i --locked
+  cd apps/api && bun i --locked
