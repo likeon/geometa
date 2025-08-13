@@ -1,7 +1,7 @@
-import { SQL } from 'bun';
 import { type SQLWrapper, sql } from 'drizzle-orm';
-import { drizzle } from 'drizzle-orm/bun-sql';
 import { withReplicas } from 'drizzle-orm/pg-core';
+import { drizzle } from 'drizzle-orm/postgres-js';
+import postgres from 'postgres';
 import * as schema from './db/schema';
 
 const poolSize = 10;
@@ -21,11 +21,11 @@ function createDbInstance() {
     databaseURL = 'postgresql://postgres:postgres@localhost/geometa';
     replicaURL = databaseURL;
   }
-  const leader = drizzle(new SQL(databaseURL, { max: poolSize }), {
+  const leader = drizzle(postgres(databaseURL, { max: poolSize }), {
     schema,
     logger: process.env.DRIZZLE_LOGGER === 'true',
   });
-  const replica = drizzle(new SQL(replicaURL, { max: poolSize }), {
+  const replica = drizzle(postgres(replicaURL, { max: poolSize }), {
     schema,
     logger: process.env.DRIZZLE_LOGGER === 'true',
   });

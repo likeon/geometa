@@ -1,5 +1,5 @@
 import { db } from '@api/lib/drizzle';
-import { migrate } from 'drizzle-orm/bun-sql/migrator';
+import { migrate } from 'drizzle-orm/postgres-js/migrator';
 
 export const runMigrate = async () => {
   console.log('⏳ Running migrations...');
