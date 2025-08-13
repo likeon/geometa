@@ -40,8 +40,8 @@ export async function syncMapGroup(group: {
     const metaValuesSql = sql.join(
       metasToSync.map((meta) => {
         return sql`(
-          ${meta.id},
-          ${meta.mapGroupId},
+          ${meta.id}::bigint,
+          ${meta.mapGroupId}::bigint,
           ${meta.name},
           ${meta.noteHtml},
           ${meta.noteFromPlonkit},
