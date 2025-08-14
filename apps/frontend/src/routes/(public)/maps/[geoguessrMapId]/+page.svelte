@@ -247,7 +247,8 @@
           <div class="space-y-1">
             <h1 class="text-xl font-bold tracking-tight">{data.mapName}</h1>
             <div class="flex items-center gap-2 text-sm">
-              <span class="text-muted-foreground">{data.metaList.length} metas · {data.totalLocations} locations</span>
+              <span class="text-muted-foreground"
+                >{data.metaList.length} metas · {data.totalLocations} locations</span>
               {#if data.mapAuthors}
                 <span class="text-muted-foreground">·</span>
                 <span class="text-muted-foreground"
@@ -936,4 +937,3 @@
     </Dialog.Footer>
   </Dialog.Content>
 </Dialog.Root>
-

@@ -53,14 +53,18 @@
       e.preventDefault();
       focusFirstInput();
     }}
-    onEscapeKeydown={onBeforeClose ? (e) => {
-      e.preventDefault();
-      onBeforeClose();
-    } : undefined}
-    onInteractOutside={onBeforeClose ? (e) => {
-      e.preventDefault();
-      onBeforeClose();
-    } : undefined}
+    onEscapeKeydown={onBeforeClose
+      ? (e) => {
+          e.preventDefault();
+          onBeforeClose();
+        }
+      : undefined}
+    onInteractOutside={onBeforeClose
+      ? (e) => {
+          e.preventDefault();
+          onBeforeClose();
+        }
+      : undefined}
     {...restProps}>
     <div bind:this={contentElement} class="contents">
       {@render children?.()}

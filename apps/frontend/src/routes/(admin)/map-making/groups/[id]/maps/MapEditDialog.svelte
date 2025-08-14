@@ -188,10 +188,7 @@
             <FormLabelWithTooltip
               label="Footer"
               tooltipContent="This footer will appear below the meta note. However, if a footer is already set for the meta itself or if the meta is marked as Plonkit, that footer will take priority and be displayed instead." />
-            <MarkdownEditor
-              bind:value={$formMapData.footer}
-              height="120px"
-              {...props} />
+            <MarkdownEditor bind:value={$formMapData.footer} height="120px" {...props} />
           {/snippet}
         </Form.Control>
         <Form.FieldErrors />

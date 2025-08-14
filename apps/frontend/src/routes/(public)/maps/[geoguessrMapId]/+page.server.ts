@@ -45,12 +45,12 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     // TODO: if map not found error 404, if something else 500
     error(500);
   }
-  
+
   const totalLocations = metaList.reduce((sum, meta) => {
     const count = parseInt(String(meta.locationsCount), 10) || 0;
     return sum + count;
   }, 0);
-  
+
   return {
     metaList,
     mapName: map.name,

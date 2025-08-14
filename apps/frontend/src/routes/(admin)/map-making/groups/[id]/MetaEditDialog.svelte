@@ -350,4 +350,3 @@ Czechia - Arrow Signs" />
   onCancel={() => {
     confirmCallback = null;
   }} />
-

@@ -53,11 +53,11 @@
   }
 
   /* Task list styles */
-  .prose ul li:has(input[type="checkbox"]) {
+  .prose ul li:has(input[type='checkbox']) {
     @apply list-none -ml-6 pl-6;
   }
 
-  .prose ul li input[type="checkbox"] {
+  .prose ul li input[type='checkbox'] {
     @apply mr-2;
   }
 }
