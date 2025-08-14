@@ -11,4 +11,5 @@
 
 .env
 .env.local
+.envrc.ports
 .decrypted*

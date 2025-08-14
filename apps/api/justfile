@@ -10,6 +10,12 @@ db-psql:
 
 alias db-shell := db-psql
 
+pgcli:
+  uvx pgcli postgresql://postgres:postgres@localhost:$TILT_PORT_POSTGRES/geometa
+
+pgcli-prod:
+  uvx pgcli $PROD_POSTRGRES_URL
+
 environment := "local"
 db-dump:
   ./utils/db/backup.sh {{environment}}
