@@ -1,6 +1,12 @@
 <script>
   import geoPin from '$lib/assets/GeoGuessr-Pin.png?enhanced';
-  import { IconList, IconListItem, IconListItemComplex } from '$lib/components/ui/icon-list';
+  import { Card, CardContent } from '$lib/components/ui/card';
+  import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
+  import Icon from '@iconify/svelte';
+  import ChromeInstallation from './ChromeInstallation.svelte';
+  import FirefoxInstallation from './FirefoxInstallation.svelte';
+  import AndroidInstallation from './AndroidInstallation.svelte';
+  import IosInstallation from './IosInstallation.svelte';
 </script>
 
 <svelte:head>
@@ -25,14 +31,23 @@
         While there might be other maps like this available, ours include a script that shows a note
         about the location after you make your guess in GeoGuessr, explaining each round and
         highlighting the clues you might have missed that could help you identify the country. The
-        map is designed for No Move because it's skill itself to find clues and it's good habbit to
-        learn to check google car, poles, roadlines etc.
+        maps are designed for No Move because it's skill itself to find clues and it's good habbit
+        to learn to check google car, poles, roadlines etc.
       </p>
       <p></p>
       <div class="flex flex-col items-center justify-center text-center">
         <div class="flex items-center space-x-2">
           <enhanced:img src={geoPin} class="h-6 sm:h-9 w-auto" alt="Geoguessr pin" />
           <a href="/maps" class="font-bold text-3xl">Our GeoGuessr maps</a>
+        </div>
+        <div class="flex items-center space-x-2 mt-5">
+          <Icon icon="mdi:github" class="h-5 w-5 text-gray-600 dark:text-gray-400" />
+          <a
+            href="https://github.com/likeon/geometa"
+            target="_blank"
+            class="text-2xl font-medium text-gray-800 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 transition-colors">
+            Learnable Meta on GitHub - entirely Open Source
+          </a>
         </div>
       </div>
       <h2 class="mt-4 mb-[-10px]">How to use</h2>
@@ -43,59 +58,55 @@
         Training Mode, you might already be familiar with it. But if this is your first time hearing
         about it, don't worry—it's easy to set up.
       </p>
-      <h4 class="mt-4 mb-[-20px]">Here's how to do it</h4>
-      <IconList>
-        <IconListItemComplex>
-          {#snippet subContent()}
-            <p class="text-muted-foreground ml-9 italic">
-              * - Chrome: <a
-                href="https://www.tampermonkey.net/faq.php?locale=en#Q209"
-                target="_blank">Enable developer mode</a> in extensions to ensure Tampermonkey works
-              properly
-            </p>
-          {/snippet}
-          <span
-            ><strong class="font-semibold text-foreground">Install the Browser Extension.</strong>
-            First, you need to install a userscript manager extension for your browser. Tampermonkey
-            is available for
-            <a
-              href="https://chrome.google.com/webstore/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo"
-              target="_blank">Chrome</a
-            >* or
-            <a href="https://addons.mozilla.org/firefox/addon/tampermonkey" target="_blank"
-              >Firefox</a
-            >.</span>
-        </IconListItemComplex>
-        <IconListItem>
-          <span
-            ><strong class="font-semibold text-foreground">Install the Userscript.</strong>
-            Once you have the extension installed, you can install the userscript by clicking
-            <a
-              href="https://github.com/likeon/geometa/raw/main/dist/geometa.user.js"
-              target="_blank">this link</a
-            >. Make sure to open new window with geoguessr after installing the script for first
-            time.
-            <p>
-              The userscript is open-source and <a
-                href="https://github.com/likeon/geometa"
-                target="_blank">available on GitHub</a
-              >.
-            </p>
-          </span>
-        </IconListItem>
+      <h4 class="mt-4 mb-2">Here's how to do it</h4>
 
-        <IconListItem>
-          <span
-            ><strong class="font-semibold text-foreground">Play one of our maps.</strong>
-            Guess a location on
-            <a href="/maps">our maps</a>. On the results screen, a note will be displayed showing
-            the meta that was in the round, in case you missed it.</span>
-        </IconListItem>
-      </IconList>
+      <Tabs value="chrome" class="w-full mt-4">
+        <TabsList class="grid w-full grid-cols-4">
+          <TabsTrigger value="chrome">Chrome</TabsTrigger>
+          <TabsTrigger value="firefox">Firefox</TabsTrigger>
+          <TabsTrigger value="android">Android</TabsTrigger>
+          <TabsTrigger value="ios">iOS</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="chrome" class="mt-4">
+          <Card>
+            <CardContent class="pt-6">
+              <ChromeInstallation />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="firefox" class="mt-4">
+          <Card>
+            <CardContent class="pt-6">
+              <FirefoxInstallation />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="android" class="mt-4">
+          <Card>
+            <CardContent class="pt-6">
+              <AndroidInstallation />
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="ios" class="mt-4">
+          <Card>
+            <CardContent class="pt-6">
+              <IosInstallation />
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
 
       <p class="font-semibold">
         Feel free to join our <a href="https://discord.gg/AcXEWznYZe" target="_blank"
-          >discord server</a> if you have any questions or feedback.
+          >Discord server</a>
+        if you have any questions or feedback. For technical issues (e.g., userscript problems), please
+        use the
+        <code class="text-sm bg-gray-100 dark:bg-gray-800 px-1 py-0.5 rounded">#help-desk</code> channel.
       </p>
     </div>
     <h3 class="mt-4">Credits</h3>
