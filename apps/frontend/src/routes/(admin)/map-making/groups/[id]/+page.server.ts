@@ -1,4 +1,4 @@
-import { and, asc, eq, isNull, lt, not, or, sql, TransactionRollbackError } from 'drizzle-orm';
+import { and, asc, eq, isNull, lt, not, or, sql } from 'drizzle-orm';
 import { DrizzleQueryError } from 'drizzle-orm/errors';
 import {
   levels,
@@ -764,10 +764,16 @@ export const actions = {
     }
 
     try {
-      await uploadMetas(locals.db, groupId, validationResult, form.data.partialUpload);
+      await uploadMetas(
+        locals.db,
+        groupId,
+        validationResult,
+        form.data.partialUpload,
+        form.data.autoCreateLevels
+      );
     } catch (error) {
-      if (error instanceof TransactionRollbackError) {
-        return setError(form, 'file', 'Level not found - precreate all used levels');
+      if (error instanceof Error && error.message.startsWith('Missing levels:')) {
+        return setError(form, 'file', error.message);
       } else {
         throw error;
       }

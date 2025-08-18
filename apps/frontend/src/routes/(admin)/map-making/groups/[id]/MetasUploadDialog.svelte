@@ -137,6 +137,23 @@
           <Form.FieldErrors />
         </Form.Field>
 
+        <Form.Field {form} name="autoCreateLevels">
+          <Form.Control>
+            {#snippet children({ props })}
+              <div class="flex items-center space-x-2">
+                <Checkbox
+                  {...props}
+                  bind:checked={$formData.autoCreateLevels}
+                  name="autoCreateLevels" />
+                <Label for={props.id} class="text-sm font-normal cursor-pointer">
+                  Auto-create levels if they don't exist
+                </Label>
+              </div>
+            {/snippet}
+          </Form.Control>
+          <Form.FieldErrors />
+        </Form.Field>
+
         <Form.Field {form} name="file">
           <Form.Control>
             {#snippet children({ props })}

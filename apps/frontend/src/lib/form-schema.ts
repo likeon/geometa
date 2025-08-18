@@ -51,7 +51,8 @@ export type MetasUploadContentSchemaSafeParse = ReturnType<
 >;
 export const metasUploadSchema = z.object({
   file: z.instanceof(File, { message: 'Please upload a file.' }),
-  partialUpload: z.boolean().default(true)
+  partialUpload: z.boolean().default(true),
+  autoCreateLevels: z.boolean().default(true)
 });
 export type MetasUploadSchema = typeof metasUploadSchema;
 

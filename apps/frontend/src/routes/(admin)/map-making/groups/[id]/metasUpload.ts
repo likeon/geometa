@@ -9,7 +9,8 @@ export async function uploadMetas(
   db: DB,
   groupId: number,
   validationResult: MetasUploadContentSchemaSafeParse,
-  partialUpload: boolean
+  partialUpload: boolean,
+  autoCreateLevels: boolean
 ) {
   await db.transaction(async (tx) => {
     const currentTimestamp = Math.floor(Date.now() / 1000);
@@ -85,16 +86,65 @@ export async function uploadMetas(
     const metaTagNameToId: Map<string, number> = new Map(
       metasInsertResult.map((item) => [item.tagName, item.id])
     );
+
+    // Auto-create missing levels if enabled
+    if (autoCreateLevels && levelsByTagName.size > 0) {
+      // Collect all unique level names from the upload data
+      const allLevelNames = new Set<string>();
+      for (const levelNameArray of levelsByTagName.values()) {
+        levelNameArray.forEach((levelName) => allLevelNames.add(levelName));
+      }
+
+      // Find missing levels
+      const missingLevelNames = Array.from(allLevelNames).filter(
+        (levelName) => !levelIdByName.has(levelName)
+      );
+
+      // Create missing levels
+      if (missingLevelNames.length > 0) {
+        const newLevelsData = missingLevelNames.map((levelName) => ({
+          name: levelName,
+          mapGroupId: groupId
+        }));
+
+        const insertedLevels = await tx
+          .insert(levels)
+          .values(newLevelsData)
+          .returning({ id: levels.id, name: levels.name });
+
+        // Update the levelIdByName map with newly created levels
+        insertedLevels.forEach((level) => {
+          levelIdByName.set(level.name, level.id);
+        });
+      }
+    }
+
     if (levelsByTagName.size) {
+      // Check for missing levels first if auto-create is disabled
+      if (!autoCreateLevels) {
+        const missingLevels = new Set<string>();
+        for (const levelNameArray of levelsByTagName.values()) {
+          levelNameArray.forEach((levelName) => {
+            if (!levelIdByName.has(levelName)) {
+              missingLevels.add(levelName);
+            }
+          });
+        }
+
+        if (missingLevels.size > 0) {
+          const missingLevelsList = Array.from(missingLevels).join(', ');
+          throw new Error(
+            `Missing levels: ${missingLevelsList}. Enable auto-create levels option or create these levels manually first.`
+          );
+        }
+      }
+
       const metaLevelsInsertValues: { metaId: number; levelId: number }[] = [];
       for (const [tagName, value] of levelsByTagName.entries()) {
         const metaId = metaTagNameToId.get(tagName);
         for (const level of value) {
-          const levelId = levelIdByName.get(level);
-          if (!levelId) {
-            throw new Error(`Level with name="${level}" not found`);
-          }
-          metaLevelsInsertValues.push({ metaId: metaId!, levelId: levelId! });
+          const levelId = levelIdByName.get(level)!;
+          metaLevelsInsertValues.push({ metaId: metaId!, levelId: levelId });
         }
       }
       let updatedLevels: { id: number }[];
