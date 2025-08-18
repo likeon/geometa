@@ -1,4 +1,5 @@
 import { and, asc, eq, isNull, lt, not, or, sql, TransactionRollbackError } from 'drizzle-orm';
+import { DrizzleQueryError } from 'drizzle-orm/errors';
 import {
   levels,
   mapGroupLocations,
@@ -188,18 +189,48 @@ export const actions = {
     let metaId;
 
     if (id === undefined) {
-      const insertResult = await locals.db
-        .insert(metas)
-        .values({ ...form.data, noteHtml, footerHtml: footerHtml, modifiedAt: currentTimestamp })
-        .returning({ insertedId: metas.id });
-      metaId = insertResult[0].insertedId;
+      try {
+        const insertResult = await locals.db
+          .insert(metas)
+          .values({ ...form.data, noteHtml, footerHtml: footerHtml, modifiedAt: currentTimestamp })
+          .returning({ insertedId: metas.id });
+        metaId = insertResult[0].insertedId;
+      } catch (error) {
+        // For DrizzleQueryError, the underlying PostgreSQL error is in the cause property
+        if (error instanceof DrizzleQueryError) {
+          const pgError = error.cause as { constraint_name?: string };
+          if (pgError?.constraint_name === 'metas_unique') {
+            return setError(
+              form,
+              'tagName',
+              'A meta with this tag name already exists in this map group'
+            );
+          }
+        }
+        throw error;
+      }
     } else {
       const savedData = await locals.db.query.metas.findFirst({ where: eq(metas.id, id) });
       await ensurePermissions(locals.db, locals.user?.id, savedData?.mapGroupId);
-      await locals.db
-        .update(metas)
-        .set({ ...dataNoId, noteHtml, footerHtml, modifiedAt: currentTimestamp })
-        .where(eq(metas.id, id));
+      try {
+        await locals.db
+          .update(metas)
+          .set({ ...dataNoId, noteHtml, footerHtml, modifiedAt: currentTimestamp })
+          .where(eq(metas.id, id));
+      } catch (error) {
+        // For DrizzleQueryError, the underlying PostgreSQL error is in the cause property
+        if (error instanceof DrizzleQueryError) {
+          const pgError = error.cause as { constraint_name?: string };
+          if (pgError?.constraint_name === 'metas_unique') {
+            return setError(
+              form,
+              'tagName',
+              'A meta with this tag name already exists in this map group'
+            );
+          }
+        }
+        throw error;
+      }
       metaId = id;
     }
 
