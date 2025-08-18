@@ -596,7 +596,16 @@ export const actions = {
     if (!form.valid) {
       return fail(400, withFiles({ form }));
     }
-    const jsonData = await extractJsonData(form.data.file);
+    let jsonData;
+    try {
+      jsonData = await extractJsonData(form.data.file);
+    } catch (_error) {
+      return setError(
+        form,
+        'file',
+        'Invalid JSON file format. Please check for unescaped special characters.'
+      );
+    }
     const validationResult = mapJsonSchema.safeParse(jsonData);
 
     if (!validationResult.success) {
@@ -737,7 +746,16 @@ export const actions = {
     if (!form.valid) {
       return fail(400, withFiles({ form }));
     }
-    const jsonData = await extractJsonData(form.data.file);
+    let jsonData;
+    try {
+      jsonData = await extractJsonData(form.data.file);
+    } catch (_error) {
+      return setError(
+        form,
+        'file',
+        'Invalid JSON file format. Please check for unescaped special characters.'
+      );
+    }
     const validationResult = metasUploadContentSchema.safeParse(jsonData);
 
     if (!validationResult.success) {
