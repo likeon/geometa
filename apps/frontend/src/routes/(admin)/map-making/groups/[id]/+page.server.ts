@@ -73,6 +73,19 @@ const mapJsonSchema = z.object({
       })
     })
     .array()
+    .superRefine((coordinates, ctx) => {
+      const panoIds = coordinates.map((coord) => coord.panoId);
+      const uniquePanoIds = new Set(panoIds);
+
+      if (panoIds.length !== uniquePanoIds.size) {
+        const duplicateCount = panoIds.length - uniquePanoIds.size;
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['duplicates'],
+          message: `Duplicate locations found (${duplicateCount} total). Use <a href="https://map-making.app/" target="_blank" class="underline hover:text-primary">map-making.app</a> to find duplicates and remove them.`
+        });
+      }
+    })
 });
 type UpsertValue = {
   mapGroupId: number;
@@ -611,19 +624,49 @@ export const actions = {
     if (!validationResult.success) {
       const processedErrors = validationResult.error.issues.map((issue) => {
         let message: string = issue.message;
+
         if (issue.path.includes('tags')) {
-          if (issue.code === 'too_small') {
-            message = "Location doesn't have a tag";
+          // Extract panoId from the location object using the path
+          const locationIndex = issue.path[1] as number; // customCoordinates[index]
+          const location = jsonData.customCoordinates?.[locationIndex];
+          const panoId = location?.panoId || location?.extra?.panoId || null;
+          const locationNumber = locationIndex + 1;
+          if (issue.code === 'too_small' || issue.message === 'Required') {
+            message = `doesn't have a tag`;
           } else if (issue.code === 'too_big') {
-            message = 'Location has more than one tag';
+            message = `has more than one tag`;
           }
+
+          // Return HTML with link if panoId exists
+          if (panoId) {
+            const sanitizedPanoId = panoId.replace(/[^a-zA-Z0-9_-]/g, '');
+            return `<a href="https://maps.google.com/maps?q=&layer=c&panoid=${encodeURIComponent(sanitizedPanoId)}" target="_blank" class="underline hover:text-primary">Location ${locationNumber}</a> ${message}`;
+          } else {
+            return `Location ${locationNumber} ${message}`;
+          }
+        } else if (issue.path.includes('duplicates')) {
+          return message;
         } else if (
           issue.path.includes('panoId') &&
           issue.message === 'Expected string, received null'
         ) {
-          message = "Location doesn't have panoId";
+          // Handle missing panoId case
+          const locationIndex = issue.path[1] as number; // customCoordinates[index]
+          const location = jsonData.customCoordinates?.[locationIndex];
+          const extraPanoId = location?.extra?.panoId || null;
+          const locationNumber = locationIndex + 1; // 1-based numbering
+          message = `doesn't have set panoId`;
+
+          // Return HTML with link if extra panoId exists
+          if (extraPanoId) {
+            const sanitizedPanoId = extraPanoId.replace(/[^a-zA-Z0-9_-]/g, '');
+            return `<a href="https://maps.google.com/maps?q=&layer=c&panoid=${encodeURIComponent(sanitizedPanoId)}" target="_blank" class="underline hover:text-primary">Location ${locationNumber}</a> ${message}`;
+          } else {
+            return `Location ${locationNumber} ${message}`;
+          }
         }
-        return `${issue.path.join(' > ')}: ${message}`;
+
+        return message;
       });
       return setError(form, 'file', processedErrors);
     }

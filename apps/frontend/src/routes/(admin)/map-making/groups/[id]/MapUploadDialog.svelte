@@ -157,7 +157,17 @@
               </div>
             {/snippet}
           </Form.Control>
-          <Form.FieldErrors />
+          <Form.FieldErrors>
+            {#snippet children({ errors })}
+              {#if errors && errors.length > 0}
+                <div class="space-y-1 text-sm text-destructive">
+                  {#each errors as error, index (index)}
+                    <p>{@html error}</p>
+                  {/each}
+                </div>
+              {/if}
+            {/snippet}
+          </Form.FieldErrors>
         </Form.Field>
       </form>
 
