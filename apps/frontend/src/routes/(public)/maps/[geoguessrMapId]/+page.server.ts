@@ -21,7 +21,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     });
 
     if (apiError) {
-      error(500);
+      error(500, 'Failed to load personal maps');
     }
 
     personalMaps = data.map(({ id, name, metasCount }) => ({ id, name, metasCount }));
@@ -30,7 +30,13 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   const { data: map, error: mapApiError } = await api.internal.maps({ geoguessrId }).get();
 
   if (mapApiError) {
-    error(500);
+    switch (mapApiError.status) {
+      case 404:
+        error(404, 'Map not found');
+        break;
+      default:
+        error(500, 'Failed to load map');
+    }
   }
 
   // if (map.isPersonal) {
@@ -42,8 +48,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
     .metas({ mapId: map.id })
     .get();
   if (apiError) {
-    // TODO: if map not found error 404, if something else 500
-    error(500);
+    error(500, 'Failed to load map metas');
   }
 
   const totalLocations = metaList.reduce((sum, meta) => {

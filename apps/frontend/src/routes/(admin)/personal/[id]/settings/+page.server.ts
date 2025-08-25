@@ -14,14 +14,15 @@ export const load = async ({ params, locals }) => {
       'x-api-user-id': locals.user!.id
     }
   });
-  if (apiError)
+  if (apiError) {
     switch (apiError.status) {
       case 404:
         error(404, 'Map not found');
         break;
       default:
-        throw apiError.value;
+        error(500, 'Something went wrong.');
     }
+  }
 
   return { id, geoguessrId: data.geoguessrId, mapName: data.name };
 };
