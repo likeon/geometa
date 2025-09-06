@@ -141,6 +141,9 @@ export const userscriptRouter = new Elysia({
         .where(eq(maps.geoguessrId, geoguessrId));
 
       const [data] = results;
+      if (!data) {
+        return status(404);
+      }
       if (
         data.userApiTokens.length === 0 ||
         !data.userApiTokens.includes(bearer)
