@@ -6,6 +6,7 @@ import {
   syncedLocations,
   syncedMapMetas,
   syncedMetas,
+  users,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
@@ -154,6 +155,59 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
   .get('/', async () => {
     return db.$primary.select().from(maps);
   })
+  .get(
+    '/mapgroup/:geoguessrId',
+    async ({ params: { geoguessrId }, status, request: { headers } }) => {
+      const userId = headers.get('x-api-user-id');
+      if (!userId) {
+        return status(401, 'Unauthorized');
+      }
+
+      // Check if user is superadmin
+      const user = await db.$primary.query.users.findFirst({
+        where: eq(users.id, userId),
+      });
+
+      if (!user || !user.isSuperadmin) {
+        return status(403, 'Forbidden: Admin access required');
+      }
+
+      const map = await db.$primary.query.maps.findFirst({
+        where: eq(maps.geoguessrId, geoguessrId),
+        with: {
+          mapGroup: {
+            with: {
+              permissions: {
+                with: {
+                  user: true,
+                },
+              },
+            },
+          },
+        },
+      });
+
+      if (!map) {
+        return status(404, 'Map not found');
+      }
+
+      if (!map.mapGroup) {
+        return status(404, 'Map has no associated mapgroup');
+      }
+
+      const owners = map.mapGroup.permissions
+        .map((p) => p.user.username)
+        .join(', ');
+
+      return {
+        ...map.mapGroup,
+        owners,
+      };
+    },
+    {
+      params: t.Object({ geoguessrId: t.String() }),
+    },
+  )
   .get(
     '/metas/:mapId',
     async ({ params: { mapId } }) => {

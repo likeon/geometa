@@ -12,6 +12,7 @@ import { superValidate } from 'sveltekit-superforms';
 import { zod } from 'sveltekit-superforms/adapters';
 import { ensurePermissions } from '$lib/utils';
 import { insertMapGroupSchema, updateMapGroupSchema } from '$lib/form-schema';
+import { api, internalHeaders } from '$lib/api';
 
 export const prerender = false;
 
@@ -101,5 +102,27 @@ export const actions = {
       .update(mapGroups)
       .set({ name: form.data.name })
       .where(eq(mapGroups.id, form.data.id!));
+  },
+  lookupMapGroup: async ({ request, locals }) => {
+    const formData = await request.formData();
+    const geoguessrId = formData.get('geoguessrId') as string;
+
+    if (!geoguessrId) {
+      return fail(400, { error: 'GeoGuessr ID is required' });
+    }
+
+    const { data, error: apiError } = await api.internal.maps
+      .mapgroup({ geoguessrId })
+      .get(internalHeaders(locals));
+
+    if (apiError || !data) {
+      const errorMessage = typeof apiError?.value === 'string' ? apiError.value : 'Map not found';
+
+      return fail(apiError?.status || 404, {
+        error: errorMessage
+      });
+    }
+
+    return { mapGroup: data };
   }
 };

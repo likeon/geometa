@@ -1,5 +1,6 @@
 <script lang="ts">
   import { superForm } from 'sveltekit-superforms';
+  import { enhance as enhanceForm } from '$app/forms';
   import BaseTable from '$lib/components/BaseTable/BaseTable.svelte';
   import { columns } from './columns';
   import { Button } from '$lib/components/ui/button';
@@ -10,8 +11,10 @@
   import { zodClient } from 'sveltekit-superforms/adapters';
   import { insertMapGroupSchema } from '$lib/form-schema';
 
-  let { data } = $props();
+  let { data, form: actionData } = $props();
   let mapGroupCreationDialogOpen = $state(false);
+  let geoguessrId = $state('');
+  let isLookingUp = $state(false);
 
   const form = superForm(data.mapGroupForm, {
     validators: zodClient(insertMapGroupSchema)
@@ -56,9 +59,70 @@
   <div class="my-5">
     <BaseTable {columns} data={data.userGroups} initialSorting={[{ id: 'name', desc: false }]} />
   </div>
+
+  {#if data.allGroups}
+    <div class="my-8">
+      <h2 class="text-lg font-semibold mb-4">Find MapGroup by GeoGuessr Map ID</h2>
+      <form
+        method="POST"
+        action="?/lookupMapGroup"
+        class="flex gap-3 items-start"
+        use:enhanceForm={() => {
+          isLookingUp = true;
+
+          return async ({ update }) => {
+            await update();
+            isLookingUp = false;
+          };
+        }}>
+        <div class="flex-1 max-w-md">
+          <Input
+            name="geoguessrId"
+            placeholder="Enter GeoGuessr Map ID"
+            bind:value={geoguessrId}
+            required />
+        </div>
+        <Button type="submit" disabled={isLookingUp}>
+          {isLookingUp ? 'Looking up...' : 'Lookup MapGroup'}
+        </Button>
+      </form>
+
+      {#if actionData?.mapGroup}
+        <div
+          class="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded">
+          <p class="font-semibold">MapGroup Found:</p>
+          <p class="mt-1">
+            <span class="font-medium">ID:</span>
+            {actionData.mapGroup.id}
+          </p>
+          <p>
+            <span class="font-medium">Name:</span>
+            {actionData.mapGroup.name}
+          </p>
+          <p>
+            <span class="font-medium">Owner(s):</span>
+            {actionData.mapGroup.owners}
+          </p>
+          <a
+            href="/map-making/groups/{actionData.mapGroup.id}"
+            class="inline-block mt-2 text-blue-600 dark:text-blue-400 hover:underline">
+            View MapGroup →
+          </a>
+        </div>
+      {/if}
+
+      {#if actionData?.error}
+        <div
+          class="mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded">
+          <p class="text-red-700 dark:text-red-300">{actionData.error}</p>
+        </div>
+      {/if}
+    </div>
+    <hr class="my-6" />
+  {/if}
+
   {#if data.allGroups}
     <div>
-      <hr />
       <ul class="">
         {#each data.allGroups as group (group.id)}
           <li>
