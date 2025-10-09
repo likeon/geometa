@@ -191,6 +191,21 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
         return status(404, 'Map not found');
       }
 
+      // Check if it's a personal map
+      if (map.isPersonal && map.userId) {
+        const owner = await db.$primary.query.users.findFirst({
+          where: eq(users.id, map.userId),
+        });
+
+        return {
+          isPersonal: true,
+          id: map.id,
+          name: map.name,
+          owner: owner?.username || 'Unknown',
+          userId: map.userId,
+        };
+      }
+
       if (!map.mapGroup) {
         return status(404, 'Map has no associated mapgroup');
       }
@@ -200,6 +215,7 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
         .join(', ');
 
       return {
+        isPersonal: false,
         ...map.mapGroup,
         owners,
       };

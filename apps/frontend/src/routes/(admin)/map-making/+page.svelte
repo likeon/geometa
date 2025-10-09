@@ -62,7 +62,7 @@
 
   {#if data.allGroups}
     <div class="my-8">
-      <h2 class="text-lg font-semibold mb-4">Find MapGroup by GeoGuessr Map ID</h2>
+      <h2 class="text-lg font-semibold mb-4">Find Map by GeoGuessr Map ID</h2>
       <form
         method="POST"
         action="?/lookupMapGroup"
@@ -83,16 +83,27 @@
             required />
         </div>
         <Button type="submit" disabled={isLookingUp}>
-          {isLookingUp ? 'Looking up...' : 'Lookup MapGroup'}
+          {isLookingUp ? 'Looking up...' : 'Lookup Map'}
         </Button>
       </form>
 
       {#if actionData?.mapGroup}
+        {@const isPersonal = actionData.mapGroup.isPersonal}
+        {@const title = isPersonal ? 'Personal Map Found:' : 'MapGroup Found:'}
+        {@const idLabel = isPersonal ? 'Personal Map ID:' : 'MapGroup ID:'}
+        {@const ownerLabel = isPersonal ? 'Owner:' : 'Owner(s):'}
+        {@const ownerValue =
+          'owner' in actionData.mapGroup ? actionData.mapGroup.owner : actionData.mapGroup.owners}
+        {@const linkUrl = isPersonal
+          ? `/personal/${actionData.mapGroup.id}`
+          : `/map-making/groups/${actionData.mapGroup.id}`}
+        {@const linkText = isPersonal ? 'View Personal Map →' : 'View MapGroup →'}
+
         <div
           class="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded">
-          <p class="font-semibold">MapGroup Found:</p>
+          <p class="font-semibold">{title}</p>
           <p class="mt-1">
-            <span class="font-medium">ID:</span>
+            <span class="font-medium">{idLabel}</span>
             {actionData.mapGroup.id}
           </p>
           <p>
@@ -100,13 +111,13 @@
             {actionData.mapGroup.name}
           </p>
           <p>
-            <span class="font-medium">Owner(s):</span>
-            {actionData.mapGroup.owners}
+            <span class="font-medium">{ownerLabel}</span>
+            {ownerValue}
           </p>
           <a
-            href="/map-making/groups/{actionData.mapGroup.id}"
+            href={linkUrl}
             class="inline-block mt-2 text-blue-600 dark:text-blue-400 hover:underline">
-            View MapGroup →
+            {linkText}
           </a>
         </div>
       {/if}
@@ -118,10 +129,9 @@
         </div>
       {/if}
     </div>
-    <hr class="my-6" />
-  {/if}
 
-  {#if data.allGroups}
+    <hr class="my-6" />
+
     <div>
       <ul class="">
         {#each data.allGroups as group (group.id)}
