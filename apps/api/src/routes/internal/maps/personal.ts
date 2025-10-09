@@ -123,11 +123,7 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
           geoguessrId: true,
           name: true,
         },
-        where: and(
-          eq(maps.id, mapId),
-          eq(maps.userId, userId),
-          eq(maps.isPersonal, true),
-        ),
+        where: and(eq(maps.id, mapId), eq(maps.isPersonal, true)),
       });
 
       if (!map) {
