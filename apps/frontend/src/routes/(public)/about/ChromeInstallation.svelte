@@ -3,6 +3,7 @@
   import { WarningBox } from '$lib/components/ui/warning-box';
   import PlayMapsStepContent from './PlayMapsStepContent.svelte';
   import * as Accordion from '$lib/components/ui/accordion';
+  import allowUserScripts from '$lib/assets/allowUserScripts.png?enhanced';
 
   const steps = [
     {
@@ -39,6 +40,13 @@
     <a href="https://www.tampermonkey.net/faq.php?locale=en#Q209" target="_blank"
       >Enable developer mode</a> in your browser's extensions settings to ensure Tampermonkey works properly.
   </p>
+  <p class="mt-2">
+    On the same page, navigate to Tampermonkey Details and enable "Allow User Scripts".
+  </p>
+  <enhanced:img
+    src={allowUserScripts}
+    class="mt-2 rounded-md border"
+    alt="Allow User Scripts setting" />
   <WarningBox>This step is absolutely crucial - the userscript won't work without it.</WarningBox>
 {/snippet}
 
