@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: image-proxy
-          image: caddy:2.7.4
+          image: caddy:2
           command: ["caddy", "run", "--config", "/etc/caddy/Caddyfile"]
           ports:
             - containerPort: 80
