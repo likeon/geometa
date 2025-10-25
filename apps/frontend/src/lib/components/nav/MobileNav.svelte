@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import logo from '$lib/assets/logo.png?enhanced';
   import { ScrollArea } from '$lib/components/ui/scroll-area';
   import * as Sheet from '$lib/components/ui/sheet/index.js';
@@ -50,7 +51,7 @@
     <Sheet.Content side="left" class="pr-0">
       <Sheet.Header class="pl-0 landscape:py-2">
         <a
-          href="/"
+          href={resolve('/')}
           class="flex items-center"
           onclick={() => {
             open = false;

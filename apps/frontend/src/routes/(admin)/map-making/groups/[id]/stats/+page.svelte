@@ -29,7 +29,8 @@
   function handlePeriodChange() {
     const url = new URL($page.url);
     url.searchParams.set('days', selectedPeriod);
-    goto(url.toString());
+    const resolvedPath = `/map-making/groups/${String(data.group.id)}/stats`;
+    goto(resolvedPath + url.search);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

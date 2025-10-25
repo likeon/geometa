@@ -173,6 +173,13 @@
     items.length > 0 ? virtualizer.getTotalSize() - items[items.length - 1].end : 0
   );
 
+  $effect(() => {
+    if (virtualListEl) {
+      // Ensure the virtualizer measures once the scroll element is ready
+      virtualizer.measure();
+    }
+  });
+
   let prevDataSize = data?.length ?? 0;
 
   // if data is removed/added unselect all rows

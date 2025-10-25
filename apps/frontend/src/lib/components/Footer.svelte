@@ -1,3 +1,7 @@
+<script>
+  import { resolve } from '$app/paths';
+</script>
+
 <footer>
   <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8 lg:py-32">
     <div class="xl:grid xl:grid-cols-3 xl:gap-8">
@@ -8,7 +12,7 @@
             <ul role="list" class="mt-6 space-y-4">
               <li>
                 <a
-                  href="/privacy"
+                  href={resolve('/privacy')}
                   class="text-sm/6 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
                   >Privacy policy</a>
               </li>

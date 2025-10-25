@@ -2,7 +2,7 @@
   import * as Form from '$lib/components/ui/form/index';
   import { Input } from '$lib/components/ui/input/index';
   import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
-  import { zodClient } from 'sveltekit-superforms/adapters';
+  import { zod4Client } from 'sveltekit-superforms/adapters';
   import * as Dialog from '$lib/components/ui/dialog/index';
   import type { PageData } from './$types';
   import { insertLevelsSchema, type InsertLevelsSchema } from '$lib/form-schema';
@@ -21,7 +21,7 @@
   } = $props();
 
   const formLevel = superForm(levelForm, {
-    validators: zodClient(insertLevelsSchema),
+    validators: zod4Client(insertLevelsSchema),
     resetForm: true,
     dataType: 'json',
     onResult({ result }) {

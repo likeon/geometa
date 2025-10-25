@@ -1,11 +1,12 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import { columns } from './columns';
   import BaseTable from '$lib/components/BaseTable/BaseTable.svelte';
   import { superForm } from 'sveltekit-superforms';
   import { Button } from '$lib/components/ui/button';
   import * as Dialog from '$lib/components/ui/dialog/index';
   import * as Form from '$lib/components/ui/form/index';
-  import { zodClient } from 'sveltekit-superforms/adapters';
+  import { zod4Client } from 'sveltekit-superforms/adapters';
   import { insertPersonalMap } from '$lib/form-schema';
   import { Input } from '$lib/components/ui/input';
   import FormLabelWithTooltip from '$lib/components/FormLabelWithTooltip.svelte';
@@ -13,7 +14,7 @@
   let personalMapCreationDialogOpen = $state(false);
 
   const formPersonal = superForm(data.personalMapForm, {
-    validators: zodClient(insertPersonalMap),
+    validators: zod4Client(insertPersonalMap),
     resetForm: true,
     dataType: 'json',
     onResult({ result }) {
@@ -28,7 +29,7 @@
 <div class="container">
   <div class="flex flex-wrap items-center">
     <div class="grow flex items-center justify-end space-x-3">
-      <a href="/personal-maps" target="_blank" rel="noopener noreferrer">
+      <a href={resolve('/personal-maps')} target="_blank" rel="noopener noreferrer">
         <Button variant="outline">What are personal maps?</Button>
       </a>
       <Button onclick={() => (personalMapCreationDialogOpen = true)}>Add personal map</Button>

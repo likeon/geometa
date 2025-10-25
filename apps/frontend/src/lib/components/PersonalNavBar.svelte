@@ -36,8 +36,9 @@
 {#snippet navItem(props: NavItemProps)}
   {@const { name, slug, tooltipText } = props}
   {@const url = `/personal/${id}` + (slug ? `/${slug}` : '')}
+  {@const resolvedHref = `/personal/${id}` + (slug ? `/${slug}` : '')}
   <a
-    href={url}
+    href={resolvedHref}
     class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium dark:text-gray-300 {isActive(
       url
     )}">

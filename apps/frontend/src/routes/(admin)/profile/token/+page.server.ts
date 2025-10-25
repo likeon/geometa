@@ -1,7 +1,7 @@
 import { error, fail } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-import { z } from 'zod';
+import { zod4 } from 'sveltekit-superforms/adapters';
+import { z } from 'zod/v4';
 import { api } from '$lib/api';
 
 const regenerateApiTokenSchema = z.object({
@@ -20,7 +20,7 @@ export const load = async ({ locals }) => {
 
   const hasApiToken = data.hasApiToken;
 
-  const regenerateApiTokenForm = await superValidate(zod(regenerateApiTokenSchema));
+  const regenerateApiTokenForm = await superValidate(zod4(regenerateApiTokenSchema));
 
   return {
     hasApiToken,
@@ -30,7 +30,7 @@ export const load = async ({ locals }) => {
 
 export const actions = {
   regenerateApiToken: async ({ request, locals }) => {
-    const form = await superValidate(request, zod(regenerateApiTokenSchema));
+    const form = await superValidate(request, zod4(regenerateApiTokenSchema));
     if (!form.valid) {
       return fail(400, { form });
     }

@@ -1,6 +1,6 @@
 import { api } from '$lib/api';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 import { error, fail } from '@sveltejs/kit';
 import { insertPersonalMap } from '$lib/form-schema';
 
@@ -20,13 +20,13 @@ export const load = async ({ locals }) => {
     }
   }
 
-  const personalMapForm = await superValidate(zod(insertPersonalMap));
+  const personalMapForm = await superValidate(zod4(insertPersonalMap));
   return { personalMaps: data, personalMapForm };
 };
 
 export const actions = {
   createPersonalMap: async ({ request, locals }) => {
-    const form = await superValidate(request, zod(insertPersonalMap));
+    const form = await superValidate(request, zod4(insertPersonalMap));
 
     if (!form.valid) {
       return fail(400, { form });

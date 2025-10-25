@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import PersonalNavBar from '$lib/components/PersonalNavBar.svelte';
   import VirtualizedTable from '$lib/components/VirtualizedTable.svelte';
   import { columns } from './columns';
@@ -46,7 +47,7 @@
       To add metas, go to the meta list of a map with sharing enabled, select the metas you want,
       and add them to your map. Visit <a
         target="_blank"
-        href="/maps"
+        href={resolve('/maps')}
         class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900">maps page</a> and
       enable the "Shared" filter to see which maps are available for selecting metas!
     </p>
@@ -105,7 +106,7 @@
             From:
             {#if selectedMeta.usedInMapGeoguessrId}
               <a
-                href="/maps/{selectedMeta.usedInMapGeoguessrId}"
+                href={`/maps/${selectedMeta.usedInMapGeoguessrId}`}
                 class="underline hover:text-primary"
                 target="_blank"
                 rel="noopener noreferrer">

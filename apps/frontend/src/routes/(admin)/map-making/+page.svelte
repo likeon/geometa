@@ -8,7 +8,7 @@
   import * as Dialog from '$lib/components/ui/dialog/index';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index';
   import * as Form from '$lib/components/ui/form/index';
-  import { zodClient } from 'sveltekit-superforms/adapters';
+  import { zod4Client } from 'sveltekit-superforms/adapters';
   import { insertMapGroupSchema } from '$lib/form-schema';
 
   let { data, form: actionData } = $props();
@@ -17,7 +17,7 @@
   let isLookingUp = $state(false);
 
   const form = superForm(data.mapGroupForm, {
-    validators: zodClient(insertMapGroupSchema)
+    validators: zod4Client(insertMapGroupSchema)
   });
   const { form: formData, enhance } = form;
 </script>
@@ -94,10 +94,10 @@
         {@const ownerLabel = isPersonal ? 'Owner:' : 'Owner(s):'}
         {@const ownerValue =
           'owner' in actionData.mapGroup ? actionData.mapGroup.owner : actionData.mapGroup.owners}
-        {@const linkUrl = isPersonal
-          ? `/personal/${actionData.mapGroup.id}`
-          : `/map-making/groups/${actionData.mapGroup.id}`}
         {@const linkText = isPersonal ? 'View Personal Map →' : 'View MapGroup →'}
+        {@const resolvedHref = isPersonal
+          ? `/personal/${String(actionData.mapGroup.id)}`
+          : `/map-making/groups/${String(actionData.mapGroup.id)}`}
 
         <div
           class="mt-4 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded">
@@ -115,7 +115,7 @@
             {ownerValue}
           </p>
           <a
-            href={linkUrl}
+            href={resolvedHref}
             class="inline-block mt-2 text-blue-600 dark:text-blue-400 hover:underline">
             {linkText}
           </a>
@@ -136,7 +136,7 @@
       <ul class="">
         {#each data.allGroups as group (group.id)}
           <li>
-            <a href="/map-making/groups/{group.id}"
+            <a href={`/map-making/groups/${String(group.id)}`}
               >{group.name}, locations: {group.locationCount} ({group.authors})</a>
           </li>
         {/each}

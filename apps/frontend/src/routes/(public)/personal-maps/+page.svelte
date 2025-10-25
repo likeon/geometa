@@ -1,4 +1,5 @@
 <script>
+  import { resolve } from '$app/paths';
   import { IconList, IconListItem, IconListItemComplex } from '$lib/components/ui/icon-list';
 </script>
 
@@ -49,7 +50,7 @@
             After creating your GeoGuessr map, copy the map ID from the URL. It's the long string of
             letters and numbers at the end of the address bar (e.g., after geoguessr.com/map-maker/)
             and use it to create a personal map in our
-            <a href="/personal" target="_blank">portal</a>.
+            <a href={resolve('/personal')} target="_blank">portal</a>.
           </span>
         </IconListItem>
 
@@ -57,9 +58,9 @@
           <span
             ><strong class="font-semibold text-foreground"
               >Choose metas from community maps.</strong>
-            Find <a href="/maps">maps</a> with the "shared" tag and select as many metas as you want.
-            You can use the filter in the top right corner to show only maps with shared metas. Then,
-            add them to your map.</span>
+            Find <a href={resolve('/maps')}>maps</a> with the "shared" tag and select as many metas as
+            you want. You can use the filter in the top right corner to show only maps with shared metas.
+            Then, add them to your map.</span>
         </IconListItem>
         <IconListItemComplex>
           {#snippet subContent()}

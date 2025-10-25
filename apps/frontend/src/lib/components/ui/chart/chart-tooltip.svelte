@@ -5,6 +5,7 @@
   import { getTooltipContext, Tooltip as TooltipPrimitive } from 'layerchart';
   import type { Snippet } from 'svelte';
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function defaultFormatter(value: any, _payload: TooltipPayload[]) {
     return `${value}`;
   }
@@ -31,7 +32,8 @@
     labelKey?: string;
     hideIndicator?: boolean;
     labelClassName?: string;
-    labelFormatter?: ((value: any, payload: TooltipPayload[]) => string | number | Snippet) | null;
+    labelFormatter?: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ((value: any, payload: TooltipPayload[]) => string | number | Snippet) | null;
     formatter?: Snippet<
       [
         {
@@ -52,16 +54,16 @@
     if (hideLabel || !tooltipCtx.payload?.length) return null;
 
     const [item] = tooltipCtx.payload;
-    const key = labelKey || item?.label || item?.name || 'value';
+    const key = labelKey ?? item?.label ?? item?.name ?? 'value';
 
     const itemConfig = getPayloadConfigFromPayload(chart.config, item, key);
 
     const value =
       !labelKey && typeof label === 'string'
-        ? chart.config[label as keyof typeof chart.config]?.label || label
+        ? (chart.config[label as keyof typeof chart.config]?.label ?? label)
         : (itemConfig?.label ?? item.label);
 
-    if (!value) return null;
+    if (value === undefined) return null;
     if (!labelFormatter) return value;
     return labelFormatter(value, tooltipCtx.payload);
   });
@@ -136,7 +138,7 @@
                   {itemConfig?.label || item.name}
                 </span>
               </div>
-              {#if item.value}
+              {#if item.value !== undefined}
                 <span class="text-foreground font-mono font-medium tabular-nums">
                   {item.value.toLocaleString()}
                 </span>

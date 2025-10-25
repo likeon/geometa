@@ -2,7 +2,7 @@
   import * as Form from '$lib/components/ui/form/index';
   import { Input } from '$lib/components/ui/input/index';
   import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
-  import { zodClient } from 'sveltekit-superforms/adapters';
+  import { zod4Client } from 'sveltekit-superforms/adapters';
   import * as Dialog from '$lib/components/ui/dialog/index';
   import type { PageData } from './$types';
   import * as Tabs from '$lib/components/ui/tabs/index';
@@ -50,7 +50,7 @@
   let saveWithoutClose = $state(false);
 
   const formMeta = superForm(metaForm, {
-    validators: zodClient(insertMetasSchema),
+    validators: zod4Client(insertMetasSchema),
     resetForm: false,
     dataType: 'json',
     onResult({ result }) {

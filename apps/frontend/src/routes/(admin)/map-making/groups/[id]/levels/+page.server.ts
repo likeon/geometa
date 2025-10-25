@@ -3,7 +3,7 @@ import { levels, mapGroups } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
 import { getGroupId } from '../utils';
 import { fail, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 import { ensurePermissions } from '$lib/utils';
 import { insertLevelsSchema } from '$lib/form-schema';
 
@@ -23,7 +23,7 @@ export const load = async ({ params, locals }) => {
     error(404, 'No group');
   }
 
-  const levelForm = await superValidate(zod(insertLevelsSchema));
+  const levelForm = await superValidate(zod4(insertLevelsSchema));
   return {
     group,
     levelForm
@@ -47,7 +47,7 @@ export const actions = {
 
   updateLevel: async ({ request, locals, params }) => {
     const mapGroupId = getGroupId(params);
-    const form = await superValidate(request, zod(insertLevelsSchema));
+    const form = await superValidate(request, zod4(insertLevelsSchema));
     if (!form.valid) {
       return fail(400, { form });
     }
