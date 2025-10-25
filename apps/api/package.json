@@ -8,7 +8,10 @@
     "db:studio": "drizzle-kit studio",
     "db:migrate": "drizzle-kit migrate",
     "lint": "biome lint .",
-    "format": "biome format --write . && biome check --write ."
+    "format": "biome format --write .",
+    "check": "biome check .",
+    "fix": "biome check --write .",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "@elysiajs/bearer": "^1.3.0",
@@ -17,10 +20,10 @@
     "@sentry/bun": "^9.22.0",
     "aws4fetch": "^1.0.20",
     "drizzle-orm": "^0.44.0",
-    "postgres": "^3.4.7",
-    "elysia": "^1.3.8",
+    "elysia": "^1.4.13",
     "jose": "^6.0.11",
     "memoize-one": "^6.0.0",
+    "postgres": "^3.4.7",
     "rehype-external-links": "^3.0.0",
     "rehype-sanitize": "^6.0.0",
     "rehype-stringify": "^10.0.1",
@@ -32,7 +35,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.1.4",
-    "bun-types": "latest",
+    "bun-types": "^1.3.0",
     "drizzle-kit": "^0.31.1"
   }
 }

@@ -1,6 +1,6 @@
 # multi-stage build didn't play well with sharp
 # but it's probably fixable
-FROM oven/bun:1 AS build
+FROM oven/bun:1.3 AS build
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \

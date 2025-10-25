@@ -2,7 +2,10 @@ import { prod } from '@api/lib/utils/env';
 import type { BunRequest, Server } from 'bun';
 import Elysia, { type StatusMap } from 'elysia';
 
-export function getRequestIp(server: Server | null, request: BunRequest) {
+export function getRequestIp(
+  server: Server<undefined> | null,
+  request: BunRequest,
+) {
   return (
     request.headers.get('cf-connecting-ip') ||
     server?.requestIP(request)?.address
@@ -40,7 +43,7 @@ function statusToNumber(
 
 function logRequest(
   startTime: number,
-  server: Server | null,
+  server: Server<undefined> | null,
   request: BunRequest,
   status: number | null,
 ) {

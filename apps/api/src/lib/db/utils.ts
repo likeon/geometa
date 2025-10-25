@@ -12,7 +12,7 @@ export function createRawSqlArray(itemList: string[]) {
   const rawItems: SQL<unknown>[] = [];
 
   for (const item of itemList) {
-    rawItems.push(sql.raw(sql`${item}`.queryChunks[1]?.toString()));
+    rawItems.push(sql.raw(sql`${item}`.queryChunks[1]!.toString()));
   }
 
   sanitizedItems.push(sql.join(rawItems, sql`, `));
