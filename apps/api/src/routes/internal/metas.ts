@@ -8,6 +8,12 @@ import { and, eq } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import sharp from 'sharp';
 
+class ImageNotFoundError extends Error {
+  constructor(imageId: number, metaId: number) {
+    super(`Image with id ${imageId} not found for meta ${metaId}.`);
+  }
+}
+
 async function fileToBuffer(file: File): Promise<Buffer> {
   const arr = await file.arrayBuffer();
   return Buffer.from(arr);
@@ -121,6 +127,12 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       },
     },
   )
+  .error({ ImageNotFoundError })
+  .onError(({ code, status }) => {
+    if (code === 'ImageNotFoundError') {
+      return status(404);
+    }
+  })
   .put(
     '/:id/images/order',
     async ({ body, userId, params, status }) => {
@@ -134,42 +146,32 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
 
       await ensurePermissions(userId, meta.mapGroupId);
 
-      try {
-        await db.$primary.transaction(async (tx) => {
-          for (const item of body.updates) {
-            const result = await tx
-              .update(metaImages)
-              .set({ order: item.order })
-              .where(
-                and(
-                  eq(metaImages.id, item.imageId),
-                  eq(metaImages.metaId, params.id),
-                ),
-              )
-              .returning({ id: metaImages.id });
+      await db.$primary.transaction(async (tx) => {
+        for (const item of body.updates) {
+          const result = await tx
+            .update(metaImages)
+            .set({ order: item.order })
+            .where(
+              and(
+                eq(metaImages.id, item.imageId),
+                eq(metaImages.metaId, params.id),
+              ),
+            )
+            .returning({ id: metaImages.id });
 
-            if (result.length === 0) {
-              const err = new Error(
-                `Image with id ${item.imageId} not found for meta ${params.id}.`,
-              );
-              (err as any).isImageNotFoundError = true;
-              throw err;
-            }
+          if (result.length === 0) {
+            // throw to rollback transaction
+            throw new ImageNotFoundError(item.imageId, params.id);
           }
-
-          await tx
-            .update(metas)
-            .set({ modifiedAt: Math.floor(Date.now() / 1000) })
-            .where(eq(metas.id, params.id));
-        });
-
-        return status(200, { message: 'Image order updated successfully.' });
-      } catch (e: any) {
-        if (e.isImageNotFoundError) {
-          return status(404, undefined);
         }
-        throw e;
-      }
+
+        await tx
+          .update(metas)
+          .set({ modifiedAt: Math.floor(Date.now() / 1000) })
+          .where(eq(metas.id, params.id));
+      });
+
+      return status(200, { message: 'Image order updated successfully.' });
     },
     {
       body: t.Object({

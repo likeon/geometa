@@ -28,6 +28,15 @@ const app = new Elysia({ prefix: '/api', serve: { idleTimeout: 60 } })
   .use(sentry())
   .use(logger())
   .use(serverTiming())
+  .onError(({ code, status }) => {
+    switch (code) {
+      case 'INTERNAL_SERVER_ERROR':
+      case 'UNKNOWN':
+        return status(500, { message: 'Internal Server Error' });
+      default:
+        break;
+    }
+  })
   .get('/health-check', () => {
     return 'ok';
   })
@@ -47,13 +56,7 @@ const app = new Elysia({ prefix: '/api', serve: { idleTimeout: 60 } })
   .use(userscriptRouter)
   .use(internalRouter)
   .use(mapsRouter)
-  .onError(({ set, code }) => {
-    if (code === 'INTERNAL_SERVER_ERROR' || code === 'UNKNOWN') {
-      set.status = 500;
-      return { message: 'Internal Server Error' };
-    }
-  })
-  .listen(parseInt(process.env.SERVER_PORT || '3000'));
+  .listen(parseInt(process.env.SERVER_PORT || '3000', 10));
 
 export type App = typeof app;
 
