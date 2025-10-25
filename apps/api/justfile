@@ -11,7 +11,7 @@ db-psql:
 alias db-shell := db-psql
 
 pgcli:
-  uvx pgcli postgresql://postgres:postgres@localhost:$TILT_PORT_POSTGRES/geometa
+  uvx pgcli postgresql://postgres:postgres@localhost:${TILT_PORT_POSTGRES:-5432}/geometa
 
 pgcli-prod:
   uvx pgcli $PROD_POSTRGRES_URL
@@ -22,6 +22,9 @@ db-dump:
 
 db-reset:
   psql -h localhost -U postgres postgres -f utils/db/reset.sql
+
+db-init:
+  psql -h localhost -U postgres geometa -f utils/db/init.sql
 
 build TAG:
   buildah bud --platform linux/arm64 -t {{TAG}}
