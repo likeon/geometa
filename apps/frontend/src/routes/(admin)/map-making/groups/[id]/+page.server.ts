@@ -11,8 +11,8 @@ import {
 } from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
 import { message, setError, superValidate, withFiles } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
-import { z } from 'zod';
+import { zod4 } from 'sveltekit-superforms/adapters';
+import { z } from 'zod/v4';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
 import { ensurePermissions, extractJsonData } from '$lib/utils';
 import { getGroupId } from './utils';
@@ -33,7 +33,9 @@ import {
 
 const imageUploadSchema = z.object({
   metaId: z.number(),
-  file: z.instanceof(File, { message: 'Please upload an image' })
+  file: z.instanceof(File, {
+    error: 'Please upload an image'
+  })
 });
 export type ImageUploadSchema = typeof imageUploadSchema;
 
@@ -80,7 +82,7 @@ const mapJsonSchema = z.object({
       if (panoIds.length !== uniquePanoIds.size) {
         const duplicateCount = panoIds.length - uniquePanoIds.size;
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           path: ['duplicates'],
           message: `Duplicate locations found (${duplicateCount} total). Use <a href="https://map-making.app/" target="_blank" class="underline hover:text-primary">map-making.app</a> to find duplicates and remove them.`
         });
@@ -151,12 +153,12 @@ export const load = async ({ params, locals }) => {
     error(404, 'No group');
   }
 
-  const metaForm = await superValidate(zod(insertMetasSchema));
-  const mapUploadForm = await superValidate(zod(mapUploadSchema));
-  const metasUploadForm = await superValidate(zod(metasUploadSchema));
-  const imageUploadForm = await superValidate(zod(imageUploadSchema));
-  const imageOrderUpdateForm = await superValidate(zod(imageOrderUpdateSchema));
-  const copyForm = await superValidate(zod(copyMetaSchema));
+  const metaForm = await superValidate(zod4(insertMetasSchema));
+  const mapUploadForm = await superValidate(zod4(mapUploadSchema));
+  const metasUploadForm = await superValidate(zod4(metasUploadSchema));
+  const imageUploadForm = await superValidate(zod4(imageUploadSchema));
+  const imageOrderUpdateForm = await superValidate(zod4(imageOrderUpdateSchema));
+  const copyForm = await superValidate(zod4(copyMetaSchema));
 
   return {
     group,
@@ -172,7 +174,7 @@ export const load = async ({ params, locals }) => {
 
 export const actions = {
   updateMeta: async ({ request, locals }) => {
-    const form = await superValidate(request, zod(insertMetasSchema));
+    const form = await superValidate(request, zod4(insertMetasSchema));
 
     if (!form.valid) {
       return fail(400, { form });
@@ -530,7 +532,7 @@ export const actions = {
     };
   },
   copyMetaTo: async ({ request, locals }) => {
-    const form = await superValidate(request, zod(copyMetaSchema));
+    const form = await superValidate(request, zod4(copyMetaSchema));
     if (!form.valid) {
       return fail(400, { form });
     }
@@ -605,7 +607,7 @@ export const actions = {
   uploadMapJson: async ({ request, params, locals }) => {
     const groupId = getGroupId(params);
     await ensurePermissions(locals.db, locals.user?.id, groupId);
-    const form = await superValidate(request, zod(mapUploadSchema), { id: 'mapUpload' });
+    const form = await superValidate(request, zod4(mapUploadSchema), { id: 'mapUpload' });
     if (!form.valid) {
       return fail(400, withFiles({ form }));
     }
@@ -784,7 +786,7 @@ export const actions = {
   uploadMetas: async ({ request, params, locals }) => {
     const groupId = getGroupId(params);
     await ensurePermissions(locals.db, locals.user!.id, groupId);
-    const form = await superValidate(request, zod(metasUploadSchema));
+    const form = await superValidate(request, zod4(metasUploadSchema));
 
     if (!form.valid) {
       return fail(400, withFiles({ form }));
@@ -841,7 +843,7 @@ export const actions = {
     }
   },
   uploadMetaImages: async ({ request, locals }) => {
-    const form = await superValidate(request, zod(imageUploadSchema));
+    const form = await superValidate(request, zod4(imageUploadSchema));
 
     if (!form.valid) {
       return fail(400, withFiles({ form }));
@@ -882,7 +884,7 @@ export const actions = {
     return { success: true, imageId: imageId };
   },
   updateImageOrder: async ({ request, locals }) => {
-    const form = await superValidate(request, zod(imageOrderUpdateSchema));
+    const form = await superValidate(request, zod4(imageOrderUpdateSchema));
 
     if (!form.valid) {
       return fail(400, { form });

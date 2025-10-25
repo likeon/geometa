@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import { applyAction, enhance } from '$app/forms';
   import PersonalNavBar from '$lib/components/PersonalNavBar.svelte';
   import Icon from '@iconify/svelte';
@@ -46,7 +47,7 @@
               cancel();
             }
             return async () => {
-              await goto('/personal');
+              await goto(resolve('/personal'));
             };
           }}>
           <input type="hidden" name="id" value={data.id} />

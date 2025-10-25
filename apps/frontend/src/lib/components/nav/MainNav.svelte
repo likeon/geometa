@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from '$app/state';
+  import { resolve } from '$app/paths';
   import logo from '$lib/assets/logo.png?enhanced';
 
   type NavLink = {
@@ -12,17 +13,19 @@
   }
   let { navLinks }: Props = $props();
 
-  let linkHref = $derived(
-    page.url.pathname.startsWith('/map-making')
-      ? '/map-making'
-      : page.url.pathname.startsWith('/personal')
-        ? '/personal'
-        : '/'
-  );
+  let linkHref: '/' | '/map-making' | '/personal' = $derived.by(() => {
+    if (page.url.pathname.startsWith('/map-making')) {
+      return '/map-making';
+    }
+    if (page.url.pathname.startsWith('/personal')) {
+      return '/personal';
+    }
+    return '/';
+  });
 </script>
 
 <div class="mr-4 hidden md:flex">
-  <a href={linkHref} class="mr-4 flex items-center gap-0 lg:mr-6">
+  <a href={resolve(linkHref)} class="mr-4 flex items-center gap-0 lg:mr-6">
     <enhanced:img src={logo} class="h-6 sm:h-9 w-auto" alt="Logo" />
     <span class="self-center whitespace-nowrap text-xl font-semibold text-white">
       LearnableMeta

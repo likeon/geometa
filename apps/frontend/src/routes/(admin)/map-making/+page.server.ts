@@ -9,7 +9,7 @@ import {
 import { desc, eq, sql } from 'drizzle-orm';
 import { fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 import { ensurePermissions } from '$lib/utils';
 import { insertMapGroupSchema, updateMapGroupSchema } from '$lib/form-schema';
 import { api, internalHeaders } from '$lib/api';
@@ -69,13 +69,13 @@ export const load = async ({ locals }) => {
     allGroups = null;
   }
 
-  const mapGroupForm = await superValidate(zod(insertMapGroupSchema));
+  const mapGroupForm = await superValidate(zod4(insertMapGroupSchema));
   return { userGroups, allGroups, mapGroupForm };
 };
 
 export const actions = {
   createGroup: async ({ request, locals }) => {
-    const form = await superValidate(request, zod(insertMapGroupSchema));
+    const form = await superValidate(request, zod4(insertMapGroupSchema));
 
     if (!form.valid) {
       return fail(400, { form });
@@ -91,7 +91,7 @@ export const actions = {
     throw redirect(303, `/map-making/groups/${insertedData[0].insertedId}`);
   },
   updateGroupName: async ({ request, locals }) => {
-    const form = await superValidate(request, zod(updateMapGroupSchema));
+    const form = await superValidate(request, zod4(updateMapGroupSchema));
 
     if (!form.valid) {
       return fail(400, { form });

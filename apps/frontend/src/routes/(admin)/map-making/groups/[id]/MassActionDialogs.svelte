@@ -19,6 +19,7 @@
   import { Label } from '$lib/components/ui/label';
   import ConfirmationDialog from '$lib/components/ConfirmationDialog.svelte';
   import LoadingSmall from '$lib/components/LoadingSmall.svelte';
+  import { SvelteSet } from 'svelte/reactivity';
 
   let {
     // Dialog states
@@ -53,7 +54,7 @@
     metas: Meta[];
     levelChoices: { value: number; name: string }[];
     groupChoices: { value: number; name: string }[];
-    selectedLevelIds: Set<number>;
+    selectedLevelIds: SvelteSet<number>;
     selectedGroupId: string;
     sharingMetas: boolean;
     toggleLevel: (levelId: number) => void;
@@ -63,7 +64,7 @@
 
   function handleAddLevelsCancel() {
     isAddLevelsDialogOpen = false;
-    selectedLevelIds = new Set();
+    selectedLevelIds.clear();
   }
 
   function handleShareCancel() {
@@ -105,7 +106,7 @@
         return async ({ update }) => {
           await update();
           isAddLevelsDialogOpen = false;
-          selectedLevelIds = new Set();
+          selectedLevelIds.clear();
           toast.push('Levels added successfully!', {
             duration: 3000
           });

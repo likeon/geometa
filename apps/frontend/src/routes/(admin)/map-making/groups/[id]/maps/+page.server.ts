@@ -12,7 +12,7 @@ import {
 } from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
 import { message, setError, superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
 import { ensurePermissions, geoguessrGetMapInfo, markdown2Html } from '$lib/utils';
 import { insertMapsSchema } from '$lib/form-schema';
@@ -49,7 +49,7 @@ export const load = async ({ locals, params }) => {
 
   const levelList = await db.query.levels.findMany({ where: eq(levels.mapGroupId, group.id) });
   const regionList = await db.query.regions.findMany({ orderBy: [asc(regions.ordering)] });
-  const mapForm = await superValidate(zod(insertMapsSchema));
+  const mapForm = await superValidate(zod4(insertMapsSchema));
 
   const user = await db.query.users.findFirst({ where: eq(users.id, locals.user!.id) });
   if (!user) {
@@ -74,7 +74,7 @@ export const actions = {
   },
 
   updateMap: async ({ request, locals }) => {
-    const form = await superValidate(request, zod(insertMapsSchema));
+    const form = await superValidate(request, zod4(insertMapsSchema));
     if (!form.valid) {
       return fail(400, { form });
     }

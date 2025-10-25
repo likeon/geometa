@@ -1,39 +1,41 @@
-import { z } from 'zod';
+import { z } from 'zod/v4';
 
 export const insertMapGroupSchema = z.object({
-  name: z.string().min(1, 'Name cannot be empty').default('')
+  name: z.string().min(1, 'Name cannot be empty').prefault('')
 });
 export const updateMapGroupSchema = z.object({
-  name: z.string().min(1, 'Name cannot be empty').default(''),
+  name: z.string().min(1, 'Name cannot be empty').prefault(''),
   id: z.number()
 });
 
 export type InsertMetasSchema = typeof insertMetasSchema;
 export const insertMetasSchema = z.object({
   id: z.number().optional(),
-  mapGroupId: z.number().default(-1),
-  tagName: z.string().min(1, 'Tag cannot be empty').default(''),
-  name: z.string().min(1, 'Name cannot be empty').default(''),
-  note: z.string().default(''),
-  noteFromPlonkit: z.boolean().default(false),
-  levels: z.array(z.number()).default([]),
-  footer: z.string().optional().default('')
+  mapGroupId: z.number().prefault(-1),
+  tagName: z.string().min(1, 'Tag cannot be empty').prefault(''),
+  name: z.string().min(1, 'Name cannot be empty').prefault(''),
+  note: z.string().prefault(''),
+  noteFromPlonkit: z.boolean().prefault(false),
+  levels: z.array(z.number()).prefault([]),
+  footer: z.string().optional().prefault('')
 });
 
 // Schema for generating defaults without validation constraints
 export const insertMetasDefaultSchema = insertMetasSchema.extend({
-  tagName: z.string().default(''),
-  name: z.string().default('')
+  tagName: z.string().prefault(''),
+  name: z.string().prefault('')
 });
 
 export type MapUploadSchema = typeof mapUploadSchema;
 export const mapUploadSchema = z.object({
   file: z
-    .instanceof(File, { message: 'Please upload a file.' })
+    .instanceof(File, {
+      error: 'Please upload a file.'
+    })
     .refine((file) => file.type === 'application/json', {
-      message: 'File must be a JSON file.'
+      error: 'File must be a JSON file.'
     }),
-  partialUpload: z.boolean().default(true)
+  partialUpload: z.boolean().prefault(true)
 });
 
 export const metasUploadContentSchema = z
@@ -50,9 +52,11 @@ export type MetasUploadContentSchemaSafeParse = ReturnType<
   typeof metasUploadContentSchema.safeParse
 >;
 export const metasUploadSchema = z.object({
-  file: z.instanceof(File, { message: 'Please upload a file.' }),
-  partialUpload: z.boolean().default(true),
-  autoCreateLevels: z.boolean().default(true)
+  file: z.instanceof(File, {
+    error: 'Please upload a file.'
+  }),
+  partialUpload: z.boolean().prefault(true),
+  autoCreateLevels: z.boolean().prefault(true)
 });
 export type MetasUploadSchema = typeof metasUploadSchema;
 
@@ -66,47 +70,47 @@ export type InsertPersonalMapSchema = typeof insertPersonalMap;
 export const insertMapsSchema = z
   .object({
     id: z.number().optional(),
-    mapGroupId: z.number().default(-1),
-    name: z.string().min(1, 'Name cannot be empty').default(''),
-    geoguessrId: z.string().min(1, 'GeoguessrId cannot be empty').default(''),
+    mapGroupId: z.number().prefault(-1),
+    name: z.string().min(1, 'Name cannot be empty').prefault(''),
+    geoguessrId: z.string().min(1, 'GeoguessrId cannot be empty').prefault(''),
     description: z.string().nullable(),
-    isPublished: z.boolean().default(false),
-    isShared: z.boolean().default(false),
-    authors: z.string().nullable().default(''),
-    ordering: z.coerce.number().default(0),
-    autoUpdate: z.boolean().default(false),
-    footer: z.string().default(''),
-    isVerified: z.boolean().default(false),
-    includeFilters: z.array(z.string()).default([]),
-    excludeFilters: z.array(z.string()).default([]),
-    regions: z.array(z.number()).default([]),
-    levels: z.array(z.number()).default([]),
-    difficulty: z.coerce.number().default(0)
+    isPublished: z.boolean().prefault(false),
+    isShared: z.boolean().prefault(false),
+    authors: z.string().nullable().prefault(''),
+    ordering: z.coerce.number().prefault(0),
+    autoUpdate: z.boolean().prefault(false),
+    footer: z.string().prefault(''),
+    isVerified: z.boolean().prefault(false),
+    includeFilters: z.array(z.string()).prefault([]),
+    excludeFilters: z.array(z.string()).prefault([]),
+    regions: z.array(z.number()).prefault([]),
+    levels: z.array(z.number()).prefault([]),
+    difficulty: z.coerce.number().prefault(0)
   })
   .refine((data) => !data.isPublished || data.difficulty !== 0, {
-    message: 'You need to set difficulty to publish the map.',
-    path: ['difficulty']
+    path: ['difficulty'],
+    error: 'You need to set difficulty to publish the map.'
   })
   .refine((data) => !data.isPublished || data.regions.length > 0, {
-    message: 'You must select region to publish the map.',
-    path: ['regions']
+    path: ['regions'],
+    error: 'You must select region to publish the map.'
   })
   .refine((data) => !data.isPublished || (data.authors !== null && data.authors.trim() !== ''), {
-    message: 'You must set author to publish the map.',
-    path: ['authors']
+    path: ['authors'],
+    error: 'You must set author to publish the map.'
   })
   .refine(
     (data) => !data.isPublished || (data.description !== null && data.description.trim() !== ''),
     {
-      message: 'You must set description to publish the map.',
-      path: ['description']
+      path: ['description'],
+      error: 'You must set description to publish the map.'
     }
   );
 
 export type InsertMapsSchema = typeof insertMapsSchema;
 
 export const insertLevelsSchema = z.object({
-  name: z.string().min(1, 'Name cannot be empty').default(''),
+  name: z.string().min(1, 'Name cannot be empty').prefault(''),
   id: z.number().optional(),
   mapGroupId: z.number()
 });

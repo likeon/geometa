@@ -32,6 +32,7 @@
 {#snippet navItem(props: NavItemProps)}
   {@const { name, slug, tooltipText } = props}
   {@const url = `/map-making/groups/${groupId}` + (slug ? `/${slug}` : '')}
+  <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
   <a
     href={url}
     class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium dark:text-gray-300 {isActive(

@@ -1,4 +1,5 @@
 <script>
+  import { resolve } from '$app/paths';
   import geoPin from '$lib/assets/GeoGuessr-Pin.png?enhanced';
   import { Card, CardContent } from '$lib/components/ui/card';
   import { Tabs, TabsContent, TabsList, TabsTrigger } from '$lib/components/ui/tabs';
@@ -38,7 +39,7 @@
       <div class="flex flex-col items-center justify-center text-center">
         <div class="flex items-center space-x-2">
           <enhanced:img src={geoPin} class="h-6 sm:h-9 w-auto" alt="Geoguessr pin" />
-          <a href="/maps" class="font-bold text-3xl">Our GeoGuessr maps</a>
+          <a href={resolve('/maps')} class="font-bold text-3xl">Our GeoGuessr maps</a>
         </div>
         <div class="flex items-center space-x-2 mt-5">
           <Icon icon="mdi:github" class="h-5 w-5 text-gray-600 dark:text-gray-400" />

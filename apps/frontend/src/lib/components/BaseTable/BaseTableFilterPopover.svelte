@@ -3,6 +3,7 @@
   import { Button } from '$lib/components/ui/button';
   import { Badge } from '$lib/components/ui/badge';
   import Icon from '@iconify/svelte';
+  import { SvelteSet } from 'svelte/reactivity';
 
   const { table, columnId, title, options } = $props<{
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -20,7 +21,7 @@
 
   function toggle(value: string) {
     const current = selected();
-    const next = new Set(current);
+    const next = new SvelteSet(current);
     if (next.has(value)) {
       next.delete(value);
     } else {

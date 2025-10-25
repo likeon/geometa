@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import { type SuperValidated, type Infer, fileProxy } from 'sveltekit-superforms';
   import { superForm } from 'sveltekit-superforms';
   import { Checkbox } from '$lib/components/ui/checkbox';
@@ -186,7 +187,7 @@
           <p class="text-sm font-medium mb-2">Need help?</p>
           <p class="text-xs text-muted-foreground">
             Check the <a
-              href="/map-making/docs/meta-uploads"
+              href={resolve('/map-making/docs/meta-uploads')}
               target="_blank"
               class="underline hover:text-primary">documentation</a> for detailed format requirements
             and examples.

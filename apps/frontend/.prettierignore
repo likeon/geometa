@@ -5,3 +5,6 @@ yarn.lock
 
 # Flux folder
 flux/
+
+src/lib/components/ui/*
+!src/lib/components/ui/custom/

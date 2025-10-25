@@ -15,6 +15,7 @@
   import MetasUploadDialog from '$routes/(admin)/map-making/groups/[id]/MetasUploadDialog.svelte';
   import MassActionDialogs from '$routes/(admin)/map-making/groups/[id]/MassActionDialogs.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
+  import { SvelteSet } from 'svelte/reactivity';
 
   let { data } = $props();
 
@@ -66,7 +67,9 @@
 
   // Dialog state for adding levels
   let isAddLevelsDialogOpen = $state(false);
-  let selectedLevelIds = $state<Set<number>>(new Set());
+  // doesn't need to be wrapped in state - don't get baited
+  // svelte-ignore non_reactive_update
+  let selectedLevelIds = new SvelteSet<number>();
 
   // Dialog state for sharing metas
   let isShareDialogOpen = $state(false);
@@ -75,7 +78,7 @@
   // Dynamic filter options for levels
   const getLevelOptions = (metaList: typeof metas) => {
     const levelOptions = Array.from(
-      new Set(metaList.flatMap((row) => row.metaLevels.map((m) => m.level.name)))
+      new SvelteSet(metaList.flatMap((row) => row.metaLevels.map((m) => m.level.name)))
     )
       .sort((a, b) => a.localeCompare(b))
       .map((name) => ({ label: name, value: name }));
@@ -85,13 +88,11 @@
 
   // Toggle level selection
   const toggleLevel = (levelId: number) => {
-    const newSet = new Set(selectedLevelIds);
-    if (newSet.has(levelId)) {
-      newSet.delete(levelId);
+    if (selectedLevelIds.has(levelId)) {
+      selectedLevelIds.delete(levelId);
     } else {
-      newSet.add(levelId);
+      selectedLevelIds.add(levelId);
     }
-    selectedLevelIds = newSet;
   };
 
   let selectedIds: number[] = $state([]);
@@ -333,7 +334,7 @@
           buttonText: 'Add Levels',
           icon: '➕',
           handler: () => {
-            selectedLevelIds = new Set();
+            selectedLevelIds.clear();
             isAddLevelsDialogOpen = true;
           }
         },

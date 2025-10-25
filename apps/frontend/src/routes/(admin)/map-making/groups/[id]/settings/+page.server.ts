@@ -3,10 +3,10 @@ import { mapGroupPermissions, mapGroups, users } from '$lib/db/schema';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getGroupId } from '../utils';
 import { ensurePermissions } from '$lib/utils';
-import { z } from 'zod';
+import { z } from 'zod/v4';
 import type { DB } from '$lib/drizzle';
 import { superValidate } from 'sveltekit-superforms';
-import { zod } from 'sveltekit-superforms/adapters';
+import { zod4 } from 'sveltekit-superforms/adapters';
 
 const basePermissionDeleteSchema = z.object({
   permissionId: z.coerce.number().int()
@@ -22,7 +22,7 @@ function createPermissionDeleteSchema(db: DB, groupId: number, requestUserId: st
     });
     if (!permission) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['permissionId'],
         message: `Permission not found`
       });
@@ -31,7 +31,7 @@ function createPermissionDeleteSchema(db: DB, groupId: number, requestUserId: st
 
     if (permission.userId == requestUserId) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: 'custom',
         path: ['permissionId'],
         message: `Can't strip your own permissions`
       });
@@ -50,7 +50,7 @@ function createPermissionCreateSchema(db: DB, groupId: number) {
         .where(eq(users.username, data.username));
       if (!user.length) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           path: ['username'],
           message: `Discord user with this username is not in our database`
         });
@@ -64,7 +64,7 @@ function createPermissionCreateSchema(db: DB, groupId: number) {
         .limit(1);
       if (existingPermission.length) {
         ctx.addIssue({
-          code: z.ZodIssueCode.custom,
+          code: 'custom',
           path: ['username'],
           message: `This user already has the permissions`
         });
@@ -95,7 +95,7 @@ export const load = async ({ params, locals }) => {
   }
 
   const permissionCreateForm = await superValidate(
-    zod(createPermissionCreateSchema(locals.db, id))
+    zod4(createPermissionCreateSchema(locals.db, id))
   );
   return {
     group,
@@ -151,7 +151,7 @@ export const actions = {
     const groupId = getGroupId(params);
     const form = await superValidate(
       request,
-      zod(createPermissionCreateSchema(locals.db, groupId))
+      zod4(createPermissionCreateSchema(locals.db, groupId))
     );
     if (!form.valid) {
       return fail(400, { form });

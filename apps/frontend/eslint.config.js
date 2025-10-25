@@ -37,7 +37,7 @@ export default [
     }
   },
   {
-    ignores: ['build/', '.svelte-kit/', 'dist/']
+    ignores: ['build/', '.svelte-kit/', 'dist/', 'src/lib/components/ui']
   },
   {
     rules: {
@@ -51,7 +51,8 @@ export default [
           caughtErrorsIgnorePattern: '^_'
         }
       ],
-      'svelte/no-at-html-tags': 'off' // Disable XSS warning for {@html}
+      'svelte/no-at-html-tags': 'off', // Disable XSS warning for {@html}
+      'svelte/no-navigation-without-resolve': 'off' // rule detection is unreliable
     }
   },
   {

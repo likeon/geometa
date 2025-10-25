@@ -2,7 +2,7 @@
   import * as Form from '$lib/components/ui/form/index';
   import { Input } from '$lib/components/ui/input/index';
   import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
-  import { zodClient } from 'sveltekit-superforms/adapters';
+  import { zod4Client } from 'sveltekit-superforms/adapters';
   import * as Dialog from '$lib/components/ui/dialog/index';
   import type { PageData } from './$types';
   import { Textarea } from '$lib/components/ui/textarea/index';
@@ -33,7 +33,7 @@
   } = $props();
 
   const formMap = superForm(mapForm, {
-    validators: zodClient(insertMapsSchema),
+    validators: zod4Client(insertMapsSchema),
     resetForm: true,
     dataType: 'json',
     onResult({ result }) {

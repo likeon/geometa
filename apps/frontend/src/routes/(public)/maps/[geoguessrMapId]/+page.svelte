@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import background from '$lib/assets/background.jpg';
   import { Button } from '$lib/components/ui/button';
   import { fade } from 'svelte/transition';
@@ -50,7 +51,7 @@
   );
 
   let visibleSelectedMetaIds = $derived.by(() => {
-    const visible = new Set<number>();
+    const visible = new SvelteSet<number>();
     filteredMetaList.forEach((meta) => {
       if (selectedMetaIds.has(meta.id)) {
         visible.add(meta.id);
@@ -207,15 +208,17 @@
 
 {#snippet notLoggedInAlert()}
   You are not logged in, you can login with discord
-  <a href="/personal" class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900"
-    >here</a>
+  <a
+    href={resolve('/personal')}
+    class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900">here</a>
   and create your personal map.
 {/snippet}
 
 {#snippet noPersonalMapAlert()}
   You don't have any personal maps, you can do it
-  <a href="/personal" class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900"
-    >here</a
+  <a
+    href={resolve('/personal')}
+    class="font-semibold underline hover:text-blue-800 dark:hover:text-blue-900">here</a
   >.
 {/snippet}
 
