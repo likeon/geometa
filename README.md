@@ -14,10 +14,10 @@ If you're looking to use LearnableMeta:
 Even if you believe your issue is technical, please start with Discord support first.
 
 ## For Developers
-Repo includes source code for the entire project: userscript, frontend and api services, discord bot, k8s cluster build and deployment configuratin.
- There isn't much developer documentation at this point as we've made the decision to OpenSource everything only recently.
+Repo includes source code for the entire project: userscript, frontend and api services, discord bot, k8s cluster build and deployment configuration.
 
-Contributors are welcome, but if you are looking to implement breaking changes or plan a big feature we recommend to open a discussion on github or in discord first.
+## Contributing
+All kinds of contributions are welcome. Make sure to read the [CONTRIBUTING.md](CONTRIBUTING.md) first!
 
 ### Tech Stack
 We started with a single SvelteKit fullstack service running on Cloudflare Workers, but SvelteKit's fullstack capabilities weren't as comprehensive as we needed, and Cloudflare KV had terrible latency. Eventually we split out frontend and API services - the frontend is supposed to fetch and modify data only through the API, but right now the transition isn't fully finished and the frontend is still hitting the database directly on some old pages.
