@@ -1,0 +1,26 @@
+minimum_pre_commit_version: "3.5.0"
+default_stages: [commit]
+
+repos:
+  - repo: local
+    hooks:
+      - id: prettier
+        name: prettier (staged)
+        entry: npx --no-install prettier --write
+        language: system
+        types_or: [javascript, ts, jsx, tsx, svelte]
+        additional_dependencies: []
+
+      - id: eslint
+        name: eslint (staged)
+        entry: npx --no-install eslint --max-warnings=0
+        language: system
+        files: "\\.(?:c?js|mjs|ts|tsx|jsx|svelte)$"
+
+      # full sanity check only on push
+      - id: sanity
+        name: npm run sanity (fix + check + lint)
+        entry: bash -lc 'npm run sanity'
+        language: system
+        pass_filenames: false
+        stages: [push]

@@ -1,0 +1,14 @@
+minimum_pre_commit_version: "3.5.0"
+default_stages: [commit]
+
+repos:
+  # Repository-wide hygiene checks
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: check-yaml
+      - id: check-json
+      - id: mixed-line-ending
+      - id: check-added-large-files
