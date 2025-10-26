@@ -1,0 +1,11 @@
+minimum_pre_commit_version: "3.5.0"
+default_stages: [commit]
+
+repos:
+  - repo: local
+    hooks:
+      - id: sanity
+        name: bun run sanity (format + check + type-check)
+        entry: bash -lc 'bun run sanity'
+        language: system
+        pass_filenames: false
