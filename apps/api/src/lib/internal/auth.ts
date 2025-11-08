@@ -1,7 +1,6 @@
 import { prod } from '@api/lib/utils/env';
-import bearer from '@elysiajs/bearer';
 import * as Sentry from '@sentry/bun';
-import { Elysia } from 'elysia';
+import { Elysia, t } from 'elysia';
 import * as jose from 'jose';
 import memoizeOne from 'memoize-one';
 
@@ -31,16 +30,23 @@ const getJWKS = memoizeOne(async () => {
     },
   );
 });
+
+export function bearer() {
+  return new Elysia({ name: 'bearer' }).derive(
+    { as: 'global' },
+    function deriveBearer({ headers }) {
+      const auth = headers.authorization;
+
+      return {
+        bearer: auth?.startsWith('Bearer ') ? auth.slice(7) : null,
+      };
+    },
+  );
+}
 const frontendToken = process.env.FRONTEND_API_TOKEN;
 
 export function auth(jwt?: boolean) {
-  let nameSuffix: string;
-  if (jwt) {
-    nameSuffix = 'jwt';
-  } else {
-    nameSuffix = 'static';
-  }
-  return new Elysia({ name: `geometa-auth-${nameSuffix}` })
+  return new Elysia({ name: `geometa-auth`, seed: { jwt } })
     .use(bearer())
     .onBeforeHandle(async ({ bearer, status }) => {
       if (prod) {
@@ -83,5 +89,9 @@ export function auth(jwt?: boolean) {
           return { userId };
         },
       },
+    })
+    .model({
+      UnauthenticatedResponse: t.Void(),
+      InvalidAuthTokenResponse: t.Void(),
     });
 }

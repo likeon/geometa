@@ -13,7 +13,7 @@
     "sanity": "npm run fix && npm run check && npm run lint"
   },
   "devDependencies": {
-    "@elysiajs/eden": "^1.3.2",
+    "@elysiajs/eden": "^1.4.4",
     "@fontsource/fira-mono": "^5.0.0",
     "@iconify/json": "^2.2.243",
     "@iconify/svelte": "^5.0.0",
@@ -26,7 +26,7 @@
     "@sveltejs/kit": "^2.21.0",
     "@sveltejs/vite-plugin-svelte": "^6.0.3",
     "@tailwindcss/vite": "^4.1.8",
-    "@types/bun": "^1.2.14",
+    "@types/bun": "^1.3.2",
     "@types/eslint": "^9.6.0",
     "@types/node": "^24.0.0",
     "@zerodevx/svelte-toast": "^0.9.6",
@@ -34,7 +34,7 @@
     "clsx": "^2.1.1",
     "dotenv-cli": "^10.0.0",
     "drizzle-kit": "^0.31.1",
-    "elysia": "^1.3.8",
+    "elysia": "^1.4.15",
     "embla-carousel-svelte": "^8.6.0",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.1.5",
