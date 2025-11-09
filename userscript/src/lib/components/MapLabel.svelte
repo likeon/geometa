@@ -14,7 +14,7 @@
     background-color: #0003;
     color: #fff;
     text-align: center;
-    z-index: 999999;
+    z-index: 100;
     position: absolute;
     bottom: 4px;
     right: 4px;
@@ -25,7 +25,6 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
   }
 
   p {
