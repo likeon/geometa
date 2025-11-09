@@ -16,8 +16,8 @@ export default defineConfig({
         description: 'UserScript for GeoGuessr Learnable Meta maps',
         match: ['*://*.geoguessr.com/*'],
         connect: ['learnablemeta.com'],
-        updateURL: 'https://github.com/likeon/geometa/raw/main/dist/geometa.user.js',
-        downloadURL: 'https://github.com/likeon/geometa/raw/main/dist/geometa.user.js',
+        updateURL: 'https://github.com/likeon/geometa/raw/main/userscript/dist/geometa.user.js',
+        downloadURL: 'https://github.com/likeon/geometa/raw/main/userscript/dist/geometa.user.js',
         'run-at': 'document-start',
         require: [
           'https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/5e449d6b64c828fce5d2915772d61c7f95263e34/geoguessr-event-framework.js'
