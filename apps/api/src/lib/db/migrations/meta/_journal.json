@@ -232,6 +232,13 @@
       "when": 1754948970069,
       "tag": "0032_giant_salo",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1762801923635,
+      "tag": "0033_medical_winter_soldier",
+      "breakpoints": true
     }
   ]
 }
