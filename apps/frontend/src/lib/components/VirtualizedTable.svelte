@@ -20,6 +20,7 @@
   import Icon from '@iconify/svelte';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index';
   import { ChevronDown } from '@lucide/svelte';
+  import type { Component } from 'svelte';
 
   type FilterOption = {
     label: string;
@@ -36,7 +37,7 @@
     buttonText: string;
     handler: () => void;
     variant?: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link';
-    icon?: string;
+    icon?: Component;
   };
 
   type MassActionConfig =
@@ -239,7 +240,8 @@
                     : ''}
                   onclick={action.handler}>
                   {#if action.icon}
-                    <span class="mr-2">{action.icon}</span>
+                    {@const IconComponent = action.icon}
+                    <IconComponent class="mr-2 h-4 w-4" />
                   {/if}
                   {action.buttonText}
                 </DropdownMenu.Item>

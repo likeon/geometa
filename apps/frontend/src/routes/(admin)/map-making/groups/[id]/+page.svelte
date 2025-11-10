@@ -16,6 +16,11 @@
   import MassActionDialogs from '$routes/(admin)/map-making/groups/[id]/MassActionDialogs.svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
   import { SvelteSet } from 'svelte/reactivity';
+  import Download from '@lucide/svelte/icons/download';
+  import FileText from '@lucide/svelte/icons/file-text';
+  import Plus from '@lucide/svelte/icons/plus';
+  import Share from '@lucide/svelte/icons/share';
+  import Trash2 from '@lucide/svelte/icons/trash-2';
 
   let { data } = $props();
 
@@ -318,21 +323,21 @@
       dropdownItems: [
         {
           buttonText: 'Download Locations',
-          icon: '⬇️',
+          icon: Download,
           handler: () => {
             isDownloadLocationsDialogOpen = true;
           }
         },
         {
           buttonText: 'Download Metas',
-          icon: '📄',
+          icon: FileText,
           handler: () => {
             isDownloadMetasDialogOpen = true;
           }
         },
         {
           buttonText: 'Add Levels',
-          icon: '➕',
+          icon: Plus,
           handler: () => {
             selectedLevelIds.clear();
             isAddLevelsDialogOpen = true;
@@ -340,7 +345,7 @@
         },
         {
           buttonText: 'Share to Group',
-          icon: '📤',
+          icon: Share,
           handler: () => {
             selectedGroupId = '';
             isShareDialogOpen = true;
@@ -348,7 +353,7 @@
         },
         {
           buttonText: 'Delete Selected',
-          icon: '🗑',
+          icon: Trash2,
           variant: 'destructive',
           handler: () => {
             isDeleteDialogOpen = true;

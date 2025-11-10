@@ -8,6 +8,7 @@
   import { Button } from '$lib/components/ui/button';
   import Icon from '@iconify/svelte';
   import ConfirmationDialog from '$lib/components/ConfirmationDialog.svelte';
+  import Trash2 from '@lucide/svelte/icons/trash-2';
 
   let { data } = $props();
   let selectedId = $state<number>();
@@ -73,7 +74,7 @@
         dropdownItems: [
           {
             buttonText: 'Delete Selected',
-            icon: '🗑',
+            icon: Trash2,
             variant: 'destructive',
             handler: () => {
               isDeleteDialogOpen = true;
