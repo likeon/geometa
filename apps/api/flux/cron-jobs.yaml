@@ -36,6 +36,11 @@ spec:
                     secretKeyRef:
                       name: api
                       key: SENTRY_DSN
+                - name: GOOGLE_MAPS_API_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: api
+                      key: GOOGLE_MAPS_API_KEY
               securityContext:
                 runAsNonRoot: true
                 runAsUser: 1000
