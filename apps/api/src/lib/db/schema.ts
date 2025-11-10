@@ -62,6 +62,7 @@ export const mapGroupLocations = pgTable(
     mapGroupId: integer('map_group_id')
       .notNull()
       .references(() => mapGroups.id, { onDelete: 'cascade' }),
+    isOnStreetView: boolean('is_on_street_view'),
     updatedAt: integer('updated_at'),
     modifiedAt: integer('modified_at').default(1730419200).notNull(),
     ...commonLocationFields,

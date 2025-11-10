@@ -51,6 +51,7 @@ export const mapGroupLocations = pgTable(
     extraTag: text('extra_tag').notNull(),
     extraPanoId: text('extra_pano_id'),
     extraPanoDate: text('extra_pano_date'),
+    isOnStreetView: boolean('is_on_street_view'),
     updatedAt: integer('updated_at'),
     modifiedAt: integer('modified_at').default(1730419200).notNull()
   },
