@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: api-validate-street-view
+spec:
+  schedule: "0 0 * * *"
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: api-cron
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: api
+              image: ghcr.io/likeon/geometa-api:main-88013d5c-1762633293 # {"$imagepolicy": "geometa-prod:api"}
+              command: ["./server", "script", "validate_street_view_locations"]
+              resources:
+                requests:
+                  memory: 100Mi
+                  cpu: 100m
+                limits:
+                  memory: "800Mi"
+                  cpu: 300m
+              env:
+                - name: DATABASE_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: geometa.postgres.credentials.postgresql.acid.zalan.do
+                      key: password
+                - name: SENTRY_DSN
+                  valueFrom:
+                    secretKeyRef:
+                      name: api
+                      key: SENTRY_DSN
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 1000
+                runAsGroup: 1000
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+          imagePullSecrets:
+            - name: registries
+          serviceAccountName: api
