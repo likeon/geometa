@@ -76,7 +76,6 @@ async function main() {
             `Error checking location ${location.id} with panoId ${location.panoId}:`,
             error,
           );
-          unfoundLocationIds.push(location.id);
         }
       }
 

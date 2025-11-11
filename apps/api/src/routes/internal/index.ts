@@ -1,7 +1,7 @@
 import { permissionErrorCatcher } from '@api/lib/internal/permissions';
-import { streetViewFromPanoid } from '@api/lib/utils/google';
-import { Elysia, t } from 'elysia';
+import { Elysia } from 'elysia';
 import { discordBotRouter } from './discord-bot';
+import { locationsRouter } from './locations';
 import { mapGroupsRouter } from './map-groups';
 import { mapsRouter } from './maps';
 import { metasRouter } from './metas';
@@ -16,14 +16,5 @@ export const internalRouter = new Elysia({
   .use(metasRouter)
   .use(usersRouter)
   .use(discordBotRouter)
-  .get(
-    '/pano',
-    async ({ query: { panoId } }) => {
-      const result = await streetViewFromPanoid(panoId);
-      return result;
-    },
-    {
-      query: t.Object({ panoId: t.String() }),
-    },
-  )
+  .use(locationsRouter)
   .use(permissionErrorCatcher());

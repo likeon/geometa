@@ -18,6 +18,7 @@
   import { SvelteSet } from 'svelte/reactivity';
   import Download from '@lucide/svelte/icons/download';
   import FileText from '@lucide/svelte/icons/file-text';
+  import MapPinX from '@lucide/svelte/icons/map-pin-x';
   import Plus from '@lucide/svelte/icons/plus';
   import Share from '@lucide/svelte/icons/share';
   import Trash2 from '@lucide/svelte/icons/trash-2';
@@ -152,6 +153,19 @@
   <DashNavBar groupId={data.group.id} groupName={data.group.name}></DashNavBar>
   <div class="flex flex-wrap items-center">
     <div class="grow flex items-center justify-end">
+      {#await data.locationsNotOnStreetViewCount then locationsNotOnStreetViewCount}
+        {#if locationsNotOnStreetViewCount}
+          <Tooltip content="Locations that have been deleted from Street View">
+            <Button
+              variant="destructive"
+              class="ml-3"
+              href="/map-making/groups/{data.group.id}/download-missing-locations">
+              <MapPinX class="mr-2 h-4 w-4" />
+              {locationsNotOnStreetViewCount}
+            </Button>
+          </Tooltip>
+        {/if}
+      {/await}
       <Button variant="outline" class="ml-3" onclick={uploadLocations}>Upload locations</Button>
       <Button class="ml-3" onclick={addMeta}>Add meta</Button>
       <form

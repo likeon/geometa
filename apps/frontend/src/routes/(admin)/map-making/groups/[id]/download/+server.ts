@@ -1,4 +1,4 @@
-import { api, internalHeaders } from '$lib/api';
+import { api } from '$lib/api';
 import { getGroupId } from '../utils';
 import { error } from '@sveltejs/kit';
 
@@ -7,7 +7,7 @@ export async function GET(event) {
 
   const { data, error: apiError } = await api.internal['map-groups']({ id: groupId })[
     'download-locations'
-  ].post({}, internalHeaders(event.locals));
+  ].post({});
 
   if (apiError) {
     console.error('Download API Error:', apiError);
@@ -34,7 +34,7 @@ export async function POST(event) {
 
   const { data, error: apiError } = await api.internal['map-groups']({ id: groupId })[
     'download-locations'
-  ].post({ metaIds: metaIds.length > 0 ? metaIds : undefined }, internalHeaders(event.locals));
+  ].post({ metaIds: metaIds.length > 0 ? metaIds : undefined });
 
   if (apiError) {
     console.error('Download API Error:', apiError);

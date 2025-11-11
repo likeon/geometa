@@ -23,7 +23,7 @@ import rehypeSanitize from 'rehype-sanitize';
 import rehypeStringify from 'rehype-stringify';
 import rehypeExternalLinks from 'rehype-external-links';
 import { uploadMetas } from '$routes/(admin)/map-making/groups/[id]/metasUpload';
-import { api, internalHeaders } from '$lib/api';
+import { api } from '$lib/api';
 import {
   insertMetasSchema,
   mapUploadSchema,
@@ -153,6 +153,10 @@ export const load = async ({ params, locals }) => {
     error(404, 'No group');
   }
 
+  const locationsNotOnStreetViewCount = api.internal['locations'].count
+    .get({ query: { groupId: group.id, isOnStreetView: false } })
+    .then((res) => res.data!.count);
+
   const metaForm = await superValidate(zod4(insertMetasSchema));
   const mapUploadForm = await superValidate(zod4(mapUploadSchema));
   const metasUploadForm = await superValidate(zod4(metasUploadSchema));
@@ -162,6 +166,7 @@ export const load = async ({ params, locals }) => {
 
   return {
     group,
+    locationsNotOnStreetViewCount,
     metaForm,
     mapUploadForm,
     metasUploadForm,
@@ -842,7 +847,7 @@ export const actions = {
       }
     }
   },
-  uploadMetaImages: async ({ request, locals }) => {
+  uploadMetaImages: async ({ request }) => {
     const form = await superValidate(request, zod4(imageUploadSchema));
 
     if (!form.valid) {
@@ -851,7 +856,7 @@ export const actions = {
 
     const { data, status } = await api.internal
       .metas({ id: form.data.metaId })
-      .images.post({ file: form.data.file }, internalHeaders(locals));
+      .images.post({ file: form.data.file });
 
     switch (status) {
       case 200:
@@ -883,7 +888,7 @@ export const actions = {
       .where(eq(metas.id, savedImage[0].metas.id));
     return { success: true, imageId: imageId };
   },
-  updateImageOrder: async ({ request, locals }) => {
+  updateImageOrder: async ({ request }) => {
     const form = await superValidate(request, zod4(imageOrderUpdateSchema));
 
     if (!form.valid) {
@@ -893,7 +898,7 @@ export const actions = {
     // Call the internal API to update image order
     const { error: apiError } = await api.internal
       .metas({ id: form.data.metaId })
-      .images.order.put({ updates: form.data.updates }, internalHeaders(locals));
+      .images.order.put({ updates: form.data.updates });
 
     if (apiError) {
       console.error('Failed to update image order:', apiError);
