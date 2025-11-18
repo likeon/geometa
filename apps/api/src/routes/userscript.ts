@@ -117,7 +117,7 @@ export const userscriptRouter = new Elysia({
           mapId: maps.id,
           userApiTokens: sql<string[]>`
             CASE
-      WHEN ${maps.isPersonal} = TRUE THEN
+            WHEN ${maps.isPersonal} = TRUE THEN
             COALESCE(
             (SELECT ARRAY_AGG(${users.apiToken})
             FILTER (WHERE ${users.id} = ${maps.userId})

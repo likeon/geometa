@@ -8,6 +8,7 @@
   import { ModeWatcher } from 'mode-watcher';
   import { updated } from '$app/state';
   import * as Tooltip from '$lib/components/ui/tooltip/index';
+  import { Toaster } from '$lib/components/ui/sonner';
   // import AnnouncementBanner from '$lib/components/AnnouncementBanner.svelte';
 
   let { children } = $props();
@@ -39,3 +40,4 @@
     <Footer />
   </div>
 </Tooltip.Provider>
+<Toaster />

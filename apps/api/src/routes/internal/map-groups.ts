@@ -205,4 +205,25 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         404: t.Object({ error: t.String() }),
       },
     },
+  )
+  .post(
+    '/:id/settings',
+    async ({ params: { id: groupId }, body, userId, status }) => {
+      await ensurePermissions(userId, groupId);
+      const updated = await db
+        .update(mapGroups)
+        // need to reset syncedAt
+        .set({ ...body, syncedAt: null })
+        .where(eq(mapGroups.id, groupId))
+        .returning({ id: mapGroups.id });
+      if (updated.length) {
+        return status(200);
+      }
+      return status(404);
+    },
+    {
+      params: t.Object({ id: t.Number() }),
+      body: t.Object({ syncIncludeLocationsNotOnStreetView: t.Boolean() }),
+      userId: true,
+    },
   );

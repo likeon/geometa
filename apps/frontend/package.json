@@ -42,7 +42,7 @@
     "estree-walker": "^3.0.3",
     "globals": "^16.0.0",
     "layerchart": "^2.0.0-next.27",
-    "mode-watcher": "^1.0.7",
+    "mode-watcher": "^1.1.0",
     "paneforge": "^1.0.0-next.5",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
@@ -83,7 +83,7 @@
     "remark-parse": "^11.0.0",
     "remark-rehype": "^11.1.2",
     "runed": "^0.35",
-    "svelte-sonner": "^1.0.4",
+    "svelte-sonner": "^1.0.6",
     "unified": "^11.0.5",
     "zod": "^4.0.10"
   }

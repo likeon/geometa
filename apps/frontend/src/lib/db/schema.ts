@@ -24,7 +24,10 @@ export const metaSuggestions = pgTable('meta_suggestions', {
 export const mapGroups = pgTable('map_groups', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
   name: text('name').notNull(),
-  syncedAt: integer('synced_at')
+  syncedAt: integer('synced_at'),
+  syncIncludeLocationsNotOnStreetView: boolean('sync_include_locations_not_on_street_view')
+    .default(true)
+    .notNull()
 });
 
 export const mapGroupsRelations = relations(mapGroups, ({ many }) => ({
