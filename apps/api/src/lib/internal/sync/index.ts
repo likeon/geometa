@@ -107,11 +107,14 @@ export async function syncMapGroup(group: {
           mgl.pano_id,
           mgl.extra_tag,
           mgl.extra_pano_id,
-          mgl.extra_pano_date
+          mgl.extra_pano_date,
+          get_country_from_tag_name(mgl.extra_tag) as country
          from map_group_locations mgl
          join metas m on m.map_group_id = mgl.map_group_id and m.tag_name = mgl.extra_tag
+         join map_groups mg on mg.id = mgl.map_group_id
          where mgl.map_group_id = ${group.id} and (${group.syncedAt}::bigint IS NULL OR
-            mgl.modified_at > ${group.syncedAt}::bigint)
+            mgl.modified_at > ${group.syncedAt}::bigint) and
+            (mg.sync_include_locations_not_on_street_view or mgl.is_on_street_view is not false)
       )
       MERGE INTO synced_locations sl
       USING l
@@ -127,10 +130,10 @@ export async function syncMapGroup(group: {
           extra_tag = l.extra_tag,
           extra_pano_id = l.extra_pano_id,
           extra_pano_date = l.extra_pano_date,
-          country = get_country_from_tag_name(l.extra_tag)
+          country = l.country
       WHEN NOT MATCHED BY TARGET THEN
         INSERT (synced_meta_id, lat, lng, heading, pitch, zoom, pano_id, extra_tag, extra_pano_id, extra_pano_date, country)
-        VALUES (l.synced_meta_id, l.lat, l.lng, l.heading, l.pitch, l.zoom, l.pano_id, l.extra_tag, l.extra_pano_id, l.extra_pano_date, get_country_from_tag_name(l.extra_tag))
+        VALUES (l.synced_meta_id, l.lat, l.lng, l.heading, l.pitch, l.zoom, l.pano_id, l.extra_tag, l.extra_pano_id, l.extra_pano_date, l.country)
       ;
   `);
     await tx.execute(sql`
@@ -141,8 +144,10 @@ export async function syncMapGroup(group: {
         AND NOT EXISTS (
           SELECT 1
           FROM   map_group_locations mgl
+          JOIN map_groups mg on mg.id = mgl.map_group_id
           WHERE  mgl.map_group_id = sm.map_group_id
             AND  mgl.pano_id = sl.pano_id
+            AND (mg.sync_include_locations_not_on_street_view or mgl.is_on_street_view is not false)
         );
     `);
 

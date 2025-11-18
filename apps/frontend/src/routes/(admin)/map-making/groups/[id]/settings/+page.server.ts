@@ -7,9 +7,14 @@ import { z } from 'zod/v4';
 import type { DB } from '$lib/drizzle';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
+import { api } from '$lib/api';
 
 const basePermissionDeleteSchema = z.object({
   permissionId: z.coerce.number().int()
+});
+
+const settingsSchema = z.object({
+  syncIncludeLocationsNotOnStreetView: z.boolean()
 });
 
 function createPermissionDeleteSchema(db: DB, groupId: number, requestUserId: string) {
@@ -97,10 +102,15 @@ export const load = async ({ params, locals }) => {
   const permissionCreateForm = await superValidate(
     zod4(createPermissionCreateSchema(locals.db, id))
   );
+  const settingsForm = await superValidate(
+    { syncIncludeLocationsNotOnStreetView: group.syncIncludeLocationsNotOnStreetView },
+    zod4(settingsSchema)
+  );
   return {
     group,
     user: locals.user!,
-    permissionCreateForm
+    permissionCreateForm,
+    settingsForm
   };
 };
 
@@ -137,7 +147,6 @@ export const actions = {
       };
     } catch (err) {
       if (err instanceof z.ZodError) {
-        console.debug(err);
         const { fieldErrors } = err.flatten();
         return fail(400, {
           errors: fieldErrors,
@@ -161,5 +170,19 @@ export const actions = {
       await locals.db.select().from(users).where(eq(users.username, form.data.username))
     )[0];
     await locals.db.insert(mapGroupPermissions).values({ mapGroupId: groupId, userId: user.id });
+  },
+  updateSettings: async ({ params, request }) => {
+    const form = await superValidate(request, zod4(settingsSchema));
+    if (!form.valid) {
+      return fail(400, { form });
+    }
+
+    const { error: apiError } = await api.internal['map-groups']({
+      id: getGroupId(params)
+    }).settings.post(form.data);
+    if (apiError) {
+      // todo: handle 403 and 404
+      throw new Error('unexpected api error');
+    }
   }
 };

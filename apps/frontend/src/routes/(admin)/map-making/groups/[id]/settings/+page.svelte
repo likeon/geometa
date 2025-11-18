@@ -9,7 +9,9 @@
   import { Alert, AlertDescription } from '$lib/components/ui/alert';
   import { Card, CardContent } from '$lib/components/ui/card';
   import * as Table from '$lib/components/ui/table';
+  import { Switch } from '$lib/components/ui/switch';
   import { superForm } from 'sveltekit-superforms';
+  import { toast } from 'svelte-sonner';
 
   let { data } = $props();
 
@@ -35,6 +37,14 @@
     constraints: permissionCreateConstraints,
     enhance: permissionCreateEnhance
   } = superForm(data.permissionCreateForm);
+
+  const { form: settingsForm, enhance: settingsEnhance } = superForm(data.settingsForm, {
+    onResult({ result }) {
+      if (result.type === 'success') {
+        toast('Settings updated successfully!');
+      }
+    }
+  });
 </script>
 
 <div>
@@ -97,7 +107,27 @@
     <Button type="submit" variant="outline">Share</Button>
   </form>
 
-  <h4 class="text-lg font-semibold mt-3">Danger Zone</h4>
+  <h4 class="text-lg font-semibold mt-6">Settings</h4>
+  <p>Configure map group settings</p>
+
+  <form action="?/updateSettings" method="post" class="space-y-4 mt-2" use:settingsEnhance>
+    <div class="flex items-center space-x-2">
+      <Switch
+        id="syncIncludeLocationsNotOnStreetView"
+        name="syncIncludeLocationsNotOnStreetView"
+        bind:checked={$settingsForm.syncIncludeLocationsNotOnStreetView} />
+      <Label for="syncIncludeLocationsNotOnStreetView" class="cursor-pointer">
+        Include locations not on Street View
+      </Label>
+    </div>
+    <p class="text-sm text-muted-foreground">
+      When enabled, locations that are not available on Street View will be included when syncing
+      with GeoGuessr.
+    </p>
+    <Button type="submit" variant="outline">Save Settings</Button>
+  </form>
+
+  <h4 class="text-lg font-semibold mt-6">Danger Zone</h4>
 
   <Card class="border-red-300 dark:border-red-800 border-2 w-full max-w-lg mt-2">
     <CardContent class="p-4">
