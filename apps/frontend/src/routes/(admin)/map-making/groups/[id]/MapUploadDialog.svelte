@@ -1,7 +1,7 @@
 <script lang="ts">
   import { type SuperValidated, type Infer, fileProxy } from 'sveltekit-superforms';
   import { superForm } from 'sveltekit-superforms';
-  import { Checkbox } from '$lib/components/ui/checkbox';
+  import { RadioGroup, RadioGroupItem } from '$lib/components/ui/radio-group';
   import { Label } from '$lib/components/ui/form';
   import { Input } from '$lib/components/ui/input';
   import * as Dialog from '$lib/components/ui/dialog/index';
@@ -29,7 +29,7 @@
       }
     },
     onSubmit({ formData, cancel }) {
-      if (!isPartialUpload && !confirmFullUpload()) {
+      if ((uploadMode === 'full' || uploadMode === 'tagReplace') && !confirmFullUpload()) {
         cancel();
         isUploadDialogOpen = false;
       }
@@ -40,7 +40,7 @@
   });
 
   const { form: formData, enhance, submit, reset } = form;
-  const isPartialUpload = $derived($formData.partialUpload);
+  const uploadMode = $derived($formData.uploadMode);
   const file = fileProxy(form, 'file');
 
   $effect(() => {
@@ -72,9 +72,16 @@
   }
 
   function confirmFullUpload() {
-    return confirm(
-      'You are about to replace all locations in your map group with new locations (metas and description will stay). Are you sure?'
-    );
+    if (uploadMode === 'full') {
+      return confirm(
+        'You are about to replace ALL locations in your map group with new locations (metas and descriptions will stay). Are you sure?'
+      );
+    } else if (uploadMode === 'tagReplace') {
+      return confirm(
+        'You are about to replace locations with specific tags only. Locations with other tags will remain untouched. Are you sure?'
+      );
+    }
+    return true;
   }
 </script>
 
@@ -89,23 +96,7 @@
 
     <div class="space-y-4 py-4">
       <!-- Upload Mode Info -->
-      {#if !isPartialUpload}
-        <div class="rounded-md bg-destructive/10 border border-destructive/20 p-3">
-          <div class="flex items-start space-x-2">
-            <Icon
-              icon="material-symbols:warning-rounded"
-              width="1rem"
-              height="1rem"
-              class="text-destructive mt-0.5" />
-            <div class="space-y-1">
-              <p class="text-sm font-medium text-destructive">Full replacement mode</p>
-              <p class="text-xs text-muted-foreground">
-                All existing locations will be replaced. Metas and descriptions will be preserved.
-              </p>
-            </div>
-          </div>
-        </div>
-      {:else}
+      {#if uploadMode === 'partial'}
         <div
           class="rounded-md bg-blue-50 border border-blue-200 p-3 dark:bg-blue-950/20 dark:border-blue-900/30">
           <div class="flex items-start space-x-2">
@@ -124,24 +115,77 @@
             </div>
           </div>
         </div>
+      {:else if uploadMode === 'full'}
+        <div class="rounded-md bg-destructive/10 border border-destructive/20 p-3">
+          <div class="flex items-start space-x-2">
+            <Icon
+              icon="material-symbols:warning-rounded"
+              width="1rem"
+              height="1rem"
+              class="text-destructive mt-0.5" />
+            <div class="space-y-1">
+              <p class="text-sm font-medium text-destructive">Full replacement mode</p>
+              <p class="text-xs text-muted-foreground">
+                All existing locations will be replaced. Metas and descriptions will be preserved.
+              </p>
+            </div>
+          </div>
+        </div>
+      {:else if uploadMode === 'tagReplace'}
+        <div
+          class="rounded-md bg-orange-50 border border-orange-200 p-3 dark:bg-orange-950/20 dark:border-orange-900/30">
+          <div class="flex items-start space-x-2">
+            <Icon
+              icon="material-symbols:warning-rounded"
+              width="1rem"
+              height="1rem"
+              class="text-orange-600 mt-0.5 dark:text-orange-400" />
+            <div class="space-y-1">
+              <p class="text-sm font-medium text-orange-800 dark:text-orange-200">
+                Tag-based replacement mode
+              </p>
+              <p class="text-xs text-muted-foreground">
+                Only locations with tags present in the upload will be replaced. Other locations
+                remain untouched.
+              </p>
+            </div>
+          </div>
+        </div>
       {/if}
 
       <!-- File Upload Section -->
       <form method="post" action="?/uploadMapJson" enctype="multipart/form-data" use:enhance>
-        <Form.Field {form} name="partialUpload">
+        <!-- Upload Mode Selection -->
+        <Form.Field {form} name="uploadMode">
           <Form.Control>
             {#snippet children({ props })}
-              <div class="flex items-center space-x-2">
-                <Checkbox {...props} bind:checked={$formData.partialUpload} name="partialUpload" />
-                <Label for={props.id} class="text-sm font-normal cursor-pointer">
-                  Keep existing locations (partial upload)
-                </Label>
+              <div class="space-y-3">
+                <Label class="text-sm font-medium">Upload Mode</Label>
+                <RadioGroup bind:value={$formData.uploadMode} {...props}>
+                  <div class="flex items-center space-x-2">
+                    <RadioGroupItem value="partial" id="partial" />
+                    <Label for="partial" class="text-sm font-normal cursor-pointer">
+                      Partial upload - Add/update locations without removing existing ones
+                    </Label>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <RadioGroupItem value="tagReplace" id="tagReplace" />
+                    <Label for="tagReplace" class="text-sm font-normal cursor-pointer">
+                      Tag-based replacement - Replace only locations with uploaded tags
+                    </Label>
+                  </div>
+                  <div class="flex items-center space-x-2">
+                    <RadioGroupItem value="full" id="full" />
+                    <Label for="full" class="text-sm font-normal cursor-pointer">
+                      Full replacement - Replace all locations in the group
+                    </Label>
+                  </div>
+                </RadioGroup>
               </div>
             {/snippet}
           </Form.Control>
           <Form.FieldErrors />
         </Form.Field>
-
         <Form.Field {form} name="file">
           <Form.Control>
             {#snippet children({ props })}

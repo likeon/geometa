@@ -743,9 +743,10 @@ export const actions = {
             .returning({ id: mapGroupLocations.id });
         }
 
-        // Step 2: Delete any records that weren't upserted
+        // Step 2: Delete records based on upload mode
 
-        if (!form.data.partialUpload) {
+        if (form.data.uploadMode === 'full') {
+          // Full replacement: delete all locations not in current upload
           await trx
             .delete(mapGroupLocations)
             .where(
@@ -757,7 +758,23 @@ export const actions = {
                 )
               )
             );
+        } else if (form.data.uploadMode === 'tagReplace') {
+          // Tag-based replacement: delete only locations with tags present in upload
+          const tagsArray = Array.from(usedTags);
+          await trx
+            .delete(mapGroupLocations)
+            .where(
+              and(
+                eq(mapGroupLocations.mapGroupId, groupId),
+                inArray(mapGroupLocations.extraTag, tagsArray),
+                or(
+                  isNull(mapGroupLocations.updatedAt),
+                  lt(mapGroupLocations.updatedAt, currentTimestamp)
+                )
+              )
+            );
         }
+        // For 'partial' mode: no deletions, just upserts
 
         // Step 3: Insert tags into metas table
         if (usedTags.size > 0) {

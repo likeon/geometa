@@ -35,7 +35,7 @@ export const mapUploadSchema = z.object({
     .refine((file) => file.type === 'application/json', {
       error: 'File must be a JSON file.'
     }),
-  partialUpload: z.boolean().prefault(true)
+  uploadMode: z.enum(['partial', 'full', 'tagReplace']).prefault('partial')
 });
 
 export const metasUploadContentSchema = z
