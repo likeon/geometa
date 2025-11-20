@@ -162,24 +162,33 @@
               <div class="space-y-3">
                 <Label class="text-sm font-medium">Upload Mode</Label>
                 <RadioGroup bind:value={$formData.uploadMode} {...props}>
-                  <div class="flex items-center space-x-2">
-                    <RadioGroupItem value="partial" id="partial" />
-                    <Label for="partial" class="text-sm font-normal cursor-pointer">
+                  <button
+                    type="button"
+                    class="flex items-center space-x-2 cursor-pointer text-left"
+                    onclick={() => ($formData.uploadMode = 'partial')}>
+                    <RadioGroupItem value="partial" />
+                    <span class="text-sm font-normal">
                       Partial upload - Add/update locations without removing existing ones
-                    </Label>
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <RadioGroupItem value="tagReplace" id="tagReplace" />
-                    <Label for="tagReplace" class="text-sm font-normal cursor-pointer">
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    class="flex items-center space-x-2 cursor-pointer text-left"
+                    onclick={() => ($formData.uploadMode = 'tagReplace')}>
+                    <RadioGroupItem value="tagReplace" />
+                    <span class="text-sm font-normal">
                       Tag-based replacement - Replace only locations with uploaded tags
-                    </Label>
-                  </div>
-                  <div class="flex items-center space-x-2">
-                    <RadioGroupItem value="full" id="full" />
-                    <Label for="full" class="text-sm font-normal cursor-pointer">
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    class="flex items-center space-x-2 cursor-pointer text-left"
+                    onclick={() => ($formData.uploadMode = 'full')}>
+                    <RadioGroupItem value="full" />
+                    <span class="text-sm font-normal">
                       Full replacement - Replace all locations in the group
-                    </Label>
-                  </div>
+                    </span>
+                  </button>
                 </RadioGroup>
               </div>
             {/snippet}
