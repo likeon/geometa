@@ -8,7 +8,4 @@ install:
   prek install -t pre-commit -t pre-push
   cd apps/frontend && npm ci
   cd apps/api && bun i --locked
-  cd userscript/ && npm ci
-
-git-setup-hooks:
-  .githooks/setup.sh
+  cd userscript/ && pnpm install --frozen-lockfile
