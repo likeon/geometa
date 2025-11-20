@@ -59,6 +59,14 @@ const copyMetaSchema = z.object({
 
 export type CopyMetaSchema = typeof copyMetaSchema;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- data is validated by Zod schema immediately after this function
+function normalizeMapJsonFormat(jsonData: any) {
+  if (Array.isArray(jsonData)) {
+    return { customCoordinates: jsonData };
+  }
+  return jsonData;
+}
+
 const mapJsonSchema = z.object({
   customCoordinates: z
     .object({
@@ -618,7 +626,8 @@ export const actions = {
     }
     let jsonData;
     try {
-      jsonData = await extractJsonData(form.data.file);
+      const rawJsonData = await extractJsonData(form.data.file);
+      jsonData = normalizeMapJsonFormat(rawJsonData);
     } catch (_error) {
       return setError(
         form,
