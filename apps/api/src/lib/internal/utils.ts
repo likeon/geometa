@@ -8,12 +8,12 @@ export async function geoguessrAPIFetch(
     throw new Error('NFCA_TOKEN IS MISSING');
   }
 
-  const defaultHeaders: HeadersInit = {
+  const defaultHeaders = {
     Cookie: `_ncfa=${ncfaToken}`,
     'Content-Type': 'application/json',
   };
 
-  const mergedHeaders: HeadersInit = {
+  const mergedHeaders = {
     ...defaultHeaders,
     ...(headers || {}),
   };

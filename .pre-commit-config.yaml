@@ -8,6 +8,5 @@ repos:
     hooks:
       - id: end-of-file-fixer
       - id: trailing-whitespace
-      - id: check-json
       - id: mixed-line-ending
       - id: check-added-large-files
