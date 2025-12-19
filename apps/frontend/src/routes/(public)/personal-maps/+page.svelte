@@ -47,9 +47,9 @@
         <IconListItem>
           <span
             ><strong class="font-semibold text-foreground">Create a personal map.</strong>
-            After creating your GeoGuessr map, copy the map ID from the URL. It's the long string of
-            letters and numbers at the end of the address bar (e.g., after geoguessr.com/map-maker/)
-            and use it to create a personal map in our
+            After creating your GeoGuessr map, copy the map ID from the URL. It's the long string of letters
+            and numbers at the end of the address bar (e.g., after geoguessr.com/map-maker/) and use it
+            to create a personal map in our
             <a href={resolve('/personal')} target="_blank">portal</a>.
           </span>
         </IconListItem>
