@@ -75,16 +75,20 @@ const mapJsonSchema = z.object({
       heading: z.number(),
       pitch: z.number(),
       zoom: z.number(),
-      panoId: z.string(),
+      panoId: z.string().nullable(),
       extra: z.object({
         tags: z.string().array().length(1),
         panoId: z.string().optional().nullable(),
         panoDate: z.string().optional().nullable()
       })
     })
+    .refine((coord) => coord.panoId != null || coord.extra.panoId != null, {
+      message: 'missing panoId',
+      path: ['panoId']
+    })
     .array()
     .superRefine((coordinates, ctx) => {
-      const panoIds = coordinates.map((coord) => coord.panoId);
+      const panoIds = coordinates.map((coord) => coord.panoId ?? coord.extra.panoId);
       const uniquePanoIds = new Set(panoIds);
 
       if (panoIds.length !== uniquePanoIds.size) {
@@ -662,24 +666,14 @@ export const actions = {
           }
         } else if (issue.path.includes('duplicates')) {
           return message;
-        } else if (
-          issue.path.includes('panoId') &&
-          issue.message === 'Expected string, received null'
-        ) {
-          // Handle missing panoId case
-          const locationIndex = issue.path[1] as number; // customCoordinates[index]
+        } else if (issue.path.includes('panoId') && issue.message === 'missing panoId') {
+          const locationIndex = issue.path[1] as number;
           const location = jsonData.customCoordinates?.[locationIndex];
-          const extraPanoId = location?.extra?.panoId || null;
-          const locationNumber = locationIndex + 1; // 1-based numbering
-          message = `doesn't have set panoId`;
-
-          // Return HTML with link if extra panoId exists
-          if (extraPanoId) {
-            const sanitizedPanoId = extraPanoId.replace(/[^a-zA-Z0-9_-]/g, '');
-            return `<a href="https://maps.google.com/maps?q=&layer=c&panoid=${encodeURIComponent(sanitizedPanoId)}" target="_blank" class="underline hover:text-primary">Location ${locationNumber}</a> ${message}`;
-          } else {
-            return `Location ${locationNumber} ${message}`;
+          const locationNumber = locationIndex + 1;
+          if (location?.lat != null && location?.lng != null) {
+            return `<a href="https://maps.google.com/maps?q=${location.lat},${location.lng}" target="_blank" class="underline hover:text-primary">Location ${locationNumber}</a> doesn't have panoId`;
           }
+          return `Location ${locationNumber} doesn't have panoId`;
         }
 
         return message;
@@ -692,6 +686,7 @@ export const actions = {
     const upsertValues: UpsertValue[] = [];
     const usedTags = new Set<string>();
     validationResult.data.customCoordinates.forEach((location) => {
+      const effectivePanoId = location.panoId ?? location.extra.panoId!;
       upsertValues.push({
         mapGroupId: groupId,
         lat: location.lat,
@@ -699,7 +694,7 @@ export const actions = {
         heading: location.heading,
         pitch: location.pitch,
         zoom: location.zoom,
-        panoId: location.panoId,
+        panoId: effectivePanoId,
         extraTag: location.extra.tags[0],
         extraPanoId: location.extra.panoId || null,
         extraPanoDate: location.extra.panoDate,
