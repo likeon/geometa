@@ -21,6 +21,7 @@
     numberOfLocationsUploaded = $bindable(),
     data
   }: Props = $props();
+  // svelte-ignore state_referenced_locally
   const form = superForm(data, {
     onResult({ result }) {
       if (result.type == 'success') {

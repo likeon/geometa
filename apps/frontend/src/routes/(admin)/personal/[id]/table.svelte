@@ -31,29 +31,40 @@
     isDialogOpen?: boolean;
   };
 
+  const defaultSorting: SortingState = [];
   let {
     data,
     columns,
-    initialSorting = [],
+    initialSorting = defaultSorting,
     selectedId = $bindable(),
     isDialogOpen = $bindable()
   }: DataTableProps<TData, TValue> = $props();
-  let sorting = $state<SortingState>(initialSorting);
+  let sorting = $state<SortingState>([]);
+  let hasUserSorted = $state(false);
   let rowSelection = $state<RowSelectionState>({});
   let columnFilters = $state<ColumnFiltersState>([]);
   let columnVisibility = $state<VisibilityState>({
     search: false
   });
 
+  $effect(() => {
+    if (!hasUserSorted) {
+      sorting = [...initialSorting];
+    }
+  });
+
   const table = createSvelteTable({
     get data() {
       return data;
     },
-    columns,
+    get columns() {
+      return columns;
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: (updater) => {
+      hasUserSorted = true;
       if (typeof updater === 'function') {
         sorting = updater(sorting);
       } else {
@@ -122,7 +133,7 @@
   );
   const selectedRows = $derived(table.getFilteredSelectedRowModel().rows);
 
-  let prevDataSize = data?.length ?? 0;
+  let prevDataSize = $state(0);
 
   // if data is removed/added unselected all rows
   $effect(() => {

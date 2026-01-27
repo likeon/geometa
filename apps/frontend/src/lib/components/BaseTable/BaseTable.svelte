@@ -21,27 +21,38 @@
     emptyText?: string;
   };
 
+  const defaultSorting: SortingState = [];
   let {
     data,
     columns,
-    initialSorting = [],
+    initialSorting = defaultSorting,
     selectedId = $bindable(),
     isDialogOpen = $bindable(),
     emptyText = 'No results.'
   }: DataTableProps<TData, TValue> = $props();
-  let sorting = $state<SortingState>(initialSorting);
+  let sorting = $state<SortingState>([]);
+  let hasUserSorted = $state(false);
   let rowSelection = $state<RowSelectionState>({});
   let columnFilters = $state<ColumnFiltersState>([]);
+
+  $effect(() => {
+    if (!hasUserSorted) {
+      sorting = [...initialSorting];
+    }
+  });
 
   const table = createSvelteTable({
     get data() {
       return data;
     },
-    columns,
+    get columns() {
+      return columns;
+    },
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onSortingChange: (updater) => {
+      hasUserSorted = true;
       if (typeof updater === 'function') {
         sorting = updater(sorting);
       } else {

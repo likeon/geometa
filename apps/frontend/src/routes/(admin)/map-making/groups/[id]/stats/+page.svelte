@@ -8,13 +8,15 @@
   import { goto } from '$app/navigation';
   import { page } from '$app/stores';
   import { BarChart } from 'layerchart';
+  import type { PageData } from './$types';
 
-  let { data } = $props();
+  let { data }: { data: PageData } = $props();
 
-  let selectedPeriod = $state(data.selectedPeriod || '30');
-  let summaryData = $state(data.summaryData);
-  let combinedStats = $state(data.combinedStats);
-  let statsUnavailable = $state(data.statsUnavailable);
+  let summaryData = $derived(data.summaryData);
+  let combinedStats = $derived(data.combinedStats);
+  let statsUnavailable = $derived(data.statsUnavailable);
+  let selectedPeriod = $derived(data.selectedPeriod || '30');
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let selectedMeta = $state<any>(null);
   let dialogOpen = $state(false);
@@ -26,9 +28,9 @@
     { value: '360', label: '360 days' }
   ];
 
-  function handlePeriodChange() {
+  function handlePeriodChange(newPeriod: string) {
     const url = new URL($page.url);
-    url.searchParams.set('days', selectedPeriod);
+    url.searchParams.set('days', newPeriod);
     const resolvedPath = `/map-making/groups/${String(data.group.id)}/stats`;
     goto(resolvedPath + url.search);
   }
@@ -38,14 +40,6 @@
     selectedMeta = row;
     dialogOpen = true;
   }
-
-  // Update selectedPeriod when data changes (e.g., on navigation)
-  $effect(() => {
-    selectedPeriod = data.selectedPeriod || '30';
-    summaryData = data.summaryData;
-    combinedStats = data.combinedStats;
-    statsUnavailable = data.statsUnavailable;
-  });
 
   // Chart configuration
   const chartConfig = {
@@ -92,7 +86,7 @@
 
     <div class="flex items-center gap-3">
       <span class="text-sm text-muted-foreground">Time period:</span>
-      <Select.Root type="single" bind:value={selectedPeriod} onValueChange={handlePeriodChange}>
+      <Select.Root type="single" value={selectedPeriod} onValueChange={handlePeriodChange}>
         <Select.Trigger class="w-32">
           {periodOptions.find((opt) => opt.value === selectedPeriod)?.label || 'Select period'}
         </Select.Trigger>

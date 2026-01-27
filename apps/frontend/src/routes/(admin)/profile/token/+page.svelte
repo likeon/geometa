@@ -26,12 +26,8 @@
   let copied = $state(false);
   let tokenVisible = $state(false);
 
-  const {
-    form: regenerateApiTokenFormStore,
-    errors: regenerateApiTokenErrors,
-    enhance: regenerateApiTokenEnhance,
-    message: regenerateApiTokenMessage
-  } = superForm(data.regenerateApiTokenForm, {
+  // svelte-ignore state_referenced_locally
+  const regenerateApiToken = superForm(data.regenerateApiTokenForm, {
     resetForm: false,
     onUpdated: ({ form }) => {
       if (form.valid && form.data.newRawToken && form.message?.includes('generated successfully')) {
@@ -40,6 +36,12 @@
       }
     }
   });
+  const {
+    form: regenerateApiTokenFormStore,
+    errors: regenerateApiTokenErrors,
+    enhance: regenerateApiTokenEnhance,
+    message: regenerateApiTokenMessage
+  } = regenerateApiToken;
 
   let showNewToken = $derived(
     $regenerateApiTokenFormStore.newRawToken &&

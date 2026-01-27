@@ -13,6 +13,7 @@
   let { data } = $props();
   let personalMapCreationDialogOpen = $state(false);
 
+  // svelte-ignore state_referenced_locally
   const formPersonal = superForm(data.personalMapForm, {
     validators: zod4Client(insertPersonalMap),
     resetForm: true,

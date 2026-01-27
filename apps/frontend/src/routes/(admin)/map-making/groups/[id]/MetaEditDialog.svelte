@@ -49,6 +49,7 @@
 
   let saveWithoutClose = $state(false);
 
+  // svelte-ignore state_referenced_locally
   const formMeta = superForm(metaForm, {
     validators: zod4Client(insertMetasSchema),
     resetForm: false,

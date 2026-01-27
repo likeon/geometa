@@ -17,6 +17,7 @@
   }
   let pastedFile: null | File = null;
   let { isUploadDialogOpen = $bindable(), data }: Props = $props();
+  // svelte-ignore state_referenced_locally
   const form = superForm(data, {
     id: 'upload-metas-form',
     onResult({ result }) {

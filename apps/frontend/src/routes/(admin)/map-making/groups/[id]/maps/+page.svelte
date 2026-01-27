@@ -20,14 +20,18 @@
     isMapDialogOpen = true;
   }
 
-  const levelChoices = data.levelList.map((item) => ({
-    value: item.id,
-    name: item.name
-  }));
-  const regionChoices = data.regionList.map((item) => ({
-    value: item.id,
-    name: item.name
-  }));
+  let levelChoices = $derived(
+    data.levelList.map((item) => ({
+      value: item.id,
+      name: item.name
+    }))
+  );
+  let regionChoices = $derived(
+    data.regionList.map((item) => ({
+      value: item.id,
+      name: item.name
+    }))
+  );
 </script>
 
 <div>

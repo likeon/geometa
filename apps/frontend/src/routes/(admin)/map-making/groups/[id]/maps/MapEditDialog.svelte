@@ -32,6 +32,7 @@
     user: PageData['user'];
   } = $props();
 
+  // svelte-ignore state_referenced_locally
   const formMap = superForm(mapForm, {
     validators: zod4Client(insertMapsSchema),
     resetForm: true,

@@ -20,16 +20,22 @@
 
   let isDragging = $state(false);
   let isUploading = $state(false);
-  let items = $derived(
+  // svelte-ignore state_referenced_locally
+  // eslint-disable-next-line svelte/prefer-writable-derived -- mutated by drag-and-drop
+  let items = $state(
     selectedMeta.images.map((img, index) => ({ ...img, id: img.id.toString(), order: index }))
   );
 
-  const {
-    form: imageForm,
-    errors: imageErrors,
-    enhance: imageEnhance,
-    submit: imageSubmit
-  } = superForm(imageUploadForm, {
+  $effect(() => {
+    items = selectedMeta.images.map((img, index) => ({
+      ...img,
+      id: img.id.toString(),
+      order: index
+    }));
+  });
+
+  // svelte-ignore state_referenced_locally
+  const imageFormApi = superForm(imageUploadForm, {
     onSubmit() {
       isUploading = true;
     },
@@ -38,12 +44,15 @@
     },
     async onUpdated() {}
   });
-
   const {
-    form: orderForm,
-    enhance: orderEnhance,
-    submit: orderSubmit
-  } = superForm(orderData, {
+    form: imageForm,
+    errors: imageErrors,
+    enhance: imageEnhance,
+    submit: imageSubmit
+  } = imageFormApi;
+
+  // svelte-ignore state_referenced_locally
+  const orderFormApi = superForm(orderData, {
     id: 'imageOrder',
     dataType: 'json',
     resetForm: false,
@@ -53,6 +62,7 @@
       }
     }
   });
+  const { form: orderForm, enhance: orderEnhance, submit: orderSubmit } = orderFormApi;
 
   const file = fileProxy(imageForm, 'file');
 

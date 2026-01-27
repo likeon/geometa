@@ -33,9 +33,7 @@
     locationsCount: number;
   };
 
-  let selectedMeta: Meta | undefined = $state(
-    data.metaList.length > 0 ? data.metaList[0] : undefined
-  );
+  let selectedMeta: Meta | undefined = $state(undefined);
   let rightPanelRef: HTMLDivElement | undefined = $state();
   let selectedMetaIds = new SvelteSet<number>();
   let selectAll = $state(false);
@@ -407,6 +405,8 @@
       {#if selectedMeta}
         <div
           class="bg-background shadow-lg rounded-lg p-4 space-y-4"
+          role="region"
+          aria-label="Meta details"
           ontouchstart={handleTouchStart}
           ontouchend={handleTouchEnd}>
           <div class="flex items-center justify-between">

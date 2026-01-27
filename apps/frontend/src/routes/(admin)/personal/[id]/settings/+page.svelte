@@ -13,7 +13,13 @@
   let { data } = $props();
   let geoguessrIdChangeDialogOpen = $state(false);
   let errorMessage = $state('');
+  // svelte-ignore state_referenced_locally
+  // eslint-disable-next-line svelte/prefer-writable-derived -- mutated on form success
   let geoguessrId = $state(data.geoguessrId);
+
+  $effect(() => {
+    geoguessrId = data.geoguessrId;
+  });
 </script>
 
 <div>

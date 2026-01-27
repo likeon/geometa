@@ -25,16 +25,20 @@
 
   let { data } = $props();
 
-  const levelChoices = data.group.levels.map((item) => ({
-    value: item.id,
-    name: item.name
-  }));
-  const groupChoices = data
-    .user!.permissions.filter((permission) => permission.mapGroup.id !== data.group.id)
-    .map((permission) => ({
-      value: permission.mapGroup.id,
-      name: permission.mapGroup.name
-    }));
+  let levelChoices = $derived(
+    data.group.levels.map((item) => ({
+      value: item.id,
+      name: item.name
+    }))
+  );
+  let groupChoices = $derived(
+    data
+      .user!.permissions.filter((permission) => permission.mapGroup.id !== data.group.id)
+      .map((permission) => ({
+        value: permission.mapGroup.id,
+        name: permission.mapGroup.name
+      }))
+  );
 
   let isMetaDialogOpen = $state(false);
   let isMapUploadDialogOpen = $state(false);

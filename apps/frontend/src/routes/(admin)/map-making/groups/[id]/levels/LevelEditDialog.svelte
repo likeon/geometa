@@ -20,6 +20,7 @@
     selectedLevel: PageData['group']['levels'][number] | null;
   } = $props();
 
+  // svelte-ignore state_referenced_locally
   const formLevel = superForm(levelForm, {
     validators: zod4Client(insertLevelsSchema),
     resetForm: true,

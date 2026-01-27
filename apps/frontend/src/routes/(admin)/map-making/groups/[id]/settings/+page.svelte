@@ -31,20 +31,24 @@
     }
   }
 
+  // svelte-ignore state_referenced_locally
+  const permissionCreate = superForm(data.permissionCreateForm);
   const {
     form: permissionCreateForm,
     errors: permissionCreateErrors,
     constraints: permissionCreateConstraints,
     enhance: permissionCreateEnhance
-  } = superForm(data.permissionCreateForm);
+  } = permissionCreate;
 
-  const { form: settingsForm, enhance: settingsEnhance } = superForm(data.settingsForm, {
+  // svelte-ignore state_referenced_locally
+  const settings = superForm(data.settingsForm, {
     onResult({ result }) {
       if (result.type === 'success') {
         toast('Settings updated successfully!');
       }
     }
   });
+  const { form: settingsForm, enhance: settingsEnhance } = settings;
 </script>
 
 <div>
