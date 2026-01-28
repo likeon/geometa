@@ -7,17 +7,21 @@ edition = "2024"
 env_logger = "0.11.8"
 log = "0.4.27"
 poise = "0.6.1"
-serenity = { version = "0.12.4", features = ["rustls_backend"] }
 regex = "1.11.1"
-reqwest = { version = "0.12.22", default-features = false, features = [
-  "rustls-tls",
+reqwest = { version = "0.13.1", default-features = false, features = [
   "json",
 ] }
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
-tokio = { version = "1.46.0", features = ["rt-multi-thread", "macros", "fs", "signal"] }
+serenity = { version = "0.12.4", features = ["rustls_backend"] }
+tokio = { version = "1.46.0", features = [
+  "fs",
+  "macros",
+  "rt-multi-thread",
+  "signal"
+] }
 
 [profile.release]
-strip = true
 opt-level = 3
+strip = true
 lto = true
