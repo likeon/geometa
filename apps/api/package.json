@@ -3,7 +3,7 @@
   "version": "1.0.50",
   "scripts": {
     "dev": "bun run --watch src/index.ts",
-    "build": "bun build src/index.ts --target bun --compile --minify-whitespace --minify-syntax --production --outfile server --external sharp",
+    "build": "bun build src/index.ts --target bun --compile --minify-whitespace --minify-syntax --production --outfile server",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
     "db:migrate": "drizzle-kit migrate",
