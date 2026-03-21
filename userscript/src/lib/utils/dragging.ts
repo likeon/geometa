@@ -21,6 +21,11 @@ export function setContainerPosition(container: HTMLDivElement) {
   container.style.top = getSavedPosition(topKey) ?? container.style.top;
 }
 
+export function resetContainerPosition() {
+  unsafeWindow.localStorage.removeItem(leftKey);
+  unsafeWindow.localStorage.removeItem(topKey);
+}
+
 export const onPointerDown = (event: PointerEvent, container: HTMLDivElement) => {
   const target = event.target as HTMLElement;
   if (target.closest('a') || target.closest('button')) {

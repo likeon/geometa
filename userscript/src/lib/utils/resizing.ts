@@ -11,9 +11,15 @@ export function setContainerDimensions(container: HTMLDivElement) {
   container.style.height = `${containerHeight}px`;
 }
 
+export function resetContainerDimensions() {
+  unsafeWindow.localStorage.removeItem(widthKey);
+  unsafeWindow.localStorage.removeItem(heightKey);
+}
+
 export function saveContainerDimensions(entry: ResizeObserverEntry) {
-  const containerWidth = entry.contentRect.width;
-  const containerHeight = entry.contentRect.height;
+  const target = entry.target as HTMLElement;
+  const containerWidth = target.offsetWidth;
+  const containerHeight = target.offsetHeight;
   if (containerWidth !== 0 && containerHeight !== 0) {
     unsafeWindow.localStorage.setItem(widthKey, Math.floor(containerWidth).toString());
     unsafeWindow.localStorage.setItem(heightKey, Math.floor(containerHeight).toString());

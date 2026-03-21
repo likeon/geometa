@@ -1,12 +1,15 @@
-import { unsafeWindow } from '$';
+import { GM_registerMenuCommand, unsafeWindow } from '$';
 import { initSinglePlayer } from './lib/singlePlayer';
 import { initLiveChallenge } from './lib/liveChallenge';
 import { initURLChangeEvent } from './lib/utils/url';
 import { initMapLabel } from './lib/mapLabel';
 import { initLocationsUpload } from './lib/locationsUpload';
+import { resetContainerPosition } from './lib/utils/dragging';
+import { resetContainerDimensions } from './lib/utils/resizing';
 
 function changelog() {
   return [
+    { '0.89': 'Fixed meta window resize persistence and added a menu action to reset its saved layout.' },
     { '0.88': 'Updated framework version for bug-fixes' },
     { '0.87': 'Added ability to view metas on breakdown screen' },
     { '0.86': 'Changed look of announcement closing button' },
@@ -58,6 +61,17 @@ function changelog() {
 if (unsafeWindow.notAValidVariable) {
   console.log(changelog());
 }
+
+if (typeof GM_registerMenuCommand === 'function') {
+  GM_registerMenuCommand('LearnableMeta - Reset Meta Window Layout', () => {
+    if (confirm('Reset the LearnableMeta window position and size?')) {
+      resetContainerPosition();
+      resetContainerDimensions();
+      window.location.reload();
+    }
+  });
+}
+
 initURLChangeEvent();
 
 if (document.readyState === 'loading') {
