@@ -1,14 +1,14 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: frontend
+  name: api
   annotations:
     tailscale.com/proxy-group: ingress-proxies
 spec:
   ingressClassName: tailscale
   tls:
     - hosts:
-        - geometa-frontend
+        - geometa-api
   rules:
     - http:
         paths:
@@ -16,6 +16,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: frontend
+                name: api
                 port:
                   number: 80

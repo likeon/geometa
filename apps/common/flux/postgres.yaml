@@ -33,15 +33,24 @@ spec:
       statement_timeout: "120000"                    # 2 minutes - kills queries running too long
       lock_timeout: "10000"                          # 10 seconds - fails fast when waiting for locks
   masterServiceAnnotations:
-    tailscale.com/expose: "true"
+    tailscale.com/hostname: geometa-postgres
+    tailscale.com/proxy-group: ingress-proxies
+  enableMasterLoadBalancer: true
   numberOfInstances: 3
   volume:
     size: "10Gi"
   users:
     geometa: []
-  databases:
-    geometa: geometa
   enableLogicalBackup: true
+  # backups run every 2 hours
+  # 7 days is only for in-cluster backup
+  # externally-mirrored where it is stored longer
+  logicalBackupRetention: "7 days"
+  preparedDatabases:
+    geometa:
+      schemas:
+        public:
+          defaultRoles: false
 
   resources:
     requests:

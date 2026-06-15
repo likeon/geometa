@@ -1,0 +1,2 @@
+[env]
+KUBECONFIG = "/home/likeon/Devel/k8s/talos/kubeconfig"
