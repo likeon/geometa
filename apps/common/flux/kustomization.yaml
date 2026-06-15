@@ -6,6 +6,10 @@ resources:
   - sentry.enc.yaml
   - postgres-s3-secrets.enc.yaml
   - postgres.yaml
+  - postgres-network-policy.yaml
+  - postgres-logical-backup-network-policy.yaml
   - image-proxy.yaml
   - image-proxy-secrets.enc.yaml
+  - image-proxy-network-policy.yaml
+  - cloudflared-network-policy.yaml
   - rbac.yaml

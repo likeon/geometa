@@ -1,5 +1,0 @@
-kubeconfig
-talosconfig
-controlplane.yaml
-worker.yaml
-patches/tailscale.yaml

@@ -4,11 +4,10 @@ metadata:
     name: registries
 type: kubernetes.io/dockerconfigjson
 stringData:
-    .dockerconfigjson: ENC[AES256_GCM,data:uRcAdhHMXpYeqgAvaAPn1ANykdO8616iYc/zI2WO3zMn1wa5QTngwZ8BAi14UeHO87LFlJ/obDenPXzRN5HswXTXkFqbvjVHEQ++qI394tD6FYF5U6Ny0GIhq43XVg94/pwBspU/gliGwPBCSjEhMecJiUGoljwYHv8jICV7n/omHl50IskUn7FwgECBpCEfJgsLgrfWv0iDtz6Cq/CYIt//yi9+rRhxqAXAefV997nZbYMxlaxO2Ddbh7yHcR5P7CGvsvcF0RkA9WgUczYGkkE4RCD0xTZ9t3u03GcydzuESLu5tNpkUH/EnRpz/1fLm2IYdgW8BxfXl5urAdyFmI2blgIVBo5YM6t7ypUhzEYAKaEI+/N9cPjH8m8QNJlEYsGaoo+fR3BhlWDg9MXEuZS1Ml2SnwFDoXDXaUOe5TNPcr9yj2aGMi6smAWSBrLrT1SEtMnTg6NNwr0ACVE1f+fux1Gd5rV+d7AkMSM2vhT9ypiYOF+Exx30R3eYbYfYnveCcmHqWpgnOrRC6lvPkyV5fN1yxlFoz/wdthYCX08tUK34MwlnCORH5CCj3F8h59I1k1i+84+uIKAifhdGMpZC3I4/Z24dZaJw0cC3spTUtl998VcG6BdBbmsmh2g6otYmyv5LJ3jasKS+0VgcXNaqamqkbe79NIR9QtU4qF29XLW15OCn5Wpd+nBRwCDip+ubi7ETdlMY3Y4+ksDVxsYPHQmrITnTZ2ojxPuQO9eHOgf9MlhMLFdLW0ni/wSC+zXV4+RK9rg=,iv:bYkqx8D4iTnVmpa7HqLURZ2gmECLYSaPgwdUtoQ82IU=,tag:VHM8bzEf6ZfM/SeUHsdZzg==,type:str]
+    .dockerconfigjson: ENC[AES256_GCM,data:xDnkyT7BPN0Jf59du9EMnWGaLRnr2sE2v9hDCwY9IYxFErrMP2mPv4smVUaNfoTfZgLa7fuI0zarh1UIQ1jI84nsotqvFQYpYC4vs58Ij1bYrUWtUktzbSjGBu9oFfMKbrGlLmvjmfQ8EPsPkeNQKplyf7ICmZOPejZqc+mP3A8vEznidfmysejowRigXPN/kyi8b7UvtcJI5tdTkOPWvB1Sy7a4SGwpAbBg3f9yxIIUBdhVGtiWPk0e6uMTgMgNy0dCB/GImKLM1FlMVclpgqgv74wKjyw=,iv:gy8bb8ClwRNe1+EPg+0B2H4zSkmGb0LZzBJb4RXP81E=,tag:nIthY5t5GYYw0X/XRsyjJQ==,type:str]
 sops:
     age:
-        - recipient: age1nmyhrpnparuwdkny03zxc52gn488qumxw865ss3vavkqxvauhfwq0e7y34
-          enc: |
+        - enc: |
             -----BEGIN AGE ENCRYPTED FILE-----
             YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBWNHlIdzVZdkhqWnZvT2pl
             dTJ1OWdtejJoMElacXJrc1RBK2ZJNzMyK3hnCkc1ZkV0T3RPQ2RrRW5DR0dvNnZt
@@ -16,7 +15,8 @@ sops:
             SXI5NEZ0V1JlS0REbjMxckIvSFdsMkkKR9gNCVdP1XDuzPUhI2vFrRj/bgNPSO/O
             fo1FOhwGJdH2mX2xPzxKk6wRc+vxVmRM7mlvtMRKLU63K2QKww12yA==
             -----END AGE ENCRYPTED FILE-----
-    lastmodified: "2025-05-14T13:24:51Z"
-    mac: ENC[AES256_GCM,data:8X1GWUg0Hl3DJS6rXr5o1mnoVaCpS6ZFQgQgLvMwclOV0hk9II4J5Dr1GHWd8pKbl7cehjMMQAI2/RIf3ItzxXn7AU5lqYfcaP85Rn/HxLyCT2Niez6xdD4RhhpicUhLXutvi/0O58YtcmD2Us9LO8qAK0ZLi8gTDbG4jVasA1c=,iv:NnwkTSsjUx1YMllploSbgZaxreWaawUXQ0lE8458btI=,tag:gzlQV+D0+eZF31tfQFAwfw==,type:str]
+          recipient: age1nmyhrpnparuwdkny03zxc52gn488qumxw865ss3vavkqxvauhfwq0e7y34
     encrypted_regex: ^(data|stringData)$
-    version: 3.10.2
+    lastmodified: "2026-07-07T19:59:47Z"
+    mac: ENC[AES256_GCM,data:wTVAWAbO56n3sxOwYi5DOEnPK8LiGlQgIil8BQWXj8rZslEEy6mAlhIpotYijeKn01QsgwFL+B+gA3TTf6RTbDdFrBkhwVk6kOYYpKjQN4ch6YCkzwsK7bbbryEUvqAbxu357YxK/nyA+uoVuOrL2hdE0SRMWvhQXThSOajSCNA=,iv:GEMGD7nqHZZSCf3WGoupUZxYD3AJsoNRo/3JWjmTPA0=,tag:l4OSmSN1j6C0Sn82ab1w+g==,type:str]
+    version: 3.13.2

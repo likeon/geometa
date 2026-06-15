@@ -1,0 +1,60 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: api-egress-restricted
+spec:
+  endpointSelector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - api
+          - api-cron
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: geometa
+            application: spilo
+            cluster-name: postgres
+            team: acid
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toServices:
+        - k8sService:
+            serviceName: seaweedfs-s3
+            namespace: seaweedfs
+      toPorts:
+        - ports:
+            - port: "8333"
+              protocol: TCP
+    - toEntities:
+        - kube-apiserver
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
+            - port: "6443"
+              protocol: TCP
+    - toFQDNs:
+        - matchName: www.geoguessr.com
+        - matchName: o4506021108383744.ingest.us.sentry.io
+        - matchName: maps.googleapis.com
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP

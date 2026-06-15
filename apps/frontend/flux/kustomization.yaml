@@ -7,3 +7,4 @@ resources:
   - ingres.yaml
   - image-update.yaml
   - sa.yaml
+  - network-policy.yaml

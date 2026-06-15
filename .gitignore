@@ -13,3 +13,5 @@
 .env.local
 .envrc.ports
 .decrypted*
+
+mise.local.toml

@@ -53,6 +53,7 @@ export async function geoguessrGetMapInfo(geoguessrId: string) {
 }
 
 //for metas that are taken not from syncedMeta images have no compression, we can remove it later when most map will be on new system
+// todo: remove
 export function maybeWrapImageUrl(url: string): string {
   const cdnPrefix =
     'https://learnablemeta.com/cdn-cgi/image/format=avif,quality=80/';

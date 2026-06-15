@@ -1,0 +1,56 @@
+apiVersion: cilium.io/v2
+kind: CiliumNetworkPolicy
+metadata:
+  name: frontend-egress-restricted
+spec:
+  endpointSelector:
+    matchLabels:
+      app: frontend
+  egress:
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: kube-system
+            k8s:k8s-app: kube-dns
+      toPorts:
+        - ports:
+            - port: "53"
+              protocol: UDP
+            - port: "53"
+              protocol: TCP
+          rules:
+            dns:
+              - matchPattern: "*"
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: geometa
+            application: spilo
+            cluster-name: postgres
+            team: acid
+      toPorts:
+        - ports:
+            - port: "5432"
+              protocol: TCP
+    - toServices:
+        - k8sService:
+            serviceName: api
+            namespace: geometa
+      toPorts:
+        - ports:
+            - port: "80"
+              protocol: TCP
+    - toEndpoints:
+        - matchLabels:
+            k8s:io.kubernetes.pod.namespace: geometa
+            app: api
+      toPorts:
+        - ports:
+            - port: "3000"
+              protocol: TCP
+    - toFQDNs:
+        - matchName: o4506021108383744.ingest.us.sentry.io
+        - matchName: discord.com
+        - matchName: www.geoguessr.com
+      toPorts:
+        - ports:
+            - port: "443"
+              protocol: TCP
