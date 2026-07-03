@@ -2,11 +2,14 @@
   import MapCard from './MapCard.svelte';
   import { Input } from '$lib/components/ui/input';
   import * as Popover from '$lib/components/ui/popover';
+  import * as Select from '$lib/components/ui/select';
   import { Checkbox } from '$lib/components/ui/checkbox';
   import { Label } from '$lib/components/ui/label';
+  import ArrowDownWideNarrowIcon from '@lucide/svelte/icons/arrow-down-wide-narrow';
   import FilterFielledIcon from '~icons/tabler/filter-filled';
+  import type { PageData } from './$types';
 
-  let { data } = $props();
+  let { data }: { data: PageData } = $props();
 
   const difficultyMap = [
     { value: 1, label: 'Beginner' },
@@ -14,6 +17,16 @@
     { value: 3, label: 'Advanced' }
   ] as const;
   type DifficultyValue = (typeof difficultyMap)[number]['value'];
+  type MapItem = Awaited<PageData['allMaps']>[number];
+
+  const sortOptions = [
+    { value: 'default', label: 'Default' },
+    { value: 'metas', label: 'Meta Count' },
+    { value: 'locations', label: 'Location Count' },
+    { value: 'games', label: 'Games Played' },
+    { value: 'name', label: 'Name' }
+  ] as const;
+  type SortOption = (typeof sortOptions)[number]['value'];
 
   const regionButtonClass =
     'px-4 py-1 rounded-lg border focus:outline-hidden hover:bg-gray-200 dark:hover:bg-gray-900';
@@ -22,9 +35,9 @@
   let searchText = $state('');
   let selectedDifficulties = $state(difficultyMap.map((d) => d.value));
   let sharedFilter = $state(false);
+  let sortBy = $state<SortOption>('default');
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let allMaps = $state<any[]>([]);
+  let allMaps = $state<MapItem[]>([]);
 
   // Load maps once
   $effect(() => {
@@ -43,6 +56,35 @@
         (!sharedFilter || map.isShared)
     )
   );
+
+  let sortedMaps = $derived.by(() => {
+    if (sortBy === 'default') {
+      return filteredMaps;
+    }
+
+    const maps = [...filteredMaps];
+
+    if (sortBy === 'name') {
+      return maps.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+    }
+
+    const getSortValue = (map: MapItem) => {
+      if (sortBy === 'metas') return map.metasCount;
+      if (sortBy === 'locations') return map.locationsCount;
+      return map.numberOfGamesPlayed;
+    };
+
+    return maps.sort((a, b) => toNumber(getSortValue(b)) - toNumber(getSortValue(a)));
+  });
+
+  let selectedSortLabel = $derived(
+    sortOptions.find((option) => option.value === sortBy)?.label ?? 'Default'
+  );
+
+  function toNumber(value: number | string | null | undefined) {
+    const numberValue = Number(value);
+    return Number.isFinite(numberValue) ? numberValue : 0;
+  }
 
   function handleDifficultyChange(difficultyValue: DifficultyValue, checked: boolean) {
     if (checked) {
@@ -80,55 +122,69 @@
       {/await}
     </div>
 
-    <div class="flex items-center w-full lg:w-auto relative">
-      <Input
-        placeholder="Search maps"
-        bind:value={searchText}
-        class="max-w-xs grow lg:grow-0 pr-10" />
-      <div class="absolute right-2">
-        <Popover.Root>
-          <Popover.Trigger
-            class="flex items-center justify-center h-6 w-6 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
-            aria-label="Filter by difficulty">
-            <FilterFielledIcon class="h-4 w-4" />
-          </Popover.Trigger>
-          <Popover.Content class="w-56 p-4">
-            <div class="grid gap-4">
-              <div class="space-y-2">
-                <div class="flex items-center space-x-2">
-                  <Checkbox id="shared-checkbox" bind:checked={sharedFilter}></Checkbox>
-                  <Label for="shared-checkbox" class="text-sm font-medium capitalize">
-                    Show only shared maps
-                  </Label>
-                </div>
-              </div>
-              <div class="space-y-2">
-                <h4 class="font-medium leading-none">Difficulty</h4>
-                <p class="text-sm text-muted-foreground">Filter maps by difficulty level.</p>
-              </div>
-              <div class="grid gap-2">
-                {#each difficultyMap as difficulty (difficulty.value)}
+    <div class="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
+      <div class="flex items-center w-full max-w-xs grow lg:grow-0 relative">
+        <Input placeholder="Search maps" bind:value={searchText} class="w-full pr-10" />
+        <div class="absolute right-2">
+          <Popover.Root>
+            <Popover.Trigger
+              class="flex items-center justify-center h-6 w-6 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
+              aria-label="Filter by difficulty">
+              <FilterFielledIcon class="h-4 w-4" />
+            </Popover.Trigger>
+            <Popover.Content class="w-56 p-4">
+              <div class="grid gap-4">
+                <div class="space-y-2">
                   <div class="flex items-center space-x-2">
-                    <Checkbox
-                      id={`difficulty-${difficulty.value}`}
-                      checked={selectedDifficulties.includes(difficulty.value)}
-                      onCheckedChange={(checked) => {
-                        if (typeof checked === 'boolean') {
-                          handleDifficultyChange(difficulty.value, checked);
-                        }
-                      }} />
-                    <Label
-                      for={`difficulty-${difficulty.value}`}
-                      class="text-sm font-medium capitalize">
-                      {difficulty.label}
+                    <Checkbox id="shared-checkbox" bind:checked={sharedFilter}></Checkbox>
+                    <Label for="shared-checkbox" class="text-sm font-medium capitalize">
+                      Show only shared maps
                     </Label>
                   </div>
-                {/each}
+                </div>
+                <div class="space-y-2">
+                  <h4 class="font-medium leading-none">Difficulty</h4>
+                  <p class="text-sm text-muted-foreground">Filter maps by difficulty level.</p>
+                </div>
+                <div class="grid gap-2">
+                  {#each difficultyMap as difficulty (difficulty.value)}
+                    <div class="flex items-center space-x-2">
+                      <Checkbox
+                        id={`difficulty-${difficulty.value}`}
+                        checked={selectedDifficulties.includes(difficulty.value)}
+                        onCheckedChange={(checked) => {
+                          if (typeof checked === 'boolean') {
+                            handleDifficultyChange(difficulty.value, checked);
+                          }
+                        }} />
+                      <Label
+                        for={`difficulty-${difficulty.value}`}
+                        class="text-sm font-medium capitalize">
+                        {difficulty.label}
+                      </Label>
+                    </div>
+                  {/each}
+                </div>
               </div>
-            </div>
-          </Popover.Content>
-        </Popover.Root>
+            </Popover.Content>
+          </Popover.Root>
+        </div>
       </div>
+
+      <Select.Root type="single" bind:value={sortBy}>
+        <Select.Trigger class="w-full sm:w-48" aria-label="Sort maps">
+          <ArrowDownWideNarrowIcon class="size-4" />
+          {selectedSortLabel}
+        </Select.Trigger>
+        <Select.Content>
+          <Select.Group>
+            <Select.Label>Sort maps</Select.Label>
+            {#each sortOptions as option (option.value)}
+              <Select.Item value={option.value} label={option.label} />
+            {/each}
+          </Select.Group>
+        </Select.Content>
+      </Select.Root>
     </div>
   </div>
   <div>
@@ -153,7 +209,7 @@
       </div>
     {:else}
       <div class="grid grid-cols-1 gap-2 xl:grid-cols-3">
-        {#each filteredMaps as map (map.id)}
+        {#each sortedMaps as map (map.id)}
           <MapCard {map} />
         {/each}
       </div>
