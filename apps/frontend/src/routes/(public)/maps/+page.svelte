@@ -29,7 +29,7 @@
   type SortOption = (typeof sortOptions)[number]['value'];
 
   const regionButtonClass =
-    'px-4 py-1 rounded-lg border focus:outline-hidden hover:bg-gray-200 dark:hover:bg-gray-900';
+    'px-4 py-1 rounded-lg border font-medium focus:outline-hidden hover:bg-gray-200 dark:hover:bg-gray-900';
 
   let activeRegion = $state('');
   let searchText = $state('');
@@ -224,8 +224,6 @@
   @reference "../../../app.css";
   .selected {
     @apply bg-primary text-primary-foreground;
-    /* Updated for better contrast */
-    font-weight: bold;
   }
 
   .scroll-container {
