@@ -29,7 +29,7 @@
   type SortOption = (typeof sortOptions)[number]['value'];
 
   const regionButtonClass =
-    'h-7 shrink-0 rounded-md border border-transparent bg-muted/40 px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-hidden';
+    'h-9 shrink-0 rounded-md border border-border/60 px-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-hidden';
   const iconButtonClass =
     'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-gray-200 hover:text-foreground dark:hover:bg-gray-700';
   const sortTriggerClass = `${iconButtonClass} !h-6 !w-6 border-0 bg-transparent !p-0 shadow-none dark:bg-transparent [&>svg:last-child]:hidden`;
@@ -106,25 +106,23 @@
 
 <div class="container">
   <div class="flex flex-col gap-3 py-2 lg:flex-row lg:items-center lg:justify-between">
-    <div class="flex min-w-0 items-center gap-2 lg:flex-1">
-      <div class="scroll-container flex min-w-0 gap-1 overflow-x-auto">
-        {#await data.regionList then regionList}
+    <div class="scroll-container flex min-w-0 gap-1 overflow-x-auto lg:flex-1">
+      {#await data.regionList then regionList}
+        <button
+          class={regionButtonClass}
+          class:selected={activeRegion === ''}
+          onclick={() => (activeRegion = '')}>
+          All
+        </button>
+        {#each regionList as region (region.id)}
           <button
             class={regionButtonClass}
-            class:selected={activeRegion === ''}
-            onclick={() => (activeRegion = '')}>
-            All
+            class:selected={activeRegion === region.name}
+            onclick={() => (activeRegion = region.name)}>
+            {region.name}
           </button>
-          {#each regionList as region (region.id)}
-            <button
-              class={regionButtonClass}
-              class:selected={activeRegion === region.name}
-              onclick={() => (activeRegion = region.name)}>
-              {region.name}
-            </button>
-          {/each}
-        {/await}
-      </div>
+        {/each}
+      {/await}
     </div>
 
     <div class="flex w-full items-center gap-1 lg:w-auto lg:shrink-0">
