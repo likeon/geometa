@@ -6,7 +6,7 @@
   import { Checkbox } from '$lib/components/ui/checkbox';
   import { Label } from '$lib/components/ui/label';
   import ArrowDownWideNarrowIcon from '@lucide/svelte/icons/arrow-down-wide-narrow';
-  import FilterFielledIcon from '~icons/tabler/filter-filled';
+  import FilterFilledIcon from '~icons/tabler/filter-filled';
   import type { PageData } from './$types';
 
   let { data }: { data: PageData } = $props();
@@ -20,7 +20,7 @@
   type MapItem = Awaited<PageData['allMaps']>[number];
 
   const sortOptions = [
-    { value: 'default', label: 'Default' },
+    { value: 'default', label: 'Popularity' },
     { value: 'metas', label: 'Meta Count' },
     { value: 'locations', label: 'Location Count' },
     { value: 'games', label: 'Games Played' },
@@ -30,6 +30,9 @@
 
   const regionButtonClass =
     'px-4 py-1 rounded-lg border font-medium focus:outline-hidden hover:bg-gray-200 dark:hover:bg-gray-900';
+  const iconButtonClass =
+    'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-gray-200 hover:text-foreground dark:hover:bg-gray-700';
+  const sortTriggerClass = `${iconButtonClass} !h-6 !w-6 border-0 bg-transparent !p-0 shadow-none dark:bg-transparent [&>svg:last-child]:hidden`;
 
   let activeRegion = $state('');
   let searchText = $state('');
@@ -78,7 +81,7 @@
   });
 
   let selectedSortLabel = $derived(
-    sortOptions.find((option) => option.value === sortBy)?.label ?? 'Default'
+    sortOptions.find((option) => option.value === sortBy)?.label ?? 'Popularity'
   );
 
   function toNumber(value: number | string | null | undefined) {
@@ -122,59 +125,56 @@
       {/await}
     </div>
 
-    <div class="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
-      <div class="flex items-center w-full max-w-xs grow lg:grow-0 relative">
-        <Input placeholder="Search maps" bind:value={searchText} class="w-full pr-10" />
-        <div class="absolute right-2">
-          <Popover.Root>
-            <Popover.Trigger
-              class="flex items-center justify-center h-6 w-6 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"
-              aria-label="Filter by difficulty">
-              <FilterFielledIcon class="h-4 w-4" />
-            </Popover.Trigger>
-            <Popover.Content class="w-56 p-4">
-              <div class="grid gap-4">
-                <div class="space-y-2">
-                  <div class="flex items-center space-x-2">
-                    <Checkbox id="shared-checkbox" bind:checked={sharedFilter}></Checkbox>
-                    <Label for="shared-checkbox" class="text-sm font-medium capitalize">
-                      Show only shared maps
-                    </Label>
-                  </div>
-                </div>
-                <div class="space-y-2">
-                  <h4 class="font-medium leading-none">Difficulty</h4>
-                  <p class="text-sm text-muted-foreground">Filter maps by difficulty level.</p>
-                </div>
-                <div class="grid gap-2">
-                  {#each difficultyMap as difficulty (difficulty.value)}
-                    <div class="flex items-center space-x-2">
-                      <Checkbox
-                        id={`difficulty-${difficulty.value}`}
-                        checked={selectedDifficulties.includes(difficulty.value)}
-                        onCheckedChange={(checked) => {
-                          if (typeof checked === 'boolean') {
-                            handleDifficultyChange(difficulty.value, checked);
-                          }
-                        }} />
-                      <Label
-                        for={`difficulty-${difficulty.value}`}
-                        class="text-sm font-medium capitalize">
-                        {difficulty.label}
-                      </Label>
-                    </div>
-                  {/each}
-                </div>
+    <div class="flex items-center w-full lg:w-auto gap-1">
+      <Input placeholder="Search maps" bind:value={searchText} class="max-w-xs grow lg:grow-0" />
+
+      <Popover.Root>
+        <Popover.Trigger class={iconButtonClass} aria-label="Filter maps" title="Filter maps">
+          <FilterFilledIcon class="h-4 w-4" />
+        </Popover.Trigger>
+        <Popover.Content class="w-56 p-4">
+          <div class="grid gap-4">
+            <div class="space-y-2">
+              <div class="flex items-center space-x-2">
+                <Checkbox id="shared-checkbox" bind:checked={sharedFilter}></Checkbox>
+                <Label for="shared-checkbox" class="text-sm font-medium capitalize">
+                  Show only shared maps
+                </Label>
               </div>
-            </Popover.Content>
-          </Popover.Root>
-        </div>
-      </div>
+            </div>
+            <div class="space-y-2">
+              <h4 class="font-medium leading-none">Difficulty</h4>
+              <p class="text-sm text-muted-foreground">Filter maps by difficulty level.</p>
+            </div>
+            <div class="grid gap-2">
+              {#each difficultyMap as difficulty (difficulty.value)}
+                <div class="flex items-center space-x-2">
+                  <Checkbox
+                    id={`difficulty-${difficulty.value}`}
+                    checked={selectedDifficulties.includes(difficulty.value)}
+                    onCheckedChange={(checked) => {
+                      if (typeof checked === 'boolean') {
+                        handleDifficultyChange(difficulty.value, checked);
+                      }
+                    }} />
+                  <Label
+                    for={`difficulty-${difficulty.value}`}
+                    class="text-sm font-medium capitalize">
+                    {difficulty.label}
+                  </Label>
+                </div>
+              {/each}
+            </div>
+          </div>
+        </Popover.Content>
+      </Popover.Root>
 
       <Select.Root type="single" bind:value={sortBy}>
-        <Select.Trigger class="w-full sm:w-48" aria-label="Sort maps">
+        <Select.Trigger
+          class={sortTriggerClass}
+          aria-label={`Sort maps by ${selectedSortLabel}`}
+          title={`Sort by ${selectedSortLabel}`}>
           <ArrowDownWideNarrowIcon class="size-4" />
-          {selectedSortLabel}
         </Select.Trigger>
         <Select.Content>
           <Select.Group>
