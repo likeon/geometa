@@ -20,7 +20,8 @@
 
 <div class="md:hidden">
   <Sheet.Root bind:open>
-    <Sheet.Trigger>
+    <Sheet.Trigger
+      class="inline-flex size-8 items-center justify-center rounded-md text-white/70 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35">
       <svg
         stroke-width="1.5"
         viewBox="0 0 24 24"

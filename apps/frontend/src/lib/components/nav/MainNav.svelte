@@ -25,7 +25,7 @@
 </script>
 
 <div class="mr-4 hidden md:flex">
-  <a href={resolve(linkHref)} class="mr-4 flex items-center gap-0 lg:mr-6">
+  <a href={resolve(linkHref)} class="mr-4 flex items-center gap-0 hover:no-underline lg:mr-6">
     <enhanced:img src={logo} class="h-6 sm:h-9 w-auto" alt="Logo" />
     <span class="self-center whitespace-nowrap text-xl font-semibold text-white">
       LearnableMeta
@@ -44,7 +44,7 @@
 {#snippet NavLink({ navLink, isActive }: { navLink: (typeof navLinks)[number]; isActive: boolean })}
   <a
     href={navLink.url}
-    class="flex text-zinc-300 hover:text-white data-[active=true]:text-white items-center justify-center rounded-full px-2 text-center text-sm tracking-tight"
+    class="flex items-center justify-center rounded-md px-2.5 py-1.5 text-center text-sm font-medium tracking-tight text-white/70 transition-colors hover:bg-white/10 hover:text-white hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 data-[active=true]:bg-white/15 data-[active=true]:text-white"
     data-active={isActive}>
     <span>{navLink.name}</span>
   </a>
