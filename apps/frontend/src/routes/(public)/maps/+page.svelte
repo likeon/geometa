@@ -1,11 +1,15 @@
 <script lang="ts">
   import MapCard from './MapCard.svelte';
+  import MapListItem from './MapListItem.svelte';
   import { Input } from '$lib/components/ui/input';
   import * as Popover from '$lib/components/ui/popover';
   import * as Select from '$lib/components/ui/select';
+  import * as ToggleGroup from '$lib/components/ui/toggle-group';
   import { Checkbox } from '$lib/components/ui/checkbox';
   import { Label } from '$lib/components/ui/label';
   import ArrowDownWideNarrowIcon from '@lucide/svelte/icons/arrow-down-wide-narrow';
+  import LayoutGridIcon from '@lucide/svelte/icons/layout-grid';
+  import ListIcon from '@lucide/svelte/icons/list';
   import FilterFilledIcon from '~icons/tabler/filter-filled';
   import type { PageData } from './$types';
 
@@ -33,12 +37,15 @@
   const iconButtonClass =
     'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-gray-200 hover:text-foreground dark:hover:bg-gray-700';
   const sortTriggerClass = `${iconButtonClass} !h-6 !w-6 border-0 bg-transparent !p-0 shadow-none dark:bg-transparent [&>svg:last-child]:hidden`;
+  const viewToggleItemClass =
+    'h-6 min-w-6 !rounded-md px-1.5 text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-xs';
 
   let activeRegion = $state('');
   let searchText = $state('');
   let selectedDifficulties = $state(difficultyMap.map((d) => d.value));
   let sharedFilter = $state(false);
   let sortBy = $state<SortOption>('default');
+  let viewMode = $state<'cards' | 'list'>('cards');
 
   let allMaps = $state<MapItem[]>([]);
 
@@ -185,6 +192,28 @@
           </Select.Group>
         </Select.Content>
       </Select.Root>
+
+      <ToggleGroup.Root
+        type="single"
+        bind:value={viewMode}
+        size="sm"
+        class="gap-0.5 bg-muted/60 p-0.5"
+        aria-label="Map view">
+        <ToggleGroup.Item
+          value="cards"
+          class={viewToggleItemClass}
+          aria-label="Card view"
+          title="Card view">
+          <LayoutGridIcon class="size-4" />
+        </ToggleGroup.Item>
+        <ToggleGroup.Item
+          value="list"
+          class={viewToggleItemClass}
+          aria-label="List view"
+          title="List view">
+          <ListIcon class="size-4" />
+        </ToggleGroup.Item>
+      </ToggleGroup.Root>
     </div>
   </div>
   <div>
@@ -208,11 +237,19 @@
         </div>
       </div>
     {:else}
-      <div class="grid grid-cols-1 gap-2 xl:grid-cols-3">
-        {#each sortedMaps as map (map.id)}
-          <MapCard {map} />
-        {/each}
-      </div>
+      {#if viewMode === 'list'}
+        <div class="grid gap-2">
+          {#each sortedMaps as map (map.id)}
+            <MapListItem {map} />
+          {/each}
+        </div>
+      {:else}
+        <div class="grid grid-cols-1 gap-2 xl:grid-cols-3">
+          {#each sortedMaps as map (map.id)}
+            <MapCard {map} />
+          {/each}
+        </div>
+      {/if}
       {#if filteredMaps.length === 0}
         <p class="text-center text-muted-foreground py-8">No maps match the current filters.</p>
       {/if}
