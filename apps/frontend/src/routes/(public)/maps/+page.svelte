@@ -132,7 +132,7 @@
         <Popover.Trigger class={iconButtonClass} aria-label="Filter maps" title="Filter maps">
           <FilterFilledIcon class="h-4 w-4" />
         </Popover.Trigger>
-        <Popover.Content class="w-56 p-4">
+        <Popover.Content sideOffset={8} class="w-56 p-4">
           <div class="grid gap-4">
             <div class="space-y-2">
               <div class="flex items-center space-x-2">
