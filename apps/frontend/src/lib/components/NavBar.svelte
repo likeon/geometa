@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { page } from '$app/state';
   import MainNav from '$lib/components/nav/MainNav.svelte';
   import ModeSwitcher from '$lib/components/ModeSwitcher.svelte';
   import { Button } from '$lib/components/ui/button';
@@ -29,6 +30,9 @@
       name: 'Personal Maps'
     }
   ];
+
+  const headerIconButtonClass =
+    'size-8 rounded-md px-0 text-white/70 transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-white/35 data-[active=true]:bg-white/15 data-[active=true]:text-white';
 </script>
 
 <header class="px-2 sm:px-4 py-0 w-full bg-gradient-to-r from-green-900 to-sky-900">
@@ -41,15 +45,29 @@
           <Button
             variant="dark-ghost"
             size="icon"
-            class="size-8 px-0"
+            class={headerIconButtonClass}
             href="https://discord.gg/AcXEWznYZe"
-            target="_blank">
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Discord">
             <DiscordFillIcon class="size-5 flex-shrink-0" />
           </Button>
-          <Button variant="dark-ghost" size="icon" class="size-8 px-0" href="/personal">
+          <Button
+            variant="dark-ghost"
+            size="icon"
+            class={headerIconButtonClass}
+            href="/personal"
+            aria-label="Profile"
+            data-active={page.url.pathname.startsWith('/personal')}>
             <FaSolidUserIcon class="w-5 h-5 flex-shrink-0" />
           </Button>
-          <Button variant="dark-ghost" size="icon" class="size-8 px-0" href="/map-making">
+          <Button
+            variant="dark-ghost"
+            size="icon"
+            class={headerIconButtonClass}
+            href="/map-making"
+            aria-label="Map making"
+            data-active={page.url.pathname.startsWith('/map-making')}>
             <FaSolidToolsIcon class="w-5 h-5 flex-shrink-0" />
           </Button>
 
