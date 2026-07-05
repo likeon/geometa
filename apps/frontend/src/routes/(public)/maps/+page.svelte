@@ -29,7 +29,7 @@
   type SortOption = (typeof sortOptions)[number]['value'];
 
   const regionButtonClass =
-    'px-4 py-1 rounded-lg border font-medium focus:outline-hidden hover:bg-gray-200 dark:hover:bg-gray-900';
+    'h-7 shrink-0 rounded-md border border-transparent bg-muted/40 px-2.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground focus:outline-hidden';
   const iconButtonClass =
     'flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-gray-200 hover:text-foreground dark:hover:bg-gray-700';
   const sortTriggerClass = `${iconButtonClass} !h-6 !w-6 border-0 bg-transparent !p-0 shadow-none dark:bg-transparent [&>svg:last-child]:hidden`;
@@ -105,27 +105,29 @@
 </svelte:head>
 
 <div class="container">
-  <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between py-2 gap-4">
-    <div class="flex overflow-x-auto space-x-2 lg:space-x-2 scroll-container shrink">
-      {#await data.regionList then regionList}
-        <button
-          class={regionButtonClass}
-          class:selected={activeRegion === ''}
-          onclick={() => (activeRegion = '')}>
-          All
-        </button>
-        {#each regionList as region (region.id)}
+  <div class="flex flex-col gap-3 py-2 lg:flex-row lg:items-center lg:justify-between">
+    <div class="flex min-w-0 items-center gap-2 lg:flex-1">
+      <div class="scroll-container flex min-w-0 gap-1 overflow-x-auto">
+        {#await data.regionList then regionList}
           <button
             class={regionButtonClass}
-            class:selected={activeRegion === region.name}
-            onclick={() => (activeRegion = region.name)}>
-            {region.name}
+            class:selected={activeRegion === ''}
+            onclick={() => (activeRegion = '')}>
+            All
           </button>
-        {/each}
-      {/await}
+          {#each regionList as region (region.id)}
+            <button
+              class={regionButtonClass}
+              class:selected={activeRegion === region.name}
+              onclick={() => (activeRegion = region.name)}>
+              {region.name}
+            </button>
+          {/each}
+        {/await}
+      </div>
     </div>
 
-    <div class="flex items-center w-full lg:w-auto gap-1">
+    <div class="flex w-full items-center gap-1 lg:w-auto lg:shrink-0">
       <Input placeholder="Search maps" bind:value={searchText} class="max-w-xs grow lg:grow-0" />
 
       <Popover.Root>
@@ -191,7 +193,7 @@
     {#if allMaps.length === 0}
       <!-- Show loading spinner -->
       <div
-        class="mx-auto flex justify-center bg-background shadow-lg rounded-lg w-full max-w-[1500px] lg:h-[calc(100vh-90px)] h-[calc(100vh-80px)]">
+        class="mx-auto flex min-h-[calc(100vh-9rem)] w-full max-w-[1500px] items-center justify-center rounded-lg bg-background shadow-lg">
         <div class="loadership_RHKDA">
           <div></div>
           <div></div>
