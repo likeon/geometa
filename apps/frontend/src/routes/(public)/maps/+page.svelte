@@ -203,6 +203,7 @@
       <ToggleGroup.Root
         type="single"
         bind:value={viewMode}
+        allowDeselect={false}
         size="sm"
         class="gap-0.5 bg-muted/60 p-0.5"
         aria-label="Map view">

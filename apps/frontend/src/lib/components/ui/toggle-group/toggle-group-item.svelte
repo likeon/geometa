@@ -14,10 +14,26 @@
   }: ToggleGroupPrimitive.ItemProps & ToggleVariants = $props();
 
   const ctx = getToggleGroupCtx();
+
+  function isSelected() {
+    const groupValue = ctx.getValue();
+    return Array.isArray(groupValue) ? groupValue.includes(value) : groupValue === value;
+  }
+
+  function preventDeselect(event: MouseEvent | KeyboardEvent) {
+    if (ctx.getAllowDeselect() || !isSelected()) return;
+
+    if (event instanceof KeyboardEvent && event.key !== 'Enter' && event.key !== ' ') return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
 </script>
 
 <ToggleGroupPrimitive.Item
   bind:ref
+  onclickcapture={preventDeselect}
+  onkeydowncapture={preventDeselect}
   data-slot="toggle-group-item"
   data-variant={ctx.variant || variant}
   data-size={ctx.size || size}
