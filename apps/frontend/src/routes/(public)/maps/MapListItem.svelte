@@ -12,8 +12,8 @@
   } = $props();
 </script>
 
-<Card.Root class="py-0">
-  <div class="flex min-h-12 flex-col gap-2 px-3 py-2 lg:flex-row lg:items-center">
+<Card.Root class="min-w-0 py-0">
+  <div class="flex min-h-12 min-w-0 flex-col gap-2 px-3 py-2 lg:flex-row lg:items-center">
     <div class="min-w-0 flex-1">
       <p class="truncate text-sm font-semibold">
         {map.name}

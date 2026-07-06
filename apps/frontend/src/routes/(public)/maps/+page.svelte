@@ -246,7 +246,7 @@
       </div>
     {:else}
       {#if viewMode === 'list'}
-        <div class="grid gap-2">
+        <div class="grid grid-cols-1 gap-2">
           {#each sortedMaps as map (map.id)}
             <MapListItem {map} />
           {/each}
