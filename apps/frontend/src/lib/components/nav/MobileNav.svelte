@@ -53,12 +53,12 @@
       <Sheet.Header class="pl-0 landscape:py-2">
         <a
           href={resolve('/')}
-          class="flex items-center"
+          class="flex items-center text-foreground no-underline"
           onclick={() => {
             open = false;
           }}>
-          <enhanced:img src={logo} class="pl-1.5 h-6 w-auto ml-1 landscape:h-5" alt="Logo" />
-          <span class="font-bold landscape:text-sm">LearnableMeta</span>
+          <enhanced:img src={logo} class="ml-1 h-7 w-auto pl-1.5 landscape:h-5" alt="Logo" />
+          <span class="text-lg font-bold landscape:text-sm">LearnableMeta</span>
         </a>
       </Sheet.Header>
       <ScrollArea
