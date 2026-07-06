@@ -2,8 +2,7 @@
   import { Button } from '$lib/components/ui/button';
   import * as Card from '$lib/components/ui/card';
   import CliListIcon from '~icons/cil/list';
-  import MapSharedBadge from './MapSharedBadge.svelte';
-  import MapStatBadges from './MapStatBadges.svelte';
+  import MapBadges from './MapBadges.svelte';
   import type { PageData } from './$types';
 
   let {
@@ -22,12 +21,7 @@
       </p>
     </div>
 
-    <div class="flex shrink-0 flex-wrap items-center gap-2">
-      {#if map.isShared}
-        <MapSharedBadge />
-      {/if}
-      <MapStatBadges {map} />
-    </div>
+    <MapBadges {map} class="shrink-0" />
 
     <div class="flex shrink-0 gap-2">
       <Button size="sm" href={'https://www.geoguessr.com/maps/' + map.geoguessrId} target="_blank">
