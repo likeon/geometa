@@ -1,12 +1,18 @@
 <script lang="ts" module>
   import { getContext, setContext } from 'svelte';
   import type { ToggleVariants } from '$lib/components/ui/toggle/index.js';
-  export function setToggleGroupCtx(props: ToggleVariants) {
+
+  type ToggleGroupCtx = ToggleVariants & {
+    getAllowDeselect: () => boolean;
+    getValue: () => string | string[] | undefined;
+  };
+
+  export function setToggleGroupCtx(props: ToggleGroupCtx) {
     setContext('toggleGroup', props);
   }
 
   export function getToggleGroupCtx() {
-    return getContext<ToggleVariants>('toggleGroup');
+    return getContext<ToggleGroupCtx>('toggleGroup');
   }
 </script>
 
@@ -17,15 +23,18 @@
   let {
     ref = $bindable(null),
     value = $bindable(),
+    allowDeselect = true,
     class: className,
     size = 'default',
     variant = 'default',
     ...restProps
-  }: ToggleGroupPrimitive.RootProps & ToggleVariants = $props();
+  }: ToggleGroupPrimitive.RootProps & ToggleVariants & { allowDeselect?: boolean } = $props();
 
   setToggleGroupCtx({
     variant,
-    size
+    size,
+    getAllowDeselect: () => allowDeselect,
+    getValue: () => value
   });
 </script>
 
