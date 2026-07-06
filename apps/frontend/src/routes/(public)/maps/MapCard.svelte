@@ -3,8 +3,7 @@
   import * as Card from '$lib/components/ui/card';
   import CliListIcon from '~icons/cil/list';
   import type { PageData } from './$types';
-  import MapSharedBadge from './MapSharedBadge.svelte';
-  import MapStatBadges from './MapStatBadges.svelte';
+  import MapBadges from './MapBadges.svelte';
 
   let {
     map
@@ -15,16 +14,7 @@
 
 <Card.Root class="flex flex-col">
   <Card.Header>
-    <div class="flex flex-row pb-2">
-      {#if map.isShared}
-        <div>
-          <MapSharedBadge />
-        </div>
-      {/if}
-      <div class="ml-auto flex items-center gap-2 whitespace-nowrap">
-        <MapStatBadges {map} />
-      </div>
-    </div>
+    <MapBadges {map} split class="pb-2" />
     <Card.Title>{map.name}</Card.Title>
     <Card.Description>by <strong>{map.authors}</strong></Card.Description>
   </Card.Header>
