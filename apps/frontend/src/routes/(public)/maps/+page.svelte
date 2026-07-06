@@ -39,13 +39,16 @@
   const sortTriggerClass = `${iconButtonClass} !h-6 !w-6 border-0 bg-transparent !p-0 shadow-none dark:bg-transparent [&>svg:last-child]:hidden`;
   const viewToggleItemClass =
     'h-6 min-w-6 !rounded-md px-1.5 text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-xs';
+  const viewModeCookieName = 'maps-view-mode';
+  const viewModeCookieMaxAge = 60 * 60 * 24 * 365;
 
   let activeRegion = $state('');
   let searchText = $state('');
   let selectedDifficulties = $state(difficultyMap.map((d) => d.value));
   let sharedFilter = $state(false);
   let sortBy = $state<SortOption>('default');
-  let viewMode = $state<'cards' | 'list'>('cards');
+  // svelte-ignore state_referenced_locally
+  let viewMode = $state<PageData['mapsViewMode']>(data.mapsViewMode);
 
   let allMaps = $state<MapItem[]>([]);
 
@@ -54,6 +57,10 @@
     data.allMaps.then((maps) => {
       allMaps = maps;
     });
+  });
+
+  $effect(() => {
+    document.cookie = `${viewModeCookieName}=${viewMode}; path=/; max-age=${viewModeCookieMaxAge}; SameSite=Lax`;
   });
 
   let filteredMaps = $derived(
