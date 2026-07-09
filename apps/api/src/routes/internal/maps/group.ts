@@ -46,7 +46,12 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
         const savedData = await db.$primary.query.maps.findFirst({
           where: eq(maps.id, id),
         });
-        geoguessrIdChanged = savedData?.geoguessrId !== dataNoId.geoguessrId;
+        if (!savedData || savedData.mapGroupId === null) {
+          return status(404);
+        }
+        // also require permission on the map's current group, not just the target
+        await ensurePermissions(userId, savedData.mapGroupId);
+        geoguessrIdChanged = savedData.geoguessrId !== dataNoId.geoguessrId;
       } else {
         geoguessrIdChanged = true;
       }
