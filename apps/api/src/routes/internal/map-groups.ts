@@ -425,6 +425,26 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       userId: true,
     },
   )
+  .get(
+    '/:id',
+    async ({ params: { id: groupId }, userId, status }) => {
+      await ensurePermissions(userId, groupId);
+
+      const group = await db.$primary.query.mapGroups.findFirst({
+        where: eq(mapGroups.id, groupId),
+      });
+
+      if (!group) {
+        return status(404);
+      }
+
+      return group;
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      userId: true,
+    },
+  )
   .patch(
     '/:id',
     async ({ params: { id: groupId }, body, userId, status }) => {
