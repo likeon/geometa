@@ -38,7 +38,7 @@
   }
 </script>
 
-<Select.Root type="multiple" bind:value={selectedStrings} {name} onValueChange={handleValueChange}>
+<Select.Root type="multiple" value={selectedStrings} {name} onValueChange={handleValueChange}>
   <Select.Trigger {...restProps}>{displayText}</Select.Trigger>
   <Select.Content>
     {#each items as item (item.value)}

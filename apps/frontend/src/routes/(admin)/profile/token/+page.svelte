@@ -48,15 +48,15 @@
       $regenerateApiTokenMessage?.includes('generated successfully')
   );
 
-  function openRegenerateDialog() {
-    if ($regenerateApiTokenFormStore.newRawToken) {
-      $regenerateApiTokenFormStore.newRawToken = undefined;
-    }
-    if ($regenerateApiTokenMessage) {
-      $regenerateApiTokenMessage = undefined;
-    }
+  function resetTokenState() {
+    $regenerateApiTokenFormStore.newRawToken = undefined;
+    $regenerateApiTokenMessage = undefined;
     copied = false;
     tokenVisible = false;
+  }
+
+  function openRegenerateDialog() {
+    resetTokenState();
     regenerateDialogOpen = true;
   }
 
@@ -72,13 +72,6 @@
       console.error('Failed to copy token: ', err);
       alert('Failed to copy token to clipboard.');
     }
-  }
-
-  function dismissNewTokenAlert() {
-    $regenerateApiTokenFormStore.newRawToken = undefined;
-    $regenerateApiTokenMessage = undefined;
-    copied = false;
-    tokenVisible = false;
   }
 
   function toggleTokenVisibility() {
@@ -102,7 +95,7 @@
     </Alert>
   {/if}
 
-  {#if showNewToken && $regenerateApiTokenFormStore.newRawToken}
+  {#if showNewToken}
     <Alert class="mb-6 border-blue-200 bg-blue-50 dark:border-blue-800 dark:bg-blue-950">
       <Icon icon="mdi:information" class="h-4 w-4 text-blue-600 dark:text-blue-400" />
       <AlertDescription>
@@ -151,7 +144,7 @@
               variant="ghost"
               size="sm"
               class="p-2 h-8 w-8"
-              onclick={dismissNewTokenAlert}
+              onclick={resetTokenState}
               aria-label="Dismiss alert">
               <Icon icon="mdi:close" class="w-4 h-4" />
             </Button>
