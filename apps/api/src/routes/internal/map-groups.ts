@@ -11,9 +11,13 @@ import {
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
+import {
+  MissingLevelsError,
+  uploadMetas,
+} from '@api/lib/internal/metas-upload';
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { syncMapGroup } from '@api/lib/internal/sync';
-import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
@@ -177,6 +181,180 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     {
       params: t.Object({ id: t.Integer() }),
       body: t.Object({ name: t.String({ minLength: 1 }) }),
+      userId: true,
+    },
+  )
+  .post(
+    '/:id/locations/upload',
+    async ({ params: { id: groupId }, body, userId, status }) => {
+      await ensurePermissions(userId, groupId);
+
+      const currentTimestamp = Math.floor(Date.now() / 1000);
+      const upsertValues = body.locations.map((location) => ({
+        ...location,
+        extraPanoDate: location.extraPanoDate ?? null,
+        mapGroupId: groupId,
+        updatedAt: currentTimestamp,
+        modifiedAt: currentTimestamp, // default value - not being set on conflict
+      }));
+      const usedTags = new Set(
+        body.locations.map((location) => location.extraTag),
+      );
+
+      const BATCH_SIZE = 1000;
+      try {
+        await db.$primary.transaction(async (trx) => {
+          // Step 1: Batched upsert operation
+          for (let i = 0; i < upsertValues.length; i += BATCH_SIZE) {
+            const batch = upsertValues.slice(i, i + BATCH_SIZE);
+
+            await trx
+              .insert(mapGroupLocations)
+              .values(batch)
+              .onConflictDoUpdate({
+                target: [
+                  mapGroupLocations.mapGroupId,
+                  mapGroupLocations.panoId,
+                ],
+                set: {
+                  heading: sql`excluded.heading`,
+                  pitch: sql`excluded.pitch`,
+                  zoom: sql`excluded.zoom`,
+                  panoId: sql`excluded.pano_id`,
+                  extraTag: sql`excluded.extra_tag`,
+                  extraPanoId: sql`excluded.extra_pano_id`,
+                  extraPanoDate: sql`excluded.extra_pano_date`,
+                  updatedAt: sql`excluded.updated_at`,
+                },
+              })
+              .returning({ id: mapGroupLocations.id });
+          }
+
+          // Step 2: Delete records based on upload mode
+          if (body.uploadMode === 'full') {
+            // Full replacement: delete all locations not in current upload
+            await trx
+              .delete(mapGroupLocations)
+              .where(
+                and(
+                  eq(mapGroupLocations.mapGroupId, groupId),
+                  or(
+                    isNull(mapGroupLocations.updatedAt),
+                    lt(mapGroupLocations.updatedAt, currentTimestamp),
+                  ),
+                ),
+              );
+          } else if (body.uploadMode === 'tagReplace') {
+            // Tag-based replacement: delete only locations with tags present in upload
+            await trx
+              .delete(mapGroupLocations)
+              .where(
+                and(
+                  eq(mapGroupLocations.mapGroupId, groupId),
+                  inArray(mapGroupLocations.extraTag, Array.from(usedTags)),
+                  or(
+                    isNull(mapGroupLocations.updatedAt),
+                    lt(mapGroupLocations.updatedAt, currentTimestamp),
+                  ),
+                ),
+              );
+          }
+          // For 'partial' mode: no deletions, just upserts
+
+          // Step 3: Insert tags into metas table
+          if (usedTags.size > 0) {
+            const metaInsertValues = Array.from(usedTags).map((tagName) => ({
+              mapGroupId: groupId,
+              tagName: tagName,
+              name: '',
+              note: '',
+              modifiedAt: currentTimestamp,
+            }));
+            await trx
+              .insert(metas)
+              .values(metaInsertValues)
+              .onConflictDoNothing();
+          }
+        });
+      } catch (error) {
+        if (
+          error instanceof Error &&
+          error.message.includes(
+            'ON CONFLICT DO UPDATE command cannot affect row a second time',
+          )
+        ) {
+          return status(409, {
+            message:
+              'The uploaded file contains duplicate panoId values. Please remove duplicates and try again.',
+          });
+        }
+        throw error;
+      }
+
+      return { count: upsertValues.length };
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      body: t.Object({
+        uploadMode: t.Union([
+          t.Literal('partial'),
+          t.Literal('full'),
+          t.Literal('tagReplace'),
+        ]),
+        locations: t.Array(
+          t.Object({
+            lat: t.Number(),
+            lng: t.Number(),
+            heading: t.Number(),
+            pitch: t.Number(),
+            zoom: t.Number(),
+            panoId: t.String(),
+            extraTag: t.String(),
+            extraPanoId: t.Union([t.String(), t.Null()]),
+            extraPanoDate: t.Optional(t.Union([t.String(), t.Null()])),
+          }),
+        ),
+      }),
+      userId: true,
+    },
+  )
+  .post(
+    '/:id/metas/upload',
+    async ({ params: { id: groupId }, body, userId, status }) => {
+      await ensurePermissions(userId, groupId);
+
+      try {
+        await uploadMetas(
+          groupId,
+          body.metas,
+          body.partialUpload,
+          body.autoCreateLevels,
+        );
+      } catch (error) {
+        if (error instanceof MissingLevelsError) {
+          return status(400, { message: error.message });
+        }
+        throw error;
+      }
+      return status(200);
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      body: t.Object({
+        partialUpload: t.Boolean(),
+        autoCreateLevels: t.Boolean(),
+        metas: t.Array(
+          t.Object({
+            tagName: t.String(),
+            metaName: t.String(),
+            note: t.String(),
+            footer: t.Optional(t.Union([t.String(), t.Null()])),
+            levels: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
+            images: t.Optional(t.Union([t.Array(t.String()), t.Null()])),
+          }),
+          { minItems: 1 },
+        ),
+      }),
       userId: true,
     },
   )

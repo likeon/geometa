@@ -1,13 +1,9 @@
-import { and, eq, isNull, lt, or, sql } from 'drizzle-orm';
-import { mapGroupLocations, metas } from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
 import { message, setError, superValidate, withFiles } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { z } from 'zod/v4';
-import { inArray } from 'drizzle-orm/sql/expressions/conditions';
-import { ensurePermissions, extractJsonData } from '$lib/utils';
+import { extractJsonData } from '$lib/utils';
 import { getGroupId } from './utils';
-import { uploadMetas } from '$routes/(admin)/map-making/groups/[id]/metasUpload';
 import { api } from '$lib/api';
 import {
   insertMetasSchema,
@@ -86,21 +82,6 @@ const mapJsonSchema = z.object({
       }
     })
 });
-type UpsertValue = {
-  mapGroupId: number;
-  lat: number;
-  lng: number;
-  heading: number;
-  pitch: number;
-  zoom: number;
-  panoId: string;
-  extraTag: string;
-  extraPanoId: string | null;
-  extraPanoDate: string | null | undefined;
-  updatedAt: number;
-  modifiedAt: number;
-};
-
 export const load = async ({ params, locals }) => {
   if (!locals.user?.id) {
     error(403, 'Permission denied');
@@ -286,9 +267,8 @@ export const actions = {
       error(500, 'Failed to copy meta');
     }
   },
-  uploadMapJson: async ({ request, params, locals }) => {
+  uploadMapJson: async ({ request, params }) => {
     const groupId = getGroupId(params);
-    await ensurePermissions(locals.db, locals.user?.id, groupId);
     const form = await superValidate(request, zod4(mapUploadSchema), { id: 'mapUpload' });
     if (!form.valid) {
       return fail(400, withFiles({ form }));
@@ -346,137 +326,41 @@ export const actions = {
       return setError(form, 'file', processedErrors);
     }
 
-    const currentTimestamp = Math.floor(Date.now() / 1000);
+    const locations = validationResult.data.customCoordinates.map((location) => ({
+      lat: location.lat,
+      lng: location.lng,
+      heading: location.heading,
+      pitch: location.pitch,
+      zoom: location.zoom,
+      panoId: location.panoId ?? location.extra.panoId!,
+      extraTag: location.extra.tags[0],
+      extraPanoId: location.extra.panoId || null,
+      extraPanoDate: location.extra.panoDate
+    }));
 
-    const upsertValues: UpsertValue[] = [];
-    const usedTags = new Set<string>();
-    validationResult.data.customCoordinates.forEach((location) => {
-      const effectivePanoId = location.panoId ?? location.extra.panoId!;
-      upsertValues.push({
-        mapGroupId: groupId,
-        lat: location.lat,
-        lng: location.lng,
-        heading: location.heading,
-        pitch: location.pitch,
-        zoom: location.zoom,
-        panoId: effectivePanoId,
-        extraTag: location.extra.tags[0],
-        extraPanoId: location.extra.panoId || null,
-        extraPanoDate: location.extra.panoDate,
-        updatedAt: currentTimestamp,
-        modifiedAt: currentTimestamp // default value - not being set on conflict
-      });
-      usedTags.add(location.extra.tags[0]);
-    });
+    const { data, error: apiError } = await api.internal['map-groups']({
+      id: groupId
+    }).locations.upload.post({ uploadMode: form.data.uploadMode, locations });
 
-    // upsert data
-    const BATCH_SIZE = 1000;
-    try {
-      await locals.db.transaction(async (trx) => {
-        // Step 1: Batched upsert operation
-        for (let i = 0; i < upsertValues.length; i += BATCH_SIZE) {
-          const batch = upsertValues.slice(i, i + BATCH_SIZE);
-
-          await trx
-            .insert(mapGroupLocations)
-            .values(batch)
-            .onConflictDoUpdate({
-              target: [mapGroupLocations.mapGroupId, mapGroupLocations.panoId],
-              set: {
-                heading: sql`excluded
-                .
-                heading`,
-                pitch: sql`excluded
-                .
-                pitch`,
-                zoom: sql`excluded
-                .
-                zoom`,
-                panoId: sql`excluded
-                .
-                pano_id`,
-                extraTag: sql`excluded
-                .
-                extra_tag`,
-                extraPanoId: sql`excluded
-                .
-                extra_pano_id`,
-                extraPanoDate: sql`excluded
-                .
-                extra_pano_date`,
-                updatedAt: sql`excluded
-                .
-                updated_at`
-              }
-            })
-            .returning({ id: mapGroupLocations.id });
-        }
-
-        // Step 2: Delete records based on upload mode
-
-        if (form.data.uploadMode === 'full') {
-          // Full replacement: delete all locations not in current upload
-          await trx
-            .delete(mapGroupLocations)
-            .where(
-              and(
-                eq(mapGroupLocations.mapGroupId, groupId),
-                or(
-                  isNull(mapGroupLocations.updatedAt),
-                  lt(mapGroupLocations.updatedAt, currentTimestamp)
-                )
-              )
-            );
-        } else if (form.data.uploadMode === 'tagReplace') {
-          // Tag-based replacement: delete only locations with tags present in upload
-          const tagsArray = Array.from(usedTags);
-          await trx
-            .delete(mapGroupLocations)
-            .where(
-              and(
-                eq(mapGroupLocations.mapGroupId, groupId),
-                inArray(mapGroupLocations.extraTag, tagsArray),
-                or(
-                  isNull(mapGroupLocations.updatedAt),
-                  lt(mapGroupLocations.updatedAt, currentTimestamp)
-                )
-              )
-            );
-        }
-        // For 'partial' mode: no deletions, just upserts
-
-        // Step 3: Insert tags into metas table
-        if (usedTags.size > 0) {
-          const metaInsertValues = Array.from(usedTags).map((tagName) => ({
-            mapGroupId: groupId,
-            tagName: tagName,
-            name: '',
-            note: '',
-            modifiedAt: currentTimestamp
-          }));
-          await trx.insert(metas).values(metaInsertValues).onConflictDoNothing();
-        }
-      });
-      return message(form, { numberOfLocations: upsertValues.length });
-    } catch (error) {
-      console.error('Error in uploadMapJson:', error);
-      if (
-        error instanceof Error &&
-        error.message.includes('ON CONFLICT DO UPDATE command cannot affect row a second time')
-      ) {
+    if (apiError || !data) {
+      const status = apiError?.status as number;
+      if (status === 409) {
         return setError(
           form,
           'file',
           'The uploaded file contains duplicate panoId values. Please remove duplicates and try again.'
         );
       }
-      // Let other errors crash
-      throw error;
+      if (status === 403) {
+        error(403, 'Permission denied');
+      }
+      error(500, 'Failed to upload locations');
     }
+
+    return message(form, { numberOfLocations: data.count });
   },
-  uploadMetas: async ({ request, params, locals }) => {
+  uploadMetas: async ({ request, params }) => {
     const groupId = getGroupId(params);
-    await ensurePermissions(locals.db, locals.user!.id, groupId);
     const form = await superValidate(request, zod4(metasUploadSchema));
 
     if (!form.valid) {
@@ -517,20 +401,24 @@ export const actions = {
       );
     }
 
-    try {
-      await uploadMetas(
-        locals.db,
-        groupId,
-        validationResult,
-        form.data.partialUpload,
-        form.data.autoCreateLevels
-      );
-    } catch (error) {
-      if (error instanceof Error && error.message.startsWith('Missing levels:')) {
-        return setError(form, 'file', error.message);
-      } else {
-        throw error;
+    const { error: apiError } = await api.internal['map-groups']({ id: groupId }).metas.upload.post(
+      {
+        partialUpload: form.data.partialUpload,
+        autoCreateLevels: form.data.autoCreateLevels,
+        metas: validationResult.data
       }
+    );
+
+    if (apiError) {
+      const status = apiError.status as number;
+      const value = apiError.value as { message?: string } | undefined;
+      if (status === 400 && value?.message?.startsWith('Missing levels:')) {
+        return setError(form, 'file', value.message);
+      }
+      if (status === 403) {
+        error(403, 'Permission denied');
+      }
+      error(500, 'Failed to upload metas');
     }
   },
   uploadMetaImages: async ({ request }) => {
