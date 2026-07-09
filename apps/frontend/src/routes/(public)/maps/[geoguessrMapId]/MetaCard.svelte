@@ -3,15 +3,7 @@
   import { Checkbox } from '$lib/components/ui/checkbox';
   import ChevronLeftIcon from '@lucide/svelte/icons/chevron-left';
   import ChevronRightIcon from '@lucide/svelte/icons/chevron-right';
-
-  type Meta = {
-    id: number;
-    name: string;
-    note: string;
-    images: string[];
-    footer: string;
-    locationsCount: number;
-  };
+  import type { Meta } from './types';
 
   let {
     meta,

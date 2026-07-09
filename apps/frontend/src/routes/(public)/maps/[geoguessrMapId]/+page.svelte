@@ -10,15 +10,16 @@
   import * as Dialog from '$lib/components/ui/dialog/index';
   import * as Select from '$lib/components/ui/select';
   import * as Table from '$lib/components/ui/table';
-  import * as ToggleGroup from '$lib/components/ui/toggle-group';
   import { Input } from '$lib/components/ui/input';
   import { Checkbox } from '$lib/components/ui/checkbox';
   import { Search, ChevronLeft, ChevronRight } from '@lucide/svelte';
-  import LayoutGridIcon from '@lucide/svelte/icons/layout-grid';
-  import ListIcon from '@lucide/svelte/icons/list';
   import Icon from '@iconify/svelte';
   import Tooltip from '$lib/components/Tooltip.svelte';
+  import ViewModeToggle from '$lib/components/ViewModeToggle.svelte';
+  import { METAS_VIEW_MODE_COOKIE } from '$lib/view-mode';
   import MetaCard from './MetaCard.svelte';
+  import MetaDetail from './MetaDetail.svelte';
+  import type { Meta } from './types';
   import type { SubmitFunction } from '@sveltejs/kit';
 
   let { data }: PageProps = $props();
@@ -28,31 +29,13 @@
   let showErrorAlert = $state(false);
   let searchQuery = $state('');
 
-  const viewToggleItemClass =
-    'h-6 min-w-6 !rounded-md px-1.5 text-muted-foreground data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-xs';
-  const viewModeCookieName = 'metas-view-mode';
-  const viewModeCookieMaxAge = 60 * 60 * 24 * 365;
   // svelte-ignore state_referenced_locally
   let viewMode = $state<PageProps['data']['metasViewMode']>(data.metasViewMode);
   let metaDialogOpen = $state(false);
 
-  $effect(() => {
-    document.cookie = `${viewModeCookieName}=${viewMode}; path=/; max-age=${viewModeCookieMaxAge}; SameSite=Lax`;
-  });
-
-  type Meta = {
-    id: number;
-    name: string;
-    note: string;
-    images: string[];
-    footer: string;
-    locationsCount: number;
-  };
-
-  let selectedMeta: Meta | undefined = $state(undefined);
+  let manuallySelectedMeta: Meta | undefined = $state(undefined);
   let rightPanelRef: HTMLDivElement | undefined = $state();
   let selectedMetaIds = new SvelteSet<number>();
-  let selectAll = $state(false);
   let personalMapChoiceDialogOpen = $state(false);
   let confirmAdding = $state(false);
 
@@ -60,35 +43,26 @@
     data.metaList.filter((meta) => meta.name.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  // Falls back to the first visible meta when nothing is selected or the selection is filtered out
+  let selectedMeta = $derived.by(() => {
+    const selected = manuallySelectedMeta;
+    if (selected && filteredMetaList.some((meta) => meta.id === selected.id)) {
+      return selected;
+    }
+    return filteredMetaList[0];
+  });
+
   let currentMetaIndex = $derived(
     selectedMeta ? filteredMetaList.findIndex((meta) => meta.id === selectedMeta!.id) : -1
   );
 
-  let visibleSelectedMetaIds = $derived.by(() => {
-    const visible = new SvelteSet<number>();
-    filteredMetaList.forEach((meta) => {
-      if (selectedMetaIds.has(meta.id)) {
-        visible.add(meta.id);
-      }
-    });
-    return visible;
-  });
+  let visibleSelectedMetaIds = $derived(
+    new Set(filteredMetaList.filter((meta) => selectedMetaIds.has(meta.id)).map((meta) => meta.id))
+  );
 
-  $effect(() => {
-    if (filteredMetaList.length > 0) {
-      selectAll = filteredMetaList.every((meta) => selectedMetaIds.has(meta.id));
-    } else {
-      selectAll = false;
-    }
-  });
-
-  // Handle case when search filters change and current meta is no longer visible
-  $effect(() => {
-    if (filteredMetaList.length > 0 && currentMetaIndex === -1) {
-      // If current meta is not in filtered list, select the first filtered meta
-      selectMetaAndScroll(filteredMetaList[0]);
-    }
-  });
+  let selectAll = $derived(
+    filteredMetaList.length > 0 && filteredMetaList.every((meta) => selectedMetaIds.has(meta.id))
+  );
 
   function toggleMeta(id: number, checked: boolean) {
     showAddedMetasAlert = false;
@@ -110,7 +84,6 @@
         selectedMetaIds.delete(meta.id);
       }
     }
-    selectAll = checked;
   }
 
   let dialogResolve: ((value: boolean) => void) | null = null;
@@ -168,7 +141,7 @@
   };
 
   function selectMetaAndScroll(meta: Meta) {
-    selectedMeta = meta;
+    manuallySelectedMeta = meta;
     if (rightPanelRef) rightPanelRef.scrollTop = 0;
   }
 
@@ -297,28 +270,23 @@
 {/snippet}
 
 {#snippet viewToggle()}
-  <ToggleGroup.Root
-    type="single"
-    bind:value={viewMode}
-    allowDeselect={false}
-    size="sm"
-    class="gap-0.5 bg-muted/60 p-0.5"
-    aria-label="Meta view">
-    <ToggleGroup.Item
-      value="cards"
-      class={viewToggleItemClass}
-      aria-label="Card view"
-      title="Card view">
-      <LayoutGridIcon class="size-4" />
-    </ToggleGroup.Item>
-    <ToggleGroup.Item
-      value="list"
-      class={viewToggleItemClass}
-      aria-label="List view"
-      title="List view">
-      <ListIcon class="size-4" />
-    </ToggleGroup.Item>
-  </ToggleGroup.Root>
+  <ViewModeToggle bind:value={viewMode} cookieName={METAS_VIEW_MODE_COOKIE} label="Meta view" />
+{/snippet}
+
+{#snippet alerts()}
+  <DismissibleAlert variant="destructive" bind:showAlert={showErrorAlert} alertText={errorAlert} />
+  <DismissibleAlert
+    variant="default"
+    bind:showAlert={showNotLoggedInAlert}
+    alertText={notLoggedInAlert} />
+  <DismissibleAlert
+    variant="default"
+    bind:showAlert={showNoPersonalMapsAlert}
+    alertText={noPersonalMapAlert} />
+  <DismissibleAlert
+    variant="success"
+    bind:showAlert={showAddedMetasAlert}
+    alertText={addedMetasAlert} />
 {/snippet}
 
 <svelte:head>
@@ -369,22 +337,7 @@
       {:else}
         <!-- Toolbar -->
         <div class="rounded-lg border bg-card shadow-xs p-4 space-y-3">
-          <DismissibleAlert
-            variant="destructive"
-            bind:showAlert={showErrorAlert}
-            alertText={errorAlert} />
-          <DismissibleAlert
-            variant="default"
-            bind:showAlert={showNotLoggedInAlert}
-            alertText={notLoggedInAlert} />
-          <DismissibleAlert
-            variant="default"
-            bind:showAlert={showNoPersonalMapsAlert}
-            alertText={noPersonalMapAlert} />
-          <DismissibleAlert
-            variant="success"
-            bind:showAlert={showAddedMetasAlert}
-            alertText={addedMetasAlert} />
+          {@render alerts()}
 
           <div class="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div class="relative w-full sm:max-w-xs">
@@ -499,27 +452,12 @@
         <!-- Mobile Meta Selection -->
         {#if data.isMapShared}
           <div class="bg-background shadow-lg rounded-lg p-4">
-            <DismissibleAlert
-              variant="destructive"
-              bind:showAlert={showErrorAlert}
-              alertText={errorAlert} />
-            <DismissibleAlert
-              variant="default"
-              bind:showAlert={showNotLoggedInAlert}
-              alertText={notLoggedInAlert} />
-            <DismissibleAlert
-              variant="default"
-              bind:showAlert={showNoPersonalMapsAlert}
-              alertText={noPersonalMapAlert} />
-            <DismissibleAlert
-              variant="success"
-              bind:showAlert={showAddedMetasAlert}
-              alertText={addedMetasAlert} />
+            {@render alerts()}
 
             <form
               action="?/addMetasToPersonalMap"
               method="post"
-              id="mobile-delete-metas-form"
+              id="mobile-add-metas-form"
               use:enhance={addMetasEnhance}>
               {#if visibleSelectedMetaIds.size > 0}
                 <Button
@@ -635,59 +573,7 @@
               </div>
             {/if}
 
-            {#if selectedMeta.note || selectedMeta.footer !== ''}
-              <div class="prose prose-sm dark:prose-invert max-w-none">
-                <div class="rounded-lg border bg-muted/50 p-4 space-y-3">
-                  {#if selectedMeta.note}
-                    <div>
-                      {@html selectedMeta.note}
-                    </div>
-                  {/if}
-                  {#if selectedMeta.footer !== ''}
-                    <div class="text-sm text-muted-foreground border-t pt-3">
-                      {@html selectedMeta.footer}
-                    </div>
-                  {/if}
-                </div>
-              </div>
-            {/if}
-
-            <div class="space-y-3">
-              <div class="flex items-center gap-2">
-                <Icon icon="material-symbols:image" class="h-4 w-4 text-muted-foreground" />
-                <h3 class="font-semibold">Images</h3>
-                {#if selectedMeta.images.length > 0}
-                  <span class="text-sm text-muted-foreground">({selectedMeta.images.length})</span>
-                {/if}
-              </div>
-
-              {#if selectedMeta.images.length > 0}
-                <div class="space-y-3">
-                  {#each selectedMeta.images as url (url)}
-                    <div class="group relative overflow-hidden rounded-lg border bg-muted">
-                      <img
-                        src={url}
-                        alt="Meta location"
-                        class="w-full h-auto max-h-[250px] object-contain" />
-                      <a
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 hover:bg-black/70 text-white p-2 rounded-md">
-                        <Icon icon="material-symbols:open-in-new" class="h-4 w-4" />
-                      </a>
-                    </div>
-                  {/each}
-                </div>
-              {:else}
-                <div class="text-center py-8 text-muted-foreground">
-                  <Icon
-                    icon="material-symbols:image-not-supported-outline"
-                    class="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p class="text-sm">No images available</p>
-                </div>
-              {/if}
-            </div>
+            <MetaDetail meta={selectedMeta} variant="mobile" />
           </div>
         {:else}
           <div class="bg-background shadow-lg rounded-lg p-4 space-y-4">
@@ -707,29 +593,14 @@
         <div
           class="mx-auto flex flex-row bg-background shadow-lg rounded-lg overflow-hidden w-full max-w-[1500px] h-[calc(100vh-90px)]">
           <div class="w-1/4 p-4 border-r border-border bg-muted/10 rounded-l-lg h-full">
-            <DismissibleAlert
-              variant="destructive"
-              bind:showAlert={showErrorAlert}
-              alertText={errorAlert} />
-            <DismissibleAlert
-              variant="default"
-              bind:showAlert={showNotLoggedInAlert}
-              alertText={notLoggedInAlert} />
-            <DismissibleAlert
-              variant="default"
-              bind:showAlert={showNoPersonalMapsAlert}
-              alertText={noPersonalMapAlert} />
-            <DismissibleAlert
-              variant="success"
-              bind:showAlert={showAddedMetasAlert}
-              alertText={addedMetasAlert} />
+            {@render alerts()}
 
             <div class="grid grid-rows-[auto_auto_auto_1fr_auto] h-full gap-2">
               {#if data.isMapShared}
                 <form
                   action="?/addMetasToPersonalMap"
                   method="post"
-                  id="delete-metas-form"
+                  id="add-metas-form"
                   use:enhance={addMetasEnhance}>
                   {#if visibleSelectedMetaIds.size > 0}
                     <Button
@@ -923,68 +794,7 @@
                     </div>
                   </div>
 
-                  <!-- Meta Description -->
-                  {#if selectedMeta.note || selectedMeta.footer !== ''}
-                    <div class="prose prose-sm dark:prose-invert max-w-none">
-                      <div class="rounded-lg border bg-muted/50 p-4 space-y-3">
-                        {#if selectedMeta.note}
-                          <div>
-                            {@html selectedMeta.note}
-                          </div>
-                        {/if}
-                        {#if selectedMeta.footer !== ''}
-                          <div class="text-sm text-muted-foreground border-t pt-3">
-                            {@html selectedMeta.footer}
-                          </div>
-                        {/if}
-                      </div>
-                    </div>
-                  {/if}
-
-                  <!-- Images Section -->
-                  <div class="space-y-4">
-                    <div class="flex items-center gap-2">
-                      <Icon icon="material-symbols:image" class="h-5 w-5 text-muted-foreground" />
-                      <h3 class="text-lg font-semibold">Images</h3>
-                      {#if selectedMeta.images.length > 0}
-                        <span class="text-sm text-muted-foreground"
-                          >({selectedMeta.images.length})</span>
-                      {/if}
-                    </div>
-
-                    {#if selectedMeta.images.length > 0}
-                      <div
-                        class="grid gap-4 {selectedMeta.images.length === 1
-                          ? 'grid-cols-1 max-w-2xl mx-auto'
-                          : 'grid-cols-1 md:grid-cols-2'}">
-                        {#each selectedMeta.images as url (url)}
-                          <div class="group relative overflow-hidden rounded-lg border bg-muted">
-                            <img
-                              src={url}
-                              alt="Meta location"
-                              class="w-full h-auto max-h-[300px] object-contain transition-transform group-hover:scale-[1.02]" />
-                            <div
-                              class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors">
-                            </div>
-                            <a
-                              href={url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 hover:bg-black/70 text-white p-2 rounded-md">
-                              <Icon icon="material-symbols:open-in-new" class="h-4 w-4" />
-                            </a>
-                          </div>
-                        {/each}
-                      </div>
-                    {:else}
-                      <div class="text-center py-12 text-muted-foreground">
-                        <Icon
-                          icon="material-symbols:image-not-supported-outline"
-                          class="h-12 w-12 mx-auto mb-3 opacity-50" />
-                        <p>No images available for this location</p>
-                      </div>
-                    {/if}
-                  </div>
+                  <MetaDetail meta={selectedMeta} variant="desktop" />
                 {:else}
                   <!-- No Meta Available -->
                   <div class="text-center py-16 text-muted-foreground">
@@ -1138,49 +948,7 @@
         {/if}
       </Dialog.Header>
 
-      {#if selectedMeta.note || selectedMeta.footer !== ''}
-        <div class="prose prose-sm dark:prose-invert max-w-none">
-          <div class="rounded-lg border bg-muted/50 p-4 space-y-3">
-            {#if selectedMeta.note}
-              <div>
-                {@html selectedMeta.note}
-              </div>
-            {/if}
-            {#if selectedMeta.footer !== ''}
-              <div class="text-sm text-muted-foreground border-t pt-3">
-                {@html selectedMeta.footer}
-              </div>
-            {/if}
-          </div>
-        </div>
-      {/if}
-
-      {#if selectedMeta.images.length > 0}
-        <div class="space-y-3">
-          {#each selectedMeta.images as url (url)}
-            <div class="group relative overflow-hidden rounded-lg border bg-muted">
-              <img
-                src={url}
-                alt="Meta location"
-                class="w-full h-auto max-h-[400px] object-contain" />
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 hover:bg-black/70 text-white p-2 rounded-md">
-                <Icon icon="material-symbols:open-in-new" class="h-4 w-4" />
-              </a>
-            </div>
-          {/each}
-        </div>
-      {:else}
-        <div class="text-center py-8 text-muted-foreground">
-          <Icon
-            icon="material-symbols:image-not-supported-outline"
-            class="h-8 w-8 mx-auto mb-2 opacity-50" />
-          <p class="text-sm">No images available</p>
-        </div>
-      {/if}
+      <MetaDetail meta={selectedMeta} variant="dialog" />
     {/if}
   </Dialog.Content>
 </Dialog.Root>
