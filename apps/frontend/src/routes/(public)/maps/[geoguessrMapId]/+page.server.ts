@@ -1,5 +1,6 @@
 import { error, fail } from '@sveltejs/kit';
 import { api } from '$lib/api';
+import { METAS_VIEW_MODE_COOKIE, parseViewMode } from '$lib/view-mode';
 import type { PageServerLoad } from './$types';
 
 type PersonalMap = {
@@ -7,15 +8,6 @@ type PersonalMap = {
   id: number;
   metasCount: number;
 };
-
-type MetasViewMode = 'cards' | 'list';
-
-const METAS_VIEW_MODE_COOKIE = 'metas-view-mode';
-const DEFAULT_METAS_VIEW_MODE: MetasViewMode = 'list';
-
-function getMetasViewMode(value: string | undefined): MetasViewMode {
-  return value === 'cards' || value === 'list' ? value : DEFAULT_METAS_VIEW_MODE;
-}
 
 export const load: PageServerLoad = async ({ params, locals, cookies }) => {
   const geoguessrId = params.geoguessrMapId;
@@ -66,7 +58,7 @@ export const load: PageServerLoad = async ({ params, locals, cookies }) => {
   }, 0);
 
   return {
-    metasViewMode: getMetasViewMode(cookies.get(METAS_VIEW_MODE_COOKIE)),
+    metasViewMode: parseViewMode(cookies.get(METAS_VIEW_MODE_COOKIE), 'list'),
     metaList,
     mapName: map.name,
     mapAuthors: map.authors,
