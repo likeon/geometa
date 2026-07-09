@@ -7,15 +7,15 @@
   import * as Dialog from '$lib/components/ui/dialog/index';
   import * as Form from '$lib/components/ui/form';
   import { type MapUploadSchema } from '$lib/form-schema';
-  import Icon from '@iconify/svelte';
   import { Button } from '$lib/components/ui/button';
+  import UploadModeInfo from './UploadModeInfo.svelte';
+  import { createPasteUpload } from './paste-upload.svelte';
 
   interface Props {
     isUploadDialogOpen: boolean;
     numberOfLocationsUploaded: number;
     data: SuperValidated<Infer<MapUploadSchema>>;
   }
-  let pastedFile: null | File = null;
   let {
     isUploadDialogOpen = $bindable(),
     numberOfLocationsUploaded = $bindable(),
@@ -34,9 +34,7 @@
         cancel();
         isUploadDialogOpen = false;
       }
-      if (pastedFile != null) {
-        formData.set('file', pastedFile);
-      }
+      pasteUpload.applyTo(formData);
     }
   });
 
@@ -44,33 +42,11 @@
   const uploadMode = $derived($formData.uploadMode);
   const file = fileProxy(form, 'file');
 
-  $effect(() => {
-    if (isUploadDialogOpen) {
-      document.addEventListener('paste', handlePaste);
-      reset();
-      pastedFile = null;
-    } else {
-      document.removeEventListener('paste', handlePaste);
-    }
+  const pasteUpload = createPasteUpload({
+    isOpen: () => isUploadDialogOpen,
+    submit,
+    reset
   });
-
-  async function handlePaste(event: ClipboardEvent) {
-    const clipboardData =
-      event.clipboardData?.getData('application/json') ||
-      event.clipboardData?.getData('text/plain');
-    if (clipboardData) {
-      try {
-        const jsonData = JSON.parse(clipboardData);
-        pastedFile = new File([JSON.stringify(jsonData)], 'pasted-data.json', {
-          type: 'application/json'
-        });
-        submit();
-        pastedFile = null;
-      } catch {
-        alert('Pasted data is not valid JSON.');
-      }
-    }
-  }
 
   function confirmFullUpload() {
     if (uploadMode === 'full') {
@@ -98,60 +74,20 @@
     <div class="space-y-4 py-4">
       <!-- Upload Mode Info -->
       {#if uploadMode === 'partial'}
-        <div
-          class="rounded-md bg-blue-50 border border-blue-200 p-3 dark:bg-blue-950/20 dark:border-blue-900/30">
-          <div class="flex items-start space-x-2">
-            <Icon
-              icon="material-symbols:info-rounded"
-              width="1rem"
-              height="1rem"
-              class="text-blue-600 mt-0.5 dark:text-blue-400" />
-            <div class="space-y-1">
-              <p class="text-sm font-medium text-blue-800 dark:text-blue-200">
-                Partial upload mode
-              </p>
-              <p class="text-xs text-muted-foreground">
-                New locations will be added and existing ones updated. No locations will be removed.
-              </p>
-            </div>
-          </div>
-        </div>
+        <UploadModeInfo
+          variant="info"
+          title="Partial upload mode"
+          description="New locations will be added and existing ones updated. No locations will be removed." />
       {:else if uploadMode === 'full'}
-        <div class="rounded-md bg-destructive/10 border border-destructive/20 p-3">
-          <div class="flex items-start space-x-2">
-            <Icon
-              icon="material-symbols:warning-rounded"
-              width="1rem"
-              height="1rem"
-              class="text-destructive mt-0.5" />
-            <div class="space-y-1">
-              <p class="text-sm font-medium text-destructive">Full replacement mode</p>
-              <p class="text-xs text-muted-foreground">
-                All existing locations will be replaced. Metas and descriptions will be preserved.
-              </p>
-            </div>
-          </div>
-        </div>
+        <UploadModeInfo
+          variant="destructive"
+          title="Full replacement mode"
+          description="All existing locations will be replaced. Metas and descriptions will be preserved." />
       {:else if uploadMode === 'tagReplace'}
-        <div
-          class="rounded-md bg-orange-50 border border-orange-200 p-3 dark:bg-orange-950/20 dark:border-orange-900/30">
-          <div class="flex items-start space-x-2">
-            <Icon
-              icon="material-symbols:warning-rounded"
-              width="1rem"
-              height="1rem"
-              class="text-orange-600 mt-0.5 dark:text-orange-400" />
-            <div class="space-y-1">
-              <p class="text-sm font-medium text-orange-800 dark:text-orange-200">
-                Tag-based replacement mode
-              </p>
-              <p class="text-xs text-muted-foreground">
-                Only locations with tags present in the upload will be replaced. Other locations
-                remain untouched.
-              </p>
-            </div>
-          </div>
-        </div>
+        <UploadModeInfo
+          variant="warning"
+          title="Tag-based replacement mode"
+          description="Only locations with tags present in the upload will be replaced. Other locations remain untouched." />
       {/if}
 
       <!-- File Upload Section -->

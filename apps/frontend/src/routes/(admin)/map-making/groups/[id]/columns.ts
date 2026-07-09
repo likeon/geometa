@@ -1,7 +1,8 @@
 import { renderComponent } from '$lib/components/ui/data-table';
 import type { ColumnDef } from '@tanstack/table-core';
-import DataTableActions from './table-actions.svelte';
+import BaseTableDeleteDropdown from '$lib/components/BaseTable/BaseTableDeleteDropdown.svelte';
 import BaseTableHeader from '$lib/components/BaseTable/BaseTableHeader.svelte';
+import { normalizeFilterValue } from '$lib/components/BaseTable/filters';
 import { Checkbox } from '$lib/components/ui/checkbox';
 import type { PageData } from './$types';
 import Check from '@lucide/svelte/icons/check';
@@ -64,11 +65,7 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
       }),
     accessorFn: (row) => row.locationsCount?.total ?? 0,
     filterFn: (row, columnId, filterValue) => {
-      const filters = Array.isArray(filterValue)
-        ? filterValue
-        : filterValue != null
-          ? [filterValue]
-          : [];
+      const filters = normalizeFilterValue(filterValue);
 
       if (filters.length === 0) return true;
 
@@ -94,11 +91,7 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
         .sort()
         .join(', '),
     filterFn: (row, columnId, filterValue) => {
-      const filters = Array.isArray(filterValue)
-        ? (filterValue as string[])
-        : filterValue != null
-          ? [filterValue as string]
-          : [];
+      const filters = normalizeFilterValue(filterValue);
 
       if (filters.length === 0) return true;
 
@@ -129,11 +122,7 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
       }
     },
     filterFn: (row, columnId, filterValue) => {
-      const filters = Array.isArray(filterValue)
-        ? filterValue
-        : filterValue != null
-          ? [filterValue]
-          : [];
+      const filters = normalizeFilterValue(filterValue);
 
       if (filters.length === 0) return true;
 
@@ -155,11 +144,7 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
         ? renderComponent(Check, { size: 16, color: 'green', class: 'mx-auto' })
         : '',
     filterFn: (row, columnId, filterValue) => {
-      const filters = Array.isArray(filterValue)
-        ? filterValue
-        : filterValue != null
-          ? [filterValue]
-          : [];
+      const filters = normalizeFilterValue(filterValue);
 
       if (filters.length === 0) return true;
       const note = row.getValue<string>(columnId) || '';
@@ -187,7 +172,10 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
-      return renderComponent(DataTableActions, { id: row.original.id });
+      return renderComponent(BaseTableDeleteDropdown, {
+        id: row.original.id,
+        action: '?/deleteMetas'
+      });
     },
     meta: {
       class: 'min-w-[48px] max-w-[48px] text-right !w-[48px]'

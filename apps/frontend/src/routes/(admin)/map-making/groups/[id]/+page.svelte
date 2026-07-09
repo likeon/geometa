@@ -47,10 +47,7 @@
   let isDownloadMetasDialogOpen = $state(false);
   let metas = $derived(data.group.metas);
   let selectedMetaId = $state(-1);
-  let selectedMeta = $derived.by(() => {
-    const meta = metas.find((meta) => meta.id == selectedMetaId);
-    return meta != undefined ? meta : null;
-  });
+  let selectedMeta = $derived(metas.find((meta) => meta.id == selectedMetaId) ?? null);
   let metaIds = $derived(metas.map((m) => m.id));
 
   let numberOfLocationsUploaded = $state(0);
@@ -107,10 +104,6 @@
 
   let selectedIds: number[] = $state([]);
   let isDeleteDialogOpen = $state(false);
-
-  function handleDeleteCancel() {
-    // Dialog will close automatically
-  }
 
   function handleDownload(endpoint: string, type: string) {
     const form = document.createElement('form');
@@ -380,7 +373,7 @@
       ]
     }} />
 
-  {#if data.group.metas.length === 0}
+  {#if metas.length === 0}
     <div class="justify-center w-full flex mt-2">
       <p class="text-2xl">
         Upload locations using <a target="_blank" href="https://map-making.app/">map-making.app</a> json
@@ -422,7 +415,6 @@
   bind:selectedGroupId
   bind:sharingMetas
   {toggleLevel}
-  {handleDeleteCancel}
   {handleDownload} />
 
 <SvelteToast />

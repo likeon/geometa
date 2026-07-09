@@ -3,7 +3,7 @@ import type { ColumnDef } from '@tanstack/table-core';
 import type { PageData } from './$types';
 import BaseTableHeader from '$lib/components/BaseTable/BaseTableHeader.svelte';
 import BaseTableLink from '$lib/components/BaseTable/BaseTableLink.svelte';
-import TableActions from './table-actions.svelte';
+import BaseTableDeleteDropdown from '$lib/components/BaseTable/BaseTableDeleteDropdown.svelte';
 
 export const columns: ColumnDef<PageData['group']['maps'][number]>[] = [
   {
@@ -83,7 +83,10 @@ export const columns: ColumnDef<PageData['group']['maps'][number]>[] = [
   {
     id: 'actions',
     cell: ({ row }) => {
-      return renderComponent(TableActions, { id: row.original.id });
+      return renderComponent(BaseTableDeleteDropdown, {
+        id: row.original.id,
+        action: '?/deleteMap'
+      });
     },
     meta: {
       class: 'text-right w-[1%] whitespace-nowrap'
