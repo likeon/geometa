@@ -1,13 +1,126 @@
-import { locationMetas, mapGroups, metas } from '@api/lib/db/schema';
+import {
+  locationMetas,
+  mapGroupLocations,
+  mapGroupPermissions,
+  mapGroups,
+  maps,
+  metas,
+  users,
+} from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { syncMapGroup } from '@api/lib/internal/sync';
-import { and, eq, inArray, sql } from 'drizzle-orm';
+import { and, desc, eq, inArray, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .use(auth())
+  .get(
+    '/',
+    async ({ userId }) => {
+      const userGroups = await db.$primary
+        .select({
+          id: mapGroups.id,
+          name: mapGroups.name,
+          locationCount:
+            sql<number>`(SELECT COUNT(${mapGroupLocations.id}) FROM ${mapGroupLocations} WHERE ${mapGroupLocations.mapGroupId} = ${mapGroups.id})`.mapWith(
+              Number,
+            ),
+          metasCount:
+            sql<number>`(SELECT COUNT(${metas.id}) FROM ${metas} WHERE ${metas.mapGroupId} = ${mapGroups.id})`.mapWith(
+              Number,
+            ),
+          mapsCount:
+            sql<number>`(SELECT COUNT(${maps.id}) FROM ${maps} WHERE ${maps.mapGroupId} = ${mapGroups.id})`.mapWith(
+              Number,
+            ),
+          gamesPlayed:
+            sql<number>`(SELECT COALESCE(SUM(${maps.numberOfGamesPlayed}), 0) FROM ${maps} WHERE ${maps.mapGroupId} = ${mapGroups.id})`.mapWith(
+              Number,
+            ),
+        })
+        .from(mapGroups)
+        .innerJoin(
+          mapGroupPermissions,
+          eq(mapGroupPermissions.mapGroupId, mapGroups.id),
+        )
+        .where(eq(mapGroupPermissions.userId, userId))
+        .orderBy(desc(mapGroups.id));
+
+      const user = await db.$primary.query.users.findFirst({
+        where: eq(users.id, userId),
+      });
+      let allGroups = null;
+      if (user?.isSuperadmin) {
+        allGroups = await db.$primary
+          .select({
+            id: mapGroups.id,
+            name: mapGroups.name,
+            authors: sql<string | null>`
+              (SELECT string_agg(u.username, ', ')
+               FROM map_group_permissions mgp
+                      JOIN "user" u ON u.id = mgp.user_id
+               WHERE mgp.map_group_id = map_groups.id)`,
+            locationCount: sql<number>`count
+              (${mapGroupLocations.id})`.mapWith(Number),
+          })
+          .from(mapGroups)
+          .leftJoin(
+            mapGroupLocations,
+            eq(mapGroups.id, mapGroupLocations.mapGroupId),
+          )
+          .groupBy(mapGroups.id)
+          .orderBy(
+            desc(sql<number>`count
+            (${mapGroupLocations.id})`),
+          );
+      }
+
+      return { userGroups, allGroups };
+    },
+    { userId: true },
+  )
+  .post(
+    '/',
+    async ({ body, userId }) => {
+      const id = await db.$primary.transaction(async (tx) => {
+        const inserted = await tx
+          .insert(mapGroups)
+          .values({ name: body.name })
+          .returning({ id: mapGroups.id });
+        await tx
+          .insert(mapGroupPermissions)
+          .values({ mapGroupId: inserted[0].id, userId });
+        return inserted[0].id;
+      });
+      return { id };
+    },
+    {
+      body: t.Object({ name: t.String({ minLength: 1 }) }),
+      userId: true,
+    },
+  )
+  .patch(
+    '/:id',
+    async ({ params: { id: groupId }, body, userId, status }) => {
+      await ensurePermissions(userId, groupId);
+      const updated = await db
+        .update(mapGroups)
+        .set({ name: body.name })
+        .where(eq(mapGroups.id, groupId))
+        .returning({ id: mapGroups.id });
+      if (updated.length) {
+        return status(200);
+      }
+      return status(404);
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      body: t.Object({ name: t.String({ minLength: 1 }) }),
+      userId: true,
+    },
+  )
   .post(
     '/:id/sync',
     async ({ params: { id: groupId }, userId, status }) => {
