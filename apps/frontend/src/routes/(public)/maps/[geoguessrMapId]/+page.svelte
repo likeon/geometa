@@ -148,6 +148,7 @@
 
     if (!confirmAdding) {
       cancel();
+      return;
     }
 
     // Only add visible selected metas
@@ -845,7 +846,7 @@
             </div>
           </div>
 
-          <div class="lg:w-3/4 overflow-hidden flex flex-col" bind:this={rightPanelRef}>
+          <div class="lg:w-3/4 overflow-hidden flex flex-col">
             <!-- Header Section -->
             <div
               class="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 p-6">
@@ -876,7 +877,7 @@
             </div>
 
             <!-- Meta Content Section -->
-            <div class="flex-1 overflow-y-auto p-6">
+            <div class="flex-1 overflow-y-auto p-6" bind:this={rightPanelRef}>
               <div class="max-w-4xl mx-auto space-y-6">
                 {#if selectedMeta}
                   <!-- Meta Title -->
