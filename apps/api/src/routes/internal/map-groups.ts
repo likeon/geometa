@@ -260,8 +260,8 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       } else {
         await db
           .update(levels)
-          .set({ name, mapGroupId: groupId })
-          .where(eq(levels.id, id));
+          .set({ name })
+          .where(and(eq(levels.id, id), eq(levels.mapGroupId, groupId)));
       }
     },
     {

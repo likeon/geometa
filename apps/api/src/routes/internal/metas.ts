@@ -455,7 +455,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
         const { id, mapGroupId, ...cleanedMeta } = meta;
 
         try {
-          await db.$primary.transaction(async (tx) => {
+          const inserted = await db.$primary.transaction(async (tx) => {
             const insertResult = await tx
               .insert(metas)
               .values({
@@ -467,11 +467,10 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
               .returning({ insertedId: metas.id });
 
             if (insertResult.length === 0) {
-              return; // Skip if meta already exists
+              return false; // Skip if meta already exists
             }
 
             const newMetaId = insertResult[0].insertedId;
-            successfulCopies.push(id);
 
             const sourceImages = await tx
               .select({ image_url: metaImages.image_url })
@@ -537,7 +536,12 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
                 )
                 .onConflictDoNothing();
             }
+            return true;
           });
+          // count only after the transaction commits, so a rollback isn't reported as success
+          if (inserted) {
+            successfulCopies.push(id);
+          }
         } catch (error) {
           console.error(`Failed to copy meta ${id}:`, error);
           // Continue with other metas even if one fails

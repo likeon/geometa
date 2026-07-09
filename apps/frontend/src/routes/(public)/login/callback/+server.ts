@@ -42,14 +42,16 @@ export async function GET(event: RequestEvent) {
         .where(eq(users.id, discordUser.id));
     } else {
       await db.insert(users).values({ id: discordUser.id, username: discordUser.username });
-      const { error: apiError } = await api.internal.users['first-login-setup'].post(undefined, {
-        headers: {
-          'x-api-user-id': discordUser.id
-        }
-      });
-      if (apiError) {
-        throw new Error('Failed to set up default map group');
+    }
+    // Idempotent, so run it on every login: if a previous attempt failed after the
+    // user row was created, this retries and back-fills the default map group.
+    const { error: apiError } = await api.internal.users['first-login-setup'].post(undefined, {
+      headers: {
+        'x-api-user-id': discordUser.id
       }
+    });
+    if (apiError && !existingUser) {
+      throw new Error('Failed to set up default map group');
     }
     const session = await event.locals.lucia.createSession(discordUser.id, {});
     const sessionCookie = event.locals.lucia.createSessionCookie(session.id);

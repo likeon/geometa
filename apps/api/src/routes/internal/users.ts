@@ -39,6 +39,15 @@ export const usersRouter = new Elysia({ prefix: '/users' })
   .post(
     '/first-login-setup',
     async ({ userId }) => {
+      // idempotent: safe to call on every login. If the user already has any
+      // group permission, do nothing so a failed first call self-heals on retry.
+      const existing = await db.$primary.query.mapGroupPermissions.findFirst({
+        where: eq(mapGroupPermissions.userId, userId),
+      });
+      if (existing) {
+        return { mapGroupId: existing.mapGroupId };
+      }
+
       const mapGroupId = await db.$primary.transaction(async (tx) => {
         const mapGroup = await tx
           .insert(mapGroups)
