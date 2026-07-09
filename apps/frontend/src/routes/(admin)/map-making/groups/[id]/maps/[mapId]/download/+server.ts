@@ -1,4 +1,4 @@
-import { api } from '$lib/api';
+import { api, throwApiError } from '$lib/api';
 import { error } from '@sveltejs/kit';
 
 export async function GET(event) {
@@ -21,15 +21,8 @@ export async function GET(event) {
     .download.get({ query: { groupId } });
 
   if (apiError || !data) {
-    const status = apiError?.status as number;
-    if (status === 404) {
-      error(404, 'Map not found');
-    }
-    if (status === 403) {
-      error(403, 'Permission denied');
-    }
-    console.error('Download API Error:', apiError);
-    error(500, 'Failed to download map');
+    if (apiError) console.error('Download API Error:', apiError);
+    throwApiError(apiError, { 404: 'Map not found', 500: 'Failed to download map' });
   }
 
   return new Response(JSON.stringify(data), {

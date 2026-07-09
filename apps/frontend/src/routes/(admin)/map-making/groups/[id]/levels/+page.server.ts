@@ -3,7 +3,7 @@ import { getGroupId } from '../utils';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { insertLevelsSchema } from '$lib/form-schema';
-import { api } from '$lib/api';
+import { api, throwApiError } from '$lib/api';
 
 export const load = async ({ params }) => {
   const id = getGroupId(params);
@@ -11,14 +11,7 @@ export const load = async ({ params }) => {
   const { data, error: apiError } = await api.internal['map-groups']({ id })['levels-page'].get();
 
   if (apiError || !data) {
-    const status = apiError?.status as number;
-    if (status === 404) {
-      error(404, 'No group');
-    }
-    if (status === 403) {
-      error(403, 'Permission denied');
-    }
-    error(500, 'Something went wrong.');
+    throwApiError(apiError, { 404: 'No group' });
   }
 
   const levelForm = await superValidate(zod4(insertLevelsSchema));
@@ -43,14 +36,7 @@ export const actions = {
       .delete();
 
     if (apiError) {
-      const status = apiError.status as number;
-      if (status === 404) {
-        error(404, 'Level not found');
-      }
-      if (status === 403) {
-        error(403, 'Permission denied');
-      }
-      error(500, 'Failed to delete level');
+      throwApiError(apiError, { 404: 'Level not found', 500: 'Failed to delete level' });
     }
   },
 
@@ -67,11 +53,7 @@ export const actions = {
     });
 
     if (apiError) {
-      const status = apiError.status as number;
-      if (status === 403) {
-        error(403, 'Permission denied');
-      }
-      error(500, 'Failed to save level');
+      throwApiError(apiError, { 500: 'Failed to save level' });
     }
   }
 };

@@ -1,5 +1,6 @@
 import {
   levels,
+  type Meta,
   mapGroupLocations,
   mapGroups,
   metaImages,
@@ -9,13 +10,111 @@ import {
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensurePermissions } from '@api/lib/internal/permissions';
-import { generateRandomString } from '@api/lib/utils/common';
+import { generateRandomString, isUniqueViolation } from '@api/lib/utils/common';
 import { markdown2Html } from '@api/lib/utils/markdown';
 import { uploadImage } from '@api/lib/utils/s3';
 import { and, eq, inArray, not } from 'drizzle-orm';
-import { DrizzleQueryError } from 'drizzle-orm/errors';
 import { Elysia, t } from 'elysia';
 import sharp from 'sharp';
+
+type Tx = Parameters<Parameters<typeof db.$primary.transaction>[0]>[0];
+
+// Copies a meta (its images, its tag's locations, and optionally its level
+// assignments) into another group inside the given transaction. Returns true if
+// the meta was inserted, false if one with the same tag already existed there.
+// copyLevels is false for /copy and true for /share, preserving their behaviors.
+async function copyMetaToGroup(
+  tx: Tx,
+  meta: Meta,
+  targetGroupId: number,
+  currentTimestamp: number,
+  copyLevels: boolean,
+): Promise<boolean> {
+  const { id, mapGroupId, ...cleanedMeta } = meta;
+
+  const insertResult = await tx
+    .insert(metas)
+    .values({
+      ...cleanedMeta,
+      mapGroupId: targetGroupId,
+      modifiedAt: currentTimestamp,
+    })
+    .onConflictDoNothing()
+    .returning({ insertedId: metas.id });
+  if (insertResult.length === 0) {
+    return false;
+  }
+  const newMetaId = insertResult[0].insertedId;
+
+  const sourceImages = await tx
+    .select({ image_url: metaImages.image_url })
+    .from(metaImages)
+    .where(eq(metaImages.metaId, id));
+  if (sourceImages.length > 0) {
+    await tx
+      .insert(metaImages)
+      .values(
+        sourceImages.map((sourceImage) => ({
+          image_url: sourceImage.image_url,
+          metaId: newMetaId,
+        })),
+      )
+      .onConflictDoNothing();
+  }
+
+  const sourceLocations = await tx
+    .select({
+      lat: mapGroupLocations.lat,
+      lng: mapGroupLocations.lng,
+      heading: mapGroupLocations.heading,
+      pitch: mapGroupLocations.pitch,
+      zoom: mapGroupLocations.zoom,
+      panoId: mapGroupLocations.panoId,
+      extraTag: mapGroupLocations.extraTag,
+      extraPanoId: mapGroupLocations.extraPanoId,
+      extraPanoDate: mapGroupLocations.extraPanoDate,
+    })
+    .from(mapGroupLocations)
+    .where(
+      and(
+        eq(mapGroupLocations.mapGroupId, mapGroupId),
+        eq(mapGroupLocations.extraTag, meta.tagName),
+      ),
+    );
+  if (sourceLocations.length > 0) {
+    await tx
+      .insert(mapGroupLocations)
+      .values(
+        sourceLocations.map((location) => ({
+          ...location,
+          mapGroupId: targetGroupId,
+          updatedAt: currentTimestamp,
+          modifiedAt: currentTimestamp,
+        })),
+      )
+      .onConflictDoNothing();
+  }
+
+  if (copyLevels) {
+    const sourceMetaLevels = await tx
+      .select({ levelId: metaLevels.levelId })
+      .from(metaLevels)
+      .where(eq(metaLevels.metaId, id));
+    if (sourceMetaLevels.length > 0) {
+      await tx
+        .insert(metaLevels)
+        .values(
+          sourceMetaLevels.map((ml) => ({
+            metaId: newMetaId,
+            levelId: ml.levelId,
+          })),
+        )
+        .onConflictDoNothing();
+    }
+  }
+
+  return true;
+}
 
 class ImageNotFoundError extends Error {
   constructor(imageId: number, metaId: number) {
@@ -269,14 +368,11 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
         });
         return { id: metaId };
       } catch (error) {
-        if (error instanceof DrizzleQueryError) {
-          const pgError = error.cause as { constraint_name?: string };
-          if (pgError?.constraint_name === 'metas_unique') {
-            return status(409, {
-              message:
-                'A meta with this tag name already exists in this map group',
-            });
-          }
+        if (isUniqueViolation(error, 'metas_unique')) {
+          return status(409, {
+            message:
+              'A meta with this tag name already exists in this map group',
+          });
         }
         throw error;
       }
@@ -452,98 +548,16 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       const successfulCopies: number[] = [];
 
       for (const meta of metasToShare) {
-        const { id, mapGroupId, ...cleanedMeta } = meta;
-
         try {
-          const inserted = await db.$primary.transaction(async (tx) => {
-            const insertResult = await tx
-              .insert(metas)
-              .values({
-                ...cleanedMeta,
-                mapGroupId: targetGroupId,
-                modifiedAt: currentTimestamp,
-              })
-              .onConflictDoNothing()
-              .returning({ insertedId: metas.id });
-
-            if (insertResult.length === 0) {
-              return false; // Skip if meta already exists
-            }
-
-            const newMetaId = insertResult[0].insertedId;
-
-            const sourceImages = await tx
-              .select({ image_url: metaImages.image_url })
-              .from(metaImages)
-              .where(eq(metaImages.metaId, id));
-            if (sourceImages.length > 0) {
-              await tx
-                .insert(metaImages)
-                .values(
-                  sourceImages.map((sourceImage) => ({
-                    image_url: sourceImage.image_url,
-                    metaId: newMetaId,
-                  })),
-                )
-                .onConflictDoNothing();
-            }
-
-            const sourceLocations = await tx
-              .select({
-                lat: mapGroupLocations.lat,
-                lng: mapGroupLocations.lng,
-                heading: mapGroupLocations.heading,
-                pitch: mapGroupLocations.pitch,
-                zoom: mapGroupLocations.zoom,
-                panoId: mapGroupLocations.panoId,
-                extraTag: mapGroupLocations.extraTag,
-                extraPanoId: mapGroupLocations.extraPanoId,
-                extraPanoDate: mapGroupLocations.extraPanoDate,
-              })
-              .from(mapGroupLocations)
-              .where(
-                and(
-                  eq(mapGroupLocations.mapGroupId, mapGroupId),
-                  eq(mapGroupLocations.extraTag, meta.tagName),
-                ),
-              );
-            if (sourceLocations.length > 0) {
-              await tx
-                .insert(mapGroupLocations)
-                .values(
-                  sourceLocations.map((location) => ({
-                    ...location,
-                    mapGroupId: targetGroupId,
-                    updatedAt: currentTimestamp,
-                    modifiedAt: currentTimestamp,
-                  })),
-                )
-                .onConflictDoNothing();
-            }
-
-            const sourceMetaLevels = await tx
-              .select({ levelId: metaLevels.levelId })
-              .from(metaLevels)
-              .where(eq(metaLevels.metaId, id));
-            if (sourceMetaLevels.length > 0) {
-              await tx
-                .insert(metaLevels)
-                .values(
-                  sourceMetaLevels.map((ml) => ({
-                    metaId: newMetaId,
-                    levelId: ml.levelId,
-                  })),
-                )
-                .onConflictDoNothing();
-            }
-            return true;
-          });
+          const inserted = await db.$primary.transaction((tx) =>
+            copyMetaToGroup(tx, meta, targetGroupId, currentTimestamp, true),
+          );
           // count only after the transaction commits, so a rollback isn't reported as success
           if (inserted) {
-            successfulCopies.push(id);
+            successfulCopies.push(meta.id);
           }
         } catch (error) {
-          console.error(`Failed to copy meta ${id}:`, error);
+          console.error(`Failed to copy meta ${meta.id}:`, error);
           // Continue with other metas even if one fails
         }
       }
@@ -576,74 +590,12 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       await ensurePermissions(userId, meta.mapGroupId);
       await ensurePermissions(userId, targetGroupId);
 
-      const { id, mapGroupId, ...cleanedMeta } = meta;
-      void id;
       const currentTimestamp = Math.floor(Date.now() / 1000);
 
-      await db.$primary.transaction(async (tx) => {
-        const insertResult = await tx
-          .insert(metas)
-          .values({
-            ...cleanedMeta,
-            mapGroupId: targetGroupId,
-            modifiedAt: currentTimestamp,
-          })
-          .onConflictDoNothing()
-          .returning({ insertedId: metas.id });
-
-        if (insertResult.length === 0) {
-          return;
-        }
-
-        const sourceImages = await tx
-          .select({ image_url: metaImages.image_url })
-          .from(metaImages)
-          .where(eq(metaImages.metaId, metaId));
-        if (sourceImages.length !== 0) {
-          await tx
-            .insert(metaImages)
-            .values(
-              sourceImages.map((sourceImage) => ({
-                image_url: sourceImage.image_url,
-                metaId: insertResult[0].insertedId,
-              })),
-            )
-            .onConflictDoNothing();
-        }
-
-        const sourceLocations = await tx
-          .select({
-            lat: mapGroupLocations.lat,
-            lng: mapGroupLocations.lng,
-            heading: mapGroupLocations.heading,
-            pitch: mapGroupLocations.pitch,
-            zoom: mapGroupLocations.zoom,
-            panoId: mapGroupLocations.panoId,
-            extraTag: mapGroupLocations.extraTag,
-            extraPanoId: mapGroupLocations.extraPanoId,
-            extraPanoDate: mapGroupLocations.extraPanoDate,
-          })
-          .from(mapGroupLocations)
-          .where(
-            and(
-              eq(mapGroupLocations.mapGroupId, mapGroupId),
-              eq(mapGroupLocations.extraTag, meta.tagName),
-            ),
-          );
-        if (sourceLocations.length !== 0) {
-          await tx
-            .insert(mapGroupLocations)
-            .values(
-              sourceLocations.map((location) => ({
-                ...location,
-                mapGroupId: targetGroupId,
-                updatedAt: currentTimestamp,
-                modifiedAt: currentTimestamp,
-              })),
-            )
-            .onConflictDoNothing();
-        }
-      });
+      // copyLevels is false here: /copy intentionally does not copy level assignments
+      await db.$primary.transaction((tx) =>
+        copyMetaToGroup(tx, meta, targetGroupId, currentTimestamp, false),
+      );
       return status(200);
     },
     {

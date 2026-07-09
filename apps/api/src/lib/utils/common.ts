@@ -11,6 +11,24 @@ export function assertNotNullish<T>(
   }
 }
 
+// A pg unique-violation surfaces as code 23505; drizzle-orm wraps the postgres.js
+// error in `.cause`, so walk both the error and its cause.
+export function isUniqueViolation(
+  error: unknown,
+  constraintName: string,
+): boolean {
+  return [error, (error as { cause?: unknown } | undefined)?.cause].some(
+    (e) => {
+      const pgError = e as
+        | { code?: string; constraint_name?: string }
+        | undefined;
+      return (
+        pgError?.code === '23505' && pgError?.constraint_name === constraintName
+      );
+    },
+  );
+}
+
 export function generateRandomString(length: number) {
   const charset =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

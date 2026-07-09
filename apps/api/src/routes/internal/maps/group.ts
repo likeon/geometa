@@ -10,6 +10,7 @@ import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { geoguessrGetMapInfo } from '@api/lib/internal/utils';
+import { isUniqueViolation } from '@api/lib/utils/common';
 import { markdown2Html } from '@api/lib/utils/markdown';
 import { and, eq, inArray, not } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
@@ -163,24 +164,8 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
           return mapId;
         });
         return { id: mapId };
-        // biome-ignore lint/suspicious/noExplicitAny: pg error introspection
-      } catch (error: any) {
-        if (
-          error.code === '23505' &&
-          error.constraint_name === 'maps_geoguessr_id_unique'
-        ) {
-          return status(409, {
-            message:
-              'This GeoGuessr ID is already used by another map. Please use a different ID.',
-          });
-        }
-        const cause = error?.cause as
-          | { code?: string; constraint_name?: string }
-          | undefined;
-        if (
-          cause?.code === '23505' &&
-          cause?.constraint_name === 'maps_geoguessr_id_unique'
-        ) {
+      } catch (error) {
+        if (isUniqueViolation(error, 'maps_geoguessr_id_unique')) {
           return status(409, {
             message:
               'This GeoGuessr ID is already used by another map. Please use a different ID.',
