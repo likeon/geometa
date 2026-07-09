@@ -1,21 +1,24 @@
 import { error } from '@sveltejs/kit';
-import { eq } from 'drizzle-orm';
-import { mapGroups } from '$lib/db/schema';
 import { getGroupId } from '../utils';
-import { ensurePermissions } from '$lib/utils';
+import { api } from '$lib/api';
 import type { PageServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals, params, url }) => {
+export const load: PageServerLoad = async ({ params, url }) => {
   const groupId = getGroupId(params);
-  await ensurePermissions(locals.db, locals.user!.id, groupId);
 
-  // Get group info from database like other pages
-  const group = await locals.db.query.mapGroups.findFirst({
-    where: eq(mapGroups.id, groupId)
-  });
+  const { data: group, error: apiError } = await api.internal['map-groups']({
+    id: groupId
+  }).get();
 
-  if (!group) {
-    error(404, 'No group');
+  if (apiError || !group) {
+    const status = apiError?.status as number;
+    if (status === 404) {
+      error(404, 'No group');
+    }
+    if (status === 403) {
+      error(403, 'Permission denied');
+    }
+    error(500, 'Something went wrong.');
   }
 
   // Get days from URL query parameter, default to 30
