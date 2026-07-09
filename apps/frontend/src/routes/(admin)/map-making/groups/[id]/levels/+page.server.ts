@@ -1,37 +1,36 @@
-import { asc, eq } from 'drizzle-orm';
-import { levels, mapGroups } from '$lib/db/schema';
 import { error } from '@sveltejs/kit';
 import { getGroupId } from '../utils';
 import { fail, superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
-import { ensurePermissions } from '$lib/utils';
 import { insertLevelsSchema } from '$lib/form-schema';
+import { api } from '$lib/api';
 
-export const load = async ({ params, locals }) => {
+export const load = async ({ params }) => {
   const id = getGroupId(params);
 
-  const group = await locals.db.query.mapGroups.findFirst({
-    with: {
-      levels: {
-        orderBy: [asc(levels.name)]
-      }
-    },
-    where: eq(mapGroups.id, id)
-  });
+  const { data, error: apiError } = await api.internal['map-groups']({ id })['levels-page'].get();
 
-  if (!group) {
-    error(404, 'No group');
+  if (apiError || !data) {
+    const status = apiError?.status as number;
+    if (status === 404) {
+      error(404, 'No group');
+    }
+    if (status === 403) {
+      error(403, 'Permission denied');
+    }
+    error(500, 'Something went wrong.');
   }
 
   const levelForm = await superValidate(zod4(insertLevelsSchema));
   return {
-    group,
+    group: data.group,
     levelForm
   };
 };
 
 export const actions = {
-  deleteLevel: async ({ request, locals }) => {
+  deleteLevel: async ({ request, params }) => {
+    const groupId = getGroupId(params);
     const data = await request.formData();
     const levelId = parseInt((data.get('id') as string) || '', 10);
 
@@ -39,29 +38,40 @@ export const actions = {
       error(400, 'Invalid ID');
     }
 
-    const level = await locals.db.query.levels.findFirst({ where: eq(levels.id, levelId) });
-    await ensurePermissions(locals.db, locals.user?.id, level?.mapGroupId);
+    const { error: apiError } = await api.internal['map-groups']({ id: groupId })
+      .levels({ levelId })
+      .delete();
 
-    await locals.db.delete(levels).where(eq(levels.id, levelId));
+    if (apiError) {
+      const status = apiError.status as number;
+      if (status === 404) {
+        error(404, 'Level not found');
+      }
+      if (status === 403) {
+        error(403, 'Permission denied');
+      }
+      error(500, 'Failed to delete level');
+    }
   },
 
-  updateLevel: async ({ request, locals, params }) => {
+  updateLevel: async ({ request, params }) => {
     const mapGroupId = getGroupId(params);
     const form = await superValidate(request, zod4(insertLevelsSchema));
     if (!form.valid) {
       return fail(400, { form });
     }
 
-    const { id, ...dataNoId } = form.data;
-    const dataWithGroupId = {
-      ...dataNoId,
-      mapGroupId
-    };
+    const { error: apiError } = await api.internal['map-groups']({ id: mapGroupId }).levels.put({
+      id: form.data.id,
+      name: form.data.name
+    });
 
-    if (id == undefined) {
-      await locals.db.insert(levels).values(dataWithGroupId).onConflictDoNothing();
-    } else {
-      await locals.db.update(levels).set(dataWithGroupId).where(eq(levels.id, id));
+    if (apiError) {
+      const status = apiError.status as number;
+      if (status === 403) {
+        error(403, 'Permission denied');
+      }
+      error(500, 'Failed to save level');
     }
   }
 };

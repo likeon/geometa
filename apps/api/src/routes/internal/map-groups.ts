@@ -221,6 +221,77 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       userId: true,
     },
   )
+  .get(
+    '/:id/levels-page',
+    async ({ params: { id: groupId }, userId, status }) => {
+      await ensurePermissions(userId, groupId);
+
+      const group = await db.$primary.query.mapGroups.findFirst({
+        with: {
+          levels: {
+            orderBy: [asc(levels.name)],
+          },
+        },
+        where: eq(mapGroups.id, groupId),
+      });
+
+      if (!group) {
+        return status(404);
+      }
+
+      return { group };
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      userId: true,
+    },
+  )
+  .put(
+    '/:id/levels',
+    async ({ params: { id: groupId }, body, userId }) => {
+      await ensurePermissions(userId, groupId);
+
+      const { id, name } = body;
+      if (id === undefined) {
+        await db
+          .insert(levels)
+          .values({ name, mapGroupId: groupId })
+          .onConflictDoNothing();
+      } else {
+        await db
+          .update(levels)
+          .set({ name, mapGroupId: groupId })
+          .where(eq(levels.id, id));
+      }
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      body: t.Object({
+        id: t.Optional(t.Integer()),
+        name: t.String({ minLength: 1 }),
+      }),
+      userId: true,
+    },
+  )
+  .delete(
+    '/:id/levels/:levelId',
+    async ({ params: { levelId }, userId, status }) => {
+      const level = await db.$primary.query.levels.findFirst({
+        where: eq(levels.id, levelId),
+      });
+      if (!level) {
+        return status(404);
+      }
+      await ensurePermissions(userId, level.mapGroupId);
+
+      await db.delete(levels).where(eq(levels.id, levelId));
+      return status(200);
+    },
+    {
+      params: t.Object({ id: t.Integer(), levelId: t.Integer() }),
+      userId: true,
+    },
+  )
   .patch(
     '/:id',
     async ({ params: { id: groupId }, body, userId, status }) => {
