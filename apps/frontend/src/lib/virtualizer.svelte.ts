@@ -3,9 +3,6 @@ import {
   elementScroll,
   observeElementOffset,
   observeElementRect,
-  observeWindowOffset,
-  observeWindowRect,
-  windowScroll,
   type PartialKeys,
   type VirtualizerOptions
 } from '@tanstack/virtual-core';
@@ -71,22 +68,6 @@ export function createVirtualizer<TScrollElement extends Element, TItemElement e
     observeElementRect: observeElementRect,
     observeElementOffset: observeElementOffset,
     scrollToFn: elementScroll,
-    ...options
-  });
-}
-
-export function createWindowVirtualizer<TItemElement extends Element>(
-  options: PartialKeys<
-    VirtualizerOptions<Window, TItemElement>,
-    'getScrollElement' | 'observeElementRect' | 'observeElementOffset' | 'scrollToFn'
-  >
-): Virtualizer<Window, TItemElement> {
-  return createVirtualizerBase<Window, TItemElement>({
-    getScrollElement: () => (typeof document !== 'undefined' ? window : null),
-    observeElementRect: observeWindowRect,
-    observeElementOffset: observeWindowOffset,
-    scrollToFn: windowScroll,
-    initialOffset: () => (typeof document !== 'undefined' ? window.scrollY : 0),
     ...options
   });
 }
