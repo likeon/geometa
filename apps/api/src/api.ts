@@ -24,7 +24,11 @@ if (prod) {
   });
 }
 
-const app = new Elysia({ prefix: '/api', serve: { idleTimeout: 60 } })
+const app = new Elysia({
+  prefix: '/api',
+  serve: { idleTimeout: 60 },
+  handler: { standardHostname: false },
+})
   .use(sentry())
   .use(logger())
   .use(serverTiming())
