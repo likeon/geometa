@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { page } from '$app/state';
   import Icon from '@iconify/svelte';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
@@ -7,6 +6,7 @@
   import { Dialog, DialogContent, DialogHeader, DialogTitle } from '$lib/components/ui/dialog';
   import { applyAction, enhance } from '$app/forms';
   import Tooltip from '$lib/components/Tooltip.svelte';
+  import NavTabs from '$lib/components/NavTabs.svelte';
 
   interface Props {
     id: number;
@@ -16,37 +16,17 @@
 
   let { id, mapName, geoguessrId }: Props = $props();
 
-  let activeRoute = $derived(page.url.pathname);
   let mapRenameDialogOpen = $state(false);
   let errorMessage = $state('');
 
-  function isActive(route: string) {
-    return activeRoute === route
-      ? 'border-green-500 text-green-600'
-      : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 dark:hover:border-gray-700 hover:text-gray-300';
-  }
-
-  type NavItemProps = {
-    name: string;
-    slug?: string;
-    tooltipText?: string;
-  };
+  const navItems = [
+    { name: 'Metas' },
+    {
+      name: 'Settings',
+      slug: 'settings'
+    }
+  ];
 </script>
-
-{#snippet navItem(props: NavItemProps)}
-  {@const { name, slug, tooltipText } = props}
-  {@const url = `/personal/${id}` + (slug ? `/${slug}` : '')}
-  {@const resolvedHref = `/personal/${id}` + (slug ? `/${slug}` : '')}
-  <a
-    href={resolvedHref}
-    class="whitespace-nowrap border-b-2 px-1 py-4 text-sm font-medium dark:text-gray-300 {isActive(
-      url
-    )}">
-    {#if tooltipText}
-      <Tooltip content={tooltipText}>{name}</Tooltip>
-    {:else}
-      <div class="mb-1"><span class="inline-flex items-center">{name}</span></div>{/if}</a
-  >{/snippet}
 
 <div class="border-b border-gray-200 mb-4">
   <div class="flex items-center justify-between">
@@ -76,15 +56,7 @@
     </div>
   </div>
 
-  <nav class="-mb-px flex space-x-8" aria-label="Tabs">
-    {@render navItem({
-      name: 'Metas'
-    })}
-    {@render navItem({
-      name: 'Settings',
-      slug: 'settings'
-    })}
-  </nav>
+  <NavTabs basePath={`/personal/${id}`} items={navItems} />
 </div>
 
 <Dialog bind:open={mapRenameDialogOpen}>
@@ -128,9 +100,3 @@
     </form>
   </DialogContent>
 </Dialog>
-
-<style>
-  a {
-    transition: all 0.3s ease;
-  }
-</style>

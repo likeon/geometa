@@ -1,14 +1,7 @@
 <script lang="ts" generics="TData extends { id: number }, TValue">
-  import {
-    type ColumnDef,
-    type ColumnFiltersState,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getSortedRowModel,
-    type RowSelectionState,
-    type SortingState
-  } from '@tanstack/table-core';
-  import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table/index.js';
+  import { type ColumnDef, type SortingState } from '@tanstack/table-core';
+  import { FlexRender } from '$lib/components/ui/data-table/index.js';
+  import { createBaseTable } from '$lib/components/BaseTable/create-table.svelte';
   import * as Table from '$lib/components/ui/table/index.js';
 
   type DataTableProps<TData, TValue> = {
@@ -30,61 +23,11 @@
     isDialogOpen = $bindable(),
     emptyText = 'No results.'
   }: DataTableProps<TData, TValue> = $props();
-  let sorting = $state<SortingState>([]);
-  let hasUserSorted = $state(false);
-  let rowSelection = $state<RowSelectionState>({});
-  let columnFilters = $state<ColumnFiltersState>([]);
 
-  $effect(() => {
-    if (!hasUserSorted) {
-      sorting = [...initialSorting];
-    }
-  });
-
-  const table = createSvelteTable({
-    get data() {
-      return data;
-    },
-    get columns() {
-      return columns;
-    },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: (updater) => {
-      hasUserSorted = true;
-      if (typeof updater === 'function') {
-        sorting = updater(sorting);
-      } else {
-        sorting = updater;
-      }
-    },
-    onRowSelectionChange: (updater) => {
-      if (typeof updater === 'function') {
-        rowSelection = updater(rowSelection);
-      } else {
-        rowSelection = updater;
-      }
-    },
-    onColumnFiltersChange: (updater) => {
-      if (typeof updater === 'function') {
-        columnFilters = updater(columnFilters);
-      } else {
-        columnFilters = updater;
-      }
-    },
-    state: {
-      get sorting() {
-        return sorting;
-      },
-      get rowSelection() {
-        return rowSelection;
-      },
-      get columnFilters() {
-        return columnFilters;
-      }
-    },
-    enableSortingRemoval: false
+  const table = createBaseTable({
+    data: () => data,
+    columns: () => columns,
+    initialSorting: () => initialSorting
   });
 </script>
 
