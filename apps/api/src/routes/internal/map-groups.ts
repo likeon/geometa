@@ -1,9 +1,11 @@
 import {
+  levels,
   locationMetas,
   mapGroupLocations,
   mapGroupPermissions,
   mapGroups,
   maps,
+  metaImages,
   metas,
   users,
 } from '@api/lib/db/schema';
@@ -11,7 +13,7 @@ import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { syncMapGroup } from '@api/lib/internal/sync';
-import { and, desc, eq, inArray, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, inArray, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
@@ -98,6 +100,63 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     },
     {
       body: t.Object({ name: t.String({ minLength: 1 }) }),
+      userId: true,
+    },
+  )
+  .get(
+    '/:id/page',
+    async ({ params: { id: groupId }, userId, status }) => {
+      await ensurePermissions(userId, groupId);
+      const [group, user] = await Promise.all([
+        db.$primary.query.mapGroups.findFirst({
+          with: {
+            metas: {
+              orderBy: [asc(metas.tagName)],
+              with: {
+                metaLevels: { with: { level: true } },
+                images: {
+                  orderBy: [asc(metaImages.order), asc(metaImages.id)],
+                },
+                locationsCount: true,
+              },
+            },
+            levels: {
+              orderBy: [asc(levels.name)],
+            },
+          },
+          where: eq(mapGroups.id, groupId),
+          extras: {
+            hasUnsycnedData: sql<boolean>`
+            EXISTS (SELECT 1
+             FROM map_group_locations mgl
+             WHERE mgl.map_group_id = ${mapGroups.id}
+               AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < mgl.modified_at))
+            OR EXISTS(SELECT 1
+             FROM metas m
+             WHERE m.map_group_id = ${mapGroups.id} AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < m.modified_at)
+            OR EXISTS(
+             SELECT 1
+             FROM maps m
+             WHERE m.map_group_id = ${mapGroups.id} AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < m.modified_at)
+            )
+            )`.as('has_unsynced_data'),
+          },
+        }),
+        db.$primary.query.users.findFirst({
+          where: eq(users.id, userId),
+          columns: { apiToken: false },
+          with: { permissions: { with: { mapGroup: true } } },
+        }),
+      ]);
+
+      if (!group) {
+        return status(404);
+      }
+
+      return { group, user };
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
       userId: true,
     },
   )
