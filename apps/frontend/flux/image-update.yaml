@@ -31,7 +31,7 @@ spec:
   interval: 30m
   sourceRef:
     kind: GitRepository
-    name: flux-system
+    name: geometa
     namespace: flux-system
   git:
     commit:
