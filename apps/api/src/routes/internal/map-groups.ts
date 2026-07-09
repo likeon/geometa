@@ -7,6 +7,7 @@ import {
   maps,
   metaImages,
   metas,
+  regions,
   users,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
@@ -158,6 +159,62 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       }
 
       return { group, user };
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      userId: true,
+    },
+  )
+  .get(
+    '/:id/maps-page',
+    async ({ params: { id: groupId }, userId, status }) => {
+      await ensurePermissions(userId, groupId);
+
+      const group = await db.$primary.query.mapGroups.findFirst({
+        with: {
+          maps: {
+            extras: {
+              locationsCount:
+                sql`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`
+                  .mapWith(Number)
+                  .as('locations_count'),
+              metasCount:
+                sql`(select count(distinct ml.meta_id) from map_locations_view ml where ml.map_id = ${maps.id})`
+                  .mapWith(Number)
+                  .as('metas_count'),
+            },
+            with: {
+              mapLevels: { with: { level: true } },
+              mapRegions: { with: { region: true } },
+              filters: true,
+            },
+          },
+        },
+        where: eq(mapGroups.id, groupId),
+      });
+
+      if (!group) {
+        return status(404);
+      }
+
+      const [levelList, regionList, user] = await Promise.all([
+        db.$primary.query.levels.findMany({
+          where: eq(levels.mapGroupId, groupId),
+        }),
+        db.$primary.query.regions.findMany({
+          orderBy: [asc(regions.ordering)],
+        }),
+        db.$primary.query.users.findFirst({
+          where: eq(users.id, userId),
+          columns: { apiToken: false },
+        }),
+      ]);
+
+      if (!user) {
+        return status(500);
+      }
+
+      return { group, levelList, regionList, user };
     },
     {
       params: t.Object({ id: t.Integer() }),

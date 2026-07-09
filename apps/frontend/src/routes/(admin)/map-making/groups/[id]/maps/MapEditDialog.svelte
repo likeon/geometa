@@ -32,7 +32,6 @@
     user: PageData['user'];
   } = $props();
 
-  // svelte-ignore state_referenced_locally
   const formMap = superForm(mapForm, {
     validators: zod4Client(insertMapsSchema),
     resetForm: true,
@@ -77,7 +76,8 @@
       formMapData.update(
         ($formMapData) => {
           $formMapData.id = map.id;
-          $formMapData.mapGroupId = map.mapGroupId;
+          // group maps always have a mapGroupId, only personal maps don't
+          $formMapData.mapGroupId = map.mapGroupId!;
           $formMapData.geoguessrId = map.geoguessrId;
           $formMapData.name = map.name;
           $formMapData.footer = map.footer;

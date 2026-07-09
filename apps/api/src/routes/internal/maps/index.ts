@@ -14,6 +14,7 @@ import { maybeWrapImageUrl } from '@api/lib/internal/utils';
 import { generateFooter } from '@api/lib/userscript/utils';
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
+import { groupMapsRouter } from './group';
 import { personalMapsRouter } from './personal';
 
 const syncedMetasStatement = db
@@ -302,4 +303,5 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
       params: t.Object({ geoguessrId: t.String() }),
     },
   )
-  .use(personalMapsRouter);
+  .use(personalMapsRouter)
+  .use(groupMapsRouter);
