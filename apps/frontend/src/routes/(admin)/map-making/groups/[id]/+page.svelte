@@ -414,7 +414,7 @@
   bind:isDeleteDialogOpen
   bind:isDownloadLocationsDialogOpen
   bind:isDownloadMetasDialogOpen
-  {selectedIds}
+  bind:selectedIds
   {metas}
   {levelChoices}
   {groupChoices}

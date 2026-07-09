@@ -30,7 +30,7 @@
     isDownloadMetasDialogOpen = $bindable(),
 
     // Data
-    selectedIds,
+    selectedIds = $bindable(),
     metas,
     levelChoices,
     groupChoices,
