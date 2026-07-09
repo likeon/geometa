@@ -1,14 +1,5 @@
-import { and, asc, eq, isNull, lt, not, or, sql } from 'drizzle-orm';
-import { DrizzleQueryError } from 'drizzle-orm/errors';
-import {
-  levels,
-  mapGroupLocations,
-  mapGroups,
-  metaImages,
-  metaLevels,
-  metas,
-  users
-} from '$lib/db/schema';
+import { and, eq, isNull, lt, or, sql } from 'drizzle-orm';
+import { mapGroupLocations, metas } from '$lib/db/schema';
 import { error, fail } from '@sveltejs/kit';
 import { message, setError, superValidate, withFiles } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
@@ -16,12 +7,6 @@ import { z } from 'zod/v4';
 import { inArray } from 'drizzle-orm/sql/expressions/conditions';
 import { ensurePermissions, extractJsonData } from '$lib/utils';
 import { getGroupId } from './utils';
-import { unified } from 'unified';
-import remarkParse from 'remark-parse';
-import remarkRehype from 'remark-rehype';
-import rehypeSanitize from 'rehype-sanitize';
-import rehypeStringify from 'rehype-stringify';
-import rehypeExternalLinks from 'rehype-external-links';
 import { uploadMetas } from '$routes/(admin)/map-making/groups/[id]/metasUpload';
 import { api } from '$lib/api';
 import {
@@ -121,49 +106,19 @@ export const load = async ({ params, locals }) => {
     error(403, 'Permission denied');
   }
   const id = getGroupId(params);
-  await ensurePermissions(locals.db, locals.user!.id, id);
-  const [group, user] = await Promise.all([
-    locals.db.query.mapGroups.findFirst({
-      with: {
-        metas: {
-          orderBy: [asc(metas.tagName)],
-          with: {
-            metaLevels: { with: { level: true } },
-            images: { orderBy: [asc(metaImages.order), asc(metaImages.id)] },
-            locationsCount: true
-          }
-        },
-        levels: {
-          orderBy: [asc(levels.name)]
-        }
-      },
-      where: eq(mapGroups.id, id),
-      extras: {
-        hasUnsycnedData: sql<boolean>`
-        EXISTS (SELECT 1
-         FROM map_group_locations mgl
-         WHERE mgl.map_group_id = ${mapGroups.id}
-           AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < mgl.modified_at))
-        OR EXISTS(SELECT 1
-         FROM metas m
-         WHERE m.map_group_id = ${mapGroups.id} AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < m.modified_at)
-        OR EXISTS(
-         SELECT 1
-         FROM maps m
-         WHERE m.map_group_id = ${mapGroups.id} AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < m.modified_at)
-        )
-        )`.as('has_unsynced_data')
-      }
-    }),
-    locals.db.query.users.findFirst({
-      where: eq(users.id, locals.user!.id),
-      with: { permissions: { with: { mapGroup: true } } }
-    })
-  ]);
+  const { data, error: apiError } = await api.internal['map-groups']({ id }).page.get();
 
-  if (!group) {
-    error(404, 'No group');
+  if (apiError || !data) {
+    const status = apiError?.status as number;
+    if (status === 404) {
+      error(404, 'No group');
+    }
+    if (status === 403) {
+      error(403, 'Permission denied');
+    }
+    error(500, 'Something went wrong.');
   }
+  const { group, user } = data;
 
   const locationsNotOnStreetViewCount = api.internal['locations'].count
     .get({ query: { groupId: group.id, isOnStreetView: false } })
@@ -190,91 +145,34 @@ export const load = async ({ params, locals }) => {
 };
 
 export const actions = {
-  updateMeta: async ({ request, locals }) => {
+  updateMeta: async ({ request }) => {
     const form = await superValidate(request, zod4(insertMetasSchema));
 
     if (!form.valid) {
       return fail(400, { form });
     }
-    await ensurePermissions(locals.db, locals.user?.id, form.data.mapGroupId);
 
-    const { id, levels, ...dataNoId } = form.data;
-    const noteHtml = String(
-      await unified()
-        .use(remarkParse)
-        .use(remarkRehype)
-        .use(rehypeSanitize)
-        .use(rehypeExternalLinks, { target: '_blank' })
-        .use(rehypeStringify)
-        .process(dataNoId.note)
-    );
-    const footerHtml = String(
-      await unified()
-        .use(remarkParse)
-        .use(remarkRehype)
-        .use(rehypeSanitize)
-        .use(rehypeExternalLinks, { target: '_blank' })
-        .use(rehypeStringify)
-        .process(dataNoId.footer)
-    );
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-    let metaId;
+    const { error: apiError } = await api.internal.metas.put(form.data);
 
-    if (id === undefined) {
-      try {
-        const insertResult = await locals.db
-          .insert(metas)
-          .values({ ...form.data, noteHtml, footerHtml: footerHtml, modifiedAt: currentTimestamp })
-          .returning({ insertedId: metas.id });
-        metaId = insertResult[0].insertedId;
-      } catch (error) {
-        // For DrizzleQueryError, the underlying PostgreSQL error is in the cause property
-        if (error instanceof DrizzleQueryError) {
-          const pgError = error.cause as { constraint_name?: string };
-          if (pgError?.constraint_name === 'metas_unique') {
-            return setError(
-              form,
-              'tagName',
-              'A meta with this tag name already exists in this map group'
-            );
-          }
-        }
-        throw error;
+    if (apiError) {
+      const status = apiError.status as number;
+      if (status === 409) {
+        return setError(
+          form,
+          'tagName',
+          'A meta with this tag name already exists in this map group'
+        );
       }
-    } else {
-      const savedData = await locals.db.query.metas.findFirst({ where: eq(metas.id, id) });
-      await ensurePermissions(locals.db, locals.user?.id, savedData?.mapGroupId);
-      try {
-        await locals.db
-          .update(metas)
-          .set({ ...dataNoId, noteHtml, footerHtml, modifiedAt: currentTimestamp })
-          .where(eq(metas.id, id));
-      } catch (error) {
-        // For DrizzleQueryError, the underlying PostgreSQL error is in the cause property
-        if (error instanceof DrizzleQueryError) {
-          const pgError = error.cause as { constraint_name?: string };
-          if (pgError?.constraint_name === 'metas_unique') {
-            return setError(
-              form,
-              'tagName',
-              'A meta with this tag name already exists in this map group'
-            );
-          }
-        }
-        throw error;
+      if (status === 403) {
+        error(403, 'Permission denied');
       }
-      metaId = id;
-    }
-
-    await locals.db
-      .delete(metaLevels)
-      .where(and(eq(metaLevels.metaId, metaId), not(inArray(metaLevels.levelId, levels))));
-    const levelsInsertValues = levels.map((levelId) => ({ levelId: levelId, metaId: metaId }));
-    if (levelsInsertValues.length != 0) {
-      await locals.db.insert(metaLevels).values(levelsInsertValues).onConflictDoNothing();
+      if (status === 404) {
+        error(404, 'Meta not found');
+      }
+      error(500, 'Failed to save meta');
     }
   },
-  deleteMetas: async ({ request, locals }) => {
+  deleteMetas: async ({ request }) => {
     const data = await request.formData();
     const idsRaw = data.getAll('id');
     const ids = idsRaw
@@ -285,22 +183,25 @@ export const actions = {
     if (ids.length === 0) {
       error(400, 'No valid IDs provided');
     }
-    const metasToDelete = await locals.db.query.metas.findMany({ where: inArray(metas.id, ids) });
 
-    if (metasToDelete.length !== ids.length) {
-      error(404, 'Some metas not found');
+    const { error: apiError } = await api.internal.metas.delete({ ids });
+
+    if (apiError) {
+      const status = apiError.status as number;
+      const message = typeof apiError.value === 'string' ? apiError.value : undefined;
+      if (status === 404) {
+        error(404, message || 'Some metas not found');
+      }
+      if (status === 400) {
+        error(400, message || 'All metas must belong to the same map group');
+      }
+      if (status === 403) {
+        error(403, 'Permission denied');
+      }
+      error(500, 'Failed to delete metas');
     }
-
-    const mapGroupIds = [...new Set(metasToDelete.map((meta) => meta.mapGroupId))];
-
-    if (mapGroupIds.length !== 1) {
-      error(400, 'All metas must belong to the same map group');
-    }
-    await ensurePermissions(locals.db, locals.user?.id, mapGroupIds[0]);
-
-    await locals.db.delete(metas).where(inArray(metas.id, ids));
   },
-  addLevels: async ({ request, locals }) => {
+  addLevels: async ({ request }) => {
     const formData = await request.formData();
     const metaIds = formData.getAll('metaIds').map((id) => Number(id));
     const levelIds = formData.getAll('levelIds').map((id) => Number(id));
@@ -309,117 +210,27 @@ export const actions = {
       return fail(400, { message: 'No metas or levels selected' });
     }
 
-    try {
-      // Verify all metas exist and get their mapGroupIds for permission checking
-      const selectedMetas = await locals.db.query.metas.findMany({
-        where: inArray(metas.id, metaIds),
-        columns: {
-          id: true,
-          mapGroupId: true,
-          tagName: true
-        }
-      });
+    const { data, error: apiError } = await api.internal.metas.levels.post({ metaIds, levelIds });
 
-      if (selectedMetas.length !== metaIds.length) {
-        return fail(404, { message: 'Some metas not found' });
+    if (apiError || !data) {
+      const status = apiError?.status as number;
+      const value = apiError?.value as { message?: string } | undefined;
+      if (status === 404 || status === 400) {
+        return fail(status, { message: value?.message || 'Failed to add levels to metas' });
       }
-
-      // Check permissions for all map groups
-      const uniqueMapGroupIds = [...new Set(selectedMetas.map((meta) => meta.mapGroupId))];
-      for (const mapGroupId of uniqueMapGroupIds) {
-        await ensurePermissions(locals.db, locals.user!.id, mapGroupId);
+      if (status === 403) {
+        error(403, 'Permission denied');
       }
-
-      // Verify all levels exist and belong to the same map groups
-      const selectedLevels = await locals.db.query.levels.findMany({
-        where: and(inArray(levels.id, levelIds), inArray(levels.mapGroupId, uniqueMapGroupIds)),
-        columns: {
-          id: true,
-          mapGroupId: true,
-          name: true
-        }
-      });
-
-      if (selectedLevels.length === 0) {
-        return fail(400, {
-          message: 'Invalid levels selected or levels do not belong to the correct map groups'
-        });
-      }
-
-      // Get existing meta-level associations to avoid duplicates
-      const existingMetaLevels = await locals.db
-        .select({
-          metaId: metaLevels.metaId,
-          levelId: metaLevels.levelId
-        })
-        .from(metaLevels)
-        .where(and(inArray(metaLevels.metaId, metaIds), inArray(metaLevels.levelId, levelIds)));
-
-      // Create a set of existing combinations for quick lookup
-      const existingCombinations = new Set(
-        existingMetaLevels.map((ml) => `${ml.metaId}-${ml.levelId}`)
-      );
-
-      // Prepare insert data, filtering out existing combinations
-      const metaLevelInserts = [];
-      for (const metaId of metaIds) {
-        const meta = selectedMetas.find((m) => m.id === metaId);
-        if (!meta) continue;
-
-        for (const levelId of levelIds) {
-          const level = selectedLevels.find((l) => l.id === levelId);
-          if (!level) continue;
-
-          // Only add if this level belongs to the same map group as the meta
-          if (level.mapGroupId !== meta.mapGroupId) continue;
-
-          // Skip if this combination already exists
-          if (existingCombinations.has(`${metaId}-${levelId}`)) continue;
-
-          metaLevelInserts.push({
-            metaId,
-            levelId
-          });
-        }
-      }
-
-      if (metaLevelInserts.length === 0) {
-        return {
-          success: true,
-          message: 'No new levels to add (all selected levels already assigned or invalid)',
-          addedCount: 0
-        };
-      }
-
-      // Insert the new meta-level associations
-      await locals.db.insert(metaLevels).values(metaLevelInserts).onConflictDoNothing(); // Extra safety in case of race conditions
-
-      // Update modifiedAt for affected metas
-      const currentTimestamp = Math.floor(Date.now() / 1000);
-      await locals.db
-        .update(metas)
-        .set({ modifiedAt: currentTimestamp })
-        .where(inArray(metas.id, metaIds));
-
-      // Mark map group as having unsynced data
-      for (const mapGroupId of uniqueMapGroupIds) {
-        await locals.db
-          .update(mapGroups)
-          .set({ syncedAt: null })
-          .where(eq(mapGroups.id, mapGroupId));
-      }
-
-      return {
-        success: true,
-        message: `Successfully added ${metaLevelInserts.length} level assignments to ${metaIds.length} metas`,
-        addedCount: metaLevelInserts.length
-      };
-    } catch (error) {
-      console.error('Error adding levels to metas:', error);
       return fail(500, { message: 'Failed to add levels to metas' });
     }
+
+    return {
+      success: true,
+      message: data.message,
+      addedCount: data.addedCount
+    };
   },
-  shareMetas: async ({ request, locals }) => {
+  shareMetas: async ({ request }) => {
     const formData = await request.formData();
     const metaIds = formData.getAll('metaIds').map((id) => Number(id));
     const targetGroupId = Number(formData.get('targetGroupId'));
@@ -428,197 +239,51 @@ export const actions = {
       return fail(400, { message: 'Invalid request data' });
     }
 
-    // Batch fetch all metas
-    const metasToShare = await locals.db.query.metas.findMany({
-      where: inArray(metas.id, metaIds)
+    const { data, error: apiError } = await api.internal.metas.share.post({
+      metaIds,
+      targetGroupId
     });
 
-    if (metasToShare.length === 0) {
-      return fail(404, { message: 'No metas found for the provided IDs' });
-    }
-
-    // Check permissions for source groups and target group
-    const uniqueSourceGroupIds = [...new Set(metasToShare.map((meta) => meta.mapGroupId))];
-    for (const groupId of uniqueSourceGroupIds) {
-      await ensurePermissions(locals.db, locals.user!.id, groupId);
-    }
-    await ensurePermissions(locals.db, locals.user!.id, targetGroupId);
-
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-    const successfulCopies: number[] = [];
-
-    // Process each meta
-    for (const meta of metasToShare) {
-      const { id, mapGroupId, ...cleanedMeta } = meta;
-
-      try {
-        // Insert the meta
-        const insertResult = await locals.db
-          .insert(metas)
-          .values({
-            ...cleanedMeta,
-            mapGroupId: targetGroupId,
-            modifiedAt: currentTimestamp
-          })
-          .onConflictDoNothing()
-          .returning({ insertedId: metas.id });
-
-        if (insertResult.length === 0) {
-          continue; // Skip if meta already exists
-        }
-
-        const newMetaId = insertResult[0].insertedId;
-        successfulCopies.push(id);
-
-        // Copy images
-        const sourceImages = await locals.db
-          .select({
-            image_url: metaImages.image_url
-          })
-          .from(metaImages)
-          .where(eq(metaImages.metaId, id));
-
-        if (sourceImages.length > 0) {
-          const imageInserts = sourceImages.map((sourceImage) => ({
-            image_url: sourceImage.image_url,
-            metaId: newMetaId
-          }));
-
-          await locals.db.insert(metaImages).values(imageInserts).onConflictDoNothing();
-        }
-
-        // Copy locations
-        const sourceLocations = await locals.db
-          .select({
-            lat: mapGroupLocations.lat,
-            lng: mapGroupLocations.lng,
-            heading: mapGroupLocations.heading,
-            pitch: mapGroupLocations.pitch,
-            zoom: mapGroupLocations.zoom,
-            panoId: mapGroupLocations.panoId,
-            extraTag: mapGroupLocations.extraTag,
-            extraPanoId: mapGroupLocations.extraPanoId,
-            extraPanoDate: mapGroupLocations.extraPanoDate
-          })
-          .from(mapGroupLocations)
-          .where(
-            and(
-              eq(mapGroupLocations.mapGroupId, mapGroupId),
-              eq(mapGroupLocations.extraTag, meta.tagName)
-            )
-          );
-
-        if (sourceLocations.length > 0) {
-          const locationInserts = sourceLocations.map((location) => ({
-            ...location,
-            mapGroupId: targetGroupId,
-            updatedAt: currentTimestamp,
-            modifiedAt: currentTimestamp
-          }));
-
-          await locals.db.insert(mapGroupLocations).values(locationInserts).onConflictDoNothing();
-        }
-
-        // Copy meta levels (if your schema includes this relationship)
-        const sourceMetaLevels = await locals.db
-          .select({
-            levelId: metaLevels.levelId
-          })
-          .from(metaLevels)
-          .where(eq(metaLevels.metaId, id));
-
-        if (sourceMetaLevels.length > 0) {
-          const metaLevelInserts = sourceMetaLevels.map((ml) => ({
-            metaId: newMetaId,
-            levelId: ml.levelId
-          }));
-
-          await locals.db.insert(metaLevels).values(metaLevelInserts).onConflictDoNothing();
-        }
-      } catch (error) {
-        console.error(`Failed to copy meta ${id}:`, error);
-        // Continue with other metas even if one fails
+    if (apiError || !data) {
+      const status = apiError?.status as number;
+      const value = apiError?.value as { message?: string } | undefined;
+      if (status === 404) {
+        return fail(404, { message: value?.message || 'No metas found for the provided IDs' });
       }
+      if (status === 403) {
+        error(403, 'Permission denied');
+      }
+      return fail(500, { message: 'Failed to share metas' });
     }
 
     return {
       success: true,
-      copiedCount: successfulCopies.length,
-      totalRequested: metaIds.length,
-      message: `Successfully shared ${successfulCopies.length} of ${metaIds.length} metas`
+      copiedCount: data.copiedCount,
+      totalRequested: data.totalRequested,
+      message: data.message
     };
   },
-  copyMetaTo: async ({ request, locals }) => {
+  copyMetaTo: async ({ request }) => {
     const form = await superValidate(request, zod4(copyMetaSchema));
     if (!form.valid) {
       return fail(400, { form });
     }
     const { metaId, mapGroupIdToCopy } = form.data;
-    const meta = await locals.db.query.metas.findFirst({ where: eq(metas.id, metaId) });
-    if (!meta) {
-      error(400, 'No meta found for this id');
-    }
-    await ensurePermissions(locals.db, locals.user!.id, meta.mapGroupId);
-    await ensurePermissions(locals.db, locals.user!.id, mapGroupIdToCopy);
-    const { id, mapGroupId, ...cleanedMeta } = meta;
-    void id;
-    const currentTimestamp = Math.floor(Date.now() / 1000);
-    const insertResult = await locals.db
-      .insert(metas)
-      .values({
-        ...cleanedMeta,
-        mapGroupId: mapGroupIdToCopy,
-        modifiedAt: currentTimestamp
-      })
-      .onConflictDoNothing()
-      .returning({ insertedId: metas.id });
 
-    if (insertResult.length == 0) {
-      return;
-    }
-    // copy images
-    const sourceImages = await locals.db
-      .select({
-        image_url: metaImages.image_url
-      })
-      .from(metaImages)
-      .where(eq(metaImages.metaId, metaId));
+    const { error: apiError } = await api.internal.metas.copy.post({
+      metaId,
+      targetGroupId: mapGroupIdToCopy
+    });
 
-    const sourceImagesInsert = sourceImages.map((sourceImage) => ({
-      image_url: sourceImage.image_url,
-      metaId: insertResult[0].insertedId
-    }));
-    if (sourceImagesInsert.length != 0) {
-      await locals.db.insert(metaImages).values(sourceImagesInsert).onConflictDoNothing();
-    }
-
-    const sourceLocations = await locals.db
-      .select({
-        lat: mapGroupLocations.lat,
-        lng: mapGroupLocations.lng,
-        heading: mapGroupLocations.heading,
-        pitch: mapGroupLocations.pitch,
-        zoom: mapGroupLocations.zoom,
-        panoId: mapGroupLocations.panoId,
-        extraTag: mapGroupLocations.extraTag,
-        extraPanoId: mapGroupLocations.extraPanoId,
-        extraPanoDate: mapGroupLocations.extraPanoDate
-      })
-      .from(mapGroupLocations)
-      .where(
-        and(
-          eq(mapGroupLocations.mapGroupId, mapGroupId),
-          eq(mapGroupLocations.extraTag, meta!.tagName)
-        )
-      );
-    const insertLocations = sourceLocations.map((location) => ({
-      ...location,
-      mapGroupId: mapGroupIdToCopy,
-      updatedAt: currentTimestamp,
-      modifiedAt: currentTimestamp
-    }));
-    if (insertLocations.length != 0) {
-      await locals.db.insert(mapGroupLocations).values(insertLocations).onConflictDoNothing();
+    if (apiError) {
+      const status = apiError.status as number;
+      if (status === 404) {
+        error(400, 'No meta found for this id');
+      }
+      if (status === 403) {
+        error(403, 'Permission denied');
+      }
+      error(500, 'Failed to copy meta');
     }
   },
   uploadMapJson: async ({ request, params, locals }) => {
@@ -889,24 +554,25 @@ export const actions = {
         throw new Error('unexpected response');
     }
   },
-  deleteMetaImage: async ({ request, locals }) => {
+  deleteMetaImage: async ({ request }) => {
     const data = await request.formData();
     const imageId = parseInt((data.get('imageId') as string) || '', 10);
     if (isNaN(imageId)) {
       error(400, 'Invalid ID');
     }
-    const savedImage = await locals.db
-      .select()
-      .from(metaImages)
-      .innerJoin(metas, eq(metas.id, metaImages.metaId))
-      .where(eq(metaImages.id, imageId));
-    await ensurePermissions(locals.db, locals.user?.id, savedImage[0]?.metas.mapGroupId);
 
-    await locals.db.delete(metaImages).where(eq(metaImages.id, imageId));
-    await locals.db
-      .update(metas)
-      .set({ modifiedAt: Math.floor(Date.now() / 1000) })
-      .where(eq(metas.id, savedImage[0].metas.id));
+    const { error: apiError } = await api.internal.metas.images({ imageId }).delete();
+
+    if (apiError) {
+      const status = apiError.status as number;
+      if (status === 404) {
+        error(404, 'Image not found');
+      }
+      if (status === 403) {
+        error(403, 'Permission denied');
+      }
+      error(500, 'Failed to delete image');
+    }
     return { success: true, imageId: imageId };
   },
   updateImageOrder: async ({ request }) => {
