@@ -48,9 +48,6 @@ export const metasUploadContentSchema = z
     images: z.string().array().optional().nullable()
   })
   .array();
-export type MetasUploadContentSchemaSafeParse = ReturnType<
-  typeof metasUploadContentSchema.safeParse
->;
 export const metasUploadSchema = z.object({
   file: z.instanceof(File, {
     error: 'Please upload a file.'
