@@ -1,6 +1,7 @@
-import { mapGroupPermissions, mapGroups, users } from '@api/lib/db/schema';
+import { mapGroupPermissions, users } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
+import { createMapGroup } from '@api/lib/internal/map-groups';
 import { assertNotNullish, generateRandomString } from '@api/lib/utils/common';
 import { eq } from 'drizzle-orm';
 import { Elysia } from 'elysia';
@@ -48,16 +49,7 @@ export const usersRouter = new Elysia({ prefix: '/users' })
         return { mapGroupId: existing.mapGroupId };
       }
 
-      const mapGroupId = await db.$primary.transaction(async (tx) => {
-        const mapGroup = await tx
-          .insert(mapGroups)
-          .values({ name: 'Default map group' })
-          .returning({ id: mapGroups.id });
-        await tx
-          .insert(mapGroupPermissions)
-          .values({ mapGroupId: mapGroup[0].id, userId });
-        return mapGroup[0].id;
-      });
+      const mapGroupId = await createMapGroup(userId, 'Default map group');
       return { mapGroupId };
     },
     {

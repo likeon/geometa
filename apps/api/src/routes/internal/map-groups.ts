@@ -12,6 +12,7 @@ import {
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
+import { createMapGroup } from '@api/lib/internal/map-groups';
 import {
   MissingLevelsError,
   uploadMetas,
@@ -91,16 +92,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .post(
     '/',
     async ({ body, userId }) => {
-      const id = await db.$primary.transaction(async (tx) => {
-        const inserted = await tx
-          .insert(mapGroups)
-          .values({ name: body.name })
-          .returning({ id: mapGroups.id });
-        await tx
-          .insert(mapGroupPermissions)
-          .values({ mapGroupId: inserted[0].id, userId });
-        return inserted[0].id;
-      });
+      const id = await createMapGroup(userId, body.name);
       return { id };
     },
     {

@@ -14,5 +14,4 @@ function createDbInstance() {
   }
   return drizzle(databaseURL, { schema, logger: false });
 }
-export type DB = ReturnType<typeof createDbInstance>;
 export const getDb = memoizeOne(createDbInstance);

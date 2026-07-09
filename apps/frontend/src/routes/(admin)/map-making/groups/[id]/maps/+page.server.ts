@@ -3,7 +3,7 @@ import { error, fail } from '@sveltejs/kit';
 import { message, setError, superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { insertMapsSchema } from '$lib/form-schema';
-import { api } from '$lib/api';
+import { api, throwApiError } from '$lib/api';
 
 export const load = async ({ params }) => {
   const groupId = getGroupId(params);
@@ -13,14 +13,7 @@ export const load = async ({ params }) => {
   ].get();
 
   if (apiError || !data) {
-    const status = apiError?.status as number;
-    if (status === 404) {
-      error(404, 'No group');
-    }
-    if (status === 403) {
-      error(403, 'Permission denied');
-    }
-    error(500, 'Something went wrong.');
+    throwApiError(apiError, { 404: 'No group' });
   }
 
   const mapForm = await superValidate(zod4(insertMapsSchema));
@@ -46,14 +39,7 @@ export const actions = {
     const { error: apiError } = await api.internal.maps.group({ id: mapId }).delete();
 
     if (apiError) {
-      const status = apiError.status as number;
-      if (status === 404) {
-        error(404, 'Map not found');
-      }
-      if (status === 403) {
-        error(403, 'Permission denied');
-      }
-      error(500, 'Failed to delete map');
+      throwApiError(apiError, { 404: 'Map not found', 500: 'Failed to delete map' });
     }
   },
 

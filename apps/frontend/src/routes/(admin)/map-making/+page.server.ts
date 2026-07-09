@@ -2,7 +2,7 @@ import { error, fail, redirect } from '@sveltejs/kit';
 import { superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
 import { insertMapGroupSchema, updateMapGroupSchema } from '$lib/form-schema';
-import { api } from '$lib/api';
+import { api, throwApiError } from '$lib/api';
 
 export const prerender = false;
 
@@ -46,7 +46,10 @@ export const actions = {
     });
 
     if (apiError) {
-      error((apiError.status as number) === 403 ? 403 : 500, 'Failed to update group name');
+      throwApiError(apiError, {
+        403: 'Failed to update group name',
+        500: 'Failed to update group name'
+      });
     }
   },
   lookupMapGroup: async ({ request }) => {

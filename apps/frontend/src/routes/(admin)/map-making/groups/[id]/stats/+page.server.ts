@@ -1,6 +1,5 @@
-import { error } from '@sveltejs/kit';
 import { getGroupId } from '../utils';
-import { api } from '$lib/api';
+import { api, throwApiError } from '$lib/api';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ params, url }) => {
@@ -11,14 +10,7 @@ export const load: PageServerLoad = async ({ params, url }) => {
   }).get();
 
   if (apiError || !group) {
-    const status = apiError?.status as number;
-    if (status === 404) {
-      error(404, 'No group');
-    }
-    if (status === 403) {
-      error(403, 'Permission denied');
-    }
-    error(500, 'Something went wrong.');
+    throwApiError(apiError, { 404: 'No group' });
   }
 
   // Get days from URL query parameter, default to 30

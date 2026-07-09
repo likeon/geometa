@@ -4,7 +4,7 @@ import { zod4 } from 'sveltekit-superforms/adapters';
 import { z } from 'zod/v4';
 import { extractJsonData } from '$lib/utils';
 import { getGroupId } from './utils';
-import { api } from '$lib/api';
+import { api, throwApiError } from '$lib/api';
 import {
   insertMetasSchema,
   mapUploadSchema,
@@ -90,14 +90,7 @@ export const load = async ({ params, locals }) => {
   const { data, error: apiError } = await api.internal['map-groups']({ id }).page.get();
 
   if (apiError || !data) {
-    const status = apiError?.status as number;
-    if (status === 404) {
-      error(404, 'No group');
-    }
-    if (status === 403) {
-      error(403, 'Permission denied');
-    }
-    error(500, 'Something went wrong.');
+    throwApiError(apiError, { 404: 'No group' });
   }
   const { group, user } = data;
 
@@ -136,21 +129,14 @@ export const actions = {
     const { error: apiError } = await api.internal.metas.put(form.data);
 
     if (apiError) {
-      const status = apiError.status as number;
-      if (status === 409) {
+      if ((apiError.status as number) === 409) {
         return setError(
           form,
           'tagName',
           'A meta with this tag name already exists in this map group'
         );
       }
-      if (status === 403) {
-        error(403, 'Permission denied');
-      }
-      if (status === 404) {
-        error(404, 'Meta not found');
-      }
-      error(500, 'Failed to save meta');
+      throwApiError(apiError, { 404: 'Meta not found', 500: 'Failed to save meta' });
     }
   },
   deleteMetas: async ({ request }) => {
@@ -168,18 +154,12 @@ export const actions = {
     const { error: apiError } = await api.internal.metas.delete({ ids });
 
     if (apiError) {
-      const status = apiError.status as number;
       const message = typeof apiError.value === 'string' ? apiError.value : undefined;
-      if (status === 404) {
-        error(404, message || 'Some metas not found');
-      }
-      if (status === 400) {
-        error(400, message || 'All metas must belong to the same map group');
-      }
-      if (status === 403) {
-        error(403, 'Permission denied');
-      }
-      error(500, 'Failed to delete metas');
+      throwApiError(apiError, {
+        404: message || 'Some metas not found',
+        400: message || 'All metas must belong to the same map group',
+        500: 'Failed to delete metas'
+      });
     }
   },
   addLevels: async ({ request }) => {
@@ -343,18 +323,14 @@ export const actions = {
     }).locations.upload.post({ uploadMode: form.data.uploadMode, locations });
 
     if (apiError || !data) {
-      const status = apiError?.status as number;
-      if (status === 409) {
+      if ((apiError?.status as number) === 409) {
         return setError(
           form,
           'file',
           'The uploaded file contains duplicate panoId values. Please remove duplicates and try again.'
         );
       }
-      if (status === 403) {
-        error(403, 'Permission denied');
-      }
-      error(500, 'Failed to upload locations');
+      throwApiError(apiError, { 500: 'Failed to upload locations' });
     }
 
     return message(form, { numberOfLocations: data.count });
@@ -410,15 +386,11 @@ export const actions = {
     );
 
     if (apiError) {
-      const status = apiError.status as number;
       const value = apiError.value as { message?: string } | undefined;
-      if (status === 400 && value?.message?.startsWith('Missing levels:')) {
+      if ((apiError.status as number) === 400 && value?.message?.startsWith('Missing levels:')) {
         return setError(form, 'file', value.message);
       }
-      if (status === 403) {
-        error(403, 'Permission denied');
-      }
-      error(500, 'Failed to upload metas');
+      throwApiError(apiError, { 500: 'Failed to upload metas' });
     }
   },
   uploadMetaImages: async ({ request }) => {
@@ -452,14 +424,7 @@ export const actions = {
     const { error: apiError } = await api.internal.metas.images({ imageId }).delete();
 
     if (apiError) {
-      const status = apiError.status as number;
-      if (status === 404) {
-        error(404, 'Image not found');
-      }
-      if (status === 403) {
-        error(403, 'Permission denied');
-      }
-      error(500, 'Failed to delete image');
+      throwApiError(apiError, { 404: 'Image not found', 500: 'Failed to delete image' });
     }
     return { success: true, imageId: imageId };
   },

@@ -1,9 +1,9 @@
-import { error, fail, redirect } from '@sveltejs/kit';
+import { fail, redirect } from '@sveltejs/kit';
 import { getGroupId } from '../utils';
 import { z } from 'zod/v4';
 import { setError, superValidate } from 'sveltekit-superforms';
 import { zod4 } from 'sveltekit-superforms/adapters';
-import { api } from '$lib/api';
+import { api, throwApiError } from '$lib/api';
 
 const permissionDeleteSchema = z.object({
   permissionId: z.coerce.number().int()
@@ -23,14 +23,7 @@ export const load = async ({ params, locals }) => {
   const { data, error: apiError } = await api.internal['map-groups']({ id })['settings-page'].get();
 
   if (apiError || !data) {
-    const status = apiError?.status as number;
-    if (status === 404) {
-      error(404, 'No group');
-    }
-    if (status === 403) {
-      error(403, 'Permission denied');
-    }
-    error(500, 'Something went wrong.');
+    throwApiError(apiError, { 404: 'No group' });
   }
   const group = data.group;
 
@@ -59,11 +52,7 @@ export const actions = {
     const { error: apiError } = await api.internal['map-groups']({ id: groupId }).delete();
 
     if (apiError) {
-      const status = apiError.status as number;
-      if (status === 403) {
-        error(403, 'Permission denied');
-      }
-      error(500, 'Failed to delete group');
+      throwApiError(apiError, { 500: 'Failed to delete group' });
     }
     redirect(303, '/map-making');
   },
@@ -86,18 +75,14 @@ export const actions = {
       .delete();
 
     if (apiError) {
-      const status = apiError.status as number;
       const value = apiError.value as { field?: string; message?: string } | undefined;
-      if (status === 400 && value?.message) {
+      if ((apiError.status as number) === 400 && value?.message) {
         return fail(400, {
           errors: { permissionId: [value.message] },
           formData: rawData
         });
       }
-      if (status === 403) {
-        error(403, 'Permission denied');
-      }
-      error(500, 'Failed to delete permission');
+      throwApiError(apiError, { 500: 'Failed to delete permission' });
     }
 
     return {
@@ -116,15 +101,11 @@ export const actions = {
     });
 
     if (apiError) {
-      const status = apiError.status as number;
       const value = apiError.value as { field?: string; message?: string } | undefined;
-      if (status === 400 && value?.message) {
+      if ((apiError.status as number) === 400 && value?.message) {
         return setError(form, 'username', value.message);
       }
-      if (status === 403) {
-        error(403, 'Permission denied');
-      }
-      error(500, 'Failed to create permission');
+      throwApiError(apiError, { 500: 'Failed to create permission' });
     }
   },
   updateSettings: async ({ params, request }) => {
