@@ -11,10 +11,11 @@ export const internalRouter = new Elysia({
   prefix: '/internal',
   detail: { tags: ['internal'] },
 })
+  // must be registered before the routers so the error hook applies to them
+  .use(permissionErrorCatcher())
   .use(mapGroupsRouter)
   .use(mapsRouter)
   .use(metasRouter)
   .use(usersRouter)
   .use(discordBotRouter)
-  .use(locationsRouter)
-  .use(permissionErrorCatcher());
+  .use(locationsRouter);

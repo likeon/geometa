@@ -558,10 +558,14 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
           }
         });
       } catch (error) {
+        const cause = error instanceof Error ? error.cause : undefined;
         if (
-          error instanceof Error &&
-          error.message.includes(
-            'ON CONFLICT DO UPDATE command cannot affect row a second time',
+          [error, cause].some(
+            (e) =>
+              e instanceof Error &&
+              e.message.includes(
+                'ON CONFLICT DO UPDATE command cannot affect row a second time',
+              ),
           )
         ) {
           return status(409, {
