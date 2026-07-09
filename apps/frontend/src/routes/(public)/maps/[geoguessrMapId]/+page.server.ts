@@ -8,7 +8,16 @@ type PersonalMap = {
   metasCount: number;
 };
 
-export const load: PageServerLoad = async ({ params, locals }) => {
+type MetasViewMode = 'cards' | 'list';
+
+const METAS_VIEW_MODE_COOKIE = 'metas-view-mode';
+const DEFAULT_METAS_VIEW_MODE: MetasViewMode = 'list';
+
+function getMetasViewMode(value: string | undefined): MetasViewMode {
+  return value === 'cards' || value === 'list' ? value : DEFAULT_METAS_VIEW_MODE;
+}
+
+export const load: PageServerLoad = async ({ params, locals, cookies }) => {
   const geoguessrId = params.geoguessrMapId;
   let isLoggedIn = false;
   let personalMaps: PersonalMap[] = [];
@@ -57,6 +66,7 @@ export const load: PageServerLoad = async ({ params, locals }) => {
   }, 0);
 
   return {
+    metasViewMode: getMetasViewMode(cookies.get(METAS_VIEW_MODE_COOKIE)),
     metaList,
     mapName: map.name,
     mapAuthors: map.authors,
