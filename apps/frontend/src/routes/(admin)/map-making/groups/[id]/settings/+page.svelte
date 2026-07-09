@@ -19,10 +19,8 @@
   let inputText = $state('');
   let groupNameMatches = $derived(inputText == data.group.name);
 
-  const irregularPlurals: Record<string, string> = {};
-
-  export function pluralize(word: string, count: number): string {
-    return count == 1 ? word : irregularPlurals[word] || `${word}s`;
+  function pluralize(word: string, count: number): string {
+    return count == 1 ? word : `${word}s`;
   }
 
   function handlePermissionDeleteSubmit(event: SubmitEvent) {
