@@ -26,21 +26,51 @@ export async function uploadMetas(
   partialUpload: boolean,
   autoCreateLevels: boolean,
 ) {
-  await db.$primary.transaction(async (tx) => {
-    const currentTimestamp = Math.floor(Date.now() / 1000);
+  const currentTimestamp = Math.floor(Date.now() / 1000);
 
-    const metasInsertData: {
-      mapGroupId: number;
-      tagName: string;
-      name: string;
-      note: string;
-      noteHtml: string;
-      modifiedAt: number;
-      footer?: string;
-      footerHtml?: string;
-    }[] = [];
-    const levelsByTagName: Map<string, string[]> = new Map();
-    const imagesByTagName: Map<string, string[]> = new Map();
+  const metasInsertData: {
+    mapGroupId: number;
+    tagName: string;
+    name: string;
+    note: string;
+    noteHtml: string;
+    modifiedAt: number;
+    footer?: string;
+    footerHtml?: string;
+  }[] = [];
+  const levelsByTagName: Map<string, string[]> = new Map();
+  const imagesByTagName: Map<string, string[]> = new Map();
+
+  for (const sourceItem of items) {
+    const noteHtml = await markdown2Html(sourceItem.note);
+    const metaData = {
+      mapGroupId: groupId,
+      tagName: sourceItem.tagName,
+      name: sourceItem.metaName,
+      note: sourceItem.note,
+      noteHtml: noteHtml,
+      modifiedAt: currentTimestamp,
+    };
+
+    metasInsertData.push(metaData);
+
+    if (sourceItem.levels) {
+      levelsByTagName.set(sourceItem.tagName, sourceItem.levels);
+    }
+    if (sourceItem.images) {
+      imagesByTagName.set(sourceItem.tagName, sourceItem.images);
+    }
+
+    if (sourceItem.footer) {
+      const footerHtml = await markdown2Html(sourceItem.footer);
+      Object.assign(metaData, {
+        footer: sourceItem.footer,
+        footerHtml: footerHtml,
+      });
+    }
+  }
+
+  await db.$primary.transaction(async (tx) => {
     const levelsData = await tx
       .select()
       .from(levels)
@@ -49,34 +79,6 @@ export async function uploadMetas(
       levelsData.map((level) => [level.name, level.id]),
     );
 
-    for (const sourceItem of items) {
-      const noteHtml = await markdown2Html(sourceItem.note);
-      const metaData = {
-        mapGroupId: groupId,
-        tagName: sourceItem.tagName,
-        name: sourceItem.metaName,
-        note: sourceItem.note,
-        noteHtml: noteHtml,
-        modifiedAt: currentTimestamp,
-      };
-
-      metasInsertData.push(metaData);
-
-      if (sourceItem.levels) {
-        levelsByTagName.set(sourceItem.tagName, sourceItem.levels);
-      }
-      if (sourceItem.images) {
-        imagesByTagName.set(sourceItem.tagName, sourceItem.images);
-      }
-
-      if (sourceItem.footer) {
-        const footerHtml = await markdown2Html(sourceItem.footer);
-        Object.assign(metaData, {
-          footer: sourceItem.footer,
-          footerHtml: footerHtml,
-        });
-      }
-    }
     const metasInsertResult = await tx
       .insert(metas)
       .values(metasInsertData)

@@ -5,13 +5,15 @@ import remarkParse from 'remark-parse';
 import remarkRehype from 'remark-rehype';
 import { unified } from 'unified';
 
+const processor = unified()
+  .use(remarkParse)
+  .use(remarkRehype)
+  .use(rehypeSanitize)
+  .use(rehypeExternalLinks, { target: '_blank' })
+  .use(rehypeStringify)
+  .freeze();
+
 export async function markdown2Html(markdown: string) {
-  const vfile = await unified()
-    .use(remarkParse)
-    .use(remarkRehype)
-    .use(rehypeSanitize)
-    .use(rehypeExternalLinks, { target: '_blank' })
-    .use(rehypeStringify)
-    .process(markdown);
+  const vfile = await processor.process(markdown);
   return String(vfile);
 }
