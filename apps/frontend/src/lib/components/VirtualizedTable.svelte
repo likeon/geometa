@@ -1,16 +1,8 @@
 <!-- eslint-disable-next-line @typescript-eslint/no-explicit-any -->
 <script lang="ts" generics="TData extends Record<string, any>, TValue">
-  import {
-    type ColumnDef,
-    type ColumnFiltersState,
-    getCoreRowModel,
-    getFilteredRowModel,
-    getSortedRowModel,
-    type RowSelectionState,
-    type SortingState,
-    type VisibilityState
-  } from '@tanstack/table-core';
-  import { createSvelteTable, FlexRender } from '$lib/components/ui/data-table';
+  import { type ColumnDef, type SortingState } from '@tanstack/table-core';
+  import { FlexRender } from '$lib/components/ui/data-table';
+  import { createBaseTable } from '$lib/components/BaseTable/create-table.svelte';
   import BaseTableFilterPopover from '$lib/components/BaseTable/BaseTableFilterPopover.svelte';
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
@@ -91,83 +83,11 @@
     hiddenColumns = []
   }: DataTableProps<TData, TValue> = $props();
 
-  let sorting = $state<SortingState>([]);
-  let hasUserSorted = $state(false);
-  let rowSelection = $state<RowSelectionState>({});
-  let columnFilters = $state<ColumnFiltersState>([]);
-  let columnVisibility = $state<VisibilityState>({});
-  let hasUserColumnVisibility = $state(false);
-
-  $effect(() => {
-    if (!hasUserSorted) {
-      sorting = [...initialSorting];
-    }
-  });
-
-  $effect(() => {
-    if (!hasUserColumnVisibility) {
-      columnVisibility = [...hiddenColumns].reduce((acc, col) => {
-        acc[col] = false;
-        return acc;
-      }, {} as VisibilityState);
-    }
-  });
-
-  const table = createSvelteTable({
-    get data() {
-      return data;
-    },
-    get columns() {
-      return columns;
-    },
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    onSortingChange: (updater) => {
-      hasUserSorted = true;
-      if (typeof updater === 'function') {
-        sorting = updater(sorting);
-      } else {
-        sorting = updater;
-      }
-    },
-    onRowSelectionChange: (updater) => {
-      if (typeof updater === 'function') {
-        rowSelection = updater(rowSelection);
-      } else {
-        rowSelection = updater;
-      }
-    },
-    onColumnFiltersChange: (updater) => {
-      if (typeof updater === 'function') {
-        columnFilters = updater(columnFilters);
-      } else {
-        columnFilters = updater;
-      }
-    },
-    onColumnVisibilityChange: (updater) => {
-      hasUserColumnVisibility = true;
-      if (typeof updater === 'function') {
-        columnVisibility = updater(columnVisibility);
-      } else {
-        columnVisibility = updater;
-      }
-    },
-    state: {
-      get columnVisibility() {
-        return columnVisibility;
-      },
-      get sorting() {
-        return sorting;
-      },
-      get rowSelection() {
-        return rowSelection;
-      },
-      get columnFilters() {
-        return columnFilters;
-      }
-    },
-    enableSortingRemoval: false
+  const table = createBaseTable({
+    data: () => data,
+    columns: () => columns,
+    initialSorting: () => initialSorting,
+    hiddenColumns: () => hiddenColumns
   });
 
   const isFiltered = $derived(table.getState().columnFilters.length > 0);
