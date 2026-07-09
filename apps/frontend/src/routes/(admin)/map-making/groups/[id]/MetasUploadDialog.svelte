@@ -8,14 +8,14 @@
   import * as Dialog from '$lib/components/ui/dialog';
   import * as Form from '$lib/components/ui/form';
   import type { MetasUploadSchema } from '$lib/form-schema';
-  import Icon from '@iconify/svelte';
   import { Button } from '$lib/components/ui/button';
+  import UploadModeInfo from './UploadModeInfo.svelte';
+  import { createPasteUpload } from './paste-upload.svelte';
 
   interface Props {
     isUploadDialogOpen: boolean;
     data: SuperValidated<Infer<MetasUploadSchema>>;
   }
-  let pastedFile: null | File = null;
   let { isUploadDialogOpen = $bindable(), data }: Props = $props();
   // svelte-ignore state_referenced_locally
   const form = superForm(data, {
@@ -30,9 +30,7 @@
         cancel();
         isUploadDialogOpen = false;
       }
-      if (pastedFile != null) {
-        formData.set('file', pastedFile);
-      }
+      pasteUpload.applyTo(formData);
     }
   });
 
@@ -40,33 +38,11 @@
   const isPartialUpload = $derived($formData.partialUpload);
   const file = fileProxy(form, 'file');
 
-  $effect(() => {
-    if (isUploadDialogOpen) {
-      document.addEventListener('paste', handlePaste);
-      reset();
-      pastedFile = null;
-    } else {
-      document.removeEventListener('paste', handlePaste);
-    }
+  const pasteUpload = createPasteUpload({
+    isOpen: () => isUploadDialogOpen,
+    submit,
+    reset
   });
-
-  async function handlePaste(event: ClipboardEvent) {
-    const clipboardData =
-      event.clipboardData?.getData('application/json') ||
-      event.clipboardData?.getData('text/plain');
-    if (clipboardData) {
-      try {
-        const jsonData = JSON.parse(clipboardData);
-        pastedFile = new File([JSON.stringify(jsonData)], 'pasted-data.json', {
-          type: 'application/json'
-        });
-        submit();
-        pastedFile = null;
-      } catch {
-        alert('Pasted data is not valid JSON.');
-      }
-    }
-  }
 
   function confirmFullUpload() {
     return confirm(
@@ -87,40 +63,15 @@
     <div class="space-y-4 py-4">
       <!-- Upload Mode Info -->
       {#if !isPartialUpload}
-        <div class="rounded-md bg-destructive/10 border border-destructive/20 p-3">
-          <div class="flex items-start space-x-2">
-            <Icon
-              icon="material-symbols:warning-rounded"
-              width="1rem"
-              height="1rem"
-              class="text-destructive mt-0.5" />
-            <div class="space-y-1">
-              <p class="text-sm font-medium text-destructive">Full replacement mode</p>
-              <p class="text-xs text-muted-foreground">
-                All existing metas will be replaced with the uploaded ones.
-              </p>
-            </div>
-          </div>
-        </div>
+        <UploadModeInfo
+          variant="destructive"
+          title="Full replacement mode"
+          description="All existing metas will be replaced with the uploaded ones." />
       {:else}
-        <div
-          class="rounded-md bg-blue-50 border border-blue-200 p-3 dark:bg-blue-950/20 dark:border-blue-900/30">
-          <div class="flex items-start space-x-2">
-            <Icon
-              icon="material-symbols:info-rounded"
-              width="1rem"
-              height="1rem"
-              class="text-blue-600 mt-0.5 dark:text-blue-400" />
-            <div class="space-y-1">
-              <p class="text-sm font-medium text-blue-800 dark:text-blue-200">
-                Partial upload mode
-              </p>
-              <p class="text-xs text-muted-foreground">
-                New metas will be added and existing ones updated. No metas will be removed.
-              </p>
-            </div>
-          </div>
-        </div>
+        <UploadModeInfo
+          variant="info"
+          title="Partial upload mode"
+          description="New metas will be added and existing ones updated. No metas will be removed." />
       {/if}
 
       <!-- File Upload Section -->

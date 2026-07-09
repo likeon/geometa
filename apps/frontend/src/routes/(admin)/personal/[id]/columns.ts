@@ -1,6 +1,7 @@
 import { renderComponent } from '$lib/components/ui/data-table';
 import type { ColumnDef } from '@tanstack/table-core';
 import BaseTableHeader from '$lib/components/BaseTable/BaseTableHeader.svelte';
+import { normalizeFilterValue } from '$lib/components/BaseTable/filters';
 import { Checkbox } from '$lib/components/ui/checkbox';
 import type { PageData } from './$types';
 
@@ -51,11 +52,7 @@ export const columns: ColumnDef<PageData['metaList'][number]>[] = [
         sort: column.getIsSorted()
       }),
     filterFn: (row, columnId, filterValue) => {
-      const filters = Array.isArray(filterValue)
-        ? (filterValue as string[])
-        : filterValue != null
-          ? [filterValue as string]
-          : [];
+      const filters = normalizeFilterValue(filterValue);
 
       if (filters.length === 0) return true;
 

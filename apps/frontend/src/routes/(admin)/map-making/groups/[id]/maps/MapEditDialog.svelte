@@ -45,65 +45,52 @@
 
   const { form: formMapData, enhance: enhanceMap, errors: errorsMap } = formMap;
 
-  function nullifyForm() {
-    formMapData.update(
-      ($formMapData) => {
-        $formMapData.id = undefined;
-        $formMapData.mapGroupId = groupId;
-        $formMapData.geoguessrId = '';
-        $formMapData.name = '';
-        $formMapData.footer = '';
-        $formMapData.ordering = 0;
-        $formMapData.description = '';
-        $formMapData.isPublished = false;
-        $formMapData.authors = '';
-        $formMapData.autoUpdate = false;
-        $formMapData.levels = [];
-        $formMapData.regions = [];
-        $formMapData.includeFilters = [];
-        $formMapData.excludeFilters = [];
-        $formMapData.difficulty = 0;
-        $formMapData.isVerified = false;
-        $formMapData.isShared = false;
-        return $formMapData;
-      },
-      { taint: false }
-    );
-  }
-
   function fillForm(map: PageData['group']['maps'][number] | null) {
-    if (map) {
-      formMapData.update(
-        ($formMapData) => {
-          $formMapData.id = map.id;
+    const data = map
+      ? {
+          id: map.id,
           // group maps always have a mapGroupId, only personal maps don't
-          $formMapData.mapGroupId = map.mapGroupId!;
-          $formMapData.geoguessrId = map.geoguessrId;
-          $formMapData.name = map.name;
-          $formMapData.footer = map.footer;
-          $formMapData.ordering = map.ordering;
-          $formMapData.description = map.description;
-          $formMapData.isPublished = map.isPublished;
-          $formMapData.authors = map.authors;
-          $formMapData.autoUpdate = map.autoUpdate;
-          $formMapData.levels = map.mapLevels.map((item) => item.levelId);
-          $formMapData.regions = map.mapRegions.map((item) => item.regionId);
-          $formMapData.difficulty = map.difficulty;
-          $formMapData.isVerified = map.isVerified;
-          $formMapData.isShared = map.isShared;
-          $formMapData.includeFilters = map.filters
-            .filter((item) => item.isExclude == false)
-            .map((item) => item.tagLike as string);
-          $formMapData.excludeFilters = map.filters
-            .filter((item) => item.isExclude == true)
-            .map((item) => item.tagLike as string);
-          return $formMapData;
-        },
-        { taint: false }
-      );
-    } else {
-      nullifyForm();
-    }
+          mapGroupId: map.mapGroupId!,
+          geoguessrId: map.geoguessrId,
+          name: map.name,
+          footer: map.footer,
+          ordering: map.ordering,
+          description: map.description,
+          isPublished: map.isPublished,
+          authors: map.authors,
+          autoUpdate: map.autoUpdate,
+          levels: map.mapLevels.map((item) => item.levelId),
+          regions: map.mapRegions.map((item) => item.regionId),
+          difficulty: map.difficulty,
+          isVerified: map.isVerified,
+          isShared: map.isShared,
+          includeFilters: map.filters
+            .filter((item) => !item.isExclude)
+            .map((item) => item.tagLike as string),
+          excludeFilters: map.filters
+            .filter((item) => item.isExclude)
+            .map((item) => item.tagLike as string)
+        }
+      : {
+          id: undefined,
+          mapGroupId: groupId,
+          geoguessrId: '',
+          name: '',
+          footer: '',
+          ordering: 0,
+          description: '',
+          isPublished: false,
+          authors: '',
+          autoUpdate: false,
+          levels: [],
+          regions: [],
+          includeFilters: [],
+          excludeFilters: [],
+          difficulty: 0,
+          isVerified: false,
+          isShared: false
+        };
+    formMapData.update(() => data, { taint: false });
   }
   $effect(() => {
     if (isMapDialogOpen) {

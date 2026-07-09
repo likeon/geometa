@@ -34,32 +34,10 @@
 
   const { form: formLevelData, enhance: enhanceLevel } = formLevel;
 
-  function nullifyForm() {
-    formLevelData.update(
-      ($formLevelData) => {
-        $formLevelData.id = undefined;
-        $formLevelData.mapGroupId = mapGroupId;
-        $formLevelData.name = '';
-        return $formLevelData;
-      },
-      { taint: false }
-    );
-  }
-
   function fillForm(level: PageData['group']['levels'][number] | null) {
-    if (level) {
-      formLevelData.update(
-        ($formLevelData) => {
-          $formLevelData.id = level.id;
-          $formLevelData.mapGroupId = mapGroupId;
-          $formLevelData.name = level.name;
-          return $formLevelData;
-        },
-        { taint: false }
-      );
-    } else {
-      nullifyForm();
-    }
+    formLevelData.update(() => ({ id: level?.id, mapGroupId, name: level?.name ?? '' }), {
+      taint: false
+    });
   }
 
   $effect(() => {

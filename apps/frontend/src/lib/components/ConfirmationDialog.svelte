@@ -20,7 +20,7 @@
     warningTitle?: string;
     warningDescription?: string;
     onConfirm: () => void;
-    onCancel: () => void;
+    onCancel?: () => void;
   }
 
   let {
@@ -44,7 +44,7 @@
   }
 
   function handleCancel() {
-    onCancel();
+    onCancel?.();
     open = false;
   }
 </script>

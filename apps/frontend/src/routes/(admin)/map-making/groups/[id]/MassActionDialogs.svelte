@@ -42,7 +42,6 @@
 
     // Functions
     toggleLevel,
-    handleDeleteCancel,
     handleDownload
   }: {
     isAddLevelsDialogOpen: boolean;
@@ -58,7 +57,6 @@
     selectedGroupId: string;
     sharingMetas: boolean;
     toggleLevel: (levelId: number) => void;
-    handleDeleteCancel: () => void;
     handleDownload: (endpoint: string, type: string) => void;
   } = $props();
 
@@ -88,6 +86,21 @@
     deleteFormElement.requestSubmit();
   }
 </script>
+
+{#snippet selectedMetasPreview()}
+  {@const displayMetas = metas
+    .filter((meta) => selectedIds.includes(meta.id))
+    .map((meta) => meta.tagName)}
+  <div class="rounded-md bg-muted p-3">
+    <p class="text-sm font-medium mb-1">Selected metas:</p>
+    <p class="text-sm text-muted-foreground">
+      {displayMetas.slice(0, 5).join(', ')}
+      {#if displayMetas.length > 5}
+        ... and {displayMetas.length - 5} more
+      {/if}
+    </p>
+  </div>
+{/snippet}
 
 <!-- Add Levels Dialog -->
 <Dialog.Root bind:open={isAddLevelsDialogOpen}>
@@ -138,20 +151,7 @@
           <input type="hidden" name="levelIds" value={levelId} />
         {/each}
 
-        <div class="rounded-md bg-muted p-3">
-          <p class="text-sm font-medium mb-1">Selected metas:</p>
-          <p class="text-sm text-muted-foreground">
-            {#if selectedIds}
-              {@const displayMetas = metas
-                .filter((meta) => selectedIds.includes(meta.id))
-                .map((meta) => meta.tagName)}
-              {displayMetas.slice(0, 5).join(', ')}
-              {#if displayMetas.length > 5}
-                ... and {displayMetas.length - 5} more
-              {/if}
-            {/if}
-          </p>
-        </div>
+        {@render selectedMetasPreview()}
       </div>
 
       <Dialog.Footer>
@@ -214,20 +214,7 @@
           <input type="hidden" name="targetGroupId" value={selectedGroupId} />
         {/if}
 
-        <div class="rounded-md bg-muted p-3">
-          <p class="text-sm font-medium mb-1">Selected metas:</p>
-          <p class="text-sm text-muted-foreground">
-            {#if selectedIds}
-              {@const displayMetas = metas
-                .filter((meta) => selectedIds.includes(meta.id))
-                .map((meta) => meta.tagName)}
-              {displayMetas.slice(0, 5).join(', ')}
-              {#if displayMetas.length > 5}
-                ... and {displayMetas.length - 5} more
-              {/if}
-            {/if}
-          </p>
-        </div>
+        {@render selectedMetasPreview()}
       </div>
 
       <Dialog.Footer>
@@ -259,20 +246,7 @@
     </Dialog.Header>
 
     <div class="space-y-4 py-4">
-      <div class="rounded-md bg-muted p-3">
-        <p class="text-sm font-medium mb-1">Selected metas:</p>
-        <p class="text-sm text-muted-foreground">
-          {#if selectedIds}
-            {@const displayMetas = metas
-              .filter((meta) => selectedIds.includes(meta.id))
-              .map((meta) => meta.tagName)}
-            {displayMetas.slice(0, 5).join(', ')}
-            {#if displayMetas.length > 5}
-              ... and {displayMetas.length - 5} more
-            {/if}
-          {/if}
-        </p>
-      </div>
+      {@render selectedMetasPreview()}
 
       <p class="text-sm text-muted-foreground">
         This will download a JSON file containing all location data for the selected metas.
@@ -304,20 +278,7 @@
     </Dialog.Header>
 
     <div class="space-y-4 py-4">
-      <div class="rounded-md bg-muted p-3">
-        <p class="text-sm font-medium mb-1">Selected metas:</p>
-        <p class="text-sm text-muted-foreground">
-          {#if selectedIds}
-            {@const displayMetas = metas
-              .filter((meta) => selectedIds.includes(meta.id))
-              .map((meta) => meta.tagName)}
-            {displayMetas.slice(0, 5).join(', ')}
-            {#if displayMetas.length > 5}
-              ... and {displayMetas.length - 5} more
-            {/if}
-          {/if}
-        </p>
-      </div>
+      {@render selectedMetasPreview()}
 
       <p class="text-sm text-muted-foreground">
         This will download a JSON file containing meta information (names, notes, levels, images)
@@ -367,5 +328,4 @@
       name: meta.tagName,
       count: meta.locationsCount?.total
     }))}
-  onConfirm={handleDeleteConfirm}
-  onCancel={handleDeleteCancel} />
+  onConfirm={handleDeleteConfirm} />
