@@ -3,32 +3,30 @@
   import { Button } from '$lib/components/ui/button';
   import { Badge } from '$lib/components/ui/badge';
   import Icon from '@iconify/svelte';
-  import { SvelteSet } from 'svelte/reactivity';
+  import { normalizeFilterValue } from '$lib/components/BaseTable/filters';
+  import type { Table } from '@tanstack/table-core';
 
-  const { table, columnId, title, options } = $props<{
+  let {
+    table,
+    columnId,
+    title,
+    options
+  }: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    table: any;
+    table: Table<any>;
     columnId: string;
     title: string;
     options: { label: string; value: string }[];
-  }>();
+  } = $props();
 
-  const selected = $derived(() => {
-    const fv = table.getColumn(columnId)?.getFilterValue();
-    const arr = Array.isArray(fv) ? fv : fv != null ? [fv] : [];
-    return new Set(arr);
-  });
+  const selected = $derived(
+    new Set(normalizeFilterValue(table.getColumn(columnId)?.getFilterValue()))
+  );
 
   function toggle(value: string) {
-    const current = selected();
-    const next = new SvelteSet(current);
-    if (next.has(value)) {
-      next.delete(value);
-    } else {
-      next.add(value);
-    }
-
-    const arr = Array.from(next);
+    const arr = selected.has(value)
+      ? [...selected].filter((v) => v !== value)
+      : [...selected, value];
     table.getColumn(columnId)?.setFilterValue(arr.length ? arr : undefined);
   }
 </script>
@@ -37,10 +35,10 @@
   <PopoverTrigger>
     {#snippet child({ props })}
       <Button {...props} variant="outline" size="sm" class="h-8 border-dashed">
-        {#if selected().size > 0}
+        {#if selected.size > 0}
           <Icon icon="mdi:plus-circle-outline" class="mr-1 w-4 h-4" />{title}:
           <div class="flex space-x-1">
-            {#each options.filter( (o: { label: string; value: string }) => selected().has(o.value) ) as opt (opt.value)}
+            {#each options.filter((o) => selected.has(o.value)) as opt (opt.value)}
               <Badge variant="secondary" class="rounded-sm px-1 font-normal">
                 {opt.label}
               </Badge>
@@ -64,7 +62,7 @@
           onclick={() => toggle(opt.value)}>
           <Icon
             class="mt-0.5 mr-2 shrink-0"
-            icon={selected().has(opt.value) ? 'mdi:checkbox-marked' : 'mdi:checkbox-blank-outline'}
+            icon={selected.has(opt.value) ? 'mdi:checkbox-marked' : 'mdi:checkbox-blank-outline'}
             width="20"
             height="20" />
           <span class="break-words">{opt.label}</span>

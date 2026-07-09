@@ -220,7 +220,7 @@
   </div>
 
   <div
-    class="h-[{tableHeight}] overflow-auto relative w-full"
+    class="overflow-auto relative w-full"
     bind:this={virtualListEl}
     style="height: {tableHeight};">
     <Table.Root style="position: relative; width: 100%;">
