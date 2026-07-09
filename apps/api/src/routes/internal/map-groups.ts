@@ -292,6 +292,139 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       userId: true,
     },
   )
+  .get(
+    '/:id/settings-page',
+    async ({ params: { id: groupId }, userId, status }) => {
+      await ensurePermissions(userId, groupId);
+
+      const group = await db.$primary.query.mapGroups.findFirst({
+        extras: {
+          metasCount: sql<number>`(SELECT COUNT(*)
+                                   FROM metas m
+                                   WHERE m.map_group_id = ${groupId})`.as(
+            'metas_count',
+          ),
+          locationsCount: sql<number>`(SELECT COUNT(*)
+                                       FROM map_group_locations mgl
+                                       WHERE mgl.map_group_id = ${groupId})`.as(
+            'locations_count',
+          ),
+        },
+        with: {
+          permissions: {
+            with: { user: { columns: { apiToken: false } } },
+          },
+        },
+        where: eq(mapGroups.id, groupId),
+      });
+
+      if (!group) {
+        return status(404);
+      }
+
+      return { group };
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      userId: true,
+    },
+  )
+  .delete(
+    '/:id',
+    async ({ params: { id: groupId }, userId, status }) => {
+      await ensurePermissions(userId, groupId);
+      await db.delete(mapGroups).where(eq(mapGroups.id, groupId));
+      return status(200);
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      userId: true,
+    },
+  )
+  .post(
+    '/:id/permissions',
+    async ({ params: { id: groupId }, body, userId, status }) => {
+      await ensurePermissions(userId, groupId);
+
+      const username = body.username.startsWith('@')
+        ? body.username.slice(1)
+        : body.username;
+
+      const user = (
+        await db.$primary
+          .select({ id: users.id })
+          .from(users)
+          .where(eq(users.username, username))
+      )[0];
+      if (!user) {
+        return status(400, {
+          field: 'username',
+          message: 'Discord user with this username is not in our database',
+        });
+      }
+
+      const existingPermission = await db.$primary
+        .select({ id: mapGroupPermissions.id })
+        .from(mapGroupPermissions)
+        .where(
+          and(
+            eq(mapGroupPermissions.mapGroupId, groupId),
+            eq(mapGroupPermissions.userId, user.id),
+          ),
+        )
+        .limit(1);
+      if (existingPermission.length) {
+        return status(400, {
+          field: 'username',
+          message: 'This user already has the permissions',
+        });
+      }
+
+      await db
+        .insert(mapGroupPermissions)
+        .values({ mapGroupId: groupId, userId: user.id });
+      return status(200);
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      body: t.Object({ username: t.String({ minLength: 1 }) }),
+      userId: true,
+    },
+  )
+  .delete(
+    '/:id/permissions/:permissionId',
+    async ({ params: { id: groupId, permissionId }, userId, status }) => {
+      await ensurePermissions(userId, groupId);
+
+      const permission = await db.$primary.query.mapGroupPermissions.findFirst({
+        where: and(
+          eq(mapGroupPermissions.id, permissionId),
+          eq(mapGroupPermissions.mapGroupId, groupId),
+        ),
+      });
+      if (!permission) {
+        return status(400, {
+          field: 'permissionId',
+          message: 'Permission not found',
+        });
+      }
+      if (permission.userId === userId) {
+        return status(400, {
+          field: 'permissionId',
+          message: "Can't strip your own permissions",
+        });
+      }
+
+      await db
+        .delete(mapGroupPermissions)
+        .where(eq(mapGroupPermissions.id, permissionId));
+      return status(200);
+    },
+    {
+      params: t.Object({ id: t.Integer(), permissionId: t.Integer() }),
+      userId: true,
+    },
+  )
   .patch(
     '/:id',
     async ({ params: { id: groupId }, body, userId, status }) => {
