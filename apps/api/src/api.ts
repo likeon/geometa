@@ -17,11 +17,14 @@ if (prod) {
 }
 
 if (prod) {
-  runMigrate().catch((err) => {
+  // block startup on migrations so the server never serves an old schema
+  try {
+    await runMigrate();
+  } catch (err) {
     console.error('❌ Migration failed');
     console.error(err);
     process.exit(1);
-  });
+  }
 }
 
 const app = new Elysia({
