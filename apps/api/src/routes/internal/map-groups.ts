@@ -270,16 +270,16 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   )
   .delete(
     '/:id/levels/:levelId',
-    async ({ params: { levelId }, userId, status }) => {
-      const level = await db.$primary.query.levels.findFirst({
-        where: eq(levels.id, levelId),
-      });
-      if (!level) {
+    async ({ params: { id: groupId, levelId }, userId, status }) => {
+      await ensurePermissions(userId, groupId);
+
+      const deleted = await db
+        .delete(levels)
+        .where(and(eq(levels.id, levelId), eq(levels.mapGroupId, groupId)))
+        .returning({ id: levels.id });
+      if (deleted.length === 0) {
         return status(404);
       }
-      await ensurePermissions(userId, level.mapGroupId);
-
-      await db.delete(levels).where(eq(levels.id, levelId));
       return status(200);
     },
     {
