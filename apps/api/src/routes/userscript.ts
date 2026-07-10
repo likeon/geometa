@@ -1,5 +1,6 @@
 import { mapGroupPermissions, maps, users } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
+import { bearer } from '@api/lib/internal/auth';
 import {
   locationSelect,
   mapLocationsExportSelect,
@@ -97,14 +98,7 @@ export const userscriptRouter = new Elysia({
       }),
     },
   )
-  // todo: move elsewhere after personal maps merged
-  .derive(({ headers }) => {
-    const auth = headers.authorization;
-
-    return {
-      bearer: auth?.startsWith('Bearer ') ? auth.slice(7) : null,
-    };
-  })
+  .use(bearer())
   .get(
     '/map/:geoguessrId/locations',
     async ({ params: { geoguessrId }, status, bearer }) => {
