@@ -20,6 +20,7 @@ import {
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { syncMapGroup } from '@api/lib/internal/sync';
 import { geoguessrMapJson } from '@api/lib/internal/utils';
+import { isPgError } from '@api/lib/utils/common';
 import { and, asc, desc, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
@@ -552,16 +553,9 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
           }
         });
       } catch (error) {
-        const cause = error instanceof Error ? error.cause : undefined;
-        if (
-          [error, cause].some(
-            (e) =>
-              e instanceof Error &&
-              e.message.includes(
-                'ON CONFLICT DO UPDATE command cannot affect row a second time',
-              ),
-          )
-        ) {
+        // cardinality violation: ON CONFLICT DO UPDATE hit the same row twice,
+        // i.e. the upload contains duplicate panoIds
+        if (isPgError(error, '21000')) {
           return status(409, {
             message:
               'The uploaded file contains duplicate panoId values. Please remove duplicates and try again.',
