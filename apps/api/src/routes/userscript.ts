@@ -60,20 +60,6 @@ export const userscriptRouter = new Elysia({
       // hack for now, should country be marked as not null in schema since we will always have it?
       const country = meta.country || '';
 
-      // Log the location request in the background
-      // setImmediate(async () => {
-      //   try {
-      //     await db.insert(locationRequestLogs).values({
-      //       mapId: meta.mapId,
-      //       panoId: query.panoId,
-      //       syncedMetaId: meta.syncedMetaId,
-      //     });
-      //   } catch (error) {
-      //     // Don't fail the request if logging fails
-      //     console.error('Failed to log location request:', error);
-      //   }
-      // });
-
       let footer = generateFooter(
         meta.noteFromPlonkit,
         country,

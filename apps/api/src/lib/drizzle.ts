@@ -1,4 +1,3 @@
-import { type SQLWrapper, sql } from 'drizzle-orm';
 import { withReplicas } from 'drizzle-orm/pg-core';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
@@ -32,8 +31,3 @@ function createDbInstance() {
   return withReplicas(leader, [replica]);
 }
 export const db = createDbInstance();
-
-export const explainAnalyze = async <T extends SQLWrapper>(query: T) => {
-  const debugResult = await db.execute(sql`EXPLAIN ANALYZE ${query.getSQL()}`);
-  console.debug(debugResult);
-};

@@ -269,13 +269,6 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
       await ensureMapAccess(userId, mapId);
       const { metaIds } = body;
 
-      if (
-        !Array.isArray(metaIds) ||
-        metaIds.some((id) => typeof id !== 'number')
-      ) {
-        return status(400, 'Invalid metaIds array');
-      }
-
       // check if provided metaids are for sure from the map that has sharing enabled(not sure if needed but someone technically could send request with ids that are from not shared map?)
       const validMetaIds = await db
         .selectDistinct({ syncedMetaId: syncedMapMetas.syncedMetaId })
@@ -315,17 +308,10 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
   )
   .delete(
     '/:id/metas',
-    async ({ params, body, userId, status }) => {
+    async ({ params, body, userId }) => {
       const mapId = params.id;
       await ensureMapAccess(userId, mapId);
       const { metaIds } = body;
-
-      if (
-        !Array.isArray(metaIds) ||
-        metaIds.some((id) => typeof id !== 'number')
-      ) {
-        return status(400, 'Invalid metaIds array');
-      }
 
       await db
         .delete(syncedMapMetas)
