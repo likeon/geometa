@@ -417,48 +417,37 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
         });
       }
 
-      const existingMetaLevels = await db.$primary
-        .select({ metaId: metaLevels.metaId, levelId: metaLevels.levelId })
-        .from(metaLevels)
-        .where(
-          and(
-            inArray(metaLevels.metaId, metaIds),
-            inArray(metaLevels.levelId, levelIds),
-          ),
-        );
-      const existingCombinations = new Set(
-        existingMetaLevels.map((ml) => `${ml.metaId}-${ml.levelId}`),
+      // pair every meta with the selected levels of its own group; the unique
+      // index dedupes already-assigned pairs via onConflictDoNothing
+      const metaById = new Map(selectedMetas.map((meta) => [meta.id, meta]));
+      const levelById = new Map(
+        selectedLevels.map((level) => [level.id, level]),
       );
-
       const metaLevelInserts: { metaId: number; levelId: number }[] = [];
       for (const metaId of metaIds) {
-        const meta = selectedMetas.find((m) => m.id === metaId);
+        const meta = metaById.get(metaId);
         if (!meta) continue;
 
         for (const levelId of levelIds) {
-          const level = selectedLevels.find((l) => l.id === levelId);
-          if (!level) continue;
-          if (level.mapGroupId !== meta.mapGroupId) continue;
-          if (existingCombinations.has(`${metaId}-${levelId}`)) continue;
-
-          metaLevelInserts.push({ metaId, levelId });
+          const level = levelById.get(levelId);
+          if (level && level.mapGroupId === meta.mapGroupId) {
+            metaLevelInserts.push({ metaId, levelId });
+          }
         }
       }
 
-      if (metaLevelInserts.length === 0) {
-        return {
-          message:
-            'No new levels to add (all selected levels already assigned or invalid)',
-          addedCount: 0,
-        };
-      }
-
       const currentTimestamp = Math.floor(Date.now() / 1000);
-      await db.$primary.transaction(async (tx) => {
-        await tx
-          .insert(metaLevels)
-          .values(metaLevelInserts)
-          .onConflictDoNothing();
+      const addedCount = await db.$primary.transaction(async (tx) => {
+        const inserted = metaLevelInserts.length
+          ? await tx
+              .insert(metaLevels)
+              .values(metaLevelInserts)
+              .onConflictDoNothing()
+              .returning({ id: metaLevels.id })
+          : [];
+        if (inserted.length === 0) {
+          return 0;
+        }
         await tx
           .update(metas)
           .set({ modifiedAt: currentTimestamp })
@@ -467,11 +456,20 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           .update(mapGroups)
           .set({ syncedAt: null })
           .where(inArray(mapGroups.id, uniqueMapGroupIds));
+        return inserted.length;
       });
 
+      if (addedCount === 0) {
+        return {
+          message:
+            'No new levels to add (all selected levels already assigned or invalid)',
+          addedCount: 0,
+        };
+      }
+
       return {
-        message: `Successfully added ${metaLevelInserts.length} level assignments to ${metaIds.length} metas`,
-        addedCount: metaLevelInserts.length,
+        message: `Successfully added ${addedCount} level assignments to ${metaIds.length} metas`,
+        addedCount,
       };
     },
     {
