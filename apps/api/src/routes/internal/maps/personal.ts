@@ -10,6 +10,7 @@ import { auth } from '@api/lib/internal/auth';
 import { ensureMapAccess } from '@api/lib/internal/permissions';
 import { geoguessrGetMapInfo } from '@api/lib/internal/utils';
 import { generateFooter } from '@api/lib/userscript/utils';
+import { isUniqueViolation } from '@api/lib/utils/common';
 import { and, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/pg-core';
 import { Elysia, t } from 'elysia';
@@ -94,14 +95,10 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
 
         return { id: result[0].id };
       } catch (e) {
-        if (
-          e instanceof Error &&
-          'message' in e &&
-          e.message.includes('unique constraint')
-        ) {
+        if (isUniqueViolation(e, 'maps_geoguessr_id_unique')) {
           return status(409, 'Map with this GeoGuessr ID already exists.');
         }
-        return status(500, 'Internal Server Error');
+        throw e;
       }
     },
     {
@@ -264,14 +261,10 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
 
         return { id: result[0].id };
       } catch (e) {
-        if (
-          e instanceof Error &&
-          'message' in e &&
-          e.message.includes('unique constraint')
-        ) {
+        if (isUniqueViolation(e, 'maps_geoguessr_id_unique')) {
           return status(409, 'Map with this GeoGuessr ID already exists.');
         }
-        return status(500, 'Internal Server Error');
+        throw e;
       }
     },
     {
