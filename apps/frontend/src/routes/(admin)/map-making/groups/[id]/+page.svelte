@@ -197,7 +197,7 @@
           };
         }}>
         {#if browser}
-          {#if data.group.hasUnsycnedData}
+          {#if data.group.hasUnsyncedData}
             <Tooltip
               content="People playing your map will only see changes after you synchronize the changes!">
               <Button

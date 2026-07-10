@@ -124,20 +124,20 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
           },
           where: eq(mapGroups.id, groupId),
           extras: {
-            hasUnsycnedData: sql<boolean>`
+            hasUnsyncedData: sql<boolean>`
             EXISTS (SELECT 1
              FROM map_group_locations mgl
              WHERE mgl.map_group_id = ${mapGroups.id}
                AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < mgl.modified_at))
-            OR EXISTS(SELECT 1
+            OR EXISTS (SELECT 1
              FROM metas m
-             WHERE m.map_group_id = ${mapGroups.id} AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < m.modified_at)
-            OR EXISTS(
-             SELECT 1
+             WHERE m.map_group_id = ${mapGroups.id}
+               AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < m.modified_at))
+            OR EXISTS (SELECT 1
              FROM maps m
-             WHERE m.map_group_id = ${mapGroups.id} AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < m.modified_at)
-            )
-            )`.as('has_unsynced_data'),
+             WHERE m.map_group_id = ${mapGroups.id}
+               AND (${mapGroups.syncedAt} IS NULL OR ${mapGroups.syncedAt} < m.modified_at))
+            `.as('has_unsynced_data'),
           },
         }),
         db.$primary.query.users.findFirst({
