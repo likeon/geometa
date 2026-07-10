@@ -115,9 +115,6 @@ export const metasFromMapStatement = db
 
 export const mapsRouter = new Elysia({ prefix: '/maps' })
   .use(auth())
-  .get('/', async () => {
-    return db.$primary.select().from(maps);
-  })
   .get(
     '/mapgroup/:geoguessrId',
     async ({ params: { geoguessrId }, status, userId }) => {

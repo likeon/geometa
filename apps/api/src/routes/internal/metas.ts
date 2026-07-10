@@ -196,45 +196,6 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       },
     },
   )
-  .get(
-    '/:id/images',
-    async ({ userId, params, status }) => {
-      const meta = await db.$primary.query.metas.findFirst({
-        where: eq(metas.id, params.id),
-      });
-      if (!meta) {
-        return status(404, undefined);
-      }
-
-      await ensurePermissions(userId, meta.mapGroupId);
-
-      const images = await db
-        .select({
-          image_url: metaImages.image_url,
-          order: metaImages.order,
-        })
-        .from(metaImages)
-        .where(eq(metaImages.metaId, params.id))
-        .orderBy(metaImages.order, metaImages.id);
-
-      return images;
-    },
-    {
-      userId: true,
-      params: t.Object({
-        id: t.Integer(),
-      }),
-      response: {
-        200: t.Array(
-          t.Object({
-            image_url: t.String(),
-            order: t.Integer(),
-          }),
-        ),
-        404: t.Void(),
-      },
-    },
-  )
   .error({ ImageNotFoundError })
   .onError(({ code, status }) => {
     if (code === 'ImageNotFoundError') {
