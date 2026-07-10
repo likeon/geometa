@@ -9,7 +9,7 @@ import {
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensurePermissions } from '@api/lib/internal/permissions';
-import { geoguessrGetMapInfo } from '@api/lib/internal/utils';
+import { isPopularMap, popularMapMessage } from '@api/lib/internal/utils';
 import { isUniqueViolation } from '@api/lib/utils/common';
 import { markdown2Html } from '@api/lib/utils/markdown';
 import { and, eq, inArray, not } from 'drizzle-orm';
@@ -57,14 +57,12 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
         geoguessrIdChanged = true;
       }
 
-      if (geoguessrIdChanged && !user.isSuperadmin) {
-        const mapInfo = await geoguessrGetMapInfo(dataNoId.geoguessrId);
-        if (mapInfo && mapInfo.numberOfGamesPlayed > 10000) {
-          return status(403, {
-            message:
-              'This is a popular map which requires additional verification - ask for it in #map-making Discord channel',
-          });
-        }
+      if (
+        geoguessrIdChanged &&
+        !user.isSuperadmin &&
+        (await isPopularMap(dataNoId.geoguessrId))
+      ) {
+        return status(403, { message: popularMapMessage });
       }
 
       const footerHtml = await markdown2Html(dataNoId.footer || '');

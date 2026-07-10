@@ -8,7 +8,7 @@ import {
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensureMapAccess } from '@api/lib/internal/permissions';
-import { geoguessrGetMapInfo } from '@api/lib/internal/utils';
+import { isPopularMap, popularMapMessage } from '@api/lib/internal/utils';
 import { generateFooter } from '@api/lib/userscript/utils';
 import { isUniqueViolation } from '@api/lib/utils/common';
 import { and, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
@@ -72,14 +72,8 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
       if (!user) {
         return status(500);
       }
-      if (!user.isSuperadmin) {
-        const mapInfo = await geoguessrGetMapInfo(geoguessrId);
-        if (mapInfo && mapInfo.numberOfGamesPlayed > 10000) {
-          return status(
-            403,
-            'This is a popular map which requires additional verification - ask for it in #map-making Discord channel',
-          );
-        }
+      if (!user.isSuperadmin && (await isPopularMap(geoguessrId))) {
+        return status(403, popularMapMessage);
       }
 
       try {
@@ -229,14 +223,12 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
       if (!user) {
         return status(500);
       }
-      if (!user.isSuperadmin && geoguessrId) {
-        const mapInfo = await geoguessrGetMapInfo(geoguessrId);
-        if (mapInfo && mapInfo.numberOfGamesPlayed > 10000) {
-          return status(
-            403,
-            'This is a popular map which requires additional verification - ask for it in #map-making Discord channel',
-          );
-        }
+      if (
+        !user.isSuperadmin &&
+        geoguessrId &&
+        (await isPopularMap(geoguessrId))
+      ) {
+        return status(403, popularMapMessage);
       }
 
       try {
