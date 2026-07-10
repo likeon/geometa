@@ -74,8 +74,6 @@ type LoggerStore = {
   startTime: number;
 };
 
-const _ignoredErrors = ['VALIDATION', 'PARSE', 'NOT_FOUND'];
-
 export const logger = () => {
   return new Elysia({
     name: 'logger',

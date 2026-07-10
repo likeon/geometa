@@ -154,7 +154,7 @@ export const levelsRelations = relations(levels, ({ one, many }) => ({
     fields: [levels.mapGroupId],
     references: [mapGroups.id],
   }),
-  metaLevels: many(maps),
+  metaLevels: many(metaLevels),
 }));
 
 export const mapLevels = pgTable(
