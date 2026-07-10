@@ -1,3 +1,4 @@
+import { originalMapLateral } from '@api/lib/db/original-map';
 import {
   maps,
   syncedLocations,
@@ -12,7 +13,6 @@ import { isPopularMap, popularMapMessage } from '@api/lib/internal/utils';
 import { generateFooter } from '@api/lib/userscript/utils';
 import { isUniqueViolation } from '@api/lib/utils/common';
 import { and, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
 import { Elysia, t } from 'elysia';
 import { pick } from 'remeda';
 
@@ -121,8 +121,7 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
         return status(404, 'Map not found');
       }
 
-      const originalSyncedMapMetas = alias(syncedMapMetas, 'osmm');
-      const originalMaps = alias(maps, 'om');
+      const originalMap = originalMapLateral();
 
       const metas = await db
         .select({
@@ -147,11 +146,11 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
                                         FROM ${syncedLocations} sl
                                         WHERE sl.synced_meta_id = ${syncedMetas.metaId}
                                       )`,
-          usedInMapName: originalMaps.name,
-          usedInMapAuthors: originalMaps.authors,
-          usedInMapGeoguessrId: originalMaps.geoguessrId,
+          usedInMapName: originalMap.name,
+          usedInMapAuthors: originalMap.authors,
+          usedInMapGeoguessrId: originalMap.geoguessrId,
           usedInMapFooter:
-            sql<string>`coalesce(${originalMaps.footerHtml}, '')`.as(
+            sql<string>`coalesce(${originalMap.footerHtml}, '')`.as(
               'usedInMapFooter',
             ),
         })
@@ -160,28 +159,7 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
           syncedMetas,
           eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId),
         )
-        .leftJoin(
-          originalSyncedMapMetas,
-          and(
-            eq(
-              originalSyncedMapMetas.syncedMetaId,
-              syncedMapMetas.syncedMetaId,
-            ),
-            sql`${originalSyncedMapMetas.mapId} = (
-              SELECT smm2.map_id
-              FROM ${syncedMapMetas} smm2
-              INNER JOIN ${maps} m2 ON m2.id = smm2.map_id
-              WHERE smm2.synced_meta_id = ${syncedMapMetas.syncedMetaId}
-                AND m2.is_personal = FALSE
-              ORDER BY m2.number_of_games_played DESC NULLS LAST
-              LIMIT 1
-            )`,
-          ),
-        )
-        .leftJoin(
-          originalMaps,
-          eq(originalMaps.id, originalSyncedMapMetas.mapId),
-        )
+        .leftJoinLateral(originalMap, sql`true`)
         .where(eq(syncedMapMetas.mapId, mapId));
 
       // Generate footer for each meta (same logic as userscript endpoint)

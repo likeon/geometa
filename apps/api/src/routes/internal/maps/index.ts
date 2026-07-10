@@ -1,3 +1,4 @@
+import { originalMapLateral } from '@api/lib/db/original-map';
 import {
   mapGroupLocations,
   mapMetas,
@@ -17,89 +18,50 @@ import { Elysia, t } from 'elysia';
 import { groupMapsRouter } from './group';
 import { personalMapsRouter } from './personal';
 
+const syncedMetaFields = {
+  id: syncedMetas.metaId,
+  name: syncedMetas.name,
+  note: syncedMetas.note,
+  noteFromPlonkit: syncedMetas.noteFromPlonkit,
+  footer: syncedMetas.footer,
+  images: syncedMetas.images,
+  countries: sql<string[]>`
+    ARRAY(
+      SELECT DISTINCT ${syncedLocations.country}
+      FROM ${syncedLocations}
+      WHERE ${syncedLocations.syncedMetaId} = ${syncedMetas.metaId}
+        AND ${syncedLocations.country} IS NOT NULL
+    )
+  `,
+  locationsCount: sql<number>`(
+    SELECT COUNT(*)
+    FROM ${syncedLocations}
+    WHERE ${syncedLocations.syncedMetaId} = ${syncedMetas.metaId}
+  )`,
+};
+
 const syncedMetasStatement = db
   .select({
-    id: syncedMetas.metaId,
-    name: syncedMetas.name,
-    note: syncedMetas.note,
-    noteFromPlonkit: syncedMetas.noteFromPlonkit,
-    footer: syncedMetas.footer,
+    ...syncedMetaFields,
     mapFooter: maps.footerHtml,
-    images: syncedMetas.images,
-    countries: sql<string[]>`
-      ARRAY(
-        SELECT DISTINCT ${syncedLocations.country}
-        FROM ${syncedLocations}
-        WHERE ${syncedLocations.syncedMetaId} = ${syncedMetas.metaId}
-          AND ${syncedLocations.country} IS NOT NULL
-      )
-    `,
-    locationsCount: sql<number>`(
-      SELECT COUNT(*)
-      FROM ${syncedLocations}
-      WHERE ${syncedLocations.syncedMetaId} = ${syncedMetas.metaId}
-    )`,
   })
   .from(syncedMapMetas)
   .innerJoin(syncedMetas, eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId))
   .innerJoin(maps, eq(maps.id, syncedMapMetas.mapId))
   .where(eq(syncedMapMetas.mapId, sql.placeholder('mapId')))
-  .groupBy(
-    syncedMetas.metaId,
-    syncedMetas.name,
-    syncedMetas.note,
-    syncedMetas.noteFromPlonkit,
-    syncedMetas.footer,
-    syncedMetas.images,
-    maps.footerHtml,
-  )
   .prepare('get_synced_metas_by_map_id');
 
+// personal maps take the footer from the meta's original (non-personal) map
+const personalOriginalMap = originalMapLateral();
 const syncedMetasPersonalStatement = db
   .select({
-    id: syncedMetas.metaId,
-    name: syncedMetas.name,
-    note: syncedMetas.note,
-    noteFromPlonkit: syncedMetas.noteFromPlonkit,
-    footer: syncedMetas.footer,
-    mapFooter: sql<string>`
-      COALESCE((SELECT m.footer_html
-      FROM ${syncedMapMetas} sm
-      INNER JOIN ${maps} m ON m.id = sm.map_id
-      WHERE
-        sm.synced_meta_id = ${syncedMetas.metaId}
-        AND m.is_personal = FALSE
-      ORDER BY m.number_of_games_played DESC NULLS LAST, m.id ASC
-      LIMIT 1), '')
-    `,
-    images: syncedMetas.images,
-    countries: sql<string[]>`
-      ARRAY(
-        SELECT DISTINCT ${syncedLocations.country}
-        FROM ${syncedLocations}
-        WHERE ${syncedLocations.syncedMetaId} = ${syncedMetas.metaId}
-          AND ${syncedLocations.country} IS NOT NULL
-      )
-    `,
-    locationsCount: sql<number>`(
-      SELECT COUNT(*)
-      FROM ${syncedLocations}
-      WHERE ${syncedLocations.syncedMetaId} = ${syncedMetas.metaId}
-    )`,
+    ...syncedMetaFields,
+    mapFooter: sql<string>`COALESCE(${personalOriginalMap.footerHtml}, '')`,
   })
   .from(syncedMapMetas)
   .innerJoin(syncedMetas, eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId))
-  .innerJoin(maps, eq(maps.id, syncedMapMetas.mapId))
+  .leftJoinLateral(personalOriginalMap, sql`true`)
   .where(eq(syncedMapMetas.mapId, sql.placeholder('mapId')))
-  .groupBy(
-    syncedMetas.metaId,
-    syncedMetas.name,
-    syncedMetas.note,
-    syncedMetas.noteFromPlonkit,
-    syncedMetas.footer,
-    syncedMetas.images,
-    maps.footerHtml,
-  )
   .prepare('get_synced_metas_by_personal_map_id');
 
 export const metasFromMapStatement = db

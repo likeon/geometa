@@ -1,3 +1,4 @@
+import { originalMapLateral } from '@api/lib/db/original-map';
 import {
   maps,
   syncedLocations,
@@ -6,25 +7,10 @@ import {
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { and, eq, getTableColumns, sql } from 'drizzle-orm';
-import { alias } from 'drizzle-orm/pg-core';
 import { pick } from 'remeda';
 
-const originalSyncedMapMetas = alias(syncedMapMetas, 'osmm');
-const originalMaps = alias(maps, 'om');
-
-const originalMap = db
-  .select(pick(originalMaps, ['footerHtml', 'name', 'authors', 'geoguessrId']))
-  .from(originalSyncedMapMetas)
-  .innerJoin(originalMaps, eq(originalMaps.id, originalSyncedMapMetas.mapId))
-  .where(
-    and(
-      eq(maps.isPersonal, true),
-      eq(originalSyncedMapMetas.syncedMetaId, syncedMapMetas.syncedMetaId),
-    ),
-  )
-  .orderBy(sql`${originalMaps.numberOfGamesPlayed} DESC NULLS LAST`)
-  .limit(1)
-  .as('originalMap');
+// only credit an original map when the played map itself is personal
+const originalMap = originalMapLateral(eq(maps.isPersonal, true));
 
 export const locationSelect = db
   .select({
