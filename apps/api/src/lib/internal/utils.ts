@@ -52,6 +52,16 @@ export async function geoguessrGetMapInfo(geoguessrId: string) {
   return mapInfo;
 }
 
+export const popularMapMessage =
+  'This is a popular map which requires additional verification - ask for it in #map-making Discord channel';
+
+// Maps with a large playerbase need manual verification before non-superadmins
+// can claim their geoguessrId.
+export async function isPopularMap(geoguessrId: string): Promise<boolean> {
+  const mapInfo = await geoguessrGetMapInfo(geoguessrId);
+  return mapInfo !== null && mapInfo.numberOfGamesPlayed > 10000;
+}
+
 //for metas that are taken not from syncedMeta images have no compression, we can remove it later when most map will be on new system
 // todo: remove
 export function maybeWrapImageUrl(url: string): string {
