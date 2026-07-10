@@ -92,42 +92,35 @@ export const userscriptRouter = new Elysia({
         return status(401);
       }
 
-      const results = await db
+      // authorized = the token belongs to the personal map's owner, or to a
+      // user with permissions on the map's group
+      const [data] = await db
         .select({
           mapId: maps.id,
-          userApiTokens: sql<string[]>`
-            CASE
-            WHEN ${maps.isPersonal} = TRUE THEN
-            COALESCE(
-            (SELECT ARRAY_AGG(${users.apiToken})
-            FILTER (WHERE ${users.id} = ${maps.userId})
-            FROM ${users} WHERE ${users.id} = ${maps.userId}),'{}'::text[]
+          authorized: sql<boolean>`
+            EXISTS (
+              SELECT 1
+              FROM ${users} u
+              WHERE u.api_token = ${bearer}
+                AND CASE
+                  WHEN ${maps.isPersonal} THEN u.id = ${maps.userId}
+                  ELSE EXISTS (
+                    SELECT 1
+                    FROM ${mapGroupPermissions} mgp
+                    WHERE mgp.map_group_id = ${maps.mapGroupId}
+                      AND mgp.user_id = u.id
+                  )
+                END
             )
-            ELSE
-            COALESCE(
-            (
-            SELECT ARRAY_AGG(${users.apiToken})
-            FILTER (WHERE ${users.apiToken} IS NOT NULL)
-            FROM ${mapGroupPermissions}
-            JOIN ${users} ON ${users.id} = ${mapGroupPermissions.userId}
-            WHERE ${mapGroupPermissions.mapGroupId} = ${maps.mapGroupId}
-            ),'{}'::text[]
-            )
-            END
-          `.as('user_api_tokens'),
+          `,
         })
         .from(maps)
-        .leftJoin(users, eq(users.id, maps.userId))
         .where(eq(maps.geoguessrId, geoguessrId));
 
-      const [data] = results;
       if (!data) {
         return status(404);
       }
-      if (
-        data.userApiTokens.length === 0 ||
-        !data.userApiTokens.includes(bearer)
-      ) {
+      if (!data.authorized) {
         return status(403);
       }
       const locations = await mapLocationsExportSelect.execute({
