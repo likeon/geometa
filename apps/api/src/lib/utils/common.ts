@@ -7,21 +7,25 @@ export function assertNotNullish<T>(
   }
 }
 
-// A pg unique-violation surfaces as code 23505; drizzle-orm wraps the postgres.js
-// error in `.cause`, so walk both the error and its cause.
+// drizzle-orm wraps the postgres.js error in `.cause`, so walk both the error
+// and its cause when looking for a SQLSTATE code.
+function pgErrors(error: unknown) {
+  return [error, (error as { cause?: unknown } | undefined)?.cause] as (
+    | { code?: string; constraint_name?: string }
+    | undefined
+  )[];
+}
+
+export function isPgError(error: unknown, sqlState: string): boolean {
+  return pgErrors(error).some((e) => e?.code === sqlState);
+}
+
 export function isUniqueViolation(
   error: unknown,
   constraintName: string,
 ): boolean {
-  return [error, (error as { cause?: unknown } | undefined)?.cause].some(
-    (e) => {
-      const pgError = e as
-        | { code?: string; constraint_name?: string }
-        | undefined;
-      return (
-        pgError?.code === '23505' && pgError?.constraint_name === constraintName
-      );
-    },
+  return pgErrors(error).some(
+    (e) => e?.code === '23505' && e?.constraint_name === constraintName,
   );
 }
 
