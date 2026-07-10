@@ -6,8 +6,8 @@
   import SkillLevelIntermediateIcon from '~icons/carbon/skill-level-intermediate';
   import SkillLevelAdvancedIcon from '~icons/carbon/skill-level-advanced';
   import CliListIcon from '~icons/cil/list';
+  import UserFriendsIcon from '~icons/fa-solid/user-friends';
   import MapPinIcon from '~icons/gravity-ui/map-pin';
-  import RaStarlineIcon from '~icons/ri/star-line';
   import type { PageData } from './$types';
 
   let {
@@ -49,9 +49,9 @@
 {#snippet sharedBadge()}
   <Tooltip content="You can add metas from this map to personal map!:)">
     <Badge
-      class="bg-amber-500 text-amber-900 dark:bg-amber-400 dark:text-amber-950 font-semibold px-2.5 py-0.5 rounded-md">
-      <RaStarlineIcon class="inline-block mr-1" />
-      Shared
+      aria-label="Shared map"
+      class="w-6 rounded-md bg-amber-500 px-0 text-amber-900 dark:bg-amber-400 dark:text-amber-950 [&>svg]:size-4">
+      <UserFriendsIcon class="inline-block" />
     </Badge>
   </Tooltip>
 {/snippet}
