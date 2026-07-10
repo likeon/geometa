@@ -9,7 +9,11 @@ import {
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensurePermissions } from '@api/lib/internal/permissions';
-import { isPopularMap, popularMapMessage } from '@api/lib/internal/utils';
+import {
+  geoguessrMapJson,
+  isPopularMap,
+  popularMapMessage,
+} from '@api/lib/internal/utils';
 import { isUniqueViolation } from '@api/lib/utils/common';
 import { markdown2Html } from '@api/lib/utils/markdown';
 import { and, eq, inArray, not } from 'drizzle-orm';
@@ -230,30 +234,11 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
         .from(mapLocations)
         .where(eq(mapLocations.mapId, mapId));
 
-      const coordinates = locations.map((locationItem) => ({
-        lat: locationItem.lat,
-        lng: locationItem.lng,
-        heading: locationItem.heading,
-        pitch: locationItem.pitch,
-        zoom: locationItem.zoom,
-        panoId: locationItem.panoId,
-        countryCode: null,
-        stateCode: null,
-        extra: {
-          tags: [],
-          panoDate: locationItem.extraPanoDate,
-          panoId: locationItem.extraPanoId,
-        },
-      }));
-
-      const mapData = {
-        name: map.name,
-        customCoordinates: coordinates,
-        extra: {
-          tags: {},
-          infoCoordinates: [],
-        },
-      };
+      // the group-map export intentionally leaves tags empty
+      const mapData = geoguessrMapJson(
+        map.name,
+        locations.map((location) => ({ ...location, extraTag: undefined })),
+      );
 
       set.headers['Content-Type'] = 'application/json';
       set.headers['Content-Disposition'] =

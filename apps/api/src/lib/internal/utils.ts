@@ -62,6 +62,46 @@ export async function isPopularMap(geoguessrId: string): Promise<boolean> {
   return mapInfo !== null && mapInfo.numberOfGamesPlayed > 10000;
 }
 
+// GeoGuessr "map JSON" download payload, shared by the location-export
+// endpoints. Locations without an extraTag get an empty tag list.
+export function geoguessrMapJson(
+  name: string,
+  locations: {
+    lat: number;
+    lng: number;
+    heading: number;
+    pitch: number;
+    zoom: number;
+    panoId: string | null;
+    extraPanoId: string | null;
+    extraPanoDate: string | null;
+    extraTag?: string;
+  }[],
+) {
+  return {
+    name,
+    customCoordinates: locations.map((location) => ({
+      lat: location.lat,
+      lng: location.lng,
+      heading: location.heading,
+      pitch: location.pitch,
+      zoom: location.zoom,
+      panoId: location.panoId,
+      countryCode: null,
+      stateCode: null,
+      extra: {
+        tags: location.extraTag === undefined ? [] : [location.extraTag],
+        panoDate: location.extraPanoDate,
+        panoId: location.extraPanoId,
+      },
+    })),
+    extra: {
+      tags: {},
+      infoCoordinates: [],
+    },
+  };
+}
+
 //for metas that are taken not from syncedMeta images have no compression, we can remove it later when most map will be on new system
 // todo: remove
 export function maybeWrapImageUrl(url: string): string {

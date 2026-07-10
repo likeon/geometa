@@ -19,6 +19,7 @@ import {
 } from '@api/lib/internal/metas-upload';
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { syncMapGroup } from '@api/lib/internal/sync';
+import { geoguessrMapJson } from '@api/lib/internal/utils';
 import { and, asc, desc, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
@@ -684,33 +685,12 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         .from(locationMetas)
         .where(whereClause);
 
-      const coordinates = locations.map((location) => ({
-        lat: location.lat,
-        lng: location.lng,
-        heading: location.heading,
-        pitch: location.pitch,
-        zoom: location.zoom,
-        panoId: location.panoId,
-        countryCode: null,
-        stateCode: null,
-        extra: {
-          tags: [location.extraTag],
-          panoDate: location.extraPanoDate,
-          panoId: location.extraPanoId,
-        },
-      }));
-
-      const mapData = {
-        name:
-          body.metaIds && body.metaIds.length > 0
-            ? `${group.name}_selected_metas`
-            : group.name,
-        customCoordinates: coordinates,
-        extra: {
-          tags: {},
-          infoCoordinates: [],
-        },
-      };
+      const mapData = geoguessrMapJson(
+        body.metaIds && body.metaIds.length > 0
+          ? `${group.name}_selected_metas`
+          : group.name,
+        locations,
+      );
 
       set.headers['Content-Type'] = 'application/json';
       set.headers['Content-Disposition'] =
