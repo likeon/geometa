@@ -35,7 +35,7 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
         });
       }
 
-      ensurePermissions(body.discord_thread_author_id, map.mapGroupId);
+      await ensurePermissions(body.discord_thread_author_id, map.mapGroupId);
 
       const errors: string[] = [];
       if (!map.authors?.trim()) {
