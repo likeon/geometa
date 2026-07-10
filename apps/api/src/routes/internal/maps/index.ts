@@ -120,13 +120,7 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
   })
   .get(
     '/mapgroup/:geoguessrId',
-    async ({ params: { geoguessrId }, status, request: { headers } }) => {
-      const userId = headers.get('x-api-user-id');
-      if (!userId) {
-        return status(401, 'Unauthorized');
-      }
-
-      // Check if user is superadmin
+    async ({ params: { geoguessrId }, status, userId }) => {
       const user = await db.$primary.query.users.findFirst({
         where: eq(users.id, userId),
       });
@@ -185,6 +179,7 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
     },
     {
       params: t.Object({ geoguessrId: t.String() }),
+      userId: true,
     },
   )
   .get(
