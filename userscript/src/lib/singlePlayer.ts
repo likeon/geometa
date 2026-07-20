@@ -72,9 +72,7 @@ export function initSinglePlayer() {
         });
       });
       GeoGuessrEventFramework.events.addEventListener('game_end', async (event: GGEvent) => {
-        console.log('game ended');
-        const panoIds = event.detail.rounds.map((round) => round.location.panoId);
-        console.log('All round pano IDs:', panoIds);
+        logInfo('game ended');
 
         const mapInfo = await getMapInfo(event.detail.map.id, false);
         if (!mapInfo.mapFound) {
@@ -146,12 +144,13 @@ function addMetaButtonsToRounds(
 ) {
   const roundItems = document.querySelectorAll('.result-list_listItemWrapper___XCGn');
 
-  rounds.forEach((round, index) => {
-    const roundItem = roundItems[index];
-    if (!roundItem) return;
-
-    const roundNumber = roundItem.querySelector('.result-list_roundNumber__RlIKm')?.textContent;
-    if (roundNumber === 'Total') return;
+  // pair rows with rounds by the round number each row displays, so the
+  // "Total" row's position (or any reordering) cannot misalign the buttons
+  roundItems.forEach((roundItem) => {
+    const roundNumberText = roundItem.querySelector('.result-list_roundNumber__RlIKm')?.textContent;
+    const roundNumber = parseInt(roundNumberText || '');
+    const round = rounds[roundNumber - 1];
+    if (!round) return;
 
     if (roundItem.querySelector('.geometa-meta-btn')) return;
 
@@ -163,7 +162,7 @@ function addMetaButtonsToRounds(
     metaButton.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      showMetaForRound(round.location.panoId, mapId, userscriptVersion, index + 1);
+      showMetaForRound(round.location.panoId, mapId, userscriptVersion, roundNumber);
     });
 
     roundItem.appendChild(metaButton);
