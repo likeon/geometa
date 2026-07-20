@@ -1,6 +1,6 @@
 import { getMapInfo } from './utils/main';
 import UploadLocations from './components/UploadLocations.svelte';
-import { mount } from 'svelte';
+import { mount, unmount } from 'svelte';
 
 export function extractMapIdFromMapMakerUrl(url: string) {
   const match = url.match(/\/map-maker\/([^\/]+)/);
@@ -16,31 +16,39 @@ export function initLocationsUpload() {
 
 const containerId = 'geometa-locations-upload';
 
+let uploadApp: Record<string, any> | null = null;
+let runToken = 0;
+
+function removeUploadButton() {
+  if (uploadApp) {
+    unmount(uploadApp);
+    uploadApp = null;
+  }
+  document.getElementById(containerId)?.remove();
+}
+
 async function addLocationsUploadButtons() {
+  const token = ++runToken;
+
+  removeUploadButton();
+
   const mapId = extractMapIdFromMapMakerUrl(window.location.href);
   if (!mapId) {
     return;
   }
 
-  document.getElementById(containerId)?.remove();
-
   const mapInfo = await getMapInfo(mapId, true);
-  if (!mapInfo?.mapFound) {
+  if (token !== runToken || !mapInfo?.mapFound) {
     return;
   }
 
-  const targetId = 'geometa-locations-upload-container';
   const container = document.querySelector('.top-bar-menu_topBarMenu__kd9zX');
 
   if (container) {
-    const existingElement = container.querySelector('#' + targetId);
-    if (existingElement) {
-      return;
-    }
     const target = document.createElement('div');
-    target.id = targetId;
+    target.id = containerId;
     container.insertBefore(target, container.lastElementChild);
-    mount(UploadLocations, {
+    uploadApp = mount(UploadLocations, {
       target,
       props: {
         mapId
