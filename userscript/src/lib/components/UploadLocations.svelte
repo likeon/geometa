@@ -10,6 +10,7 @@
   const URL_TO_GENERATE_TOKEN = 'https://learnablemeta.com/profile/token';
 
   let showApiKeyModal = $state(false);
+  let modalMode = $state<'upload' | 'manage'>('upload');
   let apiKeyInput = $state('');
   let currentApiKey = $state<string | null>(null);
   let isLoading = $state(false);
@@ -108,10 +109,25 @@
     currentApiKey = getApiKeyFromGM();
     if (!currentApiKey || currentApiKey.trim() === '') {
       apiKeyInput = '';
+      modalMode = 'upload';
       showApiKeyModal = true;
     } else {
       await performUpload(currentApiKey);
     }
+  }
+
+  function openManageKeyModal() {
+    currentApiKey = getApiKeyFromGM();
+    apiKeyInput = '';
+    modalMode = 'manage';
+    showApiKeyModal = true;
+  }
+
+  function handleClearApiKey() {
+    saveApiKeyToGM('');
+    currentApiKey = null;
+    showApiKeyModal = false;
+    showCustomToast('LearnableMeta API Key cleared.', 'success');
   }
 
   async function performUpload(apiKey: string) {
@@ -133,7 +149,7 @@
 
       const isAuthError = /401|403|unauthorized|invalid token/i.test(detail);
       const headline = isAuthError
-        ? 'Upload failed: your API key was rejected. Please check it and try again.'
+        ? 'Upload failed: your API key was rejected. Use the 🔑 button next to Upload to update it.'
         : 'Upload failed. If this keeps happening, please report the error below on our Discord.';
 
       showCustomToast(headline, 'error', 0, detail);
@@ -143,14 +159,16 @@
 
   function handleSaveApiKey() {
     const trimmedKey = apiKeyInput.trim();
-    if (trimmedKey) {
-      saveApiKeyToGM(trimmedKey);
-      currentApiKey = trimmedKey;
-      showApiKeyModal = false;
-      showCustomToast('API Key saved!', 'success', 2000);
-      performUpload(trimmedKey);
-    } else {
+    if (!trimmedKey) {
       showCustomToast('Please enter a valid API key.', 'error', 3000);
+      return;
+    }
+    saveApiKeyToGM(trimmedKey);
+    currentApiKey = trimmedKey;
+    showApiKeyModal = false;
+    showCustomToast('API Key saved!', 'success', 2000);
+    if (modalMode === 'upload') {
+      performUpload(trimmedKey);
     }
   }
 
@@ -164,18 +182,35 @@
   <button class="custom-yellow-button" onclick={handleUploadClick} disabled={isLoading}>
     {isLoading ? 'Uploading...' : 'LearnableMeta - Upload'}
   </button>
+  <button
+    class="api-key-button"
+    onclick={openManageKeyModal}
+    disabled={isLoading}
+    title="Manage LearnableMeta API key"
+    aria-label="Manage LearnableMeta API key">
+    🔑
+  </button>
 </div>
 
 {#if showApiKeyModal}
   <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="apiKeyModalTitle">
     <div class="modal-content">
-      <h2 id="apiKeyModalTitle">Enter LearnableMeta API Key</h2>
-      <p>An API key is required to upload locations. Please paste your key below.</p>
+      <h2 id="apiKeyModalTitle">LearnableMeta API Key</h2>
+      {#if modalMode === 'upload'}
+        <p>An API key is required to upload locations. Please paste your key below.</p>
+      {:else if currentApiKey}
+        <p>
+          A key ending in <code>…{currentApiKey.slice(-4)}</code> is currently saved. Paste a new key
+          to replace it, or clear the saved key.
+        </p>
+      {:else}
+        <p>No API key is saved yet. Paste your key below.</p>
+      {/if}
       <p>
-        You can generate your API token by visiting
-
-        <a href={URL_TO_GENERATE_TOKEN} target="_blank" rel="noopener noreferrer"> profile page </a>
-        on LearnableMeta and generating it there.
+        You can generate your API token on your
+        <a href={URL_TO_GENERATE_TOKEN} target="_blank" rel="noopener noreferrer">
+          LearnableMeta profile page</a
+        >.
       </p>
       <input
         type="text"
@@ -184,8 +219,12 @@
         aria-label="API Key Input"
         class="modal-input" />
       <div class="modal-actions">
+        {#if modalMode === 'manage' && currentApiKey}
+          <button onclick={handleClearApiKey} class="modal-button modal-button-clear"
+            >Clear Key</button>
+        {/if}
         <button onclick={handleSaveApiKey} class="modal-button modal-button-save"
-          >Save & Upload</button>
+          >{modalMode === 'upload' ? 'Save & Upload' : 'Save'}</button>
         <button onclick={handleCancelModal} class="modal-button modal-button-cancel">Cancel</button>
       </div>
       <p class="modal-note">
@@ -262,6 +301,36 @@
     box-shadow: none;
     cursor: not-allowed;
     transform: none;
+  }
+
+  .api-key-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 6px;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    font-size: 14px;
+    line-height: 1;
+    background: linear-gradient(180deg, #ffeb99 0%, #f5c542 100%);
+    border: 1px solid #e0b000;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    transition: background 0.2s ease-in-out;
+  }
+
+  .api-key-button:hover:not(:disabled) {
+    background: linear-gradient(180deg, #ffe066 0%, #eab308 100%);
+  }
+
+  .api-key-button:disabled {
+    background: #e0e0e0;
+    border-color: #bbbbbb;
+    cursor: not-allowed;
   }
 
   .modal-overlay {
@@ -347,6 +416,23 @@
 
   .modal-button-cancel:hover {
     background-color: #5a6268;
+  }
+
+  .modal-button-clear {
+    background-color: #dc3545;
+    color: white;
+    margin-right: auto;
+  }
+
+  .modal-button-clear:hover {
+    background-color: #b02a37;
+  }
+
+  .modal-content code {
+    background-color: #f1f3f5;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.9em;
   }
 
   .modal-note {
