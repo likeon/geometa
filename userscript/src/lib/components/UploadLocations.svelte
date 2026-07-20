@@ -33,7 +33,7 @@
     const displayToast = () => {
       toastState = { message, detail, type };
       if (duration > 0) {
-        toastTimer = setTimeout(() => {
+        toastTimer = window.setTimeout(() => {
           hideCustomToast();
         }, duration);
       }
