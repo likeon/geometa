@@ -306,14 +306,35 @@
     flex-direction: column;
     gap: 5px;
     align-items: flex-start;
-    background: var(--ds-color-purple-100);
+    /* pages like challenge results don't load the game stylesheets, so never
+       rely on geoguessr's css variables or element resets being present */
+    background: var(--ds-color-purple-100, #1c1836);
+    color: #fff;
     padding: 6px 10px;
     border-radius: 5px;
     font-size: 17px;
+    line-height: 1.4;
     width: min(25%, 500px);
 
     resize: both;
     overflow: auto;
+  }
+
+  .geometa-container h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .geometa-container :global(p) {
+    margin: 0;
+  }
+
+  .geometa-container :global(ul),
+  .geometa-container :global(ol) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
   .geometa-container > .header {
@@ -488,7 +509,7 @@
   }
 
   .modal {
-    background: var(--ds-color-purple-100);
+    background: var(--ds-color-purple-100, #1c1836);
     padding: 15px 25px;
     border-radius: 8px;
     text-align: center;
@@ -548,7 +569,7 @@
 
   .close-btn:hover {
     background: #d3d3d3;
-    color: var(--ds-color-purple-100);
+    color: var(--ds-color-purple-100, #1c1836);
   }
 
   button {
