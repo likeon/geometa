@@ -1,6 +1,5 @@
 import { getMapInfo, logInfo, waitForElement } from './utils/main';
-import { mount } from 'svelte';
-import App from './App.svelte';
+import { mountSummaryWindow, unmountSummaryWindow } from './utils/summaryWindow';
 import { unsafeWindow } from '$';
 
 //@ts-ignore
@@ -42,7 +41,7 @@ export function initSinglePlayer() {
       await getMapInfo(event.detail.map.id, true);
     });
     GeoGuessrEventFramework.events.addEventListener('round_end', async (event: GGEvent) => {
-      document.getElementById('geometa-summary')?.remove();
+      unmountSummaryWindow();
 
       const mapInfo = await getMapInfo(event.detail.map.id, false);
       if (!mapInfo.mapFound) {
@@ -55,20 +54,14 @@ export function initSinglePlayer() {
           return;
         }
         logInfo('the result view is rendered');
-        const element = document.createElement('div');
-        element.id = 'geometa-summary';
-        container.appendChild(element);
         const lastRound = event.detail.rounds[event.detail.rounds.length - 1];
         logInfo('adding app window');
-        mount(App, {
-          target: element,
-          props: {
-            roundNumber: event.detail.rounds.length,
-            panoId: lastRound.location.panoId,
-            mapId: event.detail.map.id,
-            userscriptVersion: mapInfo.userscriptVersion,
-            source: window.location.href.includes('challenge') ? 'challenge' : 'map'
-          }
+        mountSummaryWindow(container, {
+          roundNumber: event.detail.rounds.length,
+          panoId: lastRound.location.panoId,
+          mapId: event.detail.map.id,
+          userscriptVersion: mapInfo.userscriptVersion,
+          source: window.location.href.includes('challenge') ? 'challenge' : 'map'
         });
       });
     });
@@ -117,6 +110,7 @@ export function initSinglePlayer() {
 
     window.addEventListener('urlchange', () => {
       clearMetaCache();
+      unmountSummaryWindow();
       if (currentObserver) {
         currentObserver.disconnect();
         currentObserver = null;
@@ -166,27 +160,14 @@ function showMetaForRound(
   userscriptVersion: string,
   roundNumber: number
 ) {
-  let element = document.getElementById('geometa-summary');
+  const container = document.querySelector('div[data-qa="result-view-top"]') || document.body;
 
-  if (element) {
-    element.innerHTML = '';
-  } else {
-    const container = document.querySelector('div[data-qa="result-view-top"]') || document.body;
-
-    element = document.createElement('div');
-    element.id = 'geometa-summary';
-    container.appendChild(element);
-  }
-
-  mount(App, {
-    target: element,
-    props: {
-      roundNumber,
-      panoId,
-      mapId,
-      userscriptVersion,
-      source: window.location.href.includes('challenge') ? 'challenge' : 'map'
-    }
+  mountSummaryWindow(container, {
+    roundNumber,
+    panoId,
+    mapId,
+    userscriptVersion,
+    source: window.location.href.includes('challenge') ? 'challenge' : 'map'
   });
 }
 

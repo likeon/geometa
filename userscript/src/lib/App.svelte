@@ -101,15 +101,19 @@
     });
     resizeObserver.observe(container);
 
-    header.addEventListener('pointerdown', (event) => onPointerDown(event, container));
-    document.addEventListener('pointermove', (event) => onPointerMove(event, container));
-    document.addEventListener('pointerup', (event) => onPointerUp(event, container));
+    const handlePointerDown = (event: PointerEvent) => onPointerDown(event, container);
+    const handlePointerMove = (event: PointerEvent) => onPointerMove(event, container);
+    const handlePointerUp = (event: PointerEvent) => onPointerUp(event, container);
+
+    header.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', handlePointerUp);
 
     return () => {
       resizeObserver.disconnect();
-      header.removeEventListener('pointerdown', (event) => onPointerDown(event, container));
-      document.removeEventListener('pointermove', (event) => onPointerMove(event, container));
-      document.removeEventListener('pointerup', (event) => onPointerUp(event, container));
+      header.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('pointermove', handlePointerMove);
+      document.removeEventListener('pointerup', handlePointerUp);
     };
   });
 
