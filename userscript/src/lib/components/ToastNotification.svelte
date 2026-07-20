@@ -14,17 +14,17 @@
   class="toast-notification toast-{type}"
   role="alert"
   in:fade={{ duration: 200, delay: 50 }}
-  out:fade={{ duration: 300 }}
-  style:position="absolute"
-  style:top="100%"
-  style:transform="translateX(-75%) translateY(-10px)"
-  style:margin-top="10px">
+  out:fade={{ duration: 300 }}>
   <span class="toast-message">{message}</span>
   <button class="toast-close-button" onclick={onClose} aria-label="Close">×</button>
 </div>
 
 <style>
   .toast-notification {
+    /* fixed to the viewport so the top bar's layout/overflow cannot clip it */
+    position: fixed;
+    top: 72px;
+    right: 16px;
     z-index: 10001;
     min-width: 250px;
     max-width: 400px;

@@ -165,10 +165,7 @@
 </script>
 
 <div class="upload-label-container">
-  <button
-    class="button_button__aR6_e button_sizeSmall__MB_qj custom-yellow-button"
-    onclick={handleUploadClick}
-    disabled={isLoading}>
+  <button class="custom-yellow-button" onclick={handleUploadClick} disabled={isLoading}>
     {isLoading ? 'Uploading...' : 'LearnableMeta - Upload'}
   </button>
 </div>
@@ -210,7 +207,22 @@
 {/if}
 
 <style>
+  .upload-label-container {
+    display: flex;
+    align-items: center;
+  }
+
+  /* fully self-styled - geoguessr's hashed button classes change between deploys */
   .custom-yellow-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
     background: linear-gradient(180deg, #ffeb99 0%, #f5c542 100%);
     border: 1px solid #e0b000;
     color: #002147;
