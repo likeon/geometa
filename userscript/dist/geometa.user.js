@@ -25,6 +25,7 @@
 
 ## [0.90]
 
+- Added meta pins on challenge results pages (geoguessr.com/results/...), with support for any round count
 - Fixed memory leaks from meta windows never being unmounted (drag handlers piled up every round)
 - Fixed live challenge windows stacking up instead of replacing each other
 - Fixed the upload button possibly keeping a previous map's id after map-maker navigation
@@ -4964,6 +4965,47 @@ context.l
     container.appendChild(element);
     currentApp = mount(App, { target: element, props });
   }
+  function showMetaForRound(panoId, mapId, userscriptVersion, roundNumber) {
+    const container = document.querySelector('div[data-qa="result-view-top"]') || document.body;
+    mountSummaryWindow(container, {
+      roundNumber,
+      panoId,
+      mapId,
+      userscriptVersion,
+      source: window.location.href.includes("challenge") ? "challenge" : "map"
+    });
+  }
+  function createPinObserver(panoIds, mapId, userscriptVersion) {
+    const observer = new MutationObserver(() => {
+      const pins = document.querySelectorAll('[class*="map-pin_mapPin"]');
+      pins.forEach((pin) => {
+        const pinText = pin.textContent?.trim();
+        const roundNumber = parseInt(pinText || "");
+        if (roundNumber >= 1 && roundNumber <= panoIds.length && !pin.hasAttribute("data-geometa-pin-processed")) {
+          pin.setAttribute("data-geometa-pin-processed", "true");
+          const questionIcon = document.createElement("div");
+          questionIcon.className = "geometa-pin-question";
+          questionIcon.innerHTML = "?";
+          questionIcon.title = `View meta for round ${roundNumber}`;
+          questionIcon.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            showMetaForRound(panoIds[roundNumber - 1], mapId, userscriptVersion, roundNumber);
+          });
+          const pinElement = pin;
+          if (pinElement.style.position === "" || pinElement.style.position === "static") {
+            pinElement.style.position = "relative";
+          }
+          pinElement.appendChild(questionIcon);
+        }
+      });
+    });
+    observer.observe(document.body, {
+      childList: true,
+      subtree: true
+    });
+    return observer;
+  }
   const GeoGuessrEventFramework = _unsafeWindow.GeoGuessrEventFramework;
   let currentObserver = null;
   let currentPinObserver = null;
@@ -5039,7 +5081,14 @@ context.l
           childList: true,
           subtree: true
         });
-        addClickableIconsToPins(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
+        if (currentPinObserver) {
+          currentPinObserver.disconnect();
+        }
+        currentPinObserver = createPinObserver(
+          roundData.rounds.map((round) => round.location.panoId),
+          roundData.mapId,
+          roundData.userscriptVersion
+        );
       });
       window.addEventListener("urlchange", () => {
         clearMetaCache();
@@ -5075,52 +5124,6 @@ context.l
         showMetaForRound(round.location.panoId, mapId, userscriptVersion, index2 + 1);
       });
       roundItem.appendChild(metaButton);
-    });
-  }
-  function showMetaForRound(panoId, mapId, userscriptVersion, roundNumber) {
-    const container = document.querySelector('div[data-qa="result-view-top"]') || document.body;
-    mountSummaryWindow(container, {
-      roundNumber,
-      panoId,
-      mapId,
-      userscriptVersion,
-      source: window.location.href.includes("challenge") ? "challenge" : "map"
-    });
-  }
-  function addClickableIconsToPins(rounds, mapId, userscriptVersion) {
-    if (currentPinObserver) {
-      currentPinObserver.disconnect();
-    }
-    currentPinObserver = new MutationObserver(() => {
-      const pins = document.querySelectorAll('[class*="map-pin_mapPin"]');
-      pins.forEach((pin) => {
-        const pinText = pin.textContent?.trim();
-        const roundNumber = parseInt(pinText || "");
-        if (roundNumber >= 1 && roundNumber <= 5 && !pin.hasAttribute("data-geometa-pin-processed")) {
-          pin.setAttribute("data-geometa-pin-processed", "true");
-          const questionIcon = document.createElement("div");
-          questionIcon.className = "geometa-pin-question";
-          questionIcon.innerHTML = "?";
-          questionIcon.title = `View meta for round ${roundNumber}`;
-          questionIcon.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const round = rounds[roundNumber - 1];
-            if (round) {
-              showMetaForRound(round.location.panoId, mapId, userscriptVersion, roundNumber);
-            }
-          });
-          const pinElement = pin;
-          if (pinElement.style.position === "" || pinElement.style.position === "static") {
-            pinElement.style.position = "relative";
-          }
-          pinElement.appendChild(questionIcon);
-        }
-      });
-    });
-    currentPinObserver.observe(document.body, {
-      childList: true,
-      subtree: true
     });
   }
   function initLiveChallenge() {
@@ -5200,7 +5203,7 @@ roundNumber: 4,
     });
   }
   let labelApp = null;
-  let runToken$1 = 0;
+  let runToken$2 = 0;
   function removeMapLabel() {
     if (labelApp) {
       unmount(labelApp);
@@ -5209,7 +5212,7 @@ roundNumber: 4,
     document.querySelector(".map-label")?.remove();
   }
   async function addMapLabel() {
-    const token = ++runToken$1;
+    const token = ++runToken$2;
     const mapId = extractMapIdFromUrl(window.location.href);
     if (!mapId) {
       return;
@@ -5217,11 +5220,11 @@ roundNumber: 4,
     const mapAvatarContainer = await waitForElement(
       "[class*=map-detail-page_heroImageArea], [class*=map-block_mapImageContainer]"
     );
-    if (token !== runToken$1 || !mapAvatarContainer) {
+    if (token !== runToken$2 || !mapAvatarContainer) {
       return;
     }
     const mapInfo = await getMapInfo(mapId, true);
-    if (token !== runToken$1 || !mapInfo?.mapFound) {
+    if (token !== runToken$2 || !mapInfo?.mapFound) {
       return;
     }
     removeMapLabel();
@@ -5712,7 +5715,7 @@ onload: (response) => {
   }
   const containerId = "geometa-locations-upload";
   let uploadApp = null;
-  let runToken = 0;
+  let runToken$1 = 0;
   function removeUploadButton() {
     if (uploadApp) {
       unmount(uploadApp);
@@ -5721,14 +5724,14 @@ onload: (response) => {
     document.getElementById(containerId)?.remove();
   }
   async function addLocationsUploadButtons() {
-    const token = ++runToken;
+    const token = ++runToken$1;
     removeUploadButton();
     const mapId = extractMapIdFromMapMakerUrl(window.location.href);
     if (!mapId) {
       return;
     }
     const mapInfo = await getMapInfo(mapId, true);
-    if (token !== runToken || !mapInfo?.mapFound) {
+    if (token !== runToken$1 || !mapInfo?.mapFound) {
       return;
     }
     const container = document.querySelector(".top-bar-menu_topBarMenu__kd9zX");
@@ -5742,6 +5745,55 @@ onload: (response) => {
           mapId
         }
       });
+    }
+  }
+  function extractResultsTokenFromUrl(url) {
+    const match = url.match(/\/results\/([^\/?#]+)/);
+    return match ? match[1] : null;
+  }
+  let pinObserver = null;
+  let runToken = 0;
+  function initChallengeResults() {
+    addChallengeResultsPins();
+    window.addEventListener("urlchange", () => {
+      addChallengeResultsPins();
+    });
+  }
+  async function addChallengeResultsPins() {
+    const token = ++runToken;
+    if (pinObserver) {
+      pinObserver.disconnect();
+      pinObserver = null;
+    }
+    const resultsToken = extractResultsTokenFromUrl(window.location.href);
+    if (!resultsToken) {
+      return;
+    }
+    try {
+      const url = `https://www.geoguessr.com/api/v3/results/highscores/${resultsToken}?friends=false&limit=1`;
+      const response = await fetch(url, { credentials: "include" });
+      if (!response.ok) {
+        logInfo(`failed to fetch challenge results (status ${response.status})`);
+        return;
+      }
+      const data = await response.json();
+      const game = data?.items?.[0]?.game;
+      if (!game?.map || !Array.isArray(game.rounds) || game.rounds.length === 0) {
+        logInfo("no game data in challenge results payload");
+        return;
+      }
+      if (token !== runToken) {
+        return;
+      }
+      const mapInfo = await getMapInfo(game.map, false);
+      if (token !== runToken || !mapInfo.mapFound) {
+        return;
+      }
+      const panoIds = game.rounds.map((round) => decodePanoId(round.panoId));
+      logInfo(`adding meta pins for challenge results (${panoIds.length} rounds)`);
+      pinObserver = createPinObserver(panoIds, game.map, mapInfo.userscriptVersion);
+    } catch (e) {
+      logInfo("failed to add meta pins on challenge results", e);
     }
   }
   if (typeof _GM_registerMenuCommand === "function") {
@@ -5764,7 +5816,8 @@ onload: (response) => {
       ["singlePlayer", initSinglePlayer],
       ["liveChallenge", initLiveChallenge],
       ["mapLabel", initMapLabel],
-      ["locationsUpload", initLocationsUpload]
+      ["locationsUpload", initLocationsUpload],
+      ["challengeResults", initChallengeResults]
     ];
     for (const [name, init2] of features) {
       try {

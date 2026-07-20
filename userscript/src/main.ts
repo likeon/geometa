@@ -4,6 +4,7 @@ import { initLiveChallenge } from './lib/liveChallenge';
 import { initURLChangeEvent } from './lib/utils/url';
 import { initMapLabel } from './lib/mapLabel';
 import { initLocationsUpload } from './lib/locationsUpload';
+import { initChallengeResults } from './lib/challengeResults';
 import { resetContainerPosition } from './lib/utils/dragging';
 import { resetContainerDimensions } from './lib/utils/resizing';
 
@@ -30,7 +31,8 @@ async function setupLearnableMetaFeatures() {
     ['singlePlayer', initSinglePlayer],
     ['liveChallenge', initLiveChallenge],
     ['mapLabel', initMapLabel],
-    ['locationsUpload', initLocationsUpload]
+    ['locationsUpload', initLocationsUpload],
+    ['challengeResults', initChallengeResults]
   ];
   for (const [name, init] of features) {
     try {

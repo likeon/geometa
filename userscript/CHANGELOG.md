@@ -2,6 +2,7 @@
 
 ## [0.90]
 
+- Added meta pins on challenge results pages (geoguessr.com/results/...), with support for any round count
 - Fixed memory leaks from meta windows never being unmounted (drag handlers piled up every round)
 - Fixed live challenge windows stacking up instead of replacing each other
 - Fixed the upload button possibly keeping a previous map's id after map-maker navigation

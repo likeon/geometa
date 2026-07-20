@@ -1,5 +1,6 @@
 import { getMapInfo, logInfo, waitForElement } from './utils/main';
 import { mountSummaryWindow, unmountSummaryWindow } from './utils/summaryWindow';
+import { createPinObserver, showMetaForRound } from './roundPins';
 import { unsafeWindow } from '$';
 
 //@ts-ignore
@@ -110,7 +111,14 @@ export function initSinglePlayer() {
           subtree: true
         });
 
-        addClickableIconsToPins(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
+        if (currentPinObserver) {
+          currentPinObserver.disconnect();
+        }
+        currentPinObserver = createPinObserver(
+          roundData.rounds.map((round) => round.location.panoId),
+          roundData.mapId,
+          roundData.userscriptVersion
+        );
       });
 
       window.addEventListener('urlchange', () => {
@@ -159,74 +167,5 @@ function addMetaButtonsToRounds(
     });
 
     roundItem.appendChild(metaButton);
-  });
-}
-
-function showMetaForRound(
-  panoId: string,
-  mapId: string,
-  userscriptVersion: string,
-  roundNumber: number
-) {
-  const container = document.querySelector('div[data-qa="result-view-top"]') || document.body;
-
-  mountSummaryWindow(container, {
-    roundNumber,
-    panoId,
-    mapId,
-    userscriptVersion,
-    source: window.location.href.includes('challenge') ? 'challenge' : 'map'
-  });
-}
-
-function addClickableIconsToPins(
-  rounds: GGEvent['detail']['rounds'],
-  mapId: string,
-  userscriptVersion: string
-) {
-  if (currentPinObserver) {
-    currentPinObserver.disconnect();
-  }
-
-  currentPinObserver = new MutationObserver(() => {
-    const pins = document.querySelectorAll('[class*="map-pin_mapPin"]');
-    pins.forEach((pin) => {
-      const pinText = pin.textContent?.trim();
-      const roundNumber = parseInt(pinText || '');
-
-      if (roundNumber >= 1 && roundNumber <= 5 && !pin.hasAttribute('data-geometa-pin-processed')) {
-        pin.setAttribute('data-geometa-pin-processed', 'true');
-
-        const questionIcon = document.createElement('div');
-        questionIcon.className = 'geometa-pin-question';
-        questionIcon.innerHTML = '?';
-        questionIcon.title = `View meta for round ${roundNumber}`;
-
-        questionIcon.addEventListener('click', (e) => {
-          e.preventDefault();
-          e.stopPropagation();
-
-          const round = rounds[roundNumber - 1]; // Array is 0-indexed
-          if (round) {
-            showMetaForRound(round.location.panoId, mapId, userscriptVersion, roundNumber);
-          }
-        });
-
-        const pinElement = pin as HTMLElement;
-        if (pinElement.style.position === '' || pinElement.style.position === 'static') {
-          pinElement.style.position = 'relative';
-        }
-
-        pinElement.appendChild(questionIcon);
-      }
-    });
-  });
-
-  // Start observing for map pins
-  // childList is enough - pins arrive as new nodes, and observing attributes
-  // makes the callback re-trigger on its own setAttribute calls
-  currentPinObserver.observe(document.body, {
-    childList: true,
-    subtree: true
   });
 }
