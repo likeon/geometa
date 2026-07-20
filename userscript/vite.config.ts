@@ -7,6 +7,9 @@ import { resolve } from 'path';
 function injectChangelog() {
   return {
     name: 'inject-changelog',
+    // closeBundle also fires when the dev server shuts down, which would
+    // append a second changelog to the existing dist file
+    apply: 'build' as const,
     closeBundle() {
       const changelogPath = resolve(__dirname, 'CHANGELOG.md');
       const distPath = resolve(__dirname, 'dist/geometa.user.js');
@@ -19,11 +22,14 @@ function injectChangelog() {
 
       const changelogComment = `\n\n\n/*\n${changelog}\n*/`;
 
-      const modifiedContent =
+      let modifiedContent =
         lines.slice(0, userScriptEndIndex + 1).join('\n') +
         changelogComment +
         '\n' +
         lines.slice(userScriptEndIndex + 1).join('\n');
+      if (!modifiedContent.endsWith('\n')) {
+        modifiedContent += '\n';
+      }
 
       writeFileSync(distPath, modifiedContent, 'utf-8');
       console.log('✓ Changelog injected into dist/geometa.user.js');
