@@ -16,6 +16,7 @@
 
   let toastState = $state<{
     message: string;
+    detail?: string;
     type: 'success' | 'error' | 'info' | 'warning';
   } | null>(null);
   let toastTimer = $state<number | undefined>(undefined);
@@ -23,12 +24,13 @@
   function showCustomToast(
     message: string,
     type: 'success' | 'error' | 'info' | 'warning' = 'info',
-    duration: number = 3000
+    duration: number = 3000,
+    detail?: string
   ) {
     clearTimeout(toastTimer);
 
     const displayToast = () => {
-      toastState = { message, type };
+      toastState = { message, detail, type };
       if (duration > 0) {
         toastTimer = setTimeout(() => {
           hideCustomToast();
@@ -126,21 +128,15 @@
       }, 5000);
     } catch (error: any) {
       console.error('Upload process failed:', error);
-      let toastMessage = 'An unexpected error occurred during upload.';
-      if (error && error.message) {
-        toastMessage = error.message;
-      }
+      const detail =
+        error && error.message ? error.message : 'An unexpected error occurred during upload.';
 
-      if (
-        toastMessage.includes('401') ||
-        toastMessage.includes('403') ||
-        toastMessage.toLowerCase().includes('unauthorized') ||
-        toastMessage.toLowerCase().includes('invalid token')
-      ) {
-        showCustomToast(`Upload failed: ${toastMessage}. Please check your API Key.`, 'error', 0);
-      } else {
-        showCustomToast(`Upload failed: ${toastMessage}`, 'error', 0);
-      }
+      const isAuthError = /401|403|unauthorized|invalid token/i.test(detail);
+      const headline = isAuthError
+        ? 'Upload failed: your API key was rejected. Please check it and try again.'
+        : 'Upload failed. If this keeps happening, please report the error below on our Discord.';
+
+      showCustomToast(headline, 'error', 0, detail);
       isLoading = false;
     }
   }
@@ -202,6 +198,7 @@
 {#if toastState}
   <ToastNotification
     message={toastState.message}
+    detail={toastState.detail}
     type={toastState.type}
     onClose={hideCustomToast} />
 {/if}
