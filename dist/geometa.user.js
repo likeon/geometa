@@ -5236,7 +5236,7 @@ roundNumber: 4,
       unmount(labelApp);
       labelApp = null;
     }
-    document.querySelector(".map-label")?.remove();
+    document.querySelector(".geometa-map-label")?.remove();
   }
   async function addMapLabel() {
     const token = ++runToken$2;
@@ -5259,7 +5259,7 @@ roundNumber: 4,
       mapAvatarContainer.style.position = "relative";
     }
     const element = document.createElement("div");
-    element.classList.add("map-label");
+    element.classList.add("geometa-map-label");
     mapAvatarContainer.appendChild(element);
     labelApp = mount(MapLabel, {
       target: element,
