@@ -28,7 +28,10 @@ async function addMapLabel() {
     return;
   }
 
-  const mapAvatarContainer = await waitForElement('[class*=map-block_mapImageContainer]');
+  // new map detail page layout first, old layout as fallback
+  const mapAvatarContainer = await waitForElement(
+    '[class*=map-detail-page_heroImageArea], [class*=map-block_mapImageContainer]'
+  );
   if (token !== runToken || !mapAvatarContainer) {
     return;
   }
@@ -39,6 +42,11 @@ async function addMapLabel() {
   }
 
   removeMapLabel();
+
+  // the label is positioned absolutely against the container's bottom-right corner
+  if (getComputedStyle(mapAvatarContainer).position === 'static') {
+    (mapAvatarContainer as HTMLElement).style.position = 'relative';
+  }
 
   const element = document.createElement('div');
   element.classList.add('map-label');

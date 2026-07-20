@@ -11,7 +11,7 @@
 
 <style>
   .geometa-map-label-container {
-    background-color: #0003;
+    background-color: rgba(0, 0, 0, 0.65);
     color: #fff;
     text-align: center;
     z-index: 100;
