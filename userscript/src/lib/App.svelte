@@ -65,6 +65,7 @@
       GM_xmlhttpRequest({
         method: 'GET',
         url: url,
+        timeout: 10000,
         onload: (response) => {
           if (response.status === 200) {
             try {
@@ -87,6 +88,9 @@
         onerror: (e) => {
           error = 'An error occurred while fetching data';
           console.error('Error:', e);
+        },
+        ontimeout: () => {
+          error = 'The request timed out - please try again';
         }
       });
     }

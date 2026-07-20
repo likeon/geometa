@@ -4725,6 +4725,7 @@ context.l
         _GM_xmlhttpRequest({
           method: "GET",
           url,
+          timeout: 1e4,
           onload: (response) => {
             if (response.status === 200) {
               try {
@@ -4746,6 +4747,9 @@ context.l
           onerror: (e) => {
             set(error, "An error occurred while fetching data");
             console.error("Error:", e);
+          },
+          ontimeout: () => {
+            set(error, "The request timed out - please try again");
           }
         });
       }
