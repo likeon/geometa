@@ -5540,26 +5540,6 @@ onload: (response) => {
     }
     onMount(() => {
       set(currentApiKey, getApiKeyFromGM(), true);
-      if (typeof _GM_registerMenuCommand === "function") {
-        _GM_registerMenuCommand("LearnableMeta - Set/Update API Key", () => {
-          set(currentApiKey, null);
-          const newKey = prompt("Enter your new LearnableMeta API Key:");
-          if (newKey && newKey.trim() !== "") {
-            saveApiKeyToGM(newKey.trim());
-            set(currentApiKey, newKey.trim(), true);
-            showCustomToast("LearnableMeta API Key updated!", "success");
-          } else if (newKey !== null) {
-            showCustomToast("API Key not updated (empty value provided).", "info");
-          }
-        });
-        _GM_registerMenuCommand("LearnableMeta - Clear API Key", () => {
-          if (confirm("Are you sure you want to clear your LearnableMeta API Key?")) {
-            saveApiKeyToGM("");
-            set(currentApiKey, null);
-            showCustomToast("LearnableMeta API Key cleared.", "success");
-          }
-        });
-      }
     });
     async function handleUploadClick() {
       if (get(isLoading)) return;

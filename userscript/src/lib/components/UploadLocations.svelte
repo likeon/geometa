@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { uploadLocations } from '../utils/upload';
-  import { GM_setValue, GM_getValue, GM_registerMenuCommand } from '$';
+  import { GM_setValue, GM_getValue } from '$';
   import ToastNotification from './ToastNotification.svelte';
 
   let { mapId }: { mapId: string } = $props();
@@ -81,27 +81,6 @@
 
   onMount(() => {
     currentApiKey = getApiKeyFromGM();
-
-    if (typeof GM_registerMenuCommand === 'function') {
-      GM_registerMenuCommand('LearnableMeta - Set/Update API Key', () => {
-        currentApiKey = null;
-        const newKey = prompt('Enter your new LearnableMeta API Key:');
-        if (newKey && newKey.trim() !== '') {
-          saveApiKeyToGM(newKey.trim());
-          currentApiKey = newKey.trim();
-          showCustomToast('LearnableMeta API Key updated!', 'success');
-        } else if (newKey !== null) {
-          showCustomToast('API Key not updated (empty value provided).', 'info');
-        }
-      });
-      GM_registerMenuCommand('LearnableMeta - Clear API Key', () => {
-        if (confirm('Are you sure you want to clear your LearnableMeta API Key?')) {
-          saveApiKeyToGM('');
-          currentApiKey = null;
-          showCustomToast('LearnableMeta API Key cleared.', 'success');
-        }
-      });
-    }
   });
 
   async function handleUploadClick() {
