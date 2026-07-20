@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
         - name: api
-          image: ghcr.io/likeon/geometa-api:main-7f5a500d-1784524733 # {"$imagepolicy": "geometa:api"}
+          image: ghcr.io/likeon/geometa-api:main-e66b70f2-1784530401 # {"$imagepolicy": "geometa:api"}
           # startup blocks on migrations; give them up to 5 minutes before
           # liveness/readiness take over
           startupProbe:
