@@ -215,9 +215,10 @@ function addClickableIconsToPins(
   });
 
   // Start observing for map pins
+  // childList is enough - pins arrive as new nodes, and observing attributes
+  // makes the callback re-trigger on its own setAttribute calls
   currentPinObserver.observe(document.body, {
     childList: true,
-    subtree: true,
-    attributes: true
+    subtree: true
   });
 }
