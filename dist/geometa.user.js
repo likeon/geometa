@@ -255,19 +255,45 @@
       });
     });
   }
+  const MAP_FOUND_CACHE_MS = 24 * 60 * 60 * 1e3;
+  const MAP_NOT_FOUND_CACHE_MS = 60 * 60 * 1e3;
+  function getCachedMapInfo(key) {
+    const savedMapInfo = _unsafeWindow.localStorage.getItem(key);
+    if (!savedMapInfo) {
+      return null;
+    }
+    try {
+      const parsed = JSON.parse(savedMapInfo);
+      if (parsed && parsed.mapInfo && typeof parsed.fetchedAt === "number") {
+        return parsed;
+      }
+    } catch {
+    }
+    return null;
+  }
   async function getMapInfo(geoguessrId, forceUpdate) {
     const localStorageMapInfoKey = `geometa:map-info:${geoguessrId}`;
-    if (!forceUpdate) {
-      const savedMapInfo = _unsafeWindow.localStorage.getItem(localStorageMapInfoKey);
-      if (savedMapInfo) {
-        const mapInfo2 = JSON.parse(savedMapInfo);
-        logInfo("using saved map info", mapInfo2);
-        return mapInfo2;
+    const cached = getCachedMapInfo(localStorageMapInfoKey);
+    if (!forceUpdate && cached) {
+      const ttl = cached.mapInfo.mapFound ? MAP_FOUND_CACHE_MS : MAP_NOT_FOUND_CACHE_MS;
+      if (Date.now() - cached.fetchedAt < ttl) {
+        logInfo("using saved map info", cached.mapInfo);
+        return cached.mapInfo;
       }
     }
     const url = `https://learnablemeta.com/api/userscript/map/${geoguessrId}`;
-    const mapInfo = await fetchMapInfo(url);
-    _unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(mapInfo));
+    let mapInfo;
+    try {
+      mapInfo = await fetchMapInfo(url);
+    } catch (e) {
+      if (cached) {
+        logInfo("map info fetch failed - using stale cached map info", e);
+        return cached.mapInfo;
+      }
+      throw e;
+    }
+    const toCache = { mapInfo, fetchedAt: Date.now() };
+    _unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(toCache));
     _unsafeWindow.localStorage.setItem("geometa:latest-version", mapInfo.userscriptVersion);
     return mapInfo;
   }

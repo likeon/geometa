@@ -103,19 +103,53 @@ async function fetchMapInfo(url: string): Promise<MapInfoResponse> {
   });
 }
 
+type CachedMapInfo = {
+  mapInfo: MapInfoResponse;
+  fetchedAt: number;
+};
+
+// maps get added to LearnableMeta over time, so re-check negative results sooner
+const MAP_FOUND_CACHE_MS = 24 * 60 * 60 * 1000;
+const MAP_NOT_FOUND_CACHE_MS = 60 * 60 * 1000;
+
+function getCachedMapInfo(key: string): CachedMapInfo | null {
+  const savedMapInfo = unsafeWindow.localStorage.getItem(key);
+  if (!savedMapInfo) {
+    return null;
+  }
+  try {
+    const parsed = JSON.parse(savedMapInfo);
+    // entries from older versions are the raw map info without a timestamp
+    if (parsed && parsed.mapInfo && typeof parsed.fetchedAt === 'number') {
+      return parsed as CachedMapInfo;
+    }
+  } catch {}
+  return null;
+}
+
 export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
   const localStorageMapInfoKey = `geometa:map-info:${geoguessrId}`;
-  if (!forceUpdate) {
-    const savedMapInfo = unsafeWindow.localStorage.getItem(localStorageMapInfoKey);
-    if (savedMapInfo) {
-      const mapInfo = JSON.parse(savedMapInfo) as MapInfoResponse;
-      logInfo('using saved map info', mapInfo);
-      return mapInfo;
+  const cached = getCachedMapInfo(localStorageMapInfoKey);
+  if (!forceUpdate && cached) {
+    const ttl = cached.mapInfo.mapFound ? MAP_FOUND_CACHE_MS : MAP_NOT_FOUND_CACHE_MS;
+    if (Date.now() - cached.fetchedAt < ttl) {
+      logInfo('using saved map info', cached.mapInfo);
+      return cached.mapInfo;
     }
   }
   const url = `https://learnablemeta.com/api/userscript/map/${geoguessrId}`;
-  const mapInfo = await fetchMapInfo(url);
-  unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(mapInfo));
+  let mapInfo: MapInfoResponse;
+  try {
+    mapInfo = await fetchMapInfo(url);
+  } catch (e) {
+    if (cached) {
+      logInfo('map info fetch failed - using stale cached map info', e);
+      return cached.mapInfo;
+    }
+    throw e;
+  }
+  const toCache: CachedMapInfo = { mapInfo, fetchedAt: Date.now() };
+  unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(toCache));
   unsafeWindow.localStorage.setItem('geometa:latest-version', mapInfo.userscriptVersion);
   return mapInfo;
 }
