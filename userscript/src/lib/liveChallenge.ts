@@ -1,4 +1,10 @@
-import { getChallengeId, getChallengeInfo, getMapInfo, logInfo, waitForElement } from './utils/main';
+import {
+  getChallengeId,
+  getChallengeInfo,
+  getMapInfo,
+  logInfo,
+  waitForElement
+} from './utils/main';
 import { mountSummaryWindow, unmountSummaryWindow } from './utils/summaryWindow';
 
 export function initLiveChallenge() {

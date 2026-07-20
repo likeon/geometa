@@ -35,92 +35,100 @@ function clearMetaCache() {
 }
 
 export function initSinglePlayer() {
-  GeoGuessrEventFramework.init().then(() => {
-    GeoGuessrEventFramework.events.addEventListener('game_start', async (event: GGEvent) => {
-      clearMetaCache();
-      await getMapInfo(event.detail.map.id, true);
-    });
-    GeoGuessrEventFramework.events.addEventListener('round_end', async (event: GGEvent) => {
-      unmountSummaryWindow();
+  if (!GeoGuessrEventFramework) {
+    console.error('ALM: GeoGuessrEventFramework is not available - single player support disabled');
+    return;
+  }
+  GeoGuessrEventFramework.init()
+    .then(() => {
+      GeoGuessrEventFramework.events.addEventListener('game_start', async (event: GGEvent) => {
+        clearMetaCache();
+        await getMapInfo(event.detail.map.id, true);
+      });
+      GeoGuessrEventFramework.events.addEventListener('round_end', async (event: GGEvent) => {
+        unmountSummaryWindow();
 
-      const mapInfo = await getMapInfo(event.detail.map.id, false);
-      if (!mapInfo.mapFound) {
-        logInfo('not supported map - skip');
-        return;
-      }
-      logInfo('waiting for the result view to render');
-      waitForElement('div[data-qa="result-view-top"]').then((container) => {
-        if (!container) {
+        const mapInfo = await getMapInfo(event.detail.map.id, false);
+        if (!mapInfo.mapFound) {
+          logInfo('not supported map - skip');
           return;
         }
-        logInfo('the result view is rendered');
-        const lastRound = event.detail.rounds[event.detail.rounds.length - 1];
-        logInfo('adding app window');
-        mountSummaryWindow(container, {
-          roundNumber: event.detail.rounds.length,
-          panoId: lastRound.location.panoId,
-          mapId: event.detail.map.id,
-          userscriptVersion: mapInfo.userscriptVersion,
-          source: window.location.href.includes('challenge') ? 'challenge' : 'map'
+        logInfo('waiting for the result view to render');
+        waitForElement('div[data-qa="result-view-top"]').then((container) => {
+          if (!container) {
+            return;
+          }
+          logInfo('the result view is rendered');
+          const lastRound = event.detail.rounds[event.detail.rounds.length - 1];
+          logInfo('adding app window');
+          mountSummaryWindow(container, {
+            roundNumber: event.detail.rounds.length,
+            panoId: lastRound.location.panoId,
+            mapId: event.detail.map.id,
+            userscriptVersion: mapInfo.userscriptVersion,
+            source: window.location.href.includes('challenge') ? 'challenge' : 'map'
+          });
         });
       });
-    });
-    GeoGuessrEventFramework.events.addEventListener('game_end', async (event: GGEvent) => {
-      console.log('game ended');
-      const panoIds = event.detail.rounds.map((round) => round.location.panoId);
-      console.log('All round pano IDs:', panoIds);
+      GeoGuessrEventFramework.events.addEventListener('game_end', async (event: GGEvent) => {
+        console.log('game ended');
+        const panoIds = event.detail.rounds.map((round) => round.location.panoId);
+        console.log('All round pano IDs:', panoIds);
 
-      const mapInfo = await getMapInfo(event.detail.map.id, false);
-      if (!mapInfo.mapFound) {
-        logInfo('not supported map for breakdown - skip');
-        return;
-      }
-
-      const roundData = {
-        rounds: event.detail.rounds,
-        mapId: event.detail.map.id,
-        userscriptVersion: mapInfo.userscriptVersion
-      };
-
-      waitForElement('.result-list_listWrapper__7SmiM').then((listWrapper) => {
-        if (!listWrapper) {
+        const mapInfo = await getMapInfo(event.detail.map.id, false);
+        if (!mapInfo.mapFound) {
+          logInfo('not supported map for breakdown - skip');
           return;
         }
-        addMetaButtonsToRounds(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
+
+        const roundData = {
+          rounds: event.detail.rounds,
+          mapId: event.detail.map.id,
+          userscriptVersion: mapInfo.userscriptVersion
+        };
+
+        waitForElement('.result-list_listWrapper__7SmiM').then((listWrapper) => {
+          if (!listWrapper) {
+            return;
+          }
+          addMetaButtonsToRounds(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
+        });
+
+        if (currentObserver) {
+          currentObserver.disconnect();
+        }
+
+        currentObserver = new MutationObserver(() => {
+          const listWrapper = document.querySelector('.result-list_listWrapper__7SmiM');
+          if (listWrapper && !listWrapper.querySelector('.geometa-meta-btn')) {
+            addMetaButtonsToRounds(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
+          }
+        });
+
+        currentObserver.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+
+        addClickableIconsToPins(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
       });
 
-      if (currentObserver) {
-        currentObserver.disconnect();
-      }
-
-      currentObserver = new MutationObserver(() => {
-        const listWrapper = document.querySelector('.result-list_listWrapper__7SmiM');
-        if (listWrapper && !listWrapper.querySelector('.geometa-meta-btn')) {
-          addMetaButtonsToRounds(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
+      window.addEventListener('urlchange', () => {
+        clearMetaCache();
+        unmountSummaryWindow();
+        if (currentObserver) {
+          currentObserver.disconnect();
+          currentObserver = null;
+        }
+        if (currentPinObserver) {
+          currentPinObserver.disconnect();
+          currentPinObserver = null;
         }
       });
-
-      currentObserver.observe(document.body, {
-        childList: true,
-        subtree: true
-      });
-
-      addClickableIconsToPins(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
+    })
+    .catch((e: unknown) => {
+      console.error('ALM: GeoGuessrEventFramework failed to initialize', e);
     });
-
-    window.addEventListener('urlchange', () => {
-      clearMetaCache();
-      unmountSummaryWindow();
-      if (currentObserver) {
-        currentObserver.disconnect();
-        currentObserver = null;
-      }
-      if (currentPinObserver) {
-        currentPinObserver.disconnect();
-        currentPinObserver = null;
-      }
-    });
-  });
 }
 
 function addMetaButtonsToRounds(

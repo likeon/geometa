@@ -9,7 +9,10 @@ import { resetContainerDimensions } from './lib/utils/resizing';
 
 function changelog() {
   return [
-    { '0.89': 'Fixed meta window resize persistence and added a menu action to reset its saved layout.' },
+    {
+      '0.89':
+        'Fixed meta window resize persistence and added a menu action to reset its saved layout.'
+    },
     { '0.88': 'Updated framework version for bug-fixes' },
     { '0.87': 'Added ability to view metas on breakdown screen' },
     { '0.86': 'Changed look of announcement closing button' },
@@ -81,8 +84,17 @@ if (document.readyState === 'loading') {
 }
 
 async function setupLearnableMetaFeatures() {
-  initSinglePlayer();
-  initLiveChallenge();
-  initMapLabel();
-  initLocationsUpload();
+  const features: [string, () => void][] = [
+    ['singlePlayer', initSinglePlayer],
+    ['liveChallenge', initLiveChallenge],
+    ['mapLabel', initMapLabel],
+    ['locationsUpload', initLocationsUpload]
+  ];
+  for (const [name, init] of features) {
+    try {
+      init();
+    } catch (e) {
+      console.error(`ALM: failed to initialize ${name}`, e);
+    }
+  }
 }
