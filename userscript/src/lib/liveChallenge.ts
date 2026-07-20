@@ -1,4 +1,3 @@
-import { mount } from 'svelte';
 import {
   getChallengeId,
   getChallengeInfo,
@@ -6,12 +5,12 @@ import {
   logInfo,
   waitForElement
 } from './utils/main';
-import App from './App.svelte';
+import { mountSummaryWindow, unmountSummaryWindow } from './utils/summaryWindow';
 
 export function initLiveChallenge() {
   logInfo('live challenge support enabled');
   let pinChanged = false;
-  const observer = new MutationObserver(async (mutations) => {
+  const observer = new MutationObserver(async () => {
     if (!document.querySelector('[class*=result-map_roundPin]')) {
       pinChanged = false;
       return;
@@ -21,30 +20,36 @@ export function initLiveChallenge() {
     }
     pinChanged = true;
     const challengeId = getChallengeId();
-    if (challengeId) {
+    if (!challengeId) {
+      return;
+    }
+    try {
       const { mapId, panoId } = await getChallengeInfo(challengeId);
       const mapInfo = await getMapInfo(mapId, false);
       if (!mapInfo.mapFound) return;
-      waitForElement('[class*=game_container]').then((container) => {
-        if (!container) {
-          return;
-        }
-        const element = document.createElement('div');
-        element.id = 'geometa-summary';
-        container.appendChild(element);
-        mount(App, {
-          target: element,
-          props: {
-            // this is to display announcements and there is not easy way to calculate which round it is
-            roundNumber: 4,
-            panoId,
-            mapId,
-            userscriptVersion: mapInfo.userscriptVersion,
-            source: 'liveChallenge'
-          }
-        });
+      const container = await waitForElement('[class*=game_container]');
+      if (!container) {
+        return;
+      }
+      mountSummaryWindow(container, {
+        // this is to display announcements and there is not easy way to calculate which round it is
+        roundNumber: 4,
+        panoId,
+        mapId,
+        userscriptVersion: mapInfo.userscriptVersion,
+        source: 'liveChallenge'
       });
+    } catch (e) {
+      logInfo('failed to show live challenge meta', e);
     }
+  });
+
+  window.addEventListener('urlchange', () => {
+    if (getChallengeId()) {
+      return;
+    }
+    pinChanged = false;
+    unmountSummaryWindow();
   });
 
   if (document.body) {

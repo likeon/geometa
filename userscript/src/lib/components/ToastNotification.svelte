@@ -3,28 +3,34 @@
 
   interface ToastProps {
     message: string;
+    detail?: string;
     type?: 'success' | 'error' | 'info' | 'warning';
     onClose: () => void;
   }
 
-  let { message, type = 'info', onClose }: ToastProps = $props();
+  let { message, detail, type = 'info', onClose }: ToastProps = $props();
 </script>
 
 <div
   class="toast-notification toast-{type}"
   role="alert"
   in:fade={{ duration: 200, delay: 50 }}
-  out:fade={{ duration: 300 }}
-  style:position="absolute"
-  style:top="100%"
-  style:transform="translateX(-75%) translateY(-10px)"
-  style:margin-top="10px">
-  <span class="toast-message">{message}</span>
+  out:fade={{ duration: 300 }}>
+  <div class="toast-content">
+    <span class="toast-message">{message}</span>
+    {#if detail}
+      <span class="toast-detail">{detail}</span>
+    {/if}
+  </div>
   <button class="toast-close-button" onclick={onClose} aria-label="Close">×</button>
 </div>
 
 <style>
   .toast-notification {
+    /* fixed to the viewport so the top bar's layout/overflow cannot clip it */
+    position: fixed;
+    top: 72px;
+    right: 16px;
     z-index: 10001;
     min-width: 250px;
     max-width: 400px;
@@ -35,7 +41,7 @@
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     color: white;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     font-size: 0.95em;
     line-height: 1.4;
@@ -62,9 +68,22 @@
     border-left: 5px solid #d39e00;
   }
 
-  .toast-message {
+  .toast-content {
     flex-grow: 1;
     margin-right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .toast-detail {
+    font-size: 0.8em;
+    line-height: 1.35;
+    opacity: 0.85;
+    word-break: break-word;
+    padding-top: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.35);
+    user-select: text;
   }
 
   .toast-close-button {

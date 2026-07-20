@@ -75,6 +75,9 @@ export const onPointerMove = (event: PointerEvent, container: HTMLDivElement) =>
 };
 
 export const onPointerUp = (event: PointerEvent, container: HTMLDivElement) => {
+  if (!isDragging) {
+    return;
+  }
   isDragging = false;
   if (container && container.hasPointerCapture(event.pointerId)) {
     container.releasePointerCapture(event.pointerId);

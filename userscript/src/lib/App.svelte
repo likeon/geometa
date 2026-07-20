@@ -65,6 +65,7 @@
       GM_xmlhttpRequest({
         method: 'GET',
         url: url,
+        timeout: 10000,
         onload: (response) => {
           if (response.status === 200) {
             try {
@@ -87,6 +88,9 @@
         onerror: (e) => {
           error = 'An error occurred while fetching data';
           console.error('Error:', e);
+        },
+        ontimeout: () => {
+          error = 'The request timed out - please try again';
         }
       });
     }
@@ -101,15 +105,19 @@
     });
     resizeObserver.observe(container);
 
-    header.addEventListener('pointerdown', (event) => onPointerDown(event, container));
-    document.addEventListener('pointermove', (event) => onPointerMove(event, container));
-    document.addEventListener('pointerup', (event) => onPointerUp(event, container));
+    const handlePointerDown = (event: PointerEvent) => onPointerDown(event, container);
+    const handlePointerMove = (event: PointerEvent) => onPointerMove(event, container);
+    const handlePointerUp = (event: PointerEvent) => onPointerUp(event, container);
+
+    header.addEventListener('pointerdown', handlePointerDown);
+    document.addEventListener('pointermove', handlePointerMove);
+    document.addEventListener('pointerup', handlePointerUp);
 
     return () => {
       resizeObserver.disconnect();
-      header.removeEventListener('pointerdown', (event) => onPointerDown(event, container));
-      document.removeEventListener('pointermove', (event) => onPointerMove(event, container));
-      document.removeEventListener('pointerup', (event) => onPointerUp(event, container));
+      header.removeEventListener('pointerdown', handlePointerDown);
+      document.removeEventListener('pointermove', handlePointerMove);
+      document.removeEventListener('pointerup', handlePointerUp);
     };
   });
 
@@ -302,14 +310,35 @@
     flex-direction: column;
     gap: 5px;
     align-items: flex-start;
-    background: var(--ds-color-purple-100);
+    /* pages like challenge results don't load the game stylesheets, so never
+       rely on geoguessr's css variables or element resets being present */
+    background: var(--ds-color-purple-100, #1c1836);
+    color: #fff;
     padding: 6px 10px;
     border-radius: 5px;
     font-size: 17px;
+    line-height: 1.4;
     width: min(25%, 500px);
 
     resize: both;
     overflow: auto;
+  }
+
+  .geometa-container h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .geometa-container :global(p) {
+    margin: 0;
+  }
+
+  .geometa-container :global(ul),
+  .geometa-container :global(ol) {
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
   .geometa-container > .header {
@@ -484,7 +513,7 @@
   }
 
   .modal {
-    background: var(--ds-color-purple-100);
+    background: var(--ds-color-purple-100, #1c1836);
     padding: 15px 25px;
     border-radius: 8px;
     text-align: center;
@@ -544,7 +573,7 @@
 
   .close-btn:hover {
     background: #d3d3d3;
-    color: var(--ds-color-purple-100);
+    color: var(--ds-color-purple-100, #1c1836);
   }
 
   button {
