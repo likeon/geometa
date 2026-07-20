@@ -196,14 +196,11 @@ export async function getChallengeInfo(id: string) {
 }
 
 export function decodePanoId(encoded: string) {
-  const len = Math.floor(encoded.length / 2);
-  let panoId: string[] = [];
-  for (let i = 0; i < len; i++) {
-    const code = parseInt(encoded.slice(i * 2, i * 2 + 2), 16);
-    const char = String.fromCharCode(code);
-    panoId = [...panoId, char];
+  let panoId = '';
+  for (let i = 0; i + 2 <= encoded.length; i += 2) {
+    panoId += String.fromCharCode(parseInt(encoded.slice(i, i + 2), 16));
   }
-  return panoId.join('');
+  return panoId;
 }
 
 export function logInfo(name: string, data?: any) {
