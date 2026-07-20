@@ -300,8 +300,21 @@
   function getLatestVersionInfo() {
     return _unsafeWindow.localStorage.getItem("geometa:latest-version");
   }
+  function isNewerVersion(candidate, current) {
+    const a = candidate.split(".").map(Number);
+    const b = current.split(".").map(Number);
+    for (let i = 0; i < Math.max(a.length, b.length); i++) {
+      const diff = (a[i] || 0) - (b[i] || 0);
+      if (diff) return diff > 0;
+    }
+    return false;
+  }
   function checkIfOutdated() {
-    return _GM_info.script.version != getLatestVersionInfo();
+    const latest = getLatestVersionInfo();
+    if (!latest) {
+      return false;
+    }
+    return isNewerVersion(latest, _GM_info.script.version);
   }
   function markHelpMessageAsRead() {
     _unsafeWindow.localStorage.setItem("geometa:help-message-read", "true");
