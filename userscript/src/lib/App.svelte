@@ -253,7 +253,12 @@
     {/if}
     {#if selectedMeta.images && selectedMeta.images.length}
       <hr />
-      <Carousel images={selectedMeta.images} />
+      <!-- keyed so switching tabs remounts the carousel: it tracks the current
+           slide internally and would otherwise keep an index the new tab's
+           shorter image list has no entry for, rendering nothing -->
+      {#key selectedMetaIndex}
+        <Carousel images={selectedMeta.images} />
+      {/key}
     {/if}
   {:else}
     <Spinner />

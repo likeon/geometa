@@ -259,8 +259,8 @@
   }
   const MAP_FOUND_CACHE_MS = 24 * 60 * 60 * 1e3;
   const MAP_NOT_FOUND_CACHE_MS = 60 * 60 * 1e3;
-  function getCachedMapInfo(key) {
-    const savedMapInfo = _unsafeWindow.localStorage.getItem(key);
+  function getCachedMapInfo(key2) {
+    const savedMapInfo = _unsafeWindow.localStorage.getItem(key2);
     if (!savedMapInfo) {
       return null;
     }
@@ -457,7 +457,7 @@
       throw new Error(`https://svelte.dev/e/effect_update_depth_exceeded`);
     }
   }
-  function props_invalid_value(key) {
+  function props_invalid_value(key2) {
     {
       throw new Error(`https://svelte.dev/e/props_invalid_value`);
     }
@@ -1829,13 +1829,13 @@ sources.get("length")
         },
         ownKeys(target) {
           get(version);
-          var own_keys = Reflect.ownKeys(target).filter((key2) => {
-            var source3 = sources.get(key2);
+          var own_keys = Reflect.ownKeys(target).filter((key3) => {
+            var source3 = sources.get(key3);
             return source3 === void 0 || source3.v !== UNINITIALIZED;
           });
-          for (var [key, source2] of sources) {
-            if (source2.v !== UNINITIALIZED && !(key in target)) {
-              own_keys.push(key);
+          for (var [key2, source2] of sources) {
+            if (source2.v !== UNINITIALIZED && !(key2 in target)) {
+              own_keys.push(key2);
             }
           }
           return own_keys;
@@ -2647,8 +2647,8 @@ dep
     if (STATE_SYMBOL in value) {
       deep_read(value);
     } else if (!Array.isArray(value)) {
-      for (let key in value) {
-        const prop2 = value[key];
+      for (let key2 in value) {
+        const prop2 = value[key2];
         if (typeof prop2 === "object" && prop2 && STATE_SYMBOL in prop2) {
           deep_read(prop2);
         }
@@ -2662,17 +2662,17 @@ dep
       if (value instanceof Date) {
         value.getTime();
       }
-      for (let key in value) {
+      for (let key2 in value) {
         try {
-          deep_read(value[key], visited);
+          deep_read(value[key2], visited);
         } catch (e) {
         }
       }
       const proto = get_prototype_of(value);
       if (proto !== Object.prototype && proto !== Array.prototype && proto !== Map.prototype && proto !== Set.prototype && proto !== Date.prototype) {
         const descriptors = get_descriptors(proto);
-        for (let key in descriptors) {
-          const get2 = descriptors[key].get;
+        for (let key2 in descriptors) {
+          const get2 = descriptors[key2].get;
           if (get2) {
             try {
               get2.call(value);
@@ -2979,17 +2979,17 @@ constructor(anchor, transition2 = true) {
 current_batch
       );
       if (!this.#batches.has(batch)) return;
-      var key = (
+      var key2 = (
 this.#batches.get(batch)
       );
-      var onscreen = this.#onscreen.get(key);
+      var onscreen = this.#onscreen.get(key2);
       if (onscreen) {
         resume_effect(onscreen);
       } else {
-        var offscreen = this.#offscreen.get(key);
+        var offscreen = this.#offscreen.get(key2);
         if (offscreen) {
-          this.#onscreen.set(key, offscreen.effect);
-          this.#offscreen.delete(key);
+          this.#onscreen.set(key2, offscreen.effect);
+          this.#offscreen.delete(key2);
           offscreen.fragment.lastChild.remove();
           this.anchor.before(offscreen.fragment);
           onscreen = offscreen.effect;
@@ -3007,7 +3007,7 @@ this.#batches.get(batch)
         }
       }
       for (const [k, effect2] of this.#onscreen) {
-        if (k === key) continue;
+        if (k === key2) continue;
         const on_destroy = () => {
           const keys = Array.from(this.#batches.values());
           if (keys.includes(k)) {
@@ -3037,19 +3037,19 @@ this.#batches.get(batch)
         }
       }
     };
-ensure(key, fn) {
+ensure(key2, fn) {
       var batch = (
 current_batch
       );
-      if (fn && !this.#onscreen.has(key) && !this.#offscreen.has(key)) {
+      if (fn && !this.#onscreen.has(key2) && !this.#offscreen.has(key2)) {
         {
           this.#onscreen.set(
-            key,
+            key2,
             branch(() => fn(this.anchor))
           );
         }
       }
-      this.#batches.set(batch, key);
+      this.#batches.set(batch, key2);
       {
         this.#commit();
       }
@@ -3134,6 +3134,18 @@ UNINITIALIZED
         update_branch(false, null);
       }
     }, flags2);
+  }
+  function key(node, get_key, render_fn) {
+    var branches = new BranchManager(node);
+    var legacy = !is_runes();
+    block(() => {
+      var key2 = get_key();
+      if (legacy && key2 !== null && typeof key2 === "object") {
+        key2 =
+{};
+      }
+      branches.ensure(key2, render_fn);
+    });
   }
   function index(_, i) {
     return i;
@@ -3245,14 +3257,14 @@ get(each_array);
     var matched = [];
     var stashed = [];
     var value;
-    var key;
+    var key2;
     var item;
     var i;
     if (is_animated) {
       for (i = 0; i < length; i += 1) {
         value = array[i];
-        key = get_key(value, i);
-        item = items.get(key);
+        key2 = get_key(value, i);
+        item = items.get(key2);
         if (item !== void 0) {
           item.a?.measure();
           (to_animate ??= new Set()).add(item);
@@ -3261,13 +3273,13 @@ get(each_array);
     }
     for (i = 0; i < length; i += 1) {
       value = array[i];
-      key = get_key(value, i);
-      item = items.get(key);
+      key2 = get_key(value, i);
+      item = items.get(key2);
       if (item === void 0) {
-        var pending = offscreen_items.get(key);
+        var pending = offscreen_items.get(key2);
         if (pending !== void 0) {
-          offscreen_items.delete(key);
-          items.set(key, pending);
+          offscreen_items.delete(key2);
+          items.set(key2, pending);
           var next = prev ? prev.next : current;
           link(state2, prev, pending);
           link(state2, pending, next);
@@ -3283,14 +3295,14 @@ current.e.nodes_start
             prev,
             prev === null ? state2.first : prev.next,
             value,
-            key,
+            key2,
             i,
             render_fn,
             flags2,
             get_collection
           );
         }
-        items.set(key, prev);
+        items.set(key2, prev);
         matched = [];
         stashed = [];
         current = prev.next;
@@ -3340,7 +3352,7 @@ current.e.nodes_start
         }
         matched = [];
         stashed = [];
-        while (current !== null && current.k !== key) {
+        while (current !== null && current.k !== key2) {
           if ((current.e.f & INERT) === 0) {
             (seen ??= new Set()).add(current);
           }
@@ -3406,7 +3418,7 @@ item.i,
       item.i = index2;
     }
   }
-  function create_item(anchor, state2, prev, next, value, key, index2, render_fn, flags2, get_collection, deferred2) {
+  function create_item(anchor, state2, prev, next, value, key2, index2, render_fn, flags2, get_collection, deferred2) {
     var reactive = (flags2 & EACH_ITEM_REACTIVE) !== 0;
     var mutable = (flags2 & EACH_ITEM_IMMUTABLE) === 0;
     var v = reactive ? mutable ? mutable_source(value, false, false) : source(value) : value;
@@ -3414,7 +3426,7 @@ item.i,
     var item = {
       i,
       v,
-      k: key,
+      k: key2,
       a: null,
 e: null,
       prev,
@@ -3551,13 +3563,13 @@ get_first_child(node2)
       classname = classname ? classname + " " + hash : hash;
     }
     if (directives) {
-      for (var key in directives) {
-        if (directives[key]) {
-          classname = classname ? classname + " " + key : key;
+      for (var key2 in directives) {
+        if (directives[key2]) {
+          classname = classname ? classname + " " + key2 : key2;
         } else if (classname.length) {
-          var len = key.length;
+          var len = key2.length;
           var a = 0;
-          while ((a = classname.indexOf(key, a)) >= 0) {
+          while ((a = classname.indexOf(key2, a)) >= 0) {
             var b = a + len;
             if ((a === 0 || whitespace.includes(classname[a - 1])) && (b === classname.length || whitespace.includes(classname[b]))) {
               classname = (a === 0 ? "" : classname.substring(0, a)) + classname.substring(b + 1);
@@ -3586,10 +3598,10 @@ get_first_child(node2)
       }
       dom.__className = value;
     } else if (next_classes && prev_classes !== next_classes) {
-      for (var key in next_classes) {
-        var is_present = !!next_classes[key];
-        if (prev_classes == null || is_present !== !!prev_classes[key]) {
-          dom.classList.toggle(key, is_present);
+      for (var key2 in next_classes) {
+        var is_present = !!next_classes[key2];
+        if (prev_classes == null || is_present !== !!prev_classes[key2]) {
+          dom.classList.toggle(key2, is_present);
         }
       }
     }
@@ -3646,9 +3658,9 @@ element.__attributes ??= {
     var element_proto = Element.prototype;
     while (element_proto !== proto) {
       descriptors = get_descriptors(proto);
-      for (var key in descriptors) {
-        if (descriptors[key].set) {
-          setters.push(key);
+      for (var key2 in descriptors) {
+        if (descriptors[key2].set) {
+          setters.push(key2);
         }
       }
       proto = get_prototype_of(proto);
@@ -4017,9 +4029,9 @@ component_context
       const d = derived(() => {
         let changed = false;
         const props2 = context.s;
-        for (const key in props2) {
-          if (props2[key] !== prev[key]) {
-            prev[key] = props2[key];
+        for (const key2 in props2) {
+          if (props2[key2] !== prev[key2]) {
+            prev[key2] = props2[key2];
             changed = true;
           }
         }
@@ -4067,7 +4079,7 @@ component_context
       is_store_binding = previous_is_store_binding;
     }
   }
-  function prop(props, key, flags2, fallback) {
+  function prop(props, key2, flags2, fallback) {
     var runes = !legacy_mode_flag || (flags2 & PROPS_IS_RUNES) !== 0;
     var bindable = (flags2 & PROPS_IS_BINDABLE) !== 0;
     var lazy = (flags2 & PROPS_IS_LAZY_INITIAL) !== 0;
@@ -4089,17 +4101,17 @@ fallback
     var setter;
     if (bindable) {
       var is_entry_props = STATE_SYMBOL in props || LEGACY_PROPS in props;
-      setter = get_descriptor(props, key)?.set ?? (is_entry_props && key in props ? (v) => props[key] = v : void 0);
+      setter = get_descriptor(props, key2)?.set ?? (is_entry_props && key2 in props ? (v) => props[key2] = v : void 0);
     }
     var initial_value;
     var is_store_sub = false;
     if (bindable) {
       [initial_value, is_store_sub] = capture_store_binding(() => (
-props[key]
+props[key2]
       ));
     } else {
       initial_value =
-props[key];
+props[key2];
     }
     if (initial_value === void 0 && fallback !== void 0) {
       initial_value = get_fallback();
@@ -4112,7 +4124,7 @@ props[key];
     if (runes) {
       getter = () => {
         var value = (
-props[key]
+props[key2]
         );
         if (value === void 0) return get_fallback();
         fallback_dirty = true;
@@ -4121,7 +4133,7 @@ props[key]
     } else {
       getter = () => {
         var value = (
-props[key]
+props[key2]
         );
         if (value !== void 0) {
           fallback_value =
@@ -4433,8 +4445,8 @@ context.l
   const topKey = "geometa:containerStyleTop";
   let isDragging = false;
   let dragOffset = { x: 0, y: 0 };
-  function getSavedPosition(key) {
-    const value = localStorage.getItem(key);
+  function getSavedPosition(key2) {
+    const value = localStorage.getItem(key2);
     if (value && value.startsWith("-")) {
       return null;
     }
@@ -4741,9 +4753,9 @@ context.l
   var root_8 = from_html(`<p class="geometa-footer svelte-1j2rmt2"><!></p>`);
   var root_9 = from_html(`<hr class="svelte-1j2rmt2"/> <!>`, 1);
   var root_5$1 = from_html(`<!> <p class="svelte-1j2rmt2"><!> <strong class="svelte-1j2rmt2"> </strong> </p> <div class="geometa-note svelte-1j2rmt2"><!></div> <!> <!>`, 1);
-  var root_11 = from_html(`<div class="modal-backdrop svelte-1j2rmt2"><div class="modal svelte-1j2rmt2"><p class="svelte-1j2rmt2">You are about to open this site in a new tab:</p> <p class="modal-url svelte-1j2rmt2"> </p> <div class="modal-buttons svelte-1j2rmt2"><button class="proceed-btn svelte-1j2rmt2">Continue</button> <button class="close-btn svelte-1j2rmt2">Cancel</button></div></div></div>`);
-  var root_13 = from_html(`<p class="outdated svelte-1j2rmt2"><strong class="svelte-1j2rmt2"> </strong></p>`);
-  var root_12 = from_html(`<div class="modal-backdrop svelte-1j2rmt2"><div class="modal svelte-1j2rmt2"><div class="help-message svelte-1j2rmt2"><!> <p class="svelte-1j2rmt2">Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p> <ul class="svelte-1j2rmt2"><li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere
+  var root_12 = from_html(`<div class="modal-backdrop svelte-1j2rmt2"><div class="modal svelte-1j2rmt2"><p class="svelte-1j2rmt2">You are about to open this site in a new tab:</p> <p class="modal-url svelte-1j2rmt2"> </p> <div class="modal-buttons svelte-1j2rmt2"><button class="proceed-btn svelte-1j2rmt2">Continue</button> <button class="close-btn svelte-1j2rmt2">Cancel</button></div></div></div>`);
+  var root_14 = from_html(`<p class="outdated svelte-1j2rmt2"><strong class="svelte-1j2rmt2"> </strong></p>`);
+  var root_13 = from_html(`<div class="modal-backdrop svelte-1j2rmt2"><div class="modal svelte-1j2rmt2"><div class="help-message svelte-1j2rmt2"><!> <p class="svelte-1j2rmt2">Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p> <ul class="svelte-1j2rmt2"><li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere
               on your screen.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">View Map meta list:</strong> Click the list icon to see all the metas included
               in the map you are currently playing.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Join the Community:</strong> Click the Discord icon to share feedback, suggest
               improvements, or just say hi!</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Outdated Script:</strong> The question mark icon will blink if the script is outdated.</li></ul></div> <button class="close-btn svelte-1j2rmt2">Close</button></div></div>`);
@@ -4960,10 +4972,12 @@ context.l
               var consequent_4 = ($$anchor4) => {
                 var fragment_3 = root_9();
                 var node_11 = sibling(first_child(fragment_3), 2);
-                Carousel(node_11, {
-                  get images() {
-                    return get(selectedMeta).images;
-                  }
+                key(node_11, () => get(selectedMetaIndex), ($$anchor5) => {
+                  Carousel($$anchor5, {
+                    get images() {
+                      return get(selectedMeta).images;
+                    }
+                  });
                 });
                 append($$anchor4, fragment_3);
               };
@@ -4999,7 +5013,7 @@ context.l
     var node_12 = sibling(node_3, 2);
     {
       var consequent_6 = ($$anchor2) => {
-        var div_7 = root_11();
+        var div_7 = root_12();
         var div_8 = child(div_7);
         var p_3 = sibling(child(div_8), 2);
         var text_4 = child(p_3);
@@ -5018,13 +5032,13 @@ context.l
     var node_13 = sibling(node_12, 2);
     {
       var consequent_8 = ($$anchor2) => {
-        var div_10 = root_12();
+        var div_10 = root_13();
         var div_11 = child(div_10);
         var div_12 = child(div_11);
         var node_14 = child(div_12);
         {
           var consequent_7 = ($$anchor3) => {
-            var p_4 = root_13();
+            var p_4 = root_14();
             var strong_1 = child(p_4);
             var text_5 = child(strong_1);
             template_effect(($0) => set_text(text_5, `Your script version is out of date - please install the latest version (${$0 ?? ""})!`), [getLatestVersionInfo]);
@@ -5604,9 +5618,9 @@ onload: (response) => {
         return null;
       }
     }
-    function saveApiKeyToGM(key) {
+    function saveApiKeyToGM(key2) {
       try {
-        _GM_setValue(API_KEY_STORAGE_NAME, key);
+        _GM_setValue(API_KEY_STORAGE_NAME, key2);
       } catch (e) {
         console.warn("GM_setValue is not available. API key functionality might be limited.", e);
         showCustomToast("Userscript storage (GM_setValue) is not available. Please ensure Tampermonkey/Violentmonkey is correctly configured.", "error", 0);
