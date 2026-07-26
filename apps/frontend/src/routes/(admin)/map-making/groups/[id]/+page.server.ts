@@ -40,6 +40,16 @@ const copyMetaSchema = z.object({
 
 export type CopyMetaSchema = typeof copyMetaSchema;
 
+// upload error messages are rendered with {@html} in the dialog, and some now
+// embed the user-supplied scopeTag - escape to keep that sink safe
+function escapeHtml(text: string): string {
+  return text
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;');
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- data is validated by Zod schema immediately after this function
 function normalizeMapJsonFormat(jsonData: any) {
   if (Array.isArray(jsonData)) {
@@ -92,7 +102,7 @@ export const load = async ({ params, locals }) => {
   if (apiError || !data) {
     throwApiError(apiError, { 404: 'No group' });
   }
-  const { group, user } = data;
+  const { group, user, role } = data;
 
   const locationsNotOnStreetViewCount = api.internal['locations'].count
     .get({ query: { groupId: group.id, isOnStreetView: false } })
@@ -107,6 +117,7 @@ export const load = async ({ params, locals }) => {
 
   return {
     group,
+    role,
     locationsNotOnStreetViewCount,
     metaForm,
     mapUploadForm,
@@ -320,20 +331,33 @@ export const actions = {
 
     const { data, error: apiError } = await api.internal['map-groups']({
       id: groupId
-    }).locations.upload.post({ uploadMode: form.data.uploadMode, locations });
+    }).locations.upload.post({
+      uploadMode: form.data.uploadMode,
+      scopeTag: form.data.scopeTag || undefined,
+      locations
+    });
 
     if (apiError || !data) {
-      if ((apiError?.status as number) === 409) {
+      const status = apiError?.status as number;
+      const value = apiError?.value as { message?: string } | undefined;
+      if (status === 409) {
         return setError(
           form,
           'file',
           'The uploaded file contains duplicate panoId values. Please remove duplicates and try again.'
         );
       }
+      if ((status === 400 || status === 403) && value?.message) {
+        return setError(form, 'file', escapeHtml(value.message));
+      }
       throwApiError(apiError, { 500: 'Failed to upload locations' });
     }
 
-    return message(form, { numberOfLocations: data.count });
+    return message(form, {
+      numberOfLocations: data.count,
+      ignoredCount: data.ignoredCount,
+      conflictCount: data.conflictCount
+    });
   },
   uploadMetas: async ({ request, params }) => {
     const groupId = getGroupId(params);

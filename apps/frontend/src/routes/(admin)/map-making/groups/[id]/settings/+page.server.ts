@@ -9,12 +9,18 @@ const permissionDeleteSchema = z.object({
   permissionId: z.coerce.number().int()
 });
 
+const permissionRoleSchema = z.object({
+  permissionId: z.coerce.number().int(),
+  role: z.enum(['owner', 'editor'])
+});
+
 const settingsSchema = z.object({
   syncIncludeLocationsNotOnStreetView: z.boolean()
 });
 
 const permissionCreateSchema = z.object({
-  username: z.string().transform((val) => (val.startsWith('@') ? val.slice(1) : val))
+  username: z.string().transform((val) => (val.startsWith('@') ? val.slice(1) : val)),
+  role: z.enum(['owner', 'editor']).default('editor')
 });
 
 export const load = async ({ params, locals }) => {
@@ -34,6 +40,7 @@ export const load = async ({ params, locals }) => {
   );
   return {
     group,
+    role: data.role,
     user: locals.user!,
     permissionCreateForm,
     settingsForm
@@ -97,7 +104,8 @@ export const actions = {
     }
 
     const { error: apiError } = await api.internal['map-groups']({ id: groupId }).permissions.post({
-      username: form.data.username
+      username: form.data.username,
+      role: form.data.role
     });
 
     if (apiError) {
@@ -107,6 +115,39 @@ export const actions = {
       }
       throwApiError(apiError, { 500: 'Failed to create permission' });
     }
+  },
+  updatePermissionRole: async ({ request, params }) => {
+    const groupId = getGroupId(params);
+    const formData = await request.formData();
+    const rawData = Object.fromEntries(formData);
+
+    const parsed = permissionRoleSchema.safeParse(rawData);
+    if (!parsed.success) {
+      const { fieldErrors } = parsed.error.flatten();
+      return fail(400, {
+        errors: fieldErrors,
+        formData: rawData
+      });
+    }
+
+    const { error: apiError } = await api.internal['map-groups']({ id: groupId })
+      .permissions({ permissionId: parsed.data.permissionId })
+      .patch({ role: parsed.data.role });
+
+    if (apiError) {
+      const value = apiError.value as { field?: string; message?: string } | undefined;
+      if ((apiError.status as number) === 400 && value?.message) {
+        return fail(400, {
+          errors: { permissionId: [value.message] },
+          formData: rawData
+        });
+      }
+      throwApiError(apiError, { 500: 'Failed to update role' });
+    }
+
+    return {
+      success: true
+    };
   },
   updateSettings: async ({ params, request }) => {
     const form = await superValidate(request, zod4(settingsSchema));

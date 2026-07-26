@@ -79,7 +79,10 @@
 </svelte:head>
 
 <div>
-  <DashNavBar groupId={data.group.id} groupName={data.group.name}></DashNavBar>
+  <DashNavBar
+    groupId={data.group.id}
+    groupName={data.group.name}
+    canRename={data.group.role === 'owner'}></DashNavBar>
 
   <div class="flex items-center justify-between mb-4">
     <h1 class="text-2xl font-semibold">Meta Request Statistics</h1>

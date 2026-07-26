@@ -20,7 +20,12 @@ export async function ensureMapAccess(userId: string, mapId: number) {
   }
 }
 
-export async function ensurePermissions(userId: string, groupId: number) {
+// Resolves the caller's role in a group: 'owner' | 'editor'.
+// Superadmins are treated as owners of every group.
+export async function getGroupRole(
+  userId: string,
+  groupId: number,
+): Promise<'owner' | 'editor' | null> {
   const [permission, superadminUser] = await Promise.all([
     db.$primary.query.mapGroupPermissions.findFirst({
       where: and(
@@ -33,7 +38,23 @@ export async function ensurePermissions(userId: string, groupId: number) {
     }),
   ]);
 
-  if (!(permission || superadminUser)) {
+  if (superadminUser) {
+    return 'owner';
+  }
+  return permission?.role ?? null;
+}
+
+export async function ensurePermissions(userId: string, groupId: number) {
+  const role = await getGroupRole(userId, groupId);
+  if (!role) {
+    throw new PermissionsDeniedError();
+  }
+  return role;
+}
+
+export async function ensureOwner(userId: string, groupId: number) {
+  const role = await getGroupRole(userId, groupId);
+  if (role !== 'owner') {
     throw new PermissionsDeniedError();
   }
 }

@@ -50,11 +50,27 @@
   let selectedMeta = $derived(metas.find((meta) => meta.id == selectedMetaId) ?? null);
   let metaIds = $derived(metas.map((m) => m.id));
 
-  let numberOfLocationsUploaded = $state(0);
+  type UploadResult = { count: number; ignoredCount: number; conflictCount: number };
+  let uploadResult = $state<UploadResult | null>(null);
+  let isOwner = $derived(data.role === 'owner');
 
   $effect(() => {
-    if (numberOfLocationsUploaded != 0) {
-      toast.push(`Successfully uploaded ${numberOfLocationsUploaded} locations!`, {
+    if (!uploadResult) return;
+    const { count, ignoredCount, conflictCount } = uploadResult;
+    const suffixes = [
+      ignoredCount > 0 ? `${ignoredCount} locations with other tags were ignored` : '',
+      conflictCount > 0
+        ? `${conflictCount} locations were skipped because they already belong to another meta`
+        : ''
+    ].filter(Boolean);
+    const suffix = suffixes.length ? ` (${suffixes.join('; ')})` : '';
+    if (count === 0) {
+      toast.push(`No locations were uploaded${suffix}`, {
+        duration: 8000,
+        theme: { '--toastBackground': 'red', '--toastColor': 'white' }
+      });
+    } else {
+      toast.push(`Successfully uploaded ${count} locations!${suffix}`, {
         duration: 5000
       });
     }
@@ -147,7 +163,7 @@
 {/snippet}
 
 <div>
-  <DashNavBar groupId={data.group.id} groupName={data.group.name}></DashNavBar>
+  <DashNavBar groupId={data.group.id} groupName={data.group.name} canRename={isOwner}></DashNavBar>
   <div class="flex flex-wrap items-center">
     <div class="grow flex items-center justify-end">
       {#await data.locationsNotOnStreetViewCount then locationsNotOnStreetViewCount}
@@ -197,7 +213,15 @@
           };
         }}>
         {#if browser}
-          {#if data.group.hasUnsyncedData}
+          {#if !isOwner}
+            {#if data.group.hasUnsyncedData}
+              <Tooltip content="There are unsynced changes. Only group owners can sync them live.">
+                <Button variant="ghost" class="ml-3 opacity-50" type="button" disabled>
+                  Sync UserScript
+                </Button>
+              </Tooltip>
+            {/if}
+          {:else if data.group.hasUnsyncedData}
             <Tooltip
               content="People playing your map will only see changes after you synchronize the changes!">
               <Button
@@ -248,21 +272,23 @@
               </div>
             </DropdownMenu.Item>
 
-            <DropdownMenu.Item onclick={() => (isMetasUploadDialogOpen = true)}>
-              <div class="flex items-center gap-2">
-                <Icon
-                  icon="mi:document"
-                  width="1rem"
-                  height="1rem"
-                  class="text-gray-800 dark:text-gray-300" />
-                <Icon
-                  icon="material-symbols:upload-rounded"
-                  width="1rem"
-                  height="1rem"
-                  class="text-gray-800 dark:text-gray-300" />
-                <span>Upload metas</span>
-              </div>
-            </DropdownMenu.Item>
+            {#if isOwner}
+              <DropdownMenu.Item onclick={() => (isMetasUploadDialogOpen = true)}>
+                <div class="flex items-center gap-2">
+                  <Icon
+                    icon="mi:document"
+                    width="1rem"
+                    height="1rem"
+                    class="text-gray-800 dark:text-gray-300" />
+                  <Icon
+                    icon="material-symbols:upload-rounded"
+                    width="1rem"
+                    height="1rem"
+                    class="text-gray-800 dark:text-gray-300" />
+                  <span>Upload metas</span>
+                </div>
+              </DropdownMenu.Item>
+            {/if}
 
             <DropdownMenu.Item
               onclick={() =>
@@ -396,10 +422,16 @@
 
 <MapUploadDialog
   bind:isUploadDialogOpen={isMapUploadDialogOpen}
-  bind:numberOfLocationsUploaded
-  data={data.mapUploadForm} />
+  bind:uploadResult
+  data={data.mapUploadForm}
+  role={data.role}
+  metaTags={metas.map((meta) => meta.tagName)} />
 
-<MetasUploadDialog bind:isUploadDialogOpen={isMetasUploadDialogOpen} data={data.metasUploadForm} />
+{#if isOwner}
+  <MetasUploadDialog
+    bind:isUploadDialogOpen={isMetasUploadDialogOpen}
+    data={data.metasUploadForm} />
+{/if}
 
 <MassActionDialogs
   bind:isAddLevelsDialogOpen

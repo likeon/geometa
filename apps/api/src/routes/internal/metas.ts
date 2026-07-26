@@ -9,6 +9,7 @@ import {
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
+import { logChange, metaSnapshot } from '@api/lib/internal/changes';
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { generateRandomString, isUniqueViolation } from '@api/lib/utils/common';
 import { markdown2Html } from '@api/lib/utils/markdown';
@@ -20,8 +21,8 @@ import sharp from 'sharp';
 type Tx = Parameters<Parameters<typeof db.$primary.transaction>[0]>[0];
 
 // Copies a meta (its images, its tag's locations, and optionally its level
-// assignments) into another group inside the given transaction. Returns true if
-// the meta was inserted, false if one with the same tag already existed there.
+// assignments) into another group inside the given transaction. Returns the new
+// meta id, or null if one with the same tag already existed there.
 // copyLevels is false for /copy and true for /share, preserving their behaviors.
 async function copyMetaToGroup(
   tx: Tx,
@@ -29,7 +30,7 @@ async function copyMetaToGroup(
   targetGroupId: number,
   currentTimestamp: number,
   copyLevels: boolean,
-): Promise<boolean> {
+): Promise<number | null> {
   const { id, mapGroupId, ...cleanedMeta } = meta;
 
   const insertResult = await tx
@@ -42,7 +43,7 @@ async function copyMetaToGroup(
     .onConflictDoNothing()
     .returning({ insertedId: metas.id });
   if (insertResult.length === 0) {
-    return false;
+    return null;
   }
   const newMetaId = insertResult[0].insertedId;
 
@@ -113,7 +114,7 @@ async function copyMetaToGroup(
     }
   }
 
-  return true;
+  return newMetaId;
 }
 
 class ImageNotFoundError extends Error {
@@ -174,6 +175,15 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           .update(metas)
           .set({ modifiedAt: Math.floor(Date.now() / 1000) })
           .where(eq(metas.id, params.id));
+        await logChange(tx, {
+          mapGroupId: meta.mapGroupId,
+          userId,
+          entityType: 'meta_image',
+          entityId: meta.id,
+          entityLabel: meta.tagName,
+          operation: 'create',
+          newValue: { imageUrl },
+        });
       });
       return {
         imageUrl: imageUrl,
@@ -238,6 +248,15 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           .update(metas)
           .set({ modifiedAt: Math.floor(Date.now() / 1000) })
           .where(eq(metas.id, params.id));
+        await logChange(tx, {
+          mapGroupId: meta.mapGroupId,
+          userId,
+          entityType: 'meta_image',
+          entityId: meta.id,
+          entityLabel: meta.tagName,
+          operation: 'update',
+          newValue: { reorderedImages: body.updates.length },
+        });
       });
 
       return status(200, { message: 'Image order updated successfully.' });
@@ -274,14 +293,44 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       const footerHtml = await markdown2Html(dataNoId.footer);
       const currentTimestamp = Math.floor(Date.now() / 1000);
 
+      const groupLevels = await db.$primary.query.levels.findMany({
+        where: eq(levels.mapGroupId, body.mapGroupId),
+        columns: { id: true, name: true },
+      });
+      const levelNameById = new Map(
+        groupLevels.map((level) => [level.id, level.name]),
+      );
+      const levelNames = (ids: number[]) =>
+        ids
+          .map((levelId) => levelNameById.get(levelId) ?? `#${levelId}`)
+          .sort();
+
+      let savedData: Meta | undefined;
+      let savedLevelIds: number[] = [];
       if (id !== undefined) {
-        const savedData = await db.$primary.query.metas.findFirst({
+        savedData = await db.$primary.query.metas.findFirst({
           where: eq(metas.id, id),
         });
         if (!savedData) {
           return status(404);
         }
         await ensurePermissions(userId, savedData.mapGroupId);
+        savedLevelIds = (
+          await db.$primary
+            .select({ levelId: metaLevels.levelId })
+            .from(metaLevels)
+            .where(eq(metaLevels.metaId, id))
+        ).map((row) => row.levelId);
+        if (savedData.mapGroupId !== body.mapGroupId) {
+          // the old level assignments belong to the source group
+          const sourceGroupLevels = await db.$primary.query.levels.findMany({
+            where: eq(levels.mapGroupId, savedData.mapGroupId),
+            columns: { id: true, name: true },
+          });
+          for (const level of sourceGroupLevels) {
+            levelNameById.set(level.id, level.name);
+          }
+        }
       }
 
       try {
@@ -324,6 +373,54 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
               .insert(metaLevels)
               .values(levelIds.map((levelId) => ({ levelId, metaId })))
               .onConflictDoNothing();
+          }
+          const oldSnapshot = savedData
+            ? {
+                ...metaSnapshot(savedData),
+                levels: levelNames(savedLevelIds),
+              }
+            : null;
+          const newSnapshot = {
+            ...metaSnapshot(dataNoId),
+            levels: levelNames(levelIds),
+          };
+          if (savedData && savedData.mapGroupId !== body.mapGroupId) {
+            // moved between groups: log the departure and the arrival
+            await logChange(tx, [
+              {
+                mapGroupId: savedData.mapGroupId,
+                userId,
+                entityType: 'meta',
+                entityId: metaId,
+                entityLabel: savedData.tagName,
+                operation: 'delete',
+                oldValue: oldSnapshot,
+                newValue: { movedToGroupId: body.mapGroupId },
+              },
+              {
+                mapGroupId: body.mapGroupId,
+                userId,
+                entityType: 'meta',
+                entityId: metaId,
+                entityLabel: dataNoId.tagName,
+                operation: 'create',
+                newValue: {
+                  ...newSnapshot,
+                  movedFromGroupId: savedData.mapGroupId,
+                },
+              },
+            ]);
+          } else {
+            await logChange(tx, {
+              mapGroupId: body.mapGroupId,
+              userId,
+              entityType: 'meta',
+              entityId: metaId,
+              entityLabel: dataNoId.tagName,
+              operation: id === undefined ? 'create' : 'update',
+              oldValue: oldSnapshot,
+              newValue: newSnapshot,
+            });
           }
           return metaId;
         });
@@ -371,7 +468,21 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       }
       await ensurePermissions(userId, mapGroupIds[0]);
 
-      await db.delete(metas).where(inArray(metas.id, body.ids));
+      await db.$primary.transaction(async (tx) => {
+        await tx.delete(metas).where(inArray(metas.id, body.ids));
+        await logChange(
+          tx,
+          metasToDelete.map((meta) => ({
+            mapGroupId: meta.mapGroupId,
+            userId,
+            entityType: 'meta' as const,
+            entityId: meta.id,
+            entityLabel: meta.tagName,
+            operation: 'delete' as const,
+            oldValue: metaSnapshot(meta),
+          })),
+        );
+      });
       return status(200);
     },
     {
@@ -443,7 +554,10 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
               .insert(metaLevels)
               .values(metaLevelInserts)
               .onConflictDoNothing()
-              .returning({ id: metaLevels.id })
+              .returning({
+                metaId: metaLevels.metaId,
+                levelId: metaLevels.levelId,
+              })
           : [];
         if (inserted.length === 0) {
           return 0;
@@ -456,6 +570,39 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           .update(mapGroups)
           .set({ syncedAt: null })
           .where(inArray(mapGroups.id, uniqueMapGroupIds));
+        const insertedMetaIds = new Set(inserted.map((row) => row.metaId));
+        const insertedLevelIds = new Set(inserted.map((row) => row.levelId));
+        await logChange(
+          tx,
+          uniqueMapGroupIds.flatMap((mapGroupId) => {
+            const groupMetas = selectedMetas.filter(
+              (meta) =>
+                meta.mapGroupId === mapGroupId && insertedMetaIds.has(meta.id),
+            );
+            if (groupMetas.length === 0) {
+              return [];
+            }
+            return [
+              {
+                mapGroupId,
+                userId,
+                entityType: 'meta_levels' as const,
+                entityLabel: `${groupMetas.length} metas`,
+                operation: 'update' as const,
+                newValue: {
+                  metaTags: groupMetas.map((meta) => meta.tagName),
+                  levelNames: selectedLevels
+                    .filter(
+                      (level) =>
+                        level.mapGroupId === mapGroupId &&
+                        insertedLevelIds.has(level.id),
+                    )
+                    .map((level) => level.name),
+                },
+              },
+            ];
+          }),
+        );
         return inserted.length;
       });
 
@@ -508,11 +655,32 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
 
       for (const meta of metasToShare) {
         try {
-          const inserted = await db.$primary.transaction((tx) =>
-            copyMetaToGroup(tx, meta, targetGroupId, currentTimestamp, true),
-          );
+          const newMetaId = await db.$primary.transaction(async (tx) => {
+            const insertedId = await copyMetaToGroup(
+              tx,
+              meta,
+              targetGroupId,
+              currentTimestamp,
+              true,
+            );
+            if (insertedId !== null) {
+              await logChange(tx, {
+                mapGroupId: targetGroupId,
+                userId,
+                entityType: 'meta',
+                entityId: insertedId,
+                entityLabel: meta.tagName,
+                operation: 'create',
+                newValue: {
+                  ...metaSnapshot(meta),
+                  sharedFromGroupId: meta.mapGroupId,
+                },
+              });
+            }
+            return insertedId;
+          });
           // count only after the transaction commits, so a rollback isn't reported as success
-          if (inserted) {
+          if (newMetaId !== null) {
             successfulCopies.push(meta.id);
           }
         } catch (error) {
@@ -552,9 +720,29 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       const currentTimestamp = Math.floor(Date.now() / 1000);
 
       // copyLevels is false here: /copy intentionally does not copy level assignments
-      await db.$primary.transaction((tx) =>
-        copyMetaToGroup(tx, meta, targetGroupId, currentTimestamp, false),
-      );
+      await db.$primary.transaction(async (tx) => {
+        const insertedId = await copyMetaToGroup(
+          tx,
+          meta,
+          targetGroupId,
+          currentTimestamp,
+          false,
+        );
+        if (insertedId !== null) {
+          await logChange(tx, {
+            mapGroupId: targetGroupId,
+            userId,
+            entityType: 'meta',
+            entityId: insertedId,
+            entityLabel: meta.tagName,
+            operation: 'create',
+            newValue: {
+              ...metaSnapshot(meta),
+              sharedFromGroupId: meta.mapGroupId,
+            },
+          });
+        }
+      });
       return status(200);
     },
     {
@@ -585,6 +773,15 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           .update(metas)
           .set({ modifiedAt: Math.floor(Date.now() / 1000) })
           .where(eq(metas.id, savedImage[0].metas.id));
+        await logChange(tx, {
+          mapGroupId: savedImage[0].metas.mapGroupId,
+          userId,
+          entityType: 'meta_image',
+          entityId: savedImage[0].metas.id,
+          entityLabel: savedImage[0].metas.tagName,
+          operation: 'delete',
+          oldValue: { imageUrl: savedImage[0].meta_images.image_url },
+        });
       });
 
       return { imageId };

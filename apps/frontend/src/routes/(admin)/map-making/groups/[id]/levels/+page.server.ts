@@ -17,6 +17,7 @@ export const load = async ({ params }) => {
   const levelForm = await superValidate(zod4(insertLevelsSchema));
   return {
     group: data.group,
+    role: data.role,
     levelForm
   };
 };

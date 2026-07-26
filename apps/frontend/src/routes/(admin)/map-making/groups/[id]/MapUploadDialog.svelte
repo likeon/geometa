@@ -6,30 +6,55 @@
   import { Input } from '$lib/components/ui/input';
   import * as Dialog from '$lib/components/ui/dialog/index';
   import * as Form from '$lib/components/ui/form';
+  import * as Command from '$lib/components/ui/command';
+  import { Popover, PopoverTrigger, PopoverContent } from '$lib/components/ui/popover';
   import { type MapUploadSchema } from '$lib/form-schema';
   import { Button } from '$lib/components/ui/button';
+  import ChevronsUpDown from '@lucide/svelte/icons/chevrons-up-down';
+  import Check from '@lucide/svelte/icons/check';
   import UploadModeInfo from './UploadModeInfo.svelte';
   import { createPasteUpload } from './paste-upload.svelte';
 
   interface Props {
     isUploadDialogOpen: boolean;
-    numberOfLocationsUploaded: number;
+    uploadResult: { count: number; ignoredCount: number; conflictCount: number } | null;
     data: SuperValidated<Infer<MapUploadSchema>>;
+    role: 'owner' | 'editor';
+    metaTags: string[];
   }
   let {
     isUploadDialogOpen = $bindable(),
-    numberOfLocationsUploaded = $bindable(),
-    data
+    uploadResult = $bindable(),
+    data,
+    role,
+    metaTags
   }: Props = $props();
+  const isEditor = $derived(role === 'editor');
+  let scopeTagPopoverOpen = $state(false);
   // svelte-ignore state_referenced_locally
   const form = superForm(data, {
     onResult({ result }) {
       if (result.type == 'success') {
-        numberOfLocationsUploaded = result.data?.form.message.numberOfLocations || 0;
+        const message = result.data?.form.message;
+        // fresh object every time so the toast effect fires even for
+        // conflict-only or repeated outcomes
+        uploadResult = {
+          count: message?.numberOfLocations || 0,
+          ignoredCount: message?.ignoredCount || 0,
+          conflictCount: message?.conflictCount || 0
+        };
         isUploadDialogOpen = false;
       }
     },
     onSubmit({ formData, cancel }) {
+      if (isEditor && !formData.get('scopeTag')) {
+        errors.update((e) => ({
+          ...e,
+          scopeTag: ['Select the meta to upload for first']
+        }));
+        cancel();
+        return;
+      }
       if ((uploadMode === 'full' || uploadMode === 'tagReplace') && !confirmFullUpload()) {
         cancel();
         isUploadDialogOpen = false;
@@ -38,7 +63,7 @@
     }
   });
 
-  const { form: formData, enhance, submit, reset } = form;
+  const { form: formData, errors, enhance, submit, reset } = form;
   const uploadMode = $derived($formData.uploadMode);
   const file = fileProxy(form, 'file');
 
@@ -67,7 +92,12 @@
     <Dialog.Header>
       <Dialog.Title>Upload Locations</Dialog.Title>
       <Dialog.Description>
-        Upload map JSON from map-making.app to add or update locations in this group.
+        {#if isEditor}
+          Upload map JSON from map-making.app to add or update locations for a specific meta. Only
+          locations tagged with the selected meta will be taken from the file.
+        {:else}
+          Upload map JSON from map-making.app to add or update locations in this group.
+        {/if}
       </Dialog.Description>
     </Dialog.Header>
 
@@ -114,24 +144,82 @@
                     onclick={() => ($formData.uploadMode = 'tagReplace')}>
                     <RadioGroupItem value="tagReplace" />
                     <span class="text-sm font-normal">
-                      Tag-based replacement - Replace only locations with uploaded tags
+                      {#if isEditor}
+                        Replacement - Replace all locations of the selected meta
+                      {:else}
+                        Tag-based replacement - Replace only locations with uploaded tags
+                      {/if}
                     </span>
                   </button>
-                  <button
-                    type="button"
-                    class="flex items-center space-x-2 cursor-pointer text-left"
-                    onclick={() => ($formData.uploadMode = 'full')}>
-                    <RadioGroupItem value="full" />
-                    <span class="text-sm font-normal">
-                      Full replacement - Replace all locations in the group
-                    </span>
-                  </button>
+                  {#if !isEditor}
+                    <button
+                      type="button"
+                      class="flex items-center space-x-2 cursor-pointer text-left"
+                      onclick={() => ($formData.uploadMode = 'full')}>
+                      <RadioGroupItem value="full" />
+                      <span class="text-sm font-normal">
+                        Full replacement - Replace all locations in the group
+                      </span>
+                    </button>
+                  {/if}
                 </RadioGroup>
               </div>
             {/snippet}
           </Form.Control>
           <Form.FieldErrors />
         </Form.Field>
+        {#if isEditor}
+          <Form.Field {form} name="scopeTag">
+            <Form.Control>
+              {#snippet children({ props })}
+                <div class="space-y-2">
+                  <label for={props.id} class="text-sm font-medium">Meta</label>
+                  <input type="hidden" name="scopeTag" value={$formData.scopeTag ?? ''} />
+                  <Popover bind:open={scopeTagPopoverOpen}>
+                    <PopoverTrigger>
+                      {#snippet child({ props: triggerProps })}
+                        <Button
+                          {...props}
+                          {...triggerProps}
+                          variant="outline"
+                          role="combobox"
+                          aria-expanded={scopeTagPopoverOpen}
+                          class="w-full justify-between font-normal">
+                          {$formData.scopeTag || 'Select the meta to upload for'}
+                          <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                        </Button>
+                      {/snippet}
+                    </PopoverTrigger>
+                    <PopoverContent align="start" class="w-(--bits-popover-anchor-width) p-0">
+                      <Command.Root>
+                        <Command.Input placeholder="Search metas..." />
+                        <Command.List class="max-h-52">
+                          <Command.Empty>No meta found.</Command.Empty>
+                          {#each metaTags as tag (tag)}
+                            <Command.Item
+                              value={tag}
+                              onSelect={() => {
+                                $formData.scopeTag = tag;
+                                errors.update((e) => ({ ...e, scopeTag: undefined }));
+                                scopeTagPopoverOpen = false;
+                              }}>
+                              <Check
+                                class="mr-2 h-4 w-4 {$formData.scopeTag === tag
+                                  ? 'opacity-100'
+                                  : 'opacity-0'}" />
+                              {tag}
+                            </Command.Item>
+                          {/each}
+                        </Command.List>
+                      </Command.Root>
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              {/snippet}
+            </Form.Control>
+            <Form.FieldErrors />
+          </Form.Field>
+        {/if}
         <Form.Field {form} name="file">
           <Form.Control>
             {#snippet children({ props })}
@@ -142,6 +230,7 @@
                   type="file"
                   accept="application/json"
                   name="file"
+                  disabled={isEditor && !$formData.scopeTag}
                   bind:files={$file}
                   onchange={() => submit()} />
               </div>

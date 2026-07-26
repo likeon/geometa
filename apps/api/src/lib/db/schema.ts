@@ -11,6 +11,7 @@ import {
   check,
   index,
   integer,
+  jsonb,
   pgTable,
   pgView,
   primaryKey,
@@ -298,6 +299,11 @@ export const mapGroupPermissions = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => users.id, { onDelete: 'cascade' }),
+    // 'owner' default so permission rows inserted by pre-role code paths
+    // during a rolling deploy keep the historical full-access behavior
+    role: text('role', { enum: ['owner', 'editor'] })
+      .notNull()
+      .default('owner'),
   },
   (t) => ({
     mapGroupPermissionsUnique: uniqueIndex('map_group_permissions_unique').on(
@@ -306,6 +312,58 @@ export const mapGroupPermissions = pgTable(
     ),
   }),
 );
+export const mapGroupChanges = pgTable(
+  'map_group_changes',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    mapGroupId: integer('map_group_id')
+      .notNull()
+      .references(() => mapGroups.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id),
+    entityType: text('entity_type', {
+      enum: [
+        'meta',
+        'meta_image',
+        'meta_levels',
+        'location_batch',
+        'level',
+        'map',
+        'group',
+        'settings',
+        'sync',
+      ],
+    }).notNull(),
+    entityId: integer('entity_id'),
+    entityLabel: text('entity_label'),
+    operation: text('operation', {
+      enum: ['create', 'update', 'delete'],
+    }).notNull(),
+    oldValue: jsonb('old_value'),
+    newValue: jsonb('new_value'),
+    createdAt: integer('created_at').notNull(),
+  },
+  (t) => [
+    // matches the changes-page ORDER BY (created_at DESC, id DESC) so keyset
+    // pagination never sorts large same-second tie groups
+    index('map_group_changes_group_created_idx').on(
+      t.mapGroupId,
+      t.createdAt.desc(),
+      t.id.desc(),
+    ),
+  ],
+);
+export const mapGroupChangesRelations = relations(
+  mapGroupChanges,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [mapGroupChanges.userId],
+      references: [users.id],
+    }),
+  }),
+);
+
 export const mapGroupPermissionsRelations = relations(
   mapGroupPermissions,
   ({ one }) => ({

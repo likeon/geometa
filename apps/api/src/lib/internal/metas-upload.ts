@@ -1,5 +1,6 @@
 import { levels, metaImages, metaLevels, metas } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
+import { logChange, metaSnapshot } from '@api/lib/internal/changes';
 import { markdown2Html } from '@api/lib/utils/markdown';
 import { and, eq, inArray, notInArray, sql } from 'drizzle-orm';
 
@@ -22,6 +23,7 @@ export type MetaUploadItem = {
 
 export async function uploadMetas(
   groupId: number,
+  userId: string,
   items: MetaUploadItem[],
   partialUpload: boolean,
   autoCreateLevels: boolean,
@@ -60,6 +62,47 @@ export async function uploadMetas(
       levelsData.map((level) => [level.name, level.id]),
     );
 
+    const oldMetas = await tx
+      .select()
+      .from(metas)
+      .where(
+        and(
+          eq(metas.mapGroupId, groupId),
+          inArray(
+            metas.tagName,
+            items.map((item) => item.tagName),
+          ),
+        ),
+      );
+    const oldMetaByTag = new Map(oldMetas.map((meta) => [meta.tagName, meta]));
+
+    // current level/image assignments of the updated metas, so the change log
+    // captures uploads that only reassign levels or swap images
+    const oldMetaIds = oldMetas.map((meta) => meta.id);
+    const oldLevelNamesByMetaId = new Map<number, string[]>();
+    const oldImagesByMetaId = new Map<number, string[]>();
+    if (oldMetaIds.length > 0) {
+      const oldMetaLevels = await tx
+        .select({ metaId: metaLevels.metaId, name: levels.name })
+        .from(metaLevels)
+        .innerJoin(levels, eq(levels.id, metaLevels.levelId))
+        .where(inArray(metaLevels.metaId, oldMetaIds));
+      for (const row of oldMetaLevels) {
+        const list = oldLevelNamesByMetaId.get(row.metaId) ?? [];
+        list.push(row.name);
+        oldLevelNamesByMetaId.set(row.metaId, list);
+      }
+      const oldMetaImages = await tx
+        .select({ metaId: metaImages.metaId, url: metaImages.image_url })
+        .from(metaImages)
+        .where(inArray(metaImages.metaId, oldMetaIds));
+      for (const row of oldMetaImages) {
+        const list = oldImagesByMetaId.get(row.metaId) ?? [];
+        list.push(row.url);
+        oldImagesByMetaId.set(row.metaId, list);
+      }
+    }
+
     const metasInsertResult = await tx
       .insert(metas)
       .values(metasInsertData)
@@ -75,15 +118,87 @@ export async function uploadMetas(
         },
       })
       .returning({ id: metas.id, tagName: metas.tagName });
+    const metaIdByTag = new Map(
+      metasInsertResult.map((row) => [row.tagName, row.id]),
+    );
+    await logChange(
+      tx,
+      items.map((item) => {
+        const oldMeta = oldMetaByTag.get(item.tagName);
+        const oldValue: Record<string, unknown> | null = oldMeta
+          ? { ...metaSnapshot(oldMeta) }
+          : null;
+        // mirror what the upsert actually persists (footer falls back to
+        // the column default '', noteFromPlonkit is untouched on conflict)
+        const newValue: Record<string, unknown> = {
+          ...metaSnapshot({
+            tagName: item.tagName,
+            name: item.metaName,
+            note: item.note,
+            footer: item.footer || '',
+            noteFromPlonkit: oldMeta?.noteFromPlonkit ?? false,
+          }),
+        };
+        // levels/images are only rewritten when the file provides them
+        if (item.levels != null) {
+          if (oldValue && oldMeta) {
+            oldValue.levels = [
+              ...(oldLevelNamesByMetaId.get(oldMeta.id) ?? []),
+            ].sort();
+          }
+          newValue.levels = [...item.levels].sort();
+        }
+        if (item.images != null) {
+          if (oldValue && oldMeta) {
+            oldValue.images = [
+              ...(oldImagesByMetaId.get(oldMeta.id) ?? []),
+            ].sort();
+          }
+          newValue.images = [...item.images].sort();
+        }
+        return {
+          mapGroupId: groupId,
+          userId,
+          entityType: 'meta' as const,
+          entityId: metaIdByTag.get(item.tagName),
+          entityLabel: item.tagName,
+          operation: oldMeta ? ('update' as const) : ('create' as const),
+          oldValue,
+          newValue,
+        };
+      }),
+    );
     if (!partialUpload) {
-      await tx.delete(metas).where(
-        and(
-          eq(metas.mapGroupId, groupId),
-          notInArray(
-            metas.id,
-            metasInsertResult.map((row) => row.id),
+      const deletedMetas = await tx
+        .delete(metas)
+        .where(
+          and(
+            eq(metas.mapGroupId, groupId),
+            notInArray(
+              metas.id,
+              metasInsertResult.map((row) => row.id),
+            ),
           ),
-        ),
+        )
+        .returning({
+          id: metas.id,
+          tagName: metas.tagName,
+          name: metas.name,
+          note: metas.note,
+          footer: metas.footer,
+          noteFromPlonkit: metas.noteFromPlonkit,
+        });
+      await logChange(
+        tx,
+        deletedMetas.map((meta) => ({
+          mapGroupId: groupId,
+          userId,
+          entityType: 'meta' as const,
+          entityId: meta.id,
+          entityLabel: meta.tagName,
+          operation: 'delete' as const,
+          oldValue: metaSnapshot(meta),
+        })),
       );
     }
     const metaTagNameToId: Map<string, number> = new Map(
@@ -117,6 +232,18 @@ export async function uploadMetas(
         insertedLevels.forEach((level) => {
           levelIdByName.set(level.name, level.id);
         });
+        await logChange(
+          tx,
+          insertedLevels.map((level) => ({
+            mapGroupId: groupId,
+            userId,
+            entityType: 'level' as const,
+            entityId: level.id,
+            entityLabel: level.name,
+            operation: 'create' as const,
+            newValue: { name: level.name, autoCreatedByUpload: true },
+          })),
+        );
       }
     }
 

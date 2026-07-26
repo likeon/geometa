@@ -7,6 +7,8 @@
   import { columns } from './columns';
   import LevelEditDialog from '$routes/(admin)/map-making/groups/[id]/levels/LevelEditDialog.svelte';
 
+  let isOwner = $derived(data.role === 'owner');
+  let tableColumns = $derived(isOwner ? columns : columns.filter((c) => c.id !== 'actions'));
   let levels = $derived(data.group.levels);
 
   let selectedLevelId = $state(-1);
@@ -24,15 +26,17 @@
 </script>
 
 <div>
-  <DashNavBar groupId={data.group.id} groupName={data.group.name}></DashNavBar>
+  <DashNavBar groupId={data.group.id} groupName={data.group.name} canRename={isOwner}></DashNavBar>
   <div class="flex flex-wrap items-center">
     <div class="grow flex items-center justify-end">
-      <Button onclick={addLevel}>Add level</Button>
+      {#if isOwner}
+        <Button onclick={addLevel}>Add level</Button>
+      {/if}
     </div>
   </div>
   <div class="mt-5">
     <BaseTable
-      {columns}
+      columns={tableColumns}
       data={levels}
       bind:selectedId={selectedLevelId}
       bind:isDialogOpen={isLevelDialogOpen}
@@ -40,8 +44,10 @@
   </div>
 </div>
 
-<LevelEditDialog
-  bind:isLevelDialogOpen
-  levelForm={data.levelForm}
-  mapGroupId={data.group.id}
-  {selectedLevel} />
+{#if isOwner}
+  <LevelEditDialog
+    bind:isLevelDialogOpen
+    levelForm={data.levelForm}
+    mapGroupId={data.group.id}
+    {selectedLevel} />
+{/if}
