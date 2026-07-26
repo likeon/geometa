@@ -17,7 +17,7 @@
 
   interface Props {
     isUploadDialogOpen: boolean;
-    uploadResult: { count: number; ignoredCount: number; conflictCount: number } | null;
+    uploadResult: { count: number; ignoredCount: number } | null;
     data: SuperValidated<Infer<MapUploadSchema>>;
     role: 'owner' | 'editor';
     metaTags: string[];
@@ -40,8 +40,7 @@
         // conflict-only or repeated outcomes
         uploadResult = {
           count: message?.numberOfLocations || 0,
-          ignoredCount: message?.ignoredCount || 0,
-          conflictCount: message?.conflictCount || 0
+          ignoredCount: message?.ignoredCount || 0
         };
         isUploadDialogOpen = false;
       }

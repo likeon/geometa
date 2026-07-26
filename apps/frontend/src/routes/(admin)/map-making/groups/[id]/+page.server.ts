@@ -68,7 +68,7 @@ const mapJsonSchema = z.object({
       zoom: z.number(),
       panoId: z.string().nullable(),
       extra: z.object({
-        tags: z.string().array().length(1),
+        tags: z.string().array().min(1),
         panoId: z.string().optional().nullable(),
         panoDate: z.string().optional().nullable()
       })
@@ -289,8 +289,6 @@ export const actions = {
           const locationNumber = locationIndex + 1;
           if (issue.code === 'too_small' || issue.message === 'Required') {
             message = `doesn't have a tag`;
-          } else if (issue.code === 'too_big') {
-            message = `has more than one tag`;
           }
 
           // Return HTML with link if panoId exists
@@ -324,7 +322,7 @@ export const actions = {
       pitch: location.pitch,
       zoom: location.zoom,
       panoId: location.panoId ?? location.extra.panoId!,
-      extraTag: location.extra.tags[0],
+      tags: location.extra.tags,
       extraPanoId: location.extra.panoId || null,
       extraPanoDate: location.extra.panoDate
     }));
@@ -355,8 +353,7 @@ export const actions = {
 
     return message(form, {
       numberOfLocations: data.count,
-      ignoredCount: data.ignoredCount,
-      conflictCount: data.conflictCount
+      ignoredCount: data.ignoredCount
     });
   },
   uploadMetas: async ({ request, params }) => {

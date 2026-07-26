@@ -56,26 +56,31 @@ export const userscriptRouter = new Elysia({
       // just keep to be safe
       set.status = 200;
 
-      const [meta] = metaResult;
-      // hack for now, should country be marked as not null in schema since we will always have it?
-      const country = meta.country || '';
+      const metaList = metaResult.map((meta) => {
+        // hack for now, should country be marked as not null in schema since we will always have it?
+        const country = meta.country || '';
 
-      let footer = generateFooter(
-        meta.noteFromPlonkit,
-        country,
-        meta.footer,
-        meta.mapFooter,
-      );
-      if (meta.isPersonalMap && meta.mapAuthors && meta.mapName) {
-        footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
-      }
-      return {
-        country: country,
-        metaName: meta.name,
-        note: meta.note,
-        images: meta.images,
-        footer: footer,
-      };
+        let footer = generateFooter(
+          meta.noteFromPlonkit,
+          country,
+          meta.footer,
+          meta.mapFooter,
+        );
+        if (meta.isPersonalMap && meta.mapAuthors && meta.mapName) {
+          footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
+        }
+        return {
+          country: country,
+          metaName: meta.name,
+          note: meta.note,
+          images: meta.images,
+          footer: footer,
+        };
+      });
+
+      // the top-level fields are the first meta, kept so userscripts predating
+      // the tab strip keep working - they never see `metas`
+      return { ...metaList[0], metas: metaList };
     },
     {
       query: t.Object({

@@ -253,6 +253,13 @@
       "when": 1785007158030,
       "tag": "0035_map_group_collaboration",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1785049859779,
+      "tag": "0036_location_metas",
+      "breakpoints": true
     }
   ]
 }

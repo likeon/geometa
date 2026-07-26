@@ -33,16 +33,22 @@
 
   let { panoId, mapId, userscriptVersion, source, roundNumber }: Props = $props();
 
-  type GeoInfo = {
+  type MetaInfo = {
     country: string;
     metaName: string;
     note: string;
     images?: string[];
     footer: string;
   };
+  // `metas` is absent on responses cached by an older script version, so fall
+  // back to the top-level fields, which are always the first meta
+  type GeoInfo = MetaInfo & { metas?: MetaInfo[] };
 
   let geoInfo: GeoInfo | null = $state(null);
   let error: string | null = $state(null);
+  let selectedMetaIndex = $state(0);
+  const metas = $derived.by<MetaInfo[]>(() => (geoInfo ? (geoInfo.metas ?? [geoInfo]) : []));
+  const selectedMeta = $derived(metas[selectedMetaIndex] ?? metas[0]);
 
   let container: HTMLDivElement;
   let header: HTMLDivElement;
@@ -160,7 +166,8 @@
   updateHelpClass();
 
   $effect(() => {
-    if (geoInfo) {
+    // re-runs on tab switch too, so links in the newly shown note get bound
+    if (selectedMeta) {
       const links = document.querySelectorAll('.geometa-footer a, .geometa-note a');
       links.forEach((link) => {
         link.removeEventListener('click', confirmNavigation);
@@ -218,22 +225,37 @@
   </div>
   {#if error}
     <p>Error: {error}</p>
-  {:else if geoInfo}
+  {:else if selectedMeta}
+    {#if metas.length > 1}
+      <div class="meta-tabs" role="tablist">
+        {#each metas as meta, index (index)}
+          <button
+            type="button"
+            role="tab"
+            class="meta-tab"
+            class:active={index === selectedMetaIndex}
+            aria-selected={index === selectedMetaIndex}
+            onclick={() => (selectedMetaIndex = index)}>
+            {meta.metaName}
+          </button>
+        {/each}
+      </div>
+    {/if}
     <p>
-      <CountryFlag countryName={geoInfo.country} />
-      <strong>{geoInfo.country}</strong> - {geoInfo.metaName}
+      <CountryFlag countryName={selectedMeta.country} />
+      <strong>{selectedMeta.country}</strong> - {selectedMeta.metaName}
     </p>
     <div class="geometa-note">
-      {@html geoInfo.note}
+      {@html selectedMeta.note}
     </div>
-    {#if geoInfo.footer}
+    {#if selectedMeta.footer}
       <p class="geometa-footer">
-        {@html geoInfo.footer}
+        {@html selectedMeta.footer}
       </p>
     {/if}
-    {#if geoInfo.images && geoInfo.images.length}
+    {#if selectedMeta.images && selectedMeta.images.length}
       <hr />
-      <Carousel images={geoInfo.images} />
+      <Carousel images={selectedMeta.images} />
     {/if}
   {:else}
     <Spinner />
@@ -348,6 +370,37 @@
   .geometa-footer {
     color: #d3d3d3;
     font-size: small;
+  }
+
+  .meta-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .meta-tab {
+    background: rgba(255, 255, 255, 0.08);
+    color: #d3d3d3;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 14px;
+    line-height: 1.3;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .meta-tab:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+  }
+
+  .meta-tab.active {
+    background: #188bd2;
+    color: #fff;
   }
 
   .announcement {

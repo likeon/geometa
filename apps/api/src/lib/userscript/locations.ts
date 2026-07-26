@@ -51,11 +51,15 @@ export const locationSelect = db
       eq(syncedLocations.panoId, sql.placeholder('panoId')),
     ),
   )
-  .limit(1)
+  // a location can carry several metas; order by the label the tab shows so
+  // the order is both stable between rounds and alphabetical to the player
+  .orderBy(syncedMetas.name, syncedMetas.metaId)
   .prepare('userscript_get_location');
 
+// distinct: a pano shared by several of the map's metas must still be exported
+// once, or it gets extra chances of being drawn in game
 export const mapLocationsExportSelect = db
-  .select(
+  .selectDistinct(
     pick(getTableColumns(syncedLocations), [
       'lat',
       'lng',

@@ -1,6 +1,7 @@
 import {
   levels,
   type Meta,
+  mapGroupLocationMetas,
   mapGroupLocations,
   mapGroups,
   metaImages,
@@ -14,7 +15,7 @@ import { ensurePermissions } from '@api/lib/internal/permissions';
 import { generateRandomString, isUniqueViolation } from '@api/lib/utils/common';
 import { markdown2Html } from '@api/lib/utils/markdown';
 import { uploadImage } from '@api/lib/utils/s3';
-import { and, eq, inArray, not } from 'drizzle-orm';
+import { and, eq, inArray, not, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import sharp from 'sharp';
 
@@ -63,38 +64,34 @@ async function copyMetaToGroup(
       .onConflictDoNothing();
   }
 
-  const sourceLocations = await tx
-    .select({
-      lat: mapGroupLocations.lat,
-      lng: mapGroupLocations.lng,
-      heading: mapGroupLocations.heading,
-      pitch: mapGroupLocations.pitch,
-      zoom: mapGroupLocations.zoom,
-      panoId: mapGroupLocations.panoId,
-      extraTag: mapGroupLocations.extraTag,
-      extraPanoId: mapGroupLocations.extraPanoId,
-      extraPanoDate: mapGroupLocations.extraPanoDate,
-    })
-    .from(mapGroupLocations)
-    .where(
-      and(
-        eq(mapGroupLocations.mapGroupId, mapGroupId),
-        eq(mapGroupLocations.extraTag, meta.tagName),
-      ),
-    );
-  if (sourceLocations.length > 0) {
-    await tx
-      .insert(mapGroupLocations)
-      .values(
-        sourceLocations.map((location) => ({
-          ...location,
-          mapGroupId: targetGroupId,
-          updatedAt: currentTimestamp,
-          modifiedAt: currentTimestamp,
-        })),
-      )
-      .onConflictDoNothing();
-  }
+  // set-based so a meta with tens of thousands of locations can't blow the
+  // bind-parameter limit
+  const sourcePanos = sql`
+    SELECT src.pano_id
+    FROM ${mapGroupLocations} src
+      JOIN ${mapGroupLocationMetas} lm ON lm.location_id = src.id
+    WHERE src.map_group_id = ${mapGroupId} AND lm.meta_id = ${id}
+  `;
+  await tx.execute(sql`
+    INSERT INTO ${mapGroupLocations}
+      (map_group_id, lat, lng, heading, pitch, zoom, pano_id, extra_tag,
+       extra_pano_id, extra_pano_date, updated_at, modified_at)
+    SELECT ${targetGroupId}, src.lat, src.lng, src.heading, src.pitch, src.zoom,
+           src.pano_id, ${meta.tagName}, src.extra_pano_id, src.extra_pano_date,
+           ${currentTimestamp}, ${currentTimestamp}
+    FROM ${mapGroupLocations} src
+      JOIN ${mapGroupLocationMetas} lm ON lm.location_id = src.id
+    WHERE src.map_group_id = ${mapGroupId} AND lm.meta_id = ${id}
+    ON CONFLICT DO NOTHING
+  `);
+  await tx.execute(sql`
+    INSERT INTO ${mapGroupLocationMetas} (location_id, meta_id)
+    SELECT tgt.id, ${newMetaId}
+    FROM ${mapGroupLocations} tgt
+    WHERE tgt.map_group_id = ${targetGroupId}
+      AND tgt.pano_id IN (${sourcePanos})
+    ON CONFLICT DO NOTHING
+  `);
 
   if (copyLevels) {
     const sourceMetaLevels = await tx
