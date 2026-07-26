@@ -1,6 +1,7 @@
 import { maps } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
+import { logChange } from '@api/lib/internal/changes';
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { eq } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
@@ -35,6 +36,8 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
         });
       }
 
+      // any group member qualifies: the real gate is the Discord server
+      // restricting who can run /publish, this only verifies map ownership
       await ensurePermissions(body.discord_thread_author_id, map.mapGroupId);
 
       const errors: string[] = [];
@@ -54,10 +57,22 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
         });
       }
 
-      await db
-        .update(maps)
-        .set({ isPublished: true })
-        .where(eq(maps.geoguessrId, geoguessrId));
+      await db.$primary.transaction(async (tx) => {
+        await tx
+          .update(maps)
+          .set({ isPublished: true })
+          .where(eq(maps.geoguessrId, geoguessrId));
+        await logChange(tx, {
+          mapGroupId: map.mapGroupId!,
+          userId: body.discord_thread_author_id,
+          entityType: 'map',
+          entityId: map.id,
+          entityLabel: map.name,
+          operation: 'update',
+          oldValue: { isPublished: false },
+          newValue: { isPublished: true },
+        });
+      });
       return status(200);
     },
     {

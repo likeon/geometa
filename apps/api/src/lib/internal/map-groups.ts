@@ -12,7 +12,7 @@ export async function createMapGroup(userId: string, name: string) {
       .returning({ id: mapGroups.id });
     await tx
       .insert(mapGroupPermissions)
-      .values({ mapGroupId: inserted[0].id, userId });
+      .values({ mapGroupId: inserted[0].id, userId, role: 'owner' });
     return inserted[0].id;
   });
 }

@@ -10,9 +10,10 @@
   interface Props {
     groupId: number;
     groupName: string;
+    canRename?: boolean;
   }
 
-  let { groupId, groupName }: Props = $props();
+  let { groupId, groupName, canRename = true }: Props = $props();
   let groupRenameDialogOpen = $state(false);
 
   const navItems = [
@@ -44,6 +45,11 @@
       tooltipText: 'View usage stats. (Temporarily unavailable - will be added back soon)'
     },
     {
+      name: 'Changes',
+      slug: 'changes',
+      tooltipText: 'A log of who changed what in this group: metas, locations, levels and maps.'
+    },
+    {
       name: 'Settings',
       slug: 'settings'
     }
@@ -53,12 +59,14 @@
 <div class="border-b border-gray-200 mb-4">
   <span class="text-sm font-semibold text-muted-foreground flex group">
     Group: {groupName || '<No name>'}
-    <button onclick={() => (groupRenameDialogOpen = true)} class=" items-center h-full"
-      ><Icon
-        icon="ic:baseline-edit"
-        class="hidden group-hover:block ml-1 mt-[2px]"
-        width="14"
-        height="14" /></button>
+    {#if canRename}
+      <button onclick={() => (groupRenameDialogOpen = true)} class=" items-center h-full"
+        ><Icon
+          icon="ic:baseline-edit"
+          class="hidden group-hover:block ml-1 mt-[2px]"
+          width="14"
+          height="14" /></button>
+    {/if}
   </span>
   <NavTabs basePath={`/map-making/groups/${groupId}`} items={navItems} />
 </div>

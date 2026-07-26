@@ -7,6 +7,8 @@
 
   let { data } = $props();
 
+  let isOwner = $derived(data.role === 'owner');
+  let tableColumns = $derived(isOwner ? columns : columns.filter((c) => c.id !== 'actions'));
   let isMapDialogOpen = $state(false);
   let selectedMapId = $state(-1);
   let maps = $derived(data.group.maps);
@@ -35,16 +37,18 @@
 </script>
 
 <div>
-  <DashNavBar groupId={data.group.id} groupName={data.group.name}></DashNavBar>
+  <DashNavBar groupId={data.group.id} groupName={data.group.name} canRename={isOwner}></DashNavBar>
 
   <div class="flex flex-wrap items-center">
     <div class="grow flex items-center justify-end">
-      <Button onclick={addMap}>Add map</Button>
+      {#if isOwner}
+        <Button onclick={addMap}>Add map</Button>
+      {/if}
     </div>
   </div>
   <div class="mt-5">
     <BaseTable
-      {columns}
+      columns={tableColumns}
       data={maps}
       bind:selectedId={selectedMapId}
       bind:isDialogOpen={isMapDialogOpen}
@@ -52,11 +56,13 @@
     </BaseTable>
   </div>
 </div>
-<MapEditDialog
-  bind:isMapDialogOpen
-  mapForm={data.mapForm}
-  {levelChoices}
-  {regionChoices}
-  groupId={data.group.id}
-  {selectedMap}
-  user={data.user} />
+{#if isOwner}
+  <MapEditDialog
+    bind:isMapDialogOpen
+    mapForm={data.mapForm}
+    {levelChoices}
+    {regionChoices}
+    groupId={data.group.id}
+    {selectedMap}
+    user={data.user} />
+{/if}

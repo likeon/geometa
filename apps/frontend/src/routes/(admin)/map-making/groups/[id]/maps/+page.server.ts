@@ -20,6 +20,7 @@ export const load = async ({ params }) => {
 
   return {
     group: data.group,
+    role: data.role,
     levelList: data.levelList,
     regionList: data.regionList,
     mapForm,

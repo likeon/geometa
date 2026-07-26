@@ -214,4 +214,5 @@ export async function syncMapGroup(group: {
       .set({ syncedAt: currentTimestamp })
       .where(eq(mapGroups.id, group.id));
   });
+  return currentTimestamp;
 }

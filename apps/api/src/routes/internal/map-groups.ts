@@ -1,6 +1,7 @@
 import {
   levels,
   locationMetas,
+  mapGroupChanges,
   mapGroupLocations,
   mapGroupPermissions,
   mapGroups,
@@ -12,16 +13,29 @@ import {
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
+import { logChange } from '@api/lib/internal/changes';
 import { createMapGroup } from '@api/lib/internal/map-groups';
 import {
   MissingLevelsError,
   uploadMetas,
 } from '@api/lib/internal/metas-upload';
-import { ensurePermissions } from '@api/lib/internal/permissions';
+import { ensureOwner, ensurePermissions } from '@api/lib/internal/permissions';
 import { syncMapGroup } from '@api/lib/internal/sync';
 import { geoguessrMapJson } from '@api/lib/internal/utils';
 import { isPgError } from '@api/lib/utils/common';
-import { and, asc, desc, eq, inArray, isNull, lt, or, sql } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gt,
+  inArray,
+  isNull,
+  lt,
+  lte,
+  or,
+  sql,
+} from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
@@ -105,7 +119,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .get(
     '/:id/page',
     async ({ params: { id: groupId }, userId, status }) => {
-      await ensurePermissions(userId, groupId);
+      const role = await ensurePermissions(userId, groupId);
       const [group, user] = await Promise.all([
         db.$primary.query.mapGroups.findFirst({
           with: {
@@ -153,7 +167,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         return status(404);
       }
 
-      return { group, user };
+      return { group, user, role };
     },
     {
       params: t.Object({ id: t.Integer() }),
@@ -163,7 +177,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .get(
     '/:id/maps-page',
     async ({ params: { id: groupId }, userId, status }) => {
-      await ensurePermissions(userId, groupId);
+      const role = await ensurePermissions(userId, groupId);
 
       const group = await db.$primary.query.mapGroups.findFirst({
         with: {
@@ -209,7 +223,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         return status(500);
       }
 
-      return { group, levelList, regionList, user };
+      return { group, levelList, regionList, user, role };
     },
     {
       params: t.Object({ id: t.Integer() }),
@@ -219,7 +233,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .get(
     '/:id/levels-page',
     async ({ params: { id: groupId }, userId, status }) => {
-      await ensurePermissions(userId, groupId);
+      const role = await ensurePermissions(userId, groupId);
 
       const group = await db.$primary.query.mapGroups.findFirst({
         with: {
@@ -234,7 +248,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         return status(404);
       }
 
-      return { group };
+      return { group, role };
     },
     {
       params: t.Object({ id: t.Integer() }),
@@ -244,19 +258,50 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .put(
     '/:id/levels',
     async ({ params: { id: groupId }, body, userId }) => {
-      await ensurePermissions(userId, groupId);
+      await ensureOwner(userId, groupId);
 
       const { id, name } = body;
       if (id === undefined) {
-        await db
-          .insert(levels)
-          .values({ name, mapGroupId: groupId })
-          .onConflictDoNothing();
+        await db.$primary.transaction(async (tx) => {
+          const inserted = await tx
+            .insert(levels)
+            .values({ name, mapGroupId: groupId })
+            .onConflictDoNothing()
+            .returning({ id: levels.id });
+          if (inserted.length) {
+            await logChange(tx, {
+              mapGroupId: groupId,
+              userId,
+              entityType: 'level',
+              entityId: inserted[0].id,
+              entityLabel: name,
+              operation: 'create',
+              newValue: { name },
+            });
+          }
+        });
       } else {
-        await db
-          .update(levels)
-          .set({ name })
-          .where(and(eq(levels.id, id), eq(levels.mapGroupId, groupId)));
+        const oldLevel = await db.$primary.query.levels.findFirst({
+          where: and(eq(levels.id, id), eq(levels.mapGroupId, groupId)),
+        });
+        await db.$primary.transaction(async (tx) => {
+          await tx
+            .update(levels)
+            .set({ name })
+            .where(and(eq(levels.id, id), eq(levels.mapGroupId, groupId)));
+          if (oldLevel) {
+            await logChange(tx, {
+              mapGroupId: groupId,
+              userId,
+              entityType: 'level',
+              entityId: id,
+              entityLabel: name,
+              operation: 'update',
+              oldValue: { name: oldLevel.name },
+              newValue: { name },
+            });
+          }
+        });
       }
     },
     {
@@ -271,12 +316,26 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .delete(
     '/:id/levels/:levelId',
     async ({ params: { id: groupId, levelId }, userId, status }) => {
-      await ensurePermissions(userId, groupId);
+      await ensureOwner(userId, groupId);
 
-      const deleted = await db
-        .delete(levels)
-        .where(and(eq(levels.id, levelId), eq(levels.mapGroupId, groupId)))
-        .returning({ id: levels.id });
+      const deleted = await db.$primary.transaction(async (tx) => {
+        const deletedRows = await tx
+          .delete(levels)
+          .where(and(eq(levels.id, levelId), eq(levels.mapGroupId, groupId)))
+          .returning({ id: levels.id, name: levels.name });
+        if (deletedRows.length) {
+          await logChange(tx, {
+            mapGroupId: groupId,
+            userId,
+            entityType: 'level',
+            entityId: levelId,
+            entityLabel: deletedRows[0].name,
+            operation: 'delete',
+            oldValue: { name: deletedRows[0].name },
+          });
+        }
+        return deletedRows;
+      });
       if (deleted.length === 0) {
         return status(404);
       }
@@ -288,9 +347,108 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     },
   )
   .get(
+    '/:id/changes-page',
+    async ({ params: { id: groupId }, query, userId, status }) => {
+      const role = await ensurePermissions(userId, groupId);
+
+      const group = await db.$primary.query.mapGroups.findFirst({
+        columns: { id: true, name: true, syncedAt: true },
+        where: eq(mapGroups.id, groupId),
+      });
+      if (!group) {
+        return status(404);
+      }
+
+      const PAGE_SIZE = 100;
+
+      // keyset cursor over (created_at, id) desc, encoded "<createdAt>_<id>"
+      const MAX_INT = 2147483647;
+      let cursor: { createdAt: number; id: number } | null = null;
+      if (query.before) {
+        const parts = query.before.split('_').map(Number);
+        if (
+          parts.length !== 2 ||
+          !Number.isSafeInteger(parts[0]) ||
+          parts[0] < 0 ||
+          parts[0] > MAX_INT ||
+          !Number.isSafeInteger(parts[1]) ||
+          parts[1] < 0
+        ) {
+          return status(400, { message: 'Invalid cursor' });
+        }
+        cursor = { createdAt: parts[0], id: parts[1] };
+      }
+
+      // synced/unsynced boundary: synced_at, or (when a settings change has
+      // reset it to null) the latest sync marker so pending edits still show
+      // as unsynced instead of being dumped into history
+      let boundary = group.syncedAt;
+      if (boundary === null) {
+        const latestMarker = await db.$primary.query.mapGroupChanges.findFirst({
+          where: and(
+            eq(mapGroupChanges.mapGroupId, groupId),
+            eq(mapGroupChanges.entityType, 'sync'),
+          ),
+          orderBy: [desc(mapGroupChanges.createdAt), desc(mapGroupChanges.id)],
+          columns: { createdAt: true },
+        });
+        boundary = latestMarker?.createdAt ?? null;
+      }
+
+      const pageConditions = [eq(mapGroupChanges.mapGroupId, groupId)];
+      if (cursor) {
+        pageConditions.push(
+          sql`(${mapGroupChanges.createdAt}, ${mapGroupChanges.id}) < (${cursor.createdAt}, ${cursor.id})`,
+        );
+      } else if (boundary !== null) {
+        pageConditions.push(lte(mapGroupChanges.createdAt, boundary));
+      } else {
+        // no boundary at all (never synced, no markers): there is no synced
+        // history - everything belongs to the unsynced list
+        pageConditions.push(sql`false`);
+      }
+      const page = await db.$primary.query.mapGroupChanges.findMany({
+        where: and(...pageConditions),
+        orderBy: [desc(mapGroupChanges.createdAt), desc(mapGroupChanges.id)],
+        limit: PAGE_SIZE + 1,
+        with: { user: { columns: { username: true } } },
+      });
+      const hasMore = page.length > PAGE_SIZE;
+
+      // the first page always carries every unsynced entry on top of the
+      // paginated synced history
+      let unsyncedChanges: typeof page = [];
+      if (!cursor) {
+        const unsyncedConditions = [eq(mapGroupChanges.mapGroupId, groupId)];
+        if (boundary !== null) {
+          unsyncedConditions.push(gt(mapGroupChanges.createdAt, boundary));
+        }
+        unsyncedChanges = await db.$primary.query.mapGroupChanges.findMany({
+          where: and(...unsyncedConditions),
+          orderBy: [desc(mapGroupChanges.createdAt), desc(mapGroupChanges.id)],
+          limit: 500,
+          with: { user: { columns: { username: true } } },
+        });
+      }
+
+      return {
+        group,
+        role,
+        unsyncedChanges,
+        changes: page.slice(0, PAGE_SIZE),
+        hasMore,
+      };
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      query: t.Object({ before: t.Optional(t.String()) }),
+      userId: true,
+    },
+  )
+  .get(
     '/:id/settings-page',
     async ({ params: { id: groupId }, userId, status }) => {
-      await ensurePermissions(userId, groupId);
+      const role = await ensurePermissions(userId, groupId);
 
       const group = await db.$primary.query.mapGroups.findFirst({
         extras: {
@@ -317,7 +475,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         return status(404);
       }
 
-      return { group };
+      return { group, role };
     },
     {
       params: t.Object({ id: t.Integer() }),
@@ -327,7 +485,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .delete(
     '/:id',
     async ({ params: { id: groupId }, userId, status }) => {
-      await ensurePermissions(userId, groupId);
+      await ensureOwner(userId, groupId);
       await db.delete(mapGroups).where(eq(mapGroups.id, groupId));
       return status(200);
     },
@@ -339,7 +497,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .post(
     '/:id/permissions',
     async ({ params: { id: groupId }, body, userId, status }) => {
-      await ensurePermissions(userId, groupId);
+      await ensureOwner(userId, groupId);
 
       const username = body.username.startsWith('@')
         ? body.username.slice(1)
@@ -347,7 +505,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
 
       const user = (
         await db.$primary
-          .select({ id: users.id })
+          .select({ id: users.id, username: users.username })
           .from(users)
           .where(eq(users.username, username))
       )[0];
@@ -375,44 +533,108 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         });
       }
 
-      await db
-        .insert(mapGroupPermissions)
-        .values({ mapGroupId: groupId, userId: user.id });
+      // role is optional so a not-yet-updated frontend can still share groups
+      // during a rolling deploy
+      const role = body.role ?? 'editor';
+      await db.$primary.insert(mapGroupPermissions).values({
+        mapGroupId: groupId,
+        userId: user.id,
+        role,
+      });
       return status(200);
     },
     {
       params: t.Object({ id: t.Integer() }),
-      body: t.Object({ username: t.String({ minLength: 1 }) }),
+      body: t.Object({
+        username: t.String({ minLength: 1 }),
+        role: t.Optional(t.Union([t.Literal('owner'), t.Literal('editor')])),
+      }),
+      userId: true,
+    },
+  )
+  .patch(
+    '/:id/permissions/:permissionId',
+    async ({ params: { id: groupId, permissionId }, body, userId, status }) => {
+      await ensureOwner(userId, groupId);
+
+      // the whole check-and-mutate runs in one transaction with the group's
+      // permission rows locked, so concurrent demotions can't race past the
+      // last-owner guard
+      const failure = await db.$primary.transaction(async (tx) => {
+        const permissions = await tx
+          .select()
+          .from(mapGroupPermissions)
+          .where(eq(mapGroupPermissions.mapGroupId, groupId))
+          .for('update');
+        const permission = permissions.find((p) => p.id === permissionId);
+        if (!permission) {
+          return 'Permission not found';
+        }
+        if (permission.userId === userId) {
+          return "Can't change your own role";
+        }
+        if (
+          permission.role === 'owner' &&
+          body.role === 'editor' &&
+          !permissions.some((p) => p.role === 'owner' && p.id !== permissionId)
+        ) {
+          return 'A group must keep at least one owner';
+        }
+
+        await tx
+          .update(mapGroupPermissions)
+          .set({ role: body.role })
+          .where(eq(mapGroupPermissions.id, permissionId));
+        return null;
+      });
+      if (failure) {
+        return status(400, { field: 'permissionId', message: failure });
+      }
+      return status(200);
+    },
+    {
+      params: t.Object({ id: t.Integer(), permissionId: t.Integer() }),
+      body: t.Object({
+        role: t.Union([t.Literal('owner'), t.Literal('editor')]),
+      }),
       userId: true,
     },
   )
   .delete(
     '/:id/permissions/:permissionId',
     async ({ params: { id: groupId, permissionId }, userId, status }) => {
-      await ensurePermissions(userId, groupId);
+      await ensureOwner(userId, groupId);
 
-      const permission = await db.$primary.query.mapGroupPermissions.findFirst({
-        where: and(
-          eq(mapGroupPermissions.id, permissionId),
-          eq(mapGroupPermissions.mapGroupId, groupId),
-        ),
+      // see PATCH above: locked check-and-mutate to prevent the last-owner
+      // guard from racing
+      const failure = await db.$primary.transaction(async (tx) => {
+        const permissions = await tx
+          .select()
+          .from(mapGroupPermissions)
+          .where(eq(mapGroupPermissions.mapGroupId, groupId))
+          .for('update');
+        const permission = permissions.find((p) => p.id === permissionId);
+        if (!permission) {
+          return 'Permission not found';
+        }
+        if (permission.userId === userId) {
+          return "Can't strip your own permissions";
+        }
+        if (
+          permission.role === 'owner' &&
+          !permissions.some((p) => p.role === 'owner' && p.id !== permissionId)
+        ) {
+          return 'A group must keep at least one owner';
+        }
+
+        await tx
+          .delete(mapGroupPermissions)
+          .where(eq(mapGroupPermissions.id, permissionId));
+        return null;
       });
-      if (!permission) {
-        return status(400, {
-          field: 'permissionId',
-          message: 'Permission not found',
-        });
+      if (failure) {
+        return status(400, { field: 'permissionId', message: failure });
       }
-      if (permission.userId === userId) {
-        return status(400, {
-          field: 'permissionId',
-          message: "Can't strip your own permissions",
-        });
-      }
-
-      await db
-        .delete(mapGroupPermissions)
-        .where(eq(mapGroupPermissions.id, permissionId));
       return status(200);
     },
     {
@@ -423,7 +645,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .get(
     '/:id',
     async ({ params: { id: groupId }, userId, status }) => {
-      await ensurePermissions(userId, groupId);
+      const role = await ensurePermissions(userId, groupId);
 
       const group = await db.$primary.query.mapGroups.findFirst({
         where: eq(mapGroups.id, groupId),
@@ -433,7 +655,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         return status(404);
       }
 
-      return group;
+      return { ...group, role };
     },
     {
       params: t.Object({ id: t.Integer() }),
@@ -443,16 +665,30 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .patch(
     '/:id',
     async ({ params: { id: groupId }, body, userId, status }) => {
-      await ensurePermissions(userId, groupId);
-      const updated = await db
-        .update(mapGroups)
-        .set({ name: body.name })
-        .where(eq(mapGroups.id, groupId))
-        .returning({ id: mapGroups.id });
-      if (updated.length) {
-        return status(200);
+      await ensureOwner(userId, groupId);
+      const oldGroup = await db.$primary.query.mapGroups.findFirst({
+        where: eq(mapGroups.id, groupId),
+      });
+      if (!oldGroup) {
+        return status(404);
       }
-      return status(404);
+      await db.$primary.transaction(async (tx) => {
+        await tx
+          .update(mapGroups)
+          .set({ name: body.name })
+          .where(eq(mapGroups.id, groupId));
+        await logChange(tx, {
+          mapGroupId: groupId,
+          userId,
+          entityType: 'group',
+          entityId: groupId,
+          entityLabel: body.name,
+          operation: 'update',
+          oldValue: { name: oldGroup.name },
+          newValue: { name: body.name },
+        });
+      });
+      return status(200);
     },
     {
       params: t.Object({ id: t.Integer() }),
@@ -463,28 +699,74 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .post(
     '/:id/locations/upload',
     async ({ params: { id: groupId }, body, userId, status }) => {
-      await ensurePermissions(userId, groupId);
+      const role = await ensurePermissions(userId, groupId);
+
+      if (role === 'editor') {
+        if (!body.scopeTag) {
+          return status(403, {
+            message: 'Editors can only upload locations for a specific meta',
+          });
+        }
+        if (body.uploadMode === 'full') {
+          return status(403, {
+            message: 'Editors cannot replace all locations in a group',
+          });
+        }
+      }
+      if (body.scopeTag && body.uploadMode === 'full') {
+        return status(400, {
+          message:
+            'Full replacement cannot be combined with a scoped upload - it would delete all other metas locations',
+        });
+      }
+
+      let locations = body.locations;
+      let ignoredCount = 0;
+      let scopedMetaId: number | null = null;
+      if (body.scopeTag) {
+        const scopedMeta = await db.$primary.query.metas.findFirst({
+          where: and(
+            eq(metas.mapGroupId, groupId),
+            eq(metas.tagName, body.scopeTag),
+          ),
+        });
+        if (!scopedMeta) {
+          return status(400, {
+            message: `There is no meta with tag "${body.scopeTag}" in this group`,
+          });
+        }
+
+        locations = body.locations.filter(
+          (location) => location.extraTag === body.scopeTag,
+        );
+        ignoredCount = body.locations.length - locations.length;
+        if (locations.length === 0) {
+          return status(400, {
+            message: `The uploaded file contains no locations with tag "${body.scopeTag}"`,
+          });
+        }
+        scopedMetaId = scopedMeta.id;
+      }
 
       const currentTimestamp = Math.floor(Date.now() / 1000);
-      const upsertValues = body.locations.map((location) => ({
+      const upsertValues = locations.map((location) => ({
         ...location,
         extraPanoDate: location.extraPanoDate ?? null,
         mapGroupId: groupId,
         updatedAt: currentTimestamp,
         modifiedAt: currentTimestamp, // default value - not being set on conflict
       }));
-      const usedTags = new Set(
-        body.locations.map((location) => location.extraTag),
-      );
+      const usedTags = new Set(locations.map((location) => location.extraTag));
 
       const BATCH_SIZE = 1000;
+      let affectedCount = 0;
       try {
         await db.$primary.transaction(async (trx) => {
           // Step 1: Batched upsert operation
           for (let i = 0; i < upsertValues.length; i += BATCH_SIZE) {
             const batch = upsertValues.slice(i, i + BATCH_SIZE);
 
-            await trx
+            const affected = await trx
               .insert(mapGroupLocations)
               .values(batch)
               .onConflictDoUpdate({
@@ -502,14 +784,21 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
                   extraPanoDate: sql`excluded.extra_pano_date`,
                   updatedAt: sql`excluded.updated_at`,
                 },
+                // scoped uploads must not steal panos already belonging to
+                // another meta's tag in this group
+                ...(body.scopeTag && {
+                  setWhere: eq(mapGroupLocations.extraTag, body.scopeTag),
+                }),
               })
               .returning({ id: mapGroupLocations.id });
+            affectedCount += affected.length;
           }
 
           // Step 2: Delete records based on upload mode
+          let deletedCount = 0;
           if (body.uploadMode === 'full') {
             // Full replacement: delete all locations not in current upload
-            await trx
+            const deleted = await trx
               .delete(mapGroupLocations)
               .where(
                 and(
@@ -519,10 +808,12 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
                     lt(mapGroupLocations.updatedAt, currentTimestamp),
                   ),
                 ),
-              );
+              )
+              .returning({ id: mapGroupLocations.id });
+            deletedCount = deleted.length;
           } else if (body.uploadMode === 'tagReplace') {
             // Tag-based replacement: delete only locations with tags present in upload
-            await trx
+            const deleted = await trx
               .delete(mapGroupLocations)
               .where(
                 and(
@@ -533,12 +824,32 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
                     lt(mapGroupLocations.updatedAt, currentTimestamp),
                   ),
                 ),
-              );
+              )
+              .returning({ id: mapGroupLocations.id });
+            deletedCount = deleted.length;
           }
           // For 'partial' mode: no deletions, just upserts
 
+          await logChange(trx, {
+            mapGroupId: groupId,
+            userId,
+            entityType: 'location_batch',
+            entityId: scopedMetaId,
+            entityLabel: body.scopeTag ?? `${usedTags.size} tags`,
+            operation: 'update',
+            newValue: {
+              uploadMode: body.uploadMode,
+              count: affectedCount,
+              deletedCount,
+              ignoredCount,
+              conflictCount: upsertValues.length - affectedCount,
+              tags: Array.from(usedTags).slice(0, 100),
+            },
+          });
+
           // Step 3: Insert tags into metas table
-          if (usedTags.size > 0) {
+          // (skipped for scoped uploads - the target meta is validated to exist)
+          if (!body.scopeTag && usedTags.size > 0) {
             const metaInsertValues = Array.from(usedTags).map((tagName) => ({
               mapGroupId: groupId,
               tagName: tagName,
@@ -546,10 +857,26 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
               note: '',
               modifiedAt: currentTimestamp,
             }));
-            await trx
+            const createdMetas = await trx
               .insert(metas)
               .values(metaInsertValues)
-              .onConflictDoNothing();
+              .onConflictDoNothing()
+              .returning({ id: metas.id, tagName: metas.tagName });
+            await logChange(
+              trx,
+              createdMetas.map((meta) => ({
+                mapGroupId: groupId,
+                userId,
+                entityType: 'meta' as const,
+                entityId: meta.id,
+                entityLabel: meta.tagName,
+                operation: 'create' as const,
+                newValue: {
+                  tagName: meta.tagName,
+                  createdByLocationUpload: true,
+                },
+              })),
+            );
           }
         });
       } catch (error) {
@@ -564,7 +891,11 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         throw error;
       }
 
-      return { count: upsertValues.length };
+      return {
+        count: affectedCount,
+        ignoredCount,
+        conflictCount: upsertValues.length - affectedCount,
+      };
     },
     {
       params: t.Object({ id: t.Integer() }),
@@ -574,6 +905,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
           t.Literal('full'),
           t.Literal('tagReplace'),
         ]),
+        scopeTag: t.Optional(t.String({ minLength: 1 })),
         locations: t.Array(
           t.Object({
             lat: t.Number(),
@@ -594,11 +926,12 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .post(
     '/:id/metas/upload',
     async ({ params: { id: groupId }, body, userId, status }) => {
-      await ensurePermissions(userId, groupId);
+      await ensureOwner(userId, groupId);
 
       try {
         await uploadMetas(
           groupId,
+          userId,
           body.metas,
           body.partialUpload,
           body.autoCreateLevels,
@@ -634,14 +967,25 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .post(
     '/:id/sync',
     async ({ params: { id: groupId }, userId, status }) => {
-      await ensurePermissions(userId, groupId);
+      await ensureOwner(userId, groupId);
       const group = await db.$primary.query.mapGroups.findFirst({
         where: eq(mapGroups.id, groupId),
       });
       if (!group) {
         return status(404);
       }
-      await syncMapGroup(group);
+      const syncedAt = await syncMapGroup(group);
+      // stamped with the sync's own timestamp so the marker sits exactly on
+      // the synced/unsynced boundary instead of classifying itself unsynced
+      await logChange(db.$primary, {
+        mapGroupId: groupId,
+        userId,
+        entityType: 'sync',
+        entityId: groupId,
+        entityLabel: 'changes published',
+        operation: 'update',
+        createdAt: syncedAt,
+      });
       return;
     },
     {
@@ -811,17 +1155,43 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .post(
     '/:id/settings',
     async ({ params: { id: groupId }, body, userId, status }) => {
-      await ensurePermissions(userId, groupId);
-      const updated = await db
-        .update(mapGroups)
-        // need to reset syncedAt
-        .set({ ...body, syncedAt: null })
-        .where(eq(mapGroups.id, groupId))
-        .returning({ id: mapGroups.id });
-      if (updated.length) {
+      await ensureOwner(userId, groupId);
+      const oldGroup = await db.$primary.query.mapGroups.findFirst({
+        where: eq(mapGroups.id, groupId),
+      });
+      if (!oldGroup) {
+        return status(404);
+      }
+      // a no-op save must not invalidate the group's sync state
+      if (
+        oldGroup.syncIncludeLocationsNotOnStreetView ===
+        body.syncIncludeLocationsNotOnStreetView
+      ) {
         return status(200);
       }
-      return status(404);
+      await db.$primary.transaction(async (tx) => {
+        await tx
+          .update(mapGroups)
+          // need to reset syncedAt
+          .set({ ...body, syncedAt: null })
+          .where(eq(mapGroups.id, groupId));
+        await logChange(tx, {
+          mapGroupId: groupId,
+          userId,
+          entityType: 'settings',
+          entityId: groupId,
+          operation: 'update',
+          oldValue: {
+            syncIncludeLocationsNotOnStreetView:
+              oldGroup.syncIncludeLocationsNotOnStreetView,
+          },
+          newValue: {
+            syncIncludeLocationsNotOnStreetView:
+              body.syncIncludeLocationsNotOnStreetView,
+          },
+        });
+      });
+      return status(200);
     },
     {
       params: t.Object({ id: t.Number() }),
