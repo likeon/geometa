@@ -287,9 +287,12 @@ export const actions = {
           const location = jsonData.customCoordinates?.[locationIndex];
           const panoId = location?.panoId || location?.extra?.panoId || null;
           const locationNumber = locationIndex + 1;
-          if (issue.code === 'too_small' || issue.message === 'Required') {
-            message = `doesn't have a tag`;
-          }
+          // a numeric last path segment means a specific tag is malformed;
+          // anything else is the tags array itself being absent or empty
+          message =
+            typeof issue.path[issue.path.length - 1] === 'number'
+              ? 'has a tag that is not text'
+              : `doesn't have a tag`;
 
           // Return HTML with link if panoId exists
           if (panoId) {
