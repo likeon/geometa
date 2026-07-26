@@ -181,32 +181,74 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     async ({ params: { id: groupId }, userId, status }) => {
       const role = await ensurePermissions(userId, groupId);
 
-      const group = await db.$primary.query.mapGroups.findFirst({
-        with: {
-          maps: {
-            extras: {
-              locationsCount:
-                sql`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`
-                  .mapWith(Number)
-                  .as('locations_count'),
-              metasCount:
-                sql`(select count(distinct ml.meta_id) from map_locations_view ml where ml.map_id = ${maps.id})`
-                  .mapWith(Number)
-                  .as('metas_count'),
-            },
-            with: {
-              mapLevels: { with: { level: true } },
-              mapRegions: { with: { region: true } },
-              filters: true,
+      // counts for every map in one pass: the per-map correlated subqueries
+      // over map_locations_view re-scanned all of the group's locations twice
+      // per map (~700ms for a 19-map group). Distinct locations, so a location
+      // shared by several of a map's metas counts once.
+      const countsQuery = db.execute<{
+        map_id: number;
+        locations_count: number;
+        metas_count: number;
+      }>(sql`
+        WITH qualifying AS (
+          SELECT m.id AS map_id, mt.id AS meta_id
+          FROM ${maps} m
+          JOIN ${metas} mt ON mt.map_group_id = m.map_group_id
+          WHERE m.map_group_id = ${groupId}
+            AND (
+              EXISTS (SELECT 1 FROM map_levels ml
+                      JOIN meta_levels me ON me.level_id = ml.level_id AND me.meta_id = mt.id
+                      WHERE ml.map_id = m.id)
+              OR NOT EXISTS (SELECT 1 FROM map_levels ml WHERE ml.map_id = m.id)
+            )
+            AND (
+              EXISTS (SELECT 1 FROM map_filters mf
+                      WHERE mf.map_id = m.id AND mf.is_exclude = FALSE AND mt.tag_name ILIKE mf.tag_like)
+              OR NOT EXISTS (SELECT 1 FROM map_filters mf WHERE mf.map_id = m.id AND mf.is_exclude = FALSE)
+            )
+            AND NOT EXISTS (SELECT 1 FROM map_filters mf
+                            WHERE mf.map_id = m.id AND mf.is_exclude = TRUE AND mt.tag_name ILIKE mf.tag_like)
+        )
+        SELECT q.map_id::int,
+               count(DISTINCT lm.location_id)::int AS locations_count,
+               count(DISTINCT CASE WHEN lm.location_id IS NOT NULL THEN q.meta_id END)::int AS metas_count
+        FROM qualifying q
+        LEFT JOIN ${mapGroupLocationMetas} lm ON lm.meta_id = q.meta_id
+        GROUP BY q.map_id
+      `);
+      const [groupData, counts] = await Promise.all([
+        db.$primary.query.mapGroups.findFirst({
+          with: {
+            maps: {
+              with: {
+                mapLevels: { with: { level: true } },
+                mapRegions: { with: { region: true } },
+                filters: true,
+              },
             },
           },
-        },
-        where: eq(mapGroups.id, groupId),
-      });
+          where: eq(mapGroups.id, groupId),
+        }),
+        countsQuery,
+      ]);
 
-      if (!group) {
+      if (!groupData) {
         return status(404);
       }
+      const countsByMapId = new Map(
+        counts.map((row) => [
+          row.map_id,
+          { locationsCount: row.locations_count, metasCount: row.metas_count },
+        ]),
+      );
+      const group = {
+        ...groupData,
+        maps: groupData.maps.map((map) => ({
+          ...map,
+          locationsCount: countsByMapId.get(map.id)?.locationsCount ?? 0,
+          metasCount: countsByMapId.get(map.id)?.metasCount ?? 0,
+        })),
+      };
 
       const [levelList, regionList, user] = await Promise.all([
         db.$primary.query.levels.findMany({
