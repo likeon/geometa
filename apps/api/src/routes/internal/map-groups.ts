@@ -867,6 +867,27 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
           );
           const scopeMetaIds = groupMetas.map((meta) => meta.id);
 
+          // full replacement treats the file as authoritative, so links it no
+          // longer asserts have to go before the new ones are written -
+          // otherwise a location keeps metas the upload dropped, which the old
+          // single-tag upsert would have overwritten. Limited to the locations
+          // this upload touched: everything else is about to be deleted, and
+          // leaving those links alone keeps a location intact rather than
+          // orphaned if the delete below misses it.
+          if (body.uploadMode === 'full') {
+            const uploadedIds = [...locationIdByPano.values()];
+            for (let i = 0; i < uploadedIds.length; i += BATCH_SIZE) {
+              await trx
+                .delete(mapGroupLocationMetas)
+                .where(
+                  inArray(
+                    mapGroupLocationMetas.locationId,
+                    uploadedIds.slice(i, i + BATCH_SIZE),
+                  ),
+                );
+            }
+          }
+
           const linkValues: { locationId: number; metaId: number }[] = [];
           for (const location of locations) {
             const locationId = locationIdByPano.get(location.panoId);
