@@ -78,9 +78,28 @@ export const userscriptRouter = new Elysia({
         };
       });
 
+      // Personal maps borrow the same meta from several source maps, giving
+      // one pano many synced_metas rows that differ only in the footer credit.
+      // Those would render as identical tabs, so collapse anything whose
+      // visible content matches (first one wins - the md5 order is stable).
+      const seen = new Set<string>();
+      const dedupedMetas = metaList.filter((meta) => {
+        const key = JSON.stringify([
+          meta.country,
+          meta.metaName,
+          meta.note,
+          meta.images,
+        ]);
+        if (seen.has(key)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      });
+
       // the top-level fields are the first meta, kept so userscripts predating
       // the tab strip keep working - they never see `metas`
-      return { ...metaList[0], metas: metaList };
+      return { ...dedupedMetas[0], metas: dedupedMetas };
     },
     {
       query: t.Object({

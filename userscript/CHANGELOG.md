@@ -3,7 +3,9 @@
 ## [0.91]
 
 - A location can now have several metas: the note shows a tab for each one, so every meta for that spot is a click away
-- Which meta opens first varies from location to location, instead of always being the same one
+- When a location has several metas, which one opens first varies from location to location, so no meta is always buried behind a click
+- Tabs can be switched with the arrow keys and announce themselves properly to screen readers
+- The "upload locations" button no longer uploads the same coordinate twice when several of a map's metas share it, so those spots stop being drawn more often than intended
 
 ## [0.90]
 

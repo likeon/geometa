@@ -40,12 +40,35 @@ The player path reads `synced_locations` and would stay up, which is not much co
 *Precondition:* 0036 and its code are fully rolled out, with no pre-0036 pods left.
 
 ```sql
+-- FIRST: re-run the backfill. During the 0036 rolling deploy, pre-0036 pods
+-- kept writing extra_tag without creating link rows, and 0036's own backfill
+-- only saw its snapshot - anything committed while it ran got no links either.
+-- extra_tag still records those writes, so this recovers them:
+INSERT INTO map_group_location_metas (location_id, meta_id)
+SELECT mgl.id, m.id
+FROM map_group_locations mgl
+JOIN metas m ON m.map_group_id = mgl.map_group_id AND m.tag_name = mgl.extra_tag
+ON CONFLICT DO NOTHING;
+
 DROP INDEX map_group_locations_map_group_tag_idx;
 ALTER TABLE map_group_locations DROP COLUMN extra_tag;
 ```
 
-...plus deleting the transitional write in `POST /:id/locations/upload` and the legacy `extraTag`
-fallback in its request schema, and the `extraTag` column from `schema.ts`.
+Also: avoid clicking Sync while the 0036 deploy is rolling — an old pod's sync would strip
+second metas from any multi-tag location uploaded in that window and advance `synced_at`
+past them. (Multi-tag locations can't exist before the new frontend is out, so in practice
+the window is empty; noted for completeness.)
+
+Deployment order matters *within* 0037 too: current pods still WRITE `extra_tag` on every upload,
+so dropping the column and removing the write in one release means not-yet-replaced pods fail
+uploads during that rolling deploy. Do it as two releases:
+
+1. Code-only: delete the transitional write in `POST /:id/locations/upload`, the legacy `extraTag`
+   fallback in its request schema, and the `extraTag` column from `schema.ts`.
+2. Next release: the migration above (backfill re-run, drop index, drop column).
+
+Overall sequence: merge and deploy 0035+0036 → let it bake until an API rollback past 0036 is off
+the table (a rollback after the drop would 500 every location endpoint) → 0037 step 1 → 0037 step 2.
 
 There is no urgency. If we decide to keep the column instead, reword the comment on
 `mapGroupLocations.extraTag` in `schema.ts` so it reads as retained legacy data rather than a pending
@@ -96,6 +119,31 @@ granularity. Two uploads inside the same wall-clock second leave the older locat
 predates multi-meta and is unrelated to it; the link reconciliation is scoped to the uploaded location
 ids specifically so that a surviving location keeps its metas rather than being left orphaned. A real
 fix needs a per-upload marker rather than a timestamp.
+
+Related, also pre-existing: a long upload transaction that overlaps a concurrent sync can lose its
+changes to incremental sync forever — the trigger stamps `modified_at` with the upload transaction's
+*start* time, and a sync that starts later but finishes first sets `synced_at` past it. The next
+incremental sync then skips the whole upload. Rare (needs a sync racing a multi-second upload), and a
+per-upload marker would fix this too.
+
+### 5. Intended behaviour worth knowing (decided during review, not bugs)
+
+- **A scoped (editor) upload updates the camera of shared locations.** Coordinates are per-pano, so an
+  editor uploading for their meta can re-frame a pano another meta also uses. Pre-multi-meta the
+  `setWhere` guard skipped those rows, but that guard existed to prevent re-*tagging*, which the link
+  table makes structurally impossible. Sharing one physical location means sharing its view; the
+  change log records every batch, and the editors-talk-to-each-other model covers the rest.
+- **`tagReplace` no longer deletes orphaned locations that carry a matching legacy `extra_tag`.** It
+  can only detach links, and orphans have none. Those rows were already unreachable; they just stop
+  being cleaned up by uploads that happen to reuse their old tag. The one-line orphan prune (above)
+  remains the answer if they ever matter.
+- **Orphans are excluded from the locations export and its count** (user decision 2026-07-26: authors
+  keep full location JSONs, so orphan recovery through the export is not worth carrying a reader of
+  `extra_tag`). The "missing locations" download only contains locations that actually have metas.
+- **The userscript note dedupes metas by rendered content.** Personal maps borrow the same meta from
+  several source maps, giving one pano many `synced_metas` rows identical except for the
+  "Meta taken from…" footer credit — 93% of multi-row panos in prod data. Tabs collapse those; the
+  credit shown is the first in hash order.
 
 ### Deliberately not doing
 

@@ -1,5 +1,5 @@
 import { GM_xmlhttpRequest, unsafeWindow, GM_info } from '$';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, CACHE_NAMESPACE } from '../config';
 
 /**
  * Waits and returns an element with the specified selector.
@@ -129,7 +129,7 @@ function getCachedMapInfo(key: string): CachedMapInfo | null {
 }
 
 export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
-  const localStorageMapInfoKey = `geometa:map-info:${geoguessrId}`;
+  const localStorageMapInfoKey = `geometa:map-info${CACHE_NAMESPACE}:${geoguessrId}`;
   const cached = getCachedMapInfo(localStorageMapInfoKey);
   if (!forceUpdate && cached) {
     const ttl = cached.mapInfo.mapFound ? MAP_FOUND_CACHE_MS : MAP_NOT_FOUND_CACHE_MS;
@@ -151,12 +151,15 @@ export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
   }
   const toCache: CachedMapInfo = { mapInfo, fetchedAt: Date.now() };
   unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(toCache));
-  unsafeWindow.localStorage.setItem('geometa:latest-version', mapInfo.userscriptVersion);
+  unsafeWindow.localStorage.setItem(
+    `geometa:latest-version${CACHE_NAMESPACE}`,
+    mapInfo.userscriptVersion
+  );
   return mapInfo;
 }
 
 export function getLatestVersionInfo() {
-  return unsafeWindow.localStorage.getItem('geometa:latest-version');
+  return unsafeWindow.localStorage.getItem(`geometa:latest-version${CACHE_NAMESPACE}`);
 }
 
 function isNewerVersion(candidate: string, current: string) {

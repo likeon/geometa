@@ -413,13 +413,14 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
   .get(
     '/:id/meta-balance',
     async ({ params: { id: mapId }, query, userId, status }) => {
+      // permissions first so an outsider can't probe which group a map is in
+      await ensurePermissions(userId, query.groupId);
       const map = await db.$primary.query.maps.findFirst({
         where: and(eq(maps.id, mapId), eq(maps.mapGroupId, query.groupId)),
       });
       if (!map) {
         return status(404, { error: 'Map not found' });
       }
-      await ensurePermissions(userId, query.groupId);
 
       // Counted from live data through map_locations_view, so the numbers
       // include edits that haven't been synced yet. Exclusivity is per map, not
@@ -444,7 +445,7 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
                  count(*) OVER (PARTITION BY pano_id) AS metas_here
           FROM pair
         )
-        SELECT meta_id,
+        SELECT meta_id::int,
                meta_name,
                tag_name,
                count(*)::int AS links,

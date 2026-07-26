@@ -764,18 +764,43 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         });
       }
 
-      // a frontend that predates multi-tag uploads still sends extraTag
-      const inputLocations = body.locations.map((location) => ({
-        lat: location.lat,
-        lng: location.lng,
-        heading: location.heading,
-        pitch: location.pitch,
-        zoom: location.zoom,
-        panoId: location.panoId,
-        extraPanoId: location.extraPanoId,
-        extraPanoDate: location.extraPanoDate ?? null,
-        tags: location.tags ?? (location.extraTag ? [location.extraTag] : []),
-      }));
+      // Merge rows sharing a panoId (last coordinates win, tags unioned).
+      // Legacy files list the same pano once per tag, and without the merge
+      // the outcome depended on which upsert batch the duplicates landed in:
+      // same batch hit the ON CONFLICT twice and 409'd, different batches
+      // silently merged. A frontend that predates multi-tag uploads still
+      // sends extraTag instead of tags.
+      const byPano = new Map<
+        string,
+        {
+          lat: number;
+          lng: number;
+          heading: number;
+          pitch: number;
+          zoom: number;
+          panoId: string;
+          extraPanoId: string | null;
+          extraPanoDate: string | null;
+          tags: string[];
+        }
+      >();
+      for (const location of body.locations) {
+        const tags =
+          location.tags ?? (location.extraTag ? [location.extraTag] : []);
+        const existing = byPano.get(location.panoId);
+        byPano.set(location.panoId, {
+          lat: location.lat,
+          lng: location.lng,
+          heading: location.heading,
+          pitch: location.pitch,
+          zoom: location.zoom,
+          panoId: location.panoId,
+          extraPanoId: location.extraPanoId,
+          extraPanoDate: location.extraPanoDate ?? null,
+          tags: existing ? [...new Set([...existing.tags, ...tags])] : tags,
+        });
+      }
+      const inputLocations = [...byPano.values()];
       if (inputLocations.some((location) => location.tags.length === 0)) {
         return status(400, {
           message: 'Every location must have at least one tag',
@@ -872,11 +897,17 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
               note: '',
               modifiedAt: currentTimestamp,
             }));
-            const createdMetas = await trx
-              .insert(metas)
-              .values(metaInsertValues)
-              .onConflictDoNothing()
-              .returning({ id: metas.id, tagName: metas.tagName });
+            // chunked like every other statement here: a group can carry
+            // 15k+ distinct tags, which would blow the bind-parameter limit
+            const createdMetas: { id: number; tagName: string }[] = [];
+            for (let i = 0; i < metaInsertValues.length; i += BATCH_SIZE) {
+              const batch = await trx
+                .insert(metas)
+                .values(metaInsertValues.slice(i, i + BATCH_SIZE))
+                .onConflictDoNothing()
+                .returning({ id: metas.id, tagName: metas.tagName });
+              createdMetas.push(...batch);
+            }
             await logChange(
               trx,
               createdMetas.map((meta) => ({

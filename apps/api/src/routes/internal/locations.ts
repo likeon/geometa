@@ -6,7 +6,7 @@ import {
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensurePermissions } from '@api/lib/internal/permissions';
-import { and, count, eq, isNull, sql } from 'drizzle-orm';
+import { and, count, eq, exists, isNull, sql } from 'drizzle-orm';
 import { Elysia, type Static, t } from 'elysia';
 import { pick } from 'remeda';
 
@@ -17,7 +17,18 @@ const querySchema = t.Object({
 export type QuerySchema = Static<typeof querySchema>;
 
 const buildWhere = (query: QuerySchema) => {
-  const conditions = [eq(mapGroupLocations.mapGroupId, query.groupId)];
+  const conditions = [
+    eq(mapGroupLocations.mapGroupId, query.groupId),
+    // locations whose meta was deleted can't sync or be played; exporting
+    // them would only produce tagless rows that block re-upload. Shared by
+    // the count endpoint so the displayed number matches the download.
+    exists(
+      db
+        .select({ one: sql`1` })
+        .from(mapGroupLocationMetas)
+        .where(eq(mapGroupLocationMetas.locationId, mapGroupLocations.id)),
+    ),
+  ];
 
   if (query.isOnStreetView !== undefined) {
     conditions.push(

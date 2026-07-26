@@ -64,32 +64,27 @@ async function copyMetaToGroup(
       .onConflictDoNothing();
   }
 
-  // set-based so a meta with tens of thousands of locations can't blow the
-  // bind-parameter limit
-  const sourcePanos = sql`
-    SELECT src.pano_id
-    FROM ${mapGroupLocations} src
-      JOIN ${mapGroupLocationMetas} lm ON lm.location_id = src.id
-    WHERE src.map_group_id = ${mapGroupId} AND lm.meta_id = ${id}
-  `;
+  // Set-based so a meta with tens of thousands of locations can't blow the
+  // bind-parameter limit. Only locations this copy actually inserts get
+  // linked: a pano the target group already has belongs to some other meta
+  // there, framed for that meta, and hijacking it would hand the copied meta
+  // a mis-aimed round (the old per-row copy skipped those too).
   await tx.execute(sql`
-    INSERT INTO ${mapGroupLocations}
-      (map_group_id, lat, lng, heading, pitch, zoom, pano_id, extra_tag,
-       extra_pano_id, extra_pano_date, updated_at, modified_at)
-    SELECT ${targetGroupId}, src.lat, src.lng, src.heading, src.pitch, src.zoom,
-           src.pano_id, ${meta.tagName}, src.extra_pano_id, src.extra_pano_date,
-           ${currentTimestamp}, ${currentTimestamp}
-    FROM ${mapGroupLocations} src
-      JOIN ${mapGroupLocationMetas} lm ON lm.location_id = src.id
-    WHERE src.map_group_id = ${mapGroupId} AND lm.meta_id = ${id}
-    ON CONFLICT DO NOTHING
-  `);
-  await tx.execute(sql`
+    WITH inserted AS (
+      INSERT INTO ${mapGroupLocations}
+        (map_group_id, lat, lng, heading, pitch, zoom, pano_id, extra_tag,
+         extra_pano_id, extra_pano_date, updated_at, modified_at)
+      SELECT ${targetGroupId}, src.lat, src.lng, src.heading, src.pitch, src.zoom,
+             src.pano_id, ${meta.tagName}, src.extra_pano_id, src.extra_pano_date,
+             ${currentTimestamp}, ${currentTimestamp}
+      FROM ${mapGroupLocations} src
+        JOIN ${mapGroupLocationMetas} lm ON lm.location_id = src.id
+      WHERE src.map_group_id = ${mapGroupId} AND lm.meta_id = ${id}
+      ON CONFLICT DO NOTHING
+      RETURNING id
+    )
     INSERT INTO ${mapGroupLocationMetas} (location_id, meta_id)
-    SELECT tgt.id, ${newMetaId}
-    FROM ${mapGroupLocations} tgt
-    WHERE tgt.map_group_id = ${targetGroupId}
-      AND tgt.pano_id IN (${sourcePanos})
+    SELECT inserted.id, ${newMetaId} FROM inserted
     ON CONFLICT DO NOTHING
   `);
 

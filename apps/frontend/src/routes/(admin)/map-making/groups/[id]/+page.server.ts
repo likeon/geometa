@@ -68,7 +68,9 @@ const mapJsonSchema = z.object({
       zoom: z.number(),
       panoId: z.string().nullable(),
       extra: z.object({
-        tags: z.string().array().min(1),
+        // element min(1): the API rejects empty-string tags with a bare 422,
+        // so catch them here where we can name the offending location
+        tags: z.string().min(1).array().min(1),
         panoId: z.string().optional().nullable(),
         panoDate: z.string().optional().nullable()
       })
@@ -291,7 +293,9 @@ export const actions = {
           // anything else is the tags array itself being absent or empty
           message =
             typeof issue.path[issue.path.length - 1] === 'number'
-              ? 'has a tag that is not text'
+              ? issue.code === 'too_small'
+                ? 'has an empty tag'
+                : 'has a tag that is not text'
               : `doesn't have a tag`;
 
           // Return HTML with link if panoId exists
