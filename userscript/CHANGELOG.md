@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.91]
+
+- A location can now have several metas: the note shows a tab for each one, so every meta for that spot is a click away
+- Which meta opens first varies from location to location, instead of always being the same one
+
 ## [0.90]
 
 - Added meta pins on challenge results pages (geoguessr.com/results/...), with support for any round count
