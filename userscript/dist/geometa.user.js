@@ -179,6 +179,8 @@
   var _GM_setValue = (() => typeof GM_setValue != "undefined" ? GM_setValue : void 0)();
   var _GM_xmlhttpRequest = (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
   var _unsafeWindow = (() => typeof unsafeWindow != "undefined" ? unsafeWindow : void 0)();
+  const API_BASE_URL = "https://learnablemeta.com";
+  const SITE_BASE_URL = "https://learnablemeta.com";
   function waitForElement(selector) {
     return new Promise((resolve) => {
       try {
@@ -281,7 +283,7 @@
         return cached.mapInfo;
       }
     }
-    const url = `https://learnablemeta.com/api/userscript/map/${geoguessrId}`;
+    const url = `${API_BASE_URL}/api/userscript/map/${geoguessrId}`;
     let mapInfo;
     try {
       mapInfo = await fetchMapInfo(url);
@@ -4630,7 +4632,7 @@ context.l
   delegate(["mousemove", "click"]);
   const ANNOUNCEMENT_CACHE_KEY = "geometa:cached-announcement";
   const ANNOUNCEMENT_CACHE_DURATION_MS = 60 * 60 * 1e3;
-  const ANNOUNCEMENT_API_URL = "https://learnablemeta.com/api/userscript/announcement/";
+  const ANNOUNCEMENT_API_URL = `${API_BASE_URL}/api/userscript/announcement/`;
   async function getAnnouncement() {
     try {
       const cachedItemString = localStorage.getItem(ANNOUNCEMENT_CACHE_KEY);
@@ -4745,7 +4747,7 @@ context.l
               on your screen.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">View Map meta list:</strong> Click the list icon to see all the metas included
               in the map you are currently playing.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Join the Community:</strong> Click the Discord icon to share feedback, suggest
               improvements, or just say hi!</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Outdated Script:</strong> The question mark icon will blink if the script is outdated.</li></ul></div> <button class="close-btn svelte-1j2rmt2">Close</button></div></div>`);
-  var root$3 = from_html(`<div class="geometa-container svelte-1j2rmt2"><!> <div class="flex header svelte-1j2rmt2"><h2 class="svelte-1j2rmt2">Learnable Meta</h2> <div class="icons svelte-1j2rmt2"><a target="_blank" aria-label="List of map metas" class="svelte-1j2rmt2"><span class="skill-icons--list svelte-1j2rmt2"></span></a> <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-1j2rmt2"><span class="flat-color-icons--globe svelte-1j2rmt2"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-1j2rmt2"><span class="skill-icons--discord svelte-1j2rmt2"></span></a> <button aria-label="More information" style="background: none; border: none; padding: 0;" class="svelte-1j2rmt2"><span></span></button></div></div> <!> <!> <!></div>`);
+  var root$3 = from_html(`<div class="geometa-container svelte-1j2rmt2"><!> <div class="flex header svelte-1j2rmt2"><h2 class="svelte-1j2rmt2">Learnable Meta</h2> <div class="icons svelte-1j2rmt2"><a target="_blank" aria-label="List of map metas" class="svelte-1j2rmt2"><span class="skill-icons--list svelte-1j2rmt2"></span></a> <a target="_blank" aria-label="Learnable Meta website" class="svelte-1j2rmt2"><span class="flat-color-icons--globe svelte-1j2rmt2"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-1j2rmt2"><span class="skill-icons--discord svelte-1j2rmt2"></span></a> <button aria-label="More information" style="background: none; border: none; padding: 0;" class="svelte-1j2rmt2"><span></span></button></div></div> <!> <!> <!></div>`);
   function App($$anchor, $$props) {
     push($$props, true);
     let geoInfo = state(null);
@@ -4767,7 +4769,7 @@ context.l
           userscriptVersion: $$props.userscriptVersion,
           source: $$props.source
         }).toString();
-        const url = `https://learnablemeta.com/api/userscript/location?${urlParams}`;
+        const url = `${API_BASE_URL}/api/userscript/location?${urlParams}`;
         _GM_xmlhttpRequest({
           method: "GET",
           url,
@@ -4887,7 +4889,8 @@ context.l
     var div_3 = sibling(node, 2);
     var div_4 = sibling(child(div_3), 2);
     var a = child(div_4);
-    var button_1 = sibling(a, 6);
+    var a_1 = sibling(a, 2);
+    var button_1 = sibling(a_1, 4);
     button_1.__click = togglePopup;
     var span = child(button_1);
     bind_this(div_3, ($$value) => header = $$value, () => header);
@@ -5041,7 +5044,8 @@ context.l
     }
     bind_this(div, ($$value) => container = $$value, () => container);
     template_effect(() => {
-      set_attribute(a, "href", "https://learnablemeta.com/maps/" + $$props.mapId);
+      set_attribute(a, "href", `${SITE_BASE_URL}/maps/${$$props.mapId}`);
+      set_attribute(a_1, "href", SITE_BASE_URL);
       set_class(span, 1, clsx(get(helpClass)), "svelte-1j2rmt2");
     });
     append($$anchor, div);
@@ -5289,7 +5293,7 @@ roundNumber: 4,
   function MapLabel($$anchor, $$props) {
     var div = root$2();
     var a = sibling(child(div), 2);
-    template_effect(() => set_attribute(a, "href", `https://learnablemeta.com/maps/${$$props.mapId}`));
+    template_effect(() => set_attribute(a, "href", `${SITE_BASE_URL}/maps/${$$props.mapId}`));
     append($$anchor, div);
   }
   function initMapLabel() {
@@ -5436,7 +5440,7 @@ roundNumber: 4,
   }
   function fetchMapLocationsGM(geoguessrId, apiToken) {
     return new Promise((resolve, reject) => {
-      const apiUrl = `https://learnablemeta.com/api/userscript/map/${geoguessrId}/locations`;
+      const apiUrl = `${API_BASE_URL}/api/userscript/map/${geoguessrId}/locations`;
       _GM_xmlhttpRequest({
         method: "GET",
         url: apiUrl,
@@ -5555,7 +5559,7 @@ onload: (response) => {
   function UploadLocations($$anchor, $$props) {
     push($$props, true);
     const API_KEY_STORAGE_NAME = "learnableMeta_apiKey";
-    const URL_TO_GENERATE_TOKEN = "https://learnablemeta.com/profile/token";
+    const URL_TO_GENERATE_TOKEN = `${SITE_BASE_URL}/profile/token`;
     let showApiKeyModal = state(false);
     let modalMode = state("upload");
     let apiKeyInput = state("");
@@ -5723,7 +5727,6 @@ onload: (response) => {
         }
         var p_3 = sibling(node_1, 2);
         var a = sibling(child(p_3));
-        set_attribute(a, "href", URL_TO_GENERATE_TOKEN);
         var input = sibling(p_3, 2);
         var div_3 = sibling(input, 2);
         var node_3 = child(div_3);
@@ -5742,7 +5745,10 @@ onload: (response) => {
         var text_2 = child(button_3);
         var button_4 = sibling(button_3, 2);
         button_4.__click = handleCancelModal;
-        template_effect(() => set_text(text_2, get(modalMode) === "upload" ? "Save & Upload" : "Save"));
+        template_effect(() => {
+          set_attribute(a, "href", URL_TO_GENERATE_TOKEN);
+          set_text(text_2, get(modalMode) === "upload" ? "Save & Upload" : "Save");
+        });
         bind_value(input, () => get(apiKeyInput), ($$value) => set(apiKeyInput, $$value));
         append($$anchor2, div_1);
       };

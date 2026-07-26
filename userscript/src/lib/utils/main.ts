@@ -1,4 +1,5 @@
 import { GM_xmlhttpRequest, unsafeWindow, GM_info } from '$';
+import { API_BASE_URL } from '../config';
 
 /**
  * Waits and returns an element with the specified selector.
@@ -137,7 +138,7 @@ export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
       return cached.mapInfo;
     }
   }
-  const url = `https://learnablemeta.com/api/userscript/map/${geoguessrId}`;
+  const url = `${API_BASE_URL}/api/userscript/map/${geoguessrId}`;
   let mapInfo: MapInfoResponse;
   try {
     mapInfo = await fetchMapInfo(url);

@@ -22,6 +22,7 @@
     getLastDismissedAnnouncementTimestamp,
     markAnnouncementAsDismissed
   } from './utils/announcement';
+  import { API_BASE_URL, SITE_BASE_URL } from './config';
 
   interface Props {
     panoId: string;
@@ -66,7 +67,7 @@
         userscriptVersion,
         source
       }).toString();
-      const url = `https://learnablemeta.com/api/userscript/location?${urlParams}`;
+      const url = `${API_BASE_URL}/api/userscript/location?${urlParams}`;
 
       GM_xmlhttpRequest({
         method: 'GET',
@@ -203,13 +204,10 @@
   <div class="flex header" bind:this={header}>
     <h2>Learnable Meta</h2>
     <div class="icons">
-      <a
-        href={'https://learnablemeta.com/maps/' + mapId}
-        target="_blank"
-        aria-label="List of map metas">
+      <a href={`${SITE_BASE_URL}/maps/${mapId}`} target="_blank" aria-label="List of map metas">
         <span class="skill-icons--list"></span>
       </a>
-      <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website">
+      <a href={SITE_BASE_URL} target="_blank" aria-label="Learnable Meta website">
         <span class="flat-color-icons--globe"></span>
       </a>
       <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord">
