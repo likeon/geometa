@@ -5,3 +5,4 @@ resources:
   - frontend/flux
   - api/flux
   - discord-bot/publish-bot/flux
+  - discord-bot/challenge-bot/flux
