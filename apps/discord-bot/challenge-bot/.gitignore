@@ -1,0 +1,6 @@
+.env
+config.yaml
+state.json
+state.json.tmp
+node_modules/
+dist/

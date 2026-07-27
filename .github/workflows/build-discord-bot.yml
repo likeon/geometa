@@ -4,8 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - apps/discord-bot/**
-      - "!apps/discord-bot/flux/**"
+      - apps/discord-bot/publish-bot/**
+      - "!apps/discord-bot/publish-bot/flux/**"
   workflow_dispatch:
 
 jobs:
@@ -41,8 +41,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: apps/discord-bot
-          file: apps/discord-bot/Dockerfile
+          context: apps/discord-bot/publish-bot
+          file: apps/discord-bot/publish-bot/Dockerfile
           push: true
           tags: |
             ghcr.io/likeon/geometa-discord-bot:${{ steps.prep.outputs.BUILD_ID }}

@@ -1,0 +1,23 @@
+{
+  "name": "geoguessr-challenge-discordbot",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "build": "node -e \"require('node:fs').rmSync('dist',{recursive:true,force:true})\" && tsc",
+    "test": "npm run build && node --test dist/tests/challenge.test.js",
+    "check": "npm test",
+    "start": "node --env-file-if-exists=.env dist/bot.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.27.0",
+    "yaml": "^2.8.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "typescript": "^7.0.2"
+  }
+}

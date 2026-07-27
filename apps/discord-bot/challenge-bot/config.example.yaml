@@ -1,0 +1,65 @@
+challenge:
+  channel_id: 0                 # Discord channel ID to post challenges in
+  post_time: "12:00"            # HH:MM, in the timezone below
+  timezone: "Europe/Berlin"     # any IANA timezone name
+  rounds: 5                     # rounds per challenge
+  time_limit: 0                 # seconds per round; 0 = unlimited
+  challenge_url: "https://www.geoguessr.com/challenge/"
+  message:
+    show_title: true            # show a heading above the buttons
+    title: "Daily Challenge"    # heading text when show_title is true
+    show_date: true             # show the challenge date
+    show_next_challenge: true   # shows a countdown to the next challenge
+    show_creators: true         # show creator metadata when a selected map has it
+  leaderboard:
+    enabled: false              # post yesterday's leaderboard before today's challenges
+    max_players: 10             # number of players to show
+
+# Game modes you can attach to maps. The "settings" control GeoGuessr's
+# movement restrictions when the challenge is created.
+
+game_modes:
+  moving:
+    name: "Moving"
+    settings:
+      forbid_moving: false
+      forbid_rotating: false
+      forbid_zooming: false
+  nm:
+    name: "NM"
+    settings:
+      forbid_moving: true
+      forbid_rotating: false
+      forbid_zooming: false
+  nmpz:
+    name: "NMPZ"
+    settings:
+      forbid_moving: true
+      forbid_rotating: true
+      forbid_zooming: true
+
+# One map is picked from EACH pool every day (so 2 pools => 2 challenges posted).
+# A pool can list maps or use the public LearnableMeta catalog.
+# Within a pool, recently used maps are avoided when possible.
+
+pools:
+  - name: "World"
+    id: "world"
+    maps:
+      - name: "A Community World"
+        map_id: "62a44b22040f04bd36e8a914"    # geoguessr.com/maps/<id>
+        creator:
+          name: "Creator Name"
+          geoguessr_id: "000000000000000000000000"
+          discord_id: "000000000000000000"
+          custom_link:
+            text: "Creator Website"
+            url: "https://example.com"
+        game_modes: ["moving", "nm", "nmpz"]        # one of these is chosen at random each day
+
+  - name: "Learnable Meta Europe"
+    id: "alm-europe"
+    learnable_meta:
+      region: "Europe"          # optional exact ALM region
+      is_shared: true           # optional ALM shared-map filter
+    game_modes: ["nm", "nmpz"]  # available modes for every map in this pool
