@@ -1,0 +1,6 @@
+.env
+dist/
+flux/
+node_modules/
+state.json
+state.json.tmp

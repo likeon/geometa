@@ -1,0 +1,46 @@
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageRepository
+metadata:
+  name: challenge-bot
+spec:
+  image: ghcr.io/likeon/geometa-challenge-bot
+  interval: 5m
+  provider: generic
+  secretRef:
+    name: registries
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImagePolicy
+metadata:
+  name: challenge-bot
+spec:
+  imageRepositoryRef:
+    name: challenge-bot
+  filterTags:
+    pattern: '^main-.+?-(?P<ts>[\d]+)$'
+    extract: "$ts"
+  policy:
+    numerical:
+      order: asc
+---
+apiVersion: image.toolkit.fluxcd.io/v1beta2
+kind: ImageUpdateAutomation
+metadata:
+  name: challenge-bot
+spec:
+  interval: 30m
+  sourceRef:
+    kind: GitRepository
+    name: geometa
+    namespace: flux-system
+  git:
+    commit:
+      author:
+        email: fluxcdbot@users.noreply.github.com
+        name: fluxcdbot
+      messageTemplate: "challenge-bot: automated image update"
+    push:
+      branch: main
+  update:
+    path: ./apps/discord-bot/challenge-bot/flux
+    strategy: Setters

@@ -119,6 +119,13 @@ Writes use a temporary file and atomic replacement. Existing state files from
 the Python version are accepted. Invalid or malformed state stops startup
 instead of risking duplicate challenges; repair the file before restarting.
 
+## Deployment
+
+The Flux manifests in `flux/` run one replica and persist `state.json` on the
+`challenge-bot-state` claim. They expect a Kubernetes Secret named
+`challenge-bot` with `DISCORD_BOT_TOKEN` and `GEOGUESSR_NCFA_COOKIE` keys.
+Set the real Discord channel ID in `config.yaml` before building the image.
+
 ## Development
 
 ```bash

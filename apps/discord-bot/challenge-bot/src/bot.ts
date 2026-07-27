@@ -200,7 +200,7 @@ async function main(): Promise<void> {
   if (!cookie) throw new Error("GEOGUESSR_NCFA_COOKIE is not configured");
 
   const settings = await loadSettings();
-  const state = await StateStore.open();
+  const state = await StateStore.open(process.env.STATE_PATH?.trim() || "state.json");
   const client = new Client({ intents: [GatewayIntentBits.Guilds] });
   let ticking = false;
   let stopping = false;
