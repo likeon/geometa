@@ -1,0 +1,59 @@
+challenge:
+  channel_id: 1 # Replace with the Discord channel ID before running.
+  post_time: "12:00"
+  timezone: "Europe/Berlin"
+  rounds: 10
+  time_limit: 0
+  challenge_url: "https://www.geoguessr.com/challenge/"
+  message:
+    show_title: false
+    title: "Daily Challenge"
+    show_date: false
+    show_next_challenge: false
+    show_creators: false
+  leaderboard:
+    enabled: false
+    max_players: 10
+
+game_modes:
+  nm:
+    name: "NM"
+    settings:
+      forbid_moving: true
+      forbid_rotating: false
+      forbid_zooming: false
+
+pools:
+  - name: "Featured Maps"
+    id: "featured"
+    maps:
+      - name: "A Balanced Major Bajor World"
+        map_id: "699617147156b7076362bd45"
+        game_modes: ["nm"]
+      - name: "A Learnable World - Identify Every Country"
+        map_id: "67e33138703749d45b6faf2c"
+        game_modes: ["nm"]
+      - name: "A Learnable Meta World - Basics"
+        map_id: "66fda352ee1c8ee4735e1aa8"
+        game_modes: ["nm"]
+      - name: "A Learnable Meta World - Beginner"
+        map_id: "66c0d3feff4dbe492e06174e"
+        game_modes: ["nm"]
+      - name: "A Learnable Meta World"
+        map_id: "66fda2e27e08dc03b5bb3d6e"
+        game_modes: ["nm"]
+      - name: "A Learnable Meta World - Intermediate"
+        map_id: "67695a0a9c0874b92709eedb"
+        game_modes: ["nm"]
+  - name: "All LearnableMeta 1"
+    id: "alm-all-1"
+    learnable_meta: {}
+    game_modes: ["nm"]
+  - name: "All LearnableMeta 2"
+    id: "alm-all-2"
+    learnable_meta: {}
+    game_modes: ["nm"]
+  - name: "All LearnableMeta 3"
+    id: "alm-all-3"
+    learnable_meta: {}
+    game_modes: ["nm"]
