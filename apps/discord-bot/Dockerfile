@@ -17,5 +17,5 @@ FROM gcr.io/distroless/cc-debian12 AS runtime
 WORKDIR /app
 USER 1000
 COPY --from=builder --chown=1000:1000 /app/target/release/discord-bot /usr/local/bin/discord-bot
-ENTRYPOINT []
-CMD ["/usr/local/bin/discord-bot"]
+COPY --chown=1000:1000 config.yaml ./
+ENTRYPOINT ["/usr/local/bin/discord-bot"]

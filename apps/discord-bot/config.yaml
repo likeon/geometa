@@ -1,23 +1,10 @@
 challenge:
   channel_id: 1 # Replace with the Discord channel ID before running.
-  post_time: "12:00"
-  timezone: "Europe/Berlin"
   rounds: 10
   time_limit: 0
-  challenge_url: "https://www.geoguessr.com/challenge/"
-  message:
-    show_title: false
-    title: "Daily Challenge"
-    show_date: false
-    show_next_challenge: false
-    show_creators: false
-  leaderboard:
-    enabled: false
-    max_players: 10
 
 game_modes:
   nm:
-    name: "NM"
     settings:
       forbid_moving: true
       forbid_rotating: false
@@ -25,7 +12,6 @@ game_modes:
 
 pools:
   - name: "Featured Maps"
-    id: "featured"
     maps:
       - name: "A Balanced Major Bajor World"
         map_id: "699617147156b7076362bd45"
@@ -46,14 +32,11 @@ pools:
         map_id: "67695a0a9c0874b92709eedb"
         game_modes: ["nm"]
   - name: "All LearnableMeta 1"
-    id: "alm-all-1"
     learnable_meta: {}
     game_modes: ["nm"]
   - name: "All LearnableMeta 2"
-    id: "alm-all-2"
     learnable_meta: {}
     game_modes: ["nm"]
   - name: "All LearnableMeta 3"
-    id: "alm-all-3"
     learnable_meta: {}
     game_modes: ["nm"]
