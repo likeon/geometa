@@ -1,4 +1,4 @@
-use std::{fmt::Debug, sync::LazyLock};
+use std::{fmt::Debug, sync::LazyLock, time::Duration};
 
 use log::error;
 use poise::serenity_prelude::UserId;
@@ -6,17 +6,14 @@ use reqwest::{Client as ReqwestClient, Method, RequestBuilder};
 use serde::{Deserialize, Serialize};
 
 const TOKEN_PATH: &str = "/var/run/secrets/kubernetes.io/serviceaccount/token";
+type Error = Box<dyn std::error::Error + Send + Sync>;
 
 trait AuthExt {
-    async fn with_k8s_auth(
-        self,
-    ) -> Result<RequestBuilder, Box<dyn std::error::Error + Send + Sync>>;
+    async fn with_k8s_auth(self) -> Result<RequestBuilder, Error>;
 }
 
 impl AuthExt for RequestBuilder {
-    async fn with_k8s_auth(
-        self,
-    ) -> Result<RequestBuilder, Box<dyn std::error::Error + Send + Sync>> {
+    async fn with_k8s_auth(self) -> Result<RequestBuilder, Error> {
         let token = tokio::fs::read_to_string(TOKEN_PATH).await?;
         Ok(self.bearer_auth(token.trim()))
     }
@@ -37,15 +34,14 @@ impl Requester {
         Requester {
             base_path: format!("http://{api_host}/api"),
             requires_jwt,
-            reqwest_client: ReqwestClient::new(),
+            reqwest_client: ReqwestClient::builder()
+                .timeout(Duration::from_secs(20))
+                .build()
+                .expect("failed to create HTTP client"),
         }
     }
 
-    async fn request(
-        &self,
-        method: Method,
-        path: &str,
-    ) -> Result<RequestBuilder, Box<dyn std::error::Error + Send + Sync>> {
+    async fn request(&self, method: Method, path: &str) -> Result<RequestBuilder, Error> {
         let url = format!("{}/{}", self.base_path, path);
         let builder = self.reqwest_client.request(method, url);
 
@@ -60,6 +56,39 @@ impl Requester {
 static REQUESTER: LazyLock<Requester> = LazyLock::new(Requester::new);
 pub struct Client {}
 impl Client {
+    pub async fn maps(region: Option<&str>, is_shared: Option<bool>) -> Result<Vec<Map>, Error> {
+        let response = REQUESTER
+            .request(Method::GET, "maps")
+            .await?
+            .query(&MapsQuery { region, is_shared })
+            .send()
+            .await?
+            .error_for_status()?;
+
+        Ok(response.json().await?)
+    }
+
+    pub async fn create_challenge(request: &ChallengeRequest<'_>) -> Result<String, Error> {
+        let response = REQUESTER
+            .request(Method::POST, "internal/discord-bot/challenges")
+            .await?
+            .json(request)
+            .send()
+            .await?
+            .error_for_status()?
+            .json::<ChallengeResponse>()
+            .await?;
+
+        if !response
+            .url
+            .starts_with("https://www.geoguessr.com/challenge/")
+        {
+            return Err(std::io::Error::other("ALM API returned an invalid challenge URL").into());
+        }
+
+        Ok(response.url)
+    }
+
     pub async fn publish_map(
         geoguessr_map_id: &String,
         discord_thread_author_id: UserId,
@@ -105,6 +134,36 @@ impl Client {
             }
         }
     }
+}
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct Map {
+    #[serde(rename = "geoguessrId")]
+    pub geoguessr_id: String,
+    pub name: String,
+}
+
+#[derive(Debug, Serialize)]
+struct MapsQuery<'a> {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    region: Option<&'a str>,
+    #[serde(rename = "isShared", skip_serializing_if = "Option::is_none")]
+    is_shared: Option<bool>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ChallengeRequest<'a> {
+    pub geoguessr_map_id: &'a str,
+    pub rounds: u32,
+    pub time_limit: u32,
+    pub forbid_moving: bool,
+    pub forbid_rotating: bool,
+    pub forbid_zooming: bool,
+}
+
+#[derive(Debug, Deserialize)]
+struct ChallengeResponse {
+    url: String,
 }
 
 #[derive(Serialize, Debug)]

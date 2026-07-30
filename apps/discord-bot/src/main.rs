@@ -7,14 +7,25 @@ type Error = Box<dyn std::error::Error + Send + Sync>;
 type Context<'a> = poise::Context<'a, Data, Error>;
 
 mod alm;
+mod challenge;
 mod discord;
 mod types;
 
 use discord::commands::publish;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Error> {
     env_logger::init();
+
+    let mut args = std::env::args().skip(1);
+    match (args.next().as_deref(), args.next()) {
+        (None, None) => run_gateway().await,
+        (Some("challenge"), None) => challenge::run().await,
+        _ => Err(std::io::Error::other("usage: discord-bot [challenge]").into()),
+    }
+}
+
+async fn run_gateway() -> Result<(), Error> {
     let token = std::env::var("DISCORD_TOKEN").expect("missing DISCORD_TOKEN");
     let intents = serenity::GatewayIntents::non_privileged();
 
@@ -55,6 +66,8 @@ async fn main() {
             info!("Bot shutdown complete");
         }
     }
+
+    Ok(())
 }
 
 async fn setup_shutdown_handler() {

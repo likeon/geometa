@@ -42,7 +42,7 @@ spec:
     push:
       branch: main
   update:
-    path: ./apps/discord-bot/publish-bot/flux
+    path: ./apps/discord-bot/flux
     strategy: Setters
 ---
 apiVersion: notification.toolkit.fluxcd.io/v1beta2

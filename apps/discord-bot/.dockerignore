@@ -1,3 +1,4 @@
 target/
 flux/
 Dockerfile
+.githooks/

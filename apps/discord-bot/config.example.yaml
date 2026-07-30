@@ -1,0 +1,35 @@
+challenge:
+  channel_id: 0                 # Discord channel that receives the buttons
+  rounds: 5
+  time_limit: 0                 # seconds per round; 0 = unlimited
+
+game_modes:
+  moving:
+    settings:
+      forbid_moving: false
+      forbid_rotating: false
+      forbid_zooming: false
+  nm:
+    settings:
+      forbid_moving: true
+      forbid_rotating: false
+      forbid_zooming: false
+  nmpz:
+    settings:
+      forbid_moving: true
+      forbid_rotating: true
+      forbid_zooming: true
+
+# One challenge-link button is created from each pool.
+pools:
+  - name: "World"
+    maps:
+      - name: "A Community World"
+        map_id: "62a44b22040f04bd36e8a914"
+        game_modes: ["moving", "nm", "nmpz"]
+
+  - name: "Learnable Meta Europe"
+    learnable_meta:
+      region: "Europe"          # optional exact ALM region
+      is_shared: true           # optional ALM shared-map filter
+    game_modes: ["nm", "nmpz"]
