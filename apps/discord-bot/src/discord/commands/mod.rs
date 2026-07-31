@@ -1,3 +1,3 @@
-pub mod publish;
+mod publish;
 
-pub use publish::publish;
+pub(super) use publish::publish;

@@ -1,7 +1,8 @@
-use regex::Regex;
 use std::fmt;
 use std::str::FromStr;
 use std::sync::LazyLock;
+
+use regex::Regex;
 
 static MAP_REGEX: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"(?:https?://)?(?:www\.)?(?:geoguessr\.com/maps/)?([a-zA-Z0-9_-]+)$").unwrap()
