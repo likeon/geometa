@@ -23,7 +23,6 @@ struct Config {
 #[serde(deny_unknown_fields)]
 struct ChallengeConfig {
     channel_id: u64,
-    rounds: u32,
     time_limit: u32,
 }
 
@@ -94,7 +93,6 @@ pub async fn run() -> Result<(), Error> {
         let mode = &config.game_modes[mode_name].settings;
         let url = Client::create_challenge(&ChallengeRequest {
             geoguessr_map_id: &map.map_id,
-            rounds: config.challenge.rounds,
             time_limit: config.challenge.time_limit,
             forbid_moving: mode.forbid_moving,
             forbid_rotating: mode.forbid_rotating,
@@ -121,9 +119,6 @@ fn parse_config(source: &str) -> Result<Config, Error> {
 fn validate(config: &Config) -> Result<(), Error> {
     if config.challenge.channel_id == 0 {
         return Err(invalid("challenge.channel_id must be positive"));
-    }
-    if config.challenge.rounds == 0 {
-        return Err(invalid("challenge.rounds must be positive"));
     }
     if config.game_modes.is_empty() {
         return Err(invalid("game_modes must not be empty"));
@@ -276,7 +271,6 @@ mod tests {
     const CONFIG: &str = r#"
 challenge:
   channel_id: 123
-  rounds: 10
   time_limit: 0
 game_modes:
   nm:
@@ -300,7 +294,11 @@ pools:
         assert!(parse_config(CONFIG).is_ok());
         assert!(parse_config(include_str!("../config.yaml")).is_ok());
         assert!(
-            parse_config(&CONFIG.replace("  rounds: 10", "  rounds: 10\n  post_time: 12:00"))
+            parse_config(&CONFIG.replace("  time_limit: 0", "  time_limit: 0\n  rounds: 10"))
+                .is_err()
+        );
+        assert!(
+            parse_config(&CONFIG.replace("  time_limit: 0", "  time_limit: 0\n  post_time: 12:00"))
                 .is_err()
         );
     }
