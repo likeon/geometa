@@ -25,7 +25,7 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
             forbidRotating: body.forbid_rotating,
             forbidZooming: body.forbid_zooming,
             map: body.geoguessr_map_id,
-            rounds: body.rounds,
+            rounds: 5,
             timeLimit: body.time_limit,
           }),
         });
@@ -68,7 +68,6 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
     {
       body: t.Object({
         geoguessr_map_id: t.String({ minLength: 1 }),
-        rounds: t.Integer({ minimum: 1 }),
         time_limit: t.Integer({ minimum: 0 }),
         forbid_moving: t.Boolean(),
         forbid_rotating: t.Boolean(),

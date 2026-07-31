@@ -4,7 +4,6 @@ import { discordBotRouter } from './discord-bot';
 const originalFetch = globalThis.fetch;
 const requestBody = {
   geoguessr_map_id: '699617147156b7076362bd45',
-  rounds: 10,
   time_limit: 0,
   forbid_moving: true,
   forbid_rotating: false,
@@ -25,7 +24,7 @@ describe('POST /discord-bot/challenges', () => {
         forbidRotating: false,
         forbidZooming: false,
         map: '699617147156b7076362bd45',
-        rounds: 10,
+        rounds: 5,
         timeLimit: 0,
       });
       return Response.json({ token: 'token/value' });

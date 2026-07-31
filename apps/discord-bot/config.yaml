@@ -1,6 +1,5 @@
 challenge:
   channel_id: 1 # Replace with the Discord channel ID before running.
-  rounds: 10
   time_limit: 0
 
 game_modes:

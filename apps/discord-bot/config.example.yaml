@@ -1,6 +1,5 @@
 challenge:
   channel_id: 0                 # Discord channel that receives the buttons
-  rounds: 5
   time_limit: 0                 # seconds per round; 0 = unlimited
 
 game_modes:

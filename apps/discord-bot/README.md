@@ -16,7 +16,6 @@ The challenge job reads `config.yaml`:
 ```yaml
 challenge:
   channel_id: 123456789012345678
-  rounds: 10
   time_limit: 0
 
 game_modes:

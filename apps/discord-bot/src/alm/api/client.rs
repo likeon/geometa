@@ -154,7 +154,6 @@ struct MapsQuery<'a> {
 #[derive(Debug, Serialize)]
 pub struct ChallengeRequest<'a> {
     pub geoguessr_map_id: &'a str,
-    pub rounds: u32,
     pub time_limit: u32,
     pub forbid_moving: bool,
     pub forbid_rotating: bool,
