@@ -4,6 +4,10 @@
 
 Run all tests: `bun run test`
 
+This uses one Bun test process and produces one aggregate report. Because DB
+tests share one temporary database, the combined run executes all tests
+serially with the database preload and PostgreSQL timeout.
+
 Run DB-free tests: `bun run test:unit`
 
 Run PostgreSQL tests: `bun run test:db`

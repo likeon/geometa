@@ -1,3 +1,5 @@
+monorepo_root = true
+
 [tools]
 # languages
 bun = "1.3"
