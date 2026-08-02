@@ -466,3 +466,84 @@ describe('mapLocations view', () => {
     });
   });
 });
+
+describe('location modifiedAt trigger', () => {
+  test('no-op update preserves modifiedAt', async () => {
+    const [group] = await db
+      .insert(mapGroups)
+      .values({ name: 'Trigger group' })
+      .returning({ id: mapGroups.id });
+
+    const [location] = await db
+      .insert(mapGroupLocations)
+      .values({
+        mapGroupId: group!.id,
+        lat: 1,
+        lng: 2,
+        heading: 3,
+        pitch: 4,
+        zoom: 5,
+        panoId: 'pano-noop',
+        extraTag: 'tag',
+        modifiedAt: 1000,
+      })
+      .returning({ id: mapGroupLocations.id });
+
+    // Reassigning every column to its current value is a no-op update.
+    await db
+      .update(mapGroupLocations)
+      .set({
+        mapGroupId: group!.id,
+        lat: 1,
+        lng: 2,
+        heading: 3,
+        pitch: 4,
+        zoom: 5,
+        panoId: 'pano-noop',
+        extraTag: 'tag',
+        modifiedAt: 1000,
+      })
+      .where(eq(mapGroupLocations.id, location!.id));
+
+    const [row] = await db
+      .select({ modifiedAt: mapGroupLocations.modifiedAt })
+      .from(mapGroupLocations)
+      .where(eq(mapGroupLocations.id, location!.id));
+
+    expect(row!.modifiedAt).toBe(1000);
+  });
+
+  test('meaningful row-data update advances modifiedAt', async () => {
+    const [group] = await db
+      .insert(mapGroups)
+      .values({ name: 'Trigger group' })
+      .returning({ id: mapGroups.id });
+
+    const [location] = await db
+      .insert(mapGroupLocations)
+      .values({
+        mapGroupId: group!.id,
+        lat: 1,
+        lng: 2,
+        heading: 3,
+        pitch: 4,
+        zoom: 5,
+        panoId: 'pano-meaningful',
+        extraTag: 'tag',
+        modifiedAt: 1000,
+      })
+      .returning({ id: mapGroupLocations.id });
+
+    await db
+      .update(mapGroupLocations)
+      .set({ extraTag: 'tag-changed' })
+      .where(eq(mapGroupLocations.id, location!.id));
+
+    const [row] = await db
+      .select({ modifiedAt: mapGroupLocations.modifiedAt })
+      .from(mapGroupLocations)
+      .where(eq(mapGroupLocations.id, location!.id));
+
+    expect(row!.modifiedAt).toBeGreaterThan(1000);
+  });
+});
