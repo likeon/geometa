@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { asc } from 'drizzle-orm';
 import { mapGroupChanges, mapGroups, users } from '../db/schema';
 import { db } from '../drizzle';
-import { type ChangeEntry, logChange } from './changes';
+import { type ChangeEntry, logChange, metaSnapshot } from './changes';
 
 async function seedUser(id: string) {
   await db.insert(users).values({ id, username: id });
@@ -201,5 +201,25 @@ describe('logChange', () => {
     ).rejects.toThrow();
 
     expect(await changeRows()).toHaveLength(0);
+  });
+});
+
+describe('metaSnapshot', () => {
+  test('includes exact public audit fields and preserves false/null', () => {
+    const snapshot = metaSnapshot({
+      tagName: 'us',
+      name: 'United States',
+      note: '**Capital:** Washington',
+      footer: null,
+      noteFromPlonkit: false,
+    });
+
+    expect(snapshot).toEqual({
+      tagName: 'us',
+      name: 'United States',
+      note: '**Capital:** Washington',
+      footer: null,
+      noteFromPlonkit: false,
+    });
   });
 });

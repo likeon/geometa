@@ -7,7 +7,7 @@ import {
   syncedMetas,
 } from '../db/schema';
 import { db } from '../drizzle';
-import { locationSelect } from './locations';
+import { locationSelect, mapLocationsExportSelect } from './locations';
 
 async function seedTwoMaps() {
   const [groupA] = await db
@@ -225,6 +225,57 @@ async function seedPersonalMapAttribution() {
   return { personalMapId: personalMap!.id, tieFirstId, tieSecondId };
 }
 
+// personal map borrowing a meta that no nonpersonal map includes: the lateral
+// original lookup finds nothing, so attribution fields stay null and the
+// personal map's own footer is used
+async function seedPersonalMapWithoutOriginal() {
+  const [personalMap] = await db
+    .insert(maps)
+    .values({
+      name: 'Orphan Personal Map',
+      geoguessrId: 'map-personal-orphan',
+      isPersonal: true,
+      mapGroupId: null,
+      authors: 'Orphan Author',
+      footerHtml: '<p>Orphan footer html</p>',
+    })
+    .returning({ id: maps.id });
+
+  const [group] = await db
+    .insert(mapGroups)
+    .values({ name: 'Borrowed Group' })
+    .returning({ id: mapGroups.id });
+
+  await db.insert(syncedMetas).values({
+    metaId: 5005,
+    mapGroupId: group!.id,
+    name: 'Borrowed Meta',
+    note: 'Borrowed note',
+    noteFromPlonkit: false,
+    footer: 'Borrowed footer',
+    images: ['borrowed.jpg'],
+  });
+
+  await db.insert(syncedMapMetas).values({
+    mapId: personalMap!.id,
+    syncedMetaId: 5005,
+  });
+
+  await db.insert(syncedLocations).values({
+    lat: 1,
+    lng: 2,
+    heading: 3,
+    pitch: 4,
+    zoom: 5,
+    syncedMetaId: 5005,
+    panoId: 'pano-orphan',
+    country: 'Austria',
+    extraTag: 'tag-orphan',
+  });
+
+  return { personalMapId: personalMap!.id };
+}
+
 describe('userscript location lookup', () => {
   test('exact map+pano lookup returns the selected public fields', async () => {
     await seedTwoMaps();
@@ -328,5 +379,59 @@ describe('userscript location lookup', () => {
         mapFooter: '<p>Tie First Map footer html</p>',
       }),
     );
+  });
+
+  test('personal map without nonpersonal original uses own footer and null attribution', async () => {
+    const { personalMapId } = await seedPersonalMapWithoutOriginal();
+
+    const [result] = await locationSelect.execute({
+      mapId: 'map-personal-orphan',
+      panoId: 'pano-orphan',
+    });
+
+    expect(result).toEqual({
+      name: 'Borrowed Meta',
+      note: 'Borrowed note',
+      footer: 'Borrowed footer',
+      images: ['borrowed.jpg'],
+      noteFromPlonkit: false,
+      country: 'Austria',
+      isPersonalMap: true,
+      // no eligible nonpersonal original: the personal map's own footer wins
+      mapFooter: '<p>Orphan footer html</p>',
+      mapName: null,
+      mapAuthors: null,
+      mapGeoguessrId: null,
+      mapId: personalMapId,
+      syncedMetaId: 5005,
+    });
+  });
+});
+
+describe('userscript map locations export', () => {
+  test('includes only synced locations of the requested map and omits other maps', async () => {
+    const { mapAId, mapBId } = await seedTwoMaps();
+
+    const alphaLocations = await mapLocationsExportSelect.execute({
+      mapId: mapAId,
+    });
+    // pano-shared also exists under map B's meta; only map A's own meta's
+    // locations may come back, and pano-b-only must stay invisible
+    expect(
+      alphaLocations.sort((a, b) => a.panoId.localeCompare(b.panoId)),
+    ).toEqual([
+      { lat: 1, lng: 2, heading: 3, pitch: 4, zoom: 5, panoId: 'pano-a-only' },
+      { lat: 1, lng: 2, heading: 3, pitch: 4, zoom: 5, panoId: 'pano-shared' },
+    ]);
+
+    const betaLocations = await mapLocationsExportSelect.execute({
+      mapId: mapBId,
+    });
+    expect(
+      betaLocations.sort((a, b) => a.panoId.localeCompare(b.panoId)),
+    ).toEqual([
+      { lat: 1, lng: 2, heading: 3, pitch: 4, zoom: 5, panoId: 'pano-b-only' },
+      { lat: 1, lng: 2, heading: 3, pitch: 4, zoom: 5, panoId: 'pano-shared' },
+    ]);
   });
 });
