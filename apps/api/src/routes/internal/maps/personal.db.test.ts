@@ -406,6 +406,30 @@ describe('PATCH /api/internal/maps/personal/:id', () => {
 
     expect(response.status).toBe(404);
   });
+
+  test.todo('superadmin can update any personal map through the personal route, matching ensureMapAccess', async () => {
+    // PATCH adds an owner predicate after ensureMapAccess grants superadmin access.
+    await seedUser('user-1');
+    await seedUser('admin-1', true);
+    const { id } = await seedPersonalMap({
+      userId: 'user-1',
+      name: 'My Map',
+      geoguessrId: 'my-map',
+    });
+
+    const response = await personalMapRequest(id, 'admin-1', {
+      method: 'PATCH',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ name: 'Renamed by admin' }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ id });
+    const [row] = await db.select().from(maps).where(eq(maps.id, id));
+    expect(row).toEqual(
+      expect.objectContaining({ name: 'Renamed by admin', userId: 'user-1' }),
+    );
+  });
 });
 
 describe('DELETE /api/internal/maps/personal/:id', () => {
@@ -614,5 +638,96 @@ describe('POST/DELETE /api/internal/maps/personal/:id/metas', () => {
     expect(nonsharedSourceAfterDelete.map((row) => row.syncedMetaId)).toEqual([
       nonsharedMetaId,
     ]);
+  });
+
+  test.todo('superadmin cannot mutate group map meta associations through personal routes', async () => {
+    // Defect: both the metas POST and DELETE handlers run ensureMapAccess
+    // (which superadmins pass for any map) but then mutate syncedMapMetas by
+    // map id without an isPersonal guard, so a group map is reachable through
+    // the personal-maps endpoint. GET and PATCH reject group maps with 404.
+    await seedUser('admin-1', true);
+    const { id: groupMapId } = await seedGroupMap({
+      name: 'Group Map',
+      geoguessrId: 'group-map',
+    });
+
+    const [group] = await db
+      .insert(mapGroups)
+      .values({ name: 'Source group' })
+      .returning({ id: mapGroups.id });
+    const groupId = group!.id;
+
+    // Both metas are synced from a shared map, so the handlers would accept
+    // them if the group-map route-type guard were missing.
+    const sharedMetaId = 7101;
+    const sharedMeta2Id = 7102;
+    await db.insert(syncedMetas).values([
+      {
+        metaId: sharedMetaId,
+        mapGroupId: groupId,
+        name: 'Shared meta',
+        note: 'note',
+        noteFromPlonkit: false,
+        footer: '',
+        images: [],
+      },
+      {
+        metaId: sharedMeta2Id,
+        mapGroupId: groupId,
+        name: 'Shared meta 2',
+        note: 'note',
+        noteFromPlonkit: false,
+        footer: '',
+        images: [],
+      },
+    ]);
+    const [sourceMap] = await db
+      .insert(maps)
+      .values({
+        name: 'Shared source map',
+        geoguessrId: 'shared-source-map',
+        mapGroupId: groupId,
+        isShared: true,
+        isPersonal: false,
+      })
+      .returning({ id: maps.id });
+    await db.insert(syncedMapMetas).values([
+      { mapId: sourceMap!.id, syncedMetaId: sharedMetaId },
+      { mapId: sourceMap!.id, syncedMetaId: sharedMeta2Id },
+    ]);
+    // Pre-existing association on the group map that DELETE must not remove.
+    await db.insert(syncedMapMetas).values({
+      mapId: groupMapId,
+      syncedMetaId: sharedMetaId,
+    });
+
+    const postResponse = await personalMapMetasRequest(groupMapId, 'admin-1', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ metaIds: [sharedMetaId, sharedMeta2Id] }),
+    });
+    expect(postResponse.status).toBe(404);
+
+    const deleteResponse = await personalMapMetasRequest(
+      groupMapId,
+      'admin-1',
+      {
+        method: 'DELETE',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ metaIds: [sharedMetaId] }),
+      },
+    );
+    expect(deleteResponse.status).toBe(404);
+
+    // Association preservation: neither POST added metas nor DELETE removed any,
+    // and the group map itself is untouched.
+    const associations = await db
+      .select({ syncedMetaId: syncedMapMetas.syncedMetaId })
+      .from(syncedMapMetas)
+      .where(eq(syncedMapMetas.mapId, groupMapId));
+    expect(associations.map((row) => row.syncedMetaId)).toEqual([sharedMetaId]);
+    expect(
+      await db.select().from(maps).where(eq(maps.id, groupMapId)),
+    ).toHaveLength(1);
   });
 });
