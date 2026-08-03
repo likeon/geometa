@@ -1,15 +1,22 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { asc, eq } from 'drizzle-orm';
+import { and, asc, eq } from 'drizzle-orm';
 import { app } from '../../../api';
 import {
   levels,
+  mapData,
   mapFilters,
+  mapGroupChanges,
+  mapGroupLocations,
   mapGroupPermissions,
   mapGroups,
   mapLevels,
+  mapLocations,
   mapRegions,
   maps,
+  metas,
   regions,
+  syncedMapMetas,
+  syncedMetas,
   users,
 } from '../../../lib/db/schema';
 import { db } from '../../../lib/drizzle';
@@ -130,6 +137,46 @@ function groupMapPutRequest(userId: string, body: unknown) {
       body: JSON.stringify(body),
     }),
   );
+}
+
+function groupMapDeleteRequest(userId: string, mapId: number) {
+  return app.handle(
+    new Request(`http://localhost/api/internal/maps/group/${mapId}`, {
+      method: 'DELETE',
+      headers: { 'x-api-user-id': userId },
+    }),
+  );
+}
+
+function groupMapDownloadRequest(
+  userId: string,
+  mapId: number,
+  groupId: number,
+) {
+  return app.handle(
+    new Request(
+      `http://localhost/api/internal/maps/group/${mapId}/download?groupId=${groupId}`,
+      { headers: { 'x-api-user-id': userId } },
+    ),
+  );
+}
+
+async function getMapLogs() {
+  return db
+    .select({
+      mapGroupId: mapGroupChanges.mapGroupId,
+      userId: mapGroupChanges.userId,
+      entityType: mapGroupChanges.entityType,
+      entityId: mapGroupChanges.entityId,
+      entityLabel: mapGroupChanges.entityLabel,
+      operation: mapGroupChanges.operation,
+      oldValue: mapGroupChanges.oldValue,
+      newValue: mapGroupChanges.newValue,
+      createdAt: mapGroupChanges.createdAt,
+    })
+    .from(mapGroupChanges)
+    .where(eq(mapGroupChanges.entityType, 'map'))
+    .orderBy(asc(mapGroupChanges.id));
 }
 
 describe('PUT /api/internal/maps/group', () => {
@@ -769,5 +816,687 @@ describe('PUT /api/internal/maps/group', () => {
       // unchanged GeoGuessr ID and superadmin caller: no external lookup
       expect(geoguessrFetches).toEqual([]);
     });
+  });
+
+  describe('moving between groups', () => {
+    test('owner of source and target moves the map and logs exact source delete / target create', async () => {
+      await seedUser('owner-1');
+      const sourceId = await seedGroup('Source group');
+      const targetId = await seedGroup('Target group');
+      await seedGroupOwner('owner-1', sourceId);
+      await seedGroupOwner('owner-1', targetId);
+      const sourceLevelId = await seedLevel(sourceId, 'Beginner');
+      const targetLevelId = await seedLevel(targetId, 'Beginner');
+      const regionId = await seedRegion('Europe');
+
+      const created = await groupMapPutRequest(
+        'owner-1',
+        groupMapBody({
+          mapGroupId: sourceId,
+          geoguessrId: 'moved-map',
+          levels: [sourceLevelId],
+          regions: [regionId],
+          includeFilters: ['us'],
+        }),
+      );
+      expect(created.status).toBe(200);
+      const { id } = (await created.json()) as { id: number };
+
+      geoguessrFetches = [];
+      const moved = await groupMapPutRequest(
+        'owner-1',
+        groupMapBody({
+          id,
+          mapGroupId: targetId,
+          geoguessrId: 'moved-map',
+          levels: [targetLevelId],
+          regions: [regionId],
+          includeFilters: ['us'],
+        }),
+      );
+      expect(moved.status).toBe(200);
+      expect(await moved.json()).toEqual({ id });
+      // unchanged GeoGuessr ID: the move never reaches the external boundary
+      expect(geoguessrFetches).toEqual([]);
+
+      const [row] = await db.select().from(maps).where(eq(maps.id, id));
+      expect(row!.mapGroupId).toBe(targetId);
+      expect(row!.geoguessrId).toBe('moved-map');
+
+      // plain owner: gated fields fall back to the source map's values
+      const mapDetails = {
+        name: 'Map Name',
+        geoguessrId: 'moved-map',
+        description: 'Map description',
+        isPublished: false,
+        isShared: true,
+        authors: 'Author',
+        footer: '**Footer**',
+        difficulty: 2,
+        ordering: 0,
+        autoUpdate: false,
+        isVerified: false,
+        regions: ['Europe'],
+        levels: ['Beginner'],
+        includeFilters: ['us'],
+        excludeFilters: [],
+      };
+
+      expect(await getMapLogs()).toEqual([
+        // the original create still sits in the source group
+        {
+          mapGroupId: sourceId,
+          userId: 'owner-1',
+          entityType: 'map',
+          entityId: id,
+          entityLabel: 'Map Name',
+          operation: 'create',
+          oldValue: null,
+          newValue: { mapGroupId: sourceId, ...mapDetails },
+          createdAt: expect.any(Number),
+        },
+        // the move deletes the map from the source group...
+        {
+          mapGroupId: sourceId,
+          userId: 'owner-1',
+          entityType: 'map',
+          entityId: id,
+          entityLabel: 'Map Name',
+          operation: 'delete',
+          oldValue: { mapGroupId: sourceId, ...mapDetails },
+          newValue: { movedToGroupId: targetId },
+          createdAt: expect.any(Number),
+        },
+        // ...and creates it in the target group
+        {
+          mapGroupId: targetId,
+          userId: 'owner-1',
+          entityType: 'map',
+          entityId: id,
+          entityLabel: 'Map Name',
+          operation: 'create',
+          oldValue: null,
+          newValue: {
+            mapGroupId: targetId,
+            ...mapDetails,
+            movedFromGroupId: sourceId,
+          },
+          createdAt: expect.any(Number),
+        },
+      ]);
+    });
+
+    test('move is denied without owner access to the source group, with no mutation or log leakage', async () => {
+      await seedUser('source-owner');
+      await seedUser('target-owner');
+      const sourceId = await seedGroup('Source group');
+      const targetId = await seedGroup('Target group');
+      await seedGroupOwner('source-owner', sourceId);
+      await seedGroupOwner('target-owner', targetId);
+
+      const created = await groupMapPutRequest(
+        'source-owner',
+        groupMapBody({ mapGroupId: sourceId, geoguessrId: 'locked-map' }),
+      );
+      expect(created.status).toBe(200);
+      const { id } = (await created.json()) as { id: number };
+
+      // caller owns the target group but not the source: both are required
+      geoguessrFetches = [];
+      const moved = await groupMapPutRequest(
+        'target-owner',
+        groupMapBody({ id, mapGroupId: targetId, geoguessrId: 'locked-map' }),
+      );
+      expect(moved.status).toBe(403);
+      expect(geoguessrFetches).toEqual([]);
+
+      const [row] = await db.select().from(maps).where(eq(maps.id, id));
+      expect(row!.mapGroupId).toBe(sourceId);
+
+      // only the original create log exists: no delete/create pair leaked
+      expect(await getMapLogs()).toEqual([
+        expect.objectContaining({
+          mapGroupId: sourceId,
+          userId: 'source-owner',
+          operation: 'create',
+        }),
+      ]);
+      expect(
+        await db
+          .select()
+          .from(mapGroupChanges)
+          .where(eq(mapGroupChanges.mapGroupId, targetId)),
+      ).toEqual([]);
+    });
+  });
+
+  describe('cross-group level rejection', () => {
+    test.todo('rejects level IDs from another group before any persistence', async () => {
+      // The level FK does not enforce that map and level belong to one group.
+      await seedUser('admin-1', true);
+      const groupId = await seedGroup('Target group');
+      const otherGroupId = await seedGroup('Other group');
+      const levelId = await seedLevel(groupId, 'Beginner');
+      const foreignLevelId = await seedLevel(otherGroupId, 'Foreign level');
+
+      const created = await groupMapPutRequest(
+        'admin-1',
+        groupMapBody({
+          mapGroupId: groupId,
+          geoguessrId: 'own-level-map',
+          levels: [levelId],
+        }),
+      );
+      expect(created.status).toBe(200);
+      const { id } = (await created.json()) as { id: number };
+
+      const rejected = await groupMapPutRequest(
+        'admin-1',
+        groupMapBody({
+          id,
+          mapGroupId: groupId,
+          geoguessrId: 'own-level-map',
+          name: 'Should Not Persist',
+          levels: [foreignLevelId],
+        }),
+      );
+      expect(rejected.status).toBeGreaterThanOrEqual(400);
+      expect(rejected.status).toBeLessThan(500);
+      expect(geoguessrFetches).toEqual([]);
+
+      const [row] = await db.select().from(maps).where(eq(maps.id, id));
+      expect(row).toEqual(
+        expect.objectContaining({
+          id,
+          name: 'Map Name',
+          geoguessrId: 'own-level-map',
+        }),
+      );
+
+      expect(
+        await db
+          .select({ levelId: mapLevels.levelId })
+          .from(mapLevels)
+          .where(eq(mapLevels.mapId, id)),
+      ).toEqual([{ levelId }]);
+
+      expect(
+        await db
+          .select()
+          .from(mapGroupChanges)
+          .where(eq(mapGroupChanges.entityId, id)),
+      ).toEqual([
+        expect.objectContaining({
+          mapGroupId: groupId,
+          userId: 'admin-1',
+          entityType: 'map',
+          operation: 'create',
+        }),
+      ]);
+    });
+  });
+});
+
+describe('DELETE /api/internal/maps/group/:id', () => {
+  beforeEach(() => {
+    // map creates inside these tests hit the GeoGuessr popularity check
+    process.env.NFCA_TOKEN = 'test-token';
+    geoguessrFetches = [];
+    geoguessrMapResults = {};
+    mockFetchFailClosed();
+  });
+
+  afterEach(() => {
+    restoreFetch();
+    restoreNfcaToken();
+  });
+
+  test('owner delete cascades map level/filter/region/data/meta associations and leaves unrelated rows', async () => {
+    await seedUser('owner-1');
+    const groupId = await seedGroup('Test group');
+    await seedGroupOwner('owner-1', groupId);
+    const levelId = await seedLevel(groupId, 'Beginner');
+    const regionId = await seedRegion('Europe');
+
+    const created = await groupMapPutRequest(
+      'owner-1',
+      groupMapBody({
+        mapGroupId: groupId,
+        geoguessrId: 'doomed-map',
+        levels: [levelId],
+        regions: [regionId],
+        includeFilters: ['us'],
+        excludeFilters: ['dangerous'],
+      }),
+    );
+    expect(created.status).toBe(200);
+    const { id } = (await created.json()) as { id: number };
+
+    // a second map in the same group shares the level, region, and synced meta
+    const survivor = await groupMapPutRequest(
+      'owner-1',
+      groupMapBody({
+        mapGroupId: groupId,
+        geoguessrId: 'survivor-map',
+        levels: [levelId],
+        regions: [regionId],
+        includeFilters: ['ca'],
+      }),
+    );
+    expect(survivor.status).toBe(200);
+    const { id: survivorId } = (await survivor.json()) as { id: number };
+
+    // data and meta associations are not settable through the PUT route: seed directly
+    const [syncedMeta] = await db
+      .insert(syncedMetas)
+      .values({
+        metaId: 7001,
+        mapGroupId: groupId,
+        name: 'Synced meta',
+        note: 'note',
+        noteFromPlonkit: false,
+        footer: '',
+        images: [],
+      })
+      .returning({ metaId: syncedMetas.metaId });
+    await db.insert(mapData).values([{ mapId: id }, { mapId: survivorId }]);
+    await db.insert(syncedMapMetas).values([
+      { mapId: id, syncedMetaId: syncedMeta!.metaId },
+      { mapId: survivorId, syncedMetaId: syncedMeta!.metaId },
+    ]);
+
+    const response = await groupMapDeleteRequest('owner-1', id);
+    expect(response.status).toBe(200);
+
+    // the deleted map row is gone and every association row followed via cascade
+    expect(await db.select().from(maps).where(eq(maps.id, id))).toEqual([]);
+    expect(
+      await db.select().from(mapLevels).where(eq(mapLevels.mapId, id)),
+    ).toEqual([]);
+    expect(
+      await db.select().from(mapFilters).where(eq(mapFilters.mapId, id)),
+    ).toEqual([]);
+    expect(
+      await db.select().from(mapRegions).where(eq(mapRegions.mapId, id)),
+    ).toEqual([]);
+    expect(
+      await db.select().from(mapData).where(eq(mapData.mapId, id)),
+    ).toEqual([]);
+    expect(
+      await db
+        .select()
+        .from(syncedMapMetas)
+        .where(eq(syncedMapMetas.mapId, id)),
+    ).toEqual([]);
+
+    // the unrelated map keeps its row and every shared association
+    expect(
+      await db.select().from(maps).where(eq(maps.id, survivorId)),
+    ).toHaveLength(1);
+    expect(
+      await db
+        .select({ levelId: mapLevels.levelId })
+        .from(mapLevels)
+        .where(eq(mapLevels.mapId, survivorId)),
+    ).toEqual([{ levelId }]);
+    expect(
+      await db
+        .select({ tagLike: mapFilters.tagLike })
+        .from(mapFilters)
+        .where(eq(mapFilters.mapId, survivorId)),
+    ).toEqual([{ tagLike: 'ca' }]);
+    expect(
+      await db
+        .select({ regionId: mapRegions.regionId })
+        .from(mapRegions)
+        .where(eq(mapRegions.mapId, survivorId)),
+    ).toEqual([{ regionId }]);
+    expect(
+      await db.select().from(mapData).where(eq(mapData.mapId, survivorId)),
+    ).toHaveLength(1);
+    expect(
+      await db
+        .select({ syncedMetaId: syncedMapMetas.syncedMetaId })
+        .from(syncedMapMetas)
+        .where(eq(syncedMapMetas.mapId, survivorId)),
+    ).toEqual([{ syncedMetaId: syncedMeta!.metaId }]);
+
+    // master rows referenced by the deleted map survive: only join rows cascade
+    expect(
+      await db.select().from(levels).where(eq(levels.id, levelId)),
+    ).toHaveLength(1);
+    expect(
+      await db.select().from(regions).where(eq(regions.id, regionId)),
+    ).toHaveLength(1);
+    expect(
+      await db
+        .select()
+        .from(syncedMetas)
+        .where(eq(syncedMetas.metaId, syncedMeta!.metaId)),
+    ).toHaveLength(1);
+
+    // exactly one delete log entry, owned by the caller, for the deleted map
+    expect(
+      await db
+        .select()
+        .from(mapGroupChanges)
+        .where(
+          and(
+            eq(mapGroupChanges.entityType, 'map'),
+            eq(mapGroupChanges.entityId, id),
+            eq(mapGroupChanges.operation, 'delete'),
+          ),
+        ),
+    ).toEqual([
+      expect.objectContaining({
+        mapGroupId: groupId,
+        userId: 'owner-1',
+        entityType: 'map',
+        entityId: id,
+        entityLabel: 'Map Name',
+        operation: 'delete',
+        oldValue: expect.objectContaining({
+          name: 'Map Name',
+          geoguessrId: 'doomed-map',
+        }),
+      }),
+    ]);
+  });
+
+  test('editor and unrelated callers are denied with row and associations unchanged', async () => {
+    await seedUser('owner-1');
+    await seedUser('editor-1');
+    await seedUser('outsider-1');
+    const groupId = await seedGroup('Test group');
+    await seedGroupOwner('owner-1', groupId);
+    await db.insert(mapGroupPermissions).values({
+      mapGroupId: groupId,
+      userId: 'editor-1',
+      role: 'editor',
+    });
+    const levelId = await seedLevel(groupId, 'Beginner');
+    const regionId = await seedRegion('Europe');
+
+    const created = await groupMapPutRequest(
+      'owner-1',
+      groupMapBody({
+        mapGroupId: groupId,
+        geoguessrId: 'protected-map',
+        levels: [levelId],
+        regions: [regionId],
+        includeFilters: ['us'],
+      }),
+    );
+    expect(created.status).toBe(200);
+    const { id } = (await created.json()) as { id: number };
+
+    const [syncedMeta] = await db
+      .insert(syncedMetas)
+      .values({
+        metaId: 7001,
+        mapGroupId: groupId,
+        name: 'Synced meta',
+        note: 'note',
+        noteFromPlonkit: false,
+        footer: '',
+        images: [],
+      })
+      .returning({ metaId: syncedMetas.metaId });
+    await db.insert(mapData).values([{ mapId: id }]);
+    await db
+      .insert(syncedMapMetas)
+      .values([{ mapId: id, syncedMetaId: syncedMeta!.metaId }]);
+
+    // editor owns the group as editor, outsider has no relation to it
+    expect((await groupMapDeleteRequest('editor-1', id)).status).toBe(403);
+    expect((await groupMapDeleteRequest('outsider-1', id)).status).toBe(403);
+
+    // the map row and every association survive both denied attempts
+    expect(await db.select().from(maps).where(eq(maps.id, id))).toHaveLength(1);
+    expect(
+      await db
+        .select({ levelId: mapLevels.levelId })
+        .from(mapLevels)
+        .where(eq(mapLevels.mapId, id)),
+    ).toEqual([{ levelId }]);
+    expect(
+      await db
+        .select({ tagLike: mapFilters.tagLike })
+        .from(mapFilters)
+        .where(eq(mapFilters.mapId, id)),
+    ).toEqual([{ tagLike: 'us' }]);
+    expect(
+      await db
+        .select({ regionId: mapRegions.regionId })
+        .from(mapRegions)
+        .where(eq(mapRegions.mapId, id)),
+    ).toEqual([{ regionId }]);
+    expect(
+      await db.select().from(mapData).where(eq(mapData.mapId, id)),
+    ).toHaveLength(1);
+    expect(
+      await db
+        .select({ syncedMetaId: syncedMapMetas.syncedMetaId })
+        .from(syncedMapMetas)
+        .where(eq(syncedMapMetas.mapId, id)),
+    ).toEqual([{ syncedMetaId: syncedMeta!.metaId }]);
+
+    // no delete log leaked from the denied attempts
+    expect(
+      await db
+        .select()
+        .from(mapGroupChanges)
+        .where(
+          and(
+            eq(mapGroupChanges.entityType, 'map'),
+            eq(mapGroupChanges.entityId, id),
+            eq(mapGroupChanges.operation, 'delete'),
+          ),
+        ),
+    ).toEqual([]);
+  });
+});
+
+describe('GET /api/internal/maps/group/:id/download', () => {
+  beforeEach(() => {
+    // fail closed: this read-only route must never reach an external boundary
+    process.env.NFCA_TOKEN = 'test-token';
+    geoguessrFetches = [];
+    geoguessrMapResults = {};
+    mockFetchFailClosed();
+  });
+
+  afterEach(() => {
+    restoreFetch();
+    restoreNfcaToken();
+  });
+
+  // minimal group/meta/map/location fixture visible through the mapLocations view
+  async function seedDownloadFixture() {
+    const [group] = await db
+      .insert(mapGroups)
+      .values({ name: 'Download group' })
+      .returning({ id: mapGroups.id });
+    const groupId = group!.id;
+
+    await db.insert(metas).values({
+      mapGroupId: groupId,
+      tagName: 'alpha',
+      name: 'Alpha meta',
+      note: 'Meta note',
+    });
+
+    const [map] = await db
+      .insert(maps)
+      .values({
+        mapGroupId: groupId,
+        name: 'Download Map',
+        geoguessrId: 'download-map',
+        isPersonal: false,
+      })
+      .returning({ id: maps.id });
+
+    await db.insert(mapGroupLocations).values([
+      {
+        mapGroupId: groupId,
+        extraTag: 'alpha',
+        panoId: 'pano-a',
+        lat: 1,
+        lng: 2,
+        heading: 3,
+        pitch: 4,
+        zoom: 5,
+        extraPanoId: 'extra-a',
+        extraPanoDate: '2020-01-01',
+      },
+      {
+        mapGroupId: groupId,
+        extraTag: 'alpha',
+        panoId: 'pano-b',
+        lat: 1.5,
+        lng: 2.5,
+        heading: 3.5,
+        pitch: 4.5,
+        zoom: 5.5,
+        extraPanoId: null,
+        extraPanoDate: null,
+      },
+    ]);
+
+    return { groupId, mapId: map!.id };
+  }
+
+  test('owner and editor download the exact public JSON and omit internal view fields', async () => {
+    await seedUser('owner-1');
+    await seedUser('editor-1');
+    const { groupId, mapId } = await seedDownloadFixture();
+    await seedGroupOwner('owner-1', groupId);
+    await db.insert(mapGroupPermissions).values({
+      mapGroupId: groupId,
+      userId: 'editor-1',
+      role: 'editor',
+    });
+
+    for (const userId of ['owner-1', 'editor-1']) {
+      const response = await groupMapDownloadRequest(userId, mapId, groupId);
+      expect(response.status).toBe(200);
+      expect(response.headers.get('content-type')).toMatch(
+        /^application\/json/,
+      );
+      expect(response.headers.get('content-disposition')).toBe(
+        'attachment; filename="Download Map.json"',
+      );
+
+      const body = (await response.json()) as {
+        name: string;
+        customCoordinates: Array<{
+          lat: number;
+          lng: number;
+          heading: number;
+          pitch: number;
+          zoom: number;
+          panoId: string;
+          countryCode: null;
+          stateCode: null;
+          extra: {
+            tags: string[];
+            panoDate: string | null;
+            panoId: string | null;
+          };
+        }>;
+        extra: { tags: Record<string, never>; infoCoordinates: never[] };
+      };
+      body.customCoordinates.sort((a, b) => a.panoId.localeCompare(b.panoId));
+      expect(body).toEqual({
+        name: 'Download Map',
+        customCoordinates: [
+          {
+            lat: 1,
+            lng: 2,
+            heading: 3,
+            pitch: 4,
+            zoom: 5,
+            panoId: 'pano-a',
+            countryCode: null,
+            stateCode: null,
+            extra: {
+              // the group-map export intentionally leaves tags empty
+              tags: [],
+              panoDate: '2020-01-01',
+              panoId: 'extra-a',
+            },
+          },
+          {
+            lat: 1.5,
+            lng: 2.5,
+            heading: 3.5,
+            pitch: 4.5,
+            zoom: 5.5,
+            panoId: 'pano-b',
+            countryCode: null,
+            stateCode: null,
+            extra: {
+              tags: [],
+              panoDate: null,
+              panoId: null,
+            },
+          },
+        ],
+        extra: {
+          tags: {},
+          infoCoordinates: [],
+        },
+      });
+    }
+
+    // the view exposes internal columns for every downloaded location; none leak
+    const viewRows = await db
+      .select()
+      .from(mapLocations)
+      .where(eq(mapLocations.mapId, mapId));
+    expect(viewRows).toHaveLength(2);
+    for (const row of viewRows) {
+      expect(row).toEqual(
+        expect.objectContaining({
+          mapId,
+          tagName: 'alpha',
+          metaName: 'Alpha meta',
+          metaNote: 'Meta note',
+          metaNoteFromPlonkit: false,
+        }),
+      );
+    }
+  });
+
+  test('unrelated caller is denied without leaking the map or its locations', async () => {
+    await seedUser('outsider-1');
+    const { groupId, mapId } = await seedDownloadFixture();
+
+    const response = await groupMapDownloadRequest(
+      'outsider-1',
+      mapId,
+      groupId,
+    );
+
+    expect(response.status).toBe(403);
+  });
+
+  test('map id with a mismatched group id is 404 even for a member of the real group', async () => {
+    await seedUser('owner-1');
+    const { groupId, mapId } = await seedDownloadFixture();
+    await seedGroupOwner('owner-1', groupId);
+    const [otherGroup] = await db
+      .insert(mapGroups)
+      .values({ name: 'Other group' })
+      .returning({ id: mapGroups.id });
+
+    const response = await groupMapDownloadRequest(
+      'owner-1',
+      mapId,
+      otherGroup!.id,
+    );
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({ error: 'Map not found' });
   });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { and, asc, eq, or } from 'drizzle-orm';
+import { and, asc, eq, or, sql } from 'drizzle-orm';
 import {
   levels,
   mapFilters,
@@ -947,5 +947,221 @@ describe('syncMapGroup incremental membership move', () => {
       { mapId: mapBId, syncedMetaId: xMetaId },
       { mapId: mapBId, syncedMetaId: zMetaId },
     ]);
+  });
+});
+
+describe('syncMapGroup map-meta membership transition to zero', () => {
+  test.todo('map with associations dropping to zero removes all stale map-meta rows', async () => {
+    const [group] = await db
+      .insert(mapGroups)
+      .values({ name: 'Zero membership group' })
+      .returning({ id: mapGroups.id, syncedAt: mapGroups.syncedAt });
+    const groupId = group!.id;
+    expect(group!.syncedAt).toBeNull();
+
+    const [levelA] = await db
+      .insert(levels)
+      .values({ mapGroupId: groupId, name: 'Level A' })
+      .returning({ id: levels.id });
+    const [levelB] = await db
+      .insert(levels)
+      .values({ mapGroupId: groupId, name: 'Level B' })
+      .returning({ id: levels.id });
+    const levelAId = levelA!.id;
+    const levelBId = levelB!.id;
+
+    async function insertMeta(tagName: string, levelId: number) {
+      const [meta] = await db
+        .insert(metas)
+        .values({
+          mapGroupId: groupId,
+          tagName,
+          name: tagName,
+          note: '',
+          noteHtml: '',
+          footer: '',
+          footerHtml: '',
+          noteFromPlonkit: false,
+          modifiedAt: 100,
+        })
+        .returning({ id: metas.id });
+      const metaId = meta!.id;
+      await db.insert(metaLevels).values({ metaId, levelId });
+      return metaId;
+    }
+
+    // x and y hold level A (map A); z holds level B (map B). x and y later
+    // lose level A entirely, so map A's membership drops from two metas to
+    // zero while map B stays untouched.
+    const xMetaId = await insertMeta('x', levelAId);
+    const yMetaId = await insertMeta('y', levelAId);
+    const zMetaId = await insertMeta('z', levelBId);
+
+    const [mapA] = await db
+      .insert(maps)
+      .values({
+        mapGroupId: groupId,
+        name: 'Map A',
+        geoguessrId: 'zero-membership-a',
+      })
+      .returning({ id: maps.id });
+    const mapAId = mapA!.id;
+    await db.insert(mapLevels).values({ mapId: mapAId, levelId: levelAId });
+
+    const [mapB] = await db
+      .insert(maps)
+      .values({
+        mapGroupId: groupId,
+        name: 'Map B',
+        geoguessrId: 'zero-membership-b',
+      })
+      .returning({ id: maps.id });
+    const mapBId = mapB!.id;
+    await db.insert(mapLevels).values({ mapId: mapBId, levelId: levelBId });
+
+    const syncedAt = await syncMapGroup({ id: groupId, syncedAt: null });
+
+    // Baseline: map A holds x and y; unrelated map B holds z.
+    const beforeMapA = await db
+      .select()
+      .from(syncedMapMetas)
+      .where(eq(syncedMapMetas.mapId, mapAId))
+      .orderBy(asc(syncedMapMetas.syncedMetaId));
+    expect(beforeMapA).toEqual([
+      { mapId: mapAId, syncedMetaId: xMetaId },
+      { mapId: mapAId, syncedMetaId: yMetaId },
+    ]);
+    const beforeMapB = await db
+      .select()
+      .from(syncedMapMetas)
+      .where(eq(syncedMapMetas.mapId, mapBId))
+      .orderBy(asc(syncedMapMetas.syncedMetaId));
+    expect(beforeMapB).toEqual([{ mapId: mapBId, syncedMetaId: zMetaId }]);
+
+    // Source membership change with a controlled timestamp strictly above the
+    // sync boundary: x and y leave level A, leaving map A with no matching
+    // meta.
+    for (const metaId of [xMetaId, yMetaId]) {
+      await db
+        .update(metas)
+        .set({ modifiedAt: syncedAt + 10 })
+        .where(eq(metas.id, metaId));
+      await db
+        .delete(metaLevels)
+        .where(
+          and(eq(metaLevels.metaId, metaId), eq(metaLevels.levelId, levelAId)),
+        );
+    }
+
+    await syncMapGroup({ id: groupId, syncedAt });
+
+    // Desired contract: the transition to zero matching metas removes every
+    // stale map-A association...
+    const afterMapA = await db
+      .select()
+      .from(syncedMapMetas)
+      .where(eq(syncedMapMetas.mapId, mapAId))
+      .orderBy(asc(syncedMapMetas.syncedMetaId));
+    expect(afterMapA).toEqual([]);
+
+    // ...while unrelated map B keeps its association untouched.
+    const afterMapB = await db
+      .select()
+      .from(syncedMapMetas)
+      .where(eq(syncedMapMetas.mapId, mapBId))
+      .orderBy(asc(syncedMapMetas.syncedMetaId));
+    expect(afterMapB).toEqual(beforeMapB);
+  });
+});
+
+describe('syncMapGroup late SQL failure rollback', () => {
+  test('rejection rolls back every synced table and the group timestamp', async () => {
+    const { groupId } = await seedNullSyncedAtFixture();
+
+    const baselineGroupSyncedAt = await db
+      .select({ syncedAt: mapGroups.syncedAt })
+      .from(mapGroups)
+      .where(eq(mapGroups.id, groupId));
+    const baselineMetas = await db
+      .select()
+      .from(syncedMetas)
+      .orderBy(asc(syncedMetas.metaId));
+    const baselineLocations = await db
+      .select()
+      .from(syncedLocations)
+      .orderBy(asc(syncedLocations.syncedMetaId), asc(syncedLocations.panoId));
+    const baselineAssociations = await db
+      .select()
+      .from(syncedMapMetas)
+      .orderBy(asc(syncedMapMetas.mapId), asc(syncedMapMetas.syncedMetaId));
+    expect(baselineGroupSyncedAt[0]!.syncedAt).toBeNull();
+    expect(baselineMetas).toEqual([]);
+    expect(baselineLocations).toEqual([]);
+    expect(baselineAssociations).toEqual([]);
+
+    // Make the transaction's final statement (the map_groups synced_at
+    // update) fail deterministically, after the synced-metas,
+    // synced-locations, and map-meta writes already executed in-transaction.
+    await db.$primary.execute(sql`
+      CREATE OR REPLACE FUNCTION geometa_test_fail_sync()
+      RETURNS trigger AS $$
+      BEGIN
+        RAISE EXCEPTION 'intentional test failure';
+      END;
+      $$ LANGUAGE plpgsql;
+    `);
+    await db.$primary.execute(sql`
+      CREATE TRIGGER geometa_test_fail_sync_trigger
+      BEFORE UPDATE ON map_groups
+      FOR EACH ROW EXECUTE FUNCTION geometa_test_fail_sync()
+    `);
+
+    try {
+      let rejection: unknown;
+      try {
+        await syncMapGroup({ id: groupId, syncedAt: null });
+        throw new Error('expected syncMapGroup to reject');
+      } catch (error) {
+        rejection = error;
+      }
+
+      // The failure lands on the transaction's final statement (the
+      // map_groups synced_at update), raised by the trigger.
+      expect(rejection).toMatchObject({
+        message: expect.stringContaining('synced_at'),
+        cause: expect.objectContaining({ code: 'P0001' }),
+      });
+    } finally {
+      await db.$primary.execute(sql`
+        DROP TRIGGER IF EXISTS geometa_test_fail_sync_trigger ON map_groups
+      `);
+      await db.$primary.execute(sql`
+        DROP FUNCTION IF EXISTS geometa_test_fail_sync()
+      `);
+    }
+
+    // Rejection rolled back all in-transaction writes: synced tables and the
+    // group timestamp stay exactly at baseline.
+    const afterGroupSyncedAt = await db
+      .select({ syncedAt: mapGroups.syncedAt })
+      .from(mapGroups)
+      .where(eq(mapGroups.id, groupId));
+    const afterMetas = await db
+      .select()
+      .from(syncedMetas)
+      .orderBy(asc(syncedMetas.metaId));
+    const afterLocations = await db
+      .select()
+      .from(syncedLocations)
+      .orderBy(asc(syncedLocations.syncedMetaId), asc(syncedLocations.panoId));
+    const afterAssociations = await db
+      .select()
+      .from(syncedMapMetas)
+      .orderBy(asc(syncedMapMetas.mapId), asc(syncedMapMetas.syncedMetaId));
+
+    expect(afterGroupSyncedAt).toEqual(baselineGroupSyncedAt);
+    expect(afterMetas).toEqual(baselineMetas);
+    expect(afterLocations).toEqual(baselineLocations);
+    expect(afterAssociations).toEqual(baselineAssociations);
   });
 });
