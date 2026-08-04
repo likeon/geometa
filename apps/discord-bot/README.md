@@ -11,7 +11,8 @@ per configured pool, and exits.
 
 ## Configuration
 
-The challenge job reads `config.yaml`:
+The challenge job reads `config.yaml`. Production generates a Kubernetes
+ConfigMap from `flux/config.yaml` and mounts it at that path:
 
 ```yaml
 challenge:
@@ -53,6 +54,7 @@ GeoGuessr and owns the `_ncfa` cookie.
 
 ```bash
 cargo run
+cp config.example.yaml config.yaml # then set challenge.channel_id
 cargo run -- challenge
 ```
 

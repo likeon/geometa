@@ -292,7 +292,7 @@ pools:
     #[test]
     fn parses_minimal_config_and_rejects_removed_fields() {
         assert!(parse_config(CONFIG).is_ok());
-        assert!(parse_config(include_str!("../config.yaml")).is_ok());
+        assert!(parse_config(include_str!("../flux/config.yaml")).is_ok());
         assert!(
             parse_config(&CONFIG.replace("  time_limit: 0", "  time_limit: 0\n  rounds: 10"))
                 .is_err()
