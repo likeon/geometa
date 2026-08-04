@@ -1,5 +1,9 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
+configMapGenerator:
+  - name: discord-bot-challenge-config
+    files:
+      - config.yaml
 resources:
   - deployment.yaml
   - cronjob.yaml

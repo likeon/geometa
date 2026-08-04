@@ -21,6 +21,9 @@ spec:
           imagePullSecrets:
             - name: registries
           volumes:
+            - name: challenge-config
+              configMap:
+                name: discord-bot-challenge-config
             - name: sa-token
               projected:
                 sources:
@@ -48,6 +51,10 @@ spec:
                 - name: API_HOST
                   value: api
               volumeMounts:
+                - name: challenge-config
+                  mountPath: /app/config.yaml
+                  subPath: config.yaml
+                  readOnly: true
                 - name: sa-token
                   mountPath: /var/run/secrets/kubernetes.io/serviceaccount
                   readOnly: true
