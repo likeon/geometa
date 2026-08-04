@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { and, asc, eq, inArray } from 'drizzle-orm';
+import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 import { app } from '../../api';
 import {
   levels,
@@ -101,6 +101,19 @@ function bulkLevelAssignRequest(userId: string, body: unknown) {
 function metaCopyRequest(userId: string, body: unknown) {
   return app.handle(
     new Request('http://localhost/api/internal/metas/copy', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        'x-api-user-id': userId,
+      },
+      body: JSON.stringify(body),
+    }),
+  );
+}
+
+function metaShareRequest(userId: string, body: unknown) {
+  return app.handle(
+    new Request('http://localhost/api/internal/metas/share', {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -397,6 +410,70 @@ describe('PUT /api/internal/metas/', () => {
     expect(await getMetaLevelIds(id)).toEqual([{ levelId: beginner }]);
     // the aborted update wrote no log
     expect(await getMetaLogs(groupId)).toHaveLength(1);
+  });
+
+  test.todo('update rejects cross-group level IDs before persisting anything', async () => {
+    await seedUser('owner-1');
+    const groupId = await seedGroup('Target group');
+    const foreignGroupId = await seedGroup('Foreign group');
+    await seedPermission('owner-1', groupId);
+    const beginner = await seedLevel(groupId, 'Beginner');
+    const foreignLevel = await seedLevel(foreignGroupId, 'Foreign level');
+
+    const created = await metaPutRequest(
+      'owner-1',
+      metaBody({
+        mapGroupId: groupId,
+        tagName: 'france',
+        name: 'France',
+        note: 'old note',
+        levels: [beginner],
+      }),
+    );
+    expect(created.status).toBe(200);
+    const { id } = (await created.json()) as { id: number };
+
+    // the foreign level exists, so its FK succeeds: missing group alignment is
+    // the only thing that should reject the update
+    const rejected = await metaPutRequest(
+      'owner-1',
+      metaBody({
+        id,
+        mapGroupId: groupId,
+        tagName: 'france',
+        name: 'Should Not Persist',
+        note: 'should not persist',
+        levels: [beginner, foreignLevel],
+      }),
+    );
+    expect(rejected.status).toBeGreaterThanOrEqual(400);
+    expect(rejected.status).toBeLessThan(500);
+
+    // scalar fields untouched
+    const [row] = await db.select().from(metas).where(eq(metas.id, id));
+    expect(row).toEqual(
+      expect.objectContaining({
+        id,
+        mapGroupId: groupId,
+        name: 'France',
+        note: 'old note',
+      }),
+    );
+    // level association untouched: no cross-group row was inserted
+    expect(await getMetaLevelIds(id)).toEqual([{ levelId: beginner }]);
+    expect(
+      await db
+        .select()
+        .from(metaLevels)
+        .where(eq(metaLevels.levelId, foreignLevel)),
+    ).toEqual([]);
+    // only the original create log; no update log and nothing in the foreign group
+    expect(await getMetaLogs(groupId)).toHaveLength(1);
+    expect(await getMetaLogs(foreignGroupId)).toEqual([]);
+    // the foreign group's level itself survives untouched
+    expect(
+      await db.select().from(levels).where(eq(levels.id, foreignLevel)),
+    ).toHaveLength(1);
   });
 
   describe('move between groups', () => {
@@ -1139,5 +1216,460 @@ describe('POST /api/internal/metas/copy', () => {
     expect(targetLogs[0]!.entityId).toBe(targetId);
     expect(targetLogs[0]!.operation).toBe('create');
     expect(await getMetaLevelIds(sourceId)).toEqual([{ levelId: beginner }]);
+  });
+});
+
+describe('POST /api/internal/metas/share', () => {
+  test('shares metas with images and tag locations and reports the committed count', async () => {
+    await seedUser('owner-1');
+    const sourceGroup = await seedGroup('Source group');
+    const targetGroup = await seedGroup('Target group');
+    await seedPermission('owner-1', sourceGroup);
+    await seedPermission('owner-1', targetGroup);
+    const note = '**bold** share';
+    const footer = 'shared footer';
+
+    const franceId = await seedMeta('owner-1', sourceGroup, 'france', {
+      name: 'France',
+      note,
+      footer,
+      noteFromPlonkit: true,
+    });
+    const germanyId = await seedMeta('owner-1', sourceGroup, 'germany', {
+      note: 'germany note',
+    });
+    // image and tag locations are seeded directly: image upload hits S3 and the
+    // locations upload path is out of scope for this endpoint
+    await db.insert(metaImages).values([
+      { metaId: franceId, image_url: 'https://img.example/france.jpg' },
+      { metaId: germanyId, image_url: 'https://img.example/germany.jpg' },
+    ]);
+    await db.insert(mapGroupLocations).values({
+      mapGroupId: sourceGroup,
+      lat: 48.85,
+      lng: 2.35,
+      heading: 1,
+      pitch: 2,
+      zoom: 3,
+      panoId: 'pano-france-1',
+      extraTag: 'france',
+      extraPanoId: 'extra-1',
+      extraPanoDate: '2024-01-01',
+    });
+
+    const response = await metaShareRequest('owner-1', {
+      metaIds: [franceId, germanyId],
+      targetGroupId: targetGroup,
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      copiedCount: 2,
+      totalRequested: 2,
+      message: 'Successfully shared 2 of 2 metas',
+    });
+
+    // both copies land in the target group under fresh ids
+    const [franceCopy] = await db
+      .select()
+      .from(metas)
+      .where(
+        and(eq(metas.mapGroupId, targetGroup), eq(metas.tagName, 'france')),
+      );
+    const [germanyCopy] = await db
+      .select()
+      .from(metas)
+      .where(
+        and(eq(metas.mapGroupId, targetGroup), eq(metas.tagName, 'germany')),
+      );
+    expect(franceCopy).toBeDefined();
+    expect(germanyCopy).toBeDefined();
+    expect(franceCopy!.id).not.toBe(franceId);
+    expect(germanyCopy!.id).not.toBe(germanyId);
+    expect(franceCopy).toEqual(
+      expect.objectContaining({
+        mapGroupId: targetGroup,
+        tagName: 'france',
+        name: 'France',
+        note,
+        footer,
+        noteFromPlonkit: true,
+      }),
+    );
+
+    // images follow each copy
+    const copiedImages = await db
+      .select()
+      .from(metaImages)
+      .where(eq(metaImages.metaId, franceCopy!.id));
+    expect(copiedImages.map((image) => image.image_url)).toEqual([
+      'https://img.example/france.jpg',
+    ]);
+    // france's tag locations follow into the target group
+    const copiedLocations = await db
+      .select()
+      .from(mapGroupLocations)
+      .where(
+        and(
+          eq(mapGroupLocations.mapGroupId, targetGroup),
+          eq(mapGroupLocations.extraTag, 'france'),
+        ),
+      );
+    expect(copiedLocations).toHaveLength(1);
+    expect(copiedLocations[0]).toEqual(
+      expect.objectContaining({
+        mapGroupId: targetGroup,
+        lat: 48.85,
+        lng: 2.35,
+        heading: 1,
+        pitch: 2,
+        zoom: 3,
+        panoId: 'pano-france-1',
+        extraTag: 'france',
+        extraPanoId: 'extra-1',
+        extraPanoDate: '2024-01-01',
+      }),
+    );
+
+    // one create log per copy against the target group marking the shared origin
+    const targetLogs = await getMetaLogs(targetGroup);
+    expect(targetLogs).toHaveLength(2);
+    expect(targetLogs.map((log) => log.entityLabel).sort()).toEqual([
+      'france',
+      'germany',
+    ]);
+    expect(
+      targetLogs.every(
+        (log) => log.operation === 'create' && log.userId === 'owner-1',
+      ),
+    ).toBe(true);
+    expect(targetLogs.map((log) => log.newValue)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          tagName: 'france',
+          name: 'France',
+          note,
+          footer,
+          noteFromPlonkit: true,
+          sharedFromGroupId: sourceGroup,
+        }),
+        expect.objectContaining({
+          tagName: 'germany',
+          note: 'germany note',
+          sharedFromGroupId: sourceGroup,
+        }),
+      ]),
+    );
+    // nothing new was logged against the source group (only its two creates)
+    expect(await getMetaLogs(sourceGroup)).toHaveLength(2);
+  });
+
+  test('existing target tag is skipped: the committed count excludes it and the target meta stays untouched', async () => {
+    await seedUser('owner-1');
+    const sourceGroup = await seedGroup('Source group');
+    const targetGroup = await seedGroup('Target group');
+    await seedPermission('owner-1', sourceGroup);
+    await seedPermission('owner-1', targetGroup);
+    const targetLevel = await seedLevel(targetGroup, 'Target level');
+
+    const sourceId = await seedMeta('owner-1', sourceGroup, 'france', {
+      name: 'France Source',
+      note: 'source note',
+    });
+    await db.insert(metaImages).values({
+      metaId: sourceId,
+      image_url: 'https://img.example/source.jpg',
+    });
+    const targetId = await seedMeta('owner-1', targetGroup, 'france', {
+      name: 'France Target',
+      note: 'target note',
+      levels: [targetLevel],
+    });
+    const germanyId = await seedMeta('owner-1', sourceGroup, 'germany', {
+      note: 'germany note',
+    });
+
+    const response = await metaShareRequest('owner-1', {
+      metaIds: [sourceId, germanyId],
+      targetGroupId: targetGroup,
+    });
+    expect(response.status).toBe(200);
+    // the existing-tag no-op is excluded from the committed count
+    expect(await response.json()).toEqual({
+      copiedCount: 1,
+      totalRequested: 2,
+      message: 'Successfully shared 1 of 2 metas',
+    });
+
+    // still exactly one 'france' in the target group: the pre-existing one
+    const targetFrance = await db
+      .select()
+      .from(metas)
+      .where(
+        and(eq(metas.mapGroupId, targetGroup), eq(metas.tagName, 'france')),
+      );
+    expect(targetFrance).toHaveLength(1);
+    expect(targetFrance[0]!.id).toBe(targetId);
+    expect(targetFrance[0]).toEqual(
+      expect.objectContaining({ name: 'France Target', note: 'target note' }),
+    );
+
+    // nothing leaked from the skipped source meta: no image, no tag locations,
+    // and the pre-existing level assignment survives
+    expect(
+      await db.select().from(metaImages).where(eq(metaImages.metaId, targetId)),
+    ).toHaveLength(0);
+    expect(
+      await db
+        .select()
+        .from(mapGroupLocations)
+        .where(
+          and(
+            eq(mapGroupLocations.mapGroupId, targetGroup),
+            eq(mapGroupLocations.extraTag, 'france'),
+          ),
+        ),
+    ).toHaveLength(0);
+    expect(await getMetaLevelIds(targetId)).toEqual([{ levelId: targetLevel }]);
+
+    // the germany meta copies normally with its own create log; the skipped
+    // france writes no log against the target group
+    const [germanyCopy] = await db
+      .select()
+      .from(metas)
+      .where(
+        and(eq(metas.mapGroupId, targetGroup), eq(metas.tagName, 'germany')),
+      );
+    expect(germanyCopy).toBeDefined();
+    const targetLogs = await getMetaLogs(targetGroup);
+    expect(targetLogs).toHaveLength(2);
+    expect(targetLogs.map((log) => log.entityLabel).sort()).toEqual([
+      'france',
+      'germany',
+    ]);
+    const germanyLog = targetLogs.find((log) => log.entityLabel === 'germany')!;
+    expect(germanyLog.operation).toBe('create');
+    expect(germanyLog.newValue).toEqual(
+      expect.objectContaining({
+        tagName: 'germany',
+        sharedFromGroupId: sourceGroup,
+      }),
+    );
+  });
+
+  test('continues after a per-meta failure and counts only committed copies', async () => {
+    await seedUser('owner-1');
+    const sourceGroup = await seedGroup('Source group');
+    const targetGroup = await seedGroup('Target group');
+    await seedPermission('owner-1', sourceGroup);
+    await seedPermission('owner-1', targetGroup);
+    // the failing meta and its image are seeded before the trigger exists, so
+    // only the copy's image insert raises
+    const failingId = await seedMeta('owner-1', sourceGroup, 'fail-meta', {
+      note: 'will fail',
+    });
+    await db.insert(metaImages).values({
+      metaId: failingId,
+      image_url: 'https://img.example/fail.jpg',
+    });
+    const okId = await seedMeta('owner-1', sourceGroup, 'germany', {
+      note: 'germany note',
+    });
+    await db.insert(metaImages).values({
+      metaId: okId,
+      image_url: 'https://img.example/ok.jpg',
+    });
+
+    // make the failing meta's copy abort mid-transaction: the copy has already
+    // inserted its metas row by the time the image insert raises
+    await db.$primary.execute(sql`
+      CREATE OR REPLACE FUNCTION geometa_test_fail_share()
+      RETURNS trigger AS $$
+      BEGIN
+        RAISE EXCEPTION 'intentional share test failure';
+      END;
+      $$ LANGUAGE plpgsql;
+    `);
+    await db.$primary.execute(sql`
+      CREATE TRIGGER geometa_test_fail_share_trigger
+      BEFORE INSERT ON meta_images
+      FOR EACH ROW WHEN (NEW.image_url = 'https://img.example/fail.jpg')
+      EXECUTE FUNCTION geometa_test_fail_share()
+    `);
+
+    try {
+      const response = await metaShareRequest('owner-1', {
+        metaIds: [failingId, okId],
+        targetGroupId: targetGroup,
+      });
+      // the per-meta failure is contained: the request succeeds with the other
+      // copy, and the count reflects only the committed copy
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({
+        copiedCount: 1,
+        totalRequested: 2,
+        message: 'Successfully shared 1 of 2 metas',
+      });
+    } finally {
+      await db.$primary.execute(sql`
+        DROP TRIGGER IF EXISTS geometa_test_fail_share_trigger ON meta_images
+      `);
+      await db.$primary.execute(sql`
+        DROP FUNCTION IF EXISTS geometa_test_fail_share()
+      `);
+    }
+
+    // the failed copy left nothing behind: its whole per-meta transaction
+    // rolled back the meta and any tag-location writes
+    expect(
+      await db
+        .select()
+        .from(metas)
+        .where(
+          and(
+            eq(metas.mapGroupId, targetGroup),
+            eq(metas.tagName, 'fail-meta'),
+          ),
+        ),
+    ).toEqual([]);
+    expect(
+      await db
+        .select()
+        .from(mapGroupLocations)
+        .where(
+          and(
+            eq(mapGroupLocations.mapGroupId, targetGroup),
+            eq(mapGroupLocations.extraTag, 'fail-meta'),
+          ),
+        ),
+    ).toEqual([]);
+
+    // the healthy meta was copied in full: meta, image, and log
+    const [germanyCopy] = await db
+      .select()
+      .from(metas)
+      .where(
+        and(eq(metas.mapGroupId, targetGroup), eq(metas.tagName, 'germany')),
+      );
+    expect(germanyCopy).toBeDefined();
+    expect(germanyCopy!.id).not.toBe(okId);
+    const copiedImages = await db
+      .select()
+      .from(metaImages)
+      .where(eq(metaImages.metaId, germanyCopy!.id));
+    expect(copiedImages.map((image) => image.image_url)).toEqual([
+      'https://img.example/ok.jpg',
+    ]);
+    const targetLogs = await getMetaLogs(targetGroup);
+    expect(targetLogs).toHaveLength(1);
+    expect(targetLogs[0]!.entityLabel).toBe('germany');
+    expect(targetLogs[0]!.operation).toBe('create');
+    expect(targetLogs[0]!.newValue).toEqual(
+      expect.objectContaining({
+        tagName: 'germany',
+        sharedFromGroupId: sourceGroup,
+      }),
+    );
+
+    // the source meta keeps its own image
+    expect(
+      await db
+        .select()
+        .from(metaImages)
+        .where(eq(metaImages.metaId, failingId)),
+    ).toHaveLength(1);
+  });
+
+  test.todo('share remaps levels to same-named target-group levels and omits source-only levels', async () => {
+    await seedUser('owner-1');
+    const sourceGroup = await seedGroup('Source group');
+    const targetGroup = await seedGroup('Target group');
+    await seedPermission('owner-1', sourceGroup);
+    await seedPermission('owner-1', targetGroup);
+    // the same level name exists in both groups under distinct ids, plus one
+    // level that only the source group has
+    const sourceBeginner = await seedLevel(sourceGroup, 'Beginner');
+    const targetBeginner = await seedLevel(targetGroup, 'Beginner');
+    const sourceOnly = await seedLevel(sourceGroup, 'Source Only');
+
+    const sourceId = await seedMeta('owner-1', sourceGroup, 'france', {
+      name: 'France',
+      note: 'share remap note',
+      levels: [sourceBeginner, sourceOnly],
+    });
+
+    const response = await metaShareRequest('owner-1', {
+      metaIds: [sourceId],
+      targetGroupId: targetGroup,
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      copiedCount: 1,
+      totalRequested: 1,
+      message: 'Successfully shared 1 of 1 metas',
+    });
+
+    const [copyRow] = await db
+      .select()
+      .from(metas)
+      .where(
+        and(eq(metas.mapGroupId, targetGroup), eq(metas.tagName, 'france')),
+      );
+    expect(copyRow).toBeDefined();
+
+    // desired: the matching level name maps to the target group's own level id
+    // and the source-only level is safely omitted from the copy
+    expect(await getMetaLevelIds(copyRow!.id)).toEqual([
+      { levelId: targetBeginner },
+    ]);
+
+    // desired: no cross-group meta_levels row links a target meta to a
+    // source-group level
+    const targetLevelIds = new Set(
+      (
+        await db
+          .select({ id: levels.id })
+          .from(levels)
+          .where(eq(levels.mapGroupId, targetGroup))
+      ).map((level) => level.id),
+    );
+    const copyAssignments = await db
+      .select({ levelId: metaLevels.levelId })
+      .from(metaLevels)
+      .where(eq(metaLevels.metaId, copyRow!.id));
+    expect(
+      copyAssignments.every((assignment) =>
+        targetLevelIds.has(assignment.levelId),
+      ),
+    ).toBe(true);
+
+    // the source meta keeps its own level assignments untouched
+    expect(await getMetaLevelIds(sourceId)).toEqual([
+      { levelId: sourceBeginner },
+      { levelId: sourceOnly },
+    ]);
+
+    // the target copy is audited as a create sharing the source origin; the
+    // source group logs nothing new
+    expect(await getMetaLogs(targetGroup)).toEqual([
+      {
+        mapGroupId: targetGroup,
+        userId: 'owner-1',
+        entityType: 'meta',
+        entityId: copyRow!.id,
+        entityLabel: 'france',
+        operation: 'create',
+        oldValue: null,
+        newValue: {
+          tagName: 'france',
+          name: 'France',
+          note: 'share remap note',
+          footer: '',
+          noteFromPlonkit: false,
+          sharedFromGroupId: sourceGroup,
+        },
+        createdAt: expect.any(Number),
+      },
+    ]);
+    expect(await getMetaLogs(sourceGroup)).toHaveLength(1);
   });
 });
