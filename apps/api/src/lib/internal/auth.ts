@@ -45,7 +45,7 @@ export function bearer() {
 export function auth(jwt?: boolean) {
   return new Elysia({ name: `geometa-auth`, seed: { jwt } })
     .use(bearer())
-    .onBeforeHandle({ as: 'global' }, async ({ bearer, status }) => {
+    .onBeforeHandle({ as: 'scoped' }, async ({ bearer, status }) => {
       if (process.env.API_INTERNAL_AUTH_REQUIRED !== 'false') {
         if (!bearer) {
           return status(401);

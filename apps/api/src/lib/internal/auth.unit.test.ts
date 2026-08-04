@@ -164,6 +164,13 @@ beforeAll(async () => {
   jwks = () => ({ keys: [{ ...jwk, kid: 'test-key' }] });
 });
 
+const sign = (claims: Record<string, unknown>) =>
+  new jose.SignJWT(claims)
+    .setProtectedHeader({ alg: 'RS256', kid: 'test-key' })
+    .setIssuedAt()
+    .setExpirationTime('1h')
+    .sign(privateKey);
+
 function jwtApp() {
   return new Elysia()
     .use(auth(true))
@@ -196,13 +203,6 @@ describe('production JWT contract', () => {
     globalThis.Bun.file = originalBunFile;
     globalThis.fetch = originalFetch;
   });
-
-  const sign = (claims: Record<string, unknown>) =>
-    new jose.SignJWT(claims)
-      .setProtectedHeader({ alg: 'RS256', kid: 'test-key' })
-      .setIssuedAt()
-      .setExpirationTime('1h')
-      .sign(privateKey);
 
   const hit = (token: string) => {
     delete process.env.API_INTERNAL_AUTH_REQUIRED;
@@ -246,5 +246,102 @@ describe('production JWT contract', () => {
     // set, which fetched the endpoint exactly once. Constructing the JWKS per
     // request would fetch once per request.
     expect(jwksFetches).toBe(1);
+  });
+});
+
+// The auth gate must stay confined to the instances that mount it. Internal
+// routers each call `.use(auth())` / `.use(auth(true))`, so all their routes
+// stay gated, while sibling routers without auth (like the public `/api/maps`)
+// must remain open.
+describe('auth gate scope', () => {
+  beforeEach(() => {
+    process.env.FRONTEND_API_TOKEN = 'correct-token';
+    delete process.env.API_INTERNAL_AUTH_REQUIRED;
+    capturedErrors.length = 0;
+    globalThis.Bun.file = ((_path: string) => ({
+      text: async () => 'test-ca',
+    })) as unknown as typeof Bun.file;
+    globalThis.fetch = (async (input: string | URL | Request) => {
+      if (String(input) === 'https://kubernetes.default.svc/openid/v1/jwks') {
+        jwksFetches += 1;
+        return new Response(JSON.stringify(jwks()), {
+          headers: { 'content-type': 'application/json' },
+        });
+      }
+      return originalFetch(input);
+    }) as unknown as typeof fetch;
+  });
+
+  afterEach(() => {
+    restoreEnv('API_INTERNAL_AUTH_REQUIRED', originalAuthRequired);
+    restoreEnv('FRONTEND_API_TOKEN', originalFrontendToken);
+    globalThis.Bun.file = originalBunFile;
+    globalThis.fetch = originalFetch;
+  });
+
+  // Mirrors the real app: an internal router (prefix /internal) composing
+  // sub-routers that each mount auth, next to a public router with no auth.
+  function scopedGateApp() {
+    const internal = new Elysia({ prefix: '/internal' })
+      .use(new Elysia().use(auth()).get('/metas', () => 'ok'))
+      .use(new Elysia().use(auth(true)).get('/discord', () => 'ok'));
+
+    return new Elysia().use(internal).get('/maps', () => 'public');
+  }
+
+  test('leaves sibling public routes open', async () => {
+    const response = await scopedGateApp().handle(
+      new Request('http://localhost/maps'),
+    );
+    expect(response.status).toBe(200);
+    expect(await response.text()).toBe('public');
+  });
+
+  test('keeps static-token internal routes gated', async () => {
+    const app = scopedGateApp();
+
+    const missing = await app.handle(
+      new Request('http://localhost/internal/metas'),
+    );
+    expect(missing.status).toBe(401);
+
+    const wrong = await app.handle(
+      new Request('http://localhost/internal/metas', {
+        headers: { authorization: 'Bearer wrong-token' },
+      }),
+    );
+    expect(wrong.status).toBe(403);
+
+    const correct = await app.handle(
+      new Request('http://localhost/internal/metas', {
+        headers: { authorization: 'Bearer correct-token' },
+      }),
+    );
+    expect(correct.status).toBe(200);
+  });
+
+  test('keeps JWT internal routes gated', async () => {
+    const app = scopedGateApp();
+
+    const missing = await app.handle(
+      new Request('http://localhost/internal/discord'),
+    );
+    expect(missing.status).toBe(401);
+
+    const wrongAudience = await app.handle(
+      new Request('http://localhost/internal/discord', {
+        headers: { authorization: `Bearer ${await sign({ aud: 'api' })}` },
+      }),
+    );
+    expect(wrongAudience.status).toBe(200);
+
+    const invalid = await app.handle(
+      new Request('http://localhost/internal/discord', {
+        headers: {
+          authorization: `Bearer ${await sign({ aud: 'not-the-api' })}`,
+        },
+      }),
+    );
+    expect(invalid.status).toBe(403);
   });
 });
