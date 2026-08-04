@@ -1,5 +1,5 @@
 challenge:
-  channel_id: 1 # Replace with the Discord channel ID before running.
+  channel_id: 1534189078155624538
   time_limit: 0
 
 game_modes:
