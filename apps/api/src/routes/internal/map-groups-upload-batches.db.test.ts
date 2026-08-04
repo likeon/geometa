@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { eq } from 'drizzle-orm';
-import { app } from '../../api';
+import { app } from '@api/api';
 import {
   mapGroupChanges,
   mapGroupLocations,
@@ -8,8 +7,9 @@ import {
   mapGroups,
   metas,
   users,
-} from '../../lib/db/schema';
-import { db } from '../../lib/drizzle';
+} from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
+import { eq } from 'drizzle-orm';
 
 // The upload handler chunks its upsert into BATCH_SIZE = 1000-row INSERT
 // statements. A duplicate split across statements never triggers PostgreSQL's

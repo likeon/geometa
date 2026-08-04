@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test';
-import { and, asc, eq } from 'drizzle-orm';
-import { app } from '../../api';
+import { app } from '@api/api';
 import {
   mapGroupChanges,
   mapGroupPermissions,
@@ -8,8 +7,9 @@ import {
   metaImages,
   metas,
   users,
-} from '../../lib/db/schema';
-import { db } from '../../lib/drizzle';
+} from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
+import { and, asc, eq } from 'drizzle-orm';
 
 // distinctive value that a successful reorder overwrites
 const SEED_MODIFIED_AT = 1_000_000;

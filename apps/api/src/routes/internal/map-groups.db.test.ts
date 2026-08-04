@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { and, eq, inArray } from 'drizzle-orm';
-import { app } from '../../api';
+import { app } from '@api/api';
 import {
   mapGroupChanges,
   mapGroupLocations,
@@ -12,8 +11,9 @@ import {
   syncedMapMetas,
   syncedMetas,
   users,
-} from '../../lib/db/schema';
-import { db } from '../../lib/drizzle';
+} from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
+import { and, eq, inArray } from 'drizzle-orm';
 
 const syncedAt = 1700000000;
 
