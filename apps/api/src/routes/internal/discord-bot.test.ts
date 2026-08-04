@@ -1,7 +1,8 @@
-import { afterEach, describe, expect, test } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { discordBotRouter } from './discord-bot';
 
 const originalFetch = globalThis.fetch;
+const originalNfcaToken = process.env.NFCA_TOKEN;
 const requestBody = {
   geoguessr_map_id: '699617147156b7076362bd45',
   time_limit: 0,
@@ -10,8 +11,18 @@ const requestBody = {
   forbid_zooming: false,
 };
 
+beforeEach(() => {
+  process.env.NFCA_TOKEN = 'test';
+});
+
 afterEach(() => {
   globalThis.fetch = originalFetch;
+
+  if (originalNfcaToken === undefined) {
+    delete process.env.NFCA_TOKEN;
+  } else {
+    process.env.NFCA_TOKEN = originalNfcaToken;
+  }
 });
 
 describe('POST /discord-bot/challenges', () => {
