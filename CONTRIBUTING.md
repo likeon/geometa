@@ -27,12 +27,6 @@ Run the following installation commands in order.
     - You can find logs for `postgres`, `frontend` and `api` there
   - Since this command occupies a session, you'll need to open a new terminal window or move it to background
 4. `just api::db-init` - applies initial db data
-5. To avoid the hassle of setting up Discord auth which is enabled in production you can login under a development user account
-  - Create `.env.local` file in `./apps/frontend/` folder with the following content:
-    ```
-    ALLOW_LOGIN_BYPASS=true
-    ```
-  - Login by opening this url [http://localhost:5173/login/bypass?uid=1001][login-bypass-url]
 
 ## Pull Request Process
 

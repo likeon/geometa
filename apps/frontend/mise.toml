@@ -1,0 +1,2 @@
+[env]
+ALLOW_LOGIN_BYPASS = "true"
