@@ -1,14 +1,15 @@
-import { maps } from '@api/lib/db/schema';
+import { maps, users } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { logChange } from '@api/lib/internal/changes';
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { geoguessrAPIFetch } from '@api/lib/internal/utils';
-import { eq } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import { TypeCompiler } from 'elysia/type-system';
 
 const GEOGUESSR_CHALLENGES_URL = 'https://www.geoguessr.com/api/v3/challenges';
+const DISCORD_VERIFIED_MESSAGES_THRESHOLD = 5;
 const CHALLENGE_ERROR = { message: 'Failed to create GeoGuessr challenge' };
 const challengeResponseValidator = TypeCompiler.Compile(
   t.Object(
@@ -144,5 +145,54 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
     },
     {
       body: t.Object({ discord_thread_author_id: t.String() }),
+    },
+  )
+  .get(
+    'users/:id/is-discord-verified',
+    async ({ params: { id } }) => {
+      const user = await db.$primary.query.users.findFirst({
+        where: eq(users.id, id),
+      });
+
+      return { isDiscordVerified: user?.isDiscordVerified ?? false };
+    },
+    {
+      params: t.Object({ id: t.String({ minLength: 1 }) }),
+    },
+  )
+  .post(
+    'users/:id/verified-message',
+    async ({ params: { id } }) => {
+      const [row] = await db.$primary
+        .insert(users)
+        .values({
+          id,
+          username: id,
+          isDiscordVerified: false,
+          discordVerifiedMessages: 1,
+        })
+        .onConflictDoUpdate({
+          target: users.id,
+          set: {
+            discordVerifiedMessages: sql`COALESCE(${users.discordVerifiedMessages}, 0) + 1`,
+            isDiscordVerified: sql`CASE
+              WHEN COALESCE(${users.discordVerifiedMessages}, 0) + 1 >= ${DISCORD_VERIFIED_MESSAGES_THRESHOLD}
+              THEN true
+              ELSE ${users.isDiscordVerified}
+            END`,
+          },
+        })
+        .returning({
+          isDiscordVerified: users.isDiscordVerified,
+          discordVerifiedMessages: users.discordVerifiedMessages,
+        });
+
+      return {
+        isDiscordVerified: row?.isDiscordVerified ?? false,
+        discordVerifiedMessages: row?.discordVerifiedMessages ?? 1,
+      };
+    },
+    {
+      params: t.Object({ id: t.String({ minLength: 1 }) }),
     },
   );

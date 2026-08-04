@@ -267,6 +267,13 @@
       "when": 1786515403879,
       "tag": "0037_secret_sister_grimm",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1787009699108,
+      "tag": "0038_small_wonder_man",
+      "breakpoints": true
     }
   ]
 }

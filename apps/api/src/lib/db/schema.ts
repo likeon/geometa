@@ -274,6 +274,9 @@ export const users = pgTable('user', {
   isTrusted: boolean('is_trusted').notNull().default(false),
   isSuperadmin: boolean('is_superadmin').notNull().default(false),
   apiToken: text('api_token').unique(),
+  // default for users created via oauth
+  isDiscordVerified: boolean('is_discord_verified').notNull().default(true),
+  discordVerifiedMessages: integer('discord_verified_messages'),
 });
 export const usersRelations = relations(users, ({ many }) => ({
   permissions: many(mapGroupPermissions),
