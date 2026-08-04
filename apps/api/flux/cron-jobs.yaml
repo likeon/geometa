@@ -16,7 +16,7 @@ spec:
           restartPolicy: OnFailure
           containers:
             - name: api
-              image: ghcr.io/likeon/geometa-api:main-6655c51a-1785683207 # {"$imagepolicy": "geometa:api"}
+              image: ghcr.io/likeon/geometa-api:main-6b290902-1785849863 # {"$imagepolicy": "geometa:api"}
               command: ["./server", "script", "validate_street_view_locations"]
               resources:
                 requests:
