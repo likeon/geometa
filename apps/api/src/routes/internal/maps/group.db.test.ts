@@ -1035,6 +1035,39 @@ describe('PUT /api/internal/maps/group', () => {
       ]);
     });
   });
+
+  describe('id=0 validation', () => {
+    test.todo('rejects id 0 by validation instead of mixing create and update behavior', async () => {
+      await seedUser('owner-1');
+      const groupId = await seedGroup('Test group');
+      await seedGroupOwner('owner-1', groupId);
+
+      // id=0 passes the Integer schema, so the route mixes paths: the
+      // popularity check treats it as a create (`if (id)` is falsy) while the
+      // transaction treats it as an update of map 0 (`id === undefined` is
+      // false). No map row is touched, association inserts target a
+      // nonexistent map_id, and the response is 200 { id: 0 } or 500
+      // depending on the association arrays.
+      const response = await groupMapPutRequest(
+        'owner-1',
+        groupMapBody({
+          id: 0,
+          mapGroupId: groupId,
+          geoguessrId: 'id-zero-map',
+        }),
+      );
+      expect(response.status).toBe(422);
+      expect(await response.json()).toEqual(
+        expect.objectContaining({ type: 'validation', on: 'body' }),
+      );
+      // validation must reject before the handler: no external lookup
+      expect(geoguessrFetches).toEqual([]);
+      // and nothing may be persisted
+      expect(
+        await db.select().from(maps).where(eq(maps.geoguessrId, 'id-zero-map')),
+      ).toEqual([]);
+    });
+  });
 });
 
 describe('DELETE /api/internal/maps/group/:id', () => {

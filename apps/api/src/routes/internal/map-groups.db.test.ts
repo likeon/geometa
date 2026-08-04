@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import { app } from '../../api';
 import {
   mapGroupChanges,
@@ -181,6 +181,40 @@ function deletePermissionRequest(
       },
     ),
   );
+}
+
+// number of sessions blocked waiting on the group's permission-row FOR UPDATE
+// lock, i.e. transactions stuck in the last-owner guard
+async function blockedLockWaiterCount() {
+  const rows = await db.$primary.$client`
+    SELECT count(*)::int AS blocked
+    FROM pg_stat_activity
+    WHERE datname = current_database()
+      AND state = 'active'
+      AND wait_event_type = 'Lock'
+      AND query ILIKE '%map_group_permissions%'
+      AND query ILIKE '%for update%'
+      AND pid <> pg_backend_pid()
+  `;
+  return Number(rows[0]?.blocked ?? 0);
+}
+
+// condition polling (event-loop yields only, no fixed sleeps) until the given
+// number of transactions are blocked on the last-owner lock
+async function waitForBlockedLockWaiters(count: number, deadlineMs = 10_000) {
+  const deadline = Date.now() + deadlineMs;
+  for (;;) {
+    const blocked = await blockedLockWaiterCount();
+    if (blocked >= count) {
+      return;
+    }
+    if (Date.now() > deadline) {
+      throw new Error(
+        `timed out after ${deadlineMs}ms waiting for ${count} permission transactions to block on the last-owner lock (blocked=${blocked})`,
+      );
+    }
+    await Bun.sleep(0);
+  }
 }
 
 function locationUploadRequest(userId: string, groupId: number, body: unknown) {
@@ -546,6 +580,92 @@ describe('permission management', () => {
   });
 });
 
+describe('concurrent last-owner demotion and removal', () => {
+  test('racing DELETE and PATCH demote cannot leave a group ownerless', async () => {
+    await seedUser('race-admin', true);
+    await seedUser('race-owner-a');
+    await seedUser('race-owner-b');
+    const groupId = await seedOwnerGroup('race-owner-a', 'Race group', {
+      syncedAt,
+      syncIncludeLocationsNotOnStreetView: true,
+    });
+    await seedMember(groupId, 'race-owner-b', 'owner');
+    const ownerA = (await getPermission(groupId, 'race-owner-a'))!;
+    const ownerB = (await getPermission(groupId, 'race-owner-b'))!;
+
+    // hold the group's permission-row locks so both requests' guard
+    // transactions are guaranteed to be in flight before either can commit
+    let lockAcquired!: () => void;
+    const lockAcquiredPromise = new Promise<void>((resolve) => {
+      lockAcquired = resolve;
+    });
+    let releaseLock!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      releaseLock = resolve;
+    });
+    const lockHolder = db.$primary.transaction(async (tx) => {
+      await tx
+        .select()
+        .from(mapGroupPermissions)
+        .where(eq(mapGroupPermissions.mapGroupId, groupId))
+        .for('update');
+      lockAcquired();
+      await gate;
+    });
+    await lockAcquiredPromise;
+
+    const requests = Promise.allSettled([
+      deletePermissionRequest('race-admin', groupId, ownerA.id),
+      updatePermissionRequest('race-admin', groupId, ownerB.id, {
+        role: 'editor',
+      }),
+    ]);
+
+    // deterministically wait until both requests are blocked on the row lock
+    await waitForBlockedLockWaiters(2);
+
+    releaseLock();
+    await lockHolder;
+
+    const results = await requests;
+    expect(results).toHaveLength(2);
+    const statuses = results
+      .map((result) =>
+        result.status === 'fulfilled' ? result.value.status : -1,
+      )
+      .sort();
+    // exactly one removal/demotion wins; the loser is rejected by the
+    // last-owner guard regardless of which request wins
+    expect(statuses).toEqual([200, 400]);
+    const deleteWon =
+      results[0].status === 'fulfilled' && results[0].value.status === 200;
+    const losers = results.filter(
+      (result) => result.status === 'fulfilled' && result.value.status === 400,
+    );
+    expect(losers).toHaveLength(1);
+    const loser = losers[0] as PromiseFulfilledResult<Response>;
+    expect(await loser.value.json()).toEqual({
+      field: 'permissionId',
+      message: 'A group must keep at least one owner',
+    });
+
+    // final invariant: exactly one owner survives, and the non-surviving
+    // owner is either removed (delete won) or demoted to editor (demote won)
+    const finalPermissions = await permissionSnapshot(groupId);
+    const owners = finalPermissions.filter((p) => p.role === 'owner');
+    expect(owners).toHaveLength(1);
+    if (deleteWon) {
+      expect(owners[0].userId).toBe('race-owner-b');
+      expect(await getPermission(groupId, 'race-owner-a')).toBeUndefined();
+    } else {
+      expect(owners[0].userId).toBe('race-owner-a');
+      expect(await getPermission(groupId, 'race-owner-b')).toEqual(
+        expect.objectContaining({ role: 'editor' }),
+      );
+    }
+  });
+});
+
 describe('location upload deletion semantics', () => {
   test('partial upload preserves omitted rows', async () => {
     await seedUser('upload-owner-1');
@@ -597,6 +717,59 @@ describe('location upload deletion semantics', () => {
     // every row not in the upload is deleted, regardless of tag
     expect(await locationSnapshot(groupId)).toEqual([
       { panoId: 'pano-a', extraTag: 'tag-a', extraPanoId: null },
+    ]);
+  });
+
+  test('empty full upload deletes all rows; empty partial upload is a no-op', async () => {
+    await seedUser('upload-owner-4');
+    const groupId = await seedOwnerGroup('upload-owner-4', 'Empty uploads', {
+      syncedAt,
+      syncIncludeLocationsNotOnStreetView: true,
+    });
+    await seedLocation(groupId, 'pano-a', 'tag-a');
+    await seedLocation(groupId, 'pano-b', 'tag-b');
+    // an unrelated group's row proves deletions stay scoped to this group
+    const otherGroupId = await seedOwnerGroup(
+      'upload-owner-4',
+      'Empty upload other',
+      {
+        syncedAt,
+        syncIncludeLocationsNotOnStreetView: true,
+      },
+    );
+    await seedLocation(otherGroupId, 'pano-c', 'tag-a');
+
+    const partial = await locationUploadRequest('upload-owner-4', groupId, {
+      uploadMode: 'partial',
+      locations: [],
+    });
+    expect(partial.status).toBe(200);
+    expect(await partial.json()).toEqual({
+      count: 0,
+      ignoredCount: 0,
+      conflictCount: 0,
+    });
+    // empty partial upload is a no-op: every row survives untouched
+    expect(await locationSnapshot(groupId)).toEqual([
+      { panoId: 'pano-a', extraTag: 'tag-a', extraPanoId: null },
+      { panoId: 'pano-b', extraTag: 'tag-b', extraPanoId: null },
+    ]);
+
+    const full = await locationUploadRequest('upload-owner-4', groupId, {
+      uploadMode: 'full',
+      locations: [],
+    });
+    expect(full.status).toBe(200);
+    expect(await full.json()).toEqual({
+      count: 0,
+      ignoredCount: 0,
+      conflictCount: 0,
+    });
+    // empty full upload replaces the group with nothing: all rows deleted
+    expect(await locationSnapshot(groupId)).toEqual([]);
+    // the unrelated group is untouched by both uploads
+    expect(await locationSnapshot(otherGroupId)).toEqual([
+      { panoId: 'pano-c', extraTag: 'tag-a', extraPanoId: null },
     ]);
   });
 
@@ -728,6 +901,197 @@ describe('location upload editor scope and scoped semantics', () => {
       { panoId: 'pano-a', extraTag: 'tag-b', extraPanoId: null },
       { panoId: 'pano-x', extraTag: 'tag-a', extraPanoId: null },
     ]);
+  });
+});
+
+describe('location upload duplicate pano rollback', () => {
+  test('same-batch duplicate pano returns 409 and rolls back earlier upsert and delete work', async () => {
+    await seedUser('dup-owner-1');
+    const groupId = await seedOwnerGroup('dup-owner-1', 'Duplicate rollback', {
+      syncedAt,
+      syncIncludeLocationsNotOnStreetView: true,
+    });
+    // stale updatedAt marks these as victims of the full upload's delete step
+    await seedLocation(groupId, 'dup-seed-a', 'tag-seed-a');
+    await seedLocation(groupId, 'dup-seed-b', 'tag-seed-b');
+
+    // a full batch (BATCH_SIZE = 1000) of genuine new upserts first, then the
+    // duplicate pano pair in the following batch, so the 21000 cardinality
+    // error fires only after real work happened inside the transaction
+    const locations = Array.from({ length: 1000 }, (_, i) =>
+      locationBody(`pano-batch-${i}`, 'tag-upload'),
+    );
+    locations.push(locationBody('dup-pano', 'tag-upload'));
+    locations.push(locationBody('dup-pano', 'tag-upload'));
+
+    const response = await locationUploadRequest('dup-owner-1', groupId, {
+      uploadMode: 'full',
+      locations,
+    });
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({
+      message:
+        'The uploaded file contains duplicate panoId values. Please remove duplicates and try again.',
+    });
+    // neither the batch-1 upserts nor the full-replacement delete survived:
+    // only the seeded rows remain, untouched
+    expect(await locationSnapshot(groupId)).toEqual([
+      { panoId: 'dup-seed-a', extraTag: 'tag-seed-a', extraPanoId: null },
+      { panoId: 'dup-seed-b', extraTag: 'tag-seed-b', extraPanoId: null },
+    ]);
+    // the rolled-back upsert did not even stamp the seeded rows' timestamps
+    const remaining = await db
+      .select({
+        panoId: mapGroupLocations.panoId,
+        updatedAt: mapGroupLocations.updatedAt,
+      })
+      .from(mapGroupLocations)
+      .where(eq(mapGroupLocations.mapGroupId, groupId))
+      .orderBy(mapGroupLocations.panoId);
+    expect(remaining).toEqual([
+      { panoId: 'dup-seed-a', updatedAt: syncedAt },
+      { panoId: 'dup-seed-b', updatedAt: syncedAt },
+    ]);
+    // the auto-created meta and the location_batch/meta audit logs are gone too
+    expect(
+      await db
+        .select({ id: metas.id })
+        .from(metas)
+        .where(eq(metas.mapGroupId, groupId)),
+    ).toEqual([]);
+    expect(
+      await db
+        .select({ id: mapGroupChanges.id })
+        .from(mapGroupChanges)
+        .where(eq(mapGroupChanges.mapGroupId, groupId)),
+    ).toEqual([]);
+  });
+});
+
+async function getUploadLogs(groupId: number) {
+  return db
+    .select({
+      mapGroupId: mapGroupChanges.mapGroupId,
+      userId: mapGroupChanges.userId,
+      entityType: mapGroupChanges.entityType,
+      entityId: mapGroupChanges.entityId,
+      entityLabel: mapGroupChanges.entityLabel,
+      operation: mapGroupChanges.operation,
+      oldValue: mapGroupChanges.oldValue,
+      newValue: mapGroupChanges.newValue,
+      createdAt: mapGroupChanges.createdAt,
+    })
+    .from(mapGroupChanges)
+    .where(
+      and(
+        eq(mapGroupChanges.mapGroupId, groupId),
+        inArray(mapGroupChanges.entityType, ['location_batch', 'meta']),
+      ),
+    )
+    .orderBy(mapGroupChanges.id);
+}
+
+describe('location upload unscoped meta auto-creation', () => {
+  test('new tag creates an empty meta and exact audit entries; re-uploading the existing tag adds no duplicate meta or create entry', async () => {
+    await seedUser('upload-owner-5');
+    const groupId = await seedOwnerGroup('upload-owner-5', 'Unscoped new tag', {
+      syncedAt,
+      syncIncludeLocationsNotOnStreetView: true,
+    });
+
+    const before = Math.floor(Date.now() / 1000);
+    const response = await locationUploadRequest('upload-owner-5', groupId, {
+      uploadMode: 'partial',
+      locations: [locationBody('pano-new', 'tag-new')],
+    });
+    const after = Math.floor(Date.now() / 1000);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      count: 1,
+      ignoredCount: 0,
+      conflictCount: 0,
+    });
+
+    // the unseen tag is auto-created as an empty meta row
+    const [meta] = await db
+      .select()
+      .from(metas)
+      .where(and(eq(metas.mapGroupId, groupId), eq(metas.tagName, 'tag-new')));
+    expect(meta).toEqual(
+      expect.objectContaining({
+        mapGroupId: groupId,
+        tagName: 'tag-new',
+        name: '',
+        note: '',
+        noteHtml: '',
+        footer: '',
+        footerHtml: '',
+        noteFromPlonkit: false,
+        hasImage: false,
+      }),
+    );
+    expect(meta!.modifiedAt).toBeGreaterThanOrEqual(before);
+    expect(meta!.modifiedAt).toBeLessThanOrEqual(after);
+
+    // exact audit snapshot: the batch marker plus the meta create entry
+    expect(await getUploadLogs(groupId)).toEqual([
+      {
+        mapGroupId: groupId,
+        userId: 'upload-owner-5',
+        entityType: 'location_batch',
+        entityId: null,
+        entityLabel: '1 tags',
+        operation: 'update',
+        oldValue: null,
+        newValue: {
+          uploadMode: 'partial',
+          count: 1,
+          deletedCount: 0,
+          ignoredCount: 0,
+          conflictCount: 0,
+          tags: ['tag-new'],
+        },
+        createdAt: expect.any(Number),
+      },
+      {
+        mapGroupId: groupId,
+        userId: 'upload-owner-5',
+        entityType: 'meta',
+        entityId: meta!.id,
+        entityLabel: 'tag-new',
+        operation: 'create',
+        oldValue: null,
+        newValue: { tagName: 'tag-new', createdByLocationUpload: true },
+        createdAt: expect.any(Number),
+      },
+    ]);
+
+    // existing-tag distinction: re-uploading the same tag only upserts
+    // locations; no second meta row and no second meta create entry
+    const second = await locationUploadRequest('upload-owner-5', groupId, {
+      uploadMode: 'partial',
+      locations: [locationBody('pano-new-2', 'tag-new')],
+    });
+    expect(second.status).toBe(200);
+    expect(await second.json()).toEqual({
+      count: 1,
+      ignoredCount: 0,
+      conflictCount: 0,
+    });
+
+    expect(
+      await db
+        .select({ id: metas.id })
+        .from(metas)
+        .where(eq(metas.mapGroupId, groupId)),
+    ).toHaveLength(1);
+    // the create entry stays the only meta entry; the second upload only
+    // appends its own location_batch marker
+    const logs = await getUploadLogs(groupId);
+    expect(logs.filter((log) => log.entityType === 'meta')).toHaveLength(1);
+    expect(logs).toHaveLength(3);
   });
 });
 
