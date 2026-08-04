@@ -89,5 +89,10 @@
     "unified": "^11.0.5",
     "valibot": "^1.4.2",
     "zod": "^4.4.3"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "sharp@": true,
+    "@sentry/cli": true
   }
 }
