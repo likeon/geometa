@@ -32,6 +32,7 @@
     user: PageData['user'];
   } = $props();
 
+  // svelte-ignore state_referenced_locally - mapForm is init-only; form is repopulated on open
   const formMap = superForm(mapForm, {
     validators: zod4Client(insertMapsSchema),
     resetForm: true,
