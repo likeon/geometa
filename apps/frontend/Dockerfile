@@ -1,6 +1,4 @@
 FROM node:24-alpine AS builder
-# @sveltejs/enhanced-img needs it
-RUN apk add --no-cache vips-dev
 RUN mkdir -p /app && chown -R node:node /app
 WORKDIR /app
 USER node
