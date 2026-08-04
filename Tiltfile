@@ -12,7 +12,7 @@ k8s_resource(
 local_resource(
     'frontend',
     serve_dir='./apps/frontend',
-    serve_cmd='PORT={} npm run dev'.format(frontend_port),
+    serve_cmd='PORT={} mise exec -- npm run dev'.format(frontend_port),
     serve_env={
         'API_URL': 'http://localhost:{}'.format(api_port),
         'DATABASE_URL': 'postgres://postgres:postgres@localhost:{}/geometa'.format(postgres_port),
@@ -24,7 +24,7 @@ local_resource(
 local_resource(
     'api',
     serve_dir='./apps/api',
-    serve_cmd='bun run dev',
+    serve_cmd='mise exec -- bun run dev',
     serve_env={
         'SERVER_PORT': api_port,
         'DATABASE_URL': 'postgres://postgres:postgres@localhost:{}/geometa'.format(postgres_port),
