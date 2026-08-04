@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
-import { app } from '../../api';
-import { mapGroups, users } from '../../lib/db/schema';
-import { db } from '../../lib/drizzle';
+import { app } from '@api/api';
+import { mapGroups, users } from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
 
 const syncedAt = 1700000000;
 

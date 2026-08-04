@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { and, asc, eq } from 'drizzle-orm';
-import { app } from '../../../api';
+import { app } from '@api/api';
 import {
   levels,
   mapData,
@@ -18,9 +17,10 @@ import {
   syncedMapMetas,
   syncedMetas,
   users,
-} from '../../../lib/db/schema';
-import { db } from '../../../lib/drizzle';
-import { popularMapMessage } from '../../../lib/internal/utils';
+} from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
+import { popularMapMessage } from '@api/lib/internal/utils';
+import { and, asc, eq } from 'drizzle-orm';
 
 const originalFetch = globalThis.fetch;
 const originalNfcaToken = process.env.NFCA_TOKEN;

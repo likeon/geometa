@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'bun:test';
-import { app } from '../../../api';
+import { app } from '@api/api';
 import {
   mapGroupPermissions,
   mapGroups,
   maps,
   users,
-} from '../../../lib/db/schema';
-import { db } from '../../../lib/drizzle';
+} from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
 
 async function seedUser(id: string, isSuperadmin = false, apiToken?: string) {
   await db.insert(users).values({

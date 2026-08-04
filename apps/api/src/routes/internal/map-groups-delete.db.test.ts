@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { eq } from 'drizzle-orm';
-import { app } from '../../api';
+import { app } from '@api/api';
 import {
   levels,
   mapGroupChanges,
@@ -11,8 +10,9 @@ import {
   metas,
   syncedMetas,
   users,
-} from '../../lib/db/schema';
-import { db } from '../../lib/drizzle';
+} from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
+import { eq } from 'drizzle-orm';
 
 function deleteGroupRequest(userId: string, groupId: number) {
   return app.handle(

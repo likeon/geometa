@@ -1,5 +1,4 @@
 import { describe, expect, test } from 'bun:test';
-import { and, asc, eq, or, sql } from 'drizzle-orm';
 import {
   levels,
   mapFilters,
@@ -13,8 +12,9 @@ import {
   syncedLocations,
   syncedMapMetas,
   syncedMetas,
-} from '../../db/schema';
-import { db } from '../../drizzle';
+} from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
+import { and, asc, eq, or, sql } from 'drizzle-orm';
 import { syncMapGroup } from './index';
 
 async function seedNullSyncedAtFixture(geoguessrId = 'full-sync-map') {

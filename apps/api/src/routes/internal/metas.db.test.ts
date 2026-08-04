@@ -1,6 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { and, asc, eq, inArray, sql } from 'drizzle-orm';
-import { app } from '../../api';
+import { app } from '@api/api';
 import {
   levels,
   mapGroupChanges,
@@ -11,8 +10,9 @@ import {
   metaLevels,
   metas,
   users,
-} from '../../lib/db/schema';
-import { db } from '../../lib/drizzle';
+} from '@api/lib/db/schema';
+import { db } from '@api/lib/drizzle';
+import { and, asc, eq, inArray, sql } from 'drizzle-orm';
 
 async function seedUser(id: string) {
   await db.insert(users).values({ id, username: id });
