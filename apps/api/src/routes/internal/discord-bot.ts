@@ -6,9 +6,16 @@ import { ensurePermissions } from '@api/lib/internal/permissions';
 import { geoguessrAPIFetch } from '@api/lib/internal/utils';
 import { eq } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
+import { TypeCompiler } from 'elysia/type-system';
 
 const GEOGUESSR_CHALLENGES_URL = 'https://www.geoguessr.com/api/v3/challenges';
 const CHALLENGE_ERROR = { message: 'Failed to create GeoGuessr challenge' };
+const challengeResponseValidator = TypeCompiler.Compile(
+  t.Object(
+    { token: t.String({ pattern: '\\S' }) },
+    { additionalProperties: true },
+  ),
+);
 
 export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
   .use(auth(true))
@@ -49,20 +56,13 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
         return status(502, CHALLENGE_ERROR);
       }
 
-      const token =
-        data !== null &&
-        typeof data === 'object' &&
-        'token' in data &&
-        typeof data.token === 'string'
-          ? data.token.trim()
-          : '';
-      if (!token) {
+      if (!challengeResponseValidator.Check(data)) {
         console.error('GeoGuessr challenge creation returned no token');
         return status(502, CHALLENGE_ERROR);
       }
 
       return {
-        url: `https://www.geoguessr.com/challenge/${encodeURIComponent(token)}`,
+        url: `https://www.geoguessr.com/challenge/${encodeURIComponent(data.token.trim())}`,
       };
     },
     {
