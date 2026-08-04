@@ -38,7 +38,7 @@ describe('POST /discord-bot/challenges', () => {
         rounds: 5,
         timeLimit: 0,
       });
-      return Response.json({ token: 'token/value' });
+      return Response.json({ token: 'token/value', ignored: true });
     }) as typeof fetch;
 
     const response = await challengeRequest(requestBody);
@@ -63,9 +63,9 @@ describe('POST /discord-bot/challenges', () => {
     });
   });
 
-  test('rejects missing challenge tokens', async () => {
+  test('rejects blank challenge tokens', async () => {
     globalThis.fetch = (async () =>
-      Response.json({})) as unknown as typeof fetch;
+      Response.json({ token: '   ' })) as unknown as typeof fetch;
 
     const response = await challengeRequest(requestBody);
 
