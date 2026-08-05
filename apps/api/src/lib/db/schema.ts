@@ -56,7 +56,6 @@ const commonLocationFields = {
   pitch: real('pitch').notNull(),
   zoom: real('zoom').notNull(),
   panoId: text('pano_id').notNull(),
-  extraTag: text('extra_tag').notNull(),
   extraPanoId: text('extra_pano_id'),
   extraPanoDate: text('extra_pano_date'),
 };
@@ -71,6 +70,10 @@ export const mapGroupLocations = pgTable(
     isOnStreetView: boolean('is_on_street_view'),
     updatedAt: integer('updated_at'),
     modifiedAt: integer('modified_at').default(1730419200).notNull(),
+    // superseded by mapGroupLocationMetas and read by nothing. Uploads still
+    // write the first tag so pods running pre-0036 code stay coherent during a
+    // rolling deploy; migration 0037 drops the column and that write with it
+    extraTag: text('extra_tag'),
     ...commonLocationFields,
   },
   (t) => [
@@ -84,10 +87,41 @@ export const mapGroupLocations = pgTable(
 );
 export const mapGroupLocationsRelations = relations(
   mapGroupLocations,
-  ({ one }) => ({
+  ({ one, many }) => ({
     mapGroup: one(mapGroups, {
       fields: [mapGroupLocations.mapGroupId],
       references: [mapGroups.id],
+    }),
+    metas: many(mapGroupLocationMetas),
+  }),
+);
+
+export const mapGroupLocationMetas = pgTable(
+  'map_group_location_metas',
+  {
+    locationId: bigint('location_id', { mode: 'number' })
+      .notNull()
+      .references(() => mapGroupLocations.id, { onDelete: 'cascade' }),
+    metaId: integer('meta_id')
+      .notNull()
+      .references(() => metas.id, { onDelete: 'cascade' }),
+  },
+  (t) => [
+    primaryKey({ columns: [t.locationId, t.metaId] }),
+    index('map_group_location_metas_meta_idx').on(t.metaId),
+  ],
+);
+
+export const mapGroupLocationMetasRelations = relations(
+  mapGroupLocationMetas,
+  ({ one }) => ({
+    location: one(mapGroupLocations, {
+      fields: [mapGroupLocationMetas.locationId],
+      references: [mapGroupLocations.id],
+    }),
+    meta: one(metas, {
+      fields: [mapGroupLocationMetas.metaId],
+      references: [metas.id],
     }),
   }),
 );
@@ -461,6 +495,7 @@ export const syncedLocations = pgTable(
     // keep country here because we might use geospatial data in the future
     // different countries per meta are possible
     country: text(),
+    extraTag: text('extra_tag').notNull(),
     ...commonLocationFields,
   },
   (t) => [primaryKey({ columns: [t.syncedMetaId, t.panoId] })],

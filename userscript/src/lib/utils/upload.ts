@@ -1,4 +1,5 @@
 import { GM_xmlhttpRequest } from '$'; // Keep this if used in other parts of the file, not directly here
+import { API_BASE_URL } from '../config';
 
 async function geoguessrAPIFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const { method = 'GET', headers: initialHeaders, body, ...restOptions } = options;
@@ -114,7 +115,7 @@ export async function uploadLocations(geoguessrId: string, apiKey: string): Prom
 
 function fetchMapLocationsGM(geoguessrId: string, apiToken: string): Promise<[]> {
   return new Promise((resolve, reject) => {
-    const apiUrl = `https://learnablemeta.com/api/userscript/map/${geoguessrId}/locations`;
+    const apiUrl = `${API_BASE_URL}/api/userscript/map/${geoguessrId}/locations`;
 
     GM_xmlhttpRequest({
       method: 'GET',

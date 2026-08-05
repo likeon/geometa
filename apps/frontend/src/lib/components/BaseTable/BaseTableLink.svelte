@@ -12,7 +12,8 @@
 </script>
 
 {#if name}
-  <a href={link} class={linkClasses}>
+  <!-- table rows are clickable, so keep a link click from also opening the row dialog -->
+  <a href={link} class={linkClasses} onclick={(event) => event.stopPropagation()}>
     {name}
   </a>
 {:else}

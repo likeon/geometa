@@ -9,7 +9,7 @@ import { generateFooter } from '@api/lib/userscript/utils';
 import { eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
-const userscriptVersion = '0.90';
+const userscriptVersion = '0.91';
 
 const mapInfoQuery = db.query.maps
   .findFirst({
@@ -56,26 +56,50 @@ export const userscriptRouter = new Elysia({
       // just keep to be safe
       set.status = 200;
 
-      const [meta] = metaResult;
-      // hack for now, should country be marked as not null in schema since we will always have it?
-      const country = meta.country || '';
+      const metaList = metaResult.map((meta) => {
+        // hack for now, should country be marked as not null in schema since we will always have it?
+        const country = meta.country || '';
 
-      let footer = generateFooter(
-        meta.noteFromPlonkit,
-        country,
-        meta.footer,
-        meta.mapFooter,
-      );
-      if (meta.isPersonalMap && meta.mapAuthors && meta.mapName) {
-        footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
-      }
-      return {
-        country: country,
-        metaName: meta.name,
-        note: meta.note,
-        images: meta.images,
-        footer: footer,
-      };
+        let footer = generateFooter(
+          meta.noteFromPlonkit,
+          country,
+          meta.footer,
+          meta.mapFooter,
+        );
+        if (meta.isPersonalMap && meta.mapAuthors && meta.mapName) {
+          footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
+        }
+        return {
+          country: country,
+          metaName: meta.name,
+          note: meta.note,
+          images: meta.images,
+          footer: footer,
+        };
+      });
+
+      // Personal maps borrow the same meta from several source maps, giving
+      // one pano many synced_metas rows that differ only in the footer credit.
+      // Those would render as identical tabs, so collapse anything whose
+      // visible content matches (first one wins - the md5 order is stable).
+      const seen = new Set<string>();
+      const dedupedMetas = metaList.filter((meta) => {
+        const key = JSON.stringify([
+          meta.country,
+          meta.metaName,
+          meta.note,
+          meta.images,
+        ]);
+        if (seen.has(key)) {
+          return false;
+        }
+        seen.add(key);
+        return true;
+      });
+
+      // the top-level fields are the first meta, kept so userscripts predating
+      // the tab strip keep working - they never see `metas`
+      return { ...dedupedMetas[0], metas: dedupedMetas };
     },
     {
       query: t.Object({

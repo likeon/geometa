@@ -3,11 +3,12 @@
   import { uploadLocations } from '../utils/upload';
   import { GM_setValue, GM_getValue } from '$';
   import ToastNotification from './ToastNotification.svelte';
+  import { SITE_BASE_URL } from '../config';
 
   let { mapId }: { mapId: string } = $props();
 
   const API_KEY_STORAGE_NAME = 'learnableMeta_apiKey';
-  const URL_TO_GENERATE_TOKEN = 'https://learnablemeta.com/profile/token';
+  const URL_TO_GENERATE_TOKEN = `${SITE_BASE_URL}/profile/token`;
 
   let showApiKeyModal = $state(false);
   let modalMode = $state<'upload' | 'manage'>('upload');

@@ -22,6 +22,7 @@
     getLastDismissedAnnouncementTimestamp,
     markAnnouncementAsDismissed
   } from './utils/announcement';
+  import { API_BASE_URL, SITE_BASE_URL } from './config';
 
   interface Props {
     panoId: string;
@@ -33,16 +34,38 @@
 
   let { panoId, mapId, userscriptVersion, source, roundNumber }: Props = $props();
 
-  type GeoInfo = {
+  type MetaInfo = {
     country: string;
     metaName: string;
     note: string;
     images?: string[];
     footer: string;
   };
+  // `metas` is absent when a 0.91+ script talks to an API that predates it
+  // (rolling deploy, or the script installed from GitHub before the API
+  // ships), so fall back to the top-level fields - always the first meta
+  type GeoInfo = MetaInfo & { metas?: MetaInfo[] };
 
   let geoInfo: GeoInfo | null = $state(null);
   let error: string | null = $state(null);
+  let selectedMetaIndex = $state(0);
+  const metas = $derived.by<MetaInfo[]>(() => (geoInfo ? (geoInfo.metas ?? [geoInfo]) : []));
+  const selectedMeta = $derived(metas[selectedMetaIndex] ?? metas[0]);
+
+  // the arrow-key handling role="tab" promises to assistive tech
+  function onTabKeydown(event: KeyboardEvent) {
+    const last = metas.length - 1;
+    let next: number | null = null;
+    if (event.key === 'ArrowRight') next = selectedMetaIndex >= last ? 0 : selectedMetaIndex + 1;
+    else if (event.key === 'ArrowLeft')
+      next = selectedMetaIndex <= 0 ? last : selectedMetaIndex - 1;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = last;
+    if (next === null) return;
+    event.preventDefault();
+    selectedMetaIndex = next;
+    document.getElementById(`geometa-tab-${next}`)?.focus();
+  }
 
   let container: HTMLDivElement;
   let header: HTMLDivElement;
@@ -60,7 +83,7 @@
         userscriptVersion,
         source
       }).toString();
-      const url = `https://learnablemeta.com/api/userscript/location?${urlParams}`;
+      const url = `${API_BASE_URL}/api/userscript/location?${urlParams}`;
 
       GM_xmlhttpRequest({
         method: 'GET',
@@ -160,7 +183,8 @@
   updateHelpClass();
 
   $effect(() => {
-    if (geoInfo) {
+    // re-runs on tab switch too, so links in the newly shown note get bound
+    if (selectedMeta) {
       const links = document.querySelectorAll('.geometa-footer a, .geometa-note a');
       links.forEach((link) => {
         link.removeEventListener('click', confirmNavigation);
@@ -196,13 +220,10 @@
   <div class="flex header" bind:this={header}>
     <h2>Learnable Meta</h2>
     <div class="icons">
-      <a
-        href={'https://learnablemeta.com/maps/' + mapId}
-        target="_blank"
-        aria-label="List of map metas">
+      <a href={`${SITE_BASE_URL}/maps/${mapId}`} target="_blank" aria-label="List of map metas">
         <span class="skill-icons--list"></span>
       </a>
-      <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website">
+      <a href={SITE_BASE_URL} target="_blank" aria-label="Learnable Meta website">
         <span class="flat-color-icons--globe"></span>
       </a>
       <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord">
@@ -218,23 +239,53 @@
   </div>
   {#if error}
     <p>Error: {error}</p>
-  {:else if geoInfo}
-    <p>
-      <CountryFlag countryName={geoInfo.country} />
-      <strong>{geoInfo.country}</strong> - {geoInfo.metaName}
-    </p>
-    <div class="geometa-note">
-      {@html geoInfo.note}
-    </div>
-    {#if geoInfo.footer}
-      <p class="geometa-footer">
-        {@html geoInfo.footer}
+  {:else if selectedMeta}
+    {#if metas.length > 1}
+      <div class="meta-tabs" role="tablist" aria-label="Metas at this location">
+        {#each metas as meta, index (index)}
+          <button
+            type="button"
+            role="tab"
+            id="geometa-tab-{index}"
+            aria-controls="geometa-tabpanel"
+            class="meta-tab"
+            class:active={index === selectedMetaIndex}
+            aria-selected={index === selectedMetaIndex}
+            tabindex={index === selectedMetaIndex ? 0 : -1}
+            onkeydown={onTabKeydown}
+            onclick={() => (selectedMetaIndex = index)}>
+            {meta.metaName}
+          </button>
+        {/each}
+      </div>
+    {/if}
+    <div
+      class="meta-panel"
+      id="geometa-tabpanel"
+      role={metas.length > 1 ? 'tabpanel' : undefined}
+      aria-labelledby={metas.length > 1 ? `geometa-tab-${selectedMetaIndex}` : undefined}>
+      <p>
+        <CountryFlag countryName={selectedMeta.country} />
+        <strong>{selectedMeta.country}</strong> - {selectedMeta.metaName}
       </p>
-    {/if}
-    {#if geoInfo.images && geoInfo.images.length}
-      <hr />
-      <Carousel images={geoInfo.images} />
-    {/if}
+      <div class="geometa-note">
+        {@html selectedMeta.note}
+      </div>
+      {#if selectedMeta.footer}
+        <p class="geometa-footer">
+          {@html selectedMeta.footer}
+        </p>
+      {/if}
+      {#if selectedMeta.images && selectedMeta.images.length}
+        <hr />
+        <!-- keyed so switching tabs remounts the carousel: it tracks the current
+           slide internally and would otherwise keep an index the new tab's
+           shorter image list has no entry for, rendering nothing -->
+        {#key selectedMetaIndex}
+          <Carousel images={selectedMeta.images} />
+        {/key}
+      {/if}
+    </div>
   {:else}
     <Spinner />
   {/if}
@@ -348,6 +399,51 @@
   .geometa-footer {
     color: #d3d3d3;
     font-size: small;
+  }
+
+  .meta-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 100%;
+  }
+
+  /* mirrors the container's layout so wrapping the note in a tabpanel
+     doesn't change spacing */
+  .meta-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .meta-tab {
+    background: rgba(255, 255, 255, 0.08);
+    color: #d3d3d3;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font-size: 14px;
+    line-height: 1.3;
+    /* geoguessr's stylesheet restyles every button on game pages (see
+       .vote-close-btn / the upload button, which carry the same overrides) */
+    text-transform: none;
+    font-family: inherit;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+  }
+
+  .meta-tab:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+  }
+
+  .meta-tab.active {
+    background: #188bd2;
+    color: #fff;
   }
 
   .announcement {

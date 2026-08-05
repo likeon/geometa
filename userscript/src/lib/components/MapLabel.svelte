@@ -1,10 +1,12 @@
 <script lang="ts">
+  import { SITE_BASE_URL } from '../config';
+
   let { mapId }: { mapId: string } = $props();
 </script>
 
 <div class="geometa-map-label-container">
   <p>LearnableMeta Enabled</p>
-  <a href={`https://learnablemeta.com/maps/${mapId}`} target="_blank">
+  <a href={`${SITE_BASE_URL}/maps/${mapId}`} target="_blank">
     <button>Meta List</button>
   </a>
 </div>

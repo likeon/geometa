@@ -1,6 +1,6 @@
 import { originalMapLateral } from '@api/lib/db/original-map';
 import {
-  mapGroupLocations,
+  mapGroupLocationMetas,
   mapMetas,
   maps,
   metas,
@@ -78,24 +78,23 @@ export const metasFromMapStatement = db
         '{}'
       )
     `,
+    // the country comes from the meta's own tag, so this is at most one entry
     countries: sql<string[]>`
       ARRAY(
-        SELECT DISTINCT get_country_from_tag_name(mgl.extra_tag)
-        FROM ${mapGroupLocations} mgl
-        JOIN ${maps} m ON m.map_group_id = mgl.map_group_id
-        WHERE m.id = ${mapMetas.mapId}
-          AND mgl.extra_tag = ${mapMetas.metaTag}
-          AND mgl.extra_tag IS NOT NULL
-          AND mgl.extra_tag <> ''
+        SELECT get_country_from_tag_name(${metas}.tag_name)
+        WHERE ${metas}.tag_name <> ''
+          AND EXISTS (
+            SELECT 1
+            FROM ${mapGroupLocationMetas} lm
+            WHERE lm.meta_id = ${metas}.id
+          )
       )
     `,
     locationsCount: sql<number>`
       (
         SELECT COUNT(*)
-        FROM ${mapGroupLocations} mgl
-               JOIN ${maps} m ON m.map_group_id = mgl.map_group_id
-        WHERE m.id = ${mapMetas.mapId}
-          AND mgl.extra_tag = ${mapMetas.metaTag}
+        FROM ${mapGroupLocationMetas} lm
+        WHERE lm.meta_id = ${metas}.id
       )
     `,
   })

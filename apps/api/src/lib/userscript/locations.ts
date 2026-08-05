@@ -51,11 +51,21 @@ export const locationSelect = db
       eq(syncedLocations.panoId, sql.placeholder('panoId')),
     ),
   )
-  .limit(1)
+  // A location can carry several metas and players mostly read whichever tab
+  // opens first, so ordering by anything constant (a name) would bury the same
+  // meta on every location it appears on. Hashing the pano together with the
+  // meta varies the winner per location while staying identical every time the
+  // same location is served.
+  .orderBy(
+    sql`md5(${syncedLocations}.pano_id || ${syncedMetas}.meta_id::text)`,
+    syncedMetas.metaId,
+  )
   .prepare('userscript_get_location');
 
+// distinct: a pano shared by several of the map's metas must still be exported
+// once, or it gets extra chances of being drawn in game
 export const mapLocationsExportSelect = db
-  .select(
+  .selectDistinct(
     pick(getTableColumns(syncedLocations), [
       'lat',
       'lng',

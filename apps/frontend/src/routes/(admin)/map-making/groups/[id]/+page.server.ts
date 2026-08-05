@@ -68,7 +68,9 @@ const mapJsonSchema = z.object({
       zoom: z.number(),
       panoId: z.string().nullable(),
       extra: z.object({
-        tags: z.string().array().length(1),
+        // element min(1): the API rejects empty-string tags with a bare 422,
+        // so catch them here where we can name the offending location
+        tags: z.string().min(1).array().min(1),
         panoId: z.string().optional().nullable(),
         panoDate: z.string().optional().nullable()
       })
@@ -287,11 +289,14 @@ export const actions = {
           const location = jsonData.customCoordinates?.[locationIndex];
           const panoId = location?.panoId || location?.extra?.panoId || null;
           const locationNumber = locationIndex + 1;
-          if (issue.code === 'too_small' || issue.message === 'Required') {
-            message = `doesn't have a tag`;
-          } else if (issue.code === 'too_big') {
-            message = `has more than one tag`;
-          }
+          // a numeric last path segment means a specific tag is malformed;
+          // anything else is the tags array itself being absent or empty
+          message =
+            typeof issue.path[issue.path.length - 1] === 'number'
+              ? issue.code === 'too_small'
+                ? 'has an empty tag'
+                : 'has a tag that is not text'
+              : `doesn't have a tag`;
 
           // Return HTML with link if panoId exists
           if (panoId) {
@@ -324,7 +329,7 @@ export const actions = {
       pitch: location.pitch,
       zoom: location.zoom,
       panoId: location.panoId ?? location.extra.panoId!,
-      extraTag: location.extra.tags[0],
+      tags: location.extra.tags,
       extraPanoId: location.extra.panoId || null,
       extraPanoDate: location.extra.panoDate
     }));
@@ -355,8 +360,7 @@ export const actions = {
 
     return message(form, {
       numberOfLocations: data.count,
-      ignoredCount: data.ignoredCount,
-      conflictCount: data.conflictCount
+      ignoredCount: data.ignoredCount
     });
   },
   uploadMetas: async ({ request, params }) => {

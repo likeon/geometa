@@ -8,7 +8,9 @@
     "build": "vite build && cp dist/geometa.user.js ../dist/",
     "preview": "vite preview",
     "check": "svelte-check --tsconfig ./tsconfig.json",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "build:local": "vite build --mode development --outDir dist-local",
+    "dev:local": "vite --port 5174 --strictPort"
   },
   "devDependencies": {
     "@sveltejs/vite-plugin-svelte": "^6.2.1",

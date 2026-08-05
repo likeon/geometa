@@ -2,6 +2,7 @@ import {
   levels,
   locationMetas,
   mapGroupChanges,
+  mapGroupLocationMetas,
   mapGroupLocations,
   mapGroupPermissions,
   mapGroups,
@@ -33,6 +34,7 @@ import {
   isNull,
   lt,
   lte,
+  notExists,
   or,
   sql,
 } from 'drizzle-orm';
@@ -179,32 +181,74 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     async ({ params: { id: groupId }, userId, status }) => {
       const role = await ensurePermissions(userId, groupId);
 
-      const group = await db.$primary.query.mapGroups.findFirst({
-        with: {
-          maps: {
-            extras: {
-              locationsCount:
-                sql`(select count(*) from map_locations_view ml where ml.map_id = ${maps.id})`
-                  .mapWith(Number)
-                  .as('locations_count'),
-              metasCount:
-                sql`(select count(distinct ml.meta_id) from map_locations_view ml where ml.map_id = ${maps.id})`
-                  .mapWith(Number)
-                  .as('metas_count'),
-            },
-            with: {
-              mapLevels: { with: { level: true } },
-              mapRegions: { with: { region: true } },
-              filters: true,
+      // counts for every map in one pass: the per-map correlated subqueries
+      // over map_locations_view re-scanned all of the group's locations twice
+      // per map (~700ms for a 19-map group). Distinct locations, so a location
+      // shared by several of a map's metas counts once.
+      const countsQuery = db.execute<{
+        map_id: number;
+        locations_count: number;
+        metas_count: number;
+      }>(sql`
+        WITH qualifying AS (
+          SELECT m.id AS map_id, mt.id AS meta_id
+          FROM ${maps} m
+          JOIN ${metas} mt ON mt.map_group_id = m.map_group_id
+          WHERE m.map_group_id = ${groupId}
+            AND (
+              EXISTS (SELECT 1 FROM map_levels ml
+                      JOIN meta_levels me ON me.level_id = ml.level_id AND me.meta_id = mt.id
+                      WHERE ml.map_id = m.id)
+              OR NOT EXISTS (SELECT 1 FROM map_levels ml WHERE ml.map_id = m.id)
+            )
+            AND (
+              EXISTS (SELECT 1 FROM map_filters mf
+                      WHERE mf.map_id = m.id AND mf.is_exclude = FALSE AND mt.tag_name ILIKE mf.tag_like)
+              OR NOT EXISTS (SELECT 1 FROM map_filters mf WHERE mf.map_id = m.id AND mf.is_exclude = FALSE)
+            )
+            AND NOT EXISTS (SELECT 1 FROM map_filters mf
+                            WHERE mf.map_id = m.id AND mf.is_exclude = TRUE AND mt.tag_name ILIKE mf.tag_like)
+        )
+        SELECT q.map_id::int,
+               count(DISTINCT lm.location_id)::int AS locations_count,
+               count(DISTINCT CASE WHEN lm.location_id IS NOT NULL THEN q.meta_id END)::int AS metas_count
+        FROM qualifying q
+        LEFT JOIN ${mapGroupLocationMetas} lm ON lm.meta_id = q.meta_id
+        GROUP BY q.map_id
+      `);
+      const [groupData, counts] = await Promise.all([
+        db.$primary.query.mapGroups.findFirst({
+          with: {
+            maps: {
+              with: {
+                mapLevels: { with: { level: true } },
+                mapRegions: { with: { region: true } },
+                filters: true,
+              },
             },
           },
-        },
-        where: eq(mapGroups.id, groupId),
-      });
+          where: eq(mapGroups.id, groupId),
+        }),
+        countsQuery,
+      ]);
 
-      if (!group) {
+      if (!groupData) {
         return status(404);
       }
+      const countsByMapId = new Map(
+        counts.map((row) => [
+          row.map_id,
+          { locationsCount: row.locations_count, metasCount: row.metas_count },
+        ]),
+      );
+      const group = {
+        ...groupData,
+        maps: groupData.maps.map((map) => ({
+          ...map,
+          locationsCount: countsByMapId.get(map.id)?.locationsCount ?? 0,
+          metasCount: countsByMapId.get(map.id)?.metasCount ?? 0,
+        })),
+      };
 
       const [levelList, regionList, user] = await Promise.all([
         db.$primary.query.levels.findMany({
@@ -720,49 +764,97 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         });
       }
 
-      let locations = body.locations;
+      // Merge rows sharing a panoId (last coordinates win, tags unioned).
+      // Legacy files list the same pano once per tag, and without the merge
+      // the outcome depended on which upsert batch the duplicates landed in:
+      // same batch hit the ON CONFLICT twice and 409'd, different batches
+      // silently merged. A frontend that predates multi-tag uploads still
+      // sends extraTag instead of tags.
+      const byPano = new Map<
+        string,
+        {
+          lat: number;
+          lng: number;
+          heading: number;
+          pitch: number;
+          zoom: number;
+          panoId: string;
+          extraPanoId: string | null;
+          extraPanoDate: string | null;
+          tags: string[];
+        }
+      >();
+      for (const location of body.locations) {
+        const tags =
+          location.tags ?? (location.extraTag ? [location.extraTag] : []);
+        const existing = byPano.get(location.panoId);
+        byPano.set(location.panoId, {
+          lat: location.lat,
+          lng: location.lng,
+          heading: location.heading,
+          pitch: location.pitch,
+          zoom: location.zoom,
+          panoId: location.panoId,
+          extraPanoId: location.extraPanoId,
+          extraPanoDate: location.extraPanoDate ?? null,
+          tags: existing ? [...new Set([...existing.tags, ...tags])] : tags,
+        });
+      }
+      const inputLocations = [...byPano.values()];
+      if (inputLocations.some((location) => location.tags.length === 0)) {
+        return status(400, {
+          message: 'Every location must have at least one tag',
+        });
+      }
+
+      let locations = inputLocations;
       let ignoredCount = 0;
       let scopedMetaId: number | null = null;
       if (body.scopeTag) {
+        const scopeTag = body.scopeTag;
         const scopedMeta = await db.$primary.query.metas.findFirst({
           where: and(
             eq(metas.mapGroupId, groupId),
-            eq(metas.tagName, body.scopeTag),
+            eq(metas.tagName, scopeTag),
           ),
         });
         if (!scopedMeta) {
           return status(400, {
-            message: `There is no meta with tag "${body.scopeTag}" in this group`,
+            message: `There is no meta with tag "${scopeTag}" in this group`,
           });
         }
 
-        locations = body.locations.filter(
-          (location) => location.extraTag === body.scopeTag,
-        );
-        ignoredCount = body.locations.length - locations.length;
+        // a scoped upload only ever asserts its own meta, so other tags in the
+        // file are dropped rather than linked
+        locations = inputLocations
+          .filter((location) => location.tags.includes(scopeTag))
+          .map((location) => ({ ...location, tags: [scopeTag] }));
+        ignoredCount = inputLocations.length - locations.length;
         if (locations.length === 0) {
           return status(400, {
-            message: `The uploaded file contains no locations with tag "${body.scopeTag}"`,
+            message: `The uploaded file contains no locations with tag "${scopeTag}"`,
           });
         }
         scopedMetaId = scopedMeta.id;
       }
 
       const currentTimestamp = Math.floor(Date.now() / 1000);
-      const upsertValues = locations.map((location) => ({
+      const upsertValues = locations.map(({ tags, ...location }) => ({
         ...location,
-        extraPanoDate: location.extraPanoDate ?? null,
+        // transitional, see mapGroupLocations.extraTag in schema.ts
+        extraTag: tags[0],
         mapGroupId: groupId,
         updatedAt: currentTimestamp,
         modifiedAt: currentTimestamp, // default value - not being set on conflict
       }));
-      const usedTags = new Set(locations.map((location) => location.extraTag));
+      const usedTags = new Set(locations.flatMap((location) => location.tags));
 
       const BATCH_SIZE = 1000;
       let affectedCount = 0;
       try {
         await db.$primary.transaction(async (trx) => {
           // Step 1: Batched upsert operation
+          const locationIdByPano = new Map<string, number>();
           for (let i = 0; i < upsertValues.length; i += BATCH_SIZE) {
             const batch = upsertValues.slice(i, i + BATCH_SIZE);
 
@@ -784,70 +876,18 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
                   extraPanoDate: sql`excluded.extra_pano_date`,
                   updatedAt: sql`excluded.updated_at`,
                 },
-                // scoped uploads must not steal panos already belonging to
-                // another meta's tag in this group
-                ...(body.scopeTag && {
-                  setWhere: eq(mapGroupLocations.extraTag, body.scopeTag),
-                }),
               })
-              .returning({ id: mapGroupLocations.id });
+              .returning({
+                id: mapGroupLocations.id,
+                panoId: mapGroupLocations.panoId,
+              });
             affectedCount += affected.length;
+            for (const row of affected) {
+              locationIdByPano.set(row.panoId, row.id);
+            }
           }
 
-          // Step 2: Delete records based on upload mode
-          let deletedCount = 0;
-          if (body.uploadMode === 'full') {
-            // Full replacement: delete all locations not in current upload
-            const deleted = await trx
-              .delete(mapGroupLocations)
-              .where(
-                and(
-                  eq(mapGroupLocations.mapGroupId, groupId),
-                  or(
-                    isNull(mapGroupLocations.updatedAt),
-                    lt(mapGroupLocations.updatedAt, currentTimestamp),
-                  ),
-                ),
-              )
-              .returning({ id: mapGroupLocations.id });
-            deletedCount = deleted.length;
-          } else if (body.uploadMode === 'tagReplace') {
-            // Tag-based replacement: delete only locations with tags present in upload
-            const deleted = await trx
-              .delete(mapGroupLocations)
-              .where(
-                and(
-                  eq(mapGroupLocations.mapGroupId, groupId),
-                  inArray(mapGroupLocations.extraTag, Array.from(usedTags)),
-                  or(
-                    isNull(mapGroupLocations.updatedAt),
-                    lt(mapGroupLocations.updatedAt, currentTimestamp),
-                  ),
-                ),
-              )
-              .returning({ id: mapGroupLocations.id });
-            deletedCount = deleted.length;
-          }
-          // For 'partial' mode: no deletions, just upserts
-
-          await logChange(trx, {
-            mapGroupId: groupId,
-            userId,
-            entityType: 'location_batch',
-            entityId: scopedMetaId,
-            entityLabel: body.scopeTag ?? `${usedTags.size} tags`,
-            operation: 'update',
-            newValue: {
-              uploadMode: body.uploadMode,
-              count: affectedCount,
-              deletedCount,
-              ignoredCount,
-              conflictCount: upsertValues.length - affectedCount,
-              tags: Array.from(usedTags).slice(0, 100),
-            },
-          });
-
-          // Step 3: Insert tags into metas table
+          // Step 2: Create metas for any new tags
           // (skipped for scoped uploads - the target meta is validated to exist)
           if (!body.scopeTag && usedTags.size > 0) {
             const metaInsertValues = Array.from(usedTags).map((tagName) => ({
@@ -857,11 +897,17 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
               note: '',
               modifiedAt: currentTimestamp,
             }));
-            const createdMetas = await trx
-              .insert(metas)
-              .values(metaInsertValues)
-              .onConflictDoNothing()
-              .returning({ id: metas.id, tagName: metas.tagName });
+            // chunked like every other statement here: a group can carry
+            // 15k+ distinct tags, which would blow the bind-parameter limit
+            const createdMetas: { id: number; tagName: string }[] = [];
+            for (let i = 0; i < metaInsertValues.length; i += BATCH_SIZE) {
+              const batch = await trx
+                .insert(metas)
+                .values(metaInsertValues.slice(i, i + BATCH_SIZE))
+                .onConflictDoNothing()
+                .returning({ id: metas.id, tagName: metas.tagName });
+              createdMetas.push(...batch);
+            }
             await logChange(
               trx,
               createdMetas.map((meta) => ({
@@ -878,6 +924,154 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
               })),
             );
           }
+
+          // Step 3: Link each location to every meta its tags name
+          const groupMetas = await trx
+            .select({ id: metas.id, tagName: metas.tagName })
+            .from(metas)
+            .where(
+              and(
+                eq(metas.mapGroupId, groupId),
+                inArray(metas.tagName, Array.from(usedTags)),
+              ),
+            );
+          const metaIdByTag = new Map(
+            groupMetas.map((meta) => [meta.tagName, meta.id]),
+          );
+          const scopeMetaIds = groupMetas.map((meta) => meta.id);
+
+          // full replacement treats the file as authoritative, so links it no
+          // longer asserts have to go before the new ones are written -
+          // otherwise a location keeps metas the upload dropped, which the old
+          // single-tag upsert would have overwritten. Limited to the locations
+          // this upload touched: everything else is about to be deleted, and
+          // leaving those links alone keeps a location intact rather than
+          // orphaned if the delete below misses it.
+          if (body.uploadMode === 'full') {
+            const uploadedIds = [...locationIdByPano.values()];
+            for (let i = 0; i < uploadedIds.length; i += BATCH_SIZE) {
+              await trx
+                .delete(mapGroupLocationMetas)
+                .where(
+                  inArray(
+                    mapGroupLocationMetas.locationId,
+                    uploadedIds.slice(i, i + BATCH_SIZE),
+                  ),
+                );
+            }
+          }
+
+          const linkValues: { locationId: number; metaId: number }[] = [];
+          for (const location of locations) {
+            const locationId = locationIdByPano.get(location.panoId);
+            if (locationId === undefined) {
+              continue;
+            }
+            for (const tag of new Set(location.tags)) {
+              const metaId = metaIdByTag.get(tag);
+              if (metaId !== undefined) {
+                linkValues.push({ locationId, metaId });
+              }
+            }
+          }
+          for (let i = 0; i < linkValues.length; i += BATCH_SIZE) {
+            await trx
+              .insert(mapGroupLocationMetas)
+              .values(linkValues.slice(i, i + BATCH_SIZE))
+              .onConflictDoNothing();
+          }
+
+          // Step 4: Remove what this upload supersedes
+          let deletedCount = 0;
+          let unlinkedCount = 0;
+          const notInThisUpload = or(
+            isNull(mapGroupLocations.updatedAt),
+            lt(mapGroupLocations.updatedAt, currentTimestamp),
+          );
+          if (body.uploadMode === 'full') {
+            // Full replacement: delete all locations not in current upload
+            const deleted = await trx
+              .delete(mapGroupLocations)
+              .where(
+                and(eq(mapGroupLocations.mapGroupId, groupId), notInThisUpload),
+              )
+              .returning({ id: mapGroupLocations.id });
+            deletedCount = deleted.length;
+          } else if (body.uploadMode === 'tagReplace' && scopeMetaIds.length) {
+            // Detach the uploaded metas from locations the file no longer
+            // claims. Links to metas outside the upload are left alone, so a
+            // scoped upload can never strip another meta's locations.
+            const unlinked = await trx
+              .delete(mapGroupLocationMetas)
+              .where(
+                and(
+                  inArray(mapGroupLocationMetas.metaId, scopeMetaIds),
+                  inArray(
+                    mapGroupLocationMetas.locationId,
+                    trx
+                      .select({ id: mapGroupLocations.id })
+                      .from(mapGroupLocations)
+                      .where(
+                        and(
+                          eq(mapGroupLocations.mapGroupId, groupId),
+                          notInThisUpload,
+                        ),
+                      ),
+                  ),
+                ),
+              )
+              .returning({ locationId: mapGroupLocationMetas.locationId });
+            unlinkedCount = unlinked.length;
+
+            // a location left with no metas at all is unreachable, so drop it
+            // - this keeps tagReplace equivalent to its single-tag behaviour
+            const unlinkedIds = [
+              ...new Set(unlinked.map((row) => row.locationId)),
+            ];
+            for (let i = 0; i < unlinkedIds.length; i += BATCH_SIZE) {
+              const deleted = await trx
+                .delete(mapGroupLocations)
+                .where(
+                  and(
+                    inArray(
+                      mapGroupLocations.id,
+                      unlinkedIds.slice(i, i + BATCH_SIZE),
+                    ),
+                    notExists(
+                      trx
+                        .select({ one: sql`1` })
+                        .from(mapGroupLocationMetas)
+                        .where(
+                          eq(
+                            mapGroupLocationMetas.locationId,
+                            mapGroupLocations.id,
+                          ),
+                        ),
+                    ),
+                  ),
+                )
+                .returning({ id: mapGroupLocations.id });
+              deletedCount += deleted.length;
+            }
+          }
+          // For 'partial' mode: no deletions, just upserts
+
+          await logChange(trx, {
+            mapGroupId: groupId,
+            userId,
+            entityType: 'location_batch',
+            entityId: scopedMetaId,
+            entityLabel: body.scopeTag ?? `${usedTags.size} tags`,
+            operation: 'update',
+            newValue: {
+              uploadMode: body.uploadMode,
+              count: affectedCount,
+              deletedCount,
+              unlinkedCount,
+              ignoredCount,
+              tags: Array.from(usedTags).slice(0, 100),
+            },
+          });
         });
       } catch (error) {
         // cardinality violation: ON CONFLICT DO UPDATE hit the same row twice,
@@ -894,7 +1088,6 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       return {
         count: affectedCount,
         ignoredCount,
-        conflictCount: upsertValues.length - affectedCount,
       };
     },
     {
@@ -914,7 +1107,9 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
             pitch: t.Number(),
             zoom: t.Number(),
             panoId: t.String(),
-            extraTag: t.String(),
+            tags: t.Optional(t.Array(t.String({ minLength: 1 }))),
+            // pre-multi-meta frontends send a single tag instead
+            extraTag: t.Optional(t.String()),
             extraPanoId: t.Union([t.String(), t.Null()]),
             extraPanoDate: t.Optional(t.Union([t.String(), t.Null()])),
           }),
