@@ -25,6 +25,13 @@ export type MapGroupManifest = {
   }[];
 };
 
+export type AccessibleMapGroup = {
+  id: number;
+  name: string;
+  syncedAt: number;
+  mapCount: number;
+};
+
 export type SyncedMapCoordinate = ManagedMapCoordinate & {
   countryCode: null;
   stateCode: null;
@@ -78,6 +85,17 @@ export function fetchMapGroupManifest(
     `https://learnablemeta.com/api/userscript/map-group/${groupId}/maps`,
     apiToken
   );
+}
+
+export async function fetchAccessibleMapGroups(apiToken: string): Promise<AccessibleMapGroup[]> {
+  const data = await requestJson<{ groups: AccessibleMapGroup[] }>(
+    'https://learnablemeta.com/api/userscript/map-groups',
+    apiToken
+  );
+  if (!Array.isArray(data.groups)) {
+    throw new LearnableMetaApiError(0, 'Received invalid map group data');
+  }
+  return data.groups;
 }
 
 export async function fetchSyncedMapLocations(
