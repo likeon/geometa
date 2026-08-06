@@ -10,6 +10,7 @@
     type MapGroupManifest
   } from '../utils/learnableMetaApi';
   import { fingerprintMapCoordinates } from '../utils/mapFingerprint';
+  import { getGeoguessrDraftCoordinates } from '../utils/geoguessrDraft';
   import { modalDialog } from '../utils/modalDialog';
   import { getGeoguessrDraft, publishGeoguessrDraft, updateGeoguessrDraft } from '../utils/upload';
 
@@ -186,7 +187,7 @@
     replaceRow(row.geoguessrId, { status: 'scanning', error: undefined, selected: false });
     try {
       const draft = await getGeoguessrDraft(row.geoguessrId);
-      const fingerprint = await fingerprintMapCoordinates(draft.customCoordinates ?? []);
+      const fingerprint = await fingerprintMapCoordinates(getGeoguessrDraftCoordinates(draft));
       const changed = fingerprint !== row.fingerprint;
       replaceRow(row.geoguessrId, {
         status: changed ? 'changed' : 'current',
@@ -226,7 +227,9 @@
     let draft;
     try {
       draft = await getGeoguessrDraft(row.geoguessrId);
-      const currentFingerprint = await fingerprintMapCoordinates(draft.customCoordinates ?? []);
+      const currentFingerprint = await fingerprintMapCoordinates(
+        getGeoguessrDraftCoordinates(draft)
+      );
       if (currentFingerprint === row.fingerprint) {
         replaceRow(row.geoguessrId, { status: 'current', selected: false });
         return;
