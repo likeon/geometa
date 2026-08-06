@@ -621,8 +621,11 @@ describe('GET /api/userscript/map-group/:groupId/maps', () => {
       401,
     );
     expect((await requestGroupManifest(groupId, 'stranger-token')).status).toBe(
-      403,
+      404,
     );
+    expect(
+      (await requestGroupManifest(groupId + 10_000, 'stranger-token')).status,
+    ).toBe(404);
   });
 
   test('returns every group map with stable synchronized fingerprints', async () => {
