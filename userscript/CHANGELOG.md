@@ -2,24 +2,19 @@
 
 ## [0.91]
 
-- Added a post-sync group workflow that compares LearnableMeta locations with GeoGuessr drafts
-- Added a Creator Hub button for choosing any synchronized map group you can access
-- Added review and selection before updating changed maps
-- Added sequential draft updates, publishing, per-map progress, and retryable failures
-- Reused the browser-stored LearnableMeta API token so GeoGuessr credentials remain in the browser
+- Added map-group updates after syncing and from Creator Hub
+- Detects changed GeoGuessr maps before updating
+- Added map selection, publishing progress, and retries
+- Refreshed dialogs and API token management
 
 ## [0.90]
 
-- Added meta pins on challenge results pages (geoguessr.com/results/...), with support for any round count
-- Fixed memory leaks from meta windows never being unmounted (drag handlers piled up every round)
-- Fixed live challenge windows stacking up instead of replacing each other
-- Fixed the upload button possibly keeping a previous map's id after map-maker navigation
-- Moved the map label to the new GeoGuessr map page layout and darkened its background
-- Restyled the upload button and notifications for the new map-maker top bar
-- Upload errors now show a readable message with the technical error underneath for reports
-- Added an in-page 🔑 button to view, replace or clear the LearnableMeta API key
-- Features now initialize independently, so one failing no longer disables the rest
-- Moved this changelog to CHANGELOG.md
+- Added meta pins to challenge results
+- Fixed meta window leaks and live challenge stacking
+- Fixed stale map IDs after Map Maker navigation
+- Updated the map label and upload UI for new GeoGuessr layouts
+- Added API key management and clearer upload errors
+- Isolated features so one failure does not disable the rest
 
 ## [0.89]
 

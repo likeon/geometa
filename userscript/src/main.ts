@@ -1,4 +1,5 @@
 import { GM_registerMenuCommand } from '$';
+import { mount, unmount } from 'svelte';
 import { initSinglePlayer } from './lib/singlePlayer';
 import { initLiveChallenge } from './lib/liveChallenge';
 import { initURLChangeEvent } from './lib/utils/url';
@@ -8,16 +9,42 @@ import { initChallengeResults } from './lib/challengeResults';
 import { resetContainerPosition } from './lib/utils/dragging';
 import { resetContainerDimensions } from './lib/utils/resizing';
 import { initMapGroupUpdate } from './lib/mapGroupUpdate';
+import ResetLayoutConfirmation from './lib/components/ResetLayoutConfirmation.svelte';
+import './lib/styles/theme.css';
 import './lib/styles/buttons.css';
+import './lib/styles/modals.css';
 
-if (typeof GM_registerMenuCommand === 'function') {
-  GM_registerMenuCommand('LearnableMeta - Reset Meta Window Layout', () => {
-    if (confirm('Reset the LearnableMeta window position and size?')) {
-      resetContainerPosition();
-      resetContainerDimensions();
-      window.location.reload();
+let resetDialogApp: Record<string, any> | null = null;
+
+function openResetLayoutDialog() {
+  if (resetDialogApp) return;
+
+  const target = document.createElement('div');
+  target.id = 'learnablemeta-reset-layout-dialog';
+  document.body.appendChild(target);
+
+  function closeDialog() {
+    if (resetDialogApp) unmount(resetDialogApp);
+    resetDialogApp = null;
+    target.remove();
+  }
+
+  resetDialogApp = mount(ResetLayoutConfirmation, {
+    target,
+    props: {
+      onCancel: closeDialog,
+      onConfirm: () => {
+        resetContainerPosition();
+        resetContainerDimensions();
+        closeDialog();
+        window.location.reload();
+      }
     }
   });
+}
+
+if (typeof GM_registerMenuCommand === 'function') {
+  GM_registerMenuCommand('LearnableMeta - Reset Meta Window Layout', openResetLayoutDialog);
 }
 
 initURLChangeEvent();
