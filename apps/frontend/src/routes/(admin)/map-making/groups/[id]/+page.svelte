@@ -9,6 +9,7 @@
   import VirtualizedTable from '$lib/components/VirtualizedTable.svelte';
   import { columns } from './columns';
   import { Button } from '$lib/components/ui/button';
+  import * as Dialog from '$lib/components/ui/dialog';
   import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
   import MetaEditDialog from '$routes/(admin)/map-making/groups/[id]/MetaEditDialog.svelte';
   import MapUploadDialog from '$routes/(admin)/map-making/groups/[id]/MapUploadDialog.svelte';
@@ -86,6 +87,7 @@
   }
 
   let syncingUserScript = $state(false);
+  let showMapUpdatePrompt = $state(false);
   let sharingMetas = $state(false);
 
   // Dialog state for adding levels
@@ -190,9 +192,10 @@
             syncingUserScript = false;
             if (result.type === 'success') {
               await applyAction(result);
-              toast.push('Updated', {
+              toast.push('Userscript data synchronized', {
                 duration: 10000
               });
+              showMapUpdatePrompt = result.data?.hasMapUpdates === true;
             } else if (result.type === 'failure') {
               const errorMessage = result.data?.message || 'Something went wrong';
               toast.push(errorMessage, {
@@ -403,6 +406,32 @@
     </div>
   {/if}
 </div>
+
+<Dialog.Root bind:open={showMapUpdatePrompt}>
+  <Dialog.Content>
+    <Dialog.Header>
+      <Dialog.Title>Update your GeoGuessr maps?</Dialog.Title>
+      <Dialog.Description>
+        LearnableMeta has finished synchronizing this group. Continue to GeoGuessr to compare and
+        publish changed map locations with the LearnableMeta userscript.
+      </Dialog.Description>
+    </Dialog.Header>
+    <p class="text-sm text-muted-foreground">
+      This requires userscript version 0.91 or newer. You can review every map and deselect any you
+      do not want to update before publishing.
+    </p>
+    <Dialog.Footer>
+      <Button variant="outline" onclick={() => (showMapUpdatePrompt = false)}>Not now</Button>
+      <Button
+        href={`https://www.geoguessr.com/creator-hub?learnableMetaGroupId=${data.group.id}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        onclick={() => (showMapUpdatePrompt = false)}>
+        Continue to GeoGuessr
+      </Button>
+    </Dialog.Footer>
+  </Dialog.Content>
+</Dialog.Root>
 
 <MetaEditDialog
   bind:isMetaDialogOpen

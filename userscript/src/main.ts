@@ -7,6 +7,7 @@ import { initLocationsUpload } from './lib/locationsUpload';
 import { initChallengeResults } from './lib/challengeResults';
 import { resetContainerPosition } from './lib/utils/dragging';
 import { resetContainerDimensions } from './lib/utils/resizing';
+import { initMapGroupUpdate } from './lib/mapGroupUpdate';
 
 if (typeof GM_registerMenuCommand === 'function') {
   GM_registerMenuCommand('LearnableMeta - Reset Meta Window Layout', () => {
@@ -32,7 +33,8 @@ async function setupLearnableMetaFeatures() {
     ['liveChallenge', initLiveChallenge],
     ['mapLabel', initMapLabel],
     ['locationsUpload', initLocationsUpload],
-    ['challengeResults', initChallengeResults]
+    ['challengeResults', initChallengeResults],
+    ['mapGroupUpdate', initMapGroupUpdate]
   ];
   for (const [name, init] of features) {
     try {

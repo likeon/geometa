@@ -12,6 +12,7 @@ import {
 } from '../lib/db/schema';
 import { db } from '../lib/drizzle';
 import { plonkitFooter } from '../lib/userscript/constants';
+import { fingerprintMapCoordinates } from '../lib/userscript/map-fingerprint';
 
 async function requestLocation(mapId: string, panoId: string) {
   return app.handle(
@@ -21,14 +22,29 @@ async function requestLocation(mapId: string, panoId: string) {
   );
 }
 
-async function requestLocationsExport(geoguessrId: string, token?: string) {
+async function requestLocationsExport(
+  geoguessrId: string,
+  token?: string,
+  expectedFingerprint?: string,
+) {
+  const query = expectedFingerprint
+    ? `?expectedFingerprint=${expectedFingerprint}`
+    : '';
   return app.handle(
     new Request(
-      `http://localhost/api/userscript/map/${geoguessrId}/locations`,
+      `http://localhost/api/userscript/map/${geoguessrId}/locations${query}`,
       {
         headers: token ? { authorization: `Bearer ${token}` } : undefined,
       },
     ),
+  );
+}
+
+async function requestGroupManifest(groupId: number, token?: string) {
+  return app.handle(
+    new Request(`http://localhost/api/userscript/map-group/${groupId}/maps`, {
+      headers: token ? { authorization: `Bearer ${token}` } : undefined,
+    }),
   );
 }
 
@@ -509,6 +525,151 @@ describe('GET /api/userscript/map/:geoguessrId/locations response shape', () => 
       },
     ]);
   });
+
+  test('accepts a matching fingerprint and rejects a stale fingerprint', async () => {
+    await db.insert(users).values({
+      id: 'fingerprint-owner',
+      username: 'fingerprint-owner',
+      apiToken: 'fingerprint-owner-token',
+    });
+    const { mapId } = await seedExportMap('fingerprint-map', {
+      isPersonal: true,
+      userId: 'fingerprint-owner',
+    });
+    await seedExportLocations({ mapId, panoIds: ['pano-a'] });
+    const fingerprint = fingerprintMapCoordinates([
+      { panoId: 'pano-a', lat: 1, lng: 2, heading: 3, pitch: 4, zoom: 5 },
+    ]);
+
+    const matching = await requestLocationsExport(
+      'fingerprint-map',
+      'fingerprint-owner-token',
+      fingerprint,
+    );
+    const stale = await requestLocationsExport(
+      'fingerprint-map',
+      'fingerprint-owner-token',
+      '0'.repeat(64),
+    );
+
+    expect(matching.status).toBe(200);
+    expect(stale.status).toBe(409);
+    expect(await stale.json()).toEqual({
+      message: 'Synchronized map data changed; scan the group again',
+    });
+  });
+});
+
+describe('GET /api/userscript/map-group/:groupId/maps', () => {
+  async function seedManifestGroup() {
+    await db.insert(users).values([
+      { id: 'manifest-owner', username: 'owner', apiToken: 'manifest-token' },
+      {
+        id: 'manifest-stranger',
+        username: 'stranger',
+        apiToken: 'stranger-token',
+      },
+    ]);
+    const [group] = await db
+      .insert(mapGroups)
+      .values({ name: 'Manifest Group', syncedAt: 1_700_000_000 })
+      .returning({ id: mapGroups.id });
+    await db.insert(mapGroupPermissions).values({
+      mapGroupId: group!.id,
+      userId: 'manifest-owner',
+      role: 'owner',
+    });
+    const insertedMaps = await db
+      .insert(maps)
+      .values([
+        {
+          name: 'Populated Map',
+          geoguessrId: 'manifest-populated',
+          mapGroupId: group!.id,
+        },
+        {
+          name: 'Empty Map',
+          geoguessrId: 'manifest-empty',
+          mapGroupId: group!.id,
+        },
+      ])
+      .returning({ id: maps.id, geoguessrId: maps.geoguessrId });
+    const populated = insertedMaps.find(
+      (map) => map.geoguessrId === 'manifest-populated',
+    )!;
+    await seedExportLocations({
+      mapId: populated.id,
+      panoIds: ['pano-b', 'pano-a'],
+      syncedMetaId: 9100,
+    });
+    return group!.id;
+  }
+
+  test('requires a valid token and group permission', async () => {
+    const groupId = await seedManifestGroup();
+
+    expect((await requestGroupManifest(groupId)).status).toBe(401);
+    expect((await requestGroupManifest(groupId, 'unknown-token')).status).toBe(
+      401,
+    );
+    expect((await requestGroupManifest(groupId, 'stranger-token')).status).toBe(
+      403,
+    );
+  });
+
+  test('returns every group map with stable synchronized fingerprints', async () => {
+    const groupId = await seedManifestGroup();
+    const response = await requestGroupManifest(groupId, 'manifest-token');
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      group: {
+        id: groupId,
+        name: 'Manifest Group',
+        syncedAt: 1_700_000_000,
+      },
+      maps: [
+        {
+          name: 'Empty Map',
+          geoguessrId: 'manifest-empty',
+          locationCount: 0,
+          fingerprint: fingerprintMapCoordinates([]),
+        },
+        {
+          name: 'Populated Map',
+          geoguessrId: 'manifest-populated',
+          locationCount: 2,
+          fingerprint: fingerprintMapCoordinates([
+            { panoId: 'pano-a', lat: 1, lng: 2, heading: 3, pitch: 4, zoom: 5 },
+            { panoId: 'pano-b', lat: 1, lng: 2, heading: 3, pitch: 4, zoom: 5 },
+          ]),
+        },
+      ],
+    });
+  });
+
+  test('rejects a group that has never been synchronized', async () => {
+    await db.insert(users).values({
+      id: 'unsynced-owner',
+      username: 'owner',
+      apiToken: 'unsynced-token',
+    });
+    const [group] = await db
+      .insert(mapGroups)
+      .values({ name: 'Unsynced Group', syncedAt: null })
+      .returning({ id: mapGroups.id });
+    await db.insert(mapGroupPermissions).values({
+      mapGroupId: group!.id,
+      userId: 'unsynced-owner',
+      role: 'owner',
+    });
+
+    const response = await requestGroupManifest(group!.id, 'unsynced-token');
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({
+      message: 'Map group has not been synchronized',
+    });
+  });
 });
 
 describe('GET /api/userscript/map/:geoguessrId', () => {
@@ -528,7 +689,7 @@ describe('GET /api/userscript/map/:geoguessrId', () => {
     expect(await response.json()).toEqual({
       mapFound: true,
       isPersonal: true,
-      userscriptVersion: '0.90',
+      userscriptVersion: '0.91',
     });
   });
 
@@ -552,7 +713,7 @@ describe('GET /api/userscript/map/:geoguessrId', () => {
     expect(await response.json()).toEqual({
       mapFound: true,
       isPersonal: false,
-      userscriptVersion: '0.90',
+      userscriptVersion: '0.91',
     });
   });
 
@@ -572,7 +733,7 @@ describe('GET /api/userscript/map/:geoguessrId', () => {
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({
       mapFound: false,
-      userscriptVersion: '0.90',
+      userscriptVersion: '0.91',
     });
   });
 });

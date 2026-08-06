@@ -1,13 +1,10 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { uploadLocations } from '../utils/upload';
-  import { GM_setValue, GM_getValue } from '$';
   import ToastNotification from './ToastNotification.svelte';
+  import { clearApiKey, getApiKey, saveApiKey, URL_TO_GENERATE_TOKEN } from '../utils/apiKey';
 
   let { mapId }: { mapId: string } = $props();
-
-  const API_KEY_STORAGE_NAME = 'learnableMeta_apiKey';
-  const URL_TO_GENERATE_TOKEN = 'https://learnablemeta.com/profile/token';
 
   let showApiKeyModal = $state(false);
   let modalMode = $state<'upload' | 'manage'>('upload');
@@ -54,7 +51,7 @@
 
   function getApiKeyFromGM(): string | null {
     try {
-      return GM_getValue(API_KEY_STORAGE_NAME, null);
+      return getApiKey();
     } catch (e) {
       console.warn('GM_getValue is not available. API key functionality might be limited.', e);
       showCustomToast(
@@ -68,7 +65,7 @@
 
   function saveApiKeyToGM(key: string): void {
     try {
-      GM_setValue(API_KEY_STORAGE_NAME, key);
+      saveApiKey(key);
     } catch (e) {
       console.warn('GM_setValue is not available. API key functionality might be limited.', e);
       showCustomToast(
@@ -103,7 +100,7 @@
   }
 
   function handleClearApiKey() {
-    saveApiKeyToGM('');
+    clearApiKey();
     currentApiKey = null;
     showApiKeyModal = false;
     showCustomToast('LearnableMeta API Key cleared.', 'success');

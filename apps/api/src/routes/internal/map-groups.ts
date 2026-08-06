@@ -22,6 +22,10 @@ import {
 import { ensureOwner, ensurePermissions } from '@api/lib/internal/permissions';
 import { syncMapGroup } from '@api/lib/internal/sync';
 import { geoguessrMapJson } from '@api/lib/internal/utils';
+import {
+  getSynchronizedGroupMapSnapshots,
+  havePublishableMapLocationsChanged,
+} from '@api/lib/userscript/map-snapshots';
 import { isPgError } from '@api/lib/utils/common';
 import {
   and,
@@ -974,7 +978,11 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       if (!group) {
         return status(404);
       }
+      const snapshotsBeforeSync =
+        await getSynchronizedGroupMapSnapshots(groupId);
       const syncedAt = await syncMapGroup(group);
+      const snapshotsAfterSync =
+        await getSynchronizedGroupMapSnapshots(groupId);
       // stamped with the sync's own timestamp so the marker sits exactly on
       // the synced/unsynced boundary instead of classifying itself unsynced
       await logChange(db.$primary, {
@@ -986,7 +994,12 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         operation: 'update',
         createdAt: syncedAt,
       });
-      return;
+      return {
+        hasMapUpdates: havePublishableMapLocationsChanged(
+          snapshotsBeforeSync,
+          snapshotsAfterSync,
+        ),
+      };
     },
     {
       params: t.Object({ id: t.Integer() }),

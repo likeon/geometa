@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.90
+// @version      0.91
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
 // @downloadURL  https://github.com/likeon/geometa/raw/main/userscript/dist/geometa.user.js
@@ -22,6 +22,13 @@
 
 /*
 # Changelog
+
+## [0.91]
+
+- Added a post-sync group workflow that compares LearnableMeta locations with GeoGuessr drafts
+- Added review and selection before updating changed maps
+- Added sequential draft updates, publishing, per-map progress, and retryable failures
+- Reused the browser-stored LearnableMeta API token so GeoGuessr credentials remain in the browser
 
 ## [0.90]
 
@@ -171,7 +178,7 @@
 
   const d=new Set;const e = async e=>{d.has(e)||(d.add(e),(t=>{typeof GM_addStyle=="function"?GM_addStyle(t):(document.head||document.documentElement).appendChild(document.createElement("style")).append(t);})(e));};
 
-  e(` .loadership_ZOJAQ.svelte-f4erjd{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-f4erjd-loadership_ZOJAQ_scale 1.2s infinite,svelte-f4erjd-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-f4erjd-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-f4erjd-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-tdzec4{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.carousel.svelte-8ojyxu{position:relative;overflow:hidden;margin:0 auto}.image-wrapper.svelte-8ojyxu{width:100%;height:100%;display:flex;justify-content:center;align-items:center;cursor:zoom-in}.responsive-image.svelte-8ojyxu{max-width:100%;height:100%;display:block;object-fit:contain}.lens.svelte-8ojyxu{position:absolute;pointer-events:none;border:2px solid #aaa;border-radius:50%;box-shadow:0 0 8px #00000080}.click-area.svelte-8ojyxu{position:absolute;top:0;bottom:0;width:1.4em;cursor:pointer}.prev-area.svelte-8ojyxu{left:0}.next-area.svelte-8ojyxu{right:0}.prev.svelte-8ojyxu,.next.svelte-8ojyxu{background-color:#00000080;color:#fff;border:none;font-size:1.2em;padding:.2em;cursor:pointer;pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%)}.prev.svelte-8ojyxu{left:0}.next.svelte-8ojyxu{right:0}.indicators.svelte-8ojyxu{position:absolute;bottom:15px;left:50%;transform:translate(-50%);display:flex;justify-content:center;align-items:center;gap:8px}.indicator.svelte-8ojyxu{width:12px;height:12px;background-color:#ffffff80;border-radius:50%;cursor:pointer;border:none;padding:0;flex-shrink:0}.indicator.active.svelte-8ojyxu{background-color:#fff}.geometa-footer a{color:#188bd2;text-decoration:none}.geometa-footer a:hover{text-decoration:underline}.geometa-container.svelte-1j2rmt2{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100, #1c1836);color:#fff;padding:6px 10px;border-radius:5px;font-size:17px;line-height:1.4;width:min(25%,500px);resize:both;overflow:auto}.geometa-container.svelte-1j2rmt2 h2:where(.svelte-1j2rmt2){margin:0;font-size:1.2rem;font-weight:700}.geometa-container.svelte-1j2rmt2 p{margin:0}.geometa-container.svelte-1j2rmt2 ul,.geometa-container.svelte-1j2rmt2 ol{margin:0;padding:0;list-style:none}.geometa-container.svelte-1j2rmt2>.header:where(.svelte-1j2rmt2){margin-top:0}.geometa-footer.svelte-1j2rmt2{color:#d3d3d3;font-size:small}.announcement.svelte-1j2rmt2{background-color:#e6f7ff;color:#0050b3;padding:8px 12px;border-radius:4px;font-size:14px;display:flex;justify-content:space-between;align-items:center;width:100%;box-sizing:border-box;margin-bottom:8px;border:1px solid #91d5ff}.announcement a{color:#0050b3;font-weight:700;text-decoration:underline}.announcement a:hover{color:#003a8c}.vote-close-btn.svelte-1j2rmt2{background-color:#b3d9ff;border:1px solid #0050b3;color:#0050b3;font-size:12px;cursor:pointer;padding:1px 10px;border-radius:4px;line-height:1;margin-left:5px;text-transform:none;transition:background-color .2s ease,color .2s ease,border-color .2s ease}.vote-close-btn.svelte-1j2rmt2:hover,.vote-close-btn.svelte-1j2rmt2:focus{background-color:#0050b3;color:#fff;border-color:#036;outline:none}a.svelte-1j2rmt2{color:#188bd2}a.svelte-1j2rmt2:hover{text-decoration:underline}.skill-icons--discord.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--list.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E")}.question-mark-icon.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");cursor:pointer}.icons.svelte-1j2rmt2{display:inline-block;vertical-align:middle}.flex.svelte-1j2rmt2{display:flex;align-items:center}.icons.svelte-1j2rmt2 a:where(.svelte-1j2rmt2) span:where(.svelte-1j2rmt2){align-items:center;justify-content:center}hr.svelte-1j2rmt2{border:0;border-top:1px solid white;width:100%}.header.svelte-1j2rmt2{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center;touch-action:none;-webkit-user-select:none;user-select:none}.geometa-note a{color:#188bd2}.geometa-note a:hover{text-decoration:underline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem}.modal-backdrop.svelte-1j2rmt2{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#1e1e1ecc;display:flex;justify-content:center;align-items:center;z-index:1000}.modal.svelte-1j2rmt2{background:var(--ds-color-purple-100, #1c1836);padding:15px 25px;border-radius:8px;text-align:center;width:90%;max-width:600px;box-shadow:0 4px 6px #0003;color:#d3d3d3}.modal.svelte-1j2rmt2 p:where(.svelte-1j2rmt2){margin:0 0 10px;font-size:17px}.modal-url.svelte-1j2rmt2{font-size:15px;font-weight:700;color:#188bd2;word-break:break-word;margin:10px 0}.modal-buttons.svelte-1j2rmt2{display:flex;justify-content:center;gap:15px;margin-top:20px}.proceed-btn.svelte-1j2rmt2{background:#188bd2;color:#fff;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out}.proceed-btn.svelte-1j2rmt2:hover{background:#0056b3}.close-btn.svelte-1j2rmt2{background:transparent;color:#d3d3d3;padding:8px 16px;border:1px solid #d3d3d3;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out,color .2s ease-in-out}.close-btn.svelte-1j2rmt2:hover{background:#d3d3d3;color:var(--ds-color-purple-100, #1c1836)}button.svelte-1j2rmt2{cursor:pointer;background:none;border:none;padding:0}.blink.svelte-1j2rmt2{animation:svelte-1j2rmt2-blink-animation 1s infinite}.help-message.svelte-1j2rmt2{padding:12px;font-size:16px;line-height:1.5;text-align:left}.help-message.svelte-1j2rmt2 strong:where(.svelte-1j2rmt2){color:#007bff;font-weight:700}@keyframes svelte-1j2rmt2-blink-animation{0%{filter:brightness(1)}50%{filter:brightness(2);background-color:#004779}to{filter:brightness(1)}}.outdated.svelte-1j2rmt2 strong:where(.svelte-1j2rmt2){color:red!important}.geometa-meta-btn{background:#188bd2;color:#fff;border:none;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;margin-left:10px;transition:background-color .2s ease;font-weight:700;z-index:1000;pointer-events:auto;display:inline-block}.result-list_listItemWrapper___XCGn{display:flex!important;justify-content:space-between!important;align-items:center!important}.geometa-meta-btn:hover{background:#0056b3}.geometa-pin-question{position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:#188bd2;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;z-index:10000;transition:background-color .2s ease;border:1px solid white;box-shadow:0 1px 3px #0000004d}.geometa-pin-question:hover{background:#0056b3;transform:scale(1.1)}.geometa-map-label-container.svelte-1y99qco{background-color:#000000a6;color:#fff;text-align:center;z-index:100;position:absolute;bottom:4px;right:4px;box-sizing:border-box;border-radius:8px;padding:8px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;gap:8px}p.svelte-1y99qco{font-size:14px;font-weight:700}button.svelte-1y99qco{padding:6px 12px;font-size:12px;color:#fff;background-color:#4caf50;border:none;border-radius:4px;cursor:pointer}.toast-notification.svelte-w17ltc{position:fixed;top:72px;right:16px;z-index:10001;min-width:250px;max-width:400px;padding:14px 22px;border-radius:8px;box-shadow:0 5px 15px #0003;color:#fff;display:flex;align-items:flex-start;justify-content:space-between;font-size:.95em;line-height:1.4}.toast-success.svelte-w17ltc{background-color:#28a745;border-left:5px solid #1e7e34}.toast-error.svelte-w17ltc{background-color:#dc3545;border-left:5px solid #b02a37}.toast-info.svelte-w17ltc{background-color:#17a2b8;border-left:5px solid #117a8b}.toast-warning.svelte-w17ltc{background-color:#ffc107;color:#212529;border-left:5px solid #d39e00}.toast-content.svelte-w17ltc{flex-grow:1;margin-right:10px;display:flex;flex-direction:column;gap:6px}.toast-detail.svelte-w17ltc{font-size:.8em;line-height:1.35;opacity:.85;word-break:break-word;padding-top:6px;border-top:1px solid rgba(255,255,255,.35);-webkit-user-select:text;user-select:text}.toast-close-button.svelte-w17ltc{background:transparent;border:none;color:inherit;font-size:1.6em;font-weight:700;margin-left:10px;cursor:pointer;padding:0;line-height:1;opacity:.7;transition:opacity .2s ease}.toast-close-button.svelte-w17ltc:hover{opacity:1}.upload-label-container.svelte-1plj3lz{display:flex;align-items:center}.custom-yellow-button.svelte-1plj3lz{display:inline-flex;align-items:center;justify-content:center;padding:8px 16px;font-family:inherit;font-size:12px;font-weight:700;line-height:1;white-space:nowrap;background:linear-gradient(180deg,#ffeb99,#f5c542);border:1px solid #e0b000;color:#002147;border-radius:3.75rem;box-shadow:0 2px 4px #00000026,inset 0 1px #fff6;cursor:pointer;transition:background .2s ease-in-out,transform .1s ease,box-shadow .2s ease-in-out}.custom-yellow-button.svelte-1plj3lz:hover:not(:disabled){background:linear-gradient(180deg,#ffe066,#eab308);box-shadow:0 4px 8px #0003,inset 0 1px #ffffff80;transform:translateY(-1px)}.custom-yellow-button.svelte-1plj3lz:active:not(:disabled){background:linear-gradient(180deg,#eab308,#d39e00);box-shadow:0 2px 4px #0003 inset;transform:translateY(1px)}.custom-yellow-button.svelte-1plj3lz:focus{outline:none;box-shadow:0 0 0 3px #eab30880,0 2px 4px #00000026}.custom-yellow-button.svelte-1plj3lz:disabled{background:#e0e0e0;border-color:#bbb;color:#888;box-shadow:none;cursor:not-allowed;transform:none}.api-key-button.svelte-1plj3lz{display:inline-flex;align-items:center;justify-content:center;margin-left:6px;width:30px;height:30px;padding:0;font-size:14px;line-height:1;background:linear-gradient(180deg,#ffeb99,#f5c542);border:1px solid #e0b000;border-radius:50%;cursor:pointer;box-shadow:0 2px 4px #00000026,inset 0 1px #fff6;transition:background .2s ease-in-out}.api-key-button.svelte-1plj3lz:hover:not(:disabled){background:linear-gradient(180deg,#ffe066,#eab308)}.api-key-button.svelte-1plj3lz:disabled{background:#e0e0e0;border-color:#bbb;cursor:not-allowed}.modal-overlay.svelte-1plj3lz{position:fixed;top:0;left:0;width:100%;height:100%;background-color:#0009;display:flex;justify-content:center;align-items:center;z-index:10000}.modal-content.svelte-1plj3lz{background-color:#fff;padding:25px 30px;border-radius:8px;box-shadow:0 5px 15px #0000004d;width:90%;max-width:450px;color:#333}.modal-content.svelte-1plj3lz h2:where(.svelte-1plj3lz){margin-top:0;margin-bottom:15px;color:#2c3e50}.modal-content.svelte-1plj3lz p:where(.svelte-1plj3lz){margin-bottom:15px;line-height:1.6}.modal-content.svelte-1plj3lz p:where(.svelte-1plj3lz) a:where(.svelte-1plj3lz){color:#007bff;text-decoration:underline}.modal-content.svelte-1plj3lz p:where(.svelte-1plj3lz) a:where(.svelte-1plj3lz):hover{color:#0056b3}.modal-input.svelte-1plj3lz{width:calc(100% - 20px);padding:10px;margin-bottom:20px;border:1px solid #ccc;border-radius:4px;font-size:1em}.modal-actions.svelte-1plj3lz{display:flex;justify-content:flex-end;gap:10px}.modal-button.svelte-1plj3lz{padding:10px 18px;border:none;border-radius:4px;cursor:pointer;font-weight:700;transition:background-color .2s ease}.modal-button-save.svelte-1plj3lz{background-color:#28a745;color:#fff}.modal-button-save.svelte-1plj3lz:hover{background-color:#218838}.modal-button-cancel.svelte-1plj3lz{background-color:#6c757d;color:#fff}.modal-button-cancel.svelte-1plj3lz:hover{background-color:#5a6268}.modal-button-clear.svelte-1plj3lz{background-color:#dc3545;color:#fff;margin-right:auto}.modal-button-clear.svelte-1plj3lz:hover{background-color:#b02a37}.modal-content.svelte-1plj3lz code:where(.svelte-1plj3lz){background-color:#f1f3f5;padding:1px 5px;border-radius:3px;font-size:.9em}.modal-note.svelte-1plj3lz{font-size:.85em;color:#555;margin-top:15px;text-align:center} `);
+  e(` .loadership_ZOJAQ.svelte-f4erjd{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-f4erjd-loadership_ZOJAQ_scale 1.2s infinite,svelte-f4erjd-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-f4erjd-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-f4erjd-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-tdzec4{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.carousel.svelte-8ojyxu{position:relative;overflow:hidden;margin:0 auto}.image-wrapper.svelte-8ojyxu{width:100%;height:100%;display:flex;justify-content:center;align-items:center;cursor:zoom-in}.responsive-image.svelte-8ojyxu{max-width:100%;height:100%;display:block;object-fit:contain}.lens.svelte-8ojyxu{position:absolute;pointer-events:none;border:2px solid #aaa;border-radius:50%;box-shadow:0 0 8px #00000080}.click-area.svelte-8ojyxu{position:absolute;top:0;bottom:0;width:1.4em;cursor:pointer}.prev-area.svelte-8ojyxu{left:0}.next-area.svelte-8ojyxu{right:0}.prev.svelte-8ojyxu,.next.svelte-8ojyxu{background-color:#00000080;color:#fff;border:none;font-size:1.2em;padding:.2em;cursor:pointer;pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%)}.prev.svelte-8ojyxu{left:0}.next.svelte-8ojyxu{right:0}.indicators.svelte-8ojyxu{position:absolute;bottom:15px;left:50%;transform:translate(-50%);display:flex;justify-content:center;align-items:center;gap:8px}.indicator.svelte-8ojyxu{width:12px;height:12px;background-color:#ffffff80;border-radius:50%;cursor:pointer;border:none;padding:0;flex-shrink:0}.indicator.active.svelte-8ojyxu{background-color:#fff}.geometa-footer a{color:#188bd2;text-decoration:none}.geometa-footer a:hover{text-decoration:underline}.geometa-container.svelte-1j2rmt2{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100, #1c1836);color:#fff;padding:6px 10px;border-radius:5px;font-size:17px;line-height:1.4;width:min(25%,500px);resize:both;overflow:auto}.geometa-container.svelte-1j2rmt2 h2:where(.svelte-1j2rmt2){margin:0;font-size:1.2rem;font-weight:700}.geometa-container.svelte-1j2rmt2 p{margin:0}.geometa-container.svelte-1j2rmt2 ul,.geometa-container.svelte-1j2rmt2 ol{margin:0;padding:0;list-style:none}.geometa-container.svelte-1j2rmt2>.header:where(.svelte-1j2rmt2){margin-top:0}.geometa-footer.svelte-1j2rmt2{color:#d3d3d3;font-size:small}.announcement.svelte-1j2rmt2{background-color:#e6f7ff;color:#0050b3;padding:8px 12px;border-radius:4px;font-size:14px;display:flex;justify-content:space-between;align-items:center;width:100%;box-sizing:border-box;margin-bottom:8px;border:1px solid #91d5ff}.announcement a{color:#0050b3;font-weight:700;text-decoration:underline}.announcement a:hover{color:#003a8c}.vote-close-btn.svelte-1j2rmt2{background-color:#b3d9ff;border:1px solid #0050b3;color:#0050b3;font-size:12px;cursor:pointer;padding:1px 10px;border-radius:4px;line-height:1;margin-left:5px;text-transform:none;transition:background-color .2s ease,color .2s ease,border-color .2s ease}.vote-close-btn.svelte-1j2rmt2:hover,.vote-close-btn.svelte-1j2rmt2:focus{background-color:#0050b3;color:#fff;border-color:#036;outline:none}a.svelte-1j2rmt2{color:#188bd2}a.svelte-1j2rmt2:hover{text-decoration:underline}.skill-icons--discord.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--list.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E")}.question-mark-icon.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");cursor:pointer}.icons.svelte-1j2rmt2{display:inline-block;vertical-align:middle}.flex.svelte-1j2rmt2{display:flex;align-items:center}.icons.svelte-1j2rmt2 a:where(.svelte-1j2rmt2) span:where(.svelte-1j2rmt2){align-items:center;justify-content:center}hr.svelte-1j2rmt2{border:0;border-top:1px solid white;width:100%}.header.svelte-1j2rmt2{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center;touch-action:none;-webkit-user-select:none;user-select:none}.geometa-note a{color:#188bd2}.geometa-note a:hover{text-decoration:underline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem}.modal-backdrop.svelte-1j2rmt2{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#1e1e1ecc;display:flex;justify-content:center;align-items:center;z-index:1000}.modal.svelte-1j2rmt2{background:var(--ds-color-purple-100, #1c1836);padding:15px 25px;border-radius:8px;text-align:center;width:90%;max-width:600px;box-shadow:0 4px 6px #0003;color:#d3d3d3}.modal.svelte-1j2rmt2 p:where(.svelte-1j2rmt2){margin:0 0 10px;font-size:17px}.modal-url.svelte-1j2rmt2{font-size:15px;font-weight:700;color:#188bd2;word-break:break-word;margin:10px 0}.modal-buttons.svelte-1j2rmt2{display:flex;justify-content:center;gap:15px;margin-top:20px}.proceed-btn.svelte-1j2rmt2{background:#188bd2;color:#fff;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out}.proceed-btn.svelte-1j2rmt2:hover{background:#0056b3}.close-btn.svelte-1j2rmt2{background:transparent;color:#d3d3d3;padding:8px 16px;border:1px solid #d3d3d3;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out,color .2s ease-in-out}.close-btn.svelte-1j2rmt2:hover{background:#d3d3d3;color:var(--ds-color-purple-100, #1c1836)}button.svelte-1j2rmt2{cursor:pointer;background:none;border:none;padding:0}.blink.svelte-1j2rmt2{animation:svelte-1j2rmt2-blink-animation 1s infinite}.help-message.svelte-1j2rmt2{padding:12px;font-size:16px;line-height:1.5;text-align:left}.help-message.svelte-1j2rmt2 strong:where(.svelte-1j2rmt2){color:#007bff;font-weight:700}@keyframes svelte-1j2rmt2-blink-animation{0%{filter:brightness(1)}50%{filter:brightness(2);background-color:#004779}to{filter:brightness(1)}}.outdated.svelte-1j2rmt2 strong:where(.svelte-1j2rmt2){color:red!important}.geometa-meta-btn{background:#188bd2;color:#fff;border:none;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;margin-left:10px;transition:background-color .2s ease;font-weight:700;z-index:1000;pointer-events:auto;display:inline-block}.result-list_listItemWrapper___XCGn{display:flex!important;justify-content:space-between!important;align-items:center!important}.geometa-meta-btn:hover{background:#0056b3}.geometa-pin-question{position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:#188bd2;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;z-index:10000;transition:background-color .2s ease;border:1px solid white;box-shadow:0 1px 3px #0000004d}.geometa-pin-question:hover{background:#0056b3;transform:scale(1.1)}.geometa-map-label-container.svelte-1y99qco{background-color:#000000a6;color:#fff;text-align:center;z-index:100;position:absolute;bottom:4px;right:4px;box-sizing:border-box;border-radius:8px;padding:8px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;gap:8px}p.svelte-1y99qco{font-size:14px;font-weight:700}button.svelte-1y99qco{padding:6px 12px;font-size:12px;color:#fff;background-color:#4caf50;border:none;border-radius:4px;cursor:pointer}.toast-notification.svelte-w17ltc{position:fixed;top:72px;right:16px;z-index:10001;min-width:250px;max-width:400px;padding:14px 22px;border-radius:8px;box-shadow:0 5px 15px #0003;color:#fff;display:flex;align-items:flex-start;justify-content:space-between;font-size:.95em;line-height:1.4}.toast-success.svelte-w17ltc{background-color:#28a745;border-left:5px solid #1e7e34}.toast-error.svelte-w17ltc{background-color:#dc3545;border-left:5px solid #b02a37}.toast-info.svelte-w17ltc{background-color:#17a2b8;border-left:5px solid #117a8b}.toast-warning.svelte-w17ltc{background-color:#ffc107;color:#212529;border-left:5px solid #d39e00}.toast-content.svelte-w17ltc{flex-grow:1;margin-right:10px;display:flex;flex-direction:column;gap:6px}.toast-detail.svelte-w17ltc{font-size:.8em;line-height:1.35;opacity:.85;word-break:break-word;padding-top:6px;border-top:1px solid rgba(255,255,255,.35);-webkit-user-select:text;user-select:text}.toast-close-button.svelte-w17ltc{background:transparent;border:none;color:inherit;font-size:1.6em;font-weight:700;margin-left:10px;cursor:pointer;padding:0;line-height:1;opacity:.7;transition:opacity .2s ease}.toast-close-button.svelte-w17ltc:hover{opacity:1}.upload-label-container.svelte-1plj3lz{display:flex;align-items:center}.custom-yellow-button.svelte-1plj3lz{display:inline-flex;align-items:center;justify-content:center;padding:8px 16px;font-family:inherit;font-size:12px;font-weight:700;line-height:1;white-space:nowrap;background:linear-gradient(180deg,#ffeb99,#f5c542);border:1px solid #e0b000;color:#002147;border-radius:3.75rem;box-shadow:0 2px 4px #00000026,inset 0 1px #fff6;cursor:pointer;transition:background .2s ease-in-out,transform .1s ease,box-shadow .2s ease-in-out}.custom-yellow-button.svelte-1plj3lz:hover:not(:disabled){background:linear-gradient(180deg,#ffe066,#eab308);box-shadow:0 4px 8px #0003,inset 0 1px #ffffff80;transform:translateY(-1px)}.custom-yellow-button.svelte-1plj3lz:active:not(:disabled){background:linear-gradient(180deg,#eab308,#d39e00);box-shadow:0 2px 4px #0003 inset;transform:translateY(1px)}.custom-yellow-button.svelte-1plj3lz:focus{outline:none;box-shadow:0 0 0 3px #eab30880,0 2px 4px #00000026}.custom-yellow-button.svelte-1plj3lz:disabled{background:#e0e0e0;border-color:#bbb;color:#888;box-shadow:none;cursor:not-allowed;transform:none}.api-key-button.svelte-1plj3lz{display:inline-flex;align-items:center;justify-content:center;margin-left:6px;width:30px;height:30px;padding:0;font-size:14px;line-height:1;background:linear-gradient(180deg,#ffeb99,#f5c542);border:1px solid #e0b000;border-radius:50%;cursor:pointer;box-shadow:0 2px 4px #00000026,inset 0 1px #fff6;transition:background .2s ease-in-out}.api-key-button.svelte-1plj3lz:hover:not(:disabled){background:linear-gradient(180deg,#ffe066,#eab308)}.api-key-button.svelte-1plj3lz:disabled{background:#e0e0e0;border-color:#bbb;cursor:not-allowed}.modal-overlay.svelte-1plj3lz{position:fixed;top:0;left:0;width:100%;height:100%;background-color:#0009;display:flex;justify-content:center;align-items:center;z-index:10000}.modal-content.svelte-1plj3lz{background-color:#fff;padding:25px 30px;border-radius:8px;box-shadow:0 5px 15px #0000004d;width:90%;max-width:450px;color:#333}.modal-content.svelte-1plj3lz h2:where(.svelte-1plj3lz){margin-top:0;margin-bottom:15px;color:#2c3e50}.modal-content.svelte-1plj3lz p:where(.svelte-1plj3lz){margin-bottom:15px;line-height:1.6}.modal-content.svelte-1plj3lz p:where(.svelte-1plj3lz) a:where(.svelte-1plj3lz){color:#007bff;text-decoration:underline}.modal-content.svelte-1plj3lz p:where(.svelte-1plj3lz) a:where(.svelte-1plj3lz):hover{color:#0056b3}.modal-input.svelte-1plj3lz{width:calc(100% - 20px);padding:10px;margin-bottom:20px;border:1px solid #ccc;border-radius:4px;font-size:1em}.modal-actions.svelte-1plj3lz{display:flex;justify-content:flex-end;gap:10px}.modal-button.svelte-1plj3lz{padding:10px 18px;border:none;border-radius:4px;cursor:pointer;font-weight:700;transition:background-color .2s ease}.modal-button-save.svelte-1plj3lz{background-color:#28a745;color:#fff}.modal-button-save.svelte-1plj3lz:hover{background-color:#218838}.modal-button-cancel.svelte-1plj3lz{background-color:#6c757d;color:#fff}.modal-button-cancel.svelte-1plj3lz:hover{background-color:#5a6268}.modal-button-clear.svelte-1plj3lz{background-color:#dc3545;color:#fff;margin-right:auto}.modal-button-clear.svelte-1plj3lz:hover{background-color:#b02a37}.modal-content.svelte-1plj3lz code:where(.svelte-1plj3lz){background-color:#f1f3f5;padding:1px 5px;border-radius:3px;font-size:.9em}.modal-note.svelte-1plj3lz{font-size:.85em;color:#555;margin-top:15px;text-align:center}.backdrop.svelte-axobi4{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:24px;background:#040812c7;font-family:Arial,sans-serif;color:#172033}.panel.svelte-axobi4{width:min(780px,100%);max-height:min(760px,calc(100vh - 48px));display:flex;flex-direction:column;overflow:hidden;border:1px solid #d8dee9;border-radius:14px;background:#fff;box-shadow:0 24px 70px #00000073}header.svelte-axobi4{display:flex;align-items:flex-start;justify-content:space-between;padding:22px 24px 18px;border-bottom:1px solid #e8ebf0}h1.svelte-axobi4{margin:2px 0 0;font-size:24px;color:#101828}.eyebrow.svelte-axobi4{margin:0;color:#936b00;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.subtitle.svelte-axobi4{margin:5px 0 0;color:#667085}.icon-button.svelte-axobi4{border:0;background:transparent;font-size:28px;color:#667085;cursor:pointer}.notice.svelte-axobi4,.fatal.svelte-axobi4,.summary.svelte-axobi4{margin:18px 24px 0;padding:12px 14px;border-radius:8px;background:#f5f7fa}.fatal.svelte-axobi4{display:grid;gap:8px;background:#fff1f1;color:#8a1c1c}.summary.svelte-axobi4{background:#eef8ee;color:#245b29}.toolbar.svelte-axobi4{display:flex;justify-content:space-between;align-items:center;padding:16px 24px 10px;color:#475467;font-size:13px}.map-list.svelte-axobi4{overflow-y:auto;margin:0 24px;border:1px solid #e4e7ec;border-radius:9px}.map-row.svelte-axobi4{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid #eef0f3}.map-row.svelte-axobi4:last-child{border-bottom:0}.map-row.error-row.svelte-axobi4{background:snow}.map-details.svelte-axobi4{display:grid;min-width:0;gap:3px}.map-details.svelte-axobi4 strong:where(.svelte-axobi4){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.map-details.svelte-axobi4>span:where(.svelte-axobi4){color:#667085;font-size:12px}.map-details.svelte-axobi4 .row-error:where(.svelte-axobi4){color:#a32626;white-space:normal}.status.svelte-axobi4{padding:4px 8px;border-radius:999px;background:#fff2cc;color:#765700;font-size:11px;font-weight:700;white-space:nowrap}.status.good.svelte-axobi4{background:#e9f8ec;color:#24612d}.actions.svelte-axobi4{display:flex;justify-content:flex-end;align-items:center;gap:9px;padding:18px 24px 22px}button.svelte-axobi4{font:inherit}button.svelte-axobi4:disabled{cursor:not-allowed;opacity:.55}.primary.svelte-axobi4,.secondary.svelte-axobi4{border-radius:7px;padding:9px 14px;font-weight:700;cursor:pointer}.primary.svelte-axobi4{border:1px solid #d3a300;background:#f5c542;color:#172033}.secondary.svelte-axobi4{border:1px solid #cfd5df;background:#fff;color:#344054}.link-button.svelte-axobi4{border:0;padding:4px 7px;background:transparent;color:#3458a5;cursor:pointer}.token-button.svelte-axobi4{margin-right:auto}.token-form.svelte-axobi4{display:grid;gap:12px;padding:22px 24px}.token-form.svelte-axobi4 p:where(.svelte-axobi4){margin:0}.token-form.svelte-axobi4 .small:where(.svelte-axobi4){color:#667085;font-size:13px}.token-form.svelte-axobi4 a:where(.svelte-axobi4){color:#3458a5}.token-form.svelte-axobi4 input:where(.svelte-axobi4){border:1px solid #cfd5df;border-radius:7px;padding:10px 12px;font:inherit}.token-form.svelte-axobi4 .actions:where(.svelte-axobi4){padding:4px 0 0}.error-text.svelte-axobi4{color:#a32626;font-size:13px}@media(max-width:620px){.backdrop.svelte-axobi4{padding:8px}.panel.svelte-axobi4{max-height:calc(100vh - 16px)}.map-row.svelte-axobi4{grid-template-columns:22px minmax(0,1fr)}.status.svelte-axobi4{grid-column:2;justify-self:start}footer.actions.svelte-axobi4{flex-wrap:wrap}.token-button.svelte-axobi4{width:100%;text-align:left}} `);
 
   var _GM_getValue = (() => typeof GM_getValue != "undefined" ? GM_getValue : void 0)();
   var _GM_info = (() => typeof GM_info != "undefined" ? GM_info : void 0)();
@@ -1464,6 +1471,11 @@ current_batch
       }
       next(promise);
     });
+  }
+function user_derived(fn) {
+    const d = derived(fn);
+    push_reaction_value(d);
+    return d;
   }
 function derived_safe_equal(fn) {
     const signal = derived(fn);
@@ -3537,10 +3549,29 @@ get_first_child(node2)
       return value ?? "";
     }
   }
+  const whitespace = [..." 	\n\r\f \v\uFEFF"];
   function to_class(value, hash, directives) {
     var classname = value == null ? "" : "" + value;
     if (hash) {
       classname = classname ? classname + " " + hash : hash;
+    }
+    if (directives) {
+      for (var key in directives) {
+        if (directives[key]) {
+          classname = classname ? classname + " " + key : key;
+        } else if (classname.length) {
+          var len = key.length;
+          var a = 0;
+          while ((a = classname.indexOf(key, a)) >= 0) {
+            var b = a + len;
+            if ((a === 0 || whitespace.includes(classname[a - 1])) && (b === classname.length || whitespace.includes(classname[b]))) {
+              classname = (a === 0 ? "" : classname.substring(0, a)) + classname.substring(b + 1);
+            } else {
+              a = b;
+            }
+          }
+        }
+      }
     }
     return classname === "" ? null : classname;
   }
@@ -3550,7 +3581,7 @@ get_first_child(node2)
   function set_class(dom, is_html, value, hash, prev_classes, next_classes) {
     var prev = dom.__className;
     if (prev !== value || prev === void 0) {
-      var next_class_name = to_class(value, hash);
+      var next_class_name = to_class(value, hash, next_classes);
       {
         if (next_class_name == null) {
           dom.removeAttribute("class");
@@ -3559,6 +3590,13 @@ get_first_child(node2)
         }
       }
       dom.__className = value;
+    } else if (next_classes && prev_classes !== next_classes) {
+      for (var key in next_classes) {
+        var is_present = !!next_classes[key];
+        if (prev_classes == null || is_present !== !!prev_classes[key]) {
+          dom.classList.toggle(key, is_present);
+        }
+      }
     }
     return next_classes;
   }
@@ -3933,6 +3971,23 @@ previous_batch ?? current_batch
       }
     });
   }
+  function bind_checked(input, get2, set2 = get2) {
+    listen_to_event_and_reset_event(input, "change", (is_reset) => {
+      var value = is_reset ? input.defaultChecked : input.checked;
+      set2(value);
+    });
+    if (
+
+
+untrack(get2) == null
+    ) {
+      set2(input.checked);
+    }
+    render_effect(() => {
+      var value = get2();
+      input.checked = Boolean(value);
+    });
+  }
   function is_numberlike_input(input) {
     var type = input.type;
     return type === "number" || type === "range";
@@ -4167,12 +4222,12 @@ context.l
     ((window.__svelte ??= {}).v ??= new Set()).add(PUBLIC_VERSION);
   }
   enable_legacy_mode_flag();
-  var root$5 = from_html(`<div class="loadership_ZOJAQ svelte-f4erjd"><div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div></div>`);
+  var root$6 = from_html(`<div class="loadership_ZOJAQ svelte-f4erjd"><div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div></div>`);
   function Spinner($$anchor) {
-    var div = root$5();
+    var div = root$6();
     append($$anchor, div);
   }
-  var root_1$2 = from_html(`<img class="fi svelte-tdzec4"/>`);
+  var root_1$3 = from_html(`<img class="fi svelte-tdzec4"/>`);
   function CountryFlag($$anchor, $$props) {
     const countryCodes = {
       Afghanistan: "af",
@@ -4380,7 +4435,7 @@ context.l
     var node = first_child(fragment);
     {
       var consequent = ($$anchor2) => {
-        var img = root_1$2();
+        var img = root_1$3();
         template_effect(
           ($0) => {
             set_attribute(img, "alt", $$props.countryName);
@@ -4480,11 +4535,11 @@ context.l
       _unsafeWindow.localStorage.setItem(heightKey, Math.floor(containerHeight).toString());
     }
   }
-  var root_4$1 = from_html(`<div class="lens svelte-8ojyxu"></div>`);
-  var root_3$1 = from_html(`<div class="image-wrapper svelte-8ojyxu" role="img" aria-label="Zoomable image"><img class="responsive-image svelte-8ojyxu"/> <!></div>`);
-  var root_6$2 = from_html(`<button></button>`);
-  var root_5$2 = from_html(`<div class="controls"><button class="click-area prev-area svelte-8ojyxu" type="button" aria-label="Previous image"><span class="prev svelte-8ojyxu">&#10094;</span></button> <button class="click-area next-area svelte-8ojyxu" type="button" aria-label="Next image"><span class="next svelte-8ojyxu">&#10095;</span></button></div> <div class="indicators svelte-8ojyxu"></div>`, 1);
-  var root$4 = from_html(`<div class="carousel svelte-8ojyxu"><!> <!></div>`);
+  var root_4$2 = from_html(`<div class="lens svelte-8ojyxu"></div>`);
+  var root_3$2 = from_html(`<div class="image-wrapper svelte-8ojyxu" role="img" aria-label="Zoomable image"><img class="responsive-image svelte-8ojyxu"/> <!></div>`);
+  var root_6$3 = from_html(`<button></button>`);
+  var root_5$3 = from_html(`<div class="controls"><button class="click-area prev-area svelte-8ojyxu" type="button" aria-label="Previous image"><span class="prev svelte-8ojyxu">&#10094;</span></button> <button class="click-area next-area svelte-8ojyxu" type="button" aria-label="Next image"><span class="next svelte-8ojyxu">&#10095;</span></button></div> <div class="indicators svelte-8ojyxu"></div>`, 1);
+  var root$5 = from_html(`<div class="carousel svelte-8ojyxu"><!> <!></div>`);
   function Carousel($$anchor, $$props) {
     push($$props, false);
     let images = prop($$props, "images", 24, () => []);
@@ -4515,7 +4570,7 @@ context.l
       set(lensY, event2.clientY - rect.top);
     }
     init();
-    var div = root$4();
+    var div = root$5();
     var node = child(div);
     {
       var consequent_2 = ($$anchor2) => {
@@ -4526,7 +4581,7 @@ context.l
           var node_2 = first_child(fragment_1);
           {
             var consequent_1 = ($$anchor4) => {
-              var div_1 = root_3$1();
+              var div_1 = root_3$2();
               div_1.__mousemove = handleMouseMove;
               var img = child(div_1);
               set_attribute(img, "alt", `Image ${index2 + 1}`);
@@ -4534,7 +4589,7 @@ context.l
               var node_3 = sibling(img, 2);
               {
                 var consequent = ($$anchor5) => {
-                  var div_2 = root_4$1();
+                  var div_2 = root_4$2();
                   template_effect(() => set_style(div_2, `
                 /* Position the lens so the mouse is in its center */
                 top: ${get(lensY) - lensSize / 2}px;
@@ -4573,7 +4628,7 @@ context.l
     var node_4 = sibling(node, 2);
     {
       var consequent_3 = ($$anchor2) => {
-        var fragment_2 = root_5$2();
+        var fragment_2 = root_5$3();
         var div_3 = first_child(fragment_2);
         var button = child(div_3);
         button.__click = prev;
@@ -4581,7 +4636,7 @@ context.l
         button_1.__click = next;
         var div_4 = sibling(div_3, 2);
         each(div_4, 5, images, index, ($$anchor3, _, index2) => {
-          var button_2 = root_6$2();
+          var button_2 = root_6$3();
           set_attribute(button_2, "aria-label", `Switch to image ${index2 + 1}`);
           button_2.__click = () => set(currentIndex, index2);
           template_effect(() => set_class(button_2, 1, `indicator ${index2 === get(currentIndex) ? "active" : ""}`, "svelte-8ojyxu"));
@@ -4701,18 +4756,18 @@ context.l
       console.warn("LocalStorage Error: Could not save last dismissed announcement timestamp.", e);
     }
   }
-  var root_2$1 = from_html(`<div class="announcement svelte-1j2rmt2"><div class="svelte-1j2rmt2"><!></div> <button class="vote-close-btn svelte-1j2rmt2" aria-label="Dismiss announcement">Dismiss</button></div>`);
-  var root_3 = from_html(`<p class="svelte-1j2rmt2"> </p>`);
-  var root_6$1 = from_html(`<p class="geometa-footer svelte-1j2rmt2"><!></p>`);
-  var root_7 = from_html(`<hr class="svelte-1j2rmt2"/> <!>`, 1);
-  var root_5$1 = from_html(`<p class="svelte-1j2rmt2"><!> <strong class="svelte-1j2rmt2"> </strong> </p> <div class="geometa-note svelte-1j2rmt2"><!></div> <!> <!>`, 1);
-  var root_9 = from_html(`<div class="modal-backdrop svelte-1j2rmt2"><div class="modal svelte-1j2rmt2"><p class="svelte-1j2rmt2">You are about to open this site in a new tab:</p> <p class="modal-url svelte-1j2rmt2"> </p> <div class="modal-buttons svelte-1j2rmt2"><button class="proceed-btn svelte-1j2rmt2">Continue</button> <button class="close-btn svelte-1j2rmt2">Cancel</button></div></div></div>`);
-  var root_11 = from_html(`<p class="outdated svelte-1j2rmt2"><strong class="svelte-1j2rmt2"> </strong></p>`);
+  var root_2$2 = from_html(`<div class="announcement svelte-1j2rmt2"><div class="svelte-1j2rmt2"><!></div> <button class="vote-close-btn svelte-1j2rmt2" aria-label="Dismiss announcement">Dismiss</button></div>`);
+  var root_3$1 = from_html(`<p class="svelte-1j2rmt2"> </p>`);
+  var root_6$2 = from_html(`<p class="geometa-footer svelte-1j2rmt2"><!></p>`);
+  var root_7$1 = from_html(`<hr class="svelte-1j2rmt2"/> <!>`, 1);
+  var root_5$2 = from_html(`<p class="svelte-1j2rmt2"><!> <strong class="svelte-1j2rmt2"> </strong> </p> <div class="geometa-note svelte-1j2rmt2"><!></div> <!> <!>`, 1);
+  var root_9$1 = from_html(`<div class="modal-backdrop svelte-1j2rmt2"><div class="modal svelte-1j2rmt2"><p class="svelte-1j2rmt2">You are about to open this site in a new tab:</p> <p class="modal-url svelte-1j2rmt2"> </p> <div class="modal-buttons svelte-1j2rmt2"><button class="proceed-btn svelte-1j2rmt2">Continue</button> <button class="close-btn svelte-1j2rmt2">Cancel</button></div></div></div>`);
+  var root_11$1 = from_html(`<p class="outdated svelte-1j2rmt2"><strong class="svelte-1j2rmt2"> </strong></p>`);
   var root_10 = from_html(`<div class="modal-backdrop svelte-1j2rmt2"><div class="modal svelte-1j2rmt2"><div class="help-message svelte-1j2rmt2"><!> <p class="svelte-1j2rmt2">Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p> <ul class="svelte-1j2rmt2"><li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere
               on your screen.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">View Map meta list:</strong> Click the list icon to see all the metas included
               in the map you are currently playing.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Join the Community:</strong> Click the Discord icon to share feedback, suggest
               improvements, or just say hi!</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Outdated Script:</strong> The question mark icon will blink if the script is outdated.</li></ul></div> <button class="close-btn svelte-1j2rmt2">Close</button></div></div>`);
-  var root$3 = from_html(`<div class="geometa-container svelte-1j2rmt2"><!> <div class="flex header svelte-1j2rmt2"><h2 class="svelte-1j2rmt2">Learnable Meta</h2> <div class="icons svelte-1j2rmt2"><a target="_blank" aria-label="List of map metas" class="svelte-1j2rmt2"><span class="skill-icons--list svelte-1j2rmt2"></span></a> <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-1j2rmt2"><span class="flat-color-icons--globe svelte-1j2rmt2"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-1j2rmt2"><span class="skill-icons--discord svelte-1j2rmt2"></span></a> <button aria-label="More information" style="background: none; border: none; padding: 0;" class="svelte-1j2rmt2"><span></span></button></div></div> <!> <!> <!></div>`);
+  var root$4 = from_html(`<div class="geometa-container svelte-1j2rmt2"><!> <div class="flex header svelte-1j2rmt2"><h2 class="svelte-1j2rmt2">Learnable Meta</h2> <div class="icons svelte-1j2rmt2"><a target="_blank" aria-label="List of map metas" class="svelte-1j2rmt2"><span class="skill-icons--list svelte-1j2rmt2"></span></a> <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-1j2rmt2"><span class="flat-color-icons--globe svelte-1j2rmt2"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-1j2rmt2"><span class="skill-icons--discord svelte-1j2rmt2"></span></a> <button aria-label="More information" style="background: none; border: none; padding: 0;" class="svelte-1j2rmt2"><span></span></button></div></div> <!> <!> <!></div>`);
   function App($$anchor, $$props) {
     push($$props, true);
     let geoInfo = state(null);
@@ -4824,14 +4879,14 @@ context.l
       }
     });
     let lastDismissedTimestamp = state(proxy(getLastDismissedAnnouncementTimestamp()));
-    var div = root$3();
+    var div = root$4();
     var node = child(div);
     await_block(node, getAnnouncement, null, ($$anchor2, announcement) => {
       var fragment = comment();
       var node_1 = first_child(fragment);
       {
         var consequent = ($$anchor3) => {
-          var div_1 = root_2$1();
+          var div_1 = root_2$2();
           var div_2 = child(div_1);
           var node_2 = child(div_2);
           html(node_2, () => get(announcement).htmlMessage);
@@ -4858,7 +4913,7 @@ context.l
     var node_3 = sibling(div_3, 2);
     {
       var consequent_1 = ($$anchor2) => {
-        var p = root_3();
+        var p = root_3$1();
         var text = child(p);
         template_effect(() => set_text(text, `Error: ${get(error) ?? ""}`));
         append($$anchor2, p);
@@ -4868,7 +4923,7 @@ context.l
         var node_4 = first_child(fragment_1);
         {
           var consequent_4 = ($$anchor3) => {
-            var fragment_2 = root_5$1();
+            var fragment_2 = root_5$2();
             var p_1 = first_child(fragment_2);
             var node_5 = child(p_1);
             CountryFlag(node_5, {
@@ -4885,7 +4940,7 @@ context.l
             var node_7 = sibling(div_5, 2);
             {
               var consequent_2 = ($$anchor4) => {
-                var p_2 = root_6$1();
+                var p_2 = root_6$2();
                 var node_8 = child(p_2);
                 html(node_8, () => get(geoInfo).footer);
                 append($$anchor4, p_2);
@@ -4897,7 +4952,7 @@ context.l
             var node_9 = sibling(node_7, 2);
             {
               var consequent_3 = ($$anchor4) => {
-                var fragment_3 = root_7();
+                var fragment_3 = root_7$1();
                 var node_10 = sibling(first_child(fragment_3), 2);
                 Carousel(node_10, {
                   get images() {
@@ -4938,7 +4993,7 @@ context.l
     var node_11 = sibling(node_3, 2);
     {
       var consequent_5 = ($$anchor2) => {
-        var div_6 = root_9();
+        var div_6 = root_9$1();
         var div_7 = child(div_6);
         var p_3 = sibling(child(div_7), 2);
         var text_3 = child(p_3);
@@ -4963,7 +5018,7 @@ context.l
         var node_13 = child(div_11);
         {
           var consequent_6 = ($$anchor3) => {
-            var p_4 = root_11();
+            var p_4 = root_11$1();
             var strong_1 = child(p_4);
             var text_4 = child(strong_1);
             template_effect(($0) => set_text(text_4, `Your script version is out of date - please install the latest version (${$0 ?? ""})!`), [getLatestVersionInfo]);
@@ -5227,9 +5282,9 @@ roundNumber: 4,
       return result;
     };
   }
-  var root$2 = from_html(`<div class="geometa-map-label-container svelte-1y99qco"><p class="svelte-1y99qco">LearnableMeta Enabled</p> <a target="_blank"><button class="svelte-1y99qco">Meta List</button></a></div>`);
+  var root$3 = from_html(`<div class="geometa-map-label-container svelte-1y99qco"><p class="svelte-1y99qco">LearnableMeta Enabled</p> <a target="_blank"><button class="svelte-1y99qco">Meta List</button></a></div>`);
   function MapLabel($$anchor, $$props) {
-    var div = root$2();
+    var div = root$3();
     var a = sibling(child(div), 2);
     template_effect(() => set_attribute(a, "href", `https://learnablemeta.com/maps/${$$props.mapId}`));
     append($$anchor, div);
@@ -5279,6 +5334,64 @@ roundNumber: 4,
       }
     });
   }
+  class LearnableMetaApiError extends Error {
+    constructor(status, message) {
+      super(message);
+      this.status = status;
+      this.name = "LearnableMetaApiError";
+    }
+  }
+  function requestJson(url, apiToken) {
+    return new Promise((resolve, reject) => {
+      _GM_xmlhttpRequest({
+        method: "GET",
+        url,
+        headers: {
+          Authorization: `Bearer ${apiToken}`,
+          "Content-Type": "application/json"
+        },
+        timeout: 15e3,
+        onload: (response) => {
+          let body;
+          try {
+            body = response.responseText ? JSON.parse(response.responseText) : null;
+          } catch {
+            body = response.responseText;
+          }
+          if (response.status >= 200 && response.status < 300) {
+            resolve(body);
+            return;
+          }
+          const apiMessage = body && typeof body === "object" && "message" in body ? String(body.message) : response.statusText || "Request failed";
+          reject(
+            new LearnableMetaApiError(
+              response.status,
+              `LearnableMeta API error (${response.status}): ${apiMessage}`
+            )
+          );
+        },
+        onerror: () => reject(new LearnableMetaApiError(0, "Could not reach LearnableMeta")),
+        ontimeout: () => reject(new LearnableMetaApiError(0, "LearnableMeta request timed out"))
+      });
+    });
+  }
+  function fetchMapGroupManifest(groupId, apiToken) {
+    return requestJson(
+      `https://learnablemeta.com/api/userscript/map-group/${groupId}/maps`,
+      apiToken
+    );
+  }
+  async function fetchSyncedMapLocations(geoguessrId, apiToken, expectedFingerprint) {
+    const query = expectedFingerprint ? `?expectedFingerprint=${encodeURIComponent(expectedFingerprint)}` : "";
+    const data = await requestJson(
+      `https://learnablemeta.com/api/userscript/map/${geoguessrId}/locations${query}`,
+      apiToken
+    );
+    if (!Array.isArray(data.customCoordinates)) {
+      throw new LearnableMetaApiError(0, "Received invalid map location data");
+    }
+    return data.customCoordinates;
+  }
   async function geoguessrAPIFetch(url, options = {}) {
     const { method = "GET", headers: initialHeaders, body, ...restOptions } = options;
     const effectiveHeaders = new Headers(initialHeaders);
@@ -5321,21 +5434,45 @@ roundNumber: 4,
     }
     return response;
   }
+  function draftUrl(geoguessrId) {
+    return `https://www.geoguessr.com/api/v4/user-maps/drafts/${geoguessrId}`;
+  }
+  async function getGeoguessrDraft(geoguessrId) {
+    const response = await geoguessrAPIFetch(draftUrl(geoguessrId));
+    return response.json();
+  }
+  async function updateGeoguessrDraft(geoguessrId, draft, customCoordinates) {
+    const { avatar, description, highlighted, name, version } = draft;
+    await geoguessrAPIFetch(draftUrl(geoguessrId), {
+      method: "PUT",
+      body: JSON.stringify({
+        avatar,
+        description,
+        highlighted,
+        name,
+        customCoordinates,
+        version: version + 1
+      })
+    });
+  }
+  async function publishGeoguessrDraft(geoguessrId) {
+    await geoguessrAPIFetch(`${draftUrl(geoguessrId)}/publish`, {
+      method: "PUT",
+      body: JSON.stringify({})
+    });
+  }
   async function uploadLocations(geoguessrId, apiKey) {
-    const geoguessrDraftApiUrl = `https://www.geoguessr.com/api/v4/user-maps/drafts/${geoguessrId}`;
     let geoguessrMapDetails;
     try {
-      const response = await geoguessrAPIFetch(geoguessrDraftApiUrl);
-      geoguessrMapDetails = await response.json();
+      geoguessrMapDetails = await getGeoguessrDraft(geoguessrId);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("Failed to fetch Geoguessr map info:", error);
       throw new Error(`Geoguessr Error: Could not fetch map details. ${errorMessage}`);
     }
-    const { avatar, description, highlighted, name, version } = geoguessrMapDetails;
     let locationsToUpload;
     try {
-      locationsToUpload = await fetchMapLocationsGM(geoguessrId, apiKey);
+      locationsToUpload = await fetchSyncedMapLocations(geoguessrId, apiKey);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("Failed to fetch map locations from backend:", error);
@@ -5346,19 +5483,8 @@ roundNumber: 4,
       console.warn(errorMessage);
       throw new Error(errorMessage);
     }
-    const mapDataToUpload = {
-      avatar,
-      description,
-      highlighted,
-      name,
-      customCoordinates: locationsToUpload,
-      version: version + 1
-    };
     try {
-      await geoguessrAPIFetch(geoguessrDraftApiUrl, {
-        method: "PUT",
-        body: JSON.stringify(mapDataToUpload)
-      });
+      await updateGeoguessrDraft(geoguessrId, geoguessrMapDetails, locationsToUpload);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("Failed to update Geoguessr map draft:", error);
@@ -5366,83 +5492,12 @@ roundNumber: 4,
     }
     try {
       console.log("Publishing Geoguessr map...");
-      await geoguessrAPIFetch(`${geoguessrDraftApiUrl}/publish`, {
-        method: "PUT",
-        body: JSON.stringify({})
-      });
+      await publishGeoguessrDraft(geoguessrId);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       console.error("Failed to publish Geoguessr map:", error);
       throw new Error(`Geoguessr Error: Could not publish map. ${errorMessage}`);
     }
-  }
-  function fetchMapLocationsGM(geoguessrId, apiToken) {
-    return new Promise((resolve, reject) => {
-      const apiUrl = `https://learnablemeta.com/api/userscript/map/${geoguessrId}/locations`;
-      _GM_xmlhttpRequest({
-        method: "GET",
-        url: apiUrl,
-        headers: {
-          Authorization: `Bearer ${apiToken}`,
-          "Content-Type": "application/json"
-        },
-        timeout: 15e3,
-onload: (response) => {
-          if (response.status >= 200 && response.status < 300) {
-            try {
-              const data = JSON.parse(response.responseText);
-              if (data && Array.isArray(data.customCoordinates)) {
-                resolve(data.customCoordinates);
-              } else {
-                console.error("Unexpected data structure from backend:", data);
-                reject(new Error("Received invalid location data structure from backend."));
-              }
-            } catch (parseError) {
-              console.error(
-                "Error parsing JSON response from backend:",
-                parseError,
-                response.responseText
-              );
-              reject(
-                new Error(
-                  `Backend Error: Failed to parse location data: ${parseError.message.substring(0, 100)}`
-                )
-              );
-            }
-          } else {
-            let errorMessage = `Backend Error (${response.status}): ${response.statusText || "Failed to fetch locations"}`;
-            let rawErrorResponse = response.responseText;
-            try {
-              const parsedJsonError = JSON.parse(response.responseText);
-              if (parsedJsonError && parsedJsonError.message) {
-                errorMessage = `Backend Error (${response.status}): ${parsedJsonError.message}`;
-              } else if (parsedJsonError) {
-                errorMessage = `Backend Error (${response.status}): ${JSON.stringify(parsedJsonError).substring(0, 100)}...`;
-              }
-              rawErrorResponse = parsedJsonError;
-            } catch (e) {
-              if (response.responseText) {
-                errorMessage = `Backend Error (${response.status}): ${response.responseText.substring(0, 100)}...`;
-              }
-            }
-            console.error(
-              `Error fetching map locations from backend (Status: ${response.status}):`,
-              rawErrorResponse
-            );
-            reject(new Error(errorMessage));
-          }
-        },
-        onerror: (error) => {
-          console.error("Failed to fetch map locations (XHR onerror):", error);
-          let detail = error.error || error.statusText || "Network request failed";
-          reject(new Error(`Network Error: Could not reach backend to fetch locations. ${detail}`));
-        },
-        ontimeout: () => {
-          console.error("Failed to fetch map locations: Request timed out", apiUrl);
-          reject(new Error("Backend Timeout: Request to fetch locations timed out."));
-        }
-      });
-    });
   }
   const linear = (x) => x;
   function fade(node, { delay = 0, duration = 400, easing = linear } = {}) {
@@ -5454,18 +5509,18 @@ onload: (response) => {
       css: (t) => `opacity: ${t * o}`
     };
   }
-  var root_1$1 = from_html(`<span class="toast-detail svelte-w17ltc"> </span>`);
-  var root$1 = from_html(`<div role="alert"><div class="toast-content svelte-w17ltc"><span class="toast-message"> </span> <!></div> <button class="toast-close-button svelte-w17ltc" aria-label="Close">×</button></div>`);
+  var root_1$2 = from_html(`<span class="toast-detail svelte-w17ltc"> </span>`);
+  var root$2 = from_html(`<div role="alert"><div class="toast-content svelte-w17ltc"><span class="toast-message"> </span> <!></div> <button class="toast-close-button svelte-w17ltc" aria-label="Close">×</button></div>`);
   function ToastNotification($$anchor, $$props) {
     let type = prop($$props, "type", 3, "info");
-    var div = root$1();
+    var div = root$2();
     var div_1 = child(div);
     var span = child(div_1);
     var text = child(span);
     var node = sibling(span, 2);
     {
       var consequent = ($$anchor2) => {
-        var span_1 = root_1$1();
+        var span_1 = root_1$2();
         var text_1 = child(span_1);
         template_effect(() => set_text(text_1, $$props.detail));
         append($$anchor2, span_1);
@@ -5487,17 +5542,27 @@ onload: (response) => {
     append($$anchor, div);
   }
   delegate(["click"]);
-  var root_2 = from_html(`<p class="svelte-1plj3lz">An API key is required to upload locations. Please paste your key below.</p>`);
-  var root_4 = from_html(`<p class="svelte-1plj3lz">A key ending in <code class="svelte-1plj3lz"> </code> is currently saved. Paste a new key
+  const API_KEY_STORAGE_NAME = "learnableMeta_apiKey";
+  const URL_TO_GENERATE_TOKEN = "https://learnablemeta.com/profile/token";
+  function getApiKey() {
+    const key = _GM_getValue(API_KEY_STORAGE_NAME, null);
+    return key?.trim() || null;
+  }
+  function saveApiKey(key) {
+    _GM_setValue(API_KEY_STORAGE_NAME, key.trim());
+  }
+  function clearApiKey() {
+    _GM_setValue(API_KEY_STORAGE_NAME, "");
+  }
+  var root_2$1 = from_html(`<p class="svelte-1plj3lz">An API key is required to upload locations. Please paste your key below.</p>`);
+  var root_4$1 = from_html(`<p class="svelte-1plj3lz">A key ending in <code class="svelte-1plj3lz"> </code> is currently saved. Paste a new key
           to replace it, or clear the saved key.</p>`);
-  var root_5 = from_html(`<p class="svelte-1plj3lz">No API key is saved yet. Paste your key below.</p>`);
-  var root_6 = from_html(`<button class="modal-button modal-button-clear svelte-1plj3lz">Clear Key</button>`);
-  var root_1 = from_html(`<div class="modal-overlay svelte-1plj3lz" role="dialog" aria-modal="true" aria-labelledby="apiKeyModalTitle"><div class="modal-content svelte-1plj3lz"><h2 id="apiKeyModalTitle" class="svelte-1plj3lz">LearnableMeta API Key</h2> <!> <p class="svelte-1plj3lz">You can generate your API token on your <a target="_blank" rel="noopener noreferrer" class="svelte-1plj3lz">LearnableMeta profile page</a>.</p> <input type="text" placeholder="Paste your API key here" aria-label="API Key Input" class="modal-input svelte-1plj3lz"/> <div class="modal-actions svelte-1plj3lz"><!> <button class="modal-button modal-button-save svelte-1plj3lz"> </button> <button class="modal-button modal-button-cancel svelte-1plj3lz">Cancel</button></div> <p class="modal-note svelte-1plj3lz">Your API key will be stored securely in your browser's userscript storage for future use.</p></div></div>`);
-  var root = from_html(`<div class="upload-label-container svelte-1plj3lz"><button class="custom-yellow-button svelte-1plj3lz"> </button> <button class="api-key-button svelte-1plj3lz" title="Manage LearnableMeta API key" aria-label="Manage LearnableMeta API key">🔑</button></div> <!> <!>`, 1);
+  var root_5$1 = from_html(`<p class="svelte-1plj3lz">No API key is saved yet. Paste your key below.</p>`);
+  var root_6$1 = from_html(`<button class="modal-button modal-button-clear svelte-1plj3lz">Clear Key</button>`);
+  var root_1$1 = from_html(`<div class="modal-overlay svelte-1plj3lz" role="dialog" aria-modal="true" aria-labelledby="apiKeyModalTitle"><div class="modal-content svelte-1plj3lz"><h2 id="apiKeyModalTitle" class="svelte-1plj3lz">LearnableMeta API Key</h2> <!> <p class="svelte-1plj3lz">You can generate your API token on your <a target="_blank" rel="noopener noreferrer" class="svelte-1plj3lz">LearnableMeta profile page</a>.</p> <input type="text" placeholder="Paste your API key here" aria-label="API Key Input" class="modal-input svelte-1plj3lz"/> <div class="modal-actions svelte-1plj3lz"><!> <button class="modal-button modal-button-save svelte-1plj3lz"> </button> <button class="modal-button modal-button-cancel svelte-1plj3lz">Cancel</button></div> <p class="modal-note svelte-1plj3lz">Your API key will be stored securely in your browser's userscript storage for future use.</p></div></div>`);
+  var root$1 = from_html(`<div class="upload-label-container svelte-1plj3lz"><button class="custom-yellow-button svelte-1plj3lz"> </button> <button class="api-key-button svelte-1plj3lz" title="Manage LearnableMeta API key" aria-label="Manage LearnableMeta API key">🔑</button></div> <!> <!>`, 1);
   function UploadLocations($$anchor, $$props) {
     push($$props, true);
-    const API_KEY_STORAGE_NAME = "learnableMeta_apiKey";
-    const URL_TO_GENERATE_TOKEN = "https://learnablemeta.com/profile/token";
     let showApiKeyModal = state(false);
     let modalMode = state("upload");
     let apiKeyInput = state("");
@@ -5535,7 +5600,7 @@ onload: (response) => {
     }
     function getApiKeyFromGM() {
       try {
-        return _GM_getValue(API_KEY_STORAGE_NAME, null);
+        return getApiKey();
       } catch (e) {
         console.warn("GM_getValue is not available. API key functionality might be limited.", e);
         showCustomToast("Userscript storage (GM_getValue) is not available. Please ensure Tampermonkey/Violentmonkey is correctly configured.", "error", 0);
@@ -5544,7 +5609,7 @@ onload: (response) => {
     }
     function saveApiKeyToGM(key) {
       try {
-        _GM_setValue(API_KEY_STORAGE_NAME, key);
+        saveApiKey(key);
       } catch (e) {
         console.warn("GM_setValue is not available. API key functionality might be limited.", e);
         showCustomToast("Userscript storage (GM_setValue) is not available. Please ensure Tampermonkey/Violentmonkey is correctly configured.", "error", 0);
@@ -5571,7 +5636,7 @@ onload: (response) => {
       set(showApiKeyModal, true);
     }
     function handleClearApiKey() {
-      saveApiKeyToGM("");
+      clearApiKey();
       set(currentApiKey, null);
       set(showApiKeyModal, false);
       showCustomToast("LearnableMeta API Key cleared.", "success");
@@ -5614,7 +5679,7 @@ onload: (response) => {
       set(showApiKeyModal, false);
       set(apiKeyInput, "");
     }
-    var fragment = root();
+    var fragment = root$1();
     var div = first_child(fragment);
     var button = child(div);
     button.__click = handleUploadClick;
@@ -5624,12 +5689,12 @@ onload: (response) => {
     var node = sibling(div, 2);
     {
       var consequent_3 = ($$anchor2) => {
-        var div_1 = root_1();
+        var div_1 = root_1$1();
         var div_2 = child(div_1);
         var node_1 = sibling(child(div_2), 2);
         {
           var consequent = ($$anchor3) => {
-            var p = root_2();
+            var p = root_2$1();
             append($$anchor3, p);
           };
           var alternate_1 = ($$anchor3) => {
@@ -5637,14 +5702,14 @@ onload: (response) => {
             var node_2 = first_child(fragment_1);
             {
               var consequent_1 = ($$anchor4) => {
-                var p_1 = root_4();
+                var p_1 = root_4$1();
                 var code = sibling(child(p_1));
                 var text_1 = child(code);
                 template_effect(($0) => set_text(text_1, `…${$0 ?? ""}`), [() => get(currentApiKey).slice(-4)]);
                 append($$anchor4, p_1);
               };
               var alternate = ($$anchor4) => {
-                var p_2 = root_5();
+                var p_2 = root_5$1();
                 append($$anchor4, p_2);
               };
               if_block(
@@ -5665,13 +5730,12 @@ onload: (response) => {
         }
         var p_3 = sibling(node_1, 2);
         var a = sibling(child(p_3));
-        set_attribute(a, "href", URL_TO_GENERATE_TOKEN);
         var input = sibling(p_3, 2);
         var div_3 = sibling(input, 2);
         var node_3 = child(div_3);
         {
           var consequent_2 = ($$anchor3) => {
-            var button_2 = root_6();
+            var button_2 = root_6$1();
             button_2.__click = handleClearApiKey;
             append($$anchor3, button_2);
           };
@@ -5684,7 +5748,10 @@ onload: (response) => {
         var text_2 = child(button_3);
         var button_4 = sibling(button_3, 2);
         button_4.__click = handleCancelModal;
-        template_effect(() => set_text(text_2, get(modalMode) === "upload" ? "Save & Upload" : "Save"));
+        template_effect(() => {
+          set_attribute(a, "href", URL_TO_GENERATE_TOKEN);
+          set_text(text_2, get(modalMode) === "upload" ? "Save & Upload" : "Save");
+        });
         bind_value(input, () => get(apiKeyInput), ($$value) => set(apiKeyInput, $$value));
         append($$anchor2, div_1);
       };
@@ -5731,7 +5798,7 @@ onload: (response) => {
       addLocationsUploadButtons();
     });
   }
-  const containerId = "geometa-locations-upload";
+  const containerId$1 = "geometa-locations-upload";
   let uploadApp = null;
   let runToken$1 = 0;
   function removeUploadButton() {
@@ -5739,7 +5806,7 @@ onload: (response) => {
       unmount(uploadApp);
       uploadApp = null;
     }
-    document.getElementById(containerId)?.remove();
+    document.getElementById(containerId$1)?.remove();
   }
   async function addLocationsUploadButtons() {
     const token = ++runToken$1;
@@ -5755,7 +5822,7 @@ onload: (response) => {
     const container = document.querySelector(".top-bar-menu_topBarMenu__kd9zX");
     if (container) {
       const target = document.createElement("div");
-      target.id = containerId;
+      target.id = containerId$1;
       container.insertBefore(target, container.lastElementChild);
       uploadApp = mount(UploadLocations, {
         target,
@@ -5814,6 +5881,468 @@ onload: (response) => {
       logInfo("failed to add meta pins on challenge results", e);
     }
   }
+  function canonicalizeMapCoordinates(coordinates) {
+    const tuples = coordinates.map(
+      ({ panoId, lat, lng, heading, pitch, zoom }) => [panoId, lat, lng, heading, pitch, zoom]
+    );
+    tuples.sort((left, right) => {
+      const leftJson = JSON.stringify(left);
+      const rightJson = JSON.stringify(right);
+      return leftJson < rightJson ? -1 : leftJson > rightJson ? 1 : 0;
+    });
+    return JSON.stringify(tuples);
+  }
+  async function fingerprintMapCoordinates(coordinates) {
+    const bytes = new TextEncoder().encode(canonicalizeMapCoordinates(coordinates));
+    const digest = await crypto.subtle.digest("SHA-256", bytes);
+    return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  }
+  var root_1 = from_html(`<p class="subtitle svelte-axobi4"> </p>`);
+  var root_3 = from_html(`<p class="error-text svelte-axobi4"> </p>`);
+  var root_2 = from_html(`<div class="token-form svelte-axobi4"><p class="svelte-axobi4">Paste your LearnableMeta API token to load maps you can manage.</p> <p class="small svelte-axobi4">Generate or replace it on your <a target="_blank" rel="noopener noreferrer" class="svelte-axobi4">token page</a>.</p> <input type="password" placeholder="LearnableMeta API token" aria-label="LearnableMeta API token" class="svelte-axobi4"/> <!> <div class="actions svelte-axobi4"><button class="secondary svelte-axobi4">Cancel</button> <button class="primary svelte-axobi4">Save and scan</button></div></div>`);
+  var root_5 = from_html(`<div class="notice svelte-axobi4">Loading synchronized maps and comparing GeoGuessr drafts…</div>`);
+  var root_6 = from_html(`<div class="fatal svelte-axobi4"><strong>Could not load this group.</strong> <span> </span> <button class="secondary svelte-axobi4">Try again</button></div>`);
+  var root_9 = from_html(`<span class="row-error svelte-axobi4"> </span>`);
+  var root_8 = from_html(`<label><input type="checkbox"/> <span class="map-details svelte-axobi4"><strong class="svelte-axobi4"> </strong> <span class="svelte-axobi4"> </span> <!></span> <span> </span></label>`);
+  var root_7 = from_html(`<div class="toolbar svelte-axobi4"><span> </span> <div><button class="link-button svelte-axobi4">Select changed</button> <button class="link-button svelte-axobi4">Deselect all</button></div></div> <div class="map-list svelte-axobi4"></div>`, 1);
+  var root_11 = from_html(`<div class="notice svelte-axobi4">This group has no maps to update.</div>`);
+  var root_12 = from_html(`<div class="summary svelte-axobi4"> </div>`);
+  var root_13 = from_html(`<button class="secondary svelte-axobi4"> </button>`);
+  var root_4 = from_html(`<!> <!> <!> <!> <footer class="actions svelte-axobi4"><button class="link-button token-button svelte-axobi4">Change API token</button> <button class="secondary svelte-axobi4">Close</button> <!> <button class="primary svelte-axobi4"> </button></footer>`, 1);
+  var root = from_html(`<div class="backdrop svelte-axobi4" role="presentation"><div class="panel svelte-axobi4" role="dialog" aria-modal="true" aria-labelledby="group-update-title"><header class="svelte-axobi4"><div><p class="eyebrow svelte-axobi4">LearnableMeta</p> <h1 id="group-update-title" class="svelte-axobi4">Update GeoGuessr maps</h1> <!></div> <button class="icon-button svelte-axobi4" aria-label="Close">×</button></header> <!></div></div>`);
+  function MapGroupUpdate($$anchor, $$props) {
+    push($$props, true);
+    let phase = state("scanning");
+    let apiToken = state("");
+    let tokenInput = state("");
+    let tokenError = state("");
+    let groupName = state("");
+    let rows = state(proxy([]));
+    let fatalError = state("");
+    let finishedRun = state(false);
+    let selectedCount = user_derived(() => get(rows).filter((row) => row.status === "changed" && row.selected).length);
+    let failureCount = user_derived(() => get(rows).filter((row) => ["scan-error", "update-error", "publish-error"].includes(row.status)).length);
+    let successCount = user_derived(() => get(rows).filter((row) => row.status === "success").length);
+    let changedCount = user_derived(() => get(rows).filter((row) => row.status === "changed").length);
+    onMount(() => {
+      try {
+        const savedToken = getApiKey();
+        if (!savedToken) {
+          set(phase, "token");
+          return;
+        }
+        set(apiToken, savedToken, true);
+        void scanGroup();
+      } catch (error) {
+        set(phase, "token");
+        set(tokenError, errorMessage(error), true);
+      }
+    });
+    function errorMessage(error) {
+      return error instanceof Error ? error.message : String(error);
+    }
+    function replaceRow(geoguessrId, update) {
+      const index2 = get(rows).findIndex((row) => row.geoguessrId === geoguessrId);
+      if (index2 !== -1) get(rows)[index2] = { ...get(rows)[index2], ...update };
+    }
+    async function saveTokenAndScan() {
+      const trimmed = get(tokenInput).trim();
+      if (!trimmed) {
+        set(tokenError, "Paste a valid LearnableMeta API token.");
+        return;
+      }
+      saveApiKey(trimmed);
+      set(apiToken, trimmed, true);
+      set(tokenInput, "");
+      set(tokenError, "");
+      await scanGroup();
+    }
+    function changeToken() {
+      set(tokenInput, "");
+      set(tokenError, "");
+      set(phase, "token");
+    }
+    async function scanGroup() {
+      set(phase, "scanning");
+      set(fatalError, "");
+      set(finishedRun, false);
+      set(groupName, "");
+      set(rows, [], true);
+      try {
+        const manifest = await fetchMapGroupManifest($$props.groupId, get(apiToken));
+        set(groupName, manifest.group.name, true);
+        set(
+          rows,
+          manifest.maps.map((map) => ({
+            ...map,
+            status: map.locationCount === 0 ? "empty" : "scanning",
+            selected: false
+          })),
+          true
+        );
+        let nextIndex = 0;
+        async function worker() {
+          while (nextIndex < get(rows).length) {
+            const row = get(rows)[nextIndex++];
+            if (row.status === "scanning") await scanMap(row);
+          }
+        }
+        await Promise.all(Array.from({ length: Math.min(3, get(rows).length) }, () => worker()));
+        set(phase, "review");
+      } catch (error) {
+        if (error instanceof LearnableMetaApiError && error.status === 401) {
+          clearApiKey();
+          set(apiToken, "");
+          set(tokenError, "Your LearnableMeta API token was rejected. Paste a new token.");
+          set(phase, "token");
+          return;
+        }
+        set(fatalError, errorMessage(error), true);
+        set(phase, "review");
+      }
+    }
+    async function scanMap(row) {
+      replaceRow(row.geoguessrId, { status: "scanning", error: void 0, selected: false });
+      try {
+        const draft = await getGeoguessrDraft(row.geoguessrId);
+        const fingerprint = await fingerprintMapCoordinates(draft.customCoordinates ?? []);
+        const changed = fingerprint !== row.fingerprint;
+        replaceRow(row.geoguessrId, { status: changed ? "changed" : "current", selected: changed });
+      } catch (error) {
+        replaceRow(row.geoguessrId, {
+          status: "scan-error",
+          selected: false,
+          error: errorMessage(error)
+        });
+      }
+    }
+    function selectChanged(selected) {
+      set(rows, get(rows).map((row) => row.status === "changed" ? { ...row, selected } : row), true);
+    }
+    async function updateSelected() {
+      const selectedIds = get(rows).filter((row) => row.status === "changed" && row.selected).map((row) => row.geoguessrId);
+      if (selectedIds.length === 0) return;
+      set(phase, "updating");
+      set(finishedRun, false);
+      for (const geoguessrId of selectedIds) {
+        const row = get(rows).find((candidate) => candidate.geoguessrId === geoguessrId);
+        if (row) await updateMap(row);
+      }
+      set(finishedRun, true);
+      set(phase, "review");
+    }
+    async function updateMap(row) {
+      replaceRow(row.geoguessrId, { status: "updating", error: void 0 });
+      let draft;
+      try {
+        draft = await getGeoguessrDraft(row.geoguessrId);
+        const currentFingerprint = await fingerprintMapCoordinates(draft.customCoordinates ?? []);
+        if (currentFingerprint === row.fingerprint) {
+          replaceRow(row.geoguessrId, { status: "current", selected: false });
+          return;
+        }
+        const coordinates = await fetchSyncedMapLocations(row.geoguessrId, get(apiToken), row.fingerprint);
+        if (coordinates.length === 0) throw new Error("Cannot publish an empty map");
+        await updateGeoguessrDraft(row.geoguessrId, draft, coordinates);
+      } catch (error) {
+        replaceRow(row.geoguessrId, { status: "update-error", error: errorMessage(error) });
+        return;
+      }
+      replaceRow(row.geoguessrId, { status: "publishing" });
+      try {
+        await publishGeoguessrDraft(row.geoguessrId);
+        replaceRow(row.geoguessrId, { status: "success", selected: false });
+      } catch (error) {
+        replaceRow(row.geoguessrId, { status: "publish-error", error: errorMessage(error) });
+      }
+    }
+    async function retryFailures() {
+      set(phase, "updating");
+      set(finishedRun, false);
+      const failedIds = get(rows).filter((row) => ["scan-error", "update-error", "publish-error"].includes(row.status)).map((row) => row.geoguessrId);
+      for (const geoguessrId of failedIds) {
+        const row = get(rows).find((candidate) => candidate.geoguessrId === geoguessrId);
+        if (!row) continue;
+        if (row.status === "scan-error") {
+          await scanMap(row);
+        } else if (row.status === "publish-error") {
+          replaceRow(row.geoguessrId, { status: "publishing", error: void 0 });
+          try {
+            await publishGeoguessrDraft(row.geoguessrId);
+            replaceRow(row.geoguessrId, { status: "success", selected: false });
+          } catch (error) {
+            replaceRow(row.geoguessrId, { status: "publish-error", error: errorMessage(error) });
+          }
+        } else {
+          await updateMap(row);
+        }
+      }
+      set(finishedRun, true);
+      set(phase, "review");
+    }
+    function statusLabel(row) {
+      const labels = {
+        scanning: "Checking…",
+        changed: "Update available",
+        current: "Up to date",
+        empty: "No synchronized locations",
+        "scan-error": "Could not check",
+        updating: "Updating draft…",
+        publishing: "Publishing…",
+        success: "Updated and published",
+        "update-error": "Update failed",
+        "publish-error": "Draft updated; publish failed"
+      };
+      return labels[row.status];
+    }
+    var div = root();
+    var div_1 = child(div);
+    var header = child(div_1);
+    var div_2 = child(header);
+    var node = sibling(child(div_2), 4);
+    {
+      var consequent = ($$anchor2) => {
+        var p = root_1();
+        var text = child(p);
+        template_effect(() => set_text(text, get(groupName)));
+        append($$anchor2, p);
+      };
+      if_block(node, ($$render) => {
+        if (get(groupName)) $$render(consequent);
+      });
+    }
+    var button = sibling(div_2, 2);
+    button.__click = function(...$$args) {
+      $$props.onClose?.apply(this, $$args);
+    };
+    var node_1 = sibling(header, 2);
+    {
+      var consequent_2 = ($$anchor2) => {
+        var div_3 = root_2();
+        var p_1 = sibling(child(div_3), 2);
+        var a = sibling(child(p_1));
+        var input = sibling(p_1, 2);
+        input.__keydown = (event2) => event2.key === "Enter" && void saveTokenAndScan();
+        var node_2 = sibling(input, 2);
+        {
+          var consequent_1 = ($$anchor3) => {
+            var p_2 = root_3();
+            var text_1 = child(p_2);
+            template_effect(() => set_text(text_1, get(tokenError)));
+            append($$anchor3, p_2);
+          };
+          if_block(node_2, ($$render) => {
+            if (get(tokenError)) $$render(consequent_1);
+          });
+        }
+        var div_4 = sibling(node_2, 2);
+        var button_1 = child(div_4);
+        button_1.__click = function(...$$args) {
+          $$props.onClose?.apply(this, $$args);
+        };
+        var button_2 = sibling(button_1, 2);
+        button_2.__click = saveTokenAndScan;
+        template_effect(() => set_attribute(a, "href", URL_TO_GENERATE_TOKEN));
+        bind_value(input, () => get(tokenInput), ($$value) => set(tokenInput, $$value));
+        append($$anchor2, div_3);
+      };
+      var alternate_1 = ($$anchor2) => {
+        var fragment = root_4();
+        var node_3 = first_child(fragment);
+        {
+          var consequent_3 = ($$anchor3) => {
+            var div_5 = root_5();
+            append($$anchor3, div_5);
+          };
+          if_block(node_3, ($$render) => {
+            if (get(phase) === "scanning") $$render(consequent_3);
+          });
+        }
+        var node_4 = sibling(node_3, 2);
+        {
+          var consequent_4 = ($$anchor3) => {
+            var div_6 = root_6();
+            var span = sibling(child(div_6), 2);
+            var text_2 = child(span);
+            var button_3 = sibling(span, 2);
+            button_3.__click = scanGroup;
+            template_effect(() => set_text(text_2, get(fatalError)));
+            append($$anchor3, div_6);
+          };
+          if_block(node_4, ($$render) => {
+            if (get(fatalError)) $$render(consequent_4);
+          });
+        }
+        var node_5 = sibling(node_4, 2);
+        {
+          var consequent_6 = ($$anchor3) => {
+            var fragment_1 = root_7();
+            var div_7 = first_child(fragment_1);
+            var span_1 = child(div_7);
+            var text_3 = child(span_1);
+            var div_8 = sibling(span_1, 2);
+            var button_4 = child(div_8);
+            button_4.__click = () => selectChanged(true);
+            var button_5 = sibling(button_4, 2);
+            button_5.__click = () => selectChanged(false);
+            var div_9 = sibling(div_7, 2);
+            each(div_9, 21, () => get(rows), (row) => row.geoguessrId, ($$anchor4, row, $$index) => {
+              var label = root_8();
+              let classes;
+              var input_1 = child(label);
+              var span_2 = sibling(input_1, 2);
+              var strong = child(span_2);
+              var text_4 = child(strong);
+              var span_3 = sibling(strong, 2);
+              var text_5 = child(span_3);
+              var node_6 = sibling(span_3, 2);
+              {
+                var consequent_5 = ($$anchor5) => {
+                  var span_4 = root_9();
+                  var text_6 = child(span_4);
+                  template_effect(() => set_text(text_6, get(row).error));
+                  append($$anchor5, span_4);
+                };
+                if_block(node_6, ($$render) => {
+                  if (get(row).error) $$render(consequent_5);
+                });
+              }
+              var span_5 = sibling(span_2, 2);
+              let classes_1;
+              var text_7 = child(span_5);
+              template_effect(
+                ($0, $1) => {
+                  classes = set_class(label, 1, "map-row svelte-axobi4", null, classes, { "error-row": get(row).error });
+                  input_1.disabled = get(row).status !== "changed" || get(phase) === "updating";
+                  set_text(text_4, get(row).name);
+                  set_text(text_5, `${$0 ?? ""} synchronized locations`);
+                  classes_1 = set_class(span_5, 1, "status svelte-axobi4", null, classes_1, {
+                    good: get(row).status === "current" || get(row).status === "success"
+                  });
+                  set_text(text_7, $1);
+                },
+                [
+                  () => get(row).locationCount.toLocaleString(),
+                  () => statusLabel(get(row))
+                ]
+              );
+              bind_checked(input_1, () => get(row).selected, ($$value) => get(row).selected = $$value);
+              append($$anchor4, label);
+            });
+            template_effect(() => set_text(text_3, `${get(rows).length ?? ""} map${get(rows).length === 1 ? "" : "s"}`));
+            append($$anchor3, fragment_1);
+          };
+          var alternate = ($$anchor3) => {
+            var fragment_2 = comment();
+            var node_7 = first_child(fragment_2);
+            {
+              var consequent_7 = ($$anchor4) => {
+                var div_10 = root_11();
+                append($$anchor4, div_10);
+              };
+              if_block(
+                node_7,
+                ($$render) => {
+                  if (get(phase) === "review" && !get(fatalError)) $$render(consequent_7);
+                },
+                true
+              );
+            }
+            append($$anchor3, fragment_2);
+          };
+          if_block(node_5, ($$render) => {
+            if (get(rows).length > 0) $$render(consequent_6);
+            else $$render(alternate, false);
+          });
+        }
+        var node_8 = sibling(node_5, 2);
+        {
+          var consequent_8 = ($$anchor3) => {
+            var div_11 = root_12();
+            var text_8 = child(div_11);
+            template_effect(() => set_text(text_8, `Finished: ${get(successCount) ?? ""} published, ${get(failureCount) ?? ""} failed, ${get(changedCount) ?? ""} still available.`));
+            append($$anchor3, div_11);
+          };
+          if_block(node_8, ($$render) => {
+            if (get(finishedRun)) $$render(consequent_8);
+          });
+        }
+        var footer = sibling(node_8, 2);
+        var button_6 = child(footer);
+        button_6.__click = changeToken;
+        var button_7 = sibling(button_6, 2);
+        button_7.__click = function(...$$args) {
+          $$props.onClose?.apply(this, $$args);
+        };
+        var node_9 = sibling(button_7, 2);
+        {
+          var consequent_9 = ($$anchor3) => {
+            var button_8 = root_13();
+            button_8.__click = retryFailures;
+            var text_9 = child(button_8);
+            template_effect(() => {
+              button_8.disabled = get(phase) === "updating";
+              set_text(text_9, `Retry failed (${get(failureCount) ?? ""})`);
+            });
+            append($$anchor3, button_8);
+          };
+          if_block(node_9, ($$render) => {
+            if (get(failureCount) > 0) $$render(consequent_9);
+          });
+        }
+        var button_9 = sibling(node_9, 2);
+        button_9.__click = updateSelected;
+        var text_10 = child(button_9);
+        template_effect(() => {
+          button_6.disabled = get(phase) === "updating";
+          button_7.disabled = get(phase) === "updating";
+          button_9.disabled = get(phase) !== "review" || get(selectedCount) === 0;
+          set_text(text_10, get(phase) === "updating" ? "Updating…" : `Update and publish (${get(selectedCount)})`);
+        });
+        append($$anchor2, fragment);
+      };
+      if_block(node_1, ($$render) => {
+        if (get(phase) === "token") $$render(consequent_2);
+        else $$render(alternate_1, false);
+      });
+    }
+    template_effect(() => button.disabled = get(phase) === "updating");
+    append($$anchor, div);
+    pop();
+  }
+  delegate(["click", "keydown"]);
+  const queryParameter = "learnableMetaGroupId";
+  const containerId = "learnablemeta-map-group-update";
+  let app = null;
+  function clearHandoffParameter() {
+    const url = new URL(window.location.href);
+    url.searchParams.delete(queryParameter);
+    window.history.replaceState(window.history.state, "", url);
+  }
+  function startMapGroupUpdate(groupId) {
+    if (!Number.isSafeInteger(groupId) || groupId <= 0 || app) return;
+    const target = document.createElement("div");
+    target.id = containerId;
+    document.body.appendChild(target);
+    app = mount(MapGroupUpdate, {
+      target,
+      props: {
+        groupId,
+        onClose: () => {
+          if (app) unmount(app);
+          app = null;
+          target.remove();
+          clearHandoffParameter();
+        }
+      }
+    });
+  }
+  function initMapGroupUpdate() {
+    if (!window.location.pathname.startsWith("/creator-hub")) return;
+    const rawGroupId = new URL(window.location.href).searchParams.get(queryParameter);
+    if (!rawGroupId) return;
+    startMapGroupUpdate(Number(rawGroupId));
+  }
   if (typeof _GM_registerMenuCommand === "function") {
     _GM_registerMenuCommand("LearnableMeta - Reset Meta Window Layout", () => {
       if (confirm("Reset the LearnableMeta window position and size?")) {
@@ -5835,7 +6364,8 @@ onload: (response) => {
       ["liveChallenge", initLiveChallenge],
       ["mapLabel", initMapLabel],
       ["locationsUpload", initLocationsUpload],
-      ["challengeResults", initChallengeResults]
+      ["challengeResults", initChallengeResults],
+      ["mapGroupUpdate", initMapGroupUpdate]
     ];
     for (const [name, init2] of features) {
       try {
