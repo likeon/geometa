@@ -118,7 +118,6 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
           footer: savedData.footer,
           difficulty: savedData.difficulty,
           ordering: savedData.ordering,
-          autoUpdate: savedData.autoUpdate,
           isVerified: savedData.isVerified,
           regions: regionNames(oldRegions.map((mr) => mr.regionId)),
           levels: levelNames(oldLevels.map((ml) => ml.levelId)),
@@ -161,7 +160,6 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
         ...baseValues,
         ...(user.isSuperadmin && {
           ordering: dataNoId.ordering,
-          autoUpdate: dataNoId.autoUpdate,
           isVerified: dataNoId.isVerified,
         }),
         ...((user.isSuperadmin || user.isTrusted) && {
@@ -255,9 +253,6 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
             ordering: user.isSuperadmin
               ? dataNoId.ordering
               : (savedData?.ordering ?? 0),
-            autoUpdate: user.isSuperadmin
-              ? dataNoId.autoUpdate
-              : (savedData?.autoUpdate ?? false),
             isVerified: user.isSuperadmin
               ? dataNoId.isVerified
               : (savedData?.isVerified ?? false),
@@ -329,7 +324,6 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
         isShared: t.Boolean(),
         authors: t.Union([t.String(), t.Null()]),
         ordering: t.Number(),
-        autoUpdate: t.Boolean(),
         footer: t.String(),
         isVerified: t.Boolean(),
         includeFilters: t.Array(t.String()),

@@ -253,6 +253,13 @@
       "when": 1785007158030,
       "tag": "0035_map_group_collaboration",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "7",
+      "when": 1785995428743,
+      "tag": "0036_sparkling_jack_flag",
+      "breakpoints": true
     }
   ]
 }

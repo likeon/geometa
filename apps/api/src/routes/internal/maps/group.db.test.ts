@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { app } from '@api/api';
 import {
   levels,
-  mapData,
   mapFilters,
   mapGroupChanges,
   mapGroupLocations,
@@ -115,7 +114,6 @@ function groupMapBody(overrides: Record<string, unknown> = {}) {
     isShared: true,
     authors: 'Author',
     ordering: 3,
-    autoUpdate: true,
     difficulty: 2,
     isVerified: true,
     levels: [],
@@ -234,7 +232,6 @@ describe('PUT /api/internal/maps/group', () => {
         userId: null,
         authors: 'Author',
         ordering: 3,
-        autoUpdate: true,
         footer: '**Footer**',
         footerHtml: '<p><strong>Footer</strong></p>',
         modifiedAt: expect.any(Number),
@@ -309,7 +306,6 @@ describe('PUT /api/internal/maps/group', () => {
         isShared: false,
         authors: null,
         ordering: 0,
-        autoUpdate: false,
         difficulty: 5,
         isVerified: false,
         levels: [levelB, levelC],
@@ -336,7 +332,6 @@ describe('PUT /api/internal/maps/group', () => {
         isShared: false,
         authors: null,
         ordering: 0,
-        autoUpdate: false,
         footer: 'New footer',
         footerHtml: '<p>New footer</p>',
         difficulty: 5,
@@ -385,7 +380,6 @@ describe('PUT /api/internal/maps/group', () => {
       const requested = {
         isPublished: true,
         ordering: 7,
-        autoUpdate: true,
         isVerified: true,
       };
 
@@ -432,7 +426,6 @@ describe('PUT /api/internal/maps/group', () => {
         expect.objectContaining({
           isPublished: false,
           ordering: 0,
-          autoUpdate: false,
           isVerified: false,
           // ungated fields are honored for every role
           name: 'Map Name',
@@ -452,7 +445,6 @@ describe('PUT /api/internal/maps/group', () => {
         expect.objectContaining({
           isPublished: true,
           ordering: 0,
-          autoUpdate: false,
           isVerified: false,
         }),
       );
@@ -466,7 +458,6 @@ describe('PUT /api/internal/maps/group', () => {
         expect.objectContaining({
           isPublished: true,
           ordering: 7,
-          autoUpdate: true,
           isVerified: true,
         }),
       );
@@ -487,7 +478,6 @@ describe('PUT /api/internal/maps/group', () => {
           geoguessrId: 'admin-zero-map',
           isPublished: false,
           ordering: 0,
-          autoUpdate: false,
           isVerified: false,
         }),
       );
@@ -499,7 +489,6 @@ describe('PUT /api/internal/maps/group', () => {
         expect.objectContaining({
           isPublished: false,
           ordering: 0,
-          autoUpdate: false,
           isVerified: false,
         }),
       );
@@ -522,7 +511,6 @@ describe('PUT /api/internal/maps/group', () => {
           geoguessrId: 'retained-map',
           isPublished: true,
           ordering: 7,
-          autoUpdate: true,
           isVerified: true,
         }),
       );
@@ -535,7 +523,6 @@ describe('PUT /api/internal/maps/group', () => {
         geoguessrId: 'retained-map',
         isPublished: false,
         ordering: 0,
-        autoUpdate: false,
         isVerified: false,
       });
 
@@ -547,7 +534,6 @@ describe('PUT /api/internal/maps/group', () => {
         expect.objectContaining({
           isPublished: true,
           ordering: 7,
-          autoUpdate: true,
           isVerified: true,
         }),
       );
@@ -563,7 +549,6 @@ describe('PUT /api/internal/maps/group', () => {
         expect.objectContaining({
           isPublished: false,
           ordering: 7,
-          autoUpdate: true,
           isVerified: true,
         }),
       );
@@ -576,7 +561,6 @@ describe('PUT /api/internal/maps/group', () => {
         expect.objectContaining({
           isPublished: false,
           ordering: 0,
-          autoUpdate: false,
           isVerified: false,
         }),
       );
@@ -874,7 +858,6 @@ describe('PUT /api/internal/maps/group', () => {
         footer: '**Footer**',
         difficulty: 2,
         ordering: 0,
-        autoUpdate: false,
         isVerified: false,
         regions: ['Europe'],
         levels: ['Beginner'],
@@ -1084,7 +1067,7 @@ describe('DELETE /api/internal/maps/group/:id', () => {
     restoreNfcaToken();
   });
 
-  test('owner delete cascades map level/filter/region/data/meta associations and leaves unrelated rows', async () => {
+  test('owner delete cascades map associations and leaves unrelated rows', async () => {
     await seedUser('owner-1');
     const groupId = await seedGroup('Test group');
     await seedGroupOwner('owner-1', groupId);
@@ -1119,7 +1102,7 @@ describe('DELETE /api/internal/maps/group/:id', () => {
     expect(survivor.status).toBe(200);
     const { id: survivorId } = (await survivor.json()) as { id: number };
 
-    // data and meta associations are not settable through the PUT route: seed directly
+    // synced meta associations are not settable through the PUT route: seed directly
     const [syncedMeta] = await db
       .insert(syncedMetas)
       .values({
@@ -1132,7 +1115,6 @@ describe('DELETE /api/internal/maps/group/:id', () => {
         images: [],
       })
       .returning({ metaId: syncedMetas.metaId });
-    await db.insert(mapData).values([{ mapId: id }, { mapId: survivorId }]);
     await db.insert(syncedMapMetas).values([
       { mapId: id, syncedMetaId: syncedMeta!.metaId },
       { mapId: survivorId, syncedMetaId: syncedMeta!.metaId },
@@ -1151,9 +1133,6 @@ describe('DELETE /api/internal/maps/group/:id', () => {
     ).toEqual([]);
     expect(
       await db.select().from(mapRegions).where(eq(mapRegions.mapId, id)),
-    ).toEqual([]);
-    expect(
-      await db.select().from(mapData).where(eq(mapData.mapId, id)),
     ).toEqual([]);
     expect(
       await db
@@ -1184,9 +1163,6 @@ describe('DELETE /api/internal/maps/group/:id', () => {
         .from(mapRegions)
         .where(eq(mapRegions.mapId, survivorId)),
     ).toEqual([{ regionId }]);
-    expect(
-      await db.select().from(mapData).where(eq(mapData.mapId, survivorId)),
-    ).toHaveLength(1);
     expect(
       await db
         .select({ syncedMetaId: syncedMapMetas.syncedMetaId })
@@ -1275,7 +1251,6 @@ describe('DELETE /api/internal/maps/group/:id', () => {
         images: [],
       })
       .returning({ metaId: syncedMetas.metaId });
-    await db.insert(mapData).values([{ mapId: id }]);
     await db
       .insert(syncedMapMetas)
       .values([{ mapId: id, syncedMetaId: syncedMeta!.metaId }]);
@@ -1304,9 +1279,6 @@ describe('DELETE /api/internal/maps/group/:id', () => {
         .from(mapRegions)
         .where(eq(mapRegions.mapId, id)),
     ).toEqual([{ regionId }]);
-    expect(
-      await db.select().from(mapData).where(eq(mapData.mapId, id)),
-    ).toHaveLength(1);
     expect(
       await db
         .select({ syncedMetaId: syncedMapMetas.syncedMetaId })
