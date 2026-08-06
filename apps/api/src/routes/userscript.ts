@@ -12,7 +12,7 @@ import { locationSelect } from '@api/lib/userscript/locations';
 import { fingerprintMapCoordinates } from '@api/lib/userscript/map-fingerprint';
 import { getSynchronizedGroupMapSnapshots } from '@api/lib/userscript/map-snapshots';
 import { generateFooter } from '@api/lib/userscript/utils';
-import { and, eq, sql } from 'drizzle-orm';
+import { and, asc, eq, isNotNull, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 const userscriptVersion = '0.91';
@@ -91,6 +91,40 @@ export const userscriptRouter = new Elysia({
     },
   )
   .use(bearer())
+  .get('/map-groups', async ({ status, bearer }) => {
+    if (!bearer) {
+      return status(401);
+    }
+
+    const user = await db.$primary.query.users.findFirst({
+      where: eq(users.apiToken, bearer),
+      columns: { id: true },
+    });
+    if (!user) {
+      return status(401);
+    }
+
+    const groups = await db.$primary
+      .select({
+        id: mapGroups.id,
+        name: mapGroups.name,
+        syncedAt: mapGroups.syncedAt,
+        mapCount: sql<number>`count(${maps.id})::int`.mapWith(Number),
+      })
+      .from(mapGroupPermissions)
+      .innerJoin(mapGroups, eq(mapGroups.id, mapGroupPermissions.mapGroupId))
+      .innerJoin(maps, eq(maps.mapGroupId, mapGroups.id))
+      .where(
+        and(
+          eq(mapGroupPermissions.userId, user.id),
+          isNotNull(mapGroups.syncedAt),
+        ),
+      )
+      .groupBy(mapGroups.id, mapGroups.name, mapGroups.syncedAt)
+      .orderBy(asc(mapGroups.name), asc(mapGroups.id));
+
+    return { groups };
+  })
   .get(
     '/map-group/:groupId/maps',
     async ({ params: { groupId }, status, bearer }) => {

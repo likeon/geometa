@@ -48,6 +48,14 @@ async function requestGroupManifest(groupId: number, token?: string) {
   );
 }
 
+async function requestAccessibleGroups(token?: string) {
+  return app.handle(
+    new Request('http://localhost/api/userscript/map-groups', {
+      headers: token ? { authorization: `Bearer ${token}` } : undefined,
+    }),
+  );
+}
+
 interface SeedExportMapOptions {
   isPersonal?: boolean;
   userId?: string | null;
@@ -668,6 +676,122 @@ describe('GET /api/userscript/map-group/:groupId/maps', () => {
     expect(response.status).toBe(409);
     expect(await response.json()).toEqual({
       message: 'Map group has not been synchronized',
+    });
+  });
+});
+
+describe('GET /api/userscript/map-groups', () => {
+  test('requires a valid token', async () => {
+    await db.insert(users).values({
+      id: 'group-list-owner',
+      username: 'group-list-owner',
+      apiToken: 'group-list-token',
+    });
+
+    expect((await requestAccessibleGroups()).status).toBe(401);
+    expect((await requestAccessibleGroups('unknown-token')).status).toBe(401);
+  });
+
+  test('returns only synchronized groups with maps that the user can access', async () => {
+    await db.insert(users).values([
+      {
+        id: 'group-list-owner',
+        username: 'group-list-owner',
+        apiToken: 'group-list-token',
+      },
+      {
+        id: 'group-list-stranger',
+        username: 'group-list-stranger',
+        apiToken: 'group-list-stranger-token',
+      },
+    ]);
+    const insertedGroups = await db
+      .insert(mapGroups)
+      .values([
+        { name: 'Available B', syncedAt: 1_700_000_002 },
+        { name: 'Available A', syncedAt: 1_700_000_001 },
+        { name: 'Unsynced', syncedAt: null },
+        { name: 'Mapless', syncedAt: 1_700_000_003 },
+        { name: 'Someone Else', syncedAt: 1_700_000_004 },
+      ])
+      .returning({ id: mapGroups.id, name: mapGroups.name });
+    const byName = new Map(
+      insertedGroups.map((group) => [group.name, group.id]),
+    );
+
+    await db.insert(mapGroupPermissions).values([
+      {
+        mapGroupId: byName.get('Available A')!,
+        userId: 'group-list-owner',
+        role: 'owner',
+      },
+      {
+        mapGroupId: byName.get('Available B')!,
+        userId: 'group-list-owner',
+        role: 'editor',
+      },
+      {
+        mapGroupId: byName.get('Unsynced')!,
+        userId: 'group-list-owner',
+        role: 'owner',
+      },
+      {
+        mapGroupId: byName.get('Mapless')!,
+        userId: 'group-list-owner',
+        role: 'owner',
+      },
+      {
+        mapGroupId: byName.get('Someone Else')!,
+        userId: 'group-list-stranger',
+        role: 'owner',
+      },
+    ]);
+    await db.insert(maps).values([
+      {
+        mapGroupId: byName.get('Available A')!,
+        name: 'Available A map 1',
+        geoguessrId: 'group-list-a-1',
+      },
+      {
+        mapGroupId: byName.get('Available A')!,
+        name: 'Available A map 2',
+        geoguessrId: 'group-list-a-2',
+      },
+      {
+        mapGroupId: byName.get('Available B')!,
+        name: 'Available B map',
+        geoguessrId: 'group-list-b',
+      },
+      {
+        mapGroupId: byName.get('Unsynced')!,
+        name: 'Unsynced map',
+        geoguessrId: 'group-list-unsynced',
+      },
+      {
+        mapGroupId: byName.get('Someone Else')!,
+        name: 'Someone else map',
+        geoguessrId: 'group-list-other',
+      },
+    ]);
+
+    const response = await requestAccessibleGroups('group-list-token');
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      groups: [
+        {
+          id: byName.get('Available A'),
+          name: 'Available A',
+          syncedAt: 1_700_000_001,
+          mapCount: 2,
+        },
+        {
+          id: byName.get('Available B'),
+          name: 'Available B',
+          syncedAt: 1_700_000_002,
+          mapCount: 1,
+        },
+      ],
     });
   });
 });

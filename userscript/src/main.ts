@@ -8,6 +8,7 @@ import { initChallengeResults } from './lib/challengeResults';
 import { resetContainerPosition } from './lib/utils/dragging';
 import { resetContainerDimensions } from './lib/utils/resizing';
 import { initMapGroupUpdate } from './lib/mapGroupUpdate';
+import './lib/styles/buttons.css';
 
 if (typeof GM_registerMenuCommand === 'function') {
   GM_registerMenuCommand('LearnableMeta - Reset Meta Window Layout', () => {

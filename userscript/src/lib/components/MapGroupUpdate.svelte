@@ -2,9 +2,11 @@
   import { onMount } from 'svelte';
   import { clearApiKey, getApiKey, saveApiKey, URL_TO_GENERATE_TOKEN } from '../utils/apiKey';
   import {
+    fetchAccessibleMapGroups,
     fetchMapGroupManifest,
     fetchSyncedMapLocations,
     LearnableMetaApiError,
+    type AccessibleMapGroup,
     type MapGroupManifest
   } from '../utils/learnableMetaApi';
   import { fingerprintMapCoordinates } from '../utils/mapFingerprint';
@@ -28,13 +30,17 @@
     error?: string;
   };
 
-  let { groupId, onClose }: { groupId: number; onClose: () => void } = $props();
+  let { groupId: initialGroupId, onClose }: { groupId?: number; onClose: () => void } = $props();
 
-  let phase = $state<'token' | 'scanning' | 'review' | 'updating'>('scanning');
+  const canChooseGroup = initialGroupId === undefined;
+  let activeGroupId = $state<number | null>(initialGroupId ?? null);
+  let phase = $state<'token' | 'groups' | 'scanning' | 'review' | 'updating'>('scanning');
   let apiToken = $state('');
   let tokenInput = $state('');
   let tokenError = $state('');
   let groupName = $state('');
+  let accessibleGroups: AccessibleMapGroup[] = $state([]);
+  let groupsLoading = $state(false);
   let rows: MapRow[] = $state([]);
   let fatalError = $state('');
   let finishedRun = $state(false);
@@ -57,7 +63,7 @@
         return;
       }
       apiToken = savedToken;
-      void scanGroup();
+      void continueWithToken();
     } catch (error) {
       phase = 'token';
       tokenError = errorMessage(error);
@@ -73,7 +79,7 @@
     if (index !== -1) rows[index] = { ...rows[index], ...update };
   }
 
-  async function saveTokenAndScan() {
+  async function saveTokenAndContinue() {
     const trimmed = tokenInput.trim();
     if (!trimmed) {
       tokenError = 'Paste a valid LearnableMeta API token.';
@@ -83,7 +89,7 @@
     apiToken = trimmed;
     tokenInput = '';
     tokenError = '';
-    await scanGroup();
+    await continueWithToken();
   }
 
   function changeToken() {
@@ -92,14 +98,60 @@
     phase = 'token';
   }
 
+  async function continueWithToken() {
+    if (activeGroupId === null) {
+      await loadAccessibleGroups();
+    } else {
+      await scanGroup();
+    }
+  }
+
+  async function loadAccessibleGroups() {
+    phase = 'groups';
+    fatalError = '';
+    finishedRun = false;
+    groupName = '';
+    rows = [];
+    accessibleGroups = [];
+    groupsLoading = true;
+    try {
+      accessibleGroups = await fetchAccessibleMapGroups(apiToken);
+    } catch (error) {
+      if (error instanceof LearnableMetaApiError && error.status === 401) {
+        clearApiKey();
+        apiToken = '';
+        tokenError = 'Your LearnableMeta API token was rejected. Paste a new token.';
+        phase = 'token';
+        return;
+      }
+      fatalError = errorMessage(error);
+    } finally {
+      groupsLoading = false;
+    }
+  }
+
+  function selectGroup(groupId: number) {
+    activeGroupId = groupId;
+    void scanGroup();
+  }
+
+  function changeGroup() {
+    activeGroupId = null;
+    void loadAccessibleGroups();
+  }
+
   async function scanGroup() {
+    if (activeGroupId === null) {
+      await loadAccessibleGroups();
+      return;
+    }
     phase = 'scanning';
     fatalError = '';
     finishedRun = false;
     groupName = '';
     rows = [];
     try {
-      const manifest = await fetchMapGroupManifest(groupId, apiToken);
+      const manifest = await fetchMapGroupManifest(activeGroupId, apiToken);
       groupName = manifest.group.name;
       rows = manifest.maps.map((map) => ({
         ...map,
@@ -254,7 +306,9 @@
     <header>
       <div>
         <p class="eyebrow">LearnableMeta</p>
-        <h1 id="group-update-title">Update GeoGuessr maps</h1>
+        <h1 id="group-update-title">
+          {phase === 'groups' ? 'Choose a map group' : 'Update GeoGuessr maps'}
+        </h1>
         {#if groupName}<p class="subtitle">{groupName}</p>{/if}
       </div>
       <button
@@ -278,13 +332,39 @@
           bind:value={tokenInput}
           placeholder="LearnableMeta API token"
           aria-label="LearnableMeta API token"
-          onkeydown={(event) => event.key === 'Enter' && void saveTokenAndScan()} />
+          onkeydown={(event) => event.key === 'Enter' && void saveTokenAndContinue()} />
         {#if tokenError}<p class="error-text">{tokenError}</p>{/if}
         <div class="actions">
           <button class="secondary" onclick={onClose}>Cancel</button>
-          <button class="primary" onclick={saveTokenAndScan}>Save and scan</button>
+          <button class="primary" onclick={saveTokenAndContinue}>Save and continue</button>
         </div>
       </div>
+    {:else if phase === 'groups'}
+      {#if groupsLoading}
+        <div class="notice">Loading your synchronized map groups…</div>
+      {:else if fatalError}
+        <div class="fatal">
+          <strong>Could not load your map groups.</strong>
+          <span>{fatalError}</span>
+          <button class="secondary" onclick={loadAccessibleGroups}>Try again</button>
+        </div>
+      {:else if accessibleGroups.length > 0}
+        <div class="notice">Select a synchronized LearnableMeta group to compare its maps.</div>
+        <div class="group-list">
+          {#each accessibleGroups as group (group.id)}
+            <button class="group-row" onclick={() => selectGroup(group.id)}>
+              <strong>{group.name}</strong>
+              <span>{group.mapCount} map{group.mapCount === 1 ? '' : 's'}</span>
+            </button>
+          {/each}
+        </div>
+      {:else}
+        <div class="notice">You have no synchronized map groups containing maps.</div>
+      {/if}
+      <footer class="actions">
+        <button class="link-button token-button" onclick={changeToken}>Change API token</button>
+        <button class="secondary" onclick={onClose}>Close</button>
+      </footer>
     {:else}
       {#if phase === 'scanning'}
         <div class="notice">Loading synchronized maps and comparing GeoGuessr drafts…</div>
@@ -342,6 +422,11 @@
           disabled={phase === 'updating'}>
           Change API token
         </button>
+        {#if canChooseGroup}
+          <button class="link-button" onclick={changeGroup} disabled={phase === 'updating'}>
+            Change group
+          </button>
+        {/if}
         <button class="secondary" onclick={onClose} disabled={phase === 'updating'}>Close</button>
         {#if failureCount > 0}
           <button class="secondary" onclick={retryFailures} disabled={phase === 'updating'}>
@@ -439,6 +524,35 @@
     padding: 16px 24px 10px;
     color: #475467;
     font-size: 13px;
+  }
+  .group-list {
+    display: grid;
+    gap: 8px;
+    overflow-y: auto;
+    margin: 14px 24px 0;
+  }
+  .group-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    width: 100%;
+    border: 1px solid #d9dee7;
+    border-radius: 9px;
+    padding: 13px 15px;
+    background: #fff;
+    color: #172033;
+    text-align: left;
+    cursor: pointer;
+  }
+  .group-row:hover {
+    border-color: #d3a300;
+    background: #fffaf0;
+  }
+  .group-row span {
+    flex: none;
+    color: #667085;
+    font-size: 12px;
   }
   .map-list {
     overflow-y: auto;
