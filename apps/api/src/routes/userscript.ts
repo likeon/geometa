@@ -140,23 +140,22 @@ export const userscriptRouter = new Elysia({
         return status(401);
       }
 
-      const group = await db.$primary.query.mapGroups.findFirst({
-        where: eq(mapGroups.id, groupId),
-        columns: { id: true, name: true, syncedAt: true },
-      });
+      const [group] = await db.$primary
+        .select({
+          id: mapGroups.id,
+          name: mapGroups.name,
+          syncedAt: mapGroups.syncedAt,
+        })
+        .from(mapGroupPermissions)
+        .innerJoin(mapGroups, eq(mapGroups.id, mapGroupPermissions.mapGroupId))
+        .where(
+          and(
+            eq(mapGroupPermissions.userId, user.id),
+            eq(mapGroups.id, groupId),
+          ),
+        );
       if (!group) {
         return status(404);
-      }
-
-      const permission = await db.$primary.query.mapGroupPermissions.findFirst({
-        where: and(
-          eq(mapGroupPermissions.mapGroupId, groupId),
-          eq(mapGroupPermissions.userId, user.id),
-        ),
-        columns: { id: true },
-      });
-      if (!permission) {
-        return status(403);
       }
       if (group.syncedAt === null) {
         return status(409, { message: 'Map group has not been synchronized' });
