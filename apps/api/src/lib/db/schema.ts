@@ -109,7 +109,6 @@ export const maps = pgTable(
     userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
     authors: text('authors').default(''),
     ordering: integer('ordering').notNull().default(0),
-    autoUpdate: boolean('auto_update').notNull().default(false),
     footer: text('footer').notNull().default(''),
     footerHtml: text('footer_html').notNull().default(''),
     modifiedAt: integer('modified_at').default(1730419200).notNull(),
@@ -377,27 +376,6 @@ export const mapGroupPermissionsRelations = relations(
     }),
   }),
 );
-
-export const mapData = pgTable(
-  'map_data',
-  {
-    id: bigserial('id', { mode: 'number' }).primaryKey(),
-    mapId: integer('map_id')
-      .notNull()
-      .references(() => maps.id, { onDelete: 'cascade' }),
-    lastUpdatedPanoids: text('last_updated_panoids')
-      .notNull()
-      .$type<string[]>()
-      .default(sql`'[]'`),
-  },
-  (t) => ({
-    mapDataUnique: uniqueIndex('map_data_unique').on(t.mapId),
-  }),
-);
-
-export const mapDataRelations = relations(mapData, ({ one }) => ({
-  map: one(maps, { fields: [mapData.mapId], references: [maps.id] }),
-}));
 
 export const regions = pgTable('regions', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),

@@ -4,7 +4,6 @@ import type { AnyPgTable } from 'drizzle-orm/pg-core';
 import { db } from '../drizzle';
 import {
   levels,
-  mapData,
   mapFilters,
   mapGroupLocations,
   mapGroups,
@@ -210,7 +209,6 @@ describe('group deletion cascade', () => {
     });
 
     // Map-owned relations.
-    await db.insert(mapData).values({ mapId });
     await db.insert(mapLevels).values({ mapId, levelId });
     await db.insert(mapFilters).values({ mapId, tagLike: 'filter' });
     await db.insert(mapRegions).values({ mapId, regionId: region!.id });
@@ -255,7 +253,6 @@ describe('group deletion cascade', () => {
       ['map_levels', mapLevels],
       ['map_filters', mapFilters],
       ['map_regions', mapRegions],
-      ['map_data', mapData],
       ['meta_levels', metaLevels],
       ['meta_images', metaImages],
       ['synced_metas', syncedMetas],

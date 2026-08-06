@@ -190,11 +190,6 @@
             syncingUserScript = false;
             if (result.type === 'success') {
               await applyAction(result);
-              if (data.group.id === 1) {
-                const updateCount = result.data?.updateCount || 0;
-                toast.push(`Updated ${updateCount} map(s)`);
-              }
-
               toast.push('Updated', {
                 duration: 10000
               });

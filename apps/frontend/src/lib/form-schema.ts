@@ -76,7 +76,6 @@ export const insertMapsSchema = z
     isShared: z.boolean().prefault(false),
     authors: z.string().nullable().prefault(''),
     ordering: z.coerce.number().prefault(0),
-    autoUpdate: z.boolean().prefault(false),
     footer: z.string().prefault(''),
     isVerified: z.boolean().prefault(false),
     includeFilters: z.array(z.string()).prefault([]),
