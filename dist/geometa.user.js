@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.91
+// @version      0.92
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
 // @downloadURL  https://github.com/likeon/geometa/raw/main/userscript/dist/geometa.user.js
@@ -22,6 +22,10 @@
 
 /*
 # Changelog
+
+## [0.92]
+
+- Fixed updated maps still appearing as changed after publishing
 
 ## [0.91]
 
@@ -5996,6 +6000,11 @@ roundNumber: 4,
     const digest = await crypto.subtle.digest("SHA-256", bytes);
     return Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
   }
+  function getGeoguessrDraftCoordinates(draft) {
+    if (Array.isArray(draft.coordinates)) return draft.coordinates;
+    if (Array.isArray(draft.customCoordinates)) return draft.customCoordinates;
+    return [];
+  }
   var root_1 = from_html(`<p class="subtitle svelte-axobi4"> </p>`);
   var root_3 = from_html(`<p class="error-text svelte-axobi4"> </p>`);
   var root_2 = from_html(`<div class="token-form svelte-axobi4"><p class="svelte-axobi4">Paste your LearnableMeta API token to load maps you can manage.</p> <p class="small svelte-axobi4">Generate or replace it on your <a target="_blank" rel="noopener noreferrer" class="svelte-axobi4">token page</a>.</p> <input type="password" placeholder="LearnableMeta API token" aria-label="LearnableMeta API token" class="learnablemeta-modal-input" data-modal-initial-focus=""/> <!> <div class="learnablemeta-modal-actions token-actions svelte-axobi4"><button class="learnablemeta-button learnablemeta-button--outline">Cancel</button> <button class="learnablemeta-button learnablemeta-button--primary">Save and continue</button></div></div>`);
@@ -6157,7 +6166,7 @@ roundNumber: 4,
       replaceRow(row.geoguessrId, { status: "scanning", error: void 0, selected: false });
       try {
         const draft = await getGeoguessrDraft(row.geoguessrId);
-        const fingerprint = await fingerprintMapCoordinates(draft.customCoordinates ?? []);
+        const fingerprint = await fingerprintMapCoordinates(getGeoguessrDraftCoordinates(draft));
         const changed = fingerprint !== row.fingerprint;
         replaceRow(row.geoguessrId, { status: changed ? "changed" : "current", selected: changed });
       } catch (error) {
@@ -6188,7 +6197,7 @@ roundNumber: 4,
       let draft;
       try {
         draft = await getGeoguessrDraft(row.geoguessrId);
-        const currentFingerprint = await fingerprintMapCoordinates(draft.customCoordinates ?? []);
+        const currentFingerprint = await fingerprintMapCoordinates(getGeoguessrDraftCoordinates(draft));
         if (currentFingerprint === row.fingerprint) {
           replaceRow(row.geoguessrId, { status: "current", selected: false });
           return;

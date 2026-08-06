@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.92]
+
+- Fixed updated maps still appearing as changed after publishing
+
 ## [0.91]
 
 - Added map-group updates after syncing and from Creator Hub

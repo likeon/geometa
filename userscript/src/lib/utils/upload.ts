@@ -1,5 +1,5 @@
 import { fetchSyncedMapLocations, type SyncedMapCoordinate } from './learnableMetaApi';
-import type { ManagedMapCoordinate } from './mapFingerprint';
+import type { GeoGuessrDraftCoordinates } from './geoguessrDraft';
 
 export async function geoguessrAPIFetch(url: string, options: RequestInit = {}): Promise<Response> {
   const { method = 'GET', headers: initialHeaders, body, ...restOptions } = options;
@@ -49,13 +49,12 @@ export async function geoguessrAPIFetch(url: string, options: RequestInit = {}):
   return response;
 }
 
-export type GeoGuessrDraft = {
+export type GeoGuessrDraft = GeoGuessrDraftCoordinates & {
   avatar: unknown;
   description: string;
   highlighted: boolean;
   name: string;
   version: number;
-  customCoordinates: ManagedMapCoordinate[];
 };
 
 function draftUrl(geoguessrId: string) {
