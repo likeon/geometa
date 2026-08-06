@@ -25,24 +25,19 @@
 
 ## [0.91]
 
-- Added a post-sync group workflow that compares LearnableMeta locations with GeoGuessr drafts
-- Added a Creator Hub button for choosing any synchronized map group you can access
-- Added review and selection before updating changed maps
-- Added sequential draft updates, publishing, per-map progress, and retryable failures
-- Reused the browser-stored LearnableMeta API token so GeoGuessr credentials remain in the browser
+- Added map-group updates after syncing and from Creator Hub
+- Detects changed GeoGuessr maps before updating
+- Added map selection, publishing progress, and retries
+- Refreshed dialogs and API token management
 
 ## [0.90]
 
-- Added meta pins on challenge results pages (geoguessr.com/results/...), with support for any round count
-- Fixed memory leaks from meta windows never being unmounted (drag handlers piled up every round)
-- Fixed live challenge windows stacking up instead of replacing each other
-- Fixed the upload button possibly keeping a previous map's id after map-maker navigation
-- Moved the map label to the new GeoGuessr map page layout and darkened its background
-- Restyled the upload button and notifications for the new map-maker top bar
-- Upload errors now show a readable message with the technical error underneath for reports
-- Added an in-page 🔑 button to view, replace or clear the LearnableMeta API key
-- Features now initialize independently, so one failing no longer disables the rest
-- Moved this changelog to CHANGELOG.md
+- Added meta pins to challenge results
+- Fixed meta window leaks and live challenge stacking
+- Fixed stale map IDs after Map Maker navigation
+- Updated the map label and upload UI for new GeoGuessr layouts
+- Added API key management and clearer upload errors
+- Isolated features so one failure does not disable the rest
 
 ## [0.89]
 
@@ -179,7 +174,7 @@
 
   const d=new Set;const importCSS = async e=>{d.has(e)||(d.add(e),(t=>{typeof GM_addStyle=="function"?GM_addStyle(t):(document.head||document.documentElement).appendChild(document.createElement("style")).append(t);})(e));};
 
-  importCSS(` .loadership_ZOJAQ.svelte-f4erjd{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-f4erjd-loadership_ZOJAQ_scale 1.2s infinite,svelte-f4erjd-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-f4erjd-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-f4erjd-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-tdzec4{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.carousel.svelte-8ojyxu{position:relative;overflow:hidden;margin:0 auto}.image-wrapper.svelte-8ojyxu{width:100%;height:100%;display:flex;justify-content:center;align-items:center;cursor:zoom-in}.responsive-image.svelte-8ojyxu{max-width:100%;height:100%;display:block;object-fit:contain}.lens.svelte-8ojyxu{position:absolute;pointer-events:none;border:2px solid #aaa;border-radius:50%;box-shadow:0 0 8px #00000080}.click-area.svelte-8ojyxu{position:absolute;top:0;bottom:0;width:1.4em;cursor:pointer}.prev-area.svelte-8ojyxu{left:0}.next-area.svelte-8ojyxu{right:0}.prev.svelte-8ojyxu,.next.svelte-8ojyxu{background-color:#00000080;color:#fff;border:none;font-size:1.2em;padding:.2em;cursor:pointer;pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%)}.prev.svelte-8ojyxu{left:0}.next.svelte-8ojyxu{right:0}.indicators.svelte-8ojyxu{position:absolute;bottom:15px;left:50%;transform:translate(-50%);display:flex;justify-content:center;align-items:center;gap:8px}.indicator.svelte-8ojyxu{width:12px;height:12px;background-color:#ffffff80;border-radius:50%;cursor:pointer;border:none;padding:0;flex-shrink:0}.indicator.active.svelte-8ojyxu{background-color:#fff}.geometa-footer a{color:#188bd2;text-decoration:none}.geometa-footer a:hover{text-decoration:underline}.geometa-container.svelte-1j2rmt2{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100, #1c1836);color:#fff;padding:6px 10px;border-radius:5px;font-size:17px;line-height:1.4;width:min(25%,500px);resize:both;overflow:auto}.geometa-container.svelte-1j2rmt2 h2:where(.svelte-1j2rmt2){margin:0;font-size:1.2rem;font-weight:700}.geometa-container.svelte-1j2rmt2 p{margin:0}.geometa-container.svelte-1j2rmt2 ul,.geometa-container.svelte-1j2rmt2 ol{margin:0;padding:0;list-style:none}.geometa-container.svelte-1j2rmt2>.header:where(.svelte-1j2rmt2){margin-top:0}.geometa-footer.svelte-1j2rmt2{color:#d3d3d3;font-size:small}.announcement.svelte-1j2rmt2{background-color:#e6f7ff;color:#0050b3;padding:8px 12px;border-radius:4px;font-size:14px;display:flex;justify-content:space-between;align-items:center;width:100%;box-sizing:border-box;margin-bottom:8px;border:1px solid #91d5ff}.announcement a{color:#0050b3;font-weight:700;text-decoration:underline}.announcement a:hover{color:#003a8c}.vote-close-btn.svelte-1j2rmt2{background-color:#b3d9ff;border:1px solid #0050b3;color:#0050b3;font-size:12px;cursor:pointer;padding:1px 10px;border-radius:4px;line-height:1;margin-left:5px;text-transform:none;transition:background-color .2s ease,color .2s ease,border-color .2s ease}.vote-close-btn.svelte-1j2rmt2:hover,.vote-close-btn.svelte-1j2rmt2:focus{background-color:#0050b3;color:#fff;border-color:#036;outline:none}a.svelte-1j2rmt2{color:#188bd2}a.svelte-1j2rmt2:hover{text-decoration:underline}.skill-icons--discord.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--list.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E")}.question-mark-icon.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");cursor:pointer}.icons.svelte-1j2rmt2{display:inline-block;vertical-align:middle}.flex.svelte-1j2rmt2{display:flex;align-items:center}.icons.svelte-1j2rmt2 a:where(.svelte-1j2rmt2) span:where(.svelte-1j2rmt2){align-items:center;justify-content:center}hr.svelte-1j2rmt2{border:0;border-top:1px solid white;width:100%}.header.svelte-1j2rmt2{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center;touch-action:none;-webkit-user-select:none;user-select:none}.geometa-note a{color:#188bd2}.geometa-note a:hover{text-decoration:underline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem}.modal-backdrop.svelte-1j2rmt2{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#1e1e1ecc;display:flex;justify-content:center;align-items:center;z-index:1000}.modal.svelte-1j2rmt2{background:var(--ds-color-purple-100, #1c1836);padding:15px 25px;border-radius:8px;text-align:center;width:90%;max-width:600px;box-shadow:0 4px 6px #0003;color:#d3d3d3}.modal.svelte-1j2rmt2 p:where(.svelte-1j2rmt2){margin:0 0 10px;font-size:17px}.modal-url.svelte-1j2rmt2{font-size:15px;font-weight:700;color:#188bd2;word-break:break-word;margin:10px 0}.modal-buttons.svelte-1j2rmt2{display:flex;justify-content:center;gap:15px;margin-top:20px}.proceed-btn.svelte-1j2rmt2{background:#188bd2;color:#fff;padding:8px 16px;border:none;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out}.proceed-btn.svelte-1j2rmt2:hover{background:#0056b3}.close-btn.svelte-1j2rmt2{background:transparent;color:#d3d3d3;padding:8px 16px;border:1px solid #d3d3d3;border-radius:5px;cursor:pointer;font-size:15px;transition:background-color .2s ease-in-out,color .2s ease-in-out}.close-btn.svelte-1j2rmt2:hover{background:#d3d3d3;color:var(--ds-color-purple-100, #1c1836)}button.svelte-1j2rmt2{cursor:pointer;background:none;border:none;padding:0}.blink.svelte-1j2rmt2{animation:svelte-1j2rmt2-blink-animation 1s infinite}.help-message.svelte-1j2rmt2{padding:12px;font-size:16px;line-height:1.5;text-align:left}.help-message.svelte-1j2rmt2 strong:where(.svelte-1j2rmt2){color:#007bff;font-weight:700}@keyframes svelte-1j2rmt2-blink-animation{0%{filter:brightness(1)}50%{filter:brightness(2);background-color:#004779}to{filter:brightness(1)}}.outdated.svelte-1j2rmt2 strong:where(.svelte-1j2rmt2){color:red!important}.geometa-meta-btn{background:#188bd2;color:#fff;border:none;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;margin-left:10px;transition:background-color .2s ease;font-weight:700;z-index:1000;pointer-events:auto;display:inline-block}.result-list_listItemWrapper___XCGn{display:flex!important;justify-content:space-between!important;align-items:center!important}.geometa-meta-btn:hover{background:#0056b3}.geometa-pin-question{position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:#188bd2;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;z-index:10000;transition:background-color .2s ease;border:1px solid white;box-shadow:0 1px 3px #0000004d}.geometa-pin-question:hover{background:#0056b3;transform:scale(1.1)}.geometa-map-label-container.svelte-1y99qco{background-color:#000000a6;color:#fff;text-align:center;z-index:100;position:absolute;bottom:4px;right:4px;box-sizing:border-box;border-radius:8px;padding:8px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;gap:8px}p.svelte-1y99qco{font-size:14px;font-weight:700}button.svelte-1y99qco{padding:6px 12px;font-size:12px;color:#fff;background-color:#4caf50;border:none;border-radius:4px;cursor:pointer}.toast-notification.svelte-w17ltc{position:fixed;top:72px;right:16px;z-index:10001;min-width:250px;max-width:400px;padding:14px 22px;border-radius:8px;box-shadow:0 5px 15px #0003;color:#fff;display:flex;align-items:flex-start;justify-content:space-between;font-size:.95em;line-height:1.4}.toast-success.svelte-w17ltc{background-color:#28a745;border-left:5px solid #1e7e34}.toast-error.svelte-w17ltc{background-color:#dc3545;border-left:5px solid #b02a37}.toast-info.svelte-w17ltc{background-color:#17a2b8;border-left:5px solid #117a8b}.toast-warning.svelte-w17ltc{background-color:#ffc107;color:#212529;border-left:5px solid #d39e00}.toast-content.svelte-w17ltc{flex-grow:1;margin-right:10px;display:flex;flex-direction:column;gap:6px}.toast-detail.svelte-w17ltc{font-size:.8em;line-height:1.35;opacity:.85;word-break:break-word;padding-top:6px;border-top:1px solid rgba(255,255,255,.35);-webkit-user-select:text;user-select:text}.toast-close-button.svelte-w17ltc{background:transparent;border:none;color:inherit;font-size:1.6em;font-weight:700;margin-left:10px;cursor:pointer;padding:0;line-height:1;opacity:.7;transition:opacity .2s ease}.toast-close-button.svelte-w17ltc:hover{opacity:1}.upload-label-container.svelte-1plj3lz{display:flex;align-items:center}.api-key-button.svelte-1plj3lz{display:inline-flex;align-items:center;justify-content:center;margin-left:6px;width:30px;height:30px;padding:0;font-size:14px;line-height:1;background:linear-gradient(180deg,#ffeb99,#f5c542);border:1px solid #e0b000;border-radius:50%;cursor:pointer;box-shadow:0 2px 4px #00000026,inset 0 1px #fff6;transition:background .2s ease-in-out}.api-key-button.svelte-1plj3lz:hover:not(:disabled){background:linear-gradient(180deg,#ffe066,#eab308)}.api-key-button.svelte-1plj3lz:disabled{background:#e0e0e0;border-color:#bbb;cursor:not-allowed}.modal-overlay.svelte-1plj3lz{position:fixed;top:0;left:0;width:100%;height:100%;background-color:#0009;display:flex;justify-content:center;align-items:center;z-index:10000}.modal-content.svelte-1plj3lz{background-color:#fff;padding:25px 30px;border-radius:8px;box-shadow:0 5px 15px #0000004d;width:90%;max-width:450px;color:#333}.modal-content.svelte-1plj3lz h2:where(.svelte-1plj3lz){margin-top:0;margin-bottom:15px;color:#2c3e50}.modal-content.svelte-1plj3lz p:where(.svelte-1plj3lz){margin-bottom:15px;line-height:1.6}.modal-content.svelte-1plj3lz p:where(.svelte-1plj3lz) a:where(.svelte-1plj3lz){color:#007bff;text-decoration:underline}.modal-content.svelte-1plj3lz p:where(.svelte-1plj3lz) a:where(.svelte-1plj3lz):hover{color:#0056b3}.modal-input.svelte-1plj3lz{width:calc(100% - 20px);padding:10px;margin-bottom:20px;border:1px solid #ccc;border-radius:4px;font-size:1em}.modal-actions.svelte-1plj3lz{display:flex;justify-content:flex-end;gap:10px}.modal-button.svelte-1plj3lz{padding:10px 18px;border:none;border-radius:4px;cursor:pointer;font-weight:700;transition:background-color .2s ease}.modal-button-save.svelte-1plj3lz{background-color:#28a745;color:#fff}.modal-button-save.svelte-1plj3lz:hover{background-color:#218838}.modal-button-cancel.svelte-1plj3lz{background-color:#6c757d;color:#fff}.modal-button-cancel.svelte-1plj3lz:hover{background-color:#5a6268}.modal-button-clear.svelte-1plj3lz{background-color:#dc3545;color:#fff;margin-right:auto}.modal-button-clear.svelte-1plj3lz:hover{background-color:#b02a37}.modal-content.svelte-1plj3lz code:where(.svelte-1plj3lz){background-color:#f1f3f5;padding:1px 5px;border-radius:3px;font-size:.9em}.modal-note.svelte-1plj3lz{font-size:.85em;color:#555;margin-top:15px;text-align:center}.backdrop.svelte-axobi4{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:24px;background:#040812c7;font-family:Arial,sans-serif;color:#172033}.panel.svelte-axobi4{width:min(780px,100%);max-height:min(760px,calc(100vh - 48px));display:flex;flex-direction:column;overflow:hidden;border:1px solid #d8dee9;border-radius:14px;background:#fff;box-shadow:0 24px 70px #00000073}header.svelte-axobi4{display:flex;align-items:flex-start;justify-content:space-between;padding:22px 24px 18px;border-bottom:1px solid #e8ebf0}h1.svelte-axobi4{margin:2px 0 0;font-size:24px;color:#101828}.eyebrow.svelte-axobi4{margin:0;color:#936b00;font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}.subtitle.svelte-axobi4{margin:5px 0 0;color:#667085}.icon-button.svelte-axobi4{border:0;background:transparent;font-size:28px;color:#667085;cursor:pointer}.notice.svelte-axobi4,.fatal.svelte-axobi4,.summary.svelte-axobi4{margin:18px 24px 0;padding:12px 14px;border-radius:8px;background:#f5f7fa}.fatal.svelte-axobi4{display:grid;gap:8px;background:#fff1f1;color:#8a1c1c}.summary.svelte-axobi4{background:#eef8ee;color:#245b29}.toolbar.svelte-axobi4{display:flex;justify-content:space-between;align-items:center;padding:16px 24px 10px;color:#475467;font-size:13px}.group-list.svelte-axobi4{display:grid;gap:8px;overflow-y:auto;margin:14px 24px 0}.group-row.svelte-axobi4{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;border:1px solid #d9dee7;border-radius:9px;padding:13px 15px;background:#fff;color:#172033;text-align:left;cursor:pointer}.group-row.svelte-axobi4:hover{border-color:#d3a300;background:#fffaf0}.group-row.svelte-axobi4 span:where(.svelte-axobi4){flex:none;color:#667085;font-size:12px}.map-list.svelte-axobi4{overflow-y:auto;margin:0 24px;border:1px solid #e4e7ec;border-radius:9px}.map-row.svelte-axobi4{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid #eef0f3}.map-row.svelte-axobi4:last-child{border-bottom:0}.map-row.error-row.svelte-axobi4{background:snow}.map-details.svelte-axobi4{display:grid;min-width:0;gap:3px}.map-details.svelte-axobi4 strong:where(.svelte-axobi4){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.map-details.svelte-axobi4>span:where(.svelte-axobi4){color:#667085;font-size:12px}.map-details.svelte-axobi4 .row-error:where(.svelte-axobi4){color:#a32626;white-space:normal}.status.svelte-axobi4{padding:4px 8px;border-radius:999px;background:#fff2cc;color:#765700;font-size:11px;font-weight:700;white-space:nowrap}.status.good.svelte-axobi4{background:#e9f8ec;color:#24612d}.actions.svelte-axobi4{display:flex;justify-content:flex-end;align-items:center;gap:9px;padding:18px 24px 22px}button.svelte-axobi4{font:inherit}button.svelte-axobi4:disabled{cursor:not-allowed;opacity:.55}.primary.svelte-axobi4,.secondary.svelte-axobi4{border-radius:7px;padding:9px 14px;font-weight:700;cursor:pointer}.primary.svelte-axobi4{border:1px solid #d3a300;background:#f5c542;color:#172033}.secondary.svelte-axobi4{border:1px solid #cfd5df;background:#fff;color:#344054}.link-button.svelte-axobi4{border:0;padding:4px 7px;background:transparent;color:#3458a5;cursor:pointer}.token-button.svelte-axobi4{margin-right:auto}.token-form.svelte-axobi4{display:grid;gap:12px;padding:22px 24px}.token-form.svelte-axobi4 p:where(.svelte-axobi4){margin:0}.token-form.svelte-axobi4 .small:where(.svelte-axobi4){color:#667085;font-size:13px}.token-form.svelte-axobi4 a:where(.svelte-axobi4){color:#3458a5}.token-form.svelte-axobi4 input:where(.svelte-axobi4){border:1px solid #cfd5df;border-radius:7px;padding:10px 12px;font:inherit}.token-form.svelte-axobi4 .actions:where(.svelte-axobi4){padding:4px 0 0}.error-text.svelte-axobi4{color:#a32626;font-size:13px}@media(max-width:620px){.backdrop.svelte-axobi4{padding:8px}.panel.svelte-axobi4{max-height:calc(100vh - 16px)}.map-row.svelte-axobi4{grid-template-columns:22px minmax(0,1fr)}.status.svelte-axobi4{grid-column:2;justify-self:start}footer.actions.svelte-axobi4{flex-wrap:wrap}.token-button.svelte-axobi4{width:100%;text-align:left}} `);
+  importCSS(` .loadership_ZOJAQ.svelte-f4erjd{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-f4erjd-loadership_ZOJAQ_scale 1.2s infinite,svelte-f4erjd-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-f4erjd-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-f4erjd-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-tdzec4{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.carousel.svelte-8ojyxu{position:relative;overflow:hidden;margin:0 auto}.image-wrapper.svelte-8ojyxu{width:100%;height:100%;display:flex;justify-content:center;align-items:center;cursor:zoom-in}.responsive-image.svelte-8ojyxu{max-width:100%;height:100%;display:block;object-fit:contain}.lens.svelte-8ojyxu{position:absolute;pointer-events:none;border:2px solid #aaa;border-radius:50%;box-shadow:0 0 8px #00000080}.click-area.svelte-8ojyxu{position:absolute;top:0;bottom:0;width:1.4em;cursor:pointer}.prev-area.svelte-8ojyxu{left:0}.next-area.svelte-8ojyxu{right:0}.prev.svelte-8ojyxu,.next.svelte-8ojyxu{background-color:#00000080;color:#fff;border:none;font-size:1.2em;padding:.2em;cursor:pointer;pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%)}.prev.svelte-8ojyxu{left:0}.next.svelte-8ojyxu{right:0}.indicators.svelte-8ojyxu{position:absolute;bottom:15px;left:50%;transform:translate(-50%);display:flex;justify-content:center;align-items:center;gap:8px}.indicator.svelte-8ojyxu{width:12px;height:12px;background-color:#ffffff80;border-radius:50%;cursor:pointer;border:none;padding:0;flex-shrink:0}.indicator.active.svelte-8ojyxu{background-color:#fff}.geometa-footer a{color:#188bd2;text-decoration:none}.geometa-footer a:hover{text-decoration:underline}.geometa-container.svelte-1j2rmt2{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100, #1c1836);color:#fff;padding:6px 10px;border-radius:5px;font-size:17px;line-height:1.4;width:min(25%,500px);resize:both;overflow:auto}.geometa-container.svelte-1j2rmt2 h2:where(.svelte-1j2rmt2){margin:0;font-size:1.2rem;font-weight:700}.geometa-container.svelte-1j2rmt2 p{margin:0}.geometa-container.svelte-1j2rmt2 ul,.geometa-container.svelte-1j2rmt2 ol{margin:0;padding:0;list-style:none}.geometa-container.svelte-1j2rmt2>.header:where(.svelte-1j2rmt2){margin-top:0}.geometa-footer.svelte-1j2rmt2{color:#d3d3d3;font-size:small}.announcement.svelte-1j2rmt2{background-color:#e6f7ff;color:#0050b3;padding:8px 12px;border-radius:4px;font-size:14px;display:flex;justify-content:space-between;align-items:center;width:100%;box-sizing:border-box;margin-bottom:8px;border:1px solid #91d5ff}.announcement a{color:#0050b3;font-weight:700;text-decoration:underline}.announcement a:hover{color:#003a8c}.vote-close-btn.svelte-1j2rmt2{background-color:#b3d9ff;border:1px solid #0050b3;color:#0050b3;font-size:12px;cursor:pointer;padding:1px 10px;border-radius:4px;line-height:1;margin-left:5px;text-transform:none;transition:background-color .2s ease,color .2s ease,border-color .2s ease}.vote-close-btn.svelte-1j2rmt2:hover,.vote-close-btn.svelte-1j2rmt2:focus{background-color:#0050b3;color:#fff;border-color:#036;outline:none}a.svelte-1j2rmt2{color:#188bd2}a.svelte-1j2rmt2:hover{text-decoration:underline}.skill-icons--discord.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--list.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E")}.question-mark-icon.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");cursor:pointer}.icons.svelte-1j2rmt2{display:inline-block;vertical-align:middle}.flex.svelte-1j2rmt2{display:flex;align-items:center}.icons.svelte-1j2rmt2 a:where(.svelte-1j2rmt2) span:where(.svelte-1j2rmt2){align-items:center;justify-content:center}hr.svelte-1j2rmt2{border:0;border-top:1px solid white;width:100%}.header.svelte-1j2rmt2{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center;touch-action:none;-webkit-user-select:none;user-select:none}.geometa-note a{color:#188bd2}.geometa-note a:hover{text-decoration:underline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem}.help-toggle-button.svelte-1j2rmt2{background:transparent;border:none;padding:0;cursor:pointer}.blink.svelte-1j2rmt2{animation:svelte-1j2rmt2-blink-animation 1s infinite}@keyframes svelte-1j2rmt2-blink-animation{0%{filter:brightness(1)}50%{filter:brightness(2);background-color:#004779}to{filter:brightness(1)}}.geometa-meta-btn{background:#188bd2;color:#fff;border:none;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;margin-left:10px;transition:background-color .2s ease;font-weight:700;z-index:1000;pointer-events:auto;display:inline-block}.result-list_listItemWrapper___XCGn{display:flex!important;justify-content:space-between!important;align-items:center!important}.geometa-meta-btn:hover{background:#0056b3}.geometa-pin-question{position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:#188bd2;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;z-index:10000;transition:background-color .2s ease;border:1px solid white;box-shadow:0 1px 3px #0000004d}.geometa-pin-question:hover{background:#0056b3;transform:scale(1.1)}.geometa-map-label-container.svelte-1y99qco{background-color:#000000a6;color:#fff;text-align:center;z-index:100;position:absolute;bottom:4px;right:4px;box-sizing:border-box;border-radius:8px;padding:8px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;gap:8px}p.svelte-1y99qco{font-size:14px;font-weight:700}button.svelte-1y99qco{padding:6px 12px;font-size:12px;color:#fff;background-color:#4caf50;border:none;border-radius:4px;cursor:pointer}.toast-notification.svelte-w17ltc{position:fixed;top:72px;right:16px;z-index:10001;min-width:250px;max-width:400px;padding:14px 22px;border-radius:8px;box-shadow:0 5px 15px #0003;color:#fff;display:flex;align-items:flex-start;justify-content:space-between;font-size:.95em;line-height:1.4}.toast-success.svelte-w17ltc{background-color:#28a745;border-left:5px solid #1e7e34}.toast-error.svelte-w17ltc{background-color:#dc3545;border-left:5px solid #b02a37}.toast-info.svelte-w17ltc{background-color:#17a2b8;border-left:5px solid #117a8b}.toast-warning.svelte-w17ltc{background-color:#ffc107;color:#212529;border-left:5px solid #d39e00}.toast-content.svelte-w17ltc{flex-grow:1;margin-right:10px;display:flex;flex-direction:column;gap:6px}.toast-detail.svelte-w17ltc{font-size:.8em;line-height:1.35;opacity:.85;word-break:break-word;padding-top:6px;border-top:1px solid rgba(255,255,255,.35);-webkit-user-select:text;user-select:text}.toast-close-button.svelte-w17ltc{background:transparent;border:none;color:inherit;font-size:1.6em;font-weight:700;margin-left:10px;cursor:pointer;padding:0;line-height:1;opacity:.7;transition:opacity .2s ease}.toast-close-button.svelte-w17ltc:hover{opacity:1}.upload-label-container.svelte-1plj3lz{display:flex;align-items:center;gap:6px}.saved-key.svelte-1plj3lz{border-radius:4px;padding:2px 5px;background:var(--lm-muted);color:var(--lm-foreground);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px}.subtitle.svelte-axobi4{margin:6px 0 0;color:var(--lm-muted-foreground);font-size:14px}.map-update-close.svelte-axobi4{width:32px;height:32px;padding:0}.map-update-close.svelte-axobi4 svg:where(.svelte-axobi4){width:18px;height:18px;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:2}.notice.svelte-axobi4,.fatal.svelte-axobi4,.summary.svelte-axobi4{margin:18px 24px 0;padding:13px 15px;border:1px solid var(--lm-border);border-radius:var(--lm-radius);background:var(--lm-muted);color:var(--lm-muted-foreground);font-size:14px;line-height:1.45}.fatal.svelte-axobi4{display:grid;gap:10px;border-color:#dc262659;background:#dc262617;color:var(--lm-destructive)}.fatal.svelte-axobi4 .learnablemeta-button:where(.svelte-axobi4){justify-self:start}.summary.svelte-axobi4{border-color:#16a34a4d;background:#16a34a1a;color:#166534}.toolbar.svelte-axobi4{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 24px 10px;color:var(--lm-muted-foreground);font-size:13px;font-weight:500}.toolbar.svelte-axobi4>div:where(.svelte-axobi4){display:flex;gap:4px}.group-list.svelte-axobi4{display:grid;gap:8px;overflow-y:auto;max-height:390px;margin:14px 24px 0;padding:1px}.group-row.svelte-axobi4{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:62px;border:1px solid var(--lm-border);border-radius:var(--lm-radius);padding:12px 14px;background:var(--lm-card);color:var(--lm-card-foreground);box-shadow:0 1px 2px #0000000d;text-align:left;cursor:pointer;transition:border-color .15s ease,background-color .15s ease,box-shadow .15s ease}.group-row.svelte-axobi4:hover{border-color:var(--lm-ring);background:color-mix(in srgb,var(--lm-primary) 6%,var(--lm-card));box-shadow:0 1px 4px #0000001a}.group-row.svelte-axobi4:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--lm-ring) 30%,transparent)}.group-details.svelte-axobi4{display:grid;min-width:0;gap:3px}.group-details.svelte-axobi4 strong:where(.svelte-axobi4){overflow:hidden;font-size:14px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}.group-details.svelte-axobi4>span:where(.svelte-axobi4){color:var(--lm-muted-foreground);font-size:12px}.group-count.svelte-axobi4{display:inline-flex;flex:none;align-items:center;gap:6px;color:var(--lm-muted-foreground);font-size:12px;font-weight:500}.group-count.svelte-axobi4 svg:where(.svelte-axobi4){width:16px;height:16px;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:2}.map-list.svelte-axobi4{overflow-y:auto;margin:0 24px;border:1px solid var(--lm-border);border-radius:var(--lm-radius);background:var(--lm-card)}.map-row.svelte-axobi4{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--lm-border);color:var(--lm-card-foreground);transition:background-color .15s ease}.map-row.svelte-axobi4:hover{background:var(--lm-muted)}.map-row.selected.svelte-axobi4{background:color-mix(in srgb,var(--lm-primary) 7%,var(--lm-card))}.map-row.svelte-axobi4:last-child{border-bottom:0}.map-row.error-row.svelte-axobi4{background:#dc26260f}.map-row.svelte-axobi4 input[type=checkbox]:where(.svelte-axobi4){width:16px;height:16px;accent-color:var(--lm-primary)}.map-details.svelte-axobi4{display:grid;min-width:0;gap:3px}.map-details.svelte-axobi4 strong:where(.svelte-axobi4){overflow:hidden;font-size:14px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}.map-details.svelte-axobi4>span:where(.svelte-axobi4){color:var(--lm-muted-foreground);font-size:12px}.map-details.svelte-axobi4 .row-error:where(.svelte-axobi4){color:var(--lm-destructive);white-space:normal}.status.svelte-axobi4{padding:3px 8px;border:1px solid transparent;border-radius:calc(var(--lm-radius) - 2px);font-size:12px;font-weight:500;white-space:nowrap}.status.good.svelte-axobi4{border-color:#bbf7d0;background:#dcfce7;color:#166534}.status.warning.svelte-axobi4{border-color:#fde68a;background:#fef3c7;color:#854d0e}.status.bad.svelte-axobi4{border-color:#fecaca;background:#fee2e2;color:#991b1b}.status.working.svelte-axobi4{border-color:#bfdbfe;background:#dbeafe;color:#1e40af}.status.neutral.svelte-axobi4{border-color:var(--lm-border);background:var(--lm-muted);color:var(--lm-muted-foreground)}.token-form.svelte-axobi4{display:grid;gap:12px;padding:22px 24px 0}.token-form.svelte-axobi4 p:where(.svelte-axobi4){margin:0;font-size:14px;line-height:1.5}.token-form.svelte-axobi4 .small:where(.svelte-axobi4){color:var(--lm-muted-foreground);font-size:13px}.token-form.svelte-axobi4 a:where(.svelte-axobi4){color:var(--lm-link);text-underline-offset:3px}.token-actions.svelte-axobi4{margin:8px -24px 0}.error-text.svelte-axobi4{margin:0;color:var(--lm-destructive);font-size:13px}@media(prefers-color-scheme:dark){.summary.svelte-axobi4{color:#86efac}.status.good.svelte-axobi4{border-color:#22c55e66;background:#16a34a2e;color:#86efac}.status.warning.svelte-axobi4{border-color:#f59e0b66;background:#b4530933;color:#fde68a}.status.bad.svelte-axobi4{border-color:#ef444466;background:#b91c1c33;color:#fca5a5}.status.working.svelte-axobi4{border-color:#3b82f666;background:#1e40af38;color:#93c5fd}}@media(max-width:620px){.map-row.svelte-axobi4{grid-template-columns:22px minmax(0,1fr)}.group-details.svelte-axobi4>span:where(.svelte-axobi4){display:none}.status.svelte-axobi4{grid-column:2;justify-self:start}} `);
 
   var _GM_getValue = (() => typeof GM_getValue != "undefined" ? GM_getValue : void 0)();
   var _GM_info = (() => typeof GM_info != "undefined" ? GM_info : void 0)();
@@ -187,186 +182,6 @@
   var _GM_setValue = (() => typeof GM_setValue != "undefined" ? GM_setValue : void 0)();
   var _GM_xmlhttpRequest = (() => typeof GM_xmlhttpRequest != "undefined" ? GM_xmlhttpRequest : void 0)();
   var _unsafeWindow = (() => typeof unsafeWindow != "undefined" ? unsafeWindow : void 0)();
-  function waitForElement(selector) {
-    return new Promise((resolve) => {
-      try {
-        const existingElement = document.querySelector(selector);
-        if (existingElement) {
-          resolve(existingElement);
-          return;
-        }
-      } catch {
-      }
-      const observer = new MutationObserver(() => {
-        try {
-          const element = document.querySelector(selector);
-          if (element) {
-            observer.disconnect();
-            removeUrlChangeListener();
-            resolve(element);
-            return;
-          }
-        } catch {
-        }
-      });
-      const handleUrlChange = () => {
-        observer.disconnect();
-        removeUrlChangeListener();
-        resolve(null);
-      };
-      const removeUrlChangeListener = () => {
-        window.removeEventListener("urlchange", handleUrlChange);
-      };
-      window.addEventListener("urlchange", handleUrlChange);
-      observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ["class"]
-      });
-    });
-  }
-  function localStorageGetInt(name) {
-    const savedValue = _unsafeWindow.localStorage.getItem(name);
-    if (!savedValue) {
-      return null;
-    }
-    const savedInt = parseInt(savedValue, 10);
-    if (isNaN(savedInt)) {
-      return null;
-    }
-    return savedInt;
-  }
-  async function fetchMapInfo(url) {
-    return new Promise((resolve, reject) => {
-      _GM_xmlhttpRequest({
-        method: "GET",
-        url,
-        onload: (response) => {
-          if (response.status === 200 || response.status === 404) {
-            try {
-              const mapInfo = JSON.parse(response.responseText);
-              logInfo("fetched map info", mapInfo);
-              resolve(mapInfo);
-            } catch (e) {
-              logInfo("failed to parse map info response", e);
-              reject("Failed to parse response");
-            }
-          } else {
-            logInfo("failed to fetch map info", response);
-            reject(`HTTP error! status: ${response.status}`);
-          }
-        },
-        onerror: () => {
-          reject("An error occurred while fetching data");
-        }
-      });
-    });
-  }
-  const MAP_FOUND_CACHE_MS = 24 * 60 * 60 * 1e3;
-  const MAP_NOT_FOUND_CACHE_MS = 60 * 60 * 1e3;
-  function getCachedMapInfo(key) {
-    const savedMapInfo = _unsafeWindow.localStorage.getItem(key);
-    if (!savedMapInfo) {
-      return null;
-    }
-    try {
-      const parsed = JSON.parse(savedMapInfo);
-      if (parsed && parsed.mapInfo && typeof parsed.fetchedAt === "number") {
-        return parsed;
-      }
-    } catch {
-    }
-    return null;
-  }
-  async function getMapInfo(geoguessrId, forceUpdate) {
-    const localStorageMapInfoKey = `geometa:map-info:${geoguessrId}`;
-    const cached = getCachedMapInfo(localStorageMapInfoKey);
-    if (!forceUpdate && cached) {
-      const ttl = cached.mapInfo.mapFound ? MAP_FOUND_CACHE_MS : MAP_NOT_FOUND_CACHE_MS;
-      if (Date.now() - cached.fetchedAt < ttl) {
-        logInfo("using saved map info", cached.mapInfo);
-        return cached.mapInfo;
-      }
-    }
-    const url = `https://learnablemeta.com/api/userscript/map/${geoguessrId}`;
-    let mapInfo;
-    try {
-      mapInfo = await fetchMapInfo(url);
-    } catch (e) {
-      if (cached) {
-        logInfo("map info fetch failed - using stale cached map info", e);
-        return cached.mapInfo;
-      }
-      throw e;
-    }
-    const toCache = { mapInfo, fetchedAt: Date.now() };
-    _unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(toCache));
-    _unsafeWindow.localStorage.setItem("geometa:latest-version", mapInfo.userscriptVersion);
-    return mapInfo;
-  }
-  function getLatestVersionInfo() {
-    return _unsafeWindow.localStorage.getItem("geometa:latest-version");
-  }
-  function isNewerVersion(candidate, current) {
-    const a = candidate.split(".").map(Number);
-    const b = current.split(".").map(Number);
-    for (let i = 0; i < Math.max(a.length, b.length); i++) {
-      const diff = (a[i] || 0) - (b[i] || 0);
-      if (diff) return diff > 0;
-    }
-    return false;
-  }
-  function checkIfOutdated() {
-    const latest = getLatestVersionInfo();
-    if (!latest) {
-      return false;
-    }
-    return isNewerVersion(latest, _GM_info.script.version);
-  }
-  function markHelpMessageAsRead() {
-    _unsafeWindow.localStorage.setItem("geometa:help-message-read", "true");
-  }
-  function wasHelpMessageRead() {
-    return _unsafeWindow.localStorage.getItem("geometa:help-message-read") == "true";
-  }
-  const getChallengeId = () => {
-    const regexp = /.*\/live-challenge\/(.*)/;
-    const matches = location.pathname.match(regexp);
-    if (matches && matches.length > 1) {
-      return matches[1];
-    }
-    return null;
-  };
-  async function getChallengeInfo(id) {
-    const url = `https://game-server.geoguessr.com/api/live-challenge/${id}`;
-    const response = await fetch(url, {
-      method: "GET",
-      credentials: "include"
-    });
-    const data = await response.json();
-    const mapId = data.options.mapSlug;
-    const currentRound = data.currentRoundNumber - 1;
-    const rounds = data.rounds;
-    const panorama = rounds[currentRound].question.panoramaQuestionPayload.panorama;
-    const panoIdHex = panorama.panoId;
-    const panoId = decodePanoId(panoIdHex);
-    return { mapId, panoId };
-  }
-  function decodePanoId(encoded) {
-    let panoId = "";
-    for (let i = 0; i + 2 <= encoded.length; i += 2) {
-      panoId += String.fromCharCode(parseInt(encoded.slice(i, i + 2), 16));
-    }
-    return panoId;
-  }
-  function logInfo(name, data) {
-    console.log(`ALM: ${name}`, data);
-  }
-  function extractMapIdFromUrl(url) {
-    const match = url.match(/\/maps\/([^\/]+)/);
-    return match ? match[1] : null;
-  }
   const DEV = false;
   var is_array = Array.isArray;
   var index_of = Array.prototype.indexOf;
@@ -3530,6 +3345,31 @@ get_first_child(node2)
       }
     });
   }
+  function action(dom, action2, get_value) {
+    effect(() => {
+      var payload = untrack(() => action2(dom, get_value?.()) || {});
+      if (get_value && payload?.update) {
+        var inited = false;
+        var prev = (
+{}
+        );
+        render_effect(() => {
+          var value = get_value();
+          deep_read_state(value);
+          if (inited && safe_not_equal(prev, value)) {
+            prev = value;
+            payload.update(value);
+          }
+        });
+        inited = true;
+      }
+      if (payload?.destroy) {
+        return () => (
+payload.destroy()
+        );
+      }
+    });
+  }
   function r(e) {
     var t, f, n = "";
     if ("string" == typeof e || "number" == typeof e) n += e;
@@ -4218,14 +4058,194 @@ context.l
     );
     return l.u ??= { a: [], b: [], m: [] };
   }
+  function waitForElement(selector) {
+    return new Promise((resolve) => {
+      try {
+        const existingElement = document.querySelector(selector);
+        if (existingElement) {
+          resolve(existingElement);
+          return;
+        }
+      } catch {
+      }
+      const observer = new MutationObserver(() => {
+        try {
+          const element = document.querySelector(selector);
+          if (element) {
+            observer.disconnect();
+            removeUrlChangeListener();
+            resolve(element);
+            return;
+          }
+        } catch {
+        }
+      });
+      const handleUrlChange = () => {
+        observer.disconnect();
+        removeUrlChangeListener();
+        resolve(null);
+      };
+      const removeUrlChangeListener = () => {
+        window.removeEventListener("urlchange", handleUrlChange);
+      };
+      window.addEventListener("urlchange", handleUrlChange);
+      observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ["class"]
+      });
+    });
+  }
+  function localStorageGetInt(name) {
+    const savedValue = _unsafeWindow.localStorage.getItem(name);
+    if (!savedValue) {
+      return null;
+    }
+    const savedInt = parseInt(savedValue, 10);
+    if (isNaN(savedInt)) {
+      return null;
+    }
+    return savedInt;
+  }
+  async function fetchMapInfo(url) {
+    return new Promise((resolve, reject) => {
+      _GM_xmlhttpRequest({
+        method: "GET",
+        url,
+        onload: (response) => {
+          if (response.status === 200 || response.status === 404) {
+            try {
+              const mapInfo = JSON.parse(response.responseText);
+              logInfo("fetched map info", mapInfo);
+              resolve(mapInfo);
+            } catch (e) {
+              logInfo("failed to parse map info response", e);
+              reject("Failed to parse response");
+            }
+          } else {
+            logInfo("failed to fetch map info", response);
+            reject(`HTTP error! status: ${response.status}`);
+          }
+        },
+        onerror: () => {
+          reject("An error occurred while fetching data");
+        }
+      });
+    });
+  }
+  const MAP_FOUND_CACHE_MS = 24 * 60 * 60 * 1e3;
+  const MAP_NOT_FOUND_CACHE_MS = 60 * 60 * 1e3;
+  function getCachedMapInfo(key) {
+    const savedMapInfo = _unsafeWindow.localStorage.getItem(key);
+    if (!savedMapInfo) {
+      return null;
+    }
+    try {
+      const parsed = JSON.parse(savedMapInfo);
+      if (parsed && parsed.mapInfo && typeof parsed.fetchedAt === "number") {
+        return parsed;
+      }
+    } catch {
+    }
+    return null;
+  }
+  async function getMapInfo(geoguessrId, forceUpdate) {
+    const localStorageMapInfoKey = `geometa:map-info:${geoguessrId}`;
+    const cached = getCachedMapInfo(localStorageMapInfoKey);
+    if (!forceUpdate && cached) {
+      const ttl = cached.mapInfo.mapFound ? MAP_FOUND_CACHE_MS : MAP_NOT_FOUND_CACHE_MS;
+      if (Date.now() - cached.fetchedAt < ttl) {
+        logInfo("using saved map info", cached.mapInfo);
+        return cached.mapInfo;
+      }
+    }
+    const url = `https://learnablemeta.com/api/userscript/map/${geoguessrId}`;
+    let mapInfo;
+    try {
+      mapInfo = await fetchMapInfo(url);
+    } catch (e) {
+      if (cached) {
+        logInfo("map info fetch failed - using stale cached map info", e);
+        return cached.mapInfo;
+      }
+      throw e;
+    }
+    const toCache = { mapInfo, fetchedAt: Date.now() };
+    _unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(toCache));
+    _unsafeWindow.localStorage.setItem("geometa:latest-version", mapInfo.userscriptVersion);
+    return mapInfo;
+  }
+  function getLatestVersionInfo() {
+    return _unsafeWindow.localStorage.getItem("geometa:latest-version");
+  }
+  function isNewerVersion(candidate, current) {
+    const a = candidate.split(".").map(Number);
+    const b = current.split(".").map(Number);
+    for (let i = 0; i < Math.max(a.length, b.length); i++) {
+      const diff = (a[i] || 0) - (b[i] || 0);
+      if (diff) return diff > 0;
+    }
+    return false;
+  }
+  function checkIfOutdated() {
+    const latest = getLatestVersionInfo();
+    if (!latest) {
+      return false;
+    }
+    return isNewerVersion(latest, _GM_info.script.version);
+  }
+  function markHelpMessageAsRead() {
+    _unsafeWindow.localStorage.setItem("geometa:help-message-read", "true");
+  }
+  function wasHelpMessageRead() {
+    return _unsafeWindow.localStorage.getItem("geometa:help-message-read") == "true";
+  }
+  const getChallengeId = () => {
+    const regexp = /.*\/live-challenge\/(.*)/;
+    const matches = location.pathname.match(regexp);
+    if (matches && matches.length > 1) {
+      return matches[1];
+    }
+    return null;
+  };
+  async function getChallengeInfo(id) {
+    const url = `https://game-server.geoguessr.com/api/live-challenge/${id}`;
+    const response = await fetch(url, {
+      method: "GET",
+      credentials: "include"
+    });
+    const data = await response.json();
+    const mapId = data.options.mapSlug;
+    const currentRound = data.currentRoundNumber - 1;
+    const rounds = data.rounds;
+    const panorama = rounds[currentRound].question.panoramaQuestionPayload.panorama;
+    const panoIdHex = panorama.panoId;
+    const panoId = decodePanoId(panoIdHex);
+    return { mapId, panoId };
+  }
+  function decodePanoId(encoded) {
+    let panoId = "";
+    for (let i = 0; i + 2 <= encoded.length; i += 2) {
+      panoId += String.fromCharCode(parseInt(encoded.slice(i, i + 2), 16));
+    }
+    return panoId;
+  }
+  function logInfo(name, data) {
+    console.log(`ALM: ${name}`, data);
+  }
+  function extractMapIdFromUrl(url) {
+    const match = url.match(/\/maps\/([^\/]+)/);
+    return match ? match[1] : null;
+  }
   const PUBLIC_VERSION = "5";
   if (typeof window !== "undefined") {
     ((window.__svelte ??= {}).v ??= new Set()).add(PUBLIC_VERSION);
   }
   enable_legacy_mode_flag();
-  var root$6 = from_html(`<div class="loadership_ZOJAQ svelte-f4erjd"><div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div></div>`);
+  var root$7 = from_html(`<div class="loadership_ZOJAQ svelte-f4erjd"><div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div> <div class="svelte-f4erjd"></div></div>`);
   function Spinner($$anchor) {
-    var div = root$6();
+    var div = root$7();
     append($$anchor, div);
   }
   var root_1$3 = from_html(`<img class="fi svelte-tdzec4"/>`);
@@ -4540,7 +4560,7 @@ context.l
   var root_3$2 = from_html(`<div class="image-wrapper svelte-8ojyxu" role="img" aria-label="Zoomable image"><img class="responsive-image svelte-8ojyxu"/> <!></div>`);
   var root_6$3 = from_html(`<button></button>`);
   var root_5$3 = from_html(`<div class="controls"><button class="click-area prev-area svelte-8ojyxu" type="button" aria-label="Previous image"><span class="prev svelte-8ojyxu">&#10094;</span></button> <button class="click-area next-area svelte-8ojyxu" type="button" aria-label="Next image"><span class="next svelte-8ojyxu">&#10095;</span></button></div> <div class="indicators svelte-8ojyxu"></div>`, 1);
-  var root$5 = from_html(`<div class="carousel svelte-8ojyxu"><!> <!></div>`);
+  var root$6 = from_html(`<div class="carousel svelte-8ojyxu"><!> <!></div>`);
   function Carousel($$anchor, $$props) {
     push($$props, false);
     let images = prop($$props, "images", 24, () => []);
@@ -4571,7 +4591,7 @@ context.l
       set(lensY, event2.clientY - rect.top);
     }
     init();
-    var div = root$5();
+    var div = root$6();
     var node = child(div);
     {
       var consequent_2 = ($$anchor2) => {
@@ -4757,18 +4777,81 @@ context.l
       console.warn("LocalStorage Error: Could not save last dismissed announcement timestamp.", e);
     }
   }
+  const focusableSelector = [
+    "a[href]",
+    "button:not(:disabled)",
+    "input:not(:disabled)",
+    "select:not(:disabled)",
+    "textarea:not(:disabled)",
+    '[tabindex]:not([tabindex="-1"])'
+  ].join(",");
+  function focusableElements(node) {
+    return Array.from(node.querySelectorAll(focusableSelector)).filter(
+      (element) => !element.hidden && element.getClientRects().length > 0
+    );
+  }
+  function modalDialog(node, initialOptions) {
+    let options = initialOptions;
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    function focusDialog() {
+      if (!node.isConnected || node.contains(document.activeElement)) return;
+      const initialFocus = node.querySelector("[data-modal-initial-focus]") ?? focusableElements(node)[0];
+      if (initialFocus) {
+        initialFocus.focus();
+      } else {
+        node.tabIndex = -1;
+        node.focus();
+      }
+    }
+    function handleKeydown(event2) {
+      if (event2.key === "Escape" && options.closeOnEscape !== false) {
+        event2.preventDefault();
+        event2.stopPropagation();
+        options.onClose();
+        return;
+      }
+      if (event2.key !== "Tab") return;
+      const elements = focusableElements(node);
+      if (elements.length === 0) {
+        event2.preventDefault();
+        node.focus();
+        return;
+      }
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      const activeElement = document.activeElement;
+      if (event2.shiftKey && (activeElement === first || !node.contains(activeElement))) {
+        event2.preventDefault();
+        last.focus();
+      } else if (!event2.shiftKey && (activeElement === last || !node.contains(activeElement))) {
+        event2.preventDefault();
+        first.focus();
+      }
+    }
+    node.addEventListener("keydown", handleKeydown);
+    requestAnimationFrame(focusDialog);
+    return {
+      update(nextOptions) {
+        options = nextOptions;
+      },
+      destroy() {
+        node.removeEventListener("keydown", handleKeydown);
+        if (previouslyFocused?.isConnected) previouslyFocused.focus();
+      }
+    };
+  }
   var root_2$2 = from_html(`<div class="announcement svelte-1j2rmt2"><div class="svelte-1j2rmt2"><!></div> <button class="vote-close-btn svelte-1j2rmt2" aria-label="Dismiss announcement">Dismiss</button></div>`);
   var root_3$1 = from_html(`<p class="svelte-1j2rmt2"> </p>`);
   var root_6$2 = from_html(`<p class="geometa-footer svelte-1j2rmt2"><!></p>`);
   var root_7 = from_html(`<hr class="svelte-1j2rmt2"/> <!>`, 1);
   var root_5$2 = from_html(`<p class="svelte-1j2rmt2"><!> <strong class="svelte-1j2rmt2"> </strong> </p> <div class="geometa-note svelte-1j2rmt2"><!></div> <!> <!>`, 1);
-  var root_9 = from_html(`<div class="modal-backdrop svelte-1j2rmt2"><div class="modal svelte-1j2rmt2"><p class="svelte-1j2rmt2">You are about to open this site in a new tab:</p> <p class="modal-url svelte-1j2rmt2"> </p> <div class="modal-buttons svelte-1j2rmt2"><button class="proceed-btn svelte-1j2rmt2">Continue</button> <button class="close-btn svelte-1j2rmt2">Cancel</button></div></div></div>`);
-  var root_11$1 = from_html(`<p class="outdated svelte-1j2rmt2"><strong class="svelte-1j2rmt2"> </strong></p>`);
-  var root_10$1 = from_html(`<div class="modal-backdrop svelte-1j2rmt2"><div class="modal svelte-1j2rmt2"><div class="help-message svelte-1j2rmt2"><!> <p class="svelte-1j2rmt2">Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p> <ul class="svelte-1j2rmt2"><li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere
-              on your screen.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">View Map meta list:</strong> Click the list icon to see all the metas included
-              in the map you are currently playing.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Join the Community:</strong> Click the Discord icon to share feedback, suggest
-              improvements, or just say hi!</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Outdated Script:</strong> The question mark icon will blink if the script is outdated.</li></ul></div> <button class="close-btn svelte-1j2rmt2">Close</button></div></div>`);
-  var root$4 = from_html(`<div class="geometa-container svelte-1j2rmt2"><!> <div class="flex header svelte-1j2rmt2"><h2 class="svelte-1j2rmt2">Learnable Meta</h2> <div class="icons svelte-1j2rmt2"><a target="_blank" aria-label="List of map metas" class="svelte-1j2rmt2"><span class="skill-icons--list svelte-1j2rmt2"></span></a> <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-1j2rmt2"><span class="flat-color-icons--globe svelte-1j2rmt2"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-1j2rmt2"><span class="skill-icons--discord svelte-1j2rmt2"></span></a> <button aria-label="More information" style="background: none; border: none; padding: 0;" class="svelte-1j2rmt2"><span></span></button></div></div> <!> <!> <!></div>`);
+  var root_9 = from_html(`<div class="learnablemeta-modal-backdrop learnablemeta-ui svelte-1j2rmt2" role="presentation"><div class="learnablemeta-modal svelte-1j2rmt2" role="dialog" aria-modal="true" aria-labelledby="external-link-title"><div class="learnablemeta-modal-header svelte-1j2rmt2"><p class="learnablemeta-modal-eyebrow svelte-1j2rmt2">LearnableMeta</p> <h2 class="learnablemeta-modal-title svelte-1j2rmt2" id="external-link-title">Open external link?</h2> <p class="learnablemeta-modal-description svelte-1j2rmt2">This link will open in a new browser tab.</p></div> <div class="learnablemeta-modal-body svelte-1j2rmt2"><p class="learnablemeta-modal-code svelte-1j2rmt2"> </p></div> <div class="learnablemeta-modal-actions svelte-1j2rmt2"><button type="button" data-modal-initial-focus="" class="learnablemeta-button learnablemeta-button--outline svelte-1j2rmt2">Cancel</button> <button type="button" class="learnablemeta-button learnablemeta-button--primary svelte-1j2rmt2">Continue</button></div></div></div>`);
+  var root_11$1 = from_html(`<p class="learnablemeta-modal-alert svelte-1j2rmt2"> </p>`);
+  var root_10$1 = from_html(`<div class="learnablemeta-modal-backdrop learnablemeta-ui svelte-1j2rmt2" role="presentation"><div class="learnablemeta-modal learnablemeta-modal--wide svelte-1j2rmt2" role="dialog" aria-modal="true" aria-labelledby="learnablemeta-help-title"><div class="learnablemeta-modal-header svelte-1j2rmt2"><p class="learnablemeta-modal-eyebrow svelte-1j2rmt2">LearnableMeta</p> <h2 class="learnablemeta-modal-title svelte-1j2rmt2" id="learnablemeta-help-title">Userscript guide</h2> <p class="learnablemeta-modal-description svelte-1j2rmt2">Quick tips for using LearnableMeta while you play.</p></div> <div class="learnablemeta-modal-body svelte-1j2rmt2"><!> <ul class="learnablemeta-help-list svelte-1j2rmt2"><li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Drag to move:</strong> Click and drag the top of the note to reposition it anywhere
+              on your screen.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">View map meta list:</strong> Click the list icon to see all the metas included
+              in the map you are currently playing.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Join the community:</strong> Click the Discord icon to share feedback, suggest
+              improvements, or just say hi!</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Outdated script:</strong> The question mark icon blinks when an update is available.</li></ul></div> <div class="learnablemeta-modal-actions svelte-1j2rmt2"><button type="button" class="learnablemeta-button learnablemeta-button--primary svelte-1j2rmt2">Close</button></div></div></div>`);
+  var root$5 = from_html(`<div class="geometa-container svelte-1j2rmt2"><!> <div class="flex header svelte-1j2rmt2"><h2 class="svelte-1j2rmt2">Learnable Meta</h2> <div class="icons svelte-1j2rmt2"><a target="_blank" aria-label="List of map metas" class="svelte-1j2rmt2"><span class="skill-icons--list svelte-1j2rmt2"></span></a> <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-1j2rmt2"><span class="flat-color-icons--globe svelte-1j2rmt2"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-1j2rmt2"><span class="skill-icons--discord svelte-1j2rmt2"></span></a> <button class="help-toggle-button svelte-1j2rmt2" aria-label="More information"><span></span></button></div></div> <!> <!> <!></div>`);
   function App($$anchor, $$props) {
     push($$props, true);
     let geoInfo = state(null);
@@ -4880,7 +4963,7 @@ context.l
       }
     });
     let lastDismissedTimestamp = state(proxy(getLastDismissedAnnouncementTimestamp()));
-    var div = root$4();
+    var div = root$5();
     var node = child(div);
     await_block(node, getAnnouncement, null, ($$anchor2, announcement) => {
       var fragment = comment();
@@ -4996,13 +5079,15 @@ context.l
       var consequent_5 = ($$anchor2) => {
         var div_6 = root_9();
         var div_7 = child(div_6);
-        var p_3 = sibling(child(div_7), 2);
+        var div_8 = sibling(child(div_7), 2);
+        var p_3 = child(div_8);
         var text_3 = child(p_3);
-        var div_8 = sibling(p_3, 2);
-        var button_2 = child(div_8);
-        button_2.__click = proceed;
+        var div_9 = sibling(div_8, 2);
+        var button_2 = child(div_9);
+        button_2.__click = cancel;
         var button_3 = sibling(button_2, 2);
-        button_3.__click = cancel;
+        button_3.__click = proceed;
+        action(div_7, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({ onClose: cancel }));
         template_effect(() => set_text(text_3, get(currentUrl)));
         append($$anchor2, div_6);
       };
@@ -5013,25 +5098,26 @@ context.l
     var node_12 = sibling(node_11, 2);
     {
       var consequent_7 = ($$anchor2) => {
-        var div_9 = root_10$1();
-        var div_10 = child(div_9);
+        var div_10 = root_10$1();
         var div_11 = child(div_10);
-        var node_13 = child(div_11);
+        var div_12 = sibling(child(div_11), 2);
+        var node_13 = child(div_12);
         {
           var consequent_6 = ($$anchor3) => {
             var p_4 = root_11$1();
-            var strong_1 = child(p_4);
-            var text_4 = child(strong_1);
-            template_effect(($0) => set_text(text_4, `Your script version is out of date - please install the latest version (${$0 ?? ""})!`), [getLatestVersionInfo]);
+            var text_4 = child(p_4);
+            template_effect(($0) => set_text(text_4, `Your userscript is out of date. Install the latest version (${$0 ?? ""}).`), [getLatestVersionInfo]);
             append($$anchor3, p_4);
           };
           if_block(node_13, ($$render) => {
             if (checkIfOutdated()) $$render(consequent_6);
           });
         }
-        var button_4 = sibling(div_11, 2);
+        var div_13 = sibling(div_12, 2);
+        var button_4 = child(div_13);
         button_4.__click = togglePopup;
-        append($$anchor2, div_9);
+        action(div_11, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({ onClose: togglePopup }));
+        append($$anchor2, div_10);
       };
       if_block(node_12, ($$render) => {
         if (get(showHelpPopup)) $$render(consequent_7);
@@ -5283,9 +5369,9 @@ roundNumber: 4,
       return result;
     };
   }
-  var root$3 = from_html(`<div class="geometa-map-label-container svelte-1y99qco"><p class="svelte-1y99qco">LearnableMeta Enabled</p> <a target="_blank"><button class="svelte-1y99qco">Meta List</button></a></div>`);
+  var root$4 = from_html(`<div class="geometa-map-label-container svelte-1y99qco"><p class="svelte-1y99qco">LearnableMeta Enabled</p> <a target="_blank"><button class="svelte-1y99qco">Meta List</button></a></div>`);
   function MapLabel($$anchor, $$props) {
-    var div = root$3();
+    var div = root$4();
     var a = sibling(child(div), 2);
     template_effect(() => set_attribute(a, "href", `https://learnablemeta.com/maps/${$$props.mapId}`));
     append($$anchor, div);
@@ -5521,10 +5607,10 @@ roundNumber: 4,
     };
   }
   var root_1$2 = from_html(`<span class="toast-detail svelte-w17ltc"> </span>`);
-  var root$2 = from_html(`<div role="alert"><div class="toast-content svelte-w17ltc"><span class="toast-message"> </span> <!></div> <button class="toast-close-button svelte-w17ltc" aria-label="Close">×</button></div>`);
+  var root$3 = from_html(`<div role="alert"><div class="toast-content svelte-w17ltc"><span class="toast-message"> </span> <!></div> <button class="toast-close-button svelte-w17ltc" aria-label="Close">×</button></div>`);
   function ToastNotification($$anchor, $$props) {
     let type = prop($$props, "type", 3, "info");
-    var div = root$2();
+    var div = root$3();
     var div_1 = child(div);
     var span = child(div_1);
     var text = child(span);
@@ -5565,13 +5651,13 @@ roundNumber: 4,
   function clearApiKey() {
     _GM_setValue(API_KEY_STORAGE_NAME, "");
   }
-  var root_2$1 = from_html(`<p class="svelte-1plj3lz">An API key is required to upload locations. Please paste your key below.</p>`);
-  var root_4 = from_html(`<p class="svelte-1plj3lz">A key ending in <code class="svelte-1plj3lz"> </code> is currently saved. Paste a new key
-          to replace it, or clear the saved key.</p>`);
-  var root_5$1 = from_html(`<p class="svelte-1plj3lz">No API key is saved yet. Paste your key below.</p>`);
-  var root_6$1 = from_html(`<button class="modal-button modal-button-clear svelte-1plj3lz">Clear Key</button>`);
-  var root_1$1 = from_html(`<div class="modal-overlay svelte-1plj3lz" role="dialog" aria-modal="true" aria-labelledby="apiKeyModalTitle"><div class="modal-content svelte-1plj3lz"><h2 id="apiKeyModalTitle" class="svelte-1plj3lz">LearnableMeta API Key</h2> <!> <p class="svelte-1plj3lz">You can generate your API token on your <a target="_blank" rel="noopener noreferrer" class="svelte-1plj3lz">LearnableMeta profile page</a>.</p> <input type="text" placeholder="Paste your API key here" aria-label="API Key Input" class="modal-input svelte-1plj3lz"/> <div class="modal-actions svelte-1plj3lz"><!> <button class="modal-button modal-button-save svelte-1plj3lz"> </button> <button class="modal-button modal-button-cancel svelte-1plj3lz">Cancel</button></div> <p class="modal-note svelte-1plj3lz">Your API key will be stored securely in your browser's userscript storage for future use.</p></div></div>`);
-  var root$1 = from_html(`<div class="upload-label-container svelte-1plj3lz"><button class="learnablemeta-yellow-button"> </button> <button class="api-key-button svelte-1plj3lz" title="Manage LearnableMeta API key" aria-label="Manage LearnableMeta API key">🔑</button></div> <!> <!>`, 1);
+  var root_2$1 = from_html(`<p>An API token is required before locations can be uploaded.</p>`);
+  var root_4 = from_html(`<p>A token ending in <code class="saved-key svelte-1plj3lz"> </code> is saved. Paste
+            a new token to replace it, or clear the saved token.</p>`);
+  var root_5$1 = from_html(`<p>No API token is saved yet.</p>`);
+  var root_6$1 = from_html(`<button type="button" class="learnablemeta-button learnablemeta-button--destructive learnablemeta-modal-action-leading">Clear token</button>`);
+  var root_1$1 = from_html(`<div class="learnablemeta-modal-backdrop learnablemeta-ui" role="presentation"><div class="learnablemeta-modal" role="dialog" aria-modal="true" aria-labelledby="apiKeyModalTitle"><div class="learnablemeta-modal-header"><p class="learnablemeta-modal-eyebrow">LearnableMeta</p> <h2 class="learnablemeta-modal-title" id="apiKeyModalTitle">API token</h2> <p class="learnablemeta-modal-description">Manage the token used to download synchronized locations.</p></div> <div class="learnablemeta-modal-body"><!> <p>Generate or replace your token on the <a target="_blank" rel="noopener noreferrer">LearnableMeta profile page</a>.</p> <input type="text" placeholder="Paste your API token" aria-label="LearnableMeta API token" data-modal-initial-focus="" class="learnablemeta-modal-input"/> <p class="learnablemeta-modal-note">The token is stored only in your browser's userscript storage.</p></div> <div class="learnablemeta-modal-actions"><!> <button type="button" class="learnablemeta-button learnablemeta-button--outline">Cancel</button> <button type="button" class="learnablemeta-button learnablemeta-button--primary"> </button></div></div></div>`);
+  var root$2 = from_html(`<div class="upload-label-container learnablemeta-ui svelte-1plj3lz"><button class="learnablemeta-geoguessr-button"> </button> <button class="learnablemeta-geoguessr-button learnablemeta-geoguessr-button--icon" title="Manage LearnableMeta API key" aria-label="Manage LearnableMeta API key">🔑</button></div> <!> <!>`, 1);
   function UploadLocations($$anchor, $$props) {
     push($$props, true);
     let showApiKeyModal = state(false);
@@ -5690,7 +5776,7 @@ roundNumber: 4,
       set(showApiKeyModal, false);
       set(apiKeyInput, "");
     }
-    var fragment = root$1();
+    var fragment = root$2();
     var div = first_child(fragment);
     var button = child(div);
     button.__click = handleUploadClick;
@@ -5702,7 +5788,8 @@ roundNumber: 4,
       var consequent_3 = ($$anchor2) => {
         var div_1 = root_1$1();
         var div_2 = child(div_1);
-        var node_1 = sibling(child(div_2), 2);
+        var div_3 = sibling(child(div_2), 2);
+        var node_1 = child(div_3);
         {
           var consequent = ($$anchor3) => {
             var p = root_2$1();
@@ -5742,8 +5829,8 @@ roundNumber: 4,
         var p_3 = sibling(node_1, 2);
         var a = sibling(child(p_3));
         var input = sibling(p_3, 2);
-        var div_3 = sibling(input, 2);
-        var node_3 = child(div_3);
+        var div_4 = sibling(div_3, 2);
+        var node_3 = child(div_4);
         {
           var consequent_2 = ($$anchor3) => {
             var button_2 = root_6$1();
@@ -5755,13 +5842,14 @@ roundNumber: 4,
           });
         }
         var button_3 = sibling(node_3, 2);
-        button_3.__click = handleSaveApiKey;
-        var text_2 = child(button_3);
+        button_3.__click = handleCancelModal;
         var button_4 = sibling(button_3, 2);
-        button_4.__click = handleCancelModal;
+        button_4.__click = handleSaveApiKey;
+        var text_2 = child(button_4);
+        action(div_2, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({ onClose: handleCancelModal }));
         template_effect(() => {
           set_attribute(a, "href", URL_TO_GENERATE_TOKEN);
-          set_text(text_2, get(modalMode) === "upload" ? "Save & Upload" : "Save");
+          set_text(text_2, get(modalMode) === "upload" ? "Save and upload" : "Save");
         });
         bind_value(input, () => get(apiKeyInput), ($$value) => set(apiKeyInput, $$value));
         append($$anchor2, div_1);
@@ -5910,24 +5998,24 @@ roundNumber: 4,
   }
   var root_1 = from_html(`<p class="subtitle svelte-axobi4"> </p>`);
   var root_3 = from_html(`<p class="error-text svelte-axobi4"> </p>`);
-  var root_2 = from_html(`<div class="token-form svelte-axobi4"><p class="svelte-axobi4">Paste your LearnableMeta API token to load maps you can manage.</p> <p class="small svelte-axobi4">Generate or replace it on your <a target="_blank" rel="noopener noreferrer" class="svelte-axobi4">token page</a>.</p> <input type="password" placeholder="LearnableMeta API token" aria-label="LearnableMeta API token" class="svelte-axobi4"/> <!> <div class="actions svelte-axobi4"><button class="secondary svelte-axobi4">Cancel</button> <button class="primary svelte-axobi4">Save and continue</button></div></div>`);
+  var root_2 = from_html(`<div class="token-form svelte-axobi4"><p class="svelte-axobi4">Paste your LearnableMeta API token to load maps you can manage.</p> <p class="small svelte-axobi4">Generate or replace it on your <a target="_blank" rel="noopener noreferrer" class="svelte-axobi4">token page</a>.</p> <input type="password" placeholder="LearnableMeta API token" aria-label="LearnableMeta API token" class="learnablemeta-modal-input" data-modal-initial-focus=""/> <!> <div class="learnablemeta-modal-actions token-actions svelte-axobi4"><button class="learnablemeta-button learnablemeta-button--outline">Cancel</button> <button class="learnablemeta-button learnablemeta-button--primary">Save and continue</button></div></div>`);
   var root_6 = from_html(`<div class="notice svelte-axobi4">Loading your synchronized map groups…</div>`);
-  var root_8 = from_html(`<div class="fatal svelte-axobi4"><strong>Could not load your map groups.</strong> <span> </span> <button class="secondary svelte-axobi4">Try again</button></div>`);
-  var root_11 = from_html(`<button class="group-row svelte-axobi4"><strong> </strong> <span class="svelte-axobi4"> </span></button>`);
+  var root_8 = from_html(`<div class="fatal svelte-axobi4"><strong>Could not load your map groups.</strong> <span> </span> <button class="learnablemeta-button learnablemeta-button--outline svelte-axobi4">Try again</button></div>`);
+  var root_11 = from_html(`<button class="group-row svelte-axobi4"><span class="group-details svelte-axobi4"><strong class="svelte-axobi4"> </strong> <span class="svelte-axobi4">Synchronized and ready to compare</span></span> <span class="group-count svelte-axobi4"> <svg viewBox="0 0 24 24" aria-hidden="true" class="svelte-axobi4"><path d="m9 18 6-6-6-6"></path></svg></span></button>`);
   var root_10 = from_html(`<div class="notice svelte-axobi4">Select a synchronized LearnableMeta group to compare its maps.</div> <div class="group-list svelte-axobi4"></div>`, 1);
   var root_12 = from_html(`<div class="notice svelte-axobi4">You have no synchronized map groups containing maps.</div>`);
-  var root_5 = from_html(`<!> <footer class="actions svelte-axobi4"><button class="link-button token-button svelte-axobi4">Change API token</button> <button class="secondary svelte-axobi4">Close</button></footer>`, 1);
+  var root_5 = from_html(`<!> <footer class="learnablemeta-modal-actions"><button class="learnablemeta-button learnablemeta-button--link learnablemeta-modal-action-leading">Change API token</button> <button class="learnablemeta-button learnablemeta-button--outline">Close</button></footer>`, 1);
   var root_14 = from_html(`<div class="notice svelte-axobi4">Loading synchronized maps and comparing GeoGuessr drafts…</div>`);
-  var root_15 = from_html(`<div class="fatal svelte-axobi4"><strong>Could not load this group.</strong> <span> </span> <button class="secondary svelte-axobi4">Try again</button></div>`);
+  var root_15 = from_html(`<div class="fatal svelte-axobi4"><strong>Could not load this group.</strong> <span> </span> <button class="learnablemeta-button learnablemeta-button--outline svelte-axobi4">Try again</button></div>`);
   var root_18 = from_html(`<span class="row-error svelte-axobi4"> </span>`);
-  var root_17 = from_html(`<label><input type="checkbox"/> <span class="map-details svelte-axobi4"><strong class="svelte-axobi4"> </strong> <span class="svelte-axobi4"> </span> <!></span> <span> </span></label>`);
-  var root_16 = from_html(`<div class="toolbar svelte-axobi4"><span> </span> <div><button class="link-button svelte-axobi4">Select changed</button> <button class="link-button svelte-axobi4">Deselect all</button></div></div> <div class="map-list svelte-axobi4"></div>`, 1);
+  var root_17 = from_html(`<label><input type="checkbox" class="svelte-axobi4"/> <span class="map-details svelte-axobi4"><strong class="svelte-axobi4"> </strong> <span class="svelte-axobi4"> </span> <!></span> <span> </span></label>`);
+  var root_16 = from_html(`<div class="toolbar svelte-axobi4"><span> </span> <div class="svelte-axobi4"><button class="learnablemeta-button learnablemeta-button--link">Select changed</button> <button class="learnablemeta-button learnablemeta-button--link">Deselect all</button></div></div> <div class="map-list svelte-axobi4"></div>`, 1);
   var root_20 = from_html(`<div class="notice svelte-axobi4">This group has no maps to update.</div>`);
   var root_21 = from_html(`<div class="summary svelte-axobi4"> </div>`);
-  var root_22 = from_html(`<button class="link-button svelte-axobi4">Change group</button>`);
-  var root_23 = from_html(`<button class="secondary svelte-axobi4"> </button>`);
-  var root_13 = from_html(`<!> <!> <!> <!> <footer class="actions svelte-axobi4"><button class="link-button token-button svelte-axobi4">Change API token</button> <!> <button class="secondary svelte-axobi4">Close</button> <!> <button class="primary svelte-axobi4"> </button></footer>`, 1);
-  var root = from_html(`<div class="backdrop svelte-axobi4" role="presentation"><div class="panel svelte-axobi4" role="dialog" aria-modal="true" aria-labelledby="group-update-title"><header class="svelte-axobi4"><div><p class="eyebrow svelte-axobi4">LearnableMeta</p> <h1 id="group-update-title" class="svelte-axobi4"> </h1> <!></div> <button class="icon-button svelte-axobi4" aria-label="Close">×</button></header> <!></div></div>`);
+  var root_22 = from_html(`<button class="learnablemeta-button learnablemeta-button--link">Change group</button>`);
+  var root_23 = from_html(`<button class="learnablemeta-button learnablemeta-button--outline"> </button>`);
+  var root_13 = from_html(`<!> <!> <!> <!> <footer class="learnablemeta-modal-actions"><button class="learnablemeta-button learnablemeta-button--link learnablemeta-modal-action-leading">Change API token</button> <!> <button class="learnablemeta-button learnablemeta-button--outline">Close</button> <!> <button class="learnablemeta-button learnablemeta-button--primary"> </button></footer>`, 1);
+  var root$1 = from_html(`<div class="learnablemeta-modal-backdrop learnablemeta-ui" role="presentation"><div class="learnablemeta-modal learnablemeta-modal--map-update" role="dialog" aria-modal="true" aria-labelledby="group-update-title"><header class="learnablemeta-modal-header learnablemeta-modal-header--row"><div><p class="learnablemeta-modal-eyebrow">LearnableMeta</p> <h1 class="learnablemeta-modal-title learnablemeta-modal-title--large" id="group-update-title"> </h1> <!></div> <button class="learnablemeta-button learnablemeta-button--ghost map-update-close svelte-axobi4" aria-label="Close"><svg viewBox="0 0 24 24" aria-hidden="true" class="svelte-axobi4"><path d="M18 6 6 18M6 6l12 12"></path></svg></button></header> <!></div></div>`);
   function MapGroupUpdate($$anchor, $$props) {
     push($$props, true);
     const canChooseGroup = $$props.groupId === void 0;
@@ -6159,7 +6247,14 @@ roundNumber: 4,
       };
       return labels[row.status];
     }
-    var div = root();
+    function statusTone(row) {
+      if (row.status === "current" || row.status === "success") return "good";
+      if (["scan-error", "update-error", "publish-error"].includes(row.status)) return "bad";
+      if (["scanning", "updating", "publishing"].includes(row.status)) return "working";
+      if (row.status === "empty") return "neutral";
+      return "warning";
+    }
+    var div = root$1();
     var div_1 = child(div);
     var header = child(div_1);
     var div_2 = child(header);
@@ -6247,13 +6342,14 @@ roundNumber: 4,
                         each(div_7, 21, () => get(accessibleGroups), (group) => group.id, ($$anchor7, group) => {
                           var button_4 = root_11();
                           button_4.__click = () => selectGroup(get(group).id);
-                          var strong = child(button_4);
+                          var span_1 = child(button_4);
+                          var strong = child(span_1);
                           var text_4 = child(strong);
-                          var span_1 = sibling(strong, 2);
-                          var text_5 = child(span_1);
+                          var span_2 = sibling(span_1, 2);
+                          var text_5 = child(span_2);
                           template_effect(() => {
                             set_text(text_4, get(group).name);
-                            set_text(text_5, `${get(group).mapCount ?? ""} map${get(group).mapCount === 1 ? "" : "s"}`);
+                            set_text(text_5, `${get(group).mapCount ?? ""} map${get(group).mapCount === 1 ? "" : "s"} `);
                           });
                           append($$anchor7, button_4);
                         });
@@ -6315,9 +6411,9 @@ roundNumber: 4,
             {
               var consequent_8 = ($$anchor4) => {
                 var div_10 = root_15();
-                var span_2 = sibling(child(div_10), 2);
-                var text_6 = child(span_2);
-                var button_7 = sibling(span_2, 2);
+                var span_3 = sibling(child(div_10), 2);
+                var text_6 = child(span_3);
+                var button_7 = sibling(span_3, 2);
                 button_7.__click = scanGroup;
                 template_effect(() => set_text(text_6, get(fatalError)));
                 append($$anchor4, div_10);
@@ -6331,9 +6427,9 @@ roundNumber: 4,
               var consequent_10 = ($$anchor4) => {
                 var fragment_6 = root_16();
                 var div_11 = first_child(fragment_6);
-                var span_3 = child(div_11);
-                var text_7 = child(span_3);
-                var div_12 = sibling(span_3, 2);
+                var span_4 = child(div_11);
+                var text_7 = child(span_4);
+                var div_12 = sibling(span_4, 2);
                 var button_8 = child(div_12);
                 button_8.__click = () => selectChanged(true);
                 var button_9 = sibling(button_8, 2);
@@ -6343,39 +6439,37 @@ roundNumber: 4,
                   var label = root_17();
                   let classes;
                   var input_1 = child(label);
-                  var span_4 = sibling(input_1, 2);
-                  var strong_1 = child(span_4);
+                  var span_5 = sibling(input_1, 2);
+                  var strong_1 = child(span_5);
                   var text_8 = child(strong_1);
-                  var span_5 = sibling(strong_1, 2);
-                  var text_9 = child(span_5);
-                  var node_10 = sibling(span_5, 2);
+                  var span_6 = sibling(strong_1, 2);
+                  var text_9 = child(span_6);
+                  var node_10 = sibling(span_6, 2);
                   {
                     var consequent_9 = ($$anchor6) => {
-                      var span_6 = root_18();
-                      var text_10 = child(span_6);
+                      var span_7 = root_18();
+                      var text_10 = child(span_7);
                       template_effect(() => set_text(text_10, get(row).error));
-                      append($$anchor6, span_6);
+                      append($$anchor6, span_7);
                     };
                     if_block(node_10, ($$render) => {
                       if (get(row).error) $$render(consequent_9);
                     });
                   }
-                  var span_7 = sibling(span_4, 2);
-                  let classes_1;
-                  var text_11 = child(span_7);
+                  var span_8 = sibling(span_5, 2);
+                  var text_11 = child(span_8);
                   template_effect(
-                    ($0, $1) => {
-                      classes = set_class(label, 1, "map-row svelte-axobi4", null, classes, { "error-row": get(row).error });
+                    ($0, $1, $2) => {
+                      classes = set_class(label, 1, "map-row svelte-axobi4", null, classes, { "error-row": get(row).error, selected: get(row).selected });
                       input_1.disabled = get(row).status !== "changed" || get(phase) === "updating";
                       set_text(text_8, get(row).name);
                       set_text(text_9, `${$0 ?? ""} synchronized locations`);
-                      classes_1 = set_class(span_7, 1, "status svelte-axobi4", null, classes_1, {
-                        good: get(row).status === "current" || get(row).status === "success"
-                      });
-                      set_text(text_11, $1);
+                      set_class(span_8, 1, `status ${$1 ?? ""}`, "svelte-axobi4");
+                      set_text(text_11, $2);
                     },
                     [
                       () => get(row).locationCount.toLocaleString(),
+                      () => statusTone(get(row)),
                       () => statusLabel(get(row))
                     ]
                   );
@@ -6482,6 +6576,10 @@ roundNumber: 4,
         else $$render(alternate_5, false);
       });
     }
+    action(div_1, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({
+      onClose: $$props.onClose,
+      closeOnEscape: get(phase) !== "updating"
+    }));
     template_effect(() => {
       set_text(text, get(phase) === "groups" ? "Choose a map group" : "Update GeoGuessr maps");
       button.disabled = get(phase) === "updating";
@@ -6535,7 +6633,7 @@ roundNumber: 4,
     if (document.getElementById(launcherButtonId)) return;
     const launcher = document.createElement("button");
     launcher.id = launcherButtonId;
-    launcher.className = "learnablemeta-yellow-button";
+    launcher.className = "learnablemeta-geoguessr-button";
     launcher.type = "button";
     launcher.setAttribute("aria-label", "Update LearnableMeta maps");
     launcher.textContent = "Update maps";
@@ -6565,16 +6663,55 @@ roundNumber: 4,
     handleCreatorHubNavigation();
     window.addEventListener("urlchange", handleCreatorHubNavigation);
   }
-  const buttonsCss = ".learnablemeta-yellow-button{display:inline-flex;align-items:center;justify-content:center;padding:8px 16px;appearance:none;font-family:inherit;font-size:12px;font-weight:700;line-height:1;white-space:nowrap;background:linear-gradient(180deg,#ffeb99,#f5c542);border:1px solid #e0b000;color:#002147;border-radius:3.75rem;box-shadow:0 2px 4px #00000026,inset 0 1px #fff6;cursor:pointer;transition:background .2s ease-in-out,transform .1s ease,box-shadow .2s ease-in-out}.learnablemeta-yellow-button:hover:not(:disabled){background:linear-gradient(180deg,#ffe066,#eab308);box-shadow:0 4px 8px #0003,inset 0 1px #ffffff80;transform:translateY(-1px)}.learnablemeta-yellow-button:active:not(:disabled){background:linear-gradient(180deg,#eab308,#d39e00);box-shadow:inset 0 2px 4px #0003;transform:translateY(1px)}.learnablemeta-yellow-button:focus-visible{outline:none;box-shadow:0 0 0 3px #eab30880,0 2px 4px #00000026}.learnablemeta-yellow-button:disabled{background:#e0e0e0;border-color:#bbb;color:#888;box-shadow:none;cursor:not-allowed;transform:none}.learnablemeta-map-actions{display:flex!important;flex-direction:row!important;align-items:center!important;gap:.75rem!important}";
+  var root = from_html(`<div class="learnablemeta-modal-backdrop learnablemeta-ui" role="presentation"><div class="learnablemeta-modal" role="dialog" aria-modal="true" aria-labelledby="reset-layout-title"><div class="learnablemeta-modal-header"><p class="learnablemeta-modal-eyebrow">LearnableMeta</p> <h2 class="learnablemeta-modal-title" id="reset-layout-title">Reset window layout?</h2> <p class="learnablemeta-modal-description">The meta window will return to its default position and size.</p></div> <div class="learnablemeta-modal-actions"><button type="button" data-modal-initial-focus="" class="learnablemeta-button learnablemeta-button--outline">Cancel</button> <button type="button" class="learnablemeta-button learnablemeta-button--primary">Reset layout</button></div></div></div>`);
+  function ResetLayoutConfirmation($$anchor, $$props) {
+    var div = root();
+    var div_1 = child(div);
+    var div_2 = sibling(child(div_1), 2);
+    var button = child(div_2);
+    button.__click = function(...$$args) {
+      $$props.onCancel?.apply(this, $$args);
+    };
+    var button_1 = sibling(button, 2);
+    button_1.__click = function(...$$args) {
+      $$props.onConfirm?.apply(this, $$args);
+    };
+    action(div_1, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({ onClose: $$props.onCancel }));
+    append($$anchor, div);
+  }
+  delegate(["click"]);
+  const themeCss = ".learnablemeta-ui{--lm-background: hsl(0 0% 100%);--lm-foreground: hsl(240 10% 3.9%);--lm-card: hsl(0 0% 100%);--lm-card-foreground: hsl(240 10% 3.9%);--lm-primary: hsl(161 92% 25%);--lm-primary-hover: hsl(161 92% 22%);--lm-primary-foreground: hsl(355.7 100% 97.3%);--lm-secondary: hsl(240 4.8% 95.9%);--lm-secondary-foreground: hsl(240 5.9% 10%);--lm-muted: hsl(240 4.8% 95.9%);--lm-muted-foreground: hsl(240 3.8% 46.1%);--lm-accent: hsl(240 4.8% 95.9%);--lm-accent-foreground: hsl(240 5.9% 10%);--lm-destructive: hsl(0 72.22% 50.59%);--lm-border: hsl(240 5.9% 90%);--lm-input: hsl(240 5.9% 90%);--lm-ring: hsl(142.1 76.2% 36.3%);--lm-link: hsl(220.3 82.9% 52.7%);--lm-radius: .5rem;color:var(--lm-foreground);font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif}@media(prefers-color-scheme:dark){.learnablemeta-ui{--lm-background: hsl(0 0% 10%);--lm-foreground: hsl(0 0% 95%);--lm-card: hsl(24 9.8% 10%);--lm-card-foreground: hsl(0 0% 95%);--lm-primary: hsl(161 92% 25%);--lm-primary-hover: hsl(161 92% 29%);--lm-primary-foreground: hsl(0 0% 98%);--lm-secondary: hsl(240 3.7% 20.9%);--lm-secondary-foreground: hsl(0 0% 98%);--lm-muted: hsl(0 0% 15%);--lm-muted-foreground: hsl(240 5% 64.9%);--lm-accent: hsl(12 6.5% 15.1%);--lm-accent-foreground: hsl(0 0% 98%);--lm-destructive: hsl(0 72% 60%);--lm-border: hsl(240 3.7% 22%);--lm-input: hsl(240 3.7% 25.5%);--lm-ring: hsl(142.4 71.8% 35%);--lm-link: hsl(217.1 92.7% 67.6%);color-scheme:dark}}";
+  importCSS(themeCss);
+  const buttonsCss = ".learnablemeta-button{display:inline-flex;height:36px;flex:none;align-items:center;justify-content:center;gap:8px;padding:8px 16px;appearance:none;font-family:inherit;font-size:14px;font-weight:500;line-height:20px;white-space:nowrap;border:1px solid transparent;border-radius:var(--lm-radius, .5rem);cursor:pointer;transition:background-color .15s ease,border-color .15s ease,color .15s ease,box-shadow .15s ease}.learnablemeta-button--primary{background:var(--lm-primary, hsl(161 92% 25%));color:var(--lm-primary-foreground, #fff);box-shadow:0 1px 2px #0000001f}.learnablemeta-button--primary:hover:not(:disabled){background:var(--lm-primary-hover, hsl(161 92% 22%))}.learnablemeta-button--outline{border-color:var(--lm-border, hsl(240 5.9% 90%));background:var(--lm-background, #fff);color:var(--lm-secondary-foreground, hsl(240 5.9% 10%));box-shadow:0 1px 2px #0000000f}.learnablemeta-button--outline:hover:not(:disabled){background:var(--lm-accent, hsl(240 4.8% 95.9%));color:var(--lm-accent-foreground, hsl(240 5.9% 10%))}.learnablemeta-button--ghost{background:transparent;color:var(--lm-muted-foreground, hsl(240 3.8% 46.1%));box-shadow:none}.learnablemeta-button--ghost:hover:not(:disabled){background:var(--lm-accent, hsl(240 4.8% 95.9%));color:var(--lm-accent-foreground, hsl(240 5.9% 10%))}.learnablemeta-button--link{height:auto;padding:5px 7px;background:transparent;color:var(--lm-link, hsl(220.3 82.9% 52.7%));font-size:13px;box-shadow:none}.learnablemeta-button--link:hover:not(:disabled){text-decoration:underline;text-underline-offset:3px}.learnablemeta-button--destructive{background:var(--lm-destructive, hsl(0 72.22% 50.59%));color:#fff;box-shadow:0 1px 2px #0000001f}.learnablemeta-button--destructive:hover:not(:disabled){background:color-mix(in srgb,var(--lm-destructive, #dc2626) 88%,#000)}.learnablemeta-button--icon{width:36px;padding:0}.learnablemeta-button:active:not(:disabled){box-shadow:inset 0 1px 3px #00000040}.learnablemeta-button--ghost:active:not(:disabled),.learnablemeta-button--link:active:not(:disabled){box-shadow:none}.learnablemeta-button:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--lm-ring, #16a34a) 35%,transparent)}.learnablemeta-button:disabled{opacity:.5;cursor:not-allowed}.learnablemeta-geoguessr-button{display:inline-flex;align-items:center;justify-content:center;padding:8px 16px;appearance:none;font-family:inherit;font-size:12px;font-weight:700;line-height:1;white-space:nowrap;background:linear-gradient(180deg,#ffeb99,#f5c542);border:1px solid #e0b000;color:#002147;border-radius:3.75rem;box-shadow:0 2px 4px #00000026,inset 0 1px #fff6;cursor:pointer;transition:background .2s ease-in-out,transform .1s ease,box-shadow .2s ease-in-out}.learnablemeta-geoguessr-button:hover:not(:disabled){background:linear-gradient(180deg,#ffe066,#eab308);box-shadow:0 4px 8px #0003,inset 0 1px #ffffff80;transform:translateY(-1px)}.learnablemeta-geoguessr-button:active:not(:disabled){background:linear-gradient(180deg,#eab308,#d39e00);box-shadow:inset 0 2px 4px #0003;transform:translateY(1px)}.learnablemeta-geoguessr-button:focus-visible{outline:none;box-shadow:0 0 0 3px #eab30880,0 2px 4px #00000026}.learnablemeta-geoguessr-button:disabled{background:#e0e0e0;border-color:#bbb;color:#888;box-shadow:none;cursor:not-allowed;transform:none}.learnablemeta-geoguessr-button--icon{width:30px;height:30px;padding:0;border-radius:50%;font-size:14px}.learnablemeta-geoguessr-button--icon:hover:not(:disabled){box-shadow:0 2px 4px #00000026,inset 0 1px #fff6;transform:none}.learnablemeta-geoguessr-button--icon:active:not(:disabled){transform:none}.learnablemeta-map-actions{display:flex!important;flex-direction:row!important;align-items:center!important;gap:.75rem!important}";
   importCSS(buttonsCss);
-  if (typeof _GM_registerMenuCommand === "function") {
-    _GM_registerMenuCommand("LearnableMeta - Reset Meta Window Layout", () => {
-      if (confirm("Reset the LearnableMeta window position and size?")) {
-        resetContainerPosition();
-        resetContainerDimensions();
-        window.location.reload();
+  const modalsCss = '.learnablemeta-modal-backdrop{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:24px;background:#000000c2;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}.learnablemeta-modal,.learnablemeta-modal *{box-sizing:border-box}.learnablemeta-modal{position:relative;width:min(460px,100%);max-height:calc(100vh - 48px);overflow-y:auto;border:1px solid var(--lm-border);border-radius:calc(var(--lm-radius) + 4px);background:var(--lm-background);color:var(--lm-foreground);box-shadow:0 24px 70px #00000080;text-align:left}.learnablemeta-modal--wide{width:min(600px,100%)}.learnablemeta-modal--map-update{width:min(780px,100%);max-height:min(760px,calc(100vh - 48px));display:flex;flex-direction:column;overflow:hidden}.learnablemeta-modal:before{position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,#057a55,#0b87c1);content:""}.learnablemeta-modal-header{display:grid;gap:6px;padding:26px 24px 0}.learnablemeta-modal-header--row{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:26px 24px 20px;border-bottom:1px solid var(--lm-border);background:var(--lm-card)}.learnablemeta-modal-eyebrow{margin:0;color:var(--lm-primary);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}.learnablemeta-modal-title{margin:0;color:var(--lm-foreground);font-size:20px;font-weight:650;line-height:1.3;letter-spacing:-.025em}.learnablemeta-modal-title--large{margin-top:4px;color:var(--lm-card-foreground);font-size:22px;line-height:1.25}.learnablemeta-modal-description{margin:0;color:var(--lm-muted-foreground);font-size:14px;line-height:1.5}.learnablemeta-modal-body{display:grid;gap:14px;padding:20px 24px 0;color:var(--lm-foreground);font-size:14px;line-height:1.5}.learnablemeta-modal-body p{margin:0}.learnablemeta-modal-body a{color:var(--lm-link);text-decoration:underline;text-underline-offset:3px}.learnablemeta-modal-input{width:100%;height:38px;border:1px solid var(--lm-input);border-radius:var(--lm-radius);padding:7px 12px;outline:none;background:var(--lm-background);color:var(--lm-foreground);font:inherit;font-size:14px;box-shadow:0 1px 2px #0000000a;transition:border-color .15s ease,box-shadow .15s ease}.learnablemeta-modal-input::placeholder{color:var(--lm-muted-foreground)}.learnablemeta-modal-input:focus-visible{border-color:var(--lm-ring);box-shadow:0 0 0 3px color-mix(in srgb,var(--lm-ring) 25%,transparent)}.learnablemeta-modal-code{overflow-wrap:anywhere;border:1px solid var(--lm-border);border-radius:var(--lm-radius);padding:10px 12px;background:var(--lm-muted);color:var(--lm-link);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;line-height:1.45;-webkit-user-select:text;user-select:text}.learnablemeta-modal-note{color:var(--lm-muted-foreground);font-size:12px;line-height:1.45}.learnablemeta-modal-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:20px;padding:16px 24px;border-top:1px solid var(--lm-border);background:var(--lm-card)}.learnablemeta-modal-action-leading{margin-right:auto}.learnablemeta-modal-alert{border:1px solid rgba(220,38,38,.3);border-radius:var(--lm-radius);padding:12px 14px;background:#dc262617;color:var(--lm-destructive);font-size:13px}.learnablemeta-modal .learnablemeta-modal-body .learnablemeta-help-list{display:grid;gap:10px;margin:0;padding-left:20px;list-style:disc}.learnablemeta-modal .learnablemeta-help-list strong{color:var(--lm-foreground);font-weight:600}@media(max-width:620px){.learnablemeta-modal-backdrop{padding:8px}.learnablemeta-modal{max-height:calc(100vh - 16px)}.learnablemeta-modal-actions{flex-wrap:wrap}.learnablemeta-modal-action-leading{width:100%;margin-right:0}.learnablemeta-modal-actions .learnablemeta-button--primary,.learnablemeta-modal-actions .learnablemeta-button--outline,.learnablemeta-modal-actions .learnablemeta-button--destructive{flex:1}}';
+  importCSS(modalsCss);
+  let resetDialogApp = null;
+  function openResetLayoutDialog() {
+    if (resetDialogApp) return;
+    const target = document.createElement("div");
+    target.id = "learnablemeta-reset-layout-dialog";
+    document.body.appendChild(target);
+    function closeDialog() {
+      if (resetDialogApp) unmount(resetDialogApp);
+      resetDialogApp = null;
+      target.remove();
+    }
+    resetDialogApp = mount(ResetLayoutConfirmation, {
+      target,
+      props: {
+        onCancel: closeDialog,
+        onConfirm: () => {
+          resetContainerPosition();
+          resetContainerDimensions();
+          closeDialog();
+          window.location.reload();
+        }
       }
     });
+  }
+  if (typeof _GM_registerMenuCommand === "function") {
+    _GM_registerMenuCommand("LearnableMeta - Reset Meta Window Layout", openResetLayoutDialog);
   }
   initURLChangeEvent();
   if (document.readyState === "loading") {

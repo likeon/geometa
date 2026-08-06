@@ -22,6 +22,7 @@
     getLastDismissedAnnouncementTimestamp,
     markAnnouncementAsDismissed
   } from './utils/announcement';
+  import { modalDialog } from './utils/modalDialog';
 
   interface Props {
     panoId: string;
@@ -208,10 +209,7 @@
       <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord">
         <span class="skill-icons--discord"></span>
       </a>
-      <button
-        onclick={togglePopup}
-        aria-label="More information"
-        style="background: none; border: none; padding: 0;">
+      <button class="help-toggle-button" onclick={togglePopup} aria-label="More information">
         <span class={helpClass}></span>
       </button>
     </div>
@@ -240,52 +238,84 @@
   {/if}
 
   {#if showModal}
-    <div class="modal-backdrop">
-      <div class="modal">
-        <p>You are about to open this site in a new tab:</p>
-        <p class="modal-url">{currentUrl}</p>
-        <div class="modal-buttons">
-          <button onclick={proceed} class="proceed-btn">Continue</button>
-          <button onclick={cancel} class="close-btn">Cancel</button>
+    <div class="learnablemeta-modal-backdrop learnablemeta-ui" role="presentation">
+      <div
+        class="learnablemeta-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="external-link-title"
+        use:modalDialog={{ onClose: cancel }}>
+        <div class="learnablemeta-modal-header">
+          <p class="learnablemeta-modal-eyebrow">LearnableMeta</p>
+          <h2 class="learnablemeta-modal-title" id="external-link-title">Open external link?</h2>
+          <p class="learnablemeta-modal-description">This link will open in a new browser tab.</p>
+        </div>
+        <div class="learnablemeta-modal-body">
+          <p class="learnablemeta-modal-code">{currentUrl}</p>
+        </div>
+        <div class="learnablemeta-modal-actions">
+          <button
+            type="button"
+            onclick={cancel}
+            data-modal-initial-focus
+            class="learnablemeta-button learnablemeta-button--outline">Cancel</button>
+          <button
+            type="button"
+            onclick={proceed}
+            class="learnablemeta-button learnablemeta-button--primary">Continue</button>
         </div>
       </div>
     </div>
   {/if}
 
   {#if showHelpPopup}
-    <div class="modal-backdrop">
-      <div class="modal">
-        <div class="help-message">
+    <div class="learnablemeta-modal-backdrop learnablemeta-ui" role="presentation">
+      <div
+        class="learnablemeta-modal learnablemeta-modal--wide"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="learnablemeta-help-title"
+        use:modalDialog={{ onClose: togglePopup }}>
+        <div class="learnablemeta-modal-header">
+          <p class="learnablemeta-modal-eyebrow">LearnableMeta</p>
+          <h2 class="learnablemeta-modal-title" id="learnablemeta-help-title">Userscript guide</h2>
+          <p class="learnablemeta-modal-description">
+            Quick tips for using LearnableMeta while you play.
+          </p>
+        </div>
+        <div class="learnablemeta-modal-body">
           {#if checkIfOutdated()}
-            <p class="outdated">
-              <strong
-                >Your script version is out of date - please install the latest version ({getLatestVersionInfo()})!
-              </strong>
+            <p class="learnablemeta-modal-alert">
+              Your userscript is out of date. Install the latest version ({getLatestVersionInfo()}).
             </p>
           {/if}
-          <p>Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p>
-          <ul>
+          <ul class="learnablemeta-help-list">
             <li>
-              <strong>Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere
+              <strong>Drag to move:</strong> Click and drag the top of the note to reposition it anywhere
               on your screen.
             </li>
             <li>
               <strong>Resize:</strong> Use the bottom-right corner to resize the note to your liking.
             </li>
             <li>
-              <strong>View Map meta list:</strong> Click the list icon to see all the metas included
+              <strong>View map meta list:</strong> Click the list icon to see all the metas included
               in the map you are currently playing.
             </li>
             <li>
-              <strong>Join the Community:</strong> Click the Discord icon to share feedback, suggest
+              <strong>Join the community:</strong> Click the Discord icon to share feedback, suggest
               improvements, or just say hi!
             </li>
             <li>
-              <strong>Outdated Script:</strong> The question mark icon will blink if the script is outdated.
+              <strong>Outdated script:</strong> The question mark icon blinks when an update is available.
             </li>
           </ul>
         </div>
-        <button class="close-btn" onclick={togglePopup}>Close</button>
+        <div class="learnablemeta-modal-actions">
+          <button
+            type="button"
+            class="learnablemeta-button learnablemeta-button--primary"
+            onclick={togglePopup}>Close</button>
+        </div>
       </div>
     </div>
   {/if}
@@ -499,104 +529,15 @@
     margin-left: 1rem;
   }
 
-  .modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(30, 30, 30, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-
-  .modal {
-    background: var(--ds-color-purple-100, #1c1836);
-    padding: 15px 25px;
-    border-radius: 8px;
-    text-align: center;
-    width: 90%;
-    max-width: 600px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    color: #d3d3d3;
-  }
-
-  .modal p {
-    margin: 0 0 10px;
-    font-size: 17px;
-  }
-
-  .modal-url {
-    font-size: 15px;
-    font-weight: bold;
-    color: #188bd2;
-    word-break: break-word;
-    margin: 10px 0;
-  }
-
-  .modal-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
-  }
-
-  .proceed-btn {
-    background: #188bd2;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 15px;
-    transition: background-color 0.2s ease-in-out;
-  }
-
-  .proceed-btn:hover {
-    background: #0056b3;
-  }
-
-  .close-btn {
+  .help-toggle-button {
     background: transparent;
-    color: #d3d3d3;
-    padding: 8px 16px;
-    border: 1px solid #d3d3d3;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 15px;
-    transition:
-      background-color 0.2s ease-in-out,
-      color 0.2s ease-in-out;
-  }
-
-  .close-btn:hover {
-    background: #d3d3d3;
-    color: var(--ds-color-purple-100, #1c1836);
-  }
-
-  button {
-    cursor: pointer;
-    background: none;
     border: none;
     padding: 0;
+    cursor: pointer;
   }
 
   .blink {
     animation: blink-animation 1s infinite;
-  }
-
-  .help-message {
-    padding: 12px;
-    font-size: 16px;
-    line-height: 1.5;
-    text-align: left;
-
-    strong {
-      color: #007bff; /* Slightly darker or brighter blue */
-      font-weight: bold;
-    }
   }
 
   @keyframes blink-animation {
@@ -610,10 +551,6 @@
     100% {
       filter: brightness(1);
     }
-  }
-
-  .outdated strong {
-    color: red !important;
   }
 
   :global(.geometa-meta-btn) {

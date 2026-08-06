@@ -10,6 +10,7 @@
     type MapGroupManifest
   } from '../utils/learnableMetaApi';
   import { fingerprintMapCoordinates } from '../utils/mapFingerprint';
+  import { modalDialog } from '../utils/modalDialog';
   import { getGeoguessrDraft, publishGeoguessrDraft, updateGeoguessrDraft } from '../utils/upload';
 
   type MapStatus =
@@ -299,24 +300,41 @@
     };
     return labels[row.status];
   }
+
+  function statusTone(row: MapRow): 'good' | 'warning' | 'bad' | 'working' | 'neutral' {
+    if (row.status === 'current' || row.status === 'success') return 'good';
+    if (['scan-error', 'update-error', 'publish-error'].includes(row.status)) return 'bad';
+    if (['scanning', 'updating', 'publishing'].includes(row.status)) return 'working';
+    if (row.status === 'empty') return 'neutral';
+    return 'warning';
+  }
 </script>
 
-<div class="backdrop" role="presentation">
-  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="group-update-title">
-    <header>
+<div class="learnablemeta-modal-backdrop learnablemeta-ui" role="presentation">
+  <div
+    class="learnablemeta-modal learnablemeta-modal--map-update"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="group-update-title"
+    use:modalDialog={{ onClose, closeOnEscape: phase !== 'updating' }}>
+    <header class="learnablemeta-modal-header learnablemeta-modal-header--row">
       <div>
-        <p class="eyebrow">LearnableMeta</p>
-        <h1 id="group-update-title">
+        <p class="learnablemeta-modal-eyebrow">LearnableMeta</p>
+        <h1
+          class="learnablemeta-modal-title learnablemeta-modal-title--large"
+          id="group-update-title">
           {phase === 'groups' ? 'Choose a map group' : 'Update GeoGuessr maps'}
         </h1>
         {#if groupName}<p class="subtitle">{groupName}</p>{/if}
       </div>
       <button
-        class="icon-button"
+        class="learnablemeta-button learnablemeta-button--ghost map-update-close"
         onclick={onClose}
         disabled={phase === 'updating'}
         aria-label="Close">
-        ×
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
       </button>
     </header>
 
@@ -332,11 +350,16 @@
           bind:value={tokenInput}
           placeholder="LearnableMeta API token"
           aria-label="LearnableMeta API token"
+          class="learnablemeta-modal-input"
+          data-modal-initial-focus
           onkeydown={(event) => event.key === 'Enter' && void saveTokenAndContinue()} />
         {#if tokenError}<p class="error-text">{tokenError}</p>{/if}
-        <div class="actions">
-          <button class="secondary" onclick={onClose}>Cancel</button>
-          <button class="primary" onclick={saveTokenAndContinue}>Save and continue</button>
+        <div class="learnablemeta-modal-actions token-actions">
+          <button class="learnablemeta-button learnablemeta-button--outline" onclick={onClose}
+            >Cancel</button>
+          <button
+            class="learnablemeta-button learnablemeta-button--primary"
+            onclick={saveTokenAndContinue}>Save and continue</button>
         </div>
       </div>
     {:else if phase === 'groups'}
@@ -346,24 +369,37 @@
         <div class="fatal">
           <strong>Could not load your map groups.</strong>
           <span>{fatalError}</span>
-          <button class="secondary" onclick={loadAccessibleGroups}>Try again</button>
+          <button
+            class="learnablemeta-button learnablemeta-button--outline"
+            onclick={loadAccessibleGroups}>Try again</button>
         </div>
       {:else if accessibleGroups.length > 0}
         <div class="notice">Select a synchronized LearnableMeta group to compare its maps.</div>
         <div class="group-list">
           {#each accessibleGroups as group (group.id)}
             <button class="group-row" onclick={() => selectGroup(group.id)}>
-              <strong>{group.name}</strong>
-              <span>{group.mapCount} map{group.mapCount === 1 ? '' : 's'}</span>
+              <span class="group-details">
+                <strong>{group.name}</strong>
+                <span>Synchronized and ready to compare</span>
+              </span>
+              <span class="group-count">
+                {group.mapCount} map{group.mapCount === 1 ? '' : 's'}
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m9 18 6-6-6-6"></path>
+                </svg>
+              </span>
             </button>
           {/each}
         </div>
       {:else}
         <div class="notice">You have no synchronized map groups containing maps.</div>
       {/if}
-      <footer class="actions">
-        <button class="link-button token-button" onclick={changeToken}>Change API token</button>
-        <button class="secondary" onclick={onClose}>Close</button>
+      <footer class="learnablemeta-modal-actions">
+        <button
+          class="learnablemeta-button learnablemeta-button--link learnablemeta-modal-action-leading"
+          onclick={changeToken}>Change API token</button>
+        <button class="learnablemeta-button learnablemeta-button--outline" onclick={onClose}
+          >Close</button>
       </footer>
     {:else}
       {#if phase === 'scanning'}
@@ -373,7 +409,8 @@
         <div class="fatal">
           <strong>Could not load this group.</strong>
           <span>{fatalError}</span>
-          <button class="secondary" onclick={scanGroup}>Try again</button>
+          <button class="learnablemeta-button learnablemeta-button--outline" onclick={scanGroup}
+            >Try again</button>
         </div>
       {/if}
 
@@ -381,13 +418,17 @@
         <div class="toolbar">
           <span>{rows.length} map{rows.length === 1 ? '' : 's'}</span>
           <div>
-            <button class="link-button" onclick={() => selectChanged(true)}>Select changed</button>
-            <button class="link-button" onclick={() => selectChanged(false)}>Deselect all</button>
+            <button
+              class="learnablemeta-button learnablemeta-button--link"
+              onclick={() => selectChanged(true)}>Select changed</button>
+            <button
+              class="learnablemeta-button learnablemeta-button--link"
+              onclick={() => selectChanged(false)}>Deselect all</button>
           </div>
         </div>
         <div class="map-list">
           {#each rows as row (row.geoguessrId)}
-            <label class:error-row={row.error} class="map-row">
+            <label class:error-row={row.error} class:selected={row.selected} class="map-row">
               <input
                 type="checkbox"
                 bind:checked={row.selected}
@@ -397,9 +438,7 @@
                 <span>{row.locationCount.toLocaleString()} synchronized locations</span>
                 {#if row.error}<span class="row-error">{row.error}</span>{/if}
               </span>
-              <span
-                class:good={row.status === 'current' || row.status === 'success'}
-                class="status">
+              <span class="status {statusTone(row)}">
                 {statusLabel(row)}
               </span>
             </label>
@@ -415,26 +454,35 @@
         </div>
       {/if}
 
-      <footer class="actions">
+      <footer class="learnablemeta-modal-actions">
         <button
-          class="link-button token-button"
+          class="learnablemeta-button learnablemeta-button--link learnablemeta-modal-action-leading"
           onclick={changeToken}
           disabled={phase === 'updating'}>
           Change API token
         </button>
         {#if canChooseGroup}
-          <button class="link-button" onclick={changeGroup} disabled={phase === 'updating'}>
+          <button
+            class="learnablemeta-button learnablemeta-button--link"
+            onclick={changeGroup}
+            disabled={phase === 'updating'}>
             Change group
           </button>
         {/if}
-        <button class="secondary" onclick={onClose} disabled={phase === 'updating'}>Close</button>
+        <button
+          class="learnablemeta-button learnablemeta-button--outline"
+          onclick={onClose}
+          disabled={phase === 'updating'}>Close</button>
         {#if failureCount > 0}
-          <button class="secondary" onclick={retryFailures} disabled={phase === 'updating'}>
+          <button
+            class="learnablemeta-button learnablemeta-button--outline"
+            onclick={retryFailures}
+            disabled={phase === 'updating'}>
             Retry failed ({failureCount})
           </button>
         {/if}
         <button
-          class="primary"
+          class="learnablemeta-button learnablemeta-button--primary"
           onclick={updateSelected}
           disabled={phase !== 'review' || selectedCount === 0}>
           {phase === 'updating' ? 'Updating…' : `Update and publish (${selectedCount})`}
@@ -445,91 +493,73 @@
 </div>
 
 <style>
-  .backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 2147483647;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    background: rgba(4, 8, 18, 0.78);
-    font-family: Arial, sans-serif;
-    color: #172033;
-  }
-  .panel {
-    width: min(780px, 100%);
-    max-height: min(760px, calc(100vh - 48px));
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    border: 1px solid #d8dee9;
-    border-radius: 14px;
-    background: #fff;
-    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
-  }
-  header {
-    display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
-    padding: 22px 24px 18px;
-    border-bottom: 1px solid #e8ebf0;
-  }
-  h1 {
-    margin: 2px 0 0;
-    font-size: 24px;
-    color: #101828;
-  }
-  .eyebrow {
-    margin: 0;
-    color: #936b00;
-    font-size: 11px;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
   .subtitle {
-    margin: 5px 0 0;
-    color: #667085;
+    margin: 6px 0 0;
+    color: var(--lm-muted-foreground);
+    font-size: 14px;
   }
-  .icon-button {
-    border: 0;
-    background: transparent;
-    font-size: 28px;
-    color: #667085;
-    cursor: pointer;
+  .map-update-close {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+  }
+  .map-update-close svg {
+    width: 18px;
+    height: 18px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
   }
   .notice,
   .fatal,
   .summary {
     margin: 18px 24px 0;
-    padding: 12px 14px;
-    border-radius: 8px;
-    background: #f5f7fa;
+    padding: 13px 15px;
+    border: 1px solid var(--lm-border);
+    border-radius: var(--lm-radius);
+    background: var(--lm-muted);
+    color: var(--lm-muted-foreground);
+    font-size: 14px;
+    line-height: 1.45;
   }
   .fatal {
     display: grid;
-    gap: 8px;
-    background: #fff1f1;
-    color: #8a1c1c;
+    gap: 10px;
+    border-color: rgba(220, 38, 38, 0.35);
+    background: rgba(220, 38, 38, 0.09);
+    color: var(--lm-destructive);
+  }
+  .fatal .learnablemeta-button {
+    justify-self: start;
   }
   .summary {
-    background: #eef8ee;
-    color: #245b29;
+    border-color: rgba(22, 163, 74, 0.3);
+    background: rgba(22, 163, 74, 0.1);
+    color: #166534;
   }
   .toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 16px 24px 10px;
-    color: #475467;
+    gap: 16px;
+    padding: 18px 24px 10px;
+    color: var(--lm-muted-foreground);
     font-size: 13px;
+    font-weight: 500;
+  }
+  .toolbar > div {
+    display: flex;
+    gap: 4px;
   }
   .group-list {
     display: grid;
     gap: 8px;
     overflow-y: auto;
+    max-height: 390px;
     margin: 14px 24px 0;
+    padding: 1px;
   }
   .group-row {
     display: flex;
@@ -537,28 +567,69 @@
     justify-content: space-between;
     gap: 16px;
     width: 100%;
-    border: 1px solid #d9dee7;
-    border-radius: 9px;
-    padding: 13px 15px;
-    background: #fff;
-    color: #172033;
+    min-height: 62px;
+    border: 1px solid var(--lm-border);
+    border-radius: var(--lm-radius);
+    padding: 12px 14px;
+    background: var(--lm-card);
+    color: var(--lm-card-foreground);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     text-align: left;
     cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
   }
   .group-row:hover {
-    border-color: #d3a300;
-    background: #fffaf0;
+    border-color: var(--lm-ring);
+    background: color-mix(in srgb, var(--lm-primary) 6%, var(--lm-card));
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   }
-  .group-row span {
-    flex: none;
-    color: #667085;
+  .group-row:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--lm-ring) 30%, transparent);
+  }
+  .group-details {
+    display: grid;
+    min-width: 0;
+    gap: 3px;
+  }
+  .group-details strong {
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .group-details > span {
+    color: var(--lm-muted-foreground);
     font-size: 12px;
+  }
+  .group-count {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: 6px;
+    color: var(--lm-muted-foreground);
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .group-count svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
   }
   .map-list {
     overflow-y: auto;
     margin: 0 24px;
-    border: 1px solid #e4e7ec;
-    border-radius: 9px;
+    border: 1px solid var(--lm-border);
+    border-radius: var(--lm-radius);
+    background: var(--lm-card);
   }
   .map-row {
     display: grid;
@@ -566,13 +637,26 @@
     gap: 10px;
     align-items: center;
     padding: 12px 14px;
-    border-bottom: 1px solid #eef0f3;
+    border-bottom: 1px solid var(--lm-border);
+    color: var(--lm-card-foreground);
+    transition: background-color 0.15s ease;
+  }
+  .map-row:hover {
+    background: var(--lm-muted);
+  }
+  .map-row.selected {
+    background: color-mix(in srgb, var(--lm-primary) 7%, var(--lm-card));
   }
   .map-row:last-child {
     border-bottom: 0;
   }
   .map-row.error-row {
-    background: #fffafa;
+    background: rgba(220, 38, 38, 0.06);
+  }
+  .map-row input[type='checkbox'] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--lm-primary);
   }
   .map-details {
     display: grid;
@@ -581,119 +665,113 @@
   }
   .map-details strong {
     overflow: hidden;
+    font-size: 14px;
+    font-weight: 600;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   .map-details > span {
-    color: #667085;
+    color: var(--lm-muted-foreground);
     font-size: 12px;
   }
   .map-details .row-error {
-    color: #a32626;
+    color: var(--lm-destructive);
     white-space: normal;
   }
   .status {
-    padding: 4px 8px;
-    border-radius: 999px;
-    background: #fff2cc;
-    color: #765700;
-    font-size: 11px;
-    font-weight: 700;
+    padding: 3px 8px;
+    border: 1px solid transparent;
+    border-radius: calc(var(--lm-radius) - 2px);
+    font-size: 12px;
+    font-weight: 500;
     white-space: nowrap;
   }
   .status.good {
-    background: #e9f8ec;
-    color: #24612d;
+    border-color: #bbf7d0;
+    background: #dcfce7;
+    color: #166534;
   }
-  .actions {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 9px;
-    padding: 18px 24px 22px;
+  .status.warning {
+    border-color: #fde68a;
+    background: #fef3c7;
+    color: #854d0e;
   }
-  button {
-    font: inherit;
+  .status.bad {
+    border-color: #fecaca;
+    background: #fee2e2;
+    color: #991b1b;
   }
-  button:disabled {
-    cursor: not-allowed;
-    opacity: 0.55;
+  .status.working {
+    border-color: #bfdbfe;
+    background: #dbeafe;
+    color: #1e40af;
   }
-  .primary,
-  .secondary {
-    border-radius: 7px;
-    padding: 9px 14px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .primary {
-    border: 1px solid #d3a300;
-    background: #f5c542;
-    color: #172033;
-  }
-  .secondary {
-    border: 1px solid #cfd5df;
-    background: #fff;
-    color: #344054;
-  }
-  .link-button {
-    border: 0;
-    padding: 4px 7px;
-    background: transparent;
-    color: #3458a5;
-    cursor: pointer;
-  }
-  .token-button {
-    margin-right: auto;
+  .status.neutral {
+    border-color: var(--lm-border);
+    background: var(--lm-muted);
+    color: var(--lm-muted-foreground);
   }
   .token-form {
     display: grid;
     gap: 12px;
-    padding: 22px 24px;
+    padding: 22px 24px 0;
   }
   .token-form p {
     margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
   }
   .token-form .small {
-    color: #667085;
+    color: var(--lm-muted-foreground);
     font-size: 13px;
   }
   .token-form a {
-    color: #3458a5;
+    color: var(--lm-link);
+    text-underline-offset: 3px;
   }
-  .token-form input {
-    border: 1px solid #cfd5df;
-    border-radius: 7px;
-    padding: 10px 12px;
-    font: inherit;
-  }
-  .token-form .actions {
-    padding: 4px 0 0;
+  .token-actions {
+    margin: 8px -24px 0;
   }
   .error-text {
-    color: #a32626;
+    margin: 0;
+    color: var(--lm-destructive);
     font-size: 13px;
   }
+  @media (prefers-color-scheme: dark) {
+    .summary {
+      color: #86efac;
+    }
+    .status.good {
+      border-color: rgba(34, 197, 94, 0.4);
+      background: rgba(22, 163, 74, 0.18);
+      color: #86efac;
+    }
+    .status.warning {
+      border-color: rgba(245, 158, 11, 0.4);
+      background: rgba(180, 83, 9, 0.2);
+      color: #fde68a;
+    }
+    .status.bad {
+      border-color: rgba(239, 68, 68, 0.4);
+      background: rgba(185, 28, 28, 0.2);
+      color: #fca5a5;
+    }
+    .status.working {
+      border-color: rgba(59, 130, 246, 0.4);
+      background: rgba(30, 64, 175, 0.22);
+      color: #93c5fd;
+    }
+  }
   @media (max-width: 620px) {
-    .backdrop {
-      padding: 8px;
-    }
-    .panel {
-      max-height: calc(100vh - 16px);
-    }
     .map-row {
       grid-template-columns: 22px minmax(0, 1fr);
+    }
+    .group-details > span {
+      display: none;
     }
     .status {
       grid-column: 2;
       justify-self: start;
-    }
-    footer.actions {
-      flex-wrap: wrap;
-    }
-    .token-button {
-      width: 100%;
-      text-align: left;
     }
   }
 </style>

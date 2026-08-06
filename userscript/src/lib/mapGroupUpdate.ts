@@ -56,7 +56,7 @@ function ensureLauncherButton() {
 
   const launcher = document.createElement('button');
   launcher.id = launcherButtonId;
-  launcher.className = 'learnablemeta-yellow-button';
+  launcher.className = 'learnablemeta-geoguessr-button';
   launcher.type = 'button';
   launcher.setAttribute('aria-label', 'Update LearnableMeta maps');
   launcher.textContent = 'Update maps';
