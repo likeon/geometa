@@ -485,6 +485,9 @@ export const actions = {
     if (apiError) {
       error(500);
     }
-    return { hasMapUpdates: data?.hasMapUpdates ?? false };
+    return {
+      hasMapUpdates: data?.hasMapUpdates ?? false,
+      mapUpdatesCount: data?.mapUpdatesCount ?? null
+    };
   }
 };
