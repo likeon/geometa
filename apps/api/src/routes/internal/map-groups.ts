@@ -23,8 +23,8 @@ import { ensureOwner, ensurePermissions } from '@api/lib/internal/permissions';
 import { syncMapGroup } from '@api/lib/internal/sync';
 import { geoguessrMapJson } from '@api/lib/internal/utils';
 import {
+  countPublishableMapLocationChanges,
   getSynchronizedGroupMapSnapshots,
-  havePublishableMapLocationsChanged,
 } from '@api/lib/userscript/map-snapshots';
 import { isPgError } from '@api/lib/utils/common';
 import {
@@ -994,11 +994,13 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         operation: 'update',
         createdAt: syncedAt,
       });
+      const mapUpdatesCount = countPublishableMapLocationChanges(
+        snapshotsBeforeSync,
+        snapshotsAfterSync,
+      );
       return {
-        hasMapUpdates: havePublishableMapLocationsChanged(
-          snapshotsBeforeSync,
-          snapshotsAfterSync,
-        ),
+        hasMapUpdates: mapUpdatesCount > 0,
+        mapUpdatesCount,
       };
     },
     {

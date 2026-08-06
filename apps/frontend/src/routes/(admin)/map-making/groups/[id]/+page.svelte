@@ -88,6 +88,7 @@
 
   let syncingUserScript = $state(false);
   let showMapUpdatePrompt = $state(false);
+  let mapUpdatesCount = $state<number | null>(null);
   let sharingMetas = $state(false);
 
   // Dialog state for adding levels
@@ -195,6 +196,9 @@
               toast.push('Userscript data synchronized', {
                 duration: 10000
               });
+              const resultMapUpdatesCount = result.data?.mapUpdatesCount;
+              mapUpdatesCount =
+                typeof resultMapUpdatesCount === 'number' ? resultMapUpdatesCount : null;
               showMapUpdatePrompt = result.data?.hasMapUpdates === true;
             } else if (result.type === 'failure') {
               const errorMessage = result.data?.message || 'Something went wrong';
@@ -410,14 +414,25 @@
 <Dialog.Root bind:open={showMapUpdatePrompt}>
   <Dialog.Content>
     <Dialog.Header>
-      <Dialog.Title>Update your GeoGuessr maps?</Dialog.Title>
+      <Dialog.Title>
+        {#if mapUpdatesCount === null}
+          Update your GeoGuessr maps?
+        {:else}
+          {mapUpdatesCount} GeoGuessr {mapUpdatesCount === 1 ? 'map has' : 'maps have'} updates
+        {/if}
+      </Dialog.Title>
       <Dialog.Description>
-        LearnableMeta has finished synchronizing this group. Continue to GeoGuessr to compare and
-        publish changed map locations with the LearnableMeta userscript.
+        {#if mapUpdatesCount === null}
+          LearnableMeta has finished synchronizing this group.
+        {:else}
+          Synchronization changed the managed locations for {mapUpdatesCount}
+          {mapUpdatesCount === 1 ? 'map' : 'maps'}.
+        {/if}
+        Continue to GeoGuessr to compare and publish changed map locations with the LearnableMeta userscript.
       </Dialog.Description>
     </Dialog.Header>
     <p class="text-sm text-muted-foreground">
-      This requires userscript version 0.91 or newer. You can review every map and deselect any you
+      This requires userscript version 0.92 or newer. You can review every map and deselect any you
       do not want to update before publishing.
     </p>
     <Dialog.Footer>

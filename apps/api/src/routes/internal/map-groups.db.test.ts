@@ -1172,7 +1172,10 @@ describe('POST /api/internal/map-groups/:id/sync', () => {
     const after = Math.floor(Date.now() / 1000);
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ hasMapUpdates: true });
+    expect(await response.json()).toEqual({
+      hasMapUpdates: true,
+      mapUpdatesCount: 1,
+    });
 
     // the source meta is mirrored into the synced tables with its exact
     // rendered payload
@@ -1244,7 +1247,32 @@ describe('POST /api/internal/map-groups/:id/sync', () => {
     const response = await syncRequest('sync-mapless-owner', groupId);
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ hasMapUpdates: false });
+    expect(await response.json()).toEqual({
+      hasMapUpdates: false,
+      mapUpdatesCount: 0,
+    });
+  });
+
+  test('returns the number of maps whose managed locations changed', async () => {
+    await seedUser('sync-map-count-owner');
+    const { groupId } = await seedSyncFixture(
+      'sync-map-count-owner',
+      'Map count group',
+      'sync-map-count-one',
+    );
+    await db.insert(maps).values({
+      mapGroupId: groupId,
+      name: 'Second sync map',
+      geoguessrId: 'sync-map-count-two',
+    });
+
+    const response = await syncRequest('sync-map-count-owner', groupId);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      hasMapUpdates: true,
+      mapUpdatesCount: 2,
+    });
   });
 
   test('ignores meta-only syncs but advertises managed location changes', async () => {
@@ -1268,7 +1296,10 @@ describe('POST /api/internal/map-groups/:id/sync', () => {
     const metaOnlyResponse = await syncRequest('sync-change-owner', groupId);
 
     expect(metaOnlyResponse.status).toBe(200);
-    expect(await metaOnlyResponse.json()).toEqual({ hasMapUpdates: false });
+    expect(await metaOnlyResponse.json()).toEqual({
+      hasMapUpdates: false,
+      mapUpdatesCount: 0,
+    });
 
     const secondGroup = await getGroup(groupId);
     await db.insert(mapGroupLocations).values({
@@ -1302,7 +1333,10 @@ describe('POST /api/internal/map-groups/:id/sync', () => {
           ),
         ),
     ).toEqual([{ lat: 9 }]);
-    expect(await locationResponse.json()).toEqual({ hasMapUpdates: true });
+    expect(await locationResponse.json()).toEqual({
+      hasMapUpdates: true,
+      mapUpdatesCount: 1,
+    });
   });
 
   test('editor is denied with source and synced state unchanged', async () => {

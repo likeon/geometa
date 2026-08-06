@@ -63,16 +63,16 @@ export async function getSynchronizedGroupMapSnapshots(groupId: number) {
   });
 }
 
-export function havePublishableMapLocationsChanged(
+export function countPublishableMapLocationChanges(
   before: Awaited<ReturnType<typeof getSynchronizedGroupMapSnapshots>>,
   after: Awaited<ReturnType<typeof getSynchronizedGroupMapSnapshots>>,
 ) {
   const oldFingerprintByMapId = new Map(
     before.map((map) => [map.mapId, map.fingerprint]),
   );
-  return after.some(
+  return after.filter(
     (map) =>
       map.locationCount > 0 &&
       oldFingerprintByMapId.get(map.mapId) !== map.fingerprint,
-  );
+  ).length;
 }
