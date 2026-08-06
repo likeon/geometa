@@ -474,7 +474,7 @@ export const actions = {
   prepareUserScriptData: async (event) => {
     const groupId = getGroupId(event.params);
     // make it so every request has this user id as header
-    const { error: apiError } = await api.internal['map-groups']({ id: groupId }).sync.post(
+    const { data, error: apiError } = await api.internal['map-groups']({ id: groupId }).sync.post(
       undefined,
       {
         headers: {
@@ -485,5 +485,6 @@ export const actions = {
     if (apiError) {
       error(500);
     }
+    return { hasMapUpdates: data?.hasMapUpdates ?? false };
   }
 };

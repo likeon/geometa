@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.91]
+
+- Added a post-sync group workflow that compares LearnableMeta locations with GeoGuessr drafts
+- Added review and selection before updating changed maps
+- Added sequential draft updates, publishing, per-map progress, and retryable failures
+- Reused the browser-stored LearnableMeta API token so GeoGuessr credentials remain in the browser
+
 ## [0.90]
 
 - Added meta pins on challenge results pages (geoguessr.com/results/...), with support for any round count

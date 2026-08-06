@@ -1172,6 +1172,7 @@ describe('POST /api/internal/map-groups/:id/sync', () => {
     const after = Math.floor(Date.now() / 1000);
 
     expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ hasMapUpdates: true });
 
     // the source meta is mirrored into the synced tables with its exact
     // rendered payload
@@ -1230,6 +1231,78 @@ describe('POST /api/internal/map-groups/:id/sync', () => {
         createdAt: syncedTimestamp,
       },
     ]);
+  });
+
+  test('does not advertise map updates for a group without maps', async () => {
+    await seedUser('sync-mapless-owner');
+    const groupId = await seedOwnerGroup(
+      'sync-mapless-owner',
+      'Mapless group',
+      { syncedAt: null, syncIncludeLocationsNotOnStreetView: true },
+    );
+
+    const response = await syncRequest('sync-mapless-owner', groupId);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ hasMapUpdates: false });
+  });
+
+  test('ignores meta-only syncs but advertises managed location changes', async () => {
+    await seedUser('sync-change-owner');
+    const { groupId, metaId } = await seedSyncFixture(
+      'sync-change-owner',
+      'Changed locations group',
+      'changed-locations-map',
+    );
+    await syncRequest('sync-change-owner', groupId);
+    const firstGroup = await getGroup(groupId);
+
+    await db
+      .update(metas)
+      .set({
+        note: 'Changed note only',
+        noteHtml: '<p>Changed note only</p>',
+        modifiedAt: firstGroup.syncedAt! + 1,
+      })
+      .where(eq(metas.id, metaId));
+    const metaOnlyResponse = await syncRequest('sync-change-owner', groupId);
+
+    expect(metaOnlyResponse.status).toBe(200);
+    expect(await metaOnlyResponse.json()).toEqual({ hasMapUpdates: false });
+
+    const secondGroup = await getGroup(groupId);
+    await db.insert(mapGroupLocations).values({
+      mapGroupId: groupId,
+      panoId: 'pano-added-after-meta-sync',
+      extraTag: 'us',
+      lat: 9,
+      lng: 8,
+      heading: 7,
+      pitch: 6,
+      zoom: 5,
+      modifiedAt: secondGroup.syncedAt! + 1,
+    });
+    expect(
+      await db
+        .select({ lat: mapGroupLocations.lat })
+        .from(mapGroupLocations)
+        .where(eq(mapGroupLocations.panoId, 'pano-added-after-meta-sync')),
+    ).toEqual([{ lat: 9 }]);
+    const locationResponse = await syncRequest('sync-change-owner', groupId);
+
+    expect(locationResponse.status).toBe(200);
+    expect(
+      await db
+        .select({ lat: syncedLocations.lat })
+        .from(syncedLocations)
+        .where(
+          and(
+            eq(syncedLocations.syncedMetaId, metaId),
+            eq(syncedLocations.panoId, 'pano-added-after-meta-sync'),
+          ),
+        ),
+    ).toEqual([{ lat: 9 }]);
+    expect(await locationResponse.json()).toEqual({ hasMapUpdates: true });
   });
 
   test('editor is denied with source and synced state unchanged', async () => {
