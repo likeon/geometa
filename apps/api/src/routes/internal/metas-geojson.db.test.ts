@@ -75,6 +75,14 @@ function deleteRequest(metaId: number) {
   );
 }
 
+function previewRequest(metaId: number) {
+  return app.handle(
+    new Request(`http://localhost/api/internal/metas/${metaId}/geojson`, {
+      headers: { 'x-api-user-id': 'owner' },
+    }),
+  );
+}
+
 async function savedMeta(metaId: number) {
   const [meta] = await db
     .select({ geoJson: metas.geoJson, modifiedAt: metas.modifiedAt })
@@ -100,6 +108,16 @@ async function areaLogs(groupId: number) {
 }
 
 describe('meta GeoJSON routes', () => {
+  test('returns an existing map area for preview', async () => {
+    const geoJson = normalizeGeoJson(polygon);
+    const { metaId } = await seedMeta(geoJson);
+
+    const response = await previewRequest(metaId);
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual(geoJson);
+  });
+
   test('uploads, normalizes, marks modified, and logs a map area', async () => {
     const { groupId, metaId } = await seedMeta();
 

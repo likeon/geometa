@@ -466,6 +466,21 @@ export const actions = {
     }
     return message(form, `${data!.polygonCount} polygon${data!.polygonCount === 1 ? '' : 's'}`);
   },
+  previewMetaGeoJson: async ({ request }) => {
+    const data = await request.formData();
+    const metaId = parseInt((data.get('metaId') as string) || '', 10);
+    if (isNaN(metaId)) {
+      error(400, 'Invalid ID');
+    }
+
+    const { data: geoJson, error: apiError } = await api.internal
+      .metas({ id: metaId })
+      .geojson.get();
+    if (apiError) {
+      throwApiError(apiError, { 404: 'Map area not found', 500: 'Failed to preview map area' });
+    }
+    return { geoJson };
+  },
   deleteMetaGeoJson: async ({ request }) => {
     const data = await request.formData();
     const metaId = parseInt((data.get('metaId') as string) || '', 10);
