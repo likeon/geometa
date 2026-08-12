@@ -13,6 +13,19 @@ import {
 import { db } from '../lib/drizzle';
 import { plonkitFooter } from '../lib/userscript/constants';
 import { fingerprintMapCoordinates } from '../lib/userscript/map-fingerprint';
+import { normalizeGeoJson, type MetaGeoJson } from '../lib/utils/geojson';
+
+const mapArea = normalizeGeoJson({
+  type: 'Polygon',
+  coordinates: [
+    [
+      [10, 20],
+      [11, 20],
+      [11, 21],
+      [10, 20],
+    ],
+  ],
+});
 
 async function requestLocation(mapId: string, panoId: string) {
   return app.handle(
@@ -101,6 +114,7 @@ interface SeedLocationInput {
   metaFooter?: string;
   noteFromPlonkit?: boolean;
   images?: string[];
+  geoJson?: MetaGeoJson;
   mapFooterHtml?: string;
   authors?: string;
   numberOfGamesPlayed?: number | null;
@@ -117,6 +131,7 @@ async function seedLocation({
   metaFooter = 'Meta footer',
   noteFromPlonkit = false,
   images = ['img.jpg'],
+  geoJson,
   mapFooterHtml = '<p>Map footer</p>',
   authors = 'Map Author',
   numberOfGamesPlayed = null,
@@ -147,6 +162,7 @@ async function seedLocation({
     noteFromPlonkit,
     footer: metaFooter,
     images,
+    geoJson,
   });
 
   await db.insert(syncedMapMetas).values({
@@ -288,6 +304,7 @@ describe('GET /api/userscript/location/', () => {
         country: null,
         metaFooter: '',
         mapFooterHtml: '',
+        geoJson: mapArea,
       });
 
       const response = await requestLocation('map-a', 'pano-null-country');
@@ -298,6 +315,7 @@ describe('GET /api/userscript/location/', () => {
         metaName: 'Test Meta',
         note: 'Test note',
         images: ['img.jpg'],
+        geoJson: mapArea,
         // no meta or map footer and no country: generic plonkit footer
         footer: plonkitFooter,
       });

@@ -46,7 +46,8 @@ export async function syncMapGroup(group: {
           ${meta.noteHtml},
           ${meta.noteFromPlonkit},
           ${meta.footerHtml},
-          string_to_array(${meta.images.map(getImageUrl).join('|')}, '|')
+          string_to_array(${meta.images.map(getImageUrl).join('|')}, '|'),
+          ${meta.geoJson ? JSON.stringify(meta.geoJson) : null}::jsonb
         )`;
       }),
       sql.raw(', '),
@@ -56,7 +57,7 @@ export async function syncMapGroup(group: {
         MERGE INTO synced_metas sm
         USING (
           VALUES ${metaValuesSql}
-        ) as m(meta_id, map_group_id, name, note, note_from_plonkit, footer, images)
+        ) as m(meta_id, map_group_id, name, note, note_from_plonkit, footer, images, geojson)
         ON sm.meta_id = m.meta_id
         WHEN MATCHED THEN
           UPDATE SET
@@ -64,12 +65,13 @@ export async function syncMapGroup(group: {
             note = m.note,
             note_from_plonkit = m.note_from_plonkit,
             footer = m.footer,
-            images = m.images
+            images = m.images,
+            geojson = m.geojson
         WHEN NOT MATCHED BY TARGET THEN
           INSERT (meta_id, map_group_id, name, note,
-                  note_from_plonkit, footer, images)
+                  note_from_plonkit, footer, images, geojson)
           VALUES (m.meta_id, m.map_group_id, m.name, m.note,
-                  m.note_from_plonkit, m.footer, m.images)
+                  m.note_from_plonkit, m.footer, m.images, m.geojson)
         ;
     `);
     }

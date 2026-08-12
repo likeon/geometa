@@ -14,8 +14,21 @@ import {
   syncedMetas,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
+import { normalizeGeoJson } from '@api/lib/utils/geojson';
 import { and, asc, eq, or, sql } from 'drizzle-orm';
 import { syncMapGroup } from './index';
+
+const mapArea = normalizeGeoJson({
+  type: 'Polygon',
+  coordinates: [
+    [
+      [-78, 38],
+      [-76, 38],
+      [-76, 40],
+      [-78, 38],
+    ],
+  ],
+});
 
 async function seedNullSyncedAtFixture(geoguessrId = 'full-sync-map') {
   const [group] = await db
@@ -36,6 +49,7 @@ async function seedNullSyncedAtFixture(geoguessrId = 'full-sync-map') {
       footer: 'See [source](https://example.com)',
       footerHtml: '<p>See <a href="https://example.com">source</a></p>',
       noteFromPlonkit: true,
+      geoJson: mapArea,
       modifiedAt: 100,
     })
     .returning({ id: metas.id });
@@ -150,6 +164,7 @@ describe('syncMapGroup null syncedAt', () => {
         noteFromPlonkit: true,
         footer: '<p>See <a href="https://example.com">source</a></p>',
         images: ['https://img.example/a.jpg', 'https://img.example/b.jpg'],
+        geoJson: mapArea,
       },
       {
         metaId: jpMetaId,
@@ -159,6 +174,7 @@ describe('syncMapGroup null syncedAt', () => {
         noteFromPlonkit: false,
         footer: '',
         images: [],
+        geoJson: null,
       },
     ]);
 
@@ -231,7 +247,7 @@ describe('syncMapGroup incremental modifiedAt boundary', () => {
     // Meaningful change with modifiedAt strictly above the boundary.
     await db
       .update(metas)
-      .set({ name: 'Japan v2', modifiedAt: syncedAt + 10 })
+      .set({ name: 'Japan v2', geoJson: mapArea, modifiedAt: syncedAt + 10 })
       .where(eq(metas.id, jpMetaId));
 
     const timestamp = await syncMapGroup({ id: groupId, syncedAt });
@@ -252,10 +268,10 @@ describe('syncMapGroup incremental modifiedAt boundary', () => {
 
     // modifiedAt > syncedAt: the change must propagate.
     const [jpRow] = await db
-      .select({ name: syncedMetas.name })
+      .select({ name: syncedMetas.name, geoJson: syncedMetas.geoJson })
       .from(syncedMetas)
       .where(eq(syncedMetas.metaId, jpMetaId));
-    expect(jpRow!.name).toBe('Japan v2');
+    expect(jpRow).toEqual({ name: 'Japan v2', geoJson: mapArea });
   });
 
   test('syncs locations strictly above the boundary, skips rows equal to it', async () => {

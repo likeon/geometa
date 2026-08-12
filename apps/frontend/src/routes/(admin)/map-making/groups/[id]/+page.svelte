@@ -455,6 +455,7 @@
   {selectedMeta}
   groupId={data.group.id}
   imageUploadForm={data.imageUploadForm}
+  geoJsonUploadForm={data.geoJsonUploadForm}
   imageOrderUpdateForm={data.imageOrderUpdateForm}
   selectedIds={selectedIds.length > 0 ? selectedIds : metaIds}
   bind:selectedMetaId />

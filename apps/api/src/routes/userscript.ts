@@ -80,6 +80,7 @@ export const userscriptRouter = new Elysia({
         metaName: meta.name,
         note: meta.note,
         images: meta.images,
+        ...(meta.geoJson ? { geoJson: meta.geoJson } : {}),
         footer: footer,
       };
     },

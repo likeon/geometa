@@ -11,11 +11,14 @@ import { resetContainerDimensions } from './lib/utils/resizing';
 import { initMapGroupUpdate } from './lib/mapGroupUpdate';
 import { initLiveChallengeIdTracking } from './lib/utils/liveChallengeId';
 import ResetLayoutConfirmation from './lib/components/ResetLayoutConfirmation.svelte';
+import { initMapArea } from './lib/mapArea';
 import './lib/styles/theme.css';
 import './lib/styles/buttons.css';
 import './lib/styles/modals.css';
 
 let resetDialogApp: Record<string, any> | null = null;
+
+initMapArea();
 
 function openResetLayoutDialog() {
   if (resetDialogApp) return;

@@ -10,6 +10,7 @@ export type ChangeEntry = {
   entityType:
     | 'meta'
     | 'meta_image'
+    | 'meta_geojson'
     | 'meta_levels'
     | 'location_batch'
     | 'level'

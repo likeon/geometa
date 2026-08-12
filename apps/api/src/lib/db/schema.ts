@@ -1,3 +1,4 @@
+import type { MetaGeoJson } from '@api/lib/utils/geojson';
 import {
   type InferModelFromColumns,
   type InferSelectModel,
@@ -208,6 +209,7 @@ export const metas = pgTable(
     noteHtml: text('note_html').notNull().default(''),
     footer: text('footer').notNull().default(''),
     footerHtml: text('footer_html').notNull().default(''),
+    geoJson: jsonb('geojson').$type<MetaGeoJson>(),
     noteFromPlonkit: boolean('note_from_plonkit').notNull().default(false),
     // todo: remove?
     hasImage: boolean('has_image').notNull().default(false),
@@ -325,6 +327,7 @@ export const mapGroupChanges = pgTable(
       enum: [
         'meta',
         'meta_image',
+        'meta_geojson',
         'meta_levels',
         'location_batch',
         'level',
@@ -428,6 +431,7 @@ export const syncedMetas = pgTable('synced_metas', {
   noteFromPlonkit: boolean('note_from_plonkit').notNull(),
   footer: text().notNull(),
   images: text().array().notNull(),
+  geoJson: jsonb('geojson').$type<MetaGeoJson>(),
 });
 
 export const syncedLocations = pgTable(
