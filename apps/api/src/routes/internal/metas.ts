@@ -301,7 +301,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       await ensurePermissions(userId, meta.mapGroupId);
 
       if (body.file.size > MAX_GEOJSON_BYTES) {
-        return status(400, { message: 'GeoJSON must be 1 MiB or smaller' });
+        return status(400, { message: 'GeoJSON must be 5 MiB or smaller' });
       }
 
       let input: unknown;
