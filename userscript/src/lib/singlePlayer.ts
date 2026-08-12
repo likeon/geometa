@@ -46,6 +46,7 @@ export function initSinglePlayer() {
         clearMetaCache();
         await getMapInfo(event.detail.map.id, true);
       });
+      GeoGuessrEventFramework.events.addEventListener('round_start', unmountSummaryWindow);
       GeoGuessrEventFramework.events.addEventListener('round_end', async (event: GGEvent) => {
         unmountSummaryWindow();
 
