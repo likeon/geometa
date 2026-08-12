@@ -289,6 +289,30 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       },
     },
   )
+  .get(
+    '/:id/geojson',
+    async ({ userId, params, status }) => {
+      const meta = await db.$primary.query.metas.findFirst({
+        where: eq(metas.id, params.id),
+      });
+      if (!meta) {
+        return status(404, { message: 'Meta not found' });
+      }
+      await ensurePermissions(userId, meta.mapGroupId);
+      if (!meta.geoJson) {
+        return status(404, { message: 'Map area not found' });
+      }
+      return meta.geoJson;
+    },
+    {
+      userId: true,
+      params: t.Object({ id: t.Integer() }),
+      response: {
+        200: t.Any(),
+        404: t.Object({ message: t.String() }),
+      },
+    },
+  )
   .put(
     '/:id/geojson',
     async ({ body, userId, params, status }) => {

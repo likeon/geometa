@@ -28,6 +28,11 @@
   });
   const { form, errors, enhance: uploadEnhance, submit } = formApi;
   const file = fileProxy(form, 'file');
+
+  function geoJsonIoUrl(geoJson: unknown) {
+    // ponytail: inline data stays private; use a signed CORS URL if large previews hit browser limits.
+    return `https://geojson.io/#data=data:application/json,${encodeURIComponent(JSON.stringify(geoJson))}`;
+  }
 </script>
 
 <div class="space-y-5 p-1">
@@ -41,22 +46,42 @@
 
   {#if selectedMeta.hasGeoJson}
     <div class="rounded-md border bg-muted/40 p-3 flex items-center justify-between gap-4">
-      <div>
-        <p class="font-medium text-sm">Map area uploaded</p>
-        <p class="text-xs text-muted-foreground">Replace it below or remove it entirely.</p>
+      <p class="font-medium text-sm">Map area uploaded</p>
+      <div class="flex gap-2">
+        <form
+          method="post"
+          action="?/previewMetaGeoJson"
+          use:enhance={() => {
+            const previewWindow = window.open('about:blank', '_blank');
+            if (previewWindow) previewWindow.opener = null;
+            return async ({ result }) => {
+              const geoJson = result.type === 'success' ? result.data?.geoJson : null;
+              if (geoJson) {
+                const url = geoJsonIoUrl(geoJson);
+                if (previewWindow) previewWindow.location.replace(url);
+                else window.open(url, '_blank', 'noopener,noreferrer');
+                return;
+              }
+              previewWindow?.close();
+              await applyAction(result);
+            };
+          }}>
+          <input type="hidden" name="metaId" value={selectedMeta.id} />
+          <Button type="submit" variant="outline" size="sm">Preview</Button>
+        </form>
+        <form
+          method="post"
+          action="?/deleteMetaGeoJson"
+          use:enhance={() => {
+            return async ({ result }) => {
+              await invalidateAll();
+              await applyAction(result);
+            };
+          }}>
+          <input type="hidden" name="metaId" value={selectedMeta.id} />
+          <Button type="submit" variant="destructive" size="sm">Remove</Button>
+        </form>
       </div>
-      <form
-        method="post"
-        action="?/deleteMetaGeoJson"
-        use:enhance={() => {
-          return async ({ result }) => {
-            await invalidateAll();
-            await applyAction(result);
-          };
-        }}>
-        <input type="hidden" name="metaId" value={selectedMeta.id} />
-        <Button type="submit" variant="destructive" size="sm">Remove</Button>
-      </form>
     </div>
   {/if}
 
@@ -81,9 +106,4 @@
       <p class="text-destructive text-sm mt-2">{$errors.file}</p>
     {/if}
   </form>
-
-  <p class="text-xs text-muted-foreground">
-    Uploading or removing an area requires synchronizing the map group before players see the
-    change.
-  </p>
 </div>
