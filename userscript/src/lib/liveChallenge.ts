@@ -12,6 +12,7 @@ export function initLiveChallenge() {
   let pinChanged = false;
   const observer = new MutationObserver(async () => {
     if (!document.querySelector('[class*=result-map_roundPin]')) {
+      if (pinChanged) unmountSummaryWindow();
       pinChanged = false;
       return;
     }
