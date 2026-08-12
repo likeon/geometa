@@ -35,7 +35,7 @@
     <h3 class="font-medium">GeoJSON</h3>
     <p class="text-sm text-muted-foreground">
       Shown on GeoGuessr result maps after each round. Polygon and MultiPolygon only, using WGS84
-      coordinates. Maximum size: 1 MiB.
+      coordinates. Maximum size: 5 MiB.
     </p>
   </div>
 

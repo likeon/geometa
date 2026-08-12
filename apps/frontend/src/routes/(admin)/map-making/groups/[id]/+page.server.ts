@@ -24,7 +24,7 @@ const geoJsonUploadSchema = z.object({
   metaId: z.number(),
   file: z
     .instanceof(File, { error: 'Please upload a GeoJSON file' })
-    .refine((file) => file.size <= 1024 * 1024, 'GeoJSON must be 1 MiB or smaller')
+    .refine((file) => file.size <= 5 * 1024 * 1024, 'GeoJSON must be 5 MiB or smaller')
 });
 export type GeoJsonUploadSchema = typeof geoJsonUploadSchema;
 
