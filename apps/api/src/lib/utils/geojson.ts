@@ -1,8 +1,10 @@
 export const MAX_GEOJSON_BYTES = 5 * 1024 * 1024;
 
-type Position = number[];
+type Position = [number, number, ...number[]];
 
 export type MetaGeoJsonGeometry =
+  | { type: 'Point'; coordinates: Position }
+  | { type: 'MultiPoint'; coordinates: Position[] }
   | { type: 'Polygon'; coordinates: Position[][] }
   | { type: 'MultiPolygon'; coordinates: Position[][][] };
 
@@ -37,15 +39,24 @@ function position(value: unknown): Position {
     )
   ) {
     throw new GeoJsonValidationError(
-      'GeoJSON positions must contain finite numbers',
+      'Positions must contain at least two finite numbers',
     );
   }
   if (value[0] < -180 || value[0] > 180 || value[1] < -90 || value[1] > 90) {
     throw new GeoJsonValidationError(
-      'GeoJSON coordinates must use WGS84 longitude and latitude',
+      'Longitude must be between -180 and 180 and latitude between -90 and 90',
     );
   }
-  return value;
+  return value as Position;
+}
+
+function multiPoint(value: unknown): Position[] {
+  if (!Array.isArray(value) || value.length === 0) {
+    throw new GeoJsonValidationError(
+      'MultiPoint geometries must contain at least one position',
+    );
+  }
+  return value.map(position);
 }
 
 function ring(value: unknown): Position[] {
@@ -55,11 +66,11 @@ function ring(value: unknown): Position[] {
     );
   }
   const positions = value.map(position);
+  const first = positions[0];
+  const last = positions.at(-1)!;
   if (
-    positions[0].length !== positions.at(-1)!.length ||
-    positions[0].some(
-      (coordinate, index) => coordinate !== positions.at(-1)![index],
-    )
+    first.length !== last.length ||
+    first.some((coordinate, index) => coordinate !== last[index])
   ) {
     throw new GeoJsonValidationError('Polygon rings must be closed');
   }
@@ -75,30 +86,35 @@ function polygon(value: unknown): Position[][] {
 
 function geometry(value: unknown): MetaGeoJsonGeometry {
   const input = record(value);
-  if (input.type === 'Polygon') {
-    return { type: 'Polygon', coordinates: polygon(input.coordinates) };
-  }
-  if (input.type === 'MultiPolygon') {
-    if (!Array.isArray(input.coordinates) || input.coordinates.length === 0) {
+  switch (input.type) {
+    case 'Point':
+      return { type: 'Point', coordinates: position(input.coordinates) };
+    case 'MultiPoint':
+      return { type: 'MultiPoint', coordinates: multiPoint(input.coordinates) };
+    case 'Polygon':
+      return { type: 'Polygon', coordinates: polygon(input.coordinates) };
+    case 'MultiPolygon':
+      if (!Array.isArray(input.coordinates) || input.coordinates.length === 0) {
+        throw new GeoJsonValidationError(
+          'MultiPolygons must contain at least one polygon',
+        );
+      }
+      return {
+        type: 'MultiPolygon',
+        coordinates: input.coordinates.map(polygon),
+      };
+    default:
       throw new GeoJsonValidationError(
-        'MultiPolygons must contain at least one polygon',
+        'Only Point, MultiPoint, Polygon, and MultiPolygon geometries are supported',
       );
-    }
-    return {
-      type: 'MultiPolygon',
-      coordinates: input.coordinates.map(polygon),
-    };
   }
-  throw new GeoJsonValidationError(
-    'Only Polygon and MultiPolygon GeoJSON is supported',
-  );
 }
 
 function feature(value: unknown): MetaGeoJsonFeature {
   const input = record(value);
   if (input.type !== 'Feature') {
     throw new GeoJsonValidationError(
-      'FeatureCollection entries must be GeoJSON Features',
+      'FeatureCollection entries must be Features',
     );
   }
   const properties = input.properties ?? null;
@@ -159,7 +175,9 @@ export function summarizeGeoJson(geoJson: MetaGeoJson) {
         count +
         (item.geometry.type === 'Polygon'
           ? 1
-          : item.geometry.coordinates.length),
+          : item.geometry.type === 'MultiPolygon'
+            ? item.geometry.coordinates.length
+            : 0),
       0,
     ),
   };

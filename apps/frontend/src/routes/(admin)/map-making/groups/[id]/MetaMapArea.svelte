@@ -1,6 +1,7 @@
 <script lang="ts">
   import { applyAction, enhance } from '$app/forms';
   import { invalidateAll } from '$app/navigation';
+  import type { SubmitFunction } from '@sveltejs/kit';
   import { Button } from '$lib/components/ui/button';
   import LoadingSmall from '$lib/components/LoadingSmall.svelte';
   import { fileProxy, type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
@@ -21,51 +22,44 @@
     onSubmit() {
       isUploading = true;
     },
-    async onUpdated({ form }) {
+    onResult() {
       isUploading = false;
+    },
+    async onUpdated({ form }) {
       if (form.valid) await invalidateAll();
     }
   });
   const { form, errors, enhance: uploadEnhance, submit } = formApi;
   const file = fileProxy(form, 'file');
 
-  function geoJsonIoUrl(geoJson: unknown) {
-    // ponytail: inline data stays private; use a signed CORS URL if large previews hit browser limits.
-    return `https://geojson.io/#data=data:application/json,${encodeURIComponent(JSON.stringify(geoJson))}`;
-  }
+  const previewGeoJson: SubmitFunction = () => {
+    const previewWindow = window.open('about:blank', '_blank');
+    if (previewWindow) previewWindow.opener = null;
+
+    return async ({ result }) => {
+      const geoJson = result.type === 'success' ? result.data?.geoJson : null;
+      if (geoJson) {
+        const url = `https://geojson.io/#data=data:application/json,${encodeURIComponent(JSON.stringify(geoJson))}`;
+        if (previewWindow) previewWindow.location.replace(url);
+        else window.location.assign(url);
+        return;
+      }
+      previewWindow?.close();
+      await applyAction(result);
+    };
+  };
 </script>
 
 <div class="space-y-5 p-1">
-  <div class="space-y-1">
-    <h3 class="font-medium">GeoJSON</h3>
-    <p class="text-sm text-muted-foreground">
-      Shown on GeoGuessr result maps after each round. Polygon and MultiPolygon only, using WGS84
-      coordinates. Maximum size: 5 MiB.
-    </p>
-  </div>
+  <p class="text-sm text-muted-foreground">
+    Displayed on GeoGuessr round results. Supports GeoJSON points and polygons up to 5 MiB.
+  </p>
 
   {#if selectedMeta.hasGeoJson}
     <div class="rounded-md border bg-muted/40 p-3 flex items-center justify-between gap-4">
       <p class="font-medium text-sm">Map area uploaded</p>
       <div class="flex gap-2">
-        <form
-          method="post"
-          action="?/previewMetaGeoJson"
-          use:enhance={() => {
-            const previewWindow = window.open('about:blank', '_blank');
-            if (previewWindow) previewWindow.opener = null;
-            return async ({ result }) => {
-              const geoJson = result.type === 'success' ? result.data?.geoJson : null;
-              if (geoJson) {
-                const url = geoJsonIoUrl(geoJson);
-                if (previewWindow) previewWindow.location.replace(url);
-                else window.open(url, '_blank', 'noopener,noreferrer');
-                return;
-              }
-              previewWindow?.close();
-              await applyAction(result);
-            };
-          }}>
+        <form method="post" action="?/previewMetaGeoJson" use:enhance={previewGeoJson}>
           <input type="hidden" name="metaId" value={selectedMeta.id} />
           <Button type="submit" variant="outline" size="sm">Preview</Button>
         </form>
