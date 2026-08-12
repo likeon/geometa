@@ -28,6 +28,13 @@ const geoJsonUploadSchema = z.object({
 });
 export type GeoJsonUploadSchema = typeof geoJsonUploadSchema;
 
+function getFormId(data: FormData, name: string) {
+  const value = data.get(name);
+  const id = typeof value === 'string' ? Number(value) : NaN;
+  if (!Number.isSafeInteger(id) || id < 1) error(400, 'Invalid ID');
+  return id;
+}
+
 const imageOrderUpdateSchema = z.object({
   metaId: z.number(),
   updates: z
@@ -464,14 +471,11 @@ export const actions = {
       }
       throwApiError(apiError, { 404: 'Meta not found', 500: 'Failed to upload map area' });
     }
-    return message(form, `${data!.polygonCount} polygon${data!.polygonCount === 1 ? '' : 's'}`);
+    return message(form, `${data!.featureCount} feature${data!.featureCount === 1 ? '' : 's'}`);
   },
   previewMetaGeoJson: async ({ request }) => {
     const data = await request.formData();
-    const metaId = parseInt((data.get('metaId') as string) || '', 10);
-    if (isNaN(metaId)) {
-      error(400, 'Invalid ID');
-    }
+    const metaId = getFormId(data, 'metaId');
 
     const { data: geoJson, error: apiError } = await api.internal
       .metas({ id: metaId })
@@ -483,10 +487,7 @@ export const actions = {
   },
   deleteMetaGeoJson: async ({ request }) => {
     const data = await request.formData();
-    const metaId = parseInt((data.get('metaId') as string) || '', 10);
-    if (isNaN(metaId)) {
-      error(400, 'Invalid ID');
-    }
+    const metaId = getFormId(data, 'metaId');
 
     const { error: apiError } = await api.internal.metas({ id: metaId }).geojson.delete();
     if (apiError) {
@@ -496,10 +497,7 @@ export const actions = {
   },
   deleteMetaImage: async ({ request }) => {
     const data = await request.formData();
-    const imageId = parseInt((data.get('imageId') as string) || '', 10);
-    if (isNaN(imageId)) {
-      error(400, 'Invalid ID');
-    }
+    const imageId = getFormId(data, 'imageId');
 
     const { error: apiError } = await api.internal.metas.images({ imageId }).delete();
 

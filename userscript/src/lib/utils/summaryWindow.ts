@@ -1,6 +1,5 @@
 import { mount, unmount } from 'svelte';
 import App from '../App.svelte';
-import { clearMapArea } from '../mapArea';
 
 type SummaryProps = {
   roundNumber: number;
@@ -13,7 +12,6 @@ type SummaryProps = {
 let currentApp: Record<string, any> | null = null;
 
 export function unmountSummaryWindow() {
-  clearMapArea();
   if (currentApp) {
     unmount(currentApp);
     currentApp = null;

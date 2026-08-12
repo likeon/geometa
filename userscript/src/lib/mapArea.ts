@@ -40,7 +40,7 @@ const pageWindow = unsafeWindow as typeof window & {
   google?: { maps?: MapsApi };
 };
 
-let maps: GoogleMap[] = [];
+const maps: GoogleMap[] = [];
 const fittedBounds = new WeakMap<GoogleMap, BoundsInput>();
 const fitBoundsTargets = new WeakSet<object>();
 const wrappedMapConstructors = new WeakSet<MapConstructor>();
@@ -70,7 +70,7 @@ function isVisibleMap(map: GoogleMap) {
 
 function mapFromReact(element: Element | null) {
   if (!element) return null;
-  // ponytail: GeoGuessr has no public map lookup; update this fallback if its result-map fiber changes.
+  // GeoGuessr does not expose its result-map instance, so read it from React as a fallback.
   const key = Object.keys(element).find((name) => name.startsWith('__reactFiber'));
   const fiber = key ? (element as Record<string, any>)[key] : null;
   const map =
@@ -138,12 +138,12 @@ function trackMap(map: GoogleMap) {
 function renderPendingArea() {
   if (!pendingGeoJson || layer) return;
   const map = currentResultMap();
-  const Data = pageWindow.google?.maps?.Data;
-  if (!map || !Data) return;
+  const mapsApi = pageWindow.google?.maps;
+  if (!map || !mapsApi?.Data || !mapsApi.LatLngBounds || !mapsApi.SymbolPath) return;
   const currentBounds = fittedBounds.get(map) ?? map.getBounds();
   if (!currentBounds) return;
 
-  const nextLayer = new Data({ map });
+  const nextLayer = new mapsApi.Data({ map });
   try {
     nextLayer.setStyle({
       clickable: false,
@@ -153,7 +153,7 @@ function renderPendingArea() {
       strokeOpacity: 0.9,
       strokeWeight: 2,
       icon: {
-        path: pageWindow.google!.maps!.SymbolPath.CIRCLE,
+        path: mapsApi.SymbolPath.CIRCLE,
         scale: 5,
         fillColor: '#057a55',
         fillOpacity: 1,
@@ -162,7 +162,7 @@ function renderPendingArea() {
       }
     });
     const features = nextLayer.addGeoJson(pendingGeoJson);
-    const bounds = new pageWindow.google!.maps!.LatLngBounds(currentBounds);
+    const bounds = new mapsApi.LatLngBounds(currentBounds);
     features.forEach((feature) =>
       feature.getGeometry()?.forEachLatLng((point) => bounds.extend(point))
     );
@@ -176,6 +176,7 @@ function renderPendingArea() {
     stopWatchingForResultMap();
   } catch (error) {
     nextLayer.setMap(null);
+    stopWatchingForResultMap();
     console.error('ALM: failed to render map area', error);
   }
 }

@@ -208,7 +208,7 @@
             >Images</Tabs.Trigger>
         {:else}
           <Tooltip
-            content="Meta must be saved first before adding images"
+            content="Save the meta before adding images"
             side="right"
             delayDuration={100}
             disableCloseOnTriggerClick={true}>
@@ -222,7 +222,7 @@
             >Map area</Tabs.Trigger>
         {:else}
           <Tooltip
-            content="Meta must be saved first before adding a map area"
+            content="Save the meta before adding a map area"
             side="right"
             delayDuration={100}
             disableCloseOnTriggerClick={true}>

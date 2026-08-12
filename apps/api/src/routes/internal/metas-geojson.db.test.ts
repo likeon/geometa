@@ -120,19 +120,30 @@ describe('meta GeoJSON routes', () => {
 
   test('uploads, normalizes, marks modified, and logs a map area', async () => {
     const { groupId, metaId } = await seedMeta();
+    const input = {
+      type: 'FeatureCollection',
+      features: [
+        { type: 'Feature', properties: null, geometry: polygon },
+        {
+          type: 'Feature',
+          properties: { name: 'marker' },
+          geometry: { type: 'Point', coordinates: [10.5, 20.5] },
+        },
+      ],
+    };
 
-    const response = await uploadRequest(metaId, JSON.stringify(polygon));
+    const response = await uploadRequest(metaId, JSON.stringify(input));
 
     expect(response.status).toBe(200);
-    expect(await response.json()).toEqual({ featureCount: 1, polygonCount: 1 });
+    expect(await response.json()).toEqual({ featureCount: 2, polygonCount: 1 });
     const saved = await savedMeta(metaId);
-    expect(saved.geoJson).toEqual(normalizeGeoJson(polygon));
+    expect(saved.geoJson).toEqual(normalizeGeoJson(input));
     expect(saved.modifiedAt).not.toBe(SEED_MODIFIED_AT);
     expect(await areaLogs(groupId)).toEqual([
       {
         operation: 'create',
         oldValue: null,
-        newValue: { featureCount: 1, polygonCount: 1 },
+        newValue: { featureCount: 2, polygonCount: 1 },
       },
     ]);
   });
