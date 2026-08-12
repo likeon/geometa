@@ -20,6 +20,14 @@ const imageUploadSchema = z.object({
 });
 export type ImageUploadSchema = typeof imageUploadSchema;
 
+const geoJsonUploadSchema = z.object({
+  metaId: z.number(),
+  file: z
+    .instanceof(File, { error: 'Please upload a GeoJSON file' })
+    .refine((file) => file.size <= 1024 * 1024, 'GeoJSON must be 1 MiB or smaller')
+});
+export type GeoJsonUploadSchema = typeof geoJsonUploadSchema;
+
 const imageOrderUpdateSchema = z.object({
   metaId: z.number(),
   updates: z
@@ -112,6 +120,7 @@ export const load = async ({ params, locals }) => {
   const mapUploadForm = await superValidate(zod4(mapUploadSchema));
   const metasUploadForm = await superValidate(zod4(metasUploadSchema));
   const imageUploadForm = await superValidate(zod4(imageUploadSchema));
+  const geoJsonUploadForm = await superValidate(zod4(geoJsonUploadSchema));
   const imageOrderUpdateForm = await superValidate(zod4(imageOrderUpdateSchema));
   const copyForm = await superValidate(zod4(copyMetaSchema));
 
@@ -123,6 +132,7 @@ export const load = async ({ params, locals }) => {
     mapUploadForm,
     metasUploadForm,
     imageUploadForm,
+    geoJsonUploadForm,
     imageOrderUpdateForm,
     user,
     copyForm
@@ -437,6 +447,37 @@ export const actions = {
         console.debug(status);
         throw new Error('unexpected response');
     }
+  },
+  uploadMetaGeoJson: async ({ request }) => {
+    const form = await superValidate(request, zod4(geoJsonUploadSchema));
+    if (!form.valid) {
+      return fail(400, withFiles({ form }));
+    }
+
+    const { data, error: apiError } = await api.internal
+      .metas({ id: form.data.metaId })
+      .geojson.put({ file: form.data.file });
+    if (apiError) {
+      const value = apiError.value as { message?: string } | undefined;
+      if ((apiError.status as number) === 400) {
+        return setError(form, 'file', value?.message ?? 'Invalid GeoJSON');
+      }
+      throwApiError(apiError, { 404: 'Meta not found', 500: 'Failed to upload map area' });
+    }
+    return message(form, `${data!.polygonCount} polygon${data!.polygonCount === 1 ? '' : 's'}`);
+  },
+  deleteMetaGeoJson: async ({ request }) => {
+    const data = await request.formData();
+    const metaId = parseInt((data.get('metaId') as string) || '', 10);
+    if (isNaN(metaId)) {
+      error(400, 'Invalid ID');
+    }
+
+    const { error: apiError } = await api.internal.metas({ id: metaId }).geojson.delete();
+    if (apiError) {
+      throwApiError(apiError, { 404: 'Map area not found', 500: 'Failed to remove map area' });
+    }
+    return { success: true, metaId };
   },
   deleteMetaImage: async ({ request }) => {
     const data = await request.formData();

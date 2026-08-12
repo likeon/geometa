@@ -129,7 +129,12 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
           with: {
             metas: {
               orderBy: [asc(metas.tagName)],
-              columns: { noteHtml: false, footerHtml: false },
+              columns: { noteHtml: false, footerHtml: false, geoJson: false },
+              extras: {
+                hasGeoJson: sql<boolean>`${metas.geoJson} IS NOT NULL`.as(
+                  'has_geo_json',
+                ),
+              },
               with: {
                 metaLevels: { with: { level: true } },
                 images: {

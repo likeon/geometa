@@ -1188,6 +1188,7 @@ describe('POST /api/internal/map-groups/:id/sync', () => {
         noteFromPlonkit: true,
         footer: '',
         images: [],
+        geoJson: null,
       },
     ]);
     expect(await db.select().from(syncedLocations)).toEqual([

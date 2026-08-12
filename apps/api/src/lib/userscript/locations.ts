@@ -19,6 +19,7 @@ export const locationSelect = db
       'note',
       'footer',
       'images',
+      'geoJson',
       'noteFromPlonkit',
     ]),
     country: syncedLocations.country,

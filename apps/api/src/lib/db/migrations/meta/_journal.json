@@ -260,6 +260,13 @@
       "when": 1785995428743,
       "tag": "0036_sparkling_jack_flag",
       "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1786515403879,
+      "tag": "0037_secret_sister_grimm",
+      "breakpoints": true
     }
   ]
 }

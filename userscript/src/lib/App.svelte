@@ -23,6 +23,7 @@
     markAnnouncementAsDismissed
   } from './utils/announcement';
   import { modalDialog } from './utils/modalDialog';
+  import { clearMapArea, showMapArea } from './mapArea';
 
   interface Props {
     panoId: string;
@@ -39,6 +40,7 @@
     metaName: string;
     note: string;
     images?: string[];
+    geoJson?: Record<string, unknown> | null;
     footer: string;
   };
 
@@ -168,6 +170,12 @@
         link.addEventListener('click', confirmNavigation);
       });
     }
+  });
+
+  $effect(() => {
+    if (geoInfo?.geoJson) showMapArea(geoInfo.geoJson);
+    else clearMapArea();
+    return clearMapArea;
   });
 
   let lastDismissedTimestamp = $state(getLastDismissedAnnouncementTimestamp());

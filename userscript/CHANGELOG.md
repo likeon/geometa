@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.94]
+
+- Added GeoJSON overlays to GeoGuessr round results
+
 ## [0.93]
 
 - Added live challenge support for the new GeoGuessr party lobby
