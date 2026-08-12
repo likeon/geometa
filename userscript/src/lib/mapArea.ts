@@ -42,16 +42,18 @@ const pageWindow = unsafeWindow as typeof window & {
 
 const maps: GoogleMap[] = [];
 const fittedBounds = new WeakMap<GoogleMap, BoundsInput>();
-const fitBoundsTargets = new WeakSet<object>();
+const wrappedFitBounds = new WeakSet<GoogleMap['fitBounds']>();
 const wrappedMapConstructors = new WeakSet<MapConstructor>();
 let pendingGeoJson: GeoJson | null = null;
 let layer: DataLayer | null = null;
+let layerMap: GoogleMap | null = null;
 let renderObserver: MutationObserver | null = null;
 let fittingArea = false;
 
 function detachLayer() {
   layer?.setMap(null);
   layer = null;
+  layerMap = null;
 }
 
 function stopWatchingForResultMap() {
@@ -111,20 +113,20 @@ function watchForResultMap() {
 }
 
 function wrapFitBounds(map: GoogleMap) {
-  for (let target: object | null = map; target; target = Object.getPrototypeOf(target)) {
-    if (fitBoundsTargets.has(target)) return;
-  }
   const originalFitBounds = map.fitBounds;
-  map.fitBounds = function (...args) {
+  if (wrappedFitBounds.has(originalFitBounds)) return;
+
+  const fitBounds: GoogleMap['fitBounds'] = function (this: GoogleMap, ...args) {
     const result = originalFitBounds.apply(this, args);
     if (!fittingArea) {
       fittedBounds.set(this, args[0]);
-      if (pendingGeoJson && layer) detachLayer();
+      if (pendingGeoJson && layerMap === this) detachLayer();
     }
     trackMap(this);
     return result;
   };
-  fitBoundsTargets.add(map);
+  wrappedFitBounds.add(fitBounds);
+  map.fitBounds = fitBounds;
 }
 
 function trackMap(map: GoogleMap) {
@@ -136,10 +138,12 @@ function trackMap(map: GoogleMap) {
 }
 
 function renderPendingArea() {
-  if (!pendingGeoJson || layer) return;
+  if (!pendingGeoJson) return;
   const map = currentResultMap();
   const mapsApi = pageWindow.google?.maps;
   if (!map || !mapsApi?.Data || !mapsApi.LatLngBounds || !mapsApi.SymbolPath) return;
+  if (layerMap === map) return;
+  detachLayer();
   const currentBounds = fittedBounds.get(map) ?? map.getBounds();
   if (!currentBounds) return;
 
@@ -173,6 +177,7 @@ function renderPendingArea() {
       fittingArea = false;
     }
     layer = nextLayer;
+    layerMap = map;
     stopWatchingForResultMap();
   } catch (error) {
     nextLayer.setMap(null);
@@ -223,11 +228,6 @@ function interceptGoogleScript(script: HTMLScriptElement) {
   if (!script.src.includes('maps.googleapis.com') || script.dataset.geometaObserved) return;
   script.dataset.geometaObserved = 'true';
   interceptGoogleCallback(script);
-  const originalOnload = script.onload;
-  script.onload = function (event) {
-    wrapGoogleMaps();
-    return originalOnload?.call(this, event);
-  };
   script.addEventListener('load', wrapGoogleMaps, { once: true });
 }
 
