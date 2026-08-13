@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.92
+// @version      0.93
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
 // @downloadURL  https://github.com/likeon/geometa/raw/main/userscript/dist/geometa.user.js
@@ -22,6 +22,10 @@
 
 /*
 # Changelog
+
+## [0.93]
+
+- Added live challenge support for the new GeoGuessr party lobby
 
 ## [0.92]
 
@@ -4062,6 +4066,75 @@ context.l
     );
     return l.u ??= { a: [], b: [], m: [] };
   }
+  const LIVE_CHALLENGE_PATH = /^\/(?:api\/)?live-challenge\/([^/?#]+)\/?$/;
+  const PARTY_LOBBY_PATH = /^\/party\/lobby\/[^/?#]+\/?$/;
+  let trackedPartyChallenge = null;
+  let resourceObserver = null;
+  function pathnameFromUrl(url) {
+    try {
+      return new URL(url, "https://www.geoguessr.com").pathname;
+    } catch {
+      return null;
+    }
+  }
+  function extractLiveChallengeId(url) {
+    const pathname = pathnameFromUrl(url);
+    return pathname?.match(LIVE_CHALLENGE_PATH)?.[1] ?? null;
+  }
+  function isPartyLobbyPath(pathname) {
+    return PARTY_LOBBY_PATH.test(pathname);
+  }
+  function findPartyLiveChallengeId(pathname, resourceUrls) {
+    if (!isPartyLobbyPath(pathname)) {
+      return null;
+    }
+    for (let i = resourceUrls.length - 1; i >= 0; i--) {
+      const id = extractLiveChallengeId(resourceUrls[i]);
+      if (id) {
+        return id;
+      }
+    }
+    return null;
+  }
+  function trackResource(url) {
+    if (!isPartyLobbyPath(location.pathname)) {
+      return;
+    }
+    const id = extractLiveChallengeId(url);
+    if (id) {
+      trackedPartyChallenge = { id, partyLobbyPath: location.pathname };
+    }
+  }
+  function initLiveChallengeIdTracking() {
+    if (resourceObserver || typeof PerformanceObserver === "undefined") {
+      return;
+    }
+    for (const entry of performance.getEntriesByType("resource")) {
+      trackResource(entry.name);
+    }
+    resourceObserver = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        trackResource(entry.name);
+      }
+    });
+    resourceObserver.observe({ entryTypes: ["resource"] });
+  }
+  function getLiveChallengeId(pathname = location.pathname) {
+    const routeId = extractLiveChallengeId(pathname);
+    if (routeId) {
+      return routeId;
+    }
+    if (!isPartyLobbyPath(pathname)) {
+      return null;
+    }
+    if (trackedPartyChallenge?.partyLobbyPath === pathname) {
+      return trackedPartyChallenge.id;
+    }
+    return findPartyLiveChallengeId(
+      pathname,
+      performance.getEntriesByType("resource").map((entry) => entry.name)
+    );
+  }
   function waitForElement(selector) {
     return new Promise((resolve) => {
       try {
@@ -4205,14 +4278,7 @@ context.l
   function wasHelpMessageRead() {
     return _unsafeWindow.localStorage.getItem("geometa:help-message-read") == "true";
   }
-  const getChallengeId = () => {
-    const regexp = /.*\/live-challenge\/(.*)/;
-    const matches = location.pathname.match(regexp);
-    if (matches && matches.length > 1) {
-      return matches[1];
-    }
-    return null;
-  };
+  const getChallengeId = getLiveChallengeId;
   async function getChallengeInfo(id) {
     const url = `https://game-server.geoguessr.com/api/live-challenge/${id}`;
     const response = await fetch(url, {
@@ -5324,6 +5390,7 @@ context.l
       pinChanged = true;
       const challengeId = getChallengeId();
       if (!challengeId) {
+        pinChanged = false;
         return;
       }
       try {
@@ -6723,6 +6790,7 @@ roundNumber: 4,
     _GM_registerMenuCommand("LearnableMeta - Reset Meta Window Layout", openResetLayoutDialog);
   }
   initURLChangeEvent();
+  initLiveChallengeIdTracking();
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", setupLearnableMetaFeatures);
   } else {

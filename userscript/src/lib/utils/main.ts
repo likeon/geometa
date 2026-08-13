@@ -1,4 +1,5 @@
 import { GM_xmlhttpRequest, unsafeWindow, GM_info } from '$';
+import { getLiveChallengeId } from './liveChallengeId';
 
 /**
  * Waits and returns an element with the specified selector.
@@ -184,14 +185,7 @@ export function wasHelpMessageRead(): boolean {
   return unsafeWindow.localStorage.getItem('geometa:help-message-read') == 'true';
 }
 
-export const getChallengeId = () => {
-  const regexp = /.*\/live-challenge\/(.*)/;
-  const matches = location.pathname.match(regexp);
-  if (matches && matches.length > 1) {
-    return matches[1];
-  }
-  return null;
-};
+export const getChallengeId = getLiveChallengeId;
 
 export async function getChallengeInfo(id: string) {
   const url = `https://game-server.geoguessr.com/api/live-challenge/${id}`;

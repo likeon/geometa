@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.93]
+
+- Added live challenge support for the new GeoGuessr party lobby
+
 ## [0.92]
 
 - Fixed updated maps still appearing as changed after publishing
