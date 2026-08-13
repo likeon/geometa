@@ -21,6 +21,9 @@ export function initLiveChallenge() {
     pinChanged = true;
     const challengeId = getChallengeId();
     if (!challengeId) {
+      // A party game may render before its live-challenge request has been
+      // observed. Keep trying while the result view changes.
+      pinChanged = false;
       return;
     }
     try {

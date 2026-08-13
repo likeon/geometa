@@ -9,6 +9,7 @@ import { initChallengeResults } from './lib/challengeResults';
 import { resetContainerPosition } from './lib/utils/dragging';
 import { resetContainerDimensions } from './lib/utils/resizing';
 import { initMapGroupUpdate } from './lib/mapGroupUpdate';
+import { initLiveChallengeIdTracking } from './lib/utils/liveChallengeId';
 import ResetLayoutConfirmation from './lib/components/ResetLayoutConfirmation.svelte';
 import './lib/styles/theme.css';
 import './lib/styles/buttons.css';
@@ -48,6 +49,7 @@ if (typeof GM_registerMenuCommand === 'function') {
 }
 
 initURLChangeEvent();
+initLiveChallengeIdTracking();
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', setupLearnableMetaFeatures);

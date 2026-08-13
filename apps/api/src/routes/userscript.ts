@@ -15,7 +15,7 @@ import { generateFooter } from '@api/lib/userscript/utils';
 import { and, asc, eq, isNotNull, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
-const userscriptVersion = '0.92';
+const userscriptVersion = '0.93';
 
 const mapInfoQuery = db.query.maps
   .findFirst({
