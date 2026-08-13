@@ -28,7 +28,8 @@ export function isPartyLobbyPath(pathname: string): boolean {
 
 export function findPartyLiveChallengeId(
   pathname: string,
-  resourceUrls: readonly string[]
+  resourceUrls: readonly string[],
+  trackedChallenge: TrackedChallenge | null = null
 ): string | null {
   if (!isPartyLobbyPath(pathname)) {
     return null;
@@ -40,7 +41,8 @@ export function findPartyLiveChallengeId(
       return id;
     }
   }
-  return null;
+
+  return trackedChallenge?.partyLobbyPath === pathname ? trackedChallenge.id : null;
 }
 
 function trackResource(url: string) {
@@ -86,12 +88,9 @@ export function getLiveChallengeId(pathname: string = location.pathname): string
     return null;
   }
 
-  if (trackedPartyChallenge?.partyLobbyPath === pathname) {
-    return trackedPartyChallenge.id;
-  }
-
   return findPartyLiveChallengeId(
     pathname,
-    performance.getEntriesByType('resource').map((entry) => entry.name)
+    performance.getEntriesByType('resource').map((entry) => entry.name),
+    trackedPartyChallenge
   );
 }
