@@ -7,7 +7,6 @@ node = "24"
 
 # tools
 just = "latest"
-kind = "latest"
-kubectl = "latest"
 prek = "latest"
-tilt = "latest"
+process-compose = "latest"
+"npm:get-port-cli" = "latest"

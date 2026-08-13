@@ -1,6 +1,6 @@
 import type { Config } from 'drizzle-kit';
 
-const postgresPort = process.env.TILT_PORT_POSTGRES || '5432';
+const postgresPort = process.env.PROCESS_COMPOSE_PORT_POSTGRES || '5432';
 const databaseUrl = `postgresql://postgres:postgres@localhost:${postgresPort}/geometa`;
 
 export default {

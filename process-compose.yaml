@@ -1,0 +1,65 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/F1bonacc1/process-compose/main/schemas/process-compose-schema.json
+
+ordered_shutdown: true
+
+processes:
+  info:
+    command: |
+      printf '%s\n' \
+        "PostgreSQL: 127.0.0.1:${PROCESS_COMPOSE_PORT_POSTGRES}" \
+        "API: http://127.0.0.1:${PROCESS_COMPOSE_PORT_API}/api/docs" \
+        "Frontend: http://127.0.0.1:${PROCESS_COMPOSE_PORT_FRONTEND}/"
+
+  postgres:
+    command: >-
+      "${CONTAINER_ENGINE}" run --rm
+      --name "${POSTGRES_CONTAINER_NAME}"
+      ${CONTAINER_USERNS_OPTION}
+      --env POSTGRES_PASSWORD=postgres
+      --env POSTGRES_DB=geometa
+      --publish "127.0.0.1:${PROCESS_COMPOSE_PORT_POSTGRES}:5432"
+      --volume "${POSTGRES_DATA_DIR}:/var/lib/postgresql/data:Z"
+      docker.io/library/postgres:17
+    availability:
+      restart: always
+      backoff_seconds: 2
+    shutdown:
+      command: >-
+        "${CONTAINER_ENGINE}" stop --time 10
+        "${POSTGRES_CONTAINER_NAME}"
+      signal: 15
+      timeout_seconds: 15
+    readiness_probe:
+      exec:
+        command: >-
+          "${CONTAINER_ENGINE}" exec "${POSTGRES_CONTAINER_NAME}"
+          pg_isready -U postgres -d geometa
+      initial_delay_seconds: 1
+      period_seconds: 1
+      timeout_seconds: 5
+      success_threshold: 1
+      failure_threshold: 30
+
+  api:
+    command: mise exec -- bun run dev
+    working_dir: ./apps/api
+    environment:
+      - "SERVER_PORT=${PROCESS_COMPOSE_PORT_API}"
+      - "DATABASE_URL=${DEV_DATABASE_URL}"
+    depends_on:
+      postgres:
+        condition: process_healthy
+
+  frontend:
+    command: >-
+      PORT=${PROCESS_COMPOSE_PORT_FRONTEND}
+      mise exec -- npm run dev
+    working_dir: ./apps/frontend
+    environment:
+      - "API_URL=http://localhost:${PROCESS_COMPOSE_PORT_API}"
+      - "DATABASE_URL=${DEV_DATABASE_URL}"
+    depends_on:
+      postgres:
+        condition: process_healthy
+      api:
+        condition: process_started
