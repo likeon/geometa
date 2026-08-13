@@ -1,3 +1,0 @@
-[submodule ".tilt/scripts"]
-	path = .tilt/scripts
-	url = git@github.com:likeon/tilt-multicluster.git

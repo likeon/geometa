@@ -11,7 +11,7 @@ db-psql:
 alias db-shell := db-psql
 
 pgcli:
-  uvx pgcli postgresql://postgres:postgres@localhost:${TILT_PORT_POSTGRES:-5432}/geometa
+  uvx pgcli postgresql://postgres:postgres@localhost:${PROCESS_COMPOSE_PORT_POSTGRES:-5432}/geometa
 
 pgcli-prod:
   uvx pgcli $PROD_POSTRGRES_URL

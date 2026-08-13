@@ -11,7 +11,7 @@
 
 .env
 .env.local
-.envrc.ports
+.dev/
 .decrypted*
 
 mise.local.toml
