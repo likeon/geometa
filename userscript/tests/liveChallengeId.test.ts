@@ -32,6 +32,25 @@ describe('live challenge IDs', () => {
     ).toBe('current-game');
   });
 
+  test('prefers the newest request over a cached game from the same party lobby', () => {
+    expect(
+      findPartyLiveChallengeId(
+        '/party/lobby/WGUL5',
+        ['https://game-server.geoguessr.com/api/live-challenge/current-game'],
+        { id: 'previous-game', partyLobbyPath: '/party/lobby/WGUL5' }
+      )
+    ).toBe('current-game');
+  });
+
+  test('falls back to the cached game when its request is no longer recorded', () => {
+    expect(
+      findPartyLiveChallengeId('/party/lobby/WGUL5', [], {
+        id: 'current-game',
+        partyLobbyPath: '/party/lobby/WGUL5'
+      })
+    ).toBe('current-game');
+  });
+
   test('does not reuse observed game requests outside a party lobby', () => {
     expect(
       findPartyLiveChallengeId('/maps/map-id', [

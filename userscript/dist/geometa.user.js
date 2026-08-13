@@ -4084,7 +4084,7 @@ context.l
   function isPartyLobbyPath(pathname) {
     return PARTY_LOBBY_PATH.test(pathname);
   }
-  function findPartyLiveChallengeId(pathname, resourceUrls) {
+  function findPartyLiveChallengeId(pathname, resourceUrls, trackedChallenge = null) {
     if (!isPartyLobbyPath(pathname)) {
       return null;
     }
@@ -4094,7 +4094,7 @@ context.l
         return id;
       }
     }
-    return null;
+    return trackedChallenge?.partyLobbyPath === pathname ? trackedChallenge.id : null;
   }
   function trackResource(url) {
     if (!isPartyLobbyPath(location.pathname)) {
@@ -4127,12 +4127,10 @@ context.l
     if (!isPartyLobbyPath(pathname)) {
       return null;
     }
-    if (trackedPartyChallenge?.partyLobbyPath === pathname) {
-      return trackedPartyChallenge.id;
-    }
     return findPartyLiveChallengeId(
       pathname,
-      performance.getEntriesByType("resource").map((entry) => entry.name)
+      performance.getEntriesByType("resource").map((entry) => entry.name),
+      trackedPartyChallenge
     );
   }
   function waitForElement(selector) {
