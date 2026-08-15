@@ -110,6 +110,23 @@ function geometry(value: unknown): MetaGeoJsonGeometry {
   }
 }
 
+function validatePropertyNumbers(value: unknown) {
+  const remaining = [value];
+  while (remaining.length) {
+    const current = remaining.pop();
+    if (typeof current === 'number' && !Number.isFinite(current)) {
+      throw new GeoJsonValidationError(
+        'GeoJSON feature properties must contain only finite numbers',
+      );
+    }
+    if (Array.isArray(current)) {
+      for (const item of current) remaining.push(item);
+    } else if (current && typeof current === 'object') {
+      for (const item of Object.values(current)) remaining.push(item);
+    }
+  }
+}
+
 function feature(value: unknown): MetaGeoJsonFeature {
   const input = record(value);
   if (input.type !== 'Feature') {
@@ -126,6 +143,7 @@ function feature(value: unknown): MetaGeoJsonFeature {
       'GeoJSON feature properties must be an object or null',
     );
   }
+  validatePropertyNumbers(properties);
   if (
     input.id !== undefined &&
     typeof input.id !== 'string' &&
@@ -133,6 +151,11 @@ function feature(value: unknown): MetaGeoJsonFeature {
   ) {
     throw new GeoJsonValidationError(
       'GeoJSON feature ids must be strings or numbers',
+    );
+  }
+  if (typeof input.id === 'number' && !Number.isFinite(input.id)) {
+    throw new GeoJsonValidationError(
+      'GeoJSON feature ids must contain only finite numbers',
     );
   }
   return {
