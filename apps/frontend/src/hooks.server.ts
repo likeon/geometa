@@ -6,6 +6,7 @@ import { getDb } from '$lib/drizzle';
 import { dev } from '$app/environment';
 import { building } from '$app/environment';
 import log from '$lib/log';
+import { createLoginBypassSession, isLoginBypassEnabled } from '$lib/login-bypass';
 
 // initializes db connection
 if (!building) {
@@ -69,11 +70,19 @@ export const handle: Handle = sequence(...sentryHandlers, async ({ event, resolv
   }
 
   if (redirectToLogin) {
-    event.cookies.set('afterLoginRedirectUrl', event.url.pathname, {
-      path: '/',
-      maxAge: 1800 // 30 minutes
-    });
-    throw redirect(302, '/login');
+    if (isLoginBypassEnabled()) {
+      // Dev-only: skip Discord OAuth, authenticate as the LOGIN_BYPASS_UID user.
+      const { session, user } = await createLoginBypassSession(event);
+      event.locals.session = session;
+      event.locals.user = user;
+      redirectToLogin = false;
+    } else {
+      event.cookies.set('afterLoginRedirectUrl', event.url.pathname, {
+        path: '/',
+        maxAge: 1800 // 30 minutes
+      });
+      throw redirect(302, '/login');
+    }
   }
 
   const response = await resolve(event);
