@@ -37,11 +37,15 @@
     if (previewWindow) previewWindow.opener = null;
 
     return async ({ result }) => {
-      const geoJson = result.type === 'success' ? result.data?.geoJson : null;
-      if (geoJson) {
-        const url = `https://geojson.io/#data=data:application/json,${encodeURIComponent(JSON.stringify(geoJson))}`;
-        if (previewWindow) previewWindow.location.replace(url);
-        else window.location.assign(url);
+      const preview = result.type === 'success' ? result.data : null;
+      if (preview?.previewUrl) {
+        if (previewWindow) previewWindow.location.replace(preview.previewUrl);
+        else window.location.assign(preview.previewUrl);
+        return;
+      }
+      if (preview?.previewError) {
+        previewWindow?.close();
+        window.alert(preview.previewError);
         return;
       }
       previewWindow?.close();

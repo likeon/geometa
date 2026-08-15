@@ -28,6 +28,9 @@ const geoJsonUploadSchema = z.object({
 });
 export type GeoJsonUploadSchema = typeof geoJsonUploadSchema;
 
+// ponytail: keep external previews URL-bounded; use a signed server-backed URL if larger previews are needed.
+const MAX_GEOJSON_PREVIEW_URL_LENGTH = 512 * 1024;
+
 function getFormId(data: FormData, name: string) {
   const value = data.get(name);
   const id = typeof value === 'string' ? Number(value) : NaN;
@@ -483,7 +486,15 @@ export const actions = {
     if (apiError) {
       throwApiError(apiError, { 404: 'Map area not found', 500: 'Failed to preview map area' });
     }
-    return { geoJson };
+    const previewUrl = `https://geojson.io/#data=data:application/json,${encodeURIComponent(
+      JSON.stringify(geoJson)
+    )}`;
+    if (previewUrl.length > MAX_GEOJSON_PREVIEW_URL_LENGTH) {
+      return {
+        previewError: 'This map area is too large for the external preview (512 KiB URL limit).'
+      };
+    }
+    return { previewUrl };
   },
   deleteMetaGeoJson: async ({ request }) => {
     const data = await request.formData();
