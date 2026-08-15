@@ -93,7 +93,7 @@ function currentResultMap() {
     const reactMap = mapFromReact(resultView.querySelector('[class*="coordinate-result-map_map"]'));
     if (reactMap && isVisibleMap(reactMap)) {
       wrapFitBounds(reactMap);
-      trackMap(reactMap);
+      if (!maps.includes(reactMap)) maps.push(reactMap);
       return reactMap;
     }
     return visibleMaps.findLast((map) => resultView.contains(map.getDiv())) ?? null;
