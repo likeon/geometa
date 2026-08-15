@@ -47,6 +47,7 @@ const wrappedMapConstructors = new WeakSet<MapConstructor>();
 let pendingGeoJson: GeoJson | null = null;
 let layer: DataLayer | null = null;
 let layerMap: GoogleMap | null = null;
+let layerBounds: BoundsInput | null = null;
 let renderObserver: MutationObserver | null = null;
 let fittingArea = false;
 
@@ -54,6 +55,7 @@ function detachLayer() {
   layer?.setMap(null);
   layer = null;
   layerMap = null;
+  layerBounds = null;
 }
 
 function stopWatchingForResultMap() {
@@ -178,6 +180,7 @@ function renderPendingArea() {
     }
     layer = nextLayer;
     layerMap = map;
+    layerBounds = currentBounds;
     stopWatchingForResultMap();
   } catch (error) {
     nextLayer.setMap(null);
@@ -257,5 +260,15 @@ export function showMapArea(geoJson: unknown) {
 export function clearMapArea() {
   pendingGeoJson = null;
   stopWatchingForResultMap();
+  const map = layerMap;
+  const bounds = layerBounds;
   detachLayer();
+  if (map && bounds) {
+    fittingArea = true;
+    try {
+      map.fitBounds(bounds);
+    } finally {
+      fittingArea = false;
+    }
+  }
 }
