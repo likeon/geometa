@@ -2,10 +2,12 @@ import {
   levels,
   type Meta,
   mapGroupLocations,
+  mapGroupPermissions,
   mapGroups,
   metaImages,
   metaLevels,
   metas,
+  users,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
@@ -20,11 +22,29 @@ import {
 } from '@api/lib/utils/geojson';
 import { markdown2Html } from '@api/lib/utils/markdown';
 import { uploadImage } from '@api/lib/utils/s3';
-import { and, eq, inArray, not } from 'drizzle-orm';
+import { and, eq, inArray, not, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import sharp from 'sharp';
 
 type Tx = Parameters<Parameters<typeof db.$primary.transaction>[0]>[0];
+
+function authorizedMetaMutation(userId: string, mapGroupId: number) {
+  return and(
+    eq(metas.mapGroupId, mapGroupId),
+    sql`(
+      EXISTS (
+        SELECT 1 FROM ${mapGroupPermissions}
+        WHERE ${mapGroupPermissions.mapGroupId} = ${metas.mapGroupId}
+          AND ${mapGroupPermissions.userId} = ${userId}
+      )
+      OR EXISTS (
+        SELECT 1 FROM ${users}
+        WHERE ${users.id} = ${userId}
+          AND ${users.isSuperadmin} = true
+      )
+    )`,
+  );
+}
 
 // Copies a meta (its images, its tag's locations, and optionally its level
 // assignments) into another group inside the given transaction. Returns the new
@@ -346,14 +366,26 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       }
 
       const summary = summarizeGeoJson(geoJson);
-      await db.$primary.transaction(async (tx) => {
+      const saved = await db.$primary.transaction(async (tx) => {
         await tx
+          .select({ id: mapGroups.id })
+          .from(mapGroups)
+          .where(eq(mapGroups.id, meta.mapGroupId))
+          .for('update');
+        const updated = await tx
           .update(metas)
           .set({
             geoJson,
             modifiedAt: Math.floor(Date.now() / 1000),
           })
-          .where(eq(metas.id, meta.id));
+          .where(
+            and(
+              eq(metas.id, meta.id),
+              authorizedMetaMutation(userId, meta.mapGroupId),
+            ),
+          )
+          .returning({ id: metas.id });
+        if (updated.length === 0) return false;
         await logChange(tx, {
           mapGroupId: meta.mapGroupId,
           userId,
@@ -363,7 +395,9 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           operation: meta.geoJson ? 'update' : 'create',
           newValue: summary,
         });
+        return true;
       });
+      if (!saved) return status(404, { message: 'Meta not found' });
       return summary;
     },
     {
@@ -395,14 +429,26 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
         return status(404, { message: 'Map area not found' });
       }
 
-      await db.$primary.transaction(async (tx) => {
+      const deleted = await db.$primary.transaction(async (tx) => {
         await tx
+          .select({ id: mapGroups.id })
+          .from(mapGroups)
+          .where(eq(mapGroups.id, meta.mapGroupId))
+          .for('update');
+        const updated = await tx
           .update(metas)
           .set({
             geoJson: null,
             modifiedAt: Math.floor(Date.now() / 1000),
           })
-          .where(eq(metas.id, meta.id));
+          .where(
+            and(
+              eq(metas.id, meta.id),
+              authorizedMetaMutation(userId, meta.mapGroupId),
+            ),
+          )
+          .returning({ id: metas.id });
+        if (updated.length === 0) return false;
         await logChange(tx, {
           mapGroupId: meta.mapGroupId,
           userId,
@@ -412,7 +458,9 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           operation: 'delete',
           oldValue: summarizeGeoJson(geoJson),
         });
+        return true;
       });
+      if (!deleted) return status(404, { message: 'Meta not found' });
       return { deleted: true };
     },
     {
