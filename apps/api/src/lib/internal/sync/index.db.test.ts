@@ -234,7 +234,7 @@ describe('syncMapGroup incremental modifiedAt boundary', () => {
     return { groupId, usMetaId, jpMetaId, syncedAt };
   }
 
-  test('re-syncs metas strictly above the boundary, leaves rows equal to it untouched', async () => {
+  test('re-syncs metas at and above the boundary', async () => {
     const { groupId, usMetaId, jpMetaId, syncedAt } =
       await seedIncrementalFixture();
 
@@ -259,12 +259,12 @@ describe('syncMapGroup incremental modifiedAt boundary', () => {
       .where(eq(mapGroups.id, groupId));
     expect(group!.syncedAt).toBe(timestamp);
 
-    // modifiedAt == syncedAt: the change must not reach the synced payload.
+    // modifiedAt == syncedAt: same-second changes must reach the synced payload.
     const [usRow] = await db
       .select({ name: syncedMetas.name })
       .from(syncedMetas)
       .where(eq(syncedMetas.metaId, usMetaId));
-    expect(usRow!.name).toBe('United States');
+    expect(usRow!.name).toBe('United States v2');
 
     // modifiedAt > syncedAt: the change must propagate.
     const [jpRow] = await db
@@ -274,7 +274,7 @@ describe('syncMapGroup incremental modifiedAt boundary', () => {
     expect(jpRow).toEqual({ name: 'Japan v2', geoJson: mapArea });
   });
 
-  test('syncs locations strictly above the boundary, skips rows equal to it', async () => {
+  test('syncs locations at and above the boundary', async () => {
     const { groupId, usMetaId, syncedAt } = await seedIncrementalFixture();
 
     await db.insert(mapGroupLocations).values([
@@ -310,8 +310,9 @@ describe('syncMapGroup incremental modifiedAt boundary', () => {
       .select()
       .from(syncedLocations)
       .orderBy(asc(syncedLocations.panoId));
-    // pano-equal (modifiedAt == syncedAt) must stay out of the synced set.
+    // pano-equal (modifiedAt == syncedAt) must reach the synced set.
     expect(syncedLocationRows.map((row) => row.panoId)).toEqual([
+      'pano-equal',
       'pano-jp-1',
       'pano-new',
       'pano-us-1',

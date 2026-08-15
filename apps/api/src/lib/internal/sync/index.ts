@@ -3,40 +3,42 @@ import { db } from '@api/lib/drizzle';
 import { and, eq, getTableColumns, sql } from 'drizzle-orm';
 import { getImageUrl } from './utils';
 
-const metasSelectStatement = db
-  .select({
-    ...getTableColumns(metas),
-    images: sql<string[]>`
-      COALESCE(
-        array_agg(${metaImages.image_url} ORDER BY ${metaImages.id})
-        FILTER (WHERE ${metaImages.image_url} IS NOT NULL),
-        '{}'
-      )
-    `,
-  })
-  .from(metas)
-  .leftJoin(metaImages, eq(metaImages.metaId, metas.id))
-  .where(
-    and(
-      eq(metas.mapGroupId, sql.placeholder('mapGroupId')),
-      sql`(${sql.placeholder('groupSyncedAt')}::bigint IS NULL OR
-      ${metas.modifiedAt} > ${sql.placeholder('groupSyncedAt')}::bigint)`,
-    ),
-  )
-  .groupBy(...Object.values(getTableColumns(metas)))
-  .prepare('metas_to_sync');
-
 export async function syncMapGroup(group: {
   id: number;
   syncedAt: number | null;
 }) {
-  const currentTimestamp = Math.floor(Date.now() / 1000);
-  await db.$primary.transaction(async (tx) => {
+  return db.$primary.transaction(async (tx) => {
+    const [storedGroup] = await tx
+      .select({ syncedAt: mapGroups.syncedAt })
+      .from(mapGroups)
+      .where(eq(mapGroups.id, group.id))
+      .for('update');
+    if (!storedGroup) throw new Error(`Map group ${group.id} not found`);
+
+    const groupSyncedAt = storedGroup.syncedAt;
+    const currentTimestamp = Math.floor(Date.now() / 1000);
     // metas
-    const metasToSync = await metasSelectStatement.execute({
-      mapGroupId: group.id,
-      groupSyncedAt: group.syncedAt,
-    });
+    const metasToSync = await tx
+      .select({
+        ...getTableColumns(metas),
+        images: sql<string[]>`
+          COALESCE(
+            array_agg(${metaImages.image_url} ORDER BY ${metaImages.id})
+            FILTER (WHERE ${metaImages.image_url} IS NOT NULL),
+            '{}'
+          )
+        `,
+      })
+      .from(metas)
+      .leftJoin(metaImages, eq(metaImages.metaId, metas.id))
+      .where(
+        and(
+          eq(metas.mapGroupId, group.id),
+          sql`(${groupSyncedAt}::bigint IS NULL OR
+            ${metas.modifiedAt} >= ${groupSyncedAt}::bigint)`,
+        ),
+      )
+      .groupBy(...Object.values(getTableColumns(metas)));
     const metaValuesSql = sql.join(
       metasToSync.map((meta) => {
         return sql`(
@@ -114,8 +116,8 @@ export async function syncMapGroup(group: {
          from map_group_locations mgl
          join metas m on m.map_group_id = mgl.map_group_id and m.tag_name = mgl.extra_tag
          join map_groups mg on mg.id = mgl.map_group_id
-         where mgl.map_group_id = ${group.id} and (${group.syncedAt}::bigint IS NULL OR
-            mgl.modified_at > ${group.syncedAt}::bigint) and
+         where mgl.map_group_id = ${group.id} and (${groupSyncedAt}::bigint IS NULL OR
+            mgl.modified_at >= ${groupSyncedAt}::bigint) and
             (mg.sync_include_locations_not_on_street_view or mgl.is_on_street_view is not false)
       )
       MERGE INTO synced_locations sl
@@ -215,6 +217,6 @@ export async function syncMapGroup(group: {
       .update(mapGroups)
       .set({ syncedAt: currentTimestamp })
       .where(eq(mapGroups.id, group.id));
+    return currentTimestamp;
   });
-  return currentTimestamp;
 }
