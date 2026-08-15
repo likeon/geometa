@@ -1,17 +1,13 @@
 import type { RequestEvent } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
+
+import { createLoginBypassSession, isLoginBypassEnabled } from '$lib/login-bypass';
 
 export async function GET(event: RequestEvent) {
   const userId = event.url.searchParams.get('uid');
-  if (!userId || env.ALLOW_LOGIN_BYPASS !== 'true') {
+  if (!userId || !isLoginBypassEnabled()) {
     return new Response(null, { status: 400 });
   }
-  const session = await event.locals.lucia.createSession(userId, {});
-  const sessionCookie = event.locals.lucia.createSessionCookie(session.id);
-  event.cookies.set(sessionCookie.name, sessionCookie.value, {
-    path: '.',
-    ...sessionCookie.attributes
-  });
+  await createLoginBypassSession(event, userId);
 
   return new Response(null, {
     status: 302,
