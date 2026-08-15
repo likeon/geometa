@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.93
+// @version      0.94
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
 // @downloadURL  https://github.com/likeon/geometa/raw/main/userscript/dist/geometa.user.js
@@ -22,6 +22,10 @@
 
 /*
 # Changelog
+
+## [0.94]
+
+- Added GeoJSON overlays to GeoGuessr round results
 
 ## [0.93]
 
@@ -4908,6 +4912,209 @@ context.l
       }
     };
   }
+  const pageWindow = _unsafeWindow;
+  const maps = [];
+  const fittedBounds = new WeakMap();
+  const wrappedFitBounds = new WeakSet();
+  const wrappedMapConstructors = new WeakSet();
+  let pendingGeoJson = null;
+  let layer = null;
+  let layerMap = null;
+  let layerBounds = null;
+  let renderObserver = null;
+  let fittingArea = false;
+  function detachLayer() {
+    layer?.setMap(null);
+    layer = null;
+    layerMap = null;
+    layerBounds = null;
+  }
+  function stopWatchingForResultMap() {
+    renderObserver?.disconnect();
+    renderObserver = null;
+  }
+  function isVisibleMap(map) {
+    try {
+      const element = map.getDiv();
+      return element.isConnected && element.getClientRects().length > 0;
+    } catch {
+      return false;
+    }
+  }
+  function mapFromReact(element) {
+    if (!element) return null;
+    const key = Object.keys(element).find((name) => name.startsWith("__reactFiber"));
+    const fiber = key ? element[key] : null;
+    const map = fiber?.return?.memoizedState?.memoizedState?.current?.instance ?? fiber?.return?.updateQueue?.lastEffect?.deps?.[0];
+    return map && typeof map.fitBounds === "function" && typeof map.getBounds === "function" && typeof map.getDiv === "function" ? map : null;
+  }
+  function currentResultMap() {
+    const visibleMaps = maps.filter(isVisibleMap);
+    const resultView = pageWindow.document.querySelector('div[data-qa="result-view-top"]');
+    if (resultView) {
+      const reactMap = mapFromReact(resultView.querySelector('[class*="coordinate-result-map_map"]'));
+      if (reactMap && isVisibleMap(reactMap)) {
+        wrapFitBounds(reactMap);
+        if (!maps.includes(reactMap)) maps.push(reactMap);
+        return reactMap;
+      }
+      return visibleMaps.findLast((map) => resultView.contains(map.getDiv())) ?? null;
+    }
+    return visibleMaps.at(-1) ?? null;
+  }
+  function watchForResultMap() {
+    if (renderObserver) return;
+    renderObserver = new MutationObserver(renderPendingArea);
+    renderObserver.observe(document, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["class", "style"]
+    });
+  }
+  function wrapFitBounds(map) {
+    const originalFitBounds = map.fitBounds;
+    if (wrappedFitBounds.has(originalFitBounds)) return;
+    const fitBounds = function(...args) {
+      const result = originalFitBounds.apply(this, args);
+      if (!fittingArea) {
+        fittedBounds.set(this, args[0]);
+        if (pendingGeoJson && layerMap === this) detachLayer();
+      }
+      trackMap(this);
+      return result;
+    };
+    wrappedFitBounds.add(fitBounds);
+    map.fitBounds = fitBounds;
+  }
+  function trackMap(map) {
+    if (!maps.includes(map)) maps.push(map);
+    if (!pendingGeoJson) return;
+    watchForResultMap();
+    queueMicrotask(renderPendingArea);
+    requestAnimationFrame(renderPendingArea);
+  }
+  function renderPendingArea() {
+    if (!pendingGeoJson) return;
+    const map = currentResultMap();
+    const mapsApi = pageWindow.google?.maps;
+    if (!map || !mapsApi?.Data || !mapsApi.LatLngBounds || !mapsApi.SymbolPath) return;
+    if (layerMap === map) return;
+    detachLayer();
+    const currentBounds = fittedBounds.get(map) ?? map.getBounds();
+    if (!currentBounds) return;
+    const nextLayer = new mapsApi.Data({ map });
+    try {
+      nextLayer.setStyle({
+        clickable: false,
+        fillColor: "#057a55",
+        fillOpacity: 0.16,
+        strokeColor: "#057a55",
+        strokeOpacity: 0.9,
+        strokeWeight: 2,
+        icon: {
+          path: mapsApi.SymbolPath.CIRCLE,
+          scale: 5,
+          fillColor: "#057a55",
+          fillOpacity: 1,
+          strokeColor: "#ffffff",
+          strokeWeight: 2
+        }
+      });
+      const features = nextLayer.addGeoJson(pendingGeoJson);
+      const bounds = new mapsApi.LatLngBounds(currentBounds);
+      features.forEach(
+        (feature) => feature.getGeometry()?.forEachLatLng((point) => bounds.extend(point))
+      );
+      fittingArea = true;
+      try {
+        map.fitBounds(bounds, 48);
+      } finally {
+        fittingArea = false;
+      }
+      layer = nextLayer;
+      layerMap = map;
+      layerBounds = currentBounds;
+      stopWatchingForResultMap();
+    } catch (error) {
+      nextLayer.setMap(null);
+      stopWatchingForResultMap();
+      console.error("ALM: failed to render map area", error);
+    }
+  }
+  function wrapGoogleMaps() {
+    const mapsApi = pageWindow.google?.maps;
+    const OriginalMap = mapsApi?.Map;
+    if (!mapsApi || !OriginalMap) return false;
+    wrapFitBounds(OriginalMap.prototype);
+    if (wrappedMapConstructors.has(OriginalMap)) return true;
+    const WrappedMap = class extends OriginalMap {
+      constructor(...args) {
+        super(...args);
+        trackMap(this);
+      }
+    };
+    wrappedMapConstructors.add(WrappedMap);
+    mapsApi.Map = WrappedMap;
+    return true;
+  }
+  function interceptGoogleCallback(script) {
+    const path = new URL(script.src).searchParams.get("callback")?.split(".");
+    if (!path?.length) return;
+    let owner = pageWindow;
+    for (const part of path.slice(0, -1)) {
+      owner = owner?.[part];
+      if (!owner) return;
+    }
+    const name = path.at(-1);
+    const original = owner[name];
+    if (typeof original !== "function") return;
+    owner[name] = function(...args) {
+      wrapGoogleMaps();
+      return original.apply(this, args);
+    };
+  }
+  function interceptGoogleScript(script) {
+    if (!script.src.includes("maps.googleapis.com") || script.dataset.geometaObserved) return;
+    script.dataset.geometaObserved = "true";
+    interceptGoogleCallback(script);
+    script.addEventListener("load", wrapGoogleMaps, { once: true });
+  }
+  function initMapArea() {
+    if (wrapGoogleMaps()) return;
+    document.querySelectorAll("script[src]").forEach(interceptGoogleScript);
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        for (const node of mutation.addedNodes) {
+          if (node instanceof HTMLScriptElement) interceptGoogleScript(node);
+        }
+      }
+      if (wrapGoogleMaps()) observer.disconnect();
+    });
+    observer.observe(document, { childList: true, subtree: true });
+  }
+  function showMapArea(geoJson) {
+    clearMapArea();
+    if (!geoJson || typeof geoJson !== "object" || Array.isArray(geoJson)) return;
+    pendingGeoJson = geoJson;
+    watchForResultMap();
+    renderPendingArea();
+  }
+  function clearMapArea() {
+    pendingGeoJson = null;
+    stopWatchingForResultMap();
+    const map = layerMap;
+    const bounds = layerBounds;
+    detachLayer();
+    if (map && bounds) {
+      fittingArea = true;
+      try {
+        map.fitBounds(bounds);
+      } finally {
+        fittingArea = false;
+      }
+    }
+  }
   var root_2$2 = from_html(`<div class="announcement svelte-1j2rmt2"><div class="svelte-1j2rmt2"><!></div> <button class="vote-close-btn svelte-1j2rmt2" aria-label="Dismiss announcement">Dismiss</button></div>`);
   var root_3$1 = from_html(`<p class="svelte-1j2rmt2"> </p>`);
   var root_6$2 = from_html(`<p class="geometa-footer svelte-1j2rmt2"><!></p>`);
@@ -5029,6 +5236,11 @@ context.l
           link2.addEventListener("click", confirmNavigation);
         });
       }
+    });
+    user_effect(() => {
+      if (get(geoInfo)?.geoJson) showMapArea(get(geoInfo).geoJson);
+      else clearMapArea();
+      return clearMapArea;
     });
     let lastDismissedTimestamp = state(proxy(getLastDismissedAnnouncementTimestamp()));
     var div = root$5();
@@ -5274,6 +5486,7 @@ context.l
         clearMetaCache();
         await getMapInfo(event2.detail.map.id, true);
       });
+      GeoGuessrEventFramework.events.addEventListener("round_start", unmountSummaryWindow);
       GeoGuessrEventFramework.events.addEventListener("round_end", async (event2) => {
         unmountSummaryWindow();
         const mapInfo = await getMapInfo(event2.detail.map.id, false);
@@ -5377,8 +5590,13 @@ context.l
   function initLiveChallenge() {
     logInfo("live challenge support enabled");
     let pinChanged = false;
+    let generation = 0;
     const observer = new MutationObserver(async () => {
       if (!document.querySelector("[class*=result-map_roundPin]")) {
+        if (pinChanged) {
+          generation += 1;
+          unmountSummaryWindow();
+        }
         pinChanged = false;
         return;
       }
@@ -5386,6 +5604,7 @@ context.l
         return;
       }
       pinChanged = true;
+      const requestGeneration = ++generation;
       const challengeId = getChallengeId();
       if (!challengeId) {
         pinChanged = false;
@@ -5393,10 +5612,12 @@ context.l
       }
       try {
         const { mapId, panoId } = await getChallengeInfo(challengeId);
+        if (requestGeneration !== generation) return;
         const mapInfo = await getMapInfo(mapId, false);
+        if (requestGeneration !== generation) return;
         if (!mapInfo.mapFound) return;
         const container = await waitForElement("[class*=game_container]");
-        if (!container) {
+        if (!container || requestGeneration !== generation || !document.querySelector("[class*=result-map_roundPin]")) {
           return;
         }
         mountSummaryWindow(container, {
@@ -5414,6 +5635,7 @@ roundNumber: 4,
       if (getChallengeId()) {
         return;
       }
+      generation += 1;
       pinChanged = false;
       unmountSummaryWindow();
     });
@@ -6761,6 +6983,7 @@ roundNumber: 4,
   const modalsCss = '.learnablemeta-modal-backdrop{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:24px;background:#000000c2;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}.learnablemeta-modal,.learnablemeta-modal *{box-sizing:border-box}.learnablemeta-modal{position:relative;width:min(460px,100%);max-height:calc(100vh - 48px);overflow-y:auto;border:1px solid var(--lm-border);border-radius:calc(var(--lm-radius) + 4px);background:var(--lm-background);color:var(--lm-foreground);box-shadow:0 24px 70px #00000080;text-align:left}.learnablemeta-modal--wide{width:min(600px,100%)}.learnablemeta-modal--map-update{width:min(780px,100%);max-height:min(760px,calc(100vh - 48px));display:flex;flex-direction:column;overflow:hidden}.learnablemeta-modal:before{position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,#057a55,#0b87c1);content:""}.learnablemeta-modal-header{display:grid;gap:6px;padding:26px 24px 0}.learnablemeta-modal-header--row{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:26px 24px 20px;border-bottom:1px solid var(--lm-border);background:var(--lm-card)}.learnablemeta-modal-eyebrow{margin:0;color:var(--lm-primary);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}.learnablemeta-modal-title{margin:0;color:var(--lm-foreground);font-size:20px;font-weight:650;line-height:1.3;letter-spacing:-.025em}.learnablemeta-modal-title--large{margin-top:4px;color:var(--lm-card-foreground);font-size:22px;line-height:1.25}.learnablemeta-modal-description{margin:0;color:var(--lm-muted-foreground);font-size:14px;line-height:1.5}.learnablemeta-modal-body{display:grid;gap:14px;padding:20px 24px 0;color:var(--lm-foreground);font-size:14px;line-height:1.5}.learnablemeta-modal-body p{margin:0}.learnablemeta-modal-body a{color:var(--lm-link);text-decoration:underline;text-underline-offset:3px}.learnablemeta-modal-input{width:100%;height:38px;border:1px solid var(--lm-input);border-radius:var(--lm-radius);padding:7px 12px;outline:none;background:var(--lm-background);color:var(--lm-foreground);font:inherit;font-size:14px;box-shadow:0 1px 2px #0000000a;transition:border-color .15s ease,box-shadow .15s ease}.learnablemeta-modal-input::placeholder{color:var(--lm-muted-foreground)}.learnablemeta-modal-input:focus-visible{border-color:var(--lm-ring);box-shadow:0 0 0 3px color-mix(in srgb,var(--lm-ring) 25%,transparent)}.learnablemeta-modal-code{overflow-wrap:anywhere;border:1px solid var(--lm-border);border-radius:var(--lm-radius);padding:10px 12px;background:var(--lm-muted);color:var(--lm-link);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;line-height:1.45;-webkit-user-select:text;user-select:text}.learnablemeta-modal-note{color:var(--lm-muted-foreground);font-size:12px;line-height:1.45}.learnablemeta-modal-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:20px;padding:16px 24px;border-top:1px solid var(--lm-border);background:var(--lm-card)}.learnablemeta-modal-action-leading{margin-right:auto}.learnablemeta-modal-alert{border:1px solid rgba(220,38,38,.3);border-radius:var(--lm-radius);padding:12px 14px;background:#dc262617;color:var(--lm-destructive);font-size:13px}.learnablemeta-modal .learnablemeta-modal-body .learnablemeta-help-list{display:grid;gap:10px;margin:0;padding-left:20px;list-style:disc}.learnablemeta-modal .learnablemeta-help-list strong{color:var(--lm-foreground);font-weight:600}@media(max-width:620px){.learnablemeta-modal-backdrop{padding:8px}.learnablemeta-modal{max-height:calc(100vh - 16px)}.learnablemeta-modal-actions{flex-wrap:wrap}.learnablemeta-modal-action-leading{width:100%;margin-right:0}.learnablemeta-modal-actions .learnablemeta-button--primary,.learnablemeta-modal-actions .learnablemeta-button--outline,.learnablemeta-modal-actions .learnablemeta-button--destructive{flex:1}}';
   importCSS(modalsCss);
   let resetDialogApp = null;
+  initMapArea();
   function openResetLayoutDialog() {
     if (resetDialogApp) return;
     const target = document.createElement("div");
