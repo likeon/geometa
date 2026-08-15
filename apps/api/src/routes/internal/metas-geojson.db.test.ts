@@ -1,13 +1,15 @@
-import { describe, expect, test } from 'bun:test';
+import { describe, expect, setSystemTime, test } from 'bun:test';
 import { app } from '@api/api';
 import {
   mapGroupChanges,
   mapGroupPermissions,
   mapGroups,
   metas,
+  syncedMetas,
   users,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
+import { syncMapGroup } from '@api/lib/internal/sync';
 import { MAX_GEOJSON_BYTES, normalizeGeoJson } from '@api/lib/utils/geojson';
 import { and, eq } from 'drizzle-orm';
 
@@ -146,6 +148,27 @@ describe('meta GeoJSON routes', () => {
         newValue: { featureCount: 2, polygonCount: 1 },
       },
     ]);
+  });
+
+  test('syncs a map area uploaded in the same second as the prior sync', async () => {
+    setSystemTime(new Date('2026-01-01T00:00:00Z'));
+    try {
+      const { groupId, metaId } = await seedMeta();
+      const syncedAt = await syncMapGroup({ id: groupId, syncedAt: null });
+
+      const response = await uploadRequest(metaId, JSON.stringify(polygon));
+      expect(response.status).toBe(200);
+      expect((await savedMeta(metaId)).modifiedAt).toBe(syncedAt);
+
+      await syncMapGroup({ id: groupId, syncedAt });
+      const [synced] = await db
+        .select({ geoJson: syncedMetas.geoJson })
+        .from(syncedMetas)
+        .where(eq(syncedMetas.metaId, metaId));
+      expect(synced!.geoJson).toEqual(normalizeGeoJson(polygon));
+    } finally {
+      setSystemTime();
+    }
   });
 
   test('rejects unsupported and oversized files without changing the meta', async () => {
