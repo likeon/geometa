@@ -50,7 +50,9 @@ persist_ports() {
   mise set --file "${PROJECT_ROOT}/mise.local.toml" \
     "PROCESS_COMPOSE_PORT_POSTGRES=${PROCESS_COMPOSE_PORT_POSTGRES}" \
     "PROCESS_COMPOSE_PORT_API=${PROCESS_COMPOSE_PORT_API}" \
-    "PROCESS_COMPOSE_PORT_FRONTEND=${PROCESS_COMPOSE_PORT_FRONTEND}"
+    "PROCESS_COMPOSE_PORT_FRONTEND=${PROCESS_COMPOSE_PORT_FRONTEND}" \
+    'DATABASE_URL=postgresql://postgres:postgres@localhost:${PROCESS_COMPOSE_PORT_POSTGRES}/geometa' \
+    'DATABASE_URL_POSTGRES_DB=postgresql://postgres:postgres@localhost:${PROCESS_COMPOSE_PORT_POSTGRES}/postgres'
 }
 
 select_container_engine
