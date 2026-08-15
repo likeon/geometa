@@ -25,7 +25,6 @@
   } from '$routes/(admin)/map-making/groups/[id]/+page.server';
   import { Button } from '$lib/components/ui/button/index';
   import Icon from '@iconify/svelte';
-  import Tooltip from '$lib/components/Tooltip.svelte';
 
   let {
     isMetaDialogOpen = $bindable(),
@@ -207,29 +206,23 @@
           <Tabs.Trigger value="images" onclick={() => handleTabChange('images')}
             >Images</Tabs.Trigger>
         {:else}
-          <Tooltip
-            content="Save the meta before adding images"
-            side="right"
-            delayDuration={100}
-            disableCloseOnTriggerClick={true}>
-            <Tabs.Trigger value="images" disabled class="!pointer-events-auto cursor-not-allowed">
-              Images
-            </Tabs.Trigger>
-          </Tooltip>
+          <Tabs.Trigger
+            value="images"
+            disabled
+            title="Save the meta before adding images"
+            aria-label="Images — save the meta before adding images"
+            class="!pointer-events-auto cursor-not-allowed">Images</Tabs.Trigger>
         {/if}
         {#if selectedMeta?.id}
           <Tabs.Trigger value="map-area" onclick={() => handleTabChange('map-area')}
             >Map area</Tabs.Trigger>
         {:else}
-          <Tooltip
-            content="Save the meta before adding a map area"
-            side="right"
-            delayDuration={100}
-            disableCloseOnTriggerClick={true}>
-            <Tabs.Trigger value="map-area" disabled class="!pointer-events-auto cursor-not-allowed">
-              Map area
-            </Tabs.Trigger>
-          </Tooltip>
+          <Tabs.Trigger
+            value="map-area"
+            disabled
+            title="Save the meta before adding a map area"
+            aria-label="Map area — save the meta before adding a map area"
+            class="!pointer-events-auto cursor-not-allowed">Map area</Tabs.Trigger>
         {/if}
       </Tabs.List>
       <Tabs.Content value="info" class="h-[68vh] max-h-[650px] overflow-y-auto flex-none p-1">
