@@ -69,6 +69,8 @@ spec:
                 curl \
                   --fail \
                   --location \
+                  --connect-timeout 15 \
+                  --max-time 600 \
                   --proto '=https' \
                   --proto-redir '=https' \
                   --retry 3 \

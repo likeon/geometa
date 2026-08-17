@@ -5,7 +5,7 @@ use rand::prelude::IndexedRandom;
 
 use crate::Error;
 use crate::alm::api::client::{ChallengeRequest, Client, Map as AlmMap};
-use crate::config::{BotConfig, CONFIG, LearnableMeta, MAX_BUTTON_LABEL};
+use crate::config::{BotConfig, CONFIG, LearnableMeta, MAX_BUTTON_LABEL, load_api_client_config};
 
 #[derive(Clone, Debug, PartialEq)]
 struct Candidate {
@@ -21,8 +21,10 @@ struct ChallengeLink {
 }
 
 pub async fn run() -> Result<(), Error> {
+    let api_client_config = load_api_client_config()?;
     let config = &*CONFIG;
     config.validate_challenge()?;
+    Client::initialize(api_client_config)?;
     let selected = select_maps(config).await?;
     let mut rng = rand::rng();
     let mut links = Vec::with_capacity(selected.len());

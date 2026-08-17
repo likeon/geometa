@@ -31,6 +31,9 @@ pub(crate) const CREDIT_DEDUP_TTL: Duration = Duration::from_secs(3600);
 pub(crate) const CREDIT_DEDUP_MAX: usize = 10_000;
 pub(crate) const FINGERPRINT_DEDUP_TTL: Duration = Duration::from_secs(600);
 pub(crate) const FINGERPRINT_DEDUP_MAX: usize = 10_000;
+/// Same-author work is serialized, so a small backlog preserves normal bursts
+/// without allowing one sender to create an unbounded waiter chain.
+pub(crate) const MAX_PENDING_EVENTS_PER_AUTHOR: usize = 32;
 
 /// Discord allows at most 10 attachments per message; the per-case evidence
 /// byte cap derives from this.
@@ -227,8 +230,9 @@ pub struct SpamService {
 
 impl SpamService {
     pub fn new(pipeline: Arc<Pipeline>, queue_capacity: usize) -> Self {
-        let (tx, rx) = mpsc::channel(queue_capacity.max(1));
-        tokio::spawn(dispatch_loop(rx, pipeline.clone()));
+        let queue_capacity = queue_capacity.max(1);
+        let (tx, rx) = mpsc::channel(queue_capacity);
+        tokio::spawn(dispatch_loop(rx, pipeline.clone(), queue_capacity));
         Self { tx, pipeline }
     }
 
@@ -289,12 +293,20 @@ impl Pipeline {
 /// in FIFO receive order; each worker awaits `previous` and fires `next`.
 pub(crate) struct AuthorTails {
     inner: Mutex<HashMap<u64, Arc<Notify>>>,
+    pending: Mutex<HashMap<u64, usize>>,
+    max_pending: usize,
 }
 
 impl AuthorTails {
     pub(crate) fn new() -> Self {
+        Self::with_limit(MAX_PENDING_EVENTS_PER_AUTHOR)
+    }
+
+    fn with_limit(max_pending: usize) -> Self {
         Self {
             inner: Mutex::new(HashMap::new()),
+            pending: Mutex::new(HashMap::new()),
+            max_pending: max_pending.max(1),
         }
     }
 
@@ -306,6 +318,47 @@ impl AuthorTails {
         let next = Arc::new(Notify::new());
         inner.insert(key, next.clone());
         (previous, next)
+    }
+
+    fn admit(self: &Arc<Self>, key: u64) -> Option<(TurnGuard, AuthorPendingGuard)> {
+        let mut pending = self.pending.lock().expect("author pending lock");
+        let count = pending.entry(key).or_default();
+        if *count >= self.max_pending {
+            return None;
+        }
+        *count += 1;
+        drop(pending);
+
+        let (previous, next) = self.reserve(key);
+        Some((
+            TurnGuard::new(previous, next),
+            AuthorPendingGuard {
+                tails: self.clone(),
+                key,
+            },
+        ))
+    }
+
+    fn release_pending(&self, key: u64) {
+        let mut pending = self.pending.lock().expect("author pending lock");
+        let Some(count) = pending.get_mut(&key) else {
+            return;
+        };
+        *count -= 1;
+        if *count == 0 {
+            pending.remove(&key);
+        }
+    }
+}
+
+struct AuthorPendingGuard {
+    tails: Arc<AuthorTails>,
+    key: u64,
+}
+
+impl Drop for AuthorPendingGuard {
+    fn drop(&mut self) {
+        self.tails.release_pending(self.key);
     }
 }
 
@@ -343,6 +396,19 @@ impl FingerprintDedup {
         }
         entries.insert(message_id, (fingerprint.to_string(), now));
         true
+    }
+
+    fn release(&self, message_id: u64, fingerprint: &str) -> bool {
+        let mut entries = self.entries.lock().expect("fingerprint dedup lock");
+        if entries
+            .get(&message_id)
+            .is_some_and(|(claimed, _)| claimed == fingerprint)
+        {
+            entries.remove(&message_id);
+            true
+        } else {
+            false
+        }
     }
 }
 
@@ -441,32 +507,43 @@ impl Drop for TurnGuard {
     }
 }
 
-async fn dispatch_loop(mut rx: mpsc::Receiver<QueuedEvent>, pipeline: Arc<Pipeline>) {
+async fn dispatch_loop(
+    mut rx: mpsc::Receiver<QueuedEvent>,
+    pipeline: Arc<Pipeline>,
+    queue_capacity: usize,
+) {
     let in_flight = Arc::new(Semaphore::new(pipeline.in_flight_limit()));
+    let pending = Arc::new(Semaphore::new(
+        queue_capacity.saturating_add(MAX_PENDING_EVENTS_PER_AUTHOR),
+    ));
     let tails = Arc::new(AuthorTails::new());
 
     while let Some(event) = rx.recv().await {
-        // While saturated, hold a permit so the queue backpressures and
-        // new enqueues fail open with an error log.
-        let permit = match in_flight.clone().acquire_owned().await {
-            Ok(permit) => permit,
-            Err(_) => return,
-        };
-        let tails = tails.clone();
-        let pipeline = pipeline.clone();
-
         match event {
             QueuedEvent::Create(snapshot) => {
                 let author = snapshot.author_id.get();
-                let (previous, next) = tails.reserve(author);
+                let Some((mut turn, author_pending)) = tails.admit(author) else {
+                    pipeline.report_error(
+                        "author-pending-full",
+                        format!("user={author} exceeded pending spam-event limit"),
+                    );
+                    continue;
+                };
+                let Ok(pending_permit) = pending.clone().acquire_owned().await else {
+                    return;
+                };
+                let in_flight = in_flight.clone();
+                let pipeline = pipeline.clone();
                 tokio::spawn(async move {
-                    let mut turn = TurnGuard::new(previous, next);
+                    let _pending_permit = pending_permit;
+                    let _author_pending = author_pending;
                     turn.await_turn().await;
-                    let result =
-                        process_message(WorkKind::Create, &snapshot, pipeline.as_ref()).await;
-                    drop(permit);
-                    drop(turn);
-                    if let Err(error) = result {
+                    let Ok(_in_flight_permit) = in_flight.acquire_owned().await else {
+                        return;
+                    };
+                    if let Err(error) =
+                        process_message(WorkKind::Create, &snapshot, pipeline.as_ref()).await
+                    {
                         tracing::error!("spam pipeline event failed: {error}");
                     }
                 });
@@ -475,18 +552,35 @@ async fn dispatch_loop(mut rx: mpsc::Receiver<QueuedEvent>, pipeline: Arc<Pipeli
                 // Trusted hint orders the event by author now; a fresh
                 // snapshot that disagrees with it fails open.
                 Some(hint) => {
-                    let (previous, next) = tails.reserve(hint);
+                    let Some((mut turn, author_pending)) = tails.admit(hint) else {
+                        pipeline.report_error(
+                            "author-pending-full",
+                            format!("user={hint} exceeded pending spam-event limit"),
+                        );
+                        continue;
+                    };
+                    let Ok(pending_permit) = pending.clone().acquire_owned().await else {
+                        return;
+                    };
+                    let in_flight = in_flight.clone();
+                    let pipeline = pipeline.clone();
                     tokio::spawn(async move {
-                        let mut turn = TurnGuard::new(previous, next);
+                        let _pending_permit = pending_permit;
+                        let _author_pending = author_pending;
                         turn.await_turn().await;
+                        let Ok(_in_flight_permit) = in_flight.acquire_owned().await else {
+                            return;
+                        };
                         run_edit_chained(pipeline.as_ref(), edit, hint).await;
-                        drop(permit);
-                        drop(turn);
                     });
                 }
                 None => {
-                    // Resolve before assigning the ordering ticket
-                    // (dispatcher's only network path).
+                    // Resolve before assigning the ordering ticket. This is
+                    // the dispatcher's only network path, so bound the fetch
+                    // without holding an author turn.
+                    let Ok(fetch_permit) = in_flight.clone().acquire_owned().await else {
+                        return;
+                    };
                     let snapshot = match fetch_edit_snapshot(
                         &pipeline,
                         edit.channel_id,
@@ -495,33 +589,44 @@ async fn dispatch_loop(mut rx: mpsc::Receiver<QueuedEvent>, pipeline: Arc<Pipeli
                     .await
                     {
                         EditFetchOutcome::Snapshot(snapshot) => snapshot,
-                        EditFetchOutcome::Deleted => {
-                            drop(permit);
-                            continue;
-                        }
+                        EditFetchOutcome::Deleted => continue,
                         EditFetchOutcome::Unavailable(detail) => {
                             pipeline.report_error(
-                                    "discord-fetch",
-                                    format!(
-                                        "edit fetch failed (no author hint) channel={} message={}: {detail}",
-                                        edit.channel_id.get(),
-                                        edit.message_id.get()
-                                    ),
-                                );
-                            drop(permit);
+                                "discord-fetch",
+                                format!(
+                                    "edit fetch failed (no author hint) channel={} message={}: {detail}",
+                                    edit.channel_id.get(),
+                                    edit.message_id.get()
+                                ),
+                            );
                             continue;
                         }
                     };
+                    drop(fetch_permit);
+
                     let author = snapshot.author_id.get();
-                    let (previous, next) = tails.reserve(author);
+                    let Some((mut turn, author_pending)) = tails.admit(author) else {
+                        pipeline.report_error(
+                            "author-pending-full",
+                            format!("user={author} exceeded pending spam-event limit"),
+                        );
+                        continue;
+                    };
+                    let Ok(pending_permit) = pending.clone().acquire_owned().await else {
+                        return;
+                    };
+                    let in_flight = in_flight.clone();
+                    let pipeline = pipeline.clone();
                     tokio::spawn(async move {
-                        let mut turn = TurnGuard::new(previous, next);
+                        let _pending_permit = pending_permit;
+                        let _author_pending = author_pending;
                         turn.await_turn().await;
-                        let result =
-                            process_message(WorkKind::Edit, &snapshot, pipeline.as_ref()).await;
-                        drop(permit);
-                        drop(turn);
-                        if let Err(error) = result {
+                        let Ok(_in_flight_permit) = in_flight.acquire_owned().await else {
+                            return;
+                        };
+                        if let Err(error) =
+                            process_message(WorkKind::Edit, &snapshot, pipeline.as_ref()).await
+                        {
                             tracing::error!("spam pipeline event failed: {error}");
                         }
                     });
@@ -659,7 +764,20 @@ async fn process_message(
     snapshot: &MessageSnapshot,
     pipeline: &Pipeline,
 ) -> Result<(), Error> {
-    // Unresolved parent (possibly a moderation thread) fails open.
+    // Unsupported/oversized candidates stay: their validation failure is
+    // indeterminate (fail open), never a silent skip.
+    let images = snapshot.image_attachments();
+    if !snapshot_is_eligible_without_parent(
+        snapshot,
+        pipeline.guild_id,
+        pipeline.moderation_channel_id,
+        !images.is_empty(),
+    ) {
+        return Ok(());
+    }
+
+    // Only locally eligible messages need a channel-parent lookup. An
+    // unresolved parent (possibly a moderation thread) fails open.
     let parent = match resolve_channel_parent(pipeline, snapshot.channel_id).await {
         ChannelParent::Resolved(parent) => parent,
         ChannelParent::Unresolved => {
@@ -673,30 +791,16 @@ async fn process_message(
             return Ok(());
         }
     };
-
-    if !snapshot_is_eligible(
-        snapshot,
-        pipeline.guild_id,
-        pipeline.moderation_channel_id,
-        parent,
-    ) {
+    if parent == Some(pipeline.moderation_channel_id) {
         return Ok(());
     }
 
-    // Unsupported/oversized candidates stay: their validation failure is
-    // indeterminate (fail open), never a silent skip.
-    let images = snapshot.image_attachments();
-
-    if snapshot.content.trim().is_empty() && images.is_empty() {
-        return Ok(());
-    }
-
+    let fingerprint = snapshot.fingerprint();
     // Same fingerprint in TTL (replay or same-content edit): skip everything.
-    if !pipeline.fingerprint_dedup.claim(
-        snapshot.message_id.get(),
-        &snapshot.fingerprint(),
-        Instant::now(),
-    ) {
+    if !pipeline
+        .fingerprint_dedup
+        .claim(snapshot.message_id.get(), &fingerprint, Instant::now())
+    {
         tracing::info!(
             "spam stage=dedup kind={kind:?} guild={} channel={} message={} user={} result=duplicate-fingerprint",
             pipeline.guild_id.get(),
@@ -718,6 +822,9 @@ async fn process_message(
         }
         Ok(false) => {}
         Err(error) => {
+            pipeline
+                .fingerprint_dedup
+                .release(snapshot.message_id.get(), &fingerprint);
             pipeline.report_error(
                 "internal-api",
                 format!(
@@ -732,6 +839,13 @@ async fn process_message(
     let classification_started = Instant::now();
     let classified = classify_message(pipeline, &snapshot.content, &images).await;
     let classify_elapsed = classification_started.elapsed();
+    // Indeterminate work made no durable decision. Release before the stale
+    // check so a refetch outage cannot suppress retry for the full dedup TTL.
+    if classified.verdict == Verdict::Indeterminate {
+        pipeline
+            .fingerprint_dedup
+            .release(snapshot.message_id.get(), &fingerprint);
+    }
 
     // Discard results for messages that changed/deleted while classifiers
     // ran; a non-404 fetch outage is never a deletion.
@@ -1129,26 +1243,34 @@ async fn current_message_status(
     }
 }
 
+fn snapshot_is_eligible_without_parent(
+    snapshot: &MessageSnapshot,
+    guild_id: GuildId,
+    moderation_channel_id: ChannelId,
+    has_images: bool,
+) -> bool {
+    snapshot.guild_id == Some(guild_id)
+        && !snapshot.author_bot
+        && !snapshot.author_system
+        && snapshot.webhook_id.is_none()
+        && snapshot.kind == MessageKind::Regular
+        && snapshot.channel_id != moderation_channel_id
+        && (!snapshot.content.trim().is_empty() || has_images)
+}
+
+#[cfg(test)]
 pub fn snapshot_is_eligible(
     snapshot: &MessageSnapshot,
     guild_id: GuildId,
     moderation_channel_id: ChannelId,
     channel_parent: Option<ChannelId>,
 ) -> bool {
-    if snapshot.guild_id != Some(guild_id) {
-        return false;
-    }
-    if snapshot.author_bot || snapshot.author_system || snapshot.webhook_id.is_some() {
-        return false;
-    }
-    if snapshot.kind != MessageKind::Regular {
-        return false;
-    }
-    if snapshot.channel_id == moderation_channel_id || channel_parent == Some(moderation_channel_id)
-    {
-        return false;
-    }
-    !(snapshot.content.trim().is_empty() && snapshot.image_attachments().is_empty())
+    snapshot_is_eligible_without_parent(
+        snapshot,
+        guild_id,
+        moderation_channel_id,
+        !snapshot.image_attachments().is_empty(),
+    ) && channel_parent != Some(moderation_channel_id)
 }
 
 /// Naming is cosmetic and degrades to ids.
@@ -1254,6 +1376,74 @@ mod tests {
         assert_eq!(in_flight_limit(4, 2), 6);
         assert_eq!(in_flight_limit(1, 1), 2);
         assert_eq!(in_flight_limit(0, 0), 1);
+    }
+
+    #[test]
+    fn author_pending_limit_releases_capacity_on_drop() {
+        let tails = Arc::new(AuthorTails::with_limit(1));
+        let (turn, pending) = tails.admit(7).expect("first event admitted");
+        assert!(tails.admit(7).is_none(), "second event must be bounded");
+
+        drop(turn);
+        drop(pending);
+        assert!(
+            tails.admit(7).is_some(),
+            "dropping work must restore author capacity"
+        );
+    }
+
+    #[tokio::test]
+    async fn same_author_waiter_does_not_hold_global_permit() {
+        let tails = Arc::new(AuthorTails::with_limit(3));
+        let in_flight = Arc::new(tokio::sync::Semaphore::new(2));
+        let first_started = Arc::new(Notify::new());
+        let other_started = Arc::new(Notify::new());
+        let release_first = Arc::new(Notify::new());
+
+        let (mut first_turn, first_pending) = tails.admit(7).expect("first author event");
+        let first = tokio::spawn({
+            let in_flight = in_flight.clone();
+            let first_started = first_started.clone();
+            let release_first = release_first.clone();
+            async move {
+                let _pending = first_pending;
+                first_turn.await_turn().await;
+                let _permit = in_flight.acquire_owned().await.expect("permit");
+                first_started.notify_one();
+                release_first.notified().await;
+            }
+        });
+        first_started.notified().await;
+
+        let (mut waiting_turn, waiting_pending) = tails.admit(7).expect("waiting author event");
+        let waiting = tokio::spawn({
+            let in_flight = in_flight.clone();
+            async move {
+                let _pending = waiting_pending;
+                waiting_turn.await_turn().await;
+                let _permit = in_flight.acquire_owned().await.expect("permit");
+            }
+        });
+
+        let (mut other_turn, other_pending) = tails.admit(8).expect("other author event");
+        let other = tokio::spawn({
+            let in_flight = in_flight.clone();
+            let other_started = other_started.clone();
+            async move {
+                let _pending = other_pending;
+                other_turn.await_turn().await;
+                let _permit = in_flight.acquire_owned().await.expect("permit");
+                other_started.notify_one();
+            }
+        });
+
+        tokio::time::timeout(Duration::from_millis(200), other_started.notified())
+            .await
+            .expect("other author must run while same-author event waits");
+        other.await.expect("other author task");
+        release_first.notify_one();
+        first.await.expect("first author task");
+        waiting.await.expect("waiting author task");
     }
 
     #[tokio::test]
@@ -1602,6 +1792,17 @@ mod tests {
         // TTL expiry (60s window: entry touched at +2s has aged past 60s) allows
         // reprocessing of the same fingerprint.
         assert!(dedup.claim(1, "b", now + Duration::from_secs(63)));
+    }
+
+    #[test]
+    fn fingerprint_release_only_removes_matching_claim() {
+        let now = Instant::now();
+        let dedup = FingerprintDedup::new(Duration::from_secs(60), 4);
+        assert!(dedup.claim(1, "current", now));
+        assert!(!dedup.release(1, "stale"));
+        assert!(!dedup.claim(1, "current", now + Duration::from_secs(1)));
+        assert!(dedup.release(1, "current"));
+        assert!(dedup.claim(1, "current", now + Duration::from_secs(2)));
     }
 
     #[test]

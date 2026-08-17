@@ -1,12 +1,13 @@
-use std::{fmt::Debug, sync::LazyLock, time::Duration};
+use std::{fmt::Debug, sync::OnceLock, time::Duration};
 
 use poise::serenity_prelude::UserId;
 use reqwest::{Client as ReqwestClient, Method, RequestBuilder};
 use serde::{Deserialize, Serialize};
 use tracing::error;
 
+use crate::config::ApiClientConfig;
+
 const TOKEN_PATH: &str = "/var/run/secrets/kubernetes.io/serviceaccount/token";
-const ENV_API_DISABLE_K8S_AUTH: &str = "API_DISABLE_K8S_AUTH";
 type Error = Box<dyn std::error::Error + Send + Sync>;
 
 trait AuthExt {
@@ -27,26 +28,14 @@ struct Requester {
 }
 
 impl Requester {
-    fn new() -> Self {
-        let disable_k8s_auth = match std::env::var(ENV_API_DISABLE_K8S_AUTH) {
-            Ok(value) => value
-                .parse::<bool>()
-                .unwrap_or_else(|_| panic!("{ENV_API_DISABLE_K8S_AUTH} must be true or false")),
-            Err(std::env::VarError::NotPresent) => false,
-            Err(std::env::VarError::NotUnicode(_)) => {
-                panic!("{ENV_API_DISABLE_K8S_AUTH} must be valid UTF-8")
-            }
-        };
-        let (api_host, requires_jwt) =
-            api_host_and_auth(std::env::var("API_HOST").ok(), disable_k8s_auth);
-        Requester {
-            base_path: format!("http://{api_host}/api"),
-            requires_jwt,
+    fn new(config: ApiClientConfig) -> Result<Self, Error> {
+        Ok(Self {
+            base_path: format!("http://{}/api", config.host),
+            requires_jwt: config.requires_jwt,
             reqwest_client: ReqwestClient::builder()
                 .timeout(Duration::from_secs(20))
-                .build()
-                .expect("failed to create HTTP client"),
-        }
+                .build()?,
+        })
     }
 
     async fn request(&self, method: Method, path: &str) -> Result<RequestBuilder, Error> {
@@ -61,18 +50,24 @@ impl Requester {
     }
 }
 
-fn api_host_and_auth(configured_host: Option<String>, disable_k8s_auth: bool) -> (String, bool) {
-    match configured_host {
-        Some(host) => (host, !disable_k8s_auth),
-        None => ("localhost:3000".to_string(), false),
-    }
+static REQUESTER: OnceLock<Requester> = OnceLock::new();
+
+fn requester() -> Result<&'static Requester, Error> {
+    REQUESTER
+        .get()
+        .ok_or_else(|| std::io::Error::other("internal API client was not initialized").into())
 }
 
-static REQUESTER: LazyLock<Requester> = LazyLock::new(Requester::new);
 pub struct Client {}
 impl Client {
+    pub fn initialize(config: ApiClientConfig) -> Result<(), Error> {
+        let requester = Requester::new(config)?;
+        REQUESTER.set(requester).map_err(|_| {
+            std::io::Error::other("internal API client was initialized more than once").into()
+        })
+    }
     pub async fn maps(region: Option<&str>, is_shared: Option<bool>) -> Result<Vec<Map>, Error> {
-        let response = REQUESTER
+        let response = requester()?
             .request(Method::GET, "maps")
             .await?
             .query(&MapsQuery { region, is_shared })
@@ -84,7 +79,7 @@ impl Client {
     }
 
     pub async fn create_challenge(request: &ChallengeRequest<'_>) -> Result<String, Error> {
-        let response = REQUESTER
+        let response = requester()?
             .request(Method::POST, "internal/discord-bot/challenges")
             .await?
             .json(request)
@@ -113,7 +108,7 @@ impl Client {
         };
 
         let path = format!("internal/discord-bot/maps/{geoguessr_map_id}/publish");
-        let response = REQUESTER
+        let response = requester()?
             .request(Method::POST, &path)
             .await?
             .json(&payload)
@@ -156,7 +151,7 @@ impl Client {
     /// caller can treat it as indeterminate rather than verified.
     pub async fn is_discord_verified(user_id: u64) -> Result<bool, Error> {
         let path = format!("internal/discord-bot/users/{user_id}/is-discord-verified");
-        let response = REQUESTER
+        let response = requester()?
             .request(Method::GET, &path)
             .await?
             .send()
@@ -171,7 +166,7 @@ impl Client {
     /// are responsible for deduplicating per create event within this process.
     pub async fn record_verified_message(user_id: u64) -> Result<MessageVerification, Error> {
         let path = format!("internal/discord-bot/users/{user_id}/verified-message");
-        let response = REQUESTER
+        let response = requester()?
             .request(Method::POST, &path)
             .await?
             .send()
@@ -256,31 +251,7 @@ impl From<Box<dyn std::error::Error + Send + Sync>> for PublishMapError {
 
 #[cfg(test)]
 mod tests {
-    use super::{MessageVerification, api_host_and_auth};
-
-    #[test]
-    fn configured_api_host_requires_kubernetes_auth_by_default() {
-        assert_eq!(
-            api_host_and_auth(Some("api:3000".to_string()), false),
-            ("api:3000".to_string(), true)
-        );
-    }
-
-    #[test]
-    fn explicit_flag_disables_kubernetes_auth() {
-        assert_eq!(
-            api_host_and_auth(Some("localhost:3000".to_string()), true),
-            ("localhost:3000".to_string(), false)
-        );
-    }
-
-    #[test]
-    fn missing_api_host_uses_local_default() {
-        assert_eq!(
-            api_host_and_auth(None, false),
-            ("localhost:3000".to_string(), false)
-        );
-    }
+    use super::MessageVerification;
 
     #[test]
     fn parses_verified_message_response() {
