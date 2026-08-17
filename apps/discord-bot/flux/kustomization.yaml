@@ -1,12 +1,13 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 configMapGenerator:
-  - name: discord-bot-challenge-config
+  - name: discord-bot-config
     files:
       - config.yaml
 resources:
   - deployment.yaml
   - cronjob.yaml
+  - model-cache.yaml
   - secrets.enc.yaml
   - image-update.yaml
   - sa.yaml

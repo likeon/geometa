@@ -123,19 +123,19 @@ bot role needs read/view permissions where messages are inspected, send +
 attach-file permissions in the moderation channel, and the **Ban Members**
 permission for `ban` mode. The role must sit above any user it may ban.
 
-### Production handoff
+### Production deployment
 
-Kubernetes deployment of the ONNX inference service, plus OpenRouter API
-secret/network wiring, are deployment prerequisites handled outside this
-repository (storage, resources, network policy, tokens).
+Flux runs the ONNX Runtime Server as a gateway sidecar. An init container
+checksum-verifies the pinned tokenizer and model revision before storing them
+in the `discord-bot-model-cache` PVC. The gateway reads the tokenizer from the
+same volume and reaches ONNX over pod-local HTTP. Required external egress is
+restricted by the app's Cilium network policy.
 
-Without a spam configuration the gateway still starts normally: when
-`config.yaml` is absent (the current Deployment mounts none) spam detection
-is simply disabled. To run the pipeline in production, operators must mount
-a `config.yaml` with a `spam_detection` section (guild/moderation channel
-IDs, `mode: alert` first) and provide three spam service values through env vars
-or YAML; without them gateway fails fast rather than silently disabling spam
-detection.
+Production configuration lives in `flux/config.yaml` and starts in `alert`
+mode. The Deployment supplies the ONNX URL and tokenizer path. Add
+`OPENROUTER_API_KEY` to the existing encrypted `discord-bot` Secret alongside
+`DISCORD_TOKEN`; never commit either plaintext value. Missing dependencies
+make the gateway fail fast rather than silently disabling spam detection.
 
 ## Run
 
