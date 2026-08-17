@@ -42,8 +42,8 @@ pools:
 
 spam_detection:
   mode: alert
-  guild_id: 1390448051633651872
-  moderation_channel_id: 1538965953604227132
+  guild_id: 1288588689546412032
+  moderation_channel_id: 1539008246440792124
   onnx:
     model: tanaos-spam-detection-v1
     version: v1
