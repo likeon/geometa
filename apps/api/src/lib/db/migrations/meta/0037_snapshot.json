@@ -80,12 +80,8 @@
           "name": "levels_map_group_id_map_groups_id_fk",
           "tableFrom": "levels",
           "tableTo": "map_groups",
-          "columnsFrom": [
-            "map_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["map_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -154,12 +150,8 @@
           "name": "map_filters_map_id_maps_id_fk",
           "tableFrom": "map_filters",
           "tableTo": "maps",
-          "columnsFrom": [
-            "map_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["map_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -269,12 +261,8 @@
           "name": "map_group_changes_map_group_id_map_groups_id_fk",
           "tableFrom": "map_group_changes",
           "tableTo": "map_groups",
-          "columnsFrom": [
-            "map_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["map_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -282,12 +270,8 @@
           "name": "map_group_changes_user_id_user_id_fk",
           "tableFrom": "map_group_changes",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -458,12 +442,8 @@
           "name": "map_group_locations_map_group_id_map_groups_id_fk",
           "tableFrom": "map_group_locations",
           "tableTo": "map_groups",
-          "columnsFrom": [
-            "map_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["map_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -532,12 +512,8 @@
           "name": "map_group_permissions_map_group_id_map_groups_id_fk",
           "tableFrom": "map_group_permissions",
           "tableTo": "map_groups",
-          "columnsFrom": [
-            "map_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["map_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -545,12 +521,8 @@
           "name": "map_group_permissions_user_id_user_id_fk",
           "tableFrom": "map_group_permissions",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -650,12 +622,8 @@
           "name": "map_levels_map_id_maps_id_fk",
           "tableFrom": "map_levels",
           "tableTo": "maps",
-          "columnsFrom": [
-            "map_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["map_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -663,12 +631,8 @@
           "name": "map_levels_level_id_levels_id_fk",
           "tableFrom": "map_levels",
           "tableTo": "levels",
-          "columnsFrom": [
-            "level_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["level_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -730,12 +694,8 @@
           "name": "map_regions_map_id_maps_id_fk",
           "tableFrom": "map_regions",
           "tableTo": "maps",
-          "columnsFrom": [
-            "map_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["map_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -743,12 +703,8 @@
           "name": "map_regions_region_id_regions_id_fk",
           "tableFrom": "map_regions",
           "tableTo": "regions",
-          "columnsFrom": [
-            "region_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["region_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -910,12 +866,8 @@
           "name": "maps_map_group_id_map_groups_id_fk",
           "tableFrom": "maps",
           "tableTo": "map_groups",
-          "columnsFrom": [
-            "map_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["map_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -923,12 +875,8 @@
           "name": "maps_user_id_user_id_fk",
           "tableFrom": "maps",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -938,9 +886,7 @@
         "maps_geoguessr_id_unique": {
           "name": "maps_geoguessr_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "geoguessr_id"
-          ]
+          "columns": ["geoguessr_id"]
         }
       },
       "policies": {},
@@ -1010,12 +956,8 @@
           "name": "meta_images_meta_id_metas_id_fk",
           "tableFrom": "meta_images",
           "tableTo": "metas",
-          "columnsFrom": [
-            "meta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meta_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1077,12 +1019,8 @@
           "name": "meta_levels_meta_id_metas_id_fk",
           "tableFrom": "meta_levels",
           "tableTo": "metas",
-          "columnsFrom": [
-            "meta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meta_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1090,12 +1028,8 @@
           "name": "meta_levels_level_id_levels_id_fk",
           "tableFrom": "meta_levels",
           "tableTo": "levels",
-          "columnsFrom": [
-            "level_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["level_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1129,12 +1063,8 @@
           "name": "meta_locations_count_view_meta_id_metas_id_fk",
           "tableFrom": "meta_locations_count_view",
           "tableTo": "metas",
-          "columnsFrom": [
-            "meta_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["meta_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1327,12 +1257,8 @@
           "name": "metas_map_group_id_map_groups_id_fk",
           "tableFrom": "metas",
           "tableTo": "map_groups",
-          "columnsFrom": [
-            "map_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["map_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1404,12 +1330,8 @@
           "name": "session_user_id_user_id_fk",
           "tableFrom": "session",
           "tableTo": "user",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1497,12 +1419,8 @@
           "name": "synced_locations_synced_meta_id_synced_metas_meta_id_fk",
           "tableFrom": "synced_locations",
           "tableTo": "synced_metas",
-          "columnsFrom": [
-            "synced_meta_id"
-          ],
-          "columnsTo": [
-            "meta_id"
-          ],
+          "columnsFrom": ["synced_meta_id"],
+          "columnsTo": ["meta_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1510,10 +1428,7 @@
       "compositePrimaryKeys": {
         "synced_locations_synced_meta_id_pano_id_pk": {
           "name": "synced_locations_synced_meta_id_pano_id_pk",
-          "columns": [
-            "synced_meta_id",
-            "pano_id"
-          ]
+          "columns": ["synced_meta_id", "pano_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1544,12 +1459,8 @@
           "name": "synced_map_metas_map_id_maps_id_fk",
           "tableFrom": "synced_map_metas",
           "tableTo": "maps",
-          "columnsFrom": [
-            "map_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["map_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -1557,12 +1468,8 @@
           "name": "synced_map_metas_synced_meta_id_synced_metas_meta_id_fk",
           "tableFrom": "synced_map_metas",
           "tableTo": "synced_metas",
-          "columnsFrom": [
-            "synced_meta_id"
-          ],
-          "columnsTo": [
-            "meta_id"
-          ],
+          "columnsFrom": ["synced_meta_id"],
+          "columnsTo": ["meta_id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1570,10 +1477,7 @@
       "compositePrimaryKeys": {
         "synced_map_metas_map_id_synced_meta_id_pk": {
           "name": "synced_map_metas_map_id_synced_meta_id_pk",
-          "columns": [
-            "map_id",
-            "synced_meta_id"
-          ]
+          "columns": ["map_id", "synced_meta_id"]
         }
       },
       "uniqueConstraints": {},
@@ -1640,12 +1544,8 @@
           "name": "synced_metas_map_group_id_map_groups_id_fk",
           "tableFrom": "synced_metas",
           "tableTo": "map_groups",
-          "columnsFrom": [
-            "map_group_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["map_group_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -1700,9 +1600,7 @@
         "user_api_token_unique": {
           "name": "user_api_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "api_token"
-          ]
+          "columns": ["api_token"]
         }
       },
       "policies": {},
