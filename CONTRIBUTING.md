@@ -33,6 +33,19 @@ Run the following installation commands in order.
    - Since this command occupies a session, you'll need to open a new terminal window or move it to background
 4. `just api::db-init` - applies initial db data
 
+### Optional: local spam-detection model
+
+The Discord bot's spam pipeline needs a pinned ONNX model locally. This is
+your choice; normal frontend/API development does not need it.
+
+1. `scripts/process-compose/setup-discord-spam-model.sh` - downloads and
+   checksum-verifies the model/tokenizer into ignored `.dev/data/onnx-runtime/`
+   (idempotent, ~136 MB)
+2. Enable the `discord-bot-spam-detect-onnx` process in `process-compose.yaml`
+   (disabled by default)
+3. `just run` persists `SPAM_ONNX_API_URL` and `SPAM_ONNX_TOKENIZER_PATH` into
+   ignored `mise.local.toml` and prints the ONNX endpoint with `info`
+
 ## Pull Request Process
 
 - Clearly describe the problem or feature in your pull request
