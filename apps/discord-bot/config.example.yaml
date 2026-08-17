@@ -1,6 +1,9 @@
+---
+# Service credentials may be set in YAML; matching env vars override them.
+
 challenge:
-  channel_id: 0                 # Discord channel that receives the buttons
-  time_limit: 0                 # seconds per round; 0 = unlimited
+  channel_id: 0
+  time_limit: 0
 
 game_modes:
   moving:
@@ -19,7 +22,6 @@ game_modes:
       forbid_rotating: true
       forbid_zooming: true
 
-# One challenge-link button is created from each pool.
 pools:
   - name: "World"
     maps:
@@ -29,6 +31,16 @@ pools:
 
   - name: "Learnable Meta Europe"
     learnable_meta:
-      region: "Europe"          # optional exact ALM region
-      is_shared: true           # optional ALM shared-map filter
+      region: "Europe"
+      is_shared: true
     game_modes: ["nm", "nmpz"]
+
+# Replace IDs before use.
+spam_detection:
+  mode: alert
+  guild_id: 1
+  moderation_channel_id: 2
+  onnx:
+    model: tanaos-spam-detection-v1
+    version: v1
+  openrouter: {}

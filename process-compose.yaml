@@ -8,7 +8,10 @@ processes:
       printf '%s\n' \
         "PostgreSQL: 127.0.0.1:${PROCESS_COMPOSE_PORT_POSTGRES}" \
         "API: http://127.0.0.1:${PROCESS_COMPOSE_PORT_API}/api/docs" \
-        "Frontend: http://127.0.0.1:${PROCESS_COMPOSE_PORT_FRONTEND}/"
+        "Frontend: http://127.0.0.1:${PROCESS_COMPOSE_PORT_FRONTEND}/" \
+        "Discord bot: disabled (start from Process Compose TUI)" \
+        "ONNX: http://127.0.0.1:${PROCESS_COMPOSE_PORT_ONNX}/ (disabled)" \
+        "(provision: scripts/process-compose/setup-discord-spam-model.sh)"
 
   postgres:
     command: >-
@@ -40,6 +43,42 @@ processes:
       success_threshold: 1
       failure_threshold: 30
 
+  discord-bot-spam-detect-onnx:
+    # Disabled by default: downloading/running the ~136 MB model is optional
+    # and only needed when the spam pipeline is configured. Enable it after
+    # running scripts/process-compose/setup-discord-spam-model.sh.
+    disabled: true
+    command: >-
+      "${CONTAINER_ENGINE}" run --rm
+      --name "${ONNX_SERVER_CONTAINER_NAME}"
+      ${CONTAINER_USERNS_OPTION}
+      --publish "127.0.0.1:${PROCESS_COMPOSE_PORT_ONNX}:8080"
+      --volume "${ONNX_MODELS_DIR}:/app/models:ro,Z"
+      --env ONNX_SERVER_HTTP_PORT=8080
+      --env ONNX_SERVER_PREPARE_MODEL="tanaos-spam-detection-v1:v1"
+      --env ORT_DISABLE_TELEMETRY=1
+      docker.io/kibaes/onnxruntime-server:1.29.0-linux-cpu
+    availability:
+      restart: always
+      backoff_seconds: 2
+    readiness_probe:
+      http_get:
+        host: 127.0.0.1
+        port: "${PROCESS_COMPOSE_PORT_ONNX}"
+        path: /health
+        status_code: 200
+      initial_delay_seconds: 2
+      period_seconds: 2
+      timeout_seconds: 3
+      success_threshold: 1
+      failure_threshold: 10
+    shutdown:
+      command: >-
+        "${CONTAINER_ENGINE}" stop --time 10
+        "${ONNX_SERVER_CONTAINER_NAME}"
+      signal: 15
+      timeout_seconds: 15
+
   api:
     command: mise exec -- bun run dev
     working_dir: ./apps/api
@@ -61,5 +100,17 @@ processes:
     depends_on:
       postgres:
         condition: process_healthy
+      api:
+        condition: process_started
+
+  discord-bot:
+    # Disabled by default to avoid connecting development credentials
+    # to Discord. Start manually from Process Compose TUI when needed.
+    disabled: true
+    command: mise exec -- cargo run
+    working_dir: ./apps/discord-bot
+    environment:
+      - "API_HOST=localhost:${PROCESS_COMPOSE_PORT_API}"
+    depends_on:
       api:
         condition: process_started

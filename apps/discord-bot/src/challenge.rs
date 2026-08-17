@@ -2,69 +2,10 @@ use std::collections::{HashMap, HashSet};
 
 use poise::serenity_prelude::{ChannelId, CreateActionRow, CreateButton, CreateMessage, Http};
 use rand::prelude::IndexedRandom;
-use serde::Deserialize;
 
 use crate::Error;
 use crate::alm::api::client::{ChallengeRequest, Client, Map as AlmMap};
-
-const CONFIG_PATH: &str = "config.yaml";
-const MAX_BUTTONS: usize = 25;
-const MAX_BUTTON_LABEL: usize = 80;
-
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct Config {
-    challenge: ChallengeConfig,
-    game_modes: HashMap<String, GameMode>,
-    pools: Vec<Pool>,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct ChallengeConfig {
-    channel_id: u64,
-    time_limit: u32,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct GameMode {
-    settings: ModeSettings,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct ModeSettings {
-    forbid_moving: bool,
-    forbid_rotating: bool,
-    forbid_zooming: bool,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct Pool {
-    name: String,
-    #[serde(default)]
-    maps: Vec<Map>,
-    learnable_meta: Option<LearnableMeta>,
-    #[serde(default)]
-    game_modes: Vec<String>,
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq)]
-#[serde(deny_unknown_fields)]
-struct LearnableMeta {
-    region: Option<String>,
-    is_shared: Option<bool>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-struct Map {
-    name: String,
-    map_id: String,
-    game_modes: Vec<String>,
-}
+use crate::config::{BotConfig, CONFIG, LearnableMeta, MAX_BUTTON_LABEL};
 
 #[derive(Clone, Debug, PartialEq)]
 struct Candidate {
@@ -80,8 +21,9 @@ struct ChallengeLink {
 }
 
 pub async fn run() -> Result<(), Error> {
-    let config = parse_config(&std::fs::read_to_string(CONFIG_PATH)?)?;
-    let selected = select_maps(&config).await?;
+    let config = &*CONFIG;
+    config.validate_challenge()?;
+    let selected = select_maps(config).await?;
     let mut rng = rand::rng();
     let mut links = Vec::with_capacity(selected.len());
 
@@ -105,76 +47,12 @@ pub async fn run() -> Result<(), Error> {
         });
     }
 
-    post_buttons(config.challenge.channel_id, &links).await?;
-    log::info!("posted {} daily challenge buttons", links.len());
+    post_buttons(config.challenge.channel_id, &links, config.discord_token()?).await?;
+    tracing::info!("posted {} daily challenge buttons", links.len());
     Ok(())
 }
 
-fn parse_config(source: &str) -> Result<Config, Error> {
-    let config: Config = serde_saphyr::from_str(source)?;
-    validate(&config)?;
-    Ok(config)
-}
-
-fn validate(config: &Config) -> Result<(), Error> {
-    if config.challenge.channel_id == 0 {
-        return Err(invalid("challenge.channel_id must be positive"));
-    }
-    if config.game_modes.is_empty() {
-        return Err(invalid("game_modes must not be empty"));
-    }
-    if config.pools.is_empty() || config.pools.len() > MAX_BUTTONS {
-        return Err(invalid("pools must contain between 1 and 25 entries"));
-    }
-
-    for pool in &config.pools {
-        if pool.name.trim().is_empty() {
-            return Err(invalid("pool names must not be empty"));
-        }
-        match (pool.maps.is_empty(), pool.learnable_meta.as_ref()) {
-            (false, None) => {
-                for map in &pool.maps {
-                    if map.name.trim().is_empty() || map.map_id.trim().is_empty() {
-                        return Err(invalid(format!(
-                            "{} contains a map without a name or map_id",
-                            pool.name
-                        )));
-                    }
-                    validate_modes(&map.game_modes, &config.game_modes, &pool.name)?;
-                }
-            }
-            (true, Some(source)) => {
-                if source.region.as_ref().is_some_and(|value| value.is_empty()) {
-                    return Err(invalid(format!("{} has an empty region", pool.name)));
-                }
-                validate_modes(&pool.game_modes, &config.game_modes, &pool.name)?;
-            }
-            _ => {
-                return Err(invalid(format!(
-                    "{} must configure either maps or learnable_meta",
-                    pool.name
-                )));
-            }
-        }
-    }
-    Ok(())
-}
-
-fn validate_modes(
-    names: &[String],
-    modes: &HashMap<String, GameMode>,
-    owner: &str,
-) -> Result<(), Error> {
-    if names.is_empty() {
-        return Err(invalid(format!("{owner} has no game modes")));
-    }
-    if let Some(name) = names.iter().find(|name| !modes.contains_key(*name)) {
-        return Err(invalid(format!("{owner} references unknown mode {name}")));
-    }
-    Ok(())
-}
-
-async fn select_maps(config: &Config) -> Result<Vec<Candidate>, Error> {
+async fn select_maps(config: &BotConfig) -> Result<Vec<Candidate>, Error> {
     let mut catalogs: HashMap<LearnableMeta, Vec<AlmMap>> = HashMap::new();
     let mut selected = Vec::with_capacity(config.pools.len());
     let mut used = HashSet::new();
@@ -232,8 +110,11 @@ fn choose_unique<R: rand::Rng + ?Sized>(
         .ok_or_else(|| invalid(format!("{pool_name} has no unused maps")))
 }
 
-async fn post_buttons(channel_id: u64, links: &[ChallengeLink]) -> Result<(), Error> {
-    let token = std::env::var("DISCORD_TOKEN")?;
+async fn post_buttons(
+    channel_id: u64,
+    links: &[ChallengeLink],
+    discord_token: &str,
+) -> Result<(), Error> {
     let rows = links
         .chunks(5)
         .map(|chunk| {
@@ -247,7 +128,10 @@ async fn post_buttons(channel_id: u64, links: &[ChallengeLink]) -> Result<(), Er
         .collect();
 
     ChannelId::new(channel_id)
-        .send_message(&Http::new(&token), CreateMessage::new().components(rows))
+        .send_message(
+            &Http::new(discord_token),
+            CreateMessage::new().components(rows),
+        )
         .await?;
     Ok(())
 }
@@ -266,42 +150,7 @@ mod tests {
 
     use rand::{SeedableRng, rngs::StdRng};
 
-    use super::{Candidate, choose_unique, parse_config, truncate};
-
-    const CONFIG: &str = r#"
-challenge:
-  channel_id: 123
-  time_limit: 0
-game_modes:
-  nm:
-    settings:
-      forbid_moving: true
-      forbid_rotating: false
-      forbid_zooming: false
-pools:
-  - name: Featured
-    maps:
-      - name: Map One
-        map_id: map-1
-        game_modes: [nm]
-  - name: Learnable
-    learnable_meta: {}
-    game_modes: [nm]
-"#;
-
-    #[test]
-    fn parses_minimal_config_and_rejects_removed_fields() {
-        assert!(parse_config(CONFIG).is_ok());
-        assert!(parse_config(include_str!("../flux/config.yaml")).is_ok());
-        assert!(
-            parse_config(&CONFIG.replace("  time_limit: 0", "  time_limit: 0\n  rounds: 10"))
-                .is_err()
-        );
-        assert!(
-            parse_config(&CONFIG.replace("  time_limit: 0", "  time_limit: 0\n  post_time: 12:00"))
-                .is_err()
-        );
-    }
+    use super::{Candidate, choose_unique, truncate};
 
     #[test]
     fn selects_an_unused_map() {
