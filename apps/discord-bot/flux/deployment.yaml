@@ -112,7 +112,7 @@ spec:
                 - ALL
       containers:
         - name: discord-bot
-          image: ghcr.io/likeon/geometa-discord-bot:main-cf93f47b-1786810773 # {"$imagepolicy": "geometa:discord-bot"}
+          image: ghcr.io/likeon/geometa-discord-bot:main-6e40305a-1787010393 # {"$imagepolicy": "geometa:discord-bot"}
           imagePullPolicy: Always
           resources:
             requests:
