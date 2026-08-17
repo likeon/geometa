@@ -13,7 +13,7 @@ import {
 import { db } from '../lib/drizzle';
 import { plonkitFooter } from '../lib/userscript/constants';
 import { fingerprintMapCoordinates } from '../lib/userscript/map-fingerprint';
-import { normalizeGeoJson, type MetaGeoJson } from '../lib/utils/geojson';
+import { type MetaGeoJson, normalizeGeoJson } from '../lib/utils/geojson';
 
 const mapArea = normalizeGeoJson({
   type: 'Polygon',

@@ -6,7 +6,7 @@
     "build": "bun build src/index.ts --target bun --minify-whitespace --minify-syntax --production --outdir dist --sourcemap",
     "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "bun run src/scripts/migrate.ts",
     "test": "NODE_ENV=test API_INTERNAL_AUTH_REQUIRED=false bun test --preload ./tests/support/db-preload.ts --max-concurrency 1 --timeout 30000",
     "test:unit": "NODE_ENV=test API_INTERNAL_AUTH_REQUIRED=false bun test .unit.test.ts --concurrent --max-concurrency 20 --timeout 5000",
     "test:db": "NODE_ENV=test API_INTERNAL_AUTH_REQUIRED=false bun test .db.test.ts --preload ./tests/support/db-preload.ts --max-concurrency 1 --timeout 30000",
