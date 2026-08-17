@@ -107,5 +107,5 @@ echo "  Config: ${CONFIG_PATH}"
 echo
 echo "The disabled process-compose service mounts ${ONNX_MODELS_DIR};"
 echo "SPAM_ONNX_API_URL is persisted to mise.local.toml by run.sh."
-echo "Spam detection still requires the external Shieldstral endpoint and"
-echo "the gateway's other configuration before it can run."
+echo "Spam detection still requires OPENROUTER_API_KEY and the gateway's"
+echo "spam_detection configuration before it can run."

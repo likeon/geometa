@@ -46,6 +46,8 @@ const MAX_IMAGES_PER_REQUEST: usize = 10;
 /// payloads and evidence disk usage.
 const MAX_IMAGE_BYTES: u64 = 20 * 1024 * 1024;
 
+pub const ENV_API_HOST: &str = "API_HOST";
+pub const ENV_API_DISABLE_K8S_AUTH: &str = "API_DISABLE_K8S_AUTH";
 pub const ENV_DISCORD_TOKEN: &str = "DISCORD_TOKEN";
 pub const ENV_SPAM_ONNX_API_URL: &str = "SPAM_ONNX_API_URL";
 pub const ENV_SPAM_ONNX_TOKENIZER_PATH: &str = "SPAM_ONNX_TOKENIZER_PATH";
@@ -222,6 +224,80 @@ pub fn load_config() -> Result<BotConfig, Error> {
         .build()?
         .try_deserialize()?;
     Ok(config)
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct ApiClientConfig {
+    pub host: String,
+    pub requires_jwt: bool,
+}
+
+/// Loads and validates internal API connection settings before either runtime
+/// mode performs network work.
+pub fn load_api_client_config() -> Result<ApiClientConfig, Error> {
+    api_client_config_from(
+        std::env::var(ENV_API_HOST),
+        std::env::var(ENV_API_DISABLE_K8S_AUTH),
+    )
+}
+
+fn api_client_config_from(
+    configured_host: Result<String, std::env::VarError>,
+    disable_k8s_auth: Result<String, std::env::VarError>,
+) -> Result<ApiClientConfig, Error> {
+    let configured_host = match configured_host {
+        Ok(host) if host.trim().is_empty() => {
+            return Err(invalid(format!("{ENV_API_HOST} must not be empty")));
+        }
+        Ok(host) => Some(host),
+        Err(std::env::VarError::NotPresent) => None,
+        Err(std::env::VarError::NotUnicode(_)) => {
+            return Err(invalid(format!("{ENV_API_HOST} must be valid UTF-8")));
+        }
+    };
+    let disable_k8s_auth = match disable_k8s_auth {
+        Ok(value) => value
+            .parse::<bool>()
+            .map_err(|_| invalid(format!("{ENV_API_DISABLE_K8S_AUTH} must be true or false")))?,
+        Err(std::env::VarError::NotPresent) => false,
+        Err(std::env::VarError::NotUnicode(_)) => {
+            return Err(invalid(format!(
+                "{ENV_API_DISABLE_K8S_AUTH} must be valid UTF-8"
+            )));
+        }
+    };
+
+    let requires_jwt = configured_host.is_some() && !disable_k8s_auth;
+    let host = configured_host.unwrap_or_else(|| "localhost:3000".to_string());
+    validate_api_host(&host)?;
+    Ok(ApiClientConfig { host, requires_jwt })
+}
+
+fn validate_api_host(host: &str) -> Result<(), Error> {
+    if host != host.trim()
+        || host.contains('/')
+        || host.contains('\\')
+        || host.chars().any(char::is_control)
+    {
+        return Err(invalid(format!(
+            "{ENV_API_HOST} must contain only a host and optional port"
+        )));
+    }
+
+    let url = reqwest::Url::parse(&format!("http://{host}/api"))
+        .map_err(|error| invalid(format!("{ENV_API_HOST} is invalid: {error}")))?;
+    if url.host_str().is_none()
+        || !url.username().is_empty()
+        || url.password().is_some()
+        || url.path() != "/api"
+        || url.query().is_some()
+        || url.fragment().is_some()
+    {
+        return Err(invalid(format!(
+            "{ENV_API_HOST} must contain only a host and optional port"
+        )));
+    }
+    Ok(())
 }
 
 #[cfg(test)]
@@ -539,7 +615,10 @@ fn invalid(message: impl Into<String>) -> Error {
 
 #[cfg(test)]
 mod tests {
-    use super::{BotConfig, DEFAULT_OPENROUTER_MODEL, parse_config, parse_config_with_environment};
+    use super::{
+        api_client_config_from, parse_config, parse_config_with_environment, BotConfig,
+        DEFAULT_OPENROUTER_MODEL,
+    };
 
     const CONFIG: &str = r#"
 challenge:
@@ -586,10 +665,10 @@ spam_detection:
             parse_config(&CONFIG.replace("  time_limit: 0", "  time_limit: 0\n  rounds: 10"))
                 .is_err()
         );
-        assert!(
-            parse_config(&CONFIG.replace("  time_limit: 0", "  time_limit: 0\n  post_time: 12:00"))
-                .is_err()
-        );
+        assert!(parse_config(
+            &CONFIG.replace("  time_limit: 0", "  time_limit: 0\n  post_time: 12:00")
+        )
+        .is_err());
     }
 
     #[test]
@@ -738,5 +817,75 @@ spam_detection:
 
         // The documented defaults stay valid.
         assert!(parse_spam(SPAM).is_ok());
+    }
+
+    #[test]
+    fn api_client_config_defaults_to_unauthenticated_loopback() {
+        let config = api_client_config_from(
+            Err(std::env::VarError::NotPresent),
+            Err(std::env::VarError::NotPresent),
+        )
+        .expect("default API config");
+        assert_eq!(config.host, "localhost:3000");
+        assert!(!config.requires_jwt);
+    }
+
+    #[test]
+    fn configured_api_host_and_auth_flag_are_parsed_at_startup() {
+        let authenticated = api_client_config_from(
+            Ok("api:3000".to_string()),
+            Err(std::env::VarError::NotPresent),
+        )
+        .expect("authenticated API config");
+        assert_eq!(authenticated.host, "api:3000");
+        assert!(authenticated.requires_jwt);
+
+        let local =
+            api_client_config_from(Ok("localhost:3000".to_string()), Ok("true".to_string()))
+                .expect("local API config");
+        assert!(!local.requires_jwt);
+    }
+
+    #[test]
+    fn rejects_invalid_api_environment_values() {
+        assert!(
+            api_client_config_from(Ok("api:3000".to_string()), Ok("sometimes".to_string()),)
+                .is_err()
+        );
+        for host in [
+            "",
+            "https://api.example",
+            "api:3000/path",
+            "api:3000/.",
+            "api:3000/foo/..",
+            "api\\evil",
+            " api:3000",
+            "api:3000 ",
+            "user@api:3000",
+        ] {
+            assert!(
+                api_client_config_from(Ok(host.to_string()), Err(std::env::VarError::NotPresent),)
+                    .is_err(),
+                "host {host:?} must be rejected"
+            );
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn rejects_non_utf8_api_environment_values() {
+        use std::os::unix::ffi::OsStringExt;
+
+        let non_utf8 = std::ffi::OsString::from_vec(vec![0xff]);
+        assert!(api_client_config_from(
+            Err(std::env::VarError::NotUnicode(non_utf8.clone())),
+            Err(std::env::VarError::NotPresent),
+        )
+        .is_err());
+        assert!(api_client_config_from(
+            Err(std::env::VarError::NotPresent),
+            Err(std::env::VarError::NotUnicode(non_utf8)),
+        )
+        .is_err());
     }
 }

@@ -549,10 +549,11 @@ async fn try_to_file(
 ) -> Result<u64, String> {
     // `create_new` rejects pre-existing paths; guard armed only after
     // creation succeeds so it can never delete a file it did not create.
-    let mut file = tokio::fs::OpenOptions::new()
-        .create_new(true)
-        .write(true)
-        .mode(0o600)
+    let mut options = tokio::fs::OpenOptions::new();
+    options.create_new(true).write(true);
+    #[cfg(unix)]
+    options.mode(0o600);
+    let mut file = options
         .open(path)
         .await
         .map_err(|error| format!("cannot create evidence file: {error}"))?;

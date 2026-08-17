@@ -12,7 +12,7 @@ use tokio::sync::Semaphore;
 use tracing::{error, info};
 
 use crate::Error;
-use crate::config::{CONFIG, ServicesConfig, SpamDetection};
+use crate::config::{CONFIG, ServicesConfig, SpamDetection, load_api_client_config};
 use commands::publish;
 use spam::dispatch::{EditWork, MessageSnapshot, Pipeline, QueuedEvent, SpamService};
 use spam::evidence::{AlertReporter, EvidenceStorage};
@@ -26,8 +26,10 @@ type Context<'a> = poise::Context<'a, Data, Error>;
 type FrameworkContext<'a> = poise::FrameworkContext<'a, Data, Error>;
 
 pub(crate) async fn run() -> Result<(), Error> {
+    let api_client_config = load_api_client_config()?;
     let config = &*CONFIG;
     config.validate_gateway()?;
+    crate::alm::api::client::Client::initialize(api_client_config)?;
     let token = config.discord_token()?.to_owned();
     // Static spam dependencies (config, URLs, tokenizer, HTTP clients, evidence
     // root) are prepared before the client is built, so config problems fail
