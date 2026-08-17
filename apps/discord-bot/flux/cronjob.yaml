@@ -23,7 +23,7 @@ spec:
           volumes:
             - name: challenge-config
               configMap:
-                name: discord-bot-challenge-config
+                name: discord-bot-config
             - name: sa-token
               projected:
                 sources:

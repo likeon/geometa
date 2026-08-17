@@ -39,3 +39,12 @@ pools:
   - name: "All LearnableMeta 3"
     learnable_meta: {}
     game_modes: ["nm"]
+
+spam_detection:
+  mode: alert
+  guild_id: 1390448051633651872
+  moderation_channel_id: 1538965953604227132
+  onnx:
+    model: tanaos-spam-detection-v1
+    version: v1
+  openrouter: {}
