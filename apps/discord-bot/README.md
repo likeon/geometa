@@ -33,10 +33,10 @@ game_modes:
 ```
 
 The ALM API selects six eligible maps: two for each difficulty. Eligible maps
-are published, non-personal, and modified within the previous two months.
-Selection is weighted toward maps used less recently, then persisted
-in PostgreSQL before GeoGuessr challenges are created. One durable batch is
-reused per Berlin calendar day; retries resume only missing challenge URLs.
+are published, non-personal, and belong to map groups recently synchronized by
+the userscript. Selection is weighted toward maps used less recently, then
+persisted in PostgreSQL before GeoGuessr challenges are created. One durable
+batch is reused per Berlin calendar day; retries resume only missing challenge URLs.
 
 ## Responsibilities
 

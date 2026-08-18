@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import {
   discordChallengeBatches,
   discordChallengeMapHistory,
+  mapGroups,
   maps,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
@@ -239,8 +240,8 @@ export async function getOrCreateDailyChallengeBatch(
       process.env[RECENCY_FILTER_ENV],
     )
       ? gte(
-          maps.modifiedAt,
-          sql<number>`EXTRACT(EPOCH FROM NOW() - INTERVAL '2 months')::integer`,
+          mapGroups.syncedAt,
+          sql<number>`EXTRACT(EPOCH FROM NOW() - INTERVAL '4 months')::integer`,
         )
       : undefined;
     const candidates = await tx
@@ -253,6 +254,7 @@ export async function getOrCreateDailyChallengeBatch(
         lastSelectedAt: max(discordChallengeMapHistory.selectedAt),
       })
       .from(maps)
+      .innerJoin(mapGroups, eq(mapGroups.id, maps.mapGroupId))
       .leftJoin(
         discordChallengeMapHistory,
         eq(discordChallengeMapHistory.mapId, maps.id),

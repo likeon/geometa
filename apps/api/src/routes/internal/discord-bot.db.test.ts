@@ -95,12 +95,16 @@ async function dailyChallengesRequest(
   );
 }
 
-async function seedChallengeMaps(modifiedAt = Math.floor(Date.now() / 1000)) {
-  const [group] = await db
-    .insert(mapGroups)
-    .values({ name: 'Challenge maps' })
-    .returning({ id: mapGroups.id });
+async function seedChallengeMaps(syncedAt = Math.floor(Date.now() / 1000)) {
   const now = Math.floor(Date.now() / 1000);
+  const [group, staleGroup, neverSyncedGroup] = await db
+    .insert(mapGroups)
+    .values([
+      { name: 'Challenge maps', syncedAt },
+      { name: 'Stale challenge maps', syncedAt: now - 150 * 86_400 },
+      { name: 'Never-synced challenge maps' },
+    ])
+    .returning({ id: mapGroups.id });
   await db.insert(maps).values([
     ...[1, 2, 3].flatMap((difficulty) =>
       [1, 2].map((number) => ({
@@ -110,17 +114,26 @@ async function seedChallengeMaps(modifiedAt = Math.floor(Date.now() / 1000)) {
         authors: `Mapper ${difficulty}-${number}`,
         isPublished: true,
         difficulty,
-        modifiedAt,
+        modifiedAt: now - 365 * 86_400,
       })),
     ),
     {
-      mapGroupId: group!.id,
+      mapGroupId: staleGroup!.id,
       name: 'Abandoned Map',
       geoguessrId: 'abandoned',
       authors: 'Former Mapper',
       isPublished: true,
       difficulty: 1,
-      modifiedAt: now - 100 * 86_400,
+      modifiedAt: now,
+    },
+    {
+      mapGroupId: neverSyncedGroup!.id,
+      name: 'Never Synced Map',
+      geoguessrId: 'never-synced',
+      authors: 'Former Mapper',
+      isPublished: true,
+      difficulty: 1,
+      modifiedAt: now,
     },
     {
       mapGroupId: group!.id,
@@ -186,6 +199,11 @@ describe('POST /discord-bot/daily-challenges', () => {
       ),
     ).toBe(false);
     expect(
+      firstBody.challenges.some(
+        (challenge) => challenge.geoguessrId === 'never-synced',
+      ),
+    ).toBe(false);
+    expect(
       firstBody.challenges.every(
         (challenge) =>
           challenge.authors?.startsWith('Mapper ') &&
@@ -206,9 +224,20 @@ describe('POST /discord-bot/daily-challenges', () => {
     );
   });
 
+  test('allows maps from groups synced within four months', async () => {
+    delete process.env[RECENCY_FILTER_ENV];
+    await seedChallengeMaps(Math.floor(Date.now() / 1000) - 100 * 86_400);
+    mockSuccessfulChallengeGeneration([]);
+
+    const response = await dailyChallengesRequest();
+
+    expect(response.status).toBe(200);
+    expect(await db.select().from(discordChallengeMapHistory)).toHaveLength(6);
+  });
+
   test('allows stale maps when the recency filter is disabled', async () => {
     process.env[RECENCY_FILTER_ENV] = 'false';
-    await seedChallengeMaps(Math.floor(Date.now() / 1000) - 100 * 86_400);
+    await seedChallengeMaps(Math.floor(Date.now() / 1000) - 150 * 86_400);
     mockSuccessfulChallengeGeneration([]);
 
     const response = await dailyChallengesRequest();
@@ -367,7 +396,10 @@ describe('POST /discord-bot/daily-challenges', () => {
     delete process.env[RECENCY_FILTER_ENV];
     const [group] = await db
       .insert(mapGroups)
-      .values({ name: 'Insufficient maps' })
+      .values({
+        name: 'Insufficient maps',
+        syncedAt: Math.floor(Date.now() / 1000),
+      })
       .returning({ id: mapGroups.id });
     await db.insert(maps).values({
       mapGroupId: group!.id,
