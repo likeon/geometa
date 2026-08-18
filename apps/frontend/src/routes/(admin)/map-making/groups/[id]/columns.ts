@@ -160,7 +160,7 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
   },
   {
     accessorKey: 'hasGeoJson',
-    header: () => renderComponent(MapIcon, { size: 16, class: 'mx-auto' }),
+    header: () => renderComponent(MapIcon, { size: 16, class: 'mx-auto', 'aria-label': 'GeoJSON' }),
     cell: ({ row }) =>
       row.getValue<boolean>('hasGeoJson')
         ? renderComponent(Check, { size: 16, color: 'green', class: 'mx-auto' })

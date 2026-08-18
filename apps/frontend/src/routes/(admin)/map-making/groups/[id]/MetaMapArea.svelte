@@ -41,6 +41,12 @@
 
   function handleDragLeave(event: DragEvent) {
     event.preventDefault();
+    if (
+      event.currentTarget instanceof Node &&
+      event.relatedTarget instanceof Node &&
+      event.currentTarget.contains(event.relatedTarget)
+    )
+      return;
     isDragging = false;
   }
 
@@ -49,7 +55,9 @@
     isDragging = false;
     const files = event.dataTransfer?.files;
     if (isUploading || !files?.length) return;
-    fileInput.files = files;
+    const transfer = new DataTransfer();
+    transfer.items.add(files[0]);
+    fileInput.files = transfer.files;
     submit();
   }
 
