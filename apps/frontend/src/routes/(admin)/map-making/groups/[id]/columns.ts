@@ -7,6 +7,7 @@ import { Checkbox } from '$lib/components/ui/checkbox';
 import type { PageData } from './$types';
 import Check from '@lucide/svelte/icons/check';
 import ImageIcon from '@lucide/svelte/icons/image';
+import MapIcon from '@lucide/svelte/icons/map';
 import StickyNoteIcon from '@lucide/svelte/icons/sticky-note';
 
 export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
@@ -155,6 +156,15 @@ export const columns: ColumnDef<PageData['group']['metas'][number]>[] = [
         return false;
       });
     },
+    meta: { class: 'w-12 min-w-10 max-w-14 text-center hidden xl:table-cell' }
+  },
+  {
+    accessorKey: 'hasGeoJson',
+    header: () => renderComponent(MapIcon, { size: 16, class: 'mx-auto' }),
+    cell: ({ row }) =>
+      row.getValue<boolean>('hasGeoJson')
+        ? renderComponent(Check, { size: 16, color: 'green', class: 'mx-auto' })
+        : '',
     meta: { class: 'w-12 min-w-10 max-w-14 text-center hidden xl:table-cell' }
   },
   {
