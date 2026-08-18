@@ -32,7 +32,7 @@ spec:
                       audience: "api"
           containers:
             - name: challenge
-              image: ghcr.io/likeon/geometa-discord-bot:main-6e40305a-1787010393 # {"$imagepolicy": "geometa:discord-bot"}
+              image: ghcr.io/likeon/geometa-discord-bot:main-c82fe529-1787011441 # {"$imagepolicy": "geometa:discord-bot"}
               imagePullPolicy: Always
               args: ["challenge"]
               resources:
