@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import {
   type ChallengeMapCandidate,
+  challengeDailyKey,
   formatChallengeDate,
   isRecencyFilterEnabled,
   recencyWeight,
@@ -26,9 +27,9 @@ function candidate(
 
 describe('daily challenge date', () => {
   test('formats the Berlin calendar date', () => {
-    expect(formatChallengeDate(new Date('2026-08-17T22:30:00Z'))).toBe(
-      '18 August 2026',
-    );
+    const date = new Date('2026-08-17T22:30:00Z');
+    expect(formatChallengeDate(date)).toBe('18 August 2026');
+    expect(challengeDailyKey(date)).toBe('2026-08-18');
   });
 });
 
