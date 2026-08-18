@@ -16,7 +16,9 @@
     geoJsonUploadForm: SuperValidated<Infer<GeoJsonUploadSchema>>;
   } = $props();
 
+  let isDragging = $state(false);
   let isUploading = $state(false);
+  let fileInput: HTMLInputElement;
   // svelte-ignore state_referenced_locally
   const formApi = superForm(geoJsonUploadForm, {
     onSubmit() {
@@ -31,6 +33,25 @@
   });
   const { form, errors, enhance: uploadEnhance, submit } = formApi;
   const file = fileProxy(form, 'file');
+
+  function handleDragOver(event: DragEvent) {
+    event.preventDefault();
+    isDragging = !isUploading;
+  }
+
+  function handleDragLeave(event: DragEvent) {
+    event.preventDefault();
+    isDragging = false;
+  }
+
+  function handleDrop(event: DragEvent) {
+    event.preventDefault();
+    isDragging = false;
+    const files = event.dataTransfer?.files;
+    if (isUploading || !files?.length) return;
+    fileInput.files = files;
+    submit();
+  }
 
   const previewGeoJson: SubmitFunction = () => {
     const previewWindow = window.open('about:blank', '_blank');
@@ -88,8 +109,28 @@
     <label class="block text-sm font-medium mb-2" for={`meta-geojson-${selectedMeta.id}`}>
       {selectedMeta.hasGeoJson ? 'Replace GeoJSON' : 'Upload GeoJSON'}
     </label>
-    <div class="flex items-center gap-3">
+    <div class="flex gap-2 items-center h-12">
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div
+        class="flex-1 border-2 border-dashed rounded p-2 text-center transition-colors border-border bg-muted hover:bg-accent {isDragging
+          ? 'border-primary bg-primary/10'
+          : ''}"
+        ondragover={handleDragOver}
+        ondragleave={handleDragLeave}
+        ondrop={handleDrop}>
+        <p class="text-muted-foreground text-xs">
+          {#if isUploading}
+            <LoadingSmall />
+          {:else}
+            Drag & Drop GeoJSON here
+          {/if}
+        </p>
+      </div>
+
+      <span class="text-xs text-muted-foreground">or</span>
+
       <input
+        bind:this={fileInput}
         id={`meta-geojson-${selectedMeta.id}`}
         accept=".geojson,.json,application/geo+json,application/json"
         name="file"
@@ -98,7 +139,6 @@
         disabled={isUploading}
         onchange={() => submit()}
         class="text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-secondary file:text-secondary-foreground hover:file:bg-accent" />
-      {#if isUploading}<LoadingSmall />{/if}
     </div>
     {#if $errors.file}
       <p class="text-destructive text-sm mt-2">{$errors.file}</p>
