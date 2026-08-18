@@ -1,23 +1,23 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{BTreeMap, HashSet};
 
-use poise::serenity_prelude::{ChannelId, CreateActionRow, CreateButton, CreateMessage, Http};
-use rand::prelude::IndexedRandom;
+use poise::serenity_prelude::{ChannelId, CreateAllowedMentions, CreateEmbed, CreateMessage, Http};
 
 use crate::Error;
-use crate::alm::api::client::{ChallengeRequest, Client, Map as AlmMap};
-use crate::config::{BotConfig, CONFIG, LearnableMeta, MAX_BUTTON_LABEL, load_api_client_config};
+use crate::alm::api::client::{Client, DailyChallenge, DailyChallengesRequest};
+use crate::config::{CONFIG, load_api_client_config};
 
-#[derive(Clone, Debug, PartialEq)]
-struct Candidate {
-    name: String,
-    map_id: String,
-    game_modes: Vec<String>,
-}
+const CHALLENGES_PER_DIFFICULTY: usize = 2;
+const MAX_LINK_TEXT_CHARS: usize = 60;
+const DIFFICULTIES: [(u8, &str); 3] = [
+    (1, "🟢 Beginner"),
+    (2, "🟡 Intermediate"),
+    (3, "🔴 Advanced"),
+];
 
-#[derive(Clone, Debug, PartialEq)]
-struct ChallengeLink {
-    label: String,
-    url: String,
+#[derive(Debug, PartialEq)]
+struct ChallengeGroup {
+    label: &'static str,
+    challenges: Vec<DailyChallenge>,
 }
 
 pub async fn run() -> Result<(), Error> {
@@ -25,117 +25,119 @@ pub async fn run() -> Result<(), Error> {
     let config = &*CONFIG;
     config.validate_challenge()?;
     Client::initialize(api_client_config)?;
-    let selected = select_maps(config).await?;
-    let mut rng = rand::rng();
-    let mut links = Vec::with_capacity(selected.len());
 
-    for map in selected {
-        let mode_name = map
-            .game_modes
-            .choose(&mut rng)
-            .ok_or_else(|| invalid("map has no game modes"))?;
-        let mode = &config.game_modes[mode_name].settings;
-        let url = Client::create_challenge(&ChallengeRequest {
-            geoguessr_map_id: &map.map_id,
-            time_limit: config.challenge.time_limit,
-            forbid_moving: mode.forbid_moving,
-            forbid_rotating: mode.forbid_rotating,
-            forbid_zooming: mode.forbid_zooming,
-        })
-        .await?;
-        links.push(ChallengeLink {
-            label: truncate(&map.name, MAX_BUTTON_LABEL),
-            url,
-        });
-    }
+    let mode = config
+        .game_modes
+        .get(&config.challenge.game_mode)
+        .ok_or_else(|| invalid("challenge references an unknown game mode"))?;
+    let response = Client::daily_challenges(&DailyChallengesRequest {
+        time_limit: config.challenge.time_limit,
+        forbid_moving: mode.settings.forbid_moving,
+        forbid_rotating: mode.settings.forbid_rotating,
+        forbid_zooming: mode.settings.forbid_zooming,
+    })
+    .await?;
+    let title = format!("Daily GeoGuessr Challenges - {}", response.date);
+    let groups = group_challenges(response.challenges)?;
 
-    post_buttons(config.challenge.channel_id, &links, config.discord_token()?).await?;
-    tracing::info!("posted {} daily challenge buttons", links.len());
+    post_challenges(
+        config.challenge.channel_id,
+        &title,
+        &groups,
+        config.discord_token()?,
+    )
+    .await?;
+    tracing::info!(
+        batch_id = response.batch_id,
+        "posted six daily challenge links"
+    );
     Ok(())
 }
 
-async fn select_maps(config: &BotConfig) -> Result<Vec<Candidate>, Error> {
-    let mut catalogs: HashMap<LearnableMeta, Vec<AlmMap>> = HashMap::new();
-    let mut selected = Vec::with_capacity(config.pools.len());
-    let mut used = HashSet::new();
-    let mut rng = rand::rng();
+fn group_challenges(challenges: Vec<DailyChallenge>) -> Result<Vec<ChallengeGroup>, Error> {
+    let mut by_difficulty: BTreeMap<u8, Vec<DailyChallenge>> = BTreeMap::new();
+    let mut map_ids = HashSet::new();
 
-    for pool in &config.pools {
-        let candidates = if let Some(source) = &pool.learnable_meta {
-            if !catalogs.contains_key(source) {
-                let maps = Client::maps(source.region.as_deref(), source.is_shared).await?;
-                catalogs.insert(source.clone(), maps);
-            }
-            alm_candidates(catalogs[source].clone(), &pool.game_modes)
-        } else {
-            pool.maps
-                .iter()
-                .map(|map| Candidate {
-                    name: map.name.clone(),
-                    map_id: map.map_id.clone(),
-                    game_modes: map.game_modes.clone(),
-                })
-                .collect()
-        };
-
-        let choice = choose_unique(&candidates, &used, &mut rng, &pool.name)?;
-        used.insert(choice.map_id.clone());
-        selected.push(choice);
+    for challenge in challenges {
+        if !map_ids.insert(challenge.geoguessr_id.clone()) {
+            return Err(invalid("ALM API returned a duplicate daily challenge map"));
+        }
+        by_difficulty
+            .entry(challenge.difficulty)
+            .or_default()
+            .push(challenge);
     }
 
-    Ok(selected)
+    let mut groups = Vec::with_capacity(DIFFICULTIES.len());
+    for (difficulty, label) in DIFFICULTIES {
+        let challenges = by_difficulty.remove(&difficulty).unwrap_or_default();
+        if challenges.len() != CHALLENGES_PER_DIFFICULTY {
+            return Err(invalid(format!(
+                "ALM API returned {} maps for difficulty {difficulty}, expected {CHALLENGES_PER_DIFFICULTY}",
+                challenges.len()
+            )));
+        }
+        groups.push(ChallengeGroup { label, challenges });
+    }
+
+    if !by_difficulty.is_empty() {
+        return Err(invalid("ALM API returned an unknown challenge difficulty"));
+    }
+    Ok(groups)
 }
 
-fn alm_candidates(maps: Vec<AlmMap>, game_modes: &[String]) -> Vec<Candidate> {
-    maps.into_iter()
-        .filter(|map| !map.geoguessr_id.is_empty() && !map.name.is_empty())
-        .map(|map| Candidate {
-            name: map.name,
-            map_id: map.geoguessr_id,
-            game_modes: game_modes.to_vec(),
-        })
-        .collect()
-}
-
-fn choose_unique<R: rand::Rng + ?Sized>(
-    candidates: &[Candidate],
-    used: &HashSet<String>,
-    rng: &mut R,
-    pool_name: &str,
-) -> Result<Candidate, Error> {
-    candidates
-        .iter()
-        .filter(|map| !used.contains(&map.map_id))
-        .collect::<Vec<_>>()
-        .choose(rng)
-        .map(|map| (**map).clone())
-        .ok_or_else(|| invalid(format!("{pool_name} has no unused maps")))
-}
-
-async fn post_buttons(
+async fn post_challenges(
     channel_id: u64,
-    links: &[ChallengeLink],
+    title: &str,
+    groups: &[ChallengeGroup],
     discord_token: &str,
 ) -> Result<(), Error> {
-    let rows = links
-        .chunks(5)
-        .map(|chunk| {
-            CreateActionRow::Buttons(
-                chunk
-                    .iter()
-                    .map(|link| CreateButton::new_link(link.url.clone()).label(link.label.clone()))
-                    .collect(),
-            )
-        })
-        .collect();
+    let mut embed = CreateEmbed::new().title(title).color(0x0f_8a_6b);
+
+    for group in groups {
+        let map_links = group
+            .challenges
+            .iter()
+            .map(format_challenge_link)
+            .collect::<Vec<_>>()
+            .join("\n");
+        embed = embed.field(group.label, map_links, false);
+    }
 
     ChannelId::new(channel_id)
         .send_message(
             &Http::new(discord_token),
-            CreateMessage::new().components(rows),
+            CreateMessage::new()
+                .embed(embed)
+                .allowed_mentions(CreateAllowedMentions::new()),
         )
         .await?;
     Ok(())
+}
+
+fn format_challenge_link(challenge: &DailyChallenge) -> String {
+    let name = escape_markdown(&truncate(&challenge.name, MAX_LINK_TEXT_CHARS));
+    let author = challenge
+        .authors
+        .as_deref()
+        .filter(|author| !author.trim().is_empty())
+        .unwrap_or("Unknown author");
+    let author = escape_markdown(&truncate(author, MAX_LINK_TEXT_CHARS));
+    format!("[{name}]({}) by **{author}**", challenge.url)
+}
+
+fn escape_markdown(value: &str) -> String {
+    let mut escaped = String::with_capacity(value.len());
+    for character in value.chars() {
+        if matches!(
+            character,
+            '\\' | '*' | '_' | '~' | '`' | '|' | '[' | ']' | '<' | '>'
+        ) {
+            escaped.push('\\');
+        }
+        escaped.push(character);
+    }
+    escaped
 }
 
 fn truncate(value: &str, limit: usize) -> String {
@@ -148,39 +150,68 @@ fn invalid(message: impl Into<String>) -> Error {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashSet;
+    use super::{DIFFICULTIES, format_challenge_link, group_challenges};
+    use crate::alm::api::client::DailyChallenge;
 
-    use rand::{SeedableRng, rngs::StdRng};
-
-    use super::{Candidate, choose_unique, truncate};
+    fn challenge(id: &str, difficulty: u8) -> DailyChallenge {
+        DailyChallenge {
+            geoguessr_id: id.into(),
+            name: format!("Map {id}"),
+            authors: Some("Mapper".into()),
+            difficulty,
+            url: format!("https://www.geoguessr.com/challenge/{id}"),
+        }
+    }
 
     #[test]
-    fn selects_an_unused_map() {
-        let candidates = [
-            Candidate {
-                name: "Used".into(),
-                map_id: "used".into(),
-                game_modes: vec!["nm".into()],
-            },
-            Candidate {
-                name: "Fresh".into(),
-                map_id: "fresh".into(),
-                game_modes: vec!["nm".into()],
-            },
-        ];
-        let used = HashSet::from(["used".to_string()]);
-        let mut rng = StdRng::seed_from_u64(1);
+    fn groups_two_unique_maps_per_difficulty() {
+        let groups = group_challenges(vec![
+            challenge("advanced-1", 3),
+            challenge("beginner-1", 1),
+            challenge("intermediate-1", 2),
+            challenge("beginner-2", 1),
+            challenge("advanced-2", 3),
+            challenge("intermediate-2", 2),
+        ])
+        .expect("valid challenge groups");
 
-        assert_eq!(
-            choose_unique(&candidates, &used, &mut rng, "pool")
-                .unwrap()
-                .map_id,
-            "fresh"
+        assert_eq!(groups.len(), DIFFICULTIES.len());
+        assert_eq!(groups[0].label, "🟢 Beginner");
+        assert_eq!(groups[0].challenges.len(), 2);
+        assert_eq!(groups[1].label, "🟡 Intermediate");
+        assert_eq!(groups[2].label, "🔴 Advanced");
+    }
+
+    #[test]
+    fn rejects_duplicate_or_incomplete_groups() {
+        assert!(
+            group_challenges(vec![challenge("duplicate", 1), challenge("duplicate", 1),]).is_err()
+        );
+        assert!(
+            group_challenges(vec![
+                challenge("beginner-1", 1),
+                challenge("beginner-2", 1),
+                challenge("intermediate-1", 2),
+                challenge("intermediate-2", 2),
+                challenge("advanced-1", 3),
+            ])
+            .is_err()
         );
     }
 
     #[test]
-    fn truncates_button_labels_by_character() {
-        assert_eq!(truncate(&"\u{e4}".repeat(81), 80).chars().count(), 80);
+    fn formats_linked_map_name_and_bold_author() {
+        let challenge = DailyChallenge {
+            geoguessr_id: "map-1".into(),
+            name: "Map [One]".into(),
+            authors: Some("*Mapper*".into()),
+            difficulty: 1,
+            url: "https://www.geoguessr.com/challenge/token".into(),
+        };
+
+        assert_eq!(
+            format_challenge_link(&challenge),
+            "[Map \\[One\\]](https://www.geoguessr.com/challenge/token) by **\\*Mapper\\***"
+        );
     }
 }
