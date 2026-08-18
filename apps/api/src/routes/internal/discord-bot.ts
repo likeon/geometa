@@ -3,9 +3,16 @@ import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { logChange } from '@api/lib/internal/changes';
 import {
-  formatChallengeDate,
+  type ChallengeSettings,
+  claimDailyChallengeGeneration,
+  completeDailyChallengeGeneration,
+  type DailyChallengeBatch,
+  DailyChallengeSettingsConflictError,
+  getOrCreateDailyChallengeBatch,
   InsufficientChallengeMapsError,
-  selectDailyChallengeMaps,
+  loadDailyChallengeBatch,
+  releaseDailyChallengeGeneration,
+  saveDailyChallengeUrl,
 } from '@api/lib/internal/discord-challenges';
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { geoguessrAPIFetch } from '@api/lib/internal/utils';
@@ -29,7 +36,24 @@ const challengeSettingsSchema = t.Object({
   forbid_zooming: t.Boolean(),
 });
 
-type ChallengeSettings = typeof challengeSettingsSchema.static;
+function dailyChallengeResponse(batch: DailyChallengeBatch) {
+  return {
+    batchId: batch.batchId,
+    date: batch.date,
+    challenges: batch.maps.map((map) => {
+      if (map.url === null) {
+        throw new Error('Completed daily challenge batch has missing URLs');
+      }
+      return {
+        geoguessrId: map.geoguessrId,
+        name: map.name,
+        authors: map.authors,
+        difficulty: map.difficulty,
+        url: map.url,
+      };
+    }),
+  };
+}
 
 async function createGeoguessrChallenge(
   geoguessrMapId: string,
@@ -100,34 +124,50 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
   .post(
     'daily-challenges',
     async ({ body, status }) => {
-      let selection: Awaited<ReturnType<typeof selectDailyChallengeMaps>>;
+      let batch: DailyChallengeBatch;
       try {
-        selection = await selectDailyChallengeMaps();
+        batch = await getOrCreateDailyChallengeBatch(body);
       } catch (error) {
-        if (error instanceof InsufficientChallengeMapsError) {
+        if (
+          error instanceof InsufficientChallengeMapsError ||
+          error instanceof DailyChallengeSettingsConflictError
+        ) {
           return status(409, { message: error.message });
         }
         throw error;
       }
 
-      try {
-        const challenges = await Promise.all(
-          selection.maps.map(async (map) => ({
-            geoguessrId: map.geoguessrId,
-            name: map.name,
-            authors: map.authors,
-            difficulty: map.difficulty,
-            url: await createGeoguessrChallenge(map.geoguessrId, body),
-          })),
+      if (batch.status === 'complete') {
+        return dailyChallengeResponse(batch);
+      }
+
+      const claim = await claimDailyChallengeGeneration(batch.batchId);
+      if (claim.state === 'complete') {
+        return dailyChallengeResponse(
+          await loadDailyChallengeBatch(batch.batchId),
         );
-        return {
-          batchId: selection.batchId,
-          date: formatChallengeDate(),
-          challenges,
-        };
-      } catch {
+      }
+      if (claim.state === 'busy') {
+        return status(409, {
+          message: 'Daily challenge generation is already in progress',
+        });
+      }
+
+      const missingChallenges = batch.maps.filter((map) => map.url === null);
+      const results = await Promise.allSettled(
+        missingChallenges.map(async (map) => {
+          const url = await createGeoguessrChallenge(map.geoguessrId, body);
+          return saveDailyChallengeUrl(batch.batchId, map.id, url);
+        }),
+      );
+      if (results.some((result) => result.status === 'rejected')) {
+        await releaseDailyChallengeGeneration(batch.batchId, claim.leaseToken);
         return status(502, CHALLENGE_ERROR);
       }
+
+      await completeDailyChallengeGeneration(batch.batchId, claim.leaseToken);
+      batch = await loadDailyChallengeBatch(batch.batchId);
+      return dailyChallengeResponse(batch);
     },
     { body: challengeSettingsSchema },
   )

@@ -1,11 +1,17 @@
 import { afterEach, describe, expect, test } from 'bun:test';
 import {
+  discordChallengeBatches,
   discordChallengeMapHistory,
   mapGroups,
   maps,
   users,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
+import {
+  claimDailyChallengeGeneration,
+  getOrCreateDailyChallengeBatch,
+  releaseDailyChallengeGeneration,
+} from '@api/lib/internal/discord-challenges';
 import { eq } from 'drizzle-orm';
 import { discordBotRouter } from './discord-bot';
 
@@ -58,17 +64,32 @@ async function seedUser(
   });
 }
 
-async function dailyChallengesRequest(): Promise<Response> {
+const DEFAULT_CHALLENGE_SETTINGS = {
+  time_limit: 0,
+  forbid_moving: true,
+  forbid_rotating: false,
+  forbid_zooming: false,
+};
+
+type DailyChallengesBody = {
+  batchId: string;
+  date: string;
+  challenges: Array<{
+    geoguessrId: string;
+    authors: string | null;
+    difficulty: number;
+    url: string;
+  }>;
+};
+
+async function dailyChallengesRequest(
+  settings: typeof DEFAULT_CHALLENGE_SETTINGS = DEFAULT_CHALLENGE_SETTINGS,
+): Promise<Response> {
   return discordBotRouter.handle(
     new Request('http://localhost/discord-bot/daily-challenges', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        time_limit: 0,
-        forbid_moving: true,
-        forbid_rotating: false,
-        forbid_zooming: false,
-      }),
+      body: JSON.stringify(settings),
     }),
   );
 }
@@ -111,46 +132,60 @@ async function seedChallengeMaps(modifiedAt = Math.floor(Date.now() / 1000)) {
   ]);
 }
 
+function challengeMapFromRequest(init: RequestInit | undefined): string {
+  const request: unknown = JSON.parse(String(init?.body));
+  if (typeof request !== 'object' || request === null || !('map' in request)) {
+    throw new Error('GeoGuessr request has no map');
+  }
+  const map = request.map;
+  if (typeof map !== 'string') {
+    throw new Error('GeoGuessr request map must be a string');
+  }
+  return map;
+}
+
+function mockSuccessfulChallengeGeneration(calls: string[]) {
+  process.env.NFCA_TOKEN = 'test';
+  globalThis.fetch = (async (_input, init) => {
+    const map = challengeMapFromRequest(init);
+    calls.push(map);
+    return Response.json({ token: `token-${map}` });
+  }) as typeof fetch;
+}
+
 describe('POST /discord-bot/daily-challenges', () => {
-  test('selects, records, and creates two fresh maps per difficulty', async () => {
+  test('creates once and replays the completed daily batch', async () => {
     delete process.env[RECENCY_FILTER_ENV];
     await seedChallengeMaps();
-    process.env.NFCA_TOKEN = 'test';
-    globalThis.fetch = (async (_input, init) => {
-      const request = JSON.parse(String(init?.body));
-      return Response.json({ token: `token-${request.map}` });
-    }) as typeof fetch;
+    const generatedMaps: string[] = [];
+    mockSuccessfulChallengeGeneration(generatedMaps);
 
-    const response = await dailyChallengesRequest();
+    const firstResponse = await dailyChallengesRequest();
+    const firstBody = (await firstResponse.json()) as DailyChallengesBody;
+    const secondResponse = await dailyChallengesRequest();
+    const secondBody = (await secondResponse.json()) as DailyChallengesBody;
 
-    expect(response.status).toBe(200);
-    const body = (await response.json()) as {
-      batchId: string;
-      date: string;
-      challenges: Array<{
-        geoguessrId: string;
-        authors: string | null;
-        difficulty: number;
-        url: string;
-      }>;
-    };
-    expect(body.batchId).toBeString();
-    expect(body.date).toMatch(/^\d{1,2} [A-Z][a-z]+ \d{4}$/);
-    expect(body.challenges).toHaveLength(6);
+    expect(firstResponse.status).toBe(200);
+    expect(secondResponse.status).toBe(200);
+    expect(secondBody).toEqual(firstBody);
+    expect(firstBody.batchId).toBeString();
+    expect(firstBody.date).toMatch(/^\d{1,2} [A-Z][a-z]+ \d{4}$/);
+    expect(firstBody.challenges).toHaveLength(6);
+    expect(generatedMaps).toHaveLength(6);
     for (const difficulty of [1, 2, 3]) {
       expect(
-        body.challenges.filter(
+        firstBody.challenges.filter(
           (challenge) => challenge.difficulty === difficulty,
         ),
       ).toHaveLength(2);
     }
     expect(
-      body.challenges.some(
+      firstBody.challenges.some(
         (challenge) => challenge.geoguessrId === 'abandoned',
       ),
     ).toBe(false);
     expect(
-      body.challenges.every(
+      firstBody.challenges.every(
         (challenge) =>
           challenge.authors?.startsWith('Mapper ') &&
           challenge.url.startsWith(
@@ -159,21 +194,21 @@ describe('POST /discord-bot/daily-challenges', () => {
       ),
     ).toBe(true);
 
+    const batches = await db.select().from(discordChallengeBatches);
     const history = await db.select().from(discordChallengeMapHistory);
+    expect(batches).toHaveLength(1);
+    expect(batches[0]?.status).toBe('complete');
     expect(history).toHaveLength(6);
+    expect(history.every((entry) => entry.challengeUrl !== null)).toBe(true);
     expect(new Set(history.map((entry) => entry.batchId))).toEqual(
-      new Set([body.batchId]),
+      new Set([firstBody.batchId]),
     );
   });
 
   test('allows stale maps when the recency filter is disabled', async () => {
     process.env[RECENCY_FILTER_ENV] = 'false';
     await seedChallengeMaps(Math.floor(Date.now() / 1000) - 100 * 86_400);
-    process.env.NFCA_TOKEN = 'test';
-    globalThis.fetch = (async (_input, init) => {
-      const request = JSON.parse(String(init?.body));
-      return Response.json({ token: `token-${request.map}` });
-    }) as typeof fetch;
+    mockSuccessfulChallengeGeneration([]);
 
     const response = await dailyChallengesRequest();
 
@@ -181,19 +216,101 @@ describe('POST /discord-bot/daily-challenges', () => {
     expect(await db.select().from(discordChallengeMapHistory)).toHaveLength(6);
   });
 
-  test('keeps selection history when GeoGuessr generation fails', async () => {
+  test('persists successful URLs and resumes only missing generation', async () => {
     delete process.env[RECENCY_FILTER_ENV];
     await seedChallengeMaps();
     process.env.NFCA_TOKEN = 'test';
-    globalThis.fetch = (async () =>
-      new Response('upstream unavailable', {
-        status: 503,
-      })) as unknown as typeof fetch;
+    const generatedMaps: string[] = [];
+    let failedOnce = false;
+    globalThis.fetch = (async (_input, init) => {
+      const map = challengeMapFromRequest(init);
+      generatedMaps.push(map);
+      if (map === 'difficulty-1-1' && !failedOnce) {
+        failedOnce = true;
+        return new Response('upstream unavailable', { status: 503 });
+      }
+      return Response.json({ token: `token-${map}` });
+    }) as typeof fetch;
 
-    const response = await dailyChallengesRequest();
+    const failedResponse = await dailyChallengesRequest();
 
-    expect(response.status).toBe(502);
-    expect(await db.select().from(discordChallengeMapHistory)).toHaveLength(6);
+    expect(failedResponse.status).toBe(502);
+    const [pendingBatch] = await db.select().from(discordChallengeBatches);
+    const partialHistory = await db.select().from(discordChallengeMapHistory);
+    expect(pendingBatch?.status).toBe('pending');
+    expect(
+      partialHistory.filter((entry) => entry.challengeUrl !== null),
+    ).toHaveLength(5);
+
+    const resumedResponse = await dailyChallengesRequest();
+    const resumedBody = (await resumedResponse.json()) as DailyChallengesBody;
+    const replayResponse = await dailyChallengesRequest();
+    const replayBody = (await replayResponse.json()) as DailyChallengesBody;
+
+    expect(resumedResponse.status).toBe(200);
+    expect(replayResponse.status).toBe(200);
+    expect(resumedBody.batchId).toBe(pendingBatch?.id);
+    expect(replayBody).toEqual(resumedBody);
+    expect(generatedMaps).toHaveLength(7);
+    const completedHistory = await db.select().from(discordChallengeMapHistory);
+    expect(completedHistory.every((entry) => entry.challengeUrl !== null)).toBe(
+      true,
+    );
+  });
+
+  test('prevents an expired worker from releasing a newer lease', async () => {
+    await seedChallengeMaps();
+    const batch = await getOrCreateDailyChallengeBatch(
+      DEFAULT_CHALLENGE_SETTINGS,
+    );
+    const firstClaim = await claimDailyChallengeGeneration(batch.batchId, 1000);
+    const secondClaim = await claimDailyChallengeGeneration(
+      batch.batchId,
+      1000 + 121,
+    );
+    expect(firstClaim.state).toBe('claimed');
+    expect(secondClaim.state).toBe('claimed');
+    if (firstClaim.state !== 'claimed' || secondClaim.state !== 'claimed') {
+      throw new Error('expected generation claims');
+    }
+
+    await releaseDailyChallengeGeneration(batch.batchId, firstClaim.leaseToken);
+
+    const [stillClaimed] = await db
+      .select()
+      .from(discordChallengeBatches)
+      .where(eq(discordChallengeBatches.id, batch.batchId));
+    expect(stillClaimed?.status).toBe('generating');
+    expect(stillClaimed?.leaseToken).toBe(secondClaim.leaseToken);
+
+    await releaseDailyChallengeGeneration(
+      batch.batchId,
+      secondClaim.leaseToken,
+    );
+    const [released] = await db
+      .select()
+      .from(discordChallengeBatches)
+      .where(eq(discordChallengeBatches.id, batch.batchId));
+    expect(released?.status).toBe('pending');
+    expect(released?.leaseToken).toBeNull();
+  });
+
+  test('rejects changed settings for an existing daily batch', async () => {
+    await seedChallengeMaps();
+    const generatedMaps: string[] = [];
+    mockSuccessfulChallengeGeneration(generatedMaps);
+    expect((await dailyChallengesRequest()).status).toBe(200);
+
+    const response = await dailyChallengesRequest({
+      ...DEFAULT_CHALLENGE_SETTINGS,
+      time_limit: 30,
+    });
+
+    expect(response.status).toBe(409);
+    expect(await response.json()).toEqual({
+      message: 'Daily challenge settings differ from the existing batch',
+    });
+    expect(generatedMaps).toHaveLength(6);
   });
 
   test('rolls back when a difficulty has fewer than two eligible maps', async () => {
@@ -217,6 +334,7 @@ describe('POST /discord-bot/daily-challenges', () => {
     expect(await response.json()).toEqual({
       message: 'Difficulty 1 needs 2 eligible maps, found 1',
     });
+    expect(await db.select().from(discordChallengeBatches)).toEqual([]);
     expect(await db.select().from(discordChallengeMapHistory)).toEqual([]);
   });
 });

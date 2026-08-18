@@ -138,15 +138,48 @@ export const mapsRelations = relations(maps, ({ one, many }) => ({
   discordChallengeHistory: many(discordChallengeMapHistory),
 }));
 
+export const discordChallengeBatches = pgTable(
+  'discord_challenge_batches',
+  {
+    id: text('id').primaryKey(),
+    dailyKey: text('daily_key').notNull(),
+    timeLimit: integer('time_limit').notNull(),
+    forbidMoving: boolean('forbid_moving').notNull(),
+    forbidRotating: boolean('forbid_rotating').notNull(),
+    forbidZooming: boolean('forbid_zooming').notNull(),
+    status: text('status', {
+      enum: ['pending', 'generating', 'complete', 'failed'],
+    }).notNull(),
+    leaseToken: text('lease_token'),
+    leaseUntil: bigint('lease_until', { mode: 'number' }),
+    createdAt: bigint('created_at', { mode: 'number' }).notNull(),
+    completedAt: bigint('completed_at', { mode: 'number' }),
+  },
+  (t) => [
+    uniqueIndex('discord_challenge_batches_daily_key_unique').on(t.dailyKey),
+    check(
+      'discord_challenge_batches_status_check',
+      sql`${t.status} IN ('pending', 'generating', 'complete', 'failed')`,
+    ),
+  ],
+);
+
 export const discordChallengeMapHistory = pgTable(
   'discord_challenge_map_history',
   {
     id: bigserial('id', { mode: 'number' }).primaryKey(),
-    batchId: text('batch_id').notNull(),
-    mapId: bigint('map_id', { mode: 'number' })
+    batchId: text('batch_id')
       .notNull()
-      .references(() => maps.id, { onDelete: 'cascade' }),
-    selectedAt: integer('selected_at').notNull(),
+      .references(() => discordChallengeBatches.id, { onDelete: 'cascade' }),
+    mapId: bigint('map_id', { mode: 'number' }).references(() => maps.id, {
+      onDelete: 'set null',
+    }),
+    geoguessrId: text('geoguessr_id').notNull(),
+    mapName: text('map_name').notNull(),
+    authors: text('authors'),
+    difficulty: integer('difficulty').notNull(),
+    challengeUrl: text('challenge_url'),
+    selectedAt: bigint('selected_at', { mode: 'number' }).notNull(),
   },
   (t) => [
     uniqueIndex('discord_challenge_history_batch_map_unique').on(
@@ -159,9 +192,17 @@ export const discordChallengeMapHistory = pgTable(
     ),
   ],
 );
+export const discordChallengeBatchesRelations = relations(
+  discordChallengeBatches,
+  ({ many }) => ({ maps: many(discordChallengeMapHistory) }),
+);
 export const discordChallengeMapHistoryRelations = relations(
   discordChallengeMapHistory,
   ({ one }) => ({
+    batch: one(discordChallengeBatches, {
+      fields: [discordChallengeMapHistory.batchId],
+      references: [discordChallengeBatches.id],
+    }),
     map: one(maps, {
       fields: [discordChallengeMapHistory.mapId],
       references: [maps.id],
