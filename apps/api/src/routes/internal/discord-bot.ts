@@ -157,7 +157,12 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
       const results = await Promise.allSettled(
         missingChallenges.map(async (map) => {
           const url = await createGeoguessrChallenge(map.geoguessrId, body);
-          return saveDailyChallengeUrl(batch.batchId, map.id, url);
+          return saveDailyChallengeUrl(
+            batch.batchId,
+            map.id,
+            claim.leaseToken,
+            url,
+          );
         }),
       );
       if (results.some((result) => result.status === 'rejected')) {

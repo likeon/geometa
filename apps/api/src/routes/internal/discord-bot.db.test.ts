@@ -11,6 +11,7 @@ import {
   claimDailyChallengeGeneration,
   getOrCreateDailyChallengeBatch,
   releaseDailyChallengeGeneration,
+  saveDailyChallengeUrl,
 } from '@api/lib/internal/discord-challenges';
 import { eq } from 'drizzle-orm';
 import { discordBotRouter } from './discord-bot';
@@ -255,6 +256,55 @@ describe('POST /discord-bot/daily-challenges', () => {
     const completedHistory = await db.select().from(discordChallengeMapHistory);
     expect(completedHistory.every((entry) => entry.challengeUrl !== null)).toBe(
       true,
+    );
+  });
+
+  test('prevents an expired worker from saving a URL under a newer lease', async () => {
+    await seedChallengeMaps();
+    const batch = await getOrCreateDailyChallengeBatch(
+      DEFAULT_CHALLENGE_SETTINGS,
+    );
+    const firstClaim = await claimDailyChallengeGeneration(batch.batchId, 1000);
+    const secondClaim = await claimDailyChallengeGeneration(
+      batch.batchId,
+      1000 + 121,
+    );
+    expect(firstClaim.state).toBe('claimed');
+    expect(secondClaim.state).toBe('claimed');
+    if (firstClaim.state !== 'claimed' || secondClaim.state !== 'claimed') {
+      throw new Error('expected generation claims');
+    }
+    const historyId = batch.maps[0]!.id;
+
+    await expect(
+      saveDailyChallengeUrl(
+        batch.batchId,
+        historyId,
+        firstClaim.leaseToken,
+        'https://www.geoguessr.com/challenge/stale',
+        1000 + 121,
+      ),
+    ).rejects.toThrow('Daily challenge generation lease was lost');
+
+    const [unchanged] = await db
+      .select()
+      .from(discordChallengeMapHistory)
+      .where(eq(discordChallengeMapHistory.id, historyId));
+    expect(unchanged?.challengeUrl).toBeNull();
+
+    await saveDailyChallengeUrl(
+      batch.batchId,
+      historyId,
+      secondClaim.leaseToken,
+      'https://www.geoguessr.com/challenge/current',
+      1000 + 121,
+    );
+    const [saved] = await db
+      .select()
+      .from(discordChallengeMapHistory)
+      .where(eq(discordChallengeMapHistory.id, historyId));
+    expect(saved?.challengeUrl).toBe(
+      'https://www.geoguessr.com/challenge/current',
     );
   });
 

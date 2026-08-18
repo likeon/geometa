@@ -8,6 +8,8 @@ import { db } from '@api/lib/drizzle';
 import {
   and,
   eq,
+  exists,
+  gt,
   gte,
   inArray,
   isNull,
@@ -91,9 +93,7 @@ export function challengeDailyKey(date = new Date()): string {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
-export function isRecencyFilterEnabled(
-  value = process.env[RECENCY_FILTER_ENV],
-): boolean {
+export function isRecencyFilterEnabled(value: string | undefined): boolean {
   if (value === undefined) {
     return true;
   }
@@ -235,7 +235,9 @@ export async function getOrCreateDailyChallengeBatch(
     }
 
     const selectedAt = Math.floor(date.getTime() / 1000);
-    const recencyCondition = isRecencyFilterEnabled()
+    const recencyCondition = isRecencyFilterEnabled(
+      process.env[RECENCY_FILTER_ENV],
+    )
       ? gte(
           maps.modifiedAt,
           sql<number>`EXTRACT(EPOCH FROM NOW() - INTERVAL '2 months')::integer`,
@@ -369,9 +371,22 @@ export async function claimDailyChallengeGeneration(
 export async function saveDailyChallengeUrl(
   batchId: string,
   historyId: number,
+  leaseToken: string,
   url: string,
+  now = Math.floor(Date.now() / 1000),
 ): Promise<void> {
-  await db.$primary
+  const activeLease = db.$primary
+    .select({ id: discordChallengeBatches.id })
+    .from(discordChallengeBatches)
+    .where(
+      and(
+        eq(discordChallengeBatches.id, batchId),
+        eq(discordChallengeBatches.status, 'generating'),
+        eq(discordChallengeBatches.leaseToken, leaseToken),
+        gt(discordChallengeBatches.leaseUntil, now),
+      ),
+    );
+  const [saved] = await db.$primary
     .update(discordChallengeMapHistory)
     .set({ challengeUrl: url })
     .where(
@@ -379,8 +394,13 @@ export async function saveDailyChallengeUrl(
         eq(discordChallengeMapHistory.id, historyId),
         eq(discordChallengeMapHistory.batchId, batchId),
         isNull(discordChallengeMapHistory.challengeUrl),
+        exists(activeLease),
       ),
-    );
+    )
+    .returning({ id: discordChallengeMapHistory.id });
+  if (!saved) {
+    throw new Error('Daily challenge generation lease was lost');
+  }
 }
 
 export async function releaseDailyChallengeGeneration(
