@@ -6,7 +6,6 @@ edition = "2024"
 [dependencies]
 config = { version = "0.15.25", default-features = false, features = ["yaml"] }
 poise = "0.6.1"
-rand = "0.9.2"
 regex = "1.11.1"
 reqwest = { version = "0.13.1", default-features = false, features = [
   "json",

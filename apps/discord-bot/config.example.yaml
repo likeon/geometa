@@ -4,6 +4,7 @@
 challenge:
   channel_id: 0
   time_limit: 0
+  game_mode: nm
 
 game_modes:
   moving:
@@ -21,19 +22,6 @@ game_modes:
       forbid_moving: true
       forbid_rotating: true
       forbid_zooming: true
-
-pools:
-  - name: "World"
-    maps:
-      - name: "A Community World"
-        map_id: "62a44b22040f04bd36e8a914"
-        game_modes: ["moving", "nm", "nmpz"]
-
-  - name: "Learnable Meta Europe"
-    learnable_meta:
-      region: "Europe"
-      is_shared: true
-    game_modes: ["nm", "nmpz"]
 
 # Replace IDs before use.
 spam_detection:

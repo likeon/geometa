@@ -3,11 +3,12 @@
 One Rust binary provides:
 
 - the existing `/publish` command;
-- a daily, button-only GeoGuessr challenge post.
+- a daily GeoGuessr challenge embed.
 
 The always-on Deployment runs the Discord gateway. A Kubernetes CronJob runs
-`discord-bot challenge` at 12:00 Europe/Berlin, posts one challenge-link button
-per configured pool, and exits.
+`discord-bot challenge` at 12:00 Europe/Berlin, posts one embed containing
+Beginner, Intermediate, and Advanced groups with two linked map names and
+bold author credits each, and exits.
 
 ## Configuration
 
@@ -21,6 +22,7 @@ Kubernetes ConfigMap from `flux/config.yaml` and mounts it at that path:
 challenge:
   channel_id: 123456789012345678
   time_limit: 0
+  game_mode: nm
 
 game_modes:
   nm:
@@ -28,30 +30,18 @@ game_modes:
       forbid_moving: true
       forbid_rotating: false
       forbid_zooming: false
-
-pools:
-  - name: Featured
-    maps:
-      - name: A Community World
-        map_id: 62a44b22040f04bd36e8a914
-        game_modes: [nm]
-
-  - name: LearnableMeta
-    learnable_meta:
-      region: Europe
-      is_shared: true
-    game_modes: [nm]
 ```
 
-Each pool must contain either static `maps` or `learnable_meta`. The
-LearnableMeta filters are optional. At most 25 pools are supported because
-Discord messages allow 25 buttons.
+The ALM API selects six eligible maps: two for each difficulty. Eligible maps
+are published, non-personal, and modified within the previous two calendar
+months. Selection is weighted toward maps used less recently, then persisted
+in PostgreSQL before GeoGuessr challenges are created.
 
 ## Responsibilities
 
-The bot selects maps and posts to Discord. It calls the in-cluster ALM API for
-the map catalog and challenge creation. Only the ALM API communicates with
-GeoGuessr and owns the `_ncfa` cookie.
+The bot requests one generated daily batch and posts it to Discord. The ALM API
+owns map selection, rotation history, and GeoGuessr challenge creation. Only
+the ALM API communicates with GeoGuessr and owns the `_ncfa` cookie.
 
 ## Optional spam detection
 

@@ -1,6 +1,8 @@
+---
 challenge:
   channel_id: 1534189078155624538
   time_limit: 0
+  game_mode: nm
 
 game_modes:
   nm:
@@ -8,37 +10,6 @@ game_modes:
       forbid_moving: true
       forbid_rotating: false
       forbid_zooming: false
-
-pools:
-  - name: "Featured Maps"
-    maps:
-      - name: "A Balanced Major Bajor World"
-        map_id: "699617147156b7076362bd45"
-        game_modes: ["nm"]
-      - name: "A Learnable World - Identify Every Country"
-        map_id: "67e33138703749d45b6faf2c"
-        game_modes: ["nm"]
-      - name: "A Learnable Meta World - Basics"
-        map_id: "66fda352ee1c8ee4735e1aa8"
-        game_modes: ["nm"]
-      - name: "A Learnable Meta World - Beginner"
-        map_id: "66c0d3feff4dbe492e06174e"
-        game_modes: ["nm"]
-      - name: "A Learnable Meta World"
-        map_id: "66fda2e27e08dc03b5bb3d6e"
-        game_modes: ["nm"]
-      - name: "A Learnable Meta World - Intermediate"
-        map_id: "67695a0a9c0874b92709eedb"
-        game_modes: ["nm"]
-  - name: "All LearnableMeta 1"
-    learnable_meta: {}
-    game_modes: ["nm"]
-  - name: "All LearnableMeta 2"
-    learnable_meta: {}
-    game_modes: ["nm"]
-  - name: "All LearnableMeta 3"
-    learnable_meta: {}
-    game_modes: ["nm"]
 
 spam_detection:
   mode: alert

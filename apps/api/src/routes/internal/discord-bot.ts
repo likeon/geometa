@@ -2,6 +2,11 @@ import { maps, users } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { logChange } from '@api/lib/internal/changes';
+import {
+  formatChallengeDate,
+  InsufficientChallengeMapsError,
+  selectDailyChallengeMaps,
+} from '@api/lib/internal/discord-challenges';
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { geoguessrAPIFetch } from '@api/lib/internal/utils';
 import { eq, sql } from 'drizzle-orm';
@@ -17,64 +22,114 @@ const challengeResponseValidator = TypeCompiler.Compile(
     { additionalProperties: true },
   ),
 );
+const challengeSettingsSchema = t.Object({
+  time_limit: t.Integer({ minimum: 0 }),
+  forbid_moving: t.Boolean(),
+  forbid_rotating: t.Boolean(),
+  forbid_zooming: t.Boolean(),
+});
+
+type ChallengeSettings = typeof challengeSettingsSchema.static;
+
+async function createGeoguessrChallenge(
+  geoguessrMapId: string,
+  settings: ChallengeSettings,
+): Promise<string> {
+  let response: Response;
+  try {
+    response = await geoguessrAPIFetch(GEOGUESSR_CHALLENGES_URL, {
+      method: 'POST',
+      signal: AbortSignal.timeout(20_000),
+      body: JSON.stringify({
+        forbidMoving: settings.forbid_moving,
+        forbidRotating: settings.forbid_rotating,
+        forbidZooming: settings.forbid_zooming,
+        map: geoguessrMapId,
+        rounds: 5,
+        timeLimit: settings.time_limit,
+      }),
+    });
+  } catch (error) {
+    console.error('GeoGuessr challenge creation request failed', error);
+    throw new Error(CHALLENGE_ERROR.message);
+  }
+
+  if (!response.ok) {
+    console.error(
+      `GeoGuessr challenge creation failed with HTTP ${response.status}: ${(await response.text()).slice(0, 300)}`,
+    );
+    throw new Error(CHALLENGE_ERROR.message);
+  }
+
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    console.error('GeoGuessr challenge creation returned invalid JSON');
+    throw new Error(CHALLENGE_ERROR.message);
+  }
+
+  if (!challengeResponseValidator.Check(data)) {
+    console.error('GeoGuessr challenge creation returned no token');
+    throw new Error(CHALLENGE_ERROR.message);
+  }
+
+  return `https://www.geoguessr.com/challenge/${encodeURIComponent(data.token.trim())}`;
+}
 
 export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
   .use(auth(true))
   .post(
     'challenges',
     async ({ body, status }) => {
-      let response: Response;
       try {
-        response = await geoguessrAPIFetch(GEOGUESSR_CHALLENGES_URL, {
-          method: 'POST',
-          signal: AbortSignal.timeout(20_000),
-          body: JSON.stringify({
-            forbidMoving: body.forbid_moving,
-            forbidRotating: body.forbid_rotating,
-            forbidZooming: body.forbid_zooming,
-            map: body.geoguessr_map_id,
-            rounds: 5,
-            timeLimit: body.time_limit,
-          }),
-        });
-      } catch (error) {
-        console.error('GeoGuessr challenge creation request failed', error);
-        return status(502, CHALLENGE_ERROR);
-      }
-
-      if (!response.ok) {
-        console.error(
-          `GeoGuessr challenge creation failed with HTTP ${response.status}: ${(await response.text()).slice(0, 300)}`,
-        );
-        return status(502, CHALLENGE_ERROR);
-      }
-
-      let data: unknown;
-      try {
-        data = await response.json();
+        return {
+          url: await createGeoguessrChallenge(body.geoguessr_map_id, body),
+        };
       } catch {
-        console.error('GeoGuessr challenge creation returned invalid JSON');
         return status(502, CHALLENGE_ERROR);
       }
-
-      if (!challengeResponseValidator.Check(data)) {
-        console.error('GeoGuessr challenge creation returned no token');
-        return status(502, CHALLENGE_ERROR);
-      }
-
-      return {
-        url: `https://www.geoguessr.com/challenge/${encodeURIComponent(data.token.trim())}`,
-      };
     },
     {
-      body: t.Object({
-        geoguessr_map_id: t.String({ minLength: 1 }),
-        time_limit: t.Integer({ minimum: 0 }),
-        forbid_moving: t.Boolean(),
-        forbid_rotating: t.Boolean(),
-        forbid_zooming: t.Boolean(),
-      }),
+      body: t.Intersect([
+        challengeSettingsSchema,
+        t.Object({ geoguessr_map_id: t.String({ minLength: 1 }) }),
+      ]),
     },
+  )
+  .post(
+    'daily-challenges',
+    async ({ body, status }) => {
+      let selection: Awaited<ReturnType<typeof selectDailyChallengeMaps>>;
+      try {
+        selection = await selectDailyChallengeMaps();
+      } catch (error) {
+        if (error instanceof InsufficientChallengeMapsError) {
+          return status(409, { message: error.message });
+        }
+        throw error;
+      }
+
+      try {
+        const challenges = await Promise.all(
+          selection.maps.map(async (map) => ({
+            geoguessrId: map.geoguessrId,
+            name: map.name,
+            authors: map.authors,
+            difficulty: map.difficulty,
+            url: await createGeoguessrChallenge(map.geoguessrId, body),
+          })),
+        );
+        return {
+          batchId: selection.batchId,
+          date: formatChallengeDate(),
+          challenges,
+        };
+      } catch {
+        return status(502, CHALLENGE_ERROR);
+      }
+    },
+    { body: challengeSettingsSchema },
   )
   .post(
     'maps/:geoguessrId/publish',

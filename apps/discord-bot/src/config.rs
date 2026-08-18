@@ -20,9 +20,6 @@ pub static CONFIG: LazyLock<BotConfig> = LazyLock::new(|| {
     load_config().unwrap_or_else(|error| panic!("failed to load {CONFIG_PATH}: {error}"))
 });
 
-pub const MAX_BUTTONS: usize = 25;
-pub const MAX_BUTTON_LABEL: usize = 80;
-
 const DEFAULT_BAN_DELETE_SECONDS: u64 = 900;
 const DEFAULT_QUEUE_CAPACITY: usize = 256;
 const DEFAULT_SPAM_THRESHOLD: f64 = 0.5;
@@ -71,8 +68,6 @@ pub struct BotConfig {
     pub challenge: ChallengeConfig,
     #[serde(default)]
     pub game_modes: HashMap<String, GameMode>,
-    #[serde(default)]
-    pub pools: Vec<Pool>,
     #[serde(default)]
     pub spam_detection: Option<SpamDetection>,
 }
@@ -126,6 +121,7 @@ impl fmt::Debug for SecretString {
 pub struct ChallengeConfig {
     pub channel_id: u64,
     pub time_limit: u32,
+    pub game_mode: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -140,32 +136,6 @@ pub struct ModeSettings {
     pub forbid_moving: bool,
     pub forbid_rotating: bool,
     pub forbid_zooming: bool,
-}
-
-#[derive(Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Pool {
-    pub name: String,
-    #[serde(default)]
-    pub maps: Vec<Map>,
-    pub learnable_meta: Option<LearnableMeta>,
-    #[serde(default)]
-    pub game_modes: Vec<String>,
-}
-
-#[derive(Clone, Debug, Deserialize, Eq, Hash, PartialEq)]
-#[serde(deny_unknown_fields)]
-pub struct LearnableMeta {
-    pub region: Option<String>,
-    pub is_shared: Option<bool>,
-}
-
-#[derive(Clone, Debug, Deserialize)]
-#[serde(deny_unknown_fields)]
-pub struct Map {
-    pub name: String,
-    pub map_id: String,
-    pub game_modes: Vec<String>,
 }
 
 #[derive(Clone, Copy, Debug, Deserialize, Eq, PartialEq)]
@@ -418,40 +388,11 @@ fn validate_document(config: &BotConfig) -> Result<(), Error> {
     if config.game_modes.is_empty() {
         return Err(invalid("game_modes must not be empty"));
     }
-    if config.pools.is_empty() || config.pools.len() > MAX_BUTTONS {
-        return Err(invalid("pools must contain between 1 and 25 entries"));
-    }
-
-    for pool in &config.pools {
-        if pool.name.trim().is_empty() {
-            return Err(invalid("pool names must not be empty"));
-        }
-        match (pool.maps.is_empty(), pool.learnable_meta.as_ref()) {
-            (false, None) => {
-                for map in &pool.maps {
-                    if map.name.trim().is_empty() || map.map_id.trim().is_empty() {
-                        return Err(invalid(format!(
-                            "{} contains a map without a name or map_id",
-                            pool.name
-                        )));
-                    }
-                    validate_modes(&map.game_modes, &config.game_modes, &pool.name)?;
-                }
-            }
-            (true, Some(source)) => {
-                if source.region.as_ref().is_some_and(|value| value.is_empty()) {
-                    return Err(invalid(format!("{} has an empty region", pool.name)));
-                }
-                validate_modes(&pool.game_modes, &config.game_modes, &pool.name)?;
-            }
-            _ => {
-                return Err(invalid(format!(
-                    "{} must configure either maps or learnable_meta",
-                    pool.name
-                )));
-            }
-        }
-    }
+    validate_modes(
+        std::slice::from_ref(&config.challenge.game_mode),
+        &config.game_modes,
+        "challenge",
+    )?;
 
     if let Some(spam) = &config.spam_detection {
         validate_spam_detection(spam)?;
@@ -624,21 +565,13 @@ mod tests {
 challenge:
   channel_id: 123
   time_limit: 0
+  game_mode: nm
 game_modes:
   nm:
     settings:
       forbid_moving: true
       forbid_rotating: false
       forbid_zooming: false
-pools:
-  - name: Featured
-    maps:
-      - name: Map One
-        map_id: map-1
-        game_modes: [nm]
-  - name: Learnable
-    learnable_meta: {}
-    game_modes: [nm]
 "#;
 
     const SPAM: &str = r#"
@@ -669,6 +602,7 @@ spam_detection:
             &CONFIG.replace("  time_limit: 0", "  time_limit: 0\n  post_time: 12:00")
         )
         .is_err());
+        assert!(parse_config(&format!("{CONFIG}\npools: []\n")).is_err());
     }
 
     #[test]

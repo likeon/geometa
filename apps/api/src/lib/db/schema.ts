@@ -135,7 +135,39 @@ export const mapsRelations = relations(maps, ({ one, many }) => ({
   mapLevels: many(mapLevels),
   filters: many(mapFilters),
   mapRegions: many(mapRegions),
+  discordChallengeHistory: many(discordChallengeMapHistory),
 }));
+
+export const discordChallengeMapHistory = pgTable(
+  'discord_challenge_map_history',
+  {
+    id: bigserial('id', { mode: 'number' }).primaryKey(),
+    batchId: text('batch_id').notNull(),
+    mapId: bigint('map_id', { mode: 'number' })
+      .notNull()
+      .references(() => maps.id, { onDelete: 'cascade' }),
+    selectedAt: integer('selected_at').notNull(),
+  },
+  (t) => [
+    uniqueIndex('discord_challenge_history_batch_map_unique').on(
+      t.batchId,
+      t.mapId,
+    ),
+    index('discord_challenge_history_map_selected_idx').on(
+      t.mapId,
+      t.selectedAt.desc(),
+    ),
+  ],
+);
+export const discordChallengeMapHistoryRelations = relations(
+  discordChallengeMapHistory,
+  ({ one }) => ({
+    map: one(maps, {
+      fields: [discordChallengeMapHistory.mapId],
+      references: [maps.id],
+    }),
+  }),
+);
 
 export const levels = pgTable(
   'levels',

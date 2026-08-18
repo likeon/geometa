@@ -8,6 +8,7 @@ use tracing::error;
 use crate::config::ApiClientConfig;
 
 const TOKEN_PATH: &str = "/var/run/secrets/kubernetes.io/serviceaccount/token";
+const MAX_ERROR_BODY_CHARS: usize = 1_000;
 type Error = Box<dyn std::error::Error + Send + Sync>;
 
 trait AuthExt {
@@ -33,7 +34,7 @@ impl Requester {
             base_path: format!("http://{}/api", config.host),
             requires_jwt: config.requires_jwt,
             reqwest_client: ReqwestClient::builder()
-                .timeout(Duration::from_secs(20))
+                .timeout(Duration::from_secs(30))
                 .build()?,
         })
     }
@@ -58,6 +59,16 @@ fn requester() -> Result<&'static Requester, Error> {
         .ok_or_else(|| std::io::Error::other("internal API client was not initialized").into())
 }
 
+fn bounded_error_body(body: &str) -> String {
+    let mut characters = body.chars();
+    let bounded: String = characters.by_ref().take(MAX_ERROR_BODY_CHARS).collect();
+    if characters.next().is_some() {
+        format!("{bounded}…")
+    } else {
+        bounded
+    }
+}
+
 pub struct Client {}
 impl Client {
     pub fn initialize(config: ApiClientConfig) -> Result<(), Error> {
@@ -66,37 +77,52 @@ impl Client {
             std::io::Error::other("internal API client was initialized more than once").into()
         })
     }
-    pub async fn maps(region: Option<&str>, is_shared: Option<bool>) -> Result<Vec<Map>, Error> {
+    pub async fn daily_challenges(
+        request: &DailyChallengesRequest,
+    ) -> Result<DailyChallenges, Error> {
         let response = requester()?
-            .request(Method::GET, "maps")
-            .await?
-            .query(&MapsQuery { region, is_shared })
-            .send()
-            .await?
-            .error_for_status()?;
-
-        Ok(response.json().await?)
-    }
-
-    pub async fn create_challenge(request: &ChallengeRequest<'_>) -> Result<String, Error> {
-        let response = requester()?
-            .request(Method::POST, "internal/discord-bot/challenges")
+            .request(Method::POST, "internal/discord-bot/daily-challenges")
             .await?
             .json(request)
             .send()
-            .await?
-            .error_for_status()?
-            .json::<ChallengeResponse>()
             .await?;
 
-        if !response
-            .url
-            .starts_with("https://www.geoguessr.com/challenge/")
-        {
-            return Err(std::io::Error::other("ALM API returned an invalid challenge URL").into());
+        let status = response.status();
+        if !status.is_success() {
+            let response_body = response
+                .text()
+                .await
+                .map(|body| bounded_error_body(&body))
+                .unwrap_or_else(|body_error| {
+                    format!("<failed to read response body: {body_error}>")
+                });
+            error!(
+                %status,
+                response_body = %response_body,
+                "daily challenges API request failed"
+            );
+            return Err(std::io::Error::other(format!(
+                "daily challenges API returned HTTP {status}"
+            ))
+            .into());
         }
 
-        Ok(response.url)
+        let response = response.json::<DailyChallenges>().await?;
+        if response.batch_id.trim().is_empty()
+            || response.date.trim().is_empty()
+            || response.date.chars().count() > 64
+            || response.challenges.iter().any(|challenge| {
+                challenge.geoguessr_id.trim().is_empty()
+                    || challenge.name.trim().is_empty()
+                    || !challenge
+                        .url
+                        .starts_with("https://www.geoguessr.com/challenge/")
+            })
+        {
+            return Err(std::io::Error::other("ALM API returned invalid daily challenges").into());
+        }
+
+        Ok(response)
     }
 
     pub async fn publish_map(
@@ -176,21 +202,6 @@ impl Client {
     }
 }
 
-#[derive(Clone, Debug, Deserialize)]
-pub struct Map {
-    #[serde(rename = "geoguessrId")]
-    pub geoguessr_id: String,
-    pub name: String,
-}
-
-#[derive(Debug, Serialize)]
-struct MapsQuery<'a> {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    region: Option<&'a str>,
-    #[serde(rename = "isShared", skip_serializing_if = "Option::is_none")]
-    is_shared: Option<bool>,
-}
-
 #[derive(Debug, Deserialize)]
 struct IsDiscordVerifiedResponse {
     #[serde(rename = "isDiscordVerified")]
@@ -206,8 +217,7 @@ pub struct MessageVerification {
 }
 
 #[derive(Debug, Serialize)]
-pub struct ChallengeRequest<'a> {
-    pub geoguessr_map_id: &'a str,
+pub struct DailyChallengesRequest {
     pub time_limit: u32,
     pub forbid_moving: bool,
     pub forbid_rotating: bool,
@@ -215,8 +225,21 @@ pub struct ChallengeRequest<'a> {
 }
 
 #[derive(Debug, Deserialize)]
-struct ChallengeResponse {
-    url: String,
+pub struct DailyChallenges {
+    #[serde(rename = "batchId")]
+    pub batch_id: String,
+    pub date: String,
+    pub challenges: Vec<DailyChallenge>,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
+pub struct DailyChallenge {
+    #[serde(rename = "geoguessrId")]
+    pub geoguessr_id: String,
+    pub name: String,
+    pub authors: Option<String>,
+    pub difficulty: u8,
+    pub url: String,
 }
 
 #[derive(Serialize, Debug)]
@@ -251,7 +274,42 @@ impl From<Box<dyn std::error::Error + Send + Sync>> for PublishMapError {
 
 #[cfg(test)]
 mod tests {
-    use super::MessageVerification;
+    use super::{DailyChallenges, MAX_ERROR_BODY_CHARS, MessageVerification, bounded_error_body};
+
+    #[test]
+    fn bounds_api_error_bodies_by_character() {
+        let body = "ä".repeat(MAX_ERROR_BODY_CHARS + 1);
+        let bounded = bounded_error_body(&body);
+
+        assert_eq!(bounded.chars().count(), MAX_ERROR_BODY_CHARS + 1);
+        assert!(bounded.ends_with('…'));
+        assert_eq!(bounded_error_body("short error"), "short error");
+    }
+
+    #[test]
+    fn parses_daily_challenges_response() {
+        let body: DailyChallenges = serde_json::from_str(
+            r#"{
+                "batchId":"batch-1",
+                "date":"18 August 2026",
+                "challenges":[{
+                    "geoguessrId":"map-1",
+                    "name":"Beginner Map",
+                    "authors":"Mapper",
+                    "difficulty":1,
+                    "url":"https://www.geoguessr.com/challenge/token-1"
+                }]
+            }"#,
+        )
+        .expect("response must deserialize");
+
+        assert_eq!(body.batch_id, "batch-1");
+        assert_eq!(body.date, "18 August 2026");
+        assert_eq!(body.challenges.len(), 1);
+        assert_eq!(body.challenges[0].difficulty, 1);
+        assert_eq!(body.challenges[0].geoguessr_id, "map-1");
+        assert_eq!(body.challenges[0].authors.as_deref(), Some("Mapper"));
+    }
 
     #[test]
     fn parses_verified_message_response() {
