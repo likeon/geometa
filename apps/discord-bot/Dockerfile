@@ -13,7 +13,7 @@ RUN cargo chef cook --release --recipe-path recipe.json
 COPY . .
 RUN cargo build --release --bin discord-bot
 
-FROM gcr.io/distroless/cc-debian12 AS runtime
+FROM gcr.io/distroless/cc-debian13 AS runtime
 WORKDIR /app
 USER 1000
 COPY --from=builder --chown=1000:1000 /app/target/release/discord-bot /usr/local/bin/discord-bot
