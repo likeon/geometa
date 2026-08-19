@@ -7,13 +7,16 @@
   import { fileProxy, type Infer, superForm, type SuperValidated } from 'sveltekit-superforms';
   import type { GeoJsonUploadSchema } from './+page.server';
   import type { PageData } from './$types';
+  import { createPasteUpload } from './paste-upload.svelte';
 
   let {
     selectedMeta,
-    geoJsonUploadForm
+    geoJsonUploadForm,
+    isActive
   }: {
     selectedMeta: PageData['group']['metas'][number];
     geoJsonUploadForm: SuperValidated<Infer<GeoJsonUploadSchema>>;
+    isActive: boolean;
   } = $props();
 
   let isDragging = $state(false);
@@ -21,8 +24,9 @@
   let fileInput: HTMLInputElement;
   // svelte-ignore state_referenced_locally
   const formApi = superForm(geoJsonUploadForm, {
-    onSubmit() {
+    onSubmit({ formData }) {
       isUploading = true;
+      pasteUpload.applyTo(formData);
     },
     onResult() {
       isUploading = false;
@@ -31,8 +35,13 @@
       if (form.valid) await invalidateAll();
     }
   });
-  const { form, errors, enhance: uploadEnhance, submit } = formApi;
+  const { form, errors, enhance: uploadEnhance, submit, reset } = formApi;
   const file = fileProxy(form, 'file');
+  const pasteUpload = createPasteUpload({
+    isOpen: () => isActive,
+    submit,
+    reset
+  });
 
   function handleDragOver(event: DragEvent) {
     event.preventDefault();
@@ -130,7 +139,7 @@
           {#if isUploading}
             <LoadingSmall />
           {:else}
-            Drag & Drop GeoJSON here
+            Drag & Drop or paste GeoJSON here
           {/if}
         </p>
       </div>
