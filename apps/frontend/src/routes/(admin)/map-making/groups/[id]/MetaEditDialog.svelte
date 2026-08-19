@@ -341,7 +341,10 @@ Czechia - Arrow Signs" />
           ></MetaImages>
         </Tabs.Content>
         <Tabs.Content value="map-area" class="h-[68vh] max-h-[650px] overflow-y-auto flex-none">
-          <MetaMapArea {selectedMeta} {geoJsonUploadForm} />
+          <MetaMapArea
+            {selectedMeta}
+            {geoJsonUploadForm}
+            isActive={isMetaDialogOpen && currentTab === 'map-area'} />
         </Tabs.Content>
       {/if}
     </Tabs.Root>
