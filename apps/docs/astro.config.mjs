@@ -48,7 +48,6 @@ export default defineConfig({
             {
               label: 'Installation',
               items: [
-                { label: 'Overview', link: '/getting-started/installation/' },
                 { label: 'Chrome and Chromium', link: '/getting-started/chrome/' },
                 { label: 'Firefox', link: '/getting-started/firefox/' },
                 { label: 'Android', link: '/getting-started/android/' },

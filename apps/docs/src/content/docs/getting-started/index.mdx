@@ -3,7 +3,7 @@ title: Getting Started
 description: Learn what LearnableMeta does and how to start using it with GeoGuessr.
 ---
 
-import { CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
 
 LearnableMeta teaches useful GeoGuessr clues while you play. Its maps contain tagged locations, and its browser userscript displays an explanation after each guess.
 
@@ -14,34 +14,66 @@ LearnableMeta teaches useful GeoGuessr clues while you play. Its maps contain ta
 - A userscript manager such as Tampermonkey
 - The LearnableMeta userscript
 
+## Install LearnableMeta
+
+LearnableMeta runs as a userscript inside GeoGuessr. Choose your browser or device to install a supported userscript manager:
+
+<CardGrid>
+  <LinkCard
+    title="Chrome and Chromium"
+    href="/getting-started/chrome/"
+    description="Chrome, Edge, Brave, Opera, and other Chromium-based browsers."
+  />
+  <LinkCard
+    title="Firefox"
+    href="/getting-started/firefox/"
+    description="Firefox on desktop."
+  />
+  <LinkCard
+    title="Android"
+    href="/getting-started/android/"
+    description="Use Firefox for Android; the GeoGuessr app is not supported."
+  />
+  <LinkCard
+    title="iOS and iPadOS"
+    href="/getting-started/ios/"
+    description="Community-tested Safari and Orion options."
+  />
+</CardGrid>
+
 ## Start learning
 
 <Steps>
 
-1. **Install a userscript manager and LearnableMeta.**
+1. **Install a userscript manager.**
 
-   Follow the instructions for your browser or device.
+   Follow the guide for your browser or device above.
 
-2. **Open a fresh browser tab.**
+2. **Install LearnableMeta.**
+
+   Open the [LearnableMeta userscript installer](https://github.com/likeon/geometa/raw/main/dist/geometa.user.js) and confirm the installation in your userscript manager.
+
+3. **Open a fresh browser tab.**
 
    Tabs that were already open during installation may not load the userscript. Restarting the browser is the safest option.
 
-3. **Choose a LearnableMeta map.**
+4. **Choose a LearnableMeta map.**
 
    Browse the [available maps](https://learnablemeta.com/maps) and open one in GeoGuessr.
 
-4. **Play and review each clue.**
+5. **Play and review each clue.**
 
    Make your guess normally. On the results screen, LearnableMeta shows the clue attached to that location.
 
 </Steps>
 
+<Aside type="caution">
+  The script will not load in tabs that were open before installation. Open a new GeoGuessr tab or restart your browser before testing it.
+</Aside>
+
+If the userscript downloads as a file instead of opening an installation window, follow the [manual installation video](https://www.youtube.com/watch?v=RpjvLpyiras).
+
 <CardGrid>
-  <LinkCard
-    title="Install LearnableMeta"
-    href="/getting-started/installation/"
-    description="Choose instructions for desktop, Android, or iOS."
-  />
   <LinkCard
     title="Learn the play flow"
     href="/using-learnable-meta/"
