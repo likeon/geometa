@@ -25,6 +25,7 @@
   import { modalDialog } from './utils/modalDialog';
   import { clearMapArea, showMapArea } from './mapArea';
   import { API_BASE_URL, CACHE_NAMESPACE, SITE_BASE_URL } from './config';
+  import { isGeoJsonEnabled } from './utils/geoJsonSetting';
 
   interface Props {
     panoId: string;
@@ -57,6 +58,7 @@
   const selectedMeta = $derived(metaDetails[selectedMetaIndex] ?? null);
   const tabIdPrefix = `geometa-${crypto.randomUUID()}`;
   const cacheKey = `${CACHE_NAMESPACE}:${mapId}_${panoId}`;
+  const geoJsonEnabled = isGeoJsonEnabled();
   const loadingMetaIds = new Set<number>();
 
   function requestJson<T>(url: string): Promise<T> {
@@ -106,7 +108,11 @@
 
     loadingMetaIds.add(summary.id);
     try {
-      const query = new URLSearchParams({ panoId, mapId }).toString();
+      const query = new URLSearchParams({
+        panoId,
+        mapId,
+        includeGeoJson: String(geoJsonEnabled)
+      }).toString();
       const data = await requestJson<MetaInfo>(
         `${API_BASE_URL}/api/userscript/location/meta/${summary.id}?${query}`
       );
@@ -153,7 +159,8 @@
         panoId,
         mapId,
         userscriptVersion,
-        source
+        source,
+        includeGeoJson: String(geoJsonEnabled)
       }).toString();
       const url = `${API_BASE_URL}/api/userscript/location?${urlParams}`;
 
@@ -242,7 +249,7 @@
   });
 
   $effect(() => {
-    if (selectedMeta?.geoJson) showMapArea(selectedMeta.geoJson);
+    if (geoJsonEnabled && selectedMeta?.geoJson) showMapArea(selectedMeta.geoJson);
     else clearMapArea();
     return clearMapArea;
   });

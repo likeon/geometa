@@ -12,13 +12,15 @@ import { initMapGroupUpdate } from './lib/mapGroupUpdate';
 import { initLiveChallengeIdTracking } from './lib/utils/liveChallengeId';
 import ResetLayoutConfirmation from './lib/components/ResetLayoutConfirmation.svelte';
 import { initMapArea } from './lib/mapArea';
+import { isGeoJsonEnabled, setGeoJsonEnabled } from './lib/utils/geoJsonSetting';
 import './lib/styles/theme.css';
 import './lib/styles/buttons.css';
 import './lib/styles/modals.css';
 
 let resetDialogApp: Record<string, any> | null = null;
+const geoJsonEnabled = isGeoJsonEnabled();
 
-initMapArea();
+if (geoJsonEnabled) initMapArea();
 
 function openResetLayoutDialog() {
   if (resetDialogApp) return;
@@ -49,6 +51,13 @@ function openResetLayoutDialog() {
 
 if (typeof GM_registerMenuCommand === 'function') {
   GM_registerMenuCommand('LearnableMeta - Reset Meta Window Layout', openResetLayoutDialog);
+  GM_registerMenuCommand(
+    `LearnableMeta - GeoJSON overlays: ${geoJsonEnabled ? 'On' : 'Off'}`,
+    () => {
+      setGeoJsonEnabled(!geoJsonEnabled);
+      window.location.reload();
+    }
+  );
 }
 
 initURLChangeEvent();
