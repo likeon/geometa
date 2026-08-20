@@ -28,6 +28,7 @@
 - Added keyboard-accessible tabs for locations that belong to multiple metas
 - Show each meta's own images, links, and GeoJSON overlay
 - Load inactive meta details only when their tab is opened
+- Allow GeoJSON overlays and downloads to be disabled from the userscript menu
 
 ## [0.94]
 
@@ -5139,6 +5140,13 @@ context.l
       }
     }
   }
+  const STORAGE_KEY = "learnableMeta_geoJsonEnabled";
+  function isGeoJsonEnabled() {
+    return _GM_getValue(STORAGE_KEY, true);
+  }
+  function setGeoJsonEnabled(enabled) {
+    _GM_setValue(STORAGE_KEY, enabled);
+  }
   var root_2$2 = from_html(`<div class="announcement svelte-1j2rmt2"><div class="svelte-1j2rmt2"><!></div> <button class="vote-close-btn svelte-1j2rmt2" aria-label="Dismiss announcement">Dismiss</button></div>`);
   var root_3$1 = from_html(`<p class="svelte-1j2rmt2"> </p>`);
   var root_7 = from_html(`<button type="button" role="tab"> </button>`);
@@ -5165,6 +5173,7 @@ context.l
     const selectedMeta = user_derived(() => get(metaDetails)[get(selectedMetaIndex)] ?? null);
     const tabIdPrefix = `geometa-${crypto.randomUUID()}`;
     const cacheKey = `${CACHE_NAMESPACE}:${$$props.mapId}_${$$props.panoId}`;
+    const geoJsonEnabled2 = isGeoJsonEnabled();
     const loadingMetaIds = new Set();
     function requestJson2(url) {
       return new Promise((resolve, reject) => {
@@ -5209,7 +5218,11 @@ context.l
       }
       loadingMetaIds.add(summary.id);
       try {
-        const query = new URLSearchParams({ panoId: $$props.panoId, mapId: $$props.mapId }).toString();
+        const query = new URLSearchParams({
+          panoId: $$props.panoId,
+          mapId: $$props.mapId,
+          includeGeoJson: String(geoJsonEnabled2)
+        }).toString();
         const data = await requestJson2(`${API_BASE_URL}/api/userscript/location/meta/${summary.id}?${query}`);
         get(metaDetails)[index2] = data;
         (window.geometaMetaCache ??= new Map()).set(detailCacheKey, data);
@@ -5249,7 +5262,8 @@ context.l
           panoId: $$props.panoId,
           mapId: $$props.mapId,
           userscriptVersion: $$props.userscriptVersion,
-          source: $$props.source
+          source: $$props.source,
+          includeGeoJson: String(geoJsonEnabled2)
         }).toString();
         const url = `${API_BASE_URL}/api/userscript/location?${urlParams}`;
         requestJson2(url).then((data) => {
@@ -5320,7 +5334,7 @@ context.l
       }
     });
     user_effect(() => {
-      if (get(selectedMeta)?.geoJson) showMapArea(get(selectedMeta).geoJson);
+      if (geoJsonEnabled2 && get(selectedMeta)?.geoJson) showMapArea(get(selectedMeta).geoJson);
       else clearMapArea();
       return clearMapArea;
     });
@@ -7134,7 +7148,8 @@ roundNumber: 4,
   const modalsCss = '.learnablemeta-modal-backdrop{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:24px;background:#000000c2;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}.learnablemeta-modal,.learnablemeta-modal *{box-sizing:border-box}.learnablemeta-modal{position:relative;width:min(460px,100%);max-height:calc(100vh - 48px);overflow-y:auto;border:1px solid var(--lm-border);border-radius:calc(var(--lm-radius) + 4px);background:var(--lm-background);color:var(--lm-foreground);box-shadow:0 24px 70px #00000080;text-align:left}.learnablemeta-modal--wide{width:min(600px,100%)}.learnablemeta-modal--map-update{width:min(780px,100%);max-height:min(760px,calc(100vh - 48px));display:flex;flex-direction:column;overflow:hidden}.learnablemeta-modal:before{position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,#057a55,#0b87c1);content:""}.learnablemeta-modal-header{display:grid;gap:6px;padding:26px 24px 0}.learnablemeta-modal-header--row{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:26px 24px 20px;border-bottom:1px solid var(--lm-border);background:var(--lm-card)}.learnablemeta-modal-eyebrow{margin:0;color:var(--lm-primary);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}.learnablemeta-modal-title{margin:0;color:var(--lm-foreground);font-size:20px;font-weight:650;line-height:1.3;letter-spacing:-.025em}.learnablemeta-modal-title--large{margin-top:4px;color:var(--lm-card-foreground);font-size:22px;line-height:1.25}.learnablemeta-modal-description{margin:0;color:var(--lm-muted-foreground);font-size:14px;line-height:1.5}.learnablemeta-modal-body{display:grid;gap:14px;padding:20px 24px 0;color:var(--lm-foreground);font-size:14px;line-height:1.5}.learnablemeta-modal-body p{margin:0}.learnablemeta-modal-body a{color:var(--lm-link);text-decoration:underline;text-underline-offset:3px}.learnablemeta-modal-input{width:100%;height:38px;border:1px solid var(--lm-input);border-radius:var(--lm-radius);padding:7px 12px;outline:none;background:var(--lm-background);color:var(--lm-foreground);font:inherit;font-size:14px;box-shadow:0 1px 2px #0000000a;transition:border-color .15s ease,box-shadow .15s ease}.learnablemeta-modal-input::placeholder{color:var(--lm-muted-foreground)}.learnablemeta-modal-input:focus-visible{border-color:var(--lm-ring);box-shadow:0 0 0 3px color-mix(in srgb,var(--lm-ring) 25%,transparent)}.learnablemeta-modal-code{overflow-wrap:anywhere;border:1px solid var(--lm-border);border-radius:var(--lm-radius);padding:10px 12px;background:var(--lm-muted);color:var(--lm-link);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;line-height:1.45;-webkit-user-select:text;user-select:text}.learnablemeta-modal-note{color:var(--lm-muted-foreground);font-size:12px;line-height:1.45}.learnablemeta-modal-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:20px;padding:16px 24px;border-top:1px solid var(--lm-border);background:var(--lm-card)}.learnablemeta-modal-action-leading{margin-right:auto}.learnablemeta-modal-alert{border:1px solid rgba(220,38,38,.3);border-radius:var(--lm-radius);padding:12px 14px;background:#dc262617;color:var(--lm-destructive);font-size:13px}.learnablemeta-modal .learnablemeta-modal-body .learnablemeta-help-list{display:grid;gap:10px;margin:0;padding-left:20px;list-style:disc}.learnablemeta-modal .learnablemeta-help-list strong{color:var(--lm-foreground);font-weight:600}@media(max-width:620px){.learnablemeta-modal-backdrop{padding:8px}.learnablemeta-modal{max-height:calc(100vh - 16px)}.learnablemeta-modal-actions{flex-wrap:wrap}.learnablemeta-modal-action-leading{width:100%;margin-right:0}.learnablemeta-modal-actions .learnablemeta-button--primary,.learnablemeta-modal-actions .learnablemeta-button--outline,.learnablemeta-modal-actions .learnablemeta-button--destructive{flex:1}}';
   importCSS(modalsCss);
   let resetDialogApp = null;
-  initMapArea();
+  const geoJsonEnabled = isGeoJsonEnabled();
+  if (geoJsonEnabled) initMapArea();
   function openResetLayoutDialog() {
     if (resetDialogApp) return;
     const target = document.createElement("div");
@@ -7160,6 +7175,13 @@ roundNumber: 4,
   }
   if (typeof _GM_registerMenuCommand === "function") {
     _GM_registerMenuCommand("LearnableMeta - Reset Meta Window Layout", openResetLayoutDialog);
+    _GM_registerMenuCommand(
+      `LearnableMeta - GeoJSON overlays: ${geoJsonEnabled ? "On" : "Off"}`,
+      () => {
+        setGeoJsonEnabled(!geoJsonEnabled);
+        window.location.reload();
+      }
+    );
   }
   initURLChangeEvent();
   initLiveChallengeIdTracking();
