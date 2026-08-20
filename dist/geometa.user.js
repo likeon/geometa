@@ -27,6 +27,7 @@
 
 - Added keyboard-accessible tabs for locations that belong to multiple metas
 - Show each meta's own images, links, and GeoJSON overlay
+- Load inactive meta details only when their tab is opened
 
 ## [0.94]
 
@@ -5142,24 +5143,89 @@ context.l
   var root_3$1 = from_html(`<p class="svelte-1j2rmt2"> </p>`);
   var root_7 = from_html(`<button type="button" role="tab"> </button>`);
   var root_6$2 = from_html(`<div class="meta-tabs svelte-1j2rmt2" role="tablist" aria-label="Metas at this location"></div>`);
-  var root_8$1 = from_html(`<p class="geometa-footer svelte-1j2rmt2"><!></p>`);
-  var root_9 = from_html(`<hr class="svelte-1j2rmt2"/> <!>`, 1);
-  var root_5$2 = from_html(`<!> <div class="meta-panel svelte-1j2rmt2"><p class="svelte-1j2rmt2"><!> <strong class="svelte-1j2rmt2"> </strong> </p> <div class="geometa-note svelte-1j2rmt2"><!></div> <!> <!></div>`, 1);
-  var root_12$1 = from_html(`<div class="learnablemeta-modal-backdrop learnablemeta-ui svelte-1j2rmt2" role="presentation"><div class="learnablemeta-modal svelte-1j2rmt2" role="dialog" aria-modal="true" aria-labelledby="external-link-title"><div class="learnablemeta-modal-header svelte-1j2rmt2"><p class="learnablemeta-modal-eyebrow svelte-1j2rmt2">LearnableMeta</p> <h2 class="learnablemeta-modal-title svelte-1j2rmt2" id="external-link-title">Open external link?</h2> <p class="learnablemeta-modal-description svelte-1j2rmt2">This link will open in a new browser tab.</p></div> <div class="learnablemeta-modal-body svelte-1j2rmt2"><p class="learnablemeta-modal-code svelte-1j2rmt2"> </p></div> <div class="learnablemeta-modal-actions svelte-1j2rmt2"><button type="button" data-modal-initial-focus="" class="learnablemeta-button learnablemeta-button--outline svelte-1j2rmt2">Cancel</button> <button type="button" class="learnablemeta-button learnablemeta-button--primary svelte-1j2rmt2">Continue</button></div></div></div>`);
-  var root_14$1 = from_html(`<p class="learnablemeta-modal-alert svelte-1j2rmt2"> </p>`);
-  var root_13$1 = from_html(`<div class="learnablemeta-modal-backdrop learnablemeta-ui svelte-1j2rmt2" role="presentation"><div class="learnablemeta-modal learnablemeta-modal--wide svelte-1j2rmt2" role="dialog" aria-modal="true" aria-labelledby="learnablemeta-help-title"><div class="learnablemeta-modal-header svelte-1j2rmt2"><p class="learnablemeta-modal-eyebrow svelte-1j2rmt2">LearnableMeta</p> <h2 class="learnablemeta-modal-title svelte-1j2rmt2" id="learnablemeta-help-title">Userscript guide</h2> <p class="learnablemeta-modal-description svelte-1j2rmt2">Quick tips for using LearnableMeta while you play.</p></div> <div class="learnablemeta-modal-body svelte-1j2rmt2"><!> <ul class="learnablemeta-help-list svelte-1j2rmt2"><li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Drag to move:</strong> Click and drag the top of the note to reposition it anywhere
+  var root_8$1 = from_html(`<p class="svelte-1j2rmt2"> </p>`);
+  var root_11$1 = from_html(`<p class="geometa-footer svelte-1j2rmt2"><!></p>`);
+  var root_12$1 = from_html(`<hr class="svelte-1j2rmt2"/> <!>`, 1);
+  var root_10$1 = from_html(`<p class="svelte-1j2rmt2"><!> <strong class="svelte-1j2rmt2"> </strong> </p> <div class="geometa-note svelte-1j2rmt2"><!></div> <!> <!>`, 1);
+  var root_5$2 = from_html(`<!> <div class="meta-panel svelte-1j2rmt2"><!></div>`, 1);
+  var root_16$1 = from_html(`<div class="learnablemeta-modal-backdrop learnablemeta-ui svelte-1j2rmt2" role="presentation"><div class="learnablemeta-modal svelte-1j2rmt2" role="dialog" aria-modal="true" aria-labelledby="external-link-title"><div class="learnablemeta-modal-header svelte-1j2rmt2"><p class="learnablemeta-modal-eyebrow svelte-1j2rmt2">LearnableMeta</p> <h2 class="learnablemeta-modal-title svelte-1j2rmt2" id="external-link-title">Open external link?</h2> <p class="learnablemeta-modal-description svelte-1j2rmt2">This link will open in a new browser tab.</p></div> <div class="learnablemeta-modal-body svelte-1j2rmt2"><p class="learnablemeta-modal-code svelte-1j2rmt2"> </p></div> <div class="learnablemeta-modal-actions svelte-1j2rmt2"><button type="button" data-modal-initial-focus="" class="learnablemeta-button learnablemeta-button--outline svelte-1j2rmt2">Cancel</button> <button type="button" class="learnablemeta-button learnablemeta-button--primary svelte-1j2rmt2">Continue</button></div></div></div>`);
+  var root_18$1 = from_html(`<p class="learnablemeta-modal-alert svelte-1j2rmt2"> </p>`);
+  var root_17$1 = from_html(`<div class="learnablemeta-modal-backdrop learnablemeta-ui svelte-1j2rmt2" role="presentation"><div class="learnablemeta-modal learnablemeta-modal--wide svelte-1j2rmt2" role="dialog" aria-modal="true" aria-labelledby="learnablemeta-help-title"><div class="learnablemeta-modal-header svelte-1j2rmt2"><p class="learnablemeta-modal-eyebrow svelte-1j2rmt2">LearnableMeta</p> <h2 class="learnablemeta-modal-title svelte-1j2rmt2" id="learnablemeta-help-title">Userscript guide</h2> <p class="learnablemeta-modal-description svelte-1j2rmt2">Quick tips for using LearnableMeta while you play.</p></div> <div class="learnablemeta-modal-body svelte-1j2rmt2"><!> <ul class="learnablemeta-help-list svelte-1j2rmt2"><li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Drag to move:</strong> Click and drag the top of the note to reposition it anywhere
               on your screen.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">View map meta list:</strong> Click the list icon to see all the metas included
               in the map you are currently playing.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Join the community:</strong> Click the Discord icon to share feedback, suggest
               improvements, or just say hi!</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Outdated script:</strong> The question mark icon blinks when an update is available.</li></ul></div> <div class="learnablemeta-modal-actions svelte-1j2rmt2"><button type="button" class="learnablemeta-button learnablemeta-button--primary svelte-1j2rmt2">Close</button></div></div></div>`);
   var root$5 = from_html(`<div class="geometa-container svelte-1j2rmt2"><!> <div class="flex header svelte-1j2rmt2"><h2 class="svelte-1j2rmt2">Learnable Meta</h2> <div class="icons svelte-1j2rmt2"><a target="_blank" aria-label="List of map metas" class="svelte-1j2rmt2"><span class="skill-icons--list svelte-1j2rmt2"></span></a> <a target="_blank" aria-label="Learnable Meta website" class="svelte-1j2rmt2"><span class="flat-color-icons--globe svelte-1j2rmt2"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-1j2rmt2"><span class="skill-icons--discord svelte-1j2rmt2"></span></a> <button class="help-toggle-button svelte-1j2rmt2" aria-label="More information"><span></span></button></div></div> <!> <!> <!></div>`);
   function App($$anchor, $$props) {
     push($$props, true);
-    let geoInfo = state(null);
+    let metas = state(proxy([]));
+    let metaDetails = state(proxy([]));
     let error = state(null);
+    let detailError = state(null);
     let selectedMetaIndex = state(0);
-    const metas = user_derived(() => get(geoInfo) ? get(geoInfo).metas ?? [get(geoInfo)] : []);
-    const selectedMeta = user_derived(() => get(metas)[get(selectedMetaIndex)] ?? get(metas)[0]);
+    const selectedMeta = user_derived(() => get(metaDetails)[get(selectedMetaIndex)] ?? null);
     const tabIdPrefix = `geometa-${crypto.randomUUID()}`;
+    const cacheKey = `${CACHE_NAMESPACE}:${$$props.mapId}_${$$props.panoId}`;
+    const loadingMetaIds = new Set();
+    function requestJson2(url) {
+      return new Promise((resolve, reject) => {
+        _GM_xmlhttpRequest({
+          method: "GET",
+          url,
+          timeout: 1e4,
+          onload: (response) => {
+            if (response.status === 200) {
+              try {
+                resolve(JSON.parse(response.responseText));
+              } catch {
+                reject(new Error("Failed to parse response"));
+              }
+            } else if (response.status === 404) {
+              reject(new Error("Meta for this location not found"));
+            } else {
+              reject(new Error(`HTTP error! status: ${response.status}`));
+            }
+          },
+          onerror: (event2) => {
+            console.error("Error:", event2);
+            reject(new Error("An error occurred while fetching data"));
+          },
+          ontimeout: () => reject(new Error("The request timed out - please try again"))
+        });
+      });
+    }
+    function setInitialMeta(data) {
+      const { metas: summaries, ...primary } = data;
+      set(metas, summaries ?? [{ id: primary.id, metaName: primary.metaName }], true);
+      set(metaDetails, get(metas).map((_, index2) => index2 === 0 ? primary : null), true);
+    }
+    async function loadMeta(index2) {
+      const summary = get(metas)[index2];
+      if (!summary || get(metaDetails)[index2] || loadingMetaIds.has(summary.id)) return;
+      const detailCacheKey = `${cacheKey}_${summary.id}`;
+      const cached = window.geometaMetaCache?.get(detailCacheKey);
+      if (cached) {
+        get(metaDetails)[index2] = cached;
+        return;
+      }
+      loadingMetaIds.add(summary.id);
+      try {
+        const query = new URLSearchParams({ panoId: $$props.panoId, mapId: $$props.mapId }).toString();
+        const data = await requestJson2(`${API_BASE_URL}/api/userscript/location/meta/${summary.id}?${query}`);
+        get(metaDetails)[index2] = data;
+        (window.geometaMetaCache ??= new Map()).set(detailCacheKey, data);
+      } catch (cause) {
+        if (get(selectedMetaIndex) === index2) {
+          set(detailError, cause instanceof Error ? cause.message : String(cause), true);
+        }
+      } finally {
+        loadingMetaIds.delete(summary.id);
+      }
+    }
+    function selectMeta(index2) {
+      set(selectedMetaIndex, index2, true);
+      set(detailError, null);
+      void loadMeta(index2);
+    }
     function onTabKeydown(event2) {
       const last = get(metas).length - 1;
       let next = null;
@@ -5169,16 +5235,15 @@ context.l
       else if (event2.key === "End") next = last;
       if (next === null) return;
       event2.preventDefault();
-      set(selectedMetaIndex, next, true);
+      selectMeta(next);
       document.getElementById(`${tabIdPrefix}-tab-${next}`)?.focus();
     }
     let container;
     let header;
     onMount(() => {
-      const cacheKey = `${CACHE_NAMESPACE}:${$$props.mapId}_${$$props.panoId}`;
       const cachedData = window.geometaMetaCache?.get(cacheKey);
       if (cachedData) {
-        set(geoInfo, cachedData, true);
+        setInitialMeta(cachedData);
       } else {
         const urlParams = new URLSearchParams({
           panoId: $$props.panoId,
@@ -5187,35 +5252,11 @@ context.l
           source: $$props.source
         }).toString();
         const url = `${API_BASE_URL}/api/userscript/location?${urlParams}`;
-        _GM_xmlhttpRequest({
-          method: "GET",
-          url,
-          timeout: 1e4,
-          onload: (response) => {
-            if (response.status === 200) {
-              try {
-                const data = JSON.parse(response.responseText);
-                set(geoInfo, data, true);
-                if (!window.geometaMetaCache) {
-                  window.geometaMetaCache = new Map();
-                }
-                window.geometaMetaCache.set(cacheKey, data);
-              } catch (e) {
-                set(error, "Failed to parse response");
-              }
-            } else if (response.status === 404) {
-              set(error, "Meta for this location not found");
-            } else {
-              set(error, `HTTP error! status: ${response.status}`);
-            }
-          },
-          onerror: (e) => {
-            set(error, "An error occurred while fetching data");
-            console.error("Error:", e);
-          },
-          ontimeout: () => {
-            set(error, "The request timed out - please try again");
-          }
+        requestJson2(url).then((data) => {
+          setInitialMeta(data);
+          (window.geometaMetaCache ??= new Map()).set(cacheKey, data);
+        }).catch((cause) => {
+          set(error, cause instanceof Error ? cause.message : String(cause), true);
         });
       }
       setContainerPosition(container);
@@ -5324,28 +5365,28 @@ context.l
         template_effect(() => set_text(text, `Error: ${get(error) ?? ""}`));
         append($$anchor2, p);
       };
-      var alternate_1 = ($$anchor2) => {
+      var alternate_3 = ($$anchor2) => {
         var fragment_1 = comment();
         var node_4 = first_child(fragment_1);
         {
-          var consequent_5 = ($$anchor3) => {
+          var consequent_7 = ($$anchor3) => {
             var fragment_2 = root_5$2();
             var node_5 = first_child(fragment_2);
             {
               var consequent_2 = ($$anchor4) => {
                 var div_5 = root_6$2();
-                each(div_5, 21, () => get(metas), index, ($$anchor5, meta, index2) => {
+                each(div_5, 23, () => get(metas), (meta) => meta.id, ($$anchor5, meta, index2) => {
                   var button_2 = root_7();
                   let classes;
                   button_2.__keydown = onTabKeydown;
-                  button_2.__click = () => set(selectedMetaIndex, index2, true);
+                  button_2.__click = () => selectMeta(get(index2));
                   var text_1 = child(button_2);
                   template_effect(() => {
-                    set_attribute(button_2, "id", `${tabIdPrefix}-tab-${index2}`);
+                    set_attribute(button_2, "id", `${tabIdPrefix}-tab-${get(index2)}`);
                     set_attribute(button_2, "aria-controls", `${tabIdPrefix}-panel`);
-                    classes = set_class(button_2, 1, "meta-tab svelte-1j2rmt2", null, classes, { active: index2 === get(selectedMetaIndex) });
-                    set_attribute(button_2, "aria-selected", index2 === get(selectedMetaIndex));
-                    set_attribute(button_2, "tabindex", index2 === get(selectedMetaIndex) ? 0 : -1);
+                    classes = set_class(button_2, 1, "meta-tab svelte-1j2rmt2", null, classes, { active: get(index2) === get(selectedMetaIndex) });
+                    set_attribute(button_2, "aria-selected", get(index2) === get(selectedMetaIndex));
+                    set_attribute(button_2, "tabindex", get(index2) === get(selectedMetaIndex) ? 0 : -1);
                     set_text(text_1, get(meta).metaName);
                   });
                   append($$anchor5, button_2);
@@ -5357,66 +5398,104 @@ context.l
               });
             }
             var div_6 = sibling(node_5, 2);
-            var p_1 = child(div_6);
-            var node_6 = child(p_1);
-            CountryFlag(node_6, {
-              get countryName() {
-                return get(selectedMeta).country;
-              }
-            });
-            var strong = sibling(node_6, 2);
-            var text_2 = child(strong);
-            var text_3 = sibling(strong);
-            var div_7 = sibling(p_1, 2);
-            var node_7 = child(div_7);
-            html(node_7, () => get(selectedMeta).note);
-            var node_8 = sibling(div_7, 2);
+            var node_6 = child(div_6);
             {
               var consequent_3 = ($$anchor4) => {
-                var p_2 = root_8$1();
-                var node_9 = child(p_2);
-                html(node_9, () => get(selectedMeta).footer);
-                append($$anchor4, p_2);
+                var p_1 = root_8$1();
+                var text_2 = child(p_1);
+                template_effect(() => set_text(text_2, `Error: ${get(detailError) ?? ""}`));
+                append($$anchor4, p_1);
               };
-              if_block(node_8, ($$render) => {
-                if (get(selectedMeta).footer) $$render(consequent_3);
-              });
-            }
-            var node_10 = sibling(node_8, 2);
-            {
-              var consequent_4 = ($$anchor4) => {
-                var fragment_3 = root_9();
-                var node_11 = sibling(first_child(fragment_3), 2);
-                key(node_11, () => get(selectedMetaIndex), ($$anchor5) => {
-                  Carousel($$anchor5, {
-                    get images() {
-                      return get(selectedMeta).images;
+              var alternate_1 = ($$anchor4) => {
+                var fragment_3 = comment();
+                var node_7 = first_child(fragment_3);
+                {
+                  var consequent_6 = ($$anchor5) => {
+                    var fragment_4 = root_10$1();
+                    var p_2 = first_child(fragment_4);
+                    var node_8 = child(p_2);
+                    CountryFlag(node_8, {
+                      get countryName() {
+                        return get(selectedMeta).country;
+                      }
+                    });
+                    var strong = sibling(node_8, 2);
+                    var text_3 = child(strong);
+                    var text_4 = sibling(strong);
+                    var div_7 = sibling(p_2, 2);
+                    var node_9 = child(div_7);
+                    html(node_9, () => get(selectedMeta).note);
+                    var node_10 = sibling(div_7, 2);
+                    {
+                      var consequent_4 = ($$anchor6) => {
+                        var p_3 = root_11$1();
+                        var node_11 = child(p_3);
+                        html(node_11, () => get(selectedMeta).footer);
+                        append($$anchor6, p_3);
+                      };
+                      if_block(node_10, ($$render) => {
+                        if (get(selectedMeta).footer) $$render(consequent_4);
+                      });
                     }
-                  });
-                });
+                    var node_12 = sibling(node_10, 2);
+                    {
+                      var consequent_5 = ($$anchor6) => {
+                        var fragment_5 = root_12$1();
+                        var node_13 = sibling(first_child(fragment_5), 2);
+                        key(node_13, () => get(selectedMeta).id, ($$anchor7) => {
+                          Carousel($$anchor7, {
+                            get images() {
+                              return get(selectedMeta).images;
+                            }
+                          });
+                        });
+                        append($$anchor6, fragment_5);
+                      };
+                      if_block(node_12, ($$render) => {
+                        if (get(selectedMeta).images && get(selectedMeta).images.length) $$render(consequent_5);
+                      });
+                    }
+                    template_effect(() => {
+                      set_text(text_3, get(selectedMeta).country);
+                      set_text(text_4, ` - ${get(selectedMeta).metaName ?? ""}`);
+                    });
+                    append($$anchor5, fragment_4);
+                  };
+                  var alternate = ($$anchor5) => {
+                    Spinner($$anchor5);
+                  };
+                  if_block(
+                    node_7,
+                    ($$render) => {
+                      if (get(selectedMeta)) $$render(consequent_6);
+                      else $$render(alternate, false);
+                    },
+                    true
+                  );
+                }
                 append($$anchor4, fragment_3);
               };
-              if_block(node_10, ($$render) => {
-                if (get(selectedMeta).images && get(selectedMeta).images.length) $$render(consequent_4);
+              if_block(node_6, ($$render) => {
+                if (get(detailError)) $$render(consequent_3);
+                else $$render(alternate_1, false);
               });
             }
             template_effect(() => {
               set_attribute(div_6, "id", `${tabIdPrefix}-panel`);
               set_attribute(div_6, "role", get(metas).length > 1 ? "tabpanel" : void 0);
               set_attribute(div_6, "aria-labelledby", get(metas).length > 1 ? `${tabIdPrefix}-tab-${get(selectedMetaIndex)}` : void 0);
-              set_text(text_2, get(selectedMeta).country);
-              set_text(text_3, ` - ${get(selectedMeta).metaName ?? ""}`);
+              set_attribute(div_6, "aria-busy", !get(selectedMeta) && !get(detailError));
             });
             append($$anchor3, fragment_2);
           };
-          var alternate = ($$anchor3) => {
+          var alternate_2 = ($$anchor3) => {
             Spinner($$anchor3);
           };
           if_block(
             node_4,
             ($$render) => {
-              if (get(selectedMeta)) $$render(consequent_5);
-              else $$render(alternate, false);
+              if (get(metas).length) $$render(consequent_7);
+              else $$render(alternate_2, false);
             },
             true
           );
@@ -5425,46 +5504,46 @@ context.l
       };
       if_block(node_3, ($$render) => {
         if (get(error)) $$render(consequent_1);
-        else $$render(alternate_1, false);
+        else $$render(alternate_3, false);
       });
     }
-    var node_12 = sibling(node_3, 2);
+    var node_14 = sibling(node_3, 2);
     {
-      var consequent_6 = ($$anchor2) => {
-        var div_8 = root_12$1();
+      var consequent_8 = ($$anchor2) => {
+        var div_8 = root_16$1();
         var div_9 = child(div_8);
         var div_10 = sibling(child(div_9), 2);
-        var p_3 = child(div_10);
-        var text_4 = child(p_3);
+        var p_4 = child(div_10);
+        var text_5 = child(p_4);
         var div_11 = sibling(div_10, 2);
         var button_3 = child(div_11);
         button_3.__click = cancel;
         var button_4 = sibling(button_3, 2);
         button_4.__click = proceed;
         action(div_9, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({ onClose: cancel }));
-        template_effect(() => set_text(text_4, get(currentUrl)));
+        template_effect(() => set_text(text_5, get(currentUrl)));
         append($$anchor2, div_8);
       };
-      if_block(node_12, ($$render) => {
-        if (get(showModal)) $$render(consequent_6);
+      if_block(node_14, ($$render) => {
+        if (get(showModal)) $$render(consequent_8);
       });
     }
-    var node_13 = sibling(node_12, 2);
+    var node_15 = sibling(node_14, 2);
     {
-      var consequent_8 = ($$anchor2) => {
-        var div_12 = root_13$1();
+      var consequent_10 = ($$anchor2) => {
+        var div_12 = root_17$1();
         var div_13 = child(div_12);
         var div_14 = sibling(child(div_13), 2);
-        var node_14 = child(div_14);
+        var node_16 = child(div_14);
         {
-          var consequent_7 = ($$anchor3) => {
-            var p_4 = root_14$1();
-            var text_5 = child(p_4);
-            template_effect(($0) => set_text(text_5, `Your userscript is out of date. Install the latest version (${$0 ?? ""}).`), [getLatestVersionInfo]);
-            append($$anchor3, p_4);
+          var consequent_9 = ($$anchor3) => {
+            var p_5 = root_18$1();
+            var text_6 = child(p_5);
+            template_effect(($0) => set_text(text_6, `Your userscript is out of date. Install the latest version (${$0 ?? ""}).`), [getLatestVersionInfo]);
+            append($$anchor3, p_5);
           };
-          if_block(node_14, ($$render) => {
-            if (checkIfOutdated()) $$render(consequent_7);
+          if_block(node_16, ($$render) => {
+            if (checkIfOutdated()) $$render(consequent_9);
           });
         }
         var div_15 = sibling(div_14, 2);
@@ -5473,8 +5552,8 @@ context.l
         action(div_13, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({ onClose: togglePopup }));
         append($$anchor2, div_12);
       };
-      if_block(node_13, ($$render) => {
-        if (get(showHelpPopup)) $$render(consequent_8);
+      if_block(node_15, ($$render) => {
+        if (get(showHelpPopup)) $$render(consequent_10);
       });
     }
     bind_this(div, ($$value) => container = $$value, () => container);
