@@ -30,9 +30,9 @@ therefore built without `CONCURRENTLY`, and the backfill scans the locations tab
    migration time.
 2. Schedule a maintenance window if that measurement shows an unacceptable write-lock interval.
 3. Record the rollout start as an epoch second before starting the first new API pod.
-4. Do not run a map-group sync until every pre-0041 pod has drained. Old pods can still write
-   `extra_tag` without creating a link, and syncing during that window could publish incomplete data.
-   Record the rollout finish as an epoch second when the last old pod drains.
+4. Do not enable multi-meta uploads or run a map-group sync until every pre-0041 pod has drained.
+   Old pods can still write `extra_tag` without creating links, so a multi-meta upload handled by one
+   would lose tags. Record the rollout finish as an epoch second when the last old pod drains.
 5. After the rollout, audit only zero-link locations written during the rollout window:
 
 ```sql
@@ -50,7 +50,8 @@ ORDER BY mgl.updated_at, mgl.id;
 
 Existing zero-link rows are not evidence of rollout loss: deleting a meta intentionally leaves its
 locations orphaned. Do not run a blanket `extra_tag` backfill after deployment. Review candidates
-against rollout activity, then backfill only confirmed location IDs:
+against rollout activity, then pause location uploads for affected groups and backfill only confirmed
+location IDs:
 
 ```sql
 WITH reviewed(location_id) AS (
@@ -65,11 +66,16 @@ JOIN map_group_locations mgl ON mgl.id = r.location_id
 JOIN metas m
   ON m.map_group_id = mgl.map_group_id
  AND m.tag_name = mgl.extra_tag
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM map_group_location_metas existing
+  WHERE existing.location_id = mgl.id
+)
 ON CONFLICT DO NOTHING;
 ```
 
-Verify the reviewed IDs have links before re-enabling sync. If no rollout candidates exist, no repair
-query is needed.
+Keep those uploads paused and verify the reviewed IDs have links before re-enabling uploads and sync.
+If no rollout candidates exist, no repair query is needed.
 
 ## Removing `extra_tag` later
 
