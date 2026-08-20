@@ -40,8 +40,40 @@ export const app = new Elysia({
       path: '/docs',
       exclude: swaggerExclude,
       documentation: {
-        info: { title: 'Learnable Meta API', version: '1' },
+        info: {
+          title: 'Learnable Meta API',
+          version: '1',
+          description:
+            'Public endpoints used by the LearnableMeta userscript and map-making tools.',
+        },
         servers: swaggerServers,
+        externalDocs: {
+          description: 'LearnableMeta documentation',
+          url: 'https://docs.learnablemeta.com/',
+        },
+        tags: [
+          { name: 'Maps', description: 'Browse published LearnableMeta maps.' },
+          {
+            name: 'Userscript',
+            description:
+              'Runtime data consumed by the LearnableMeta userscript.',
+          },
+          {
+            name: 'Map making tools',
+            description:
+              'Authenticated map manifests and location exports for map-making integrations.',
+          },
+        ],
+        components: {
+          securitySchemes: {
+            learnableMetaToken: {
+              type: 'http',
+              scheme: 'bearer',
+              description:
+                'A LearnableMeta API token from https://learnablemeta.com/profile/token.',
+            },
+          },
+        },
       },
       swaggerOptions: {
         persistAuthorization: true,
