@@ -2160,7 +2160,7 @@
           "name": "extra_pano_date",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "modified_at": {
           "name": "modified_at",
@@ -2240,7 +2240,7 @@
           "name": "extra_pano_date",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "tag_name": {
           "name": "tag_name",

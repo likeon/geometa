@@ -606,7 +606,7 @@ export const locationMetas = pgView('location_metas_view', {
   panoId: text('pano_id'),
   extraTag: text('extra_tag').notNull(),
   extraPanoId: text('extra_pano_id'),
-  extraPanoDate: text('extra_pano_date').notNull(),
+  extraPanoDate: text('extra_pano_date'),
   modifiedAt: integer('modified_at').notNull(),
   metaModifiedAt: integer('meta_modified_at').notNull(),
 }).existing();
@@ -621,7 +621,7 @@ export const mapLocations = pgView('map_locations_view', {
   panoId: text('pano_id'),
   metaName: text('meta_name').notNull(),
   extraPanoId: text('extra_pano_id'),
-  extraPanoDate: text('extra_pano_date').notNull(),
+  extraPanoDate: text('extra_pano_date'),
   tagName: text('tag_name').notNull(),
   metaNote: text('meta_note').notNull(),
   metaNoteHtml: text('meta_note_html').notNull(),
