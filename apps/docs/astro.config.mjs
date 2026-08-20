@@ -53,8 +53,7 @@ export default defineConfig({
                 { label: 'Android', link: '/getting-started/android/' },
                 { label: 'iOS and iPadOS', link: '/getting-started/ios/' }
               ]
-            },
-            { label: 'Using Learnable Meta', link: '/using-learnable-meta/' }
+            }
           ]
         },
         {
