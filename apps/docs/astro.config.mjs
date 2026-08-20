@@ -6,7 +6,7 @@ export default defineConfig({
   site: 'https://docs.learnablemeta.com',
   integrations: [
     starlight({
-      title: 'Learnable Meta',
+      title: 'LearnableMeta',
       description:
         'Learn how to install Learnable Meta, play educational GeoGuessr maps, and add Learnable Meta to your own maps.',
       plugins: [
@@ -25,7 +25,7 @@ export default defineConfig({
       ],
       logo: {
         src: './src/assets/logo.png',
-        alt: 'Learnable Meta logo'
+        alt: 'LearnableMeta logo'
       },
       favicon: '/favicon.png',
       editLink: {
@@ -34,7 +34,7 @@ export default defineConfig({
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/likeon/geometa' },
         { icon: 'discord', label: 'Discord', href: 'https://discord.gg/AcXEWznYZe' },
-        { icon: 'external', label: 'Learnable Meta', href: 'https://learnablemeta.com' }
+        { icon: 'external', label: 'LearnableMeta', href: 'https://learnablemeta.com' }
       ],
       customCss: ['./src/styles/custom.css'],
       expressiveCode: {
