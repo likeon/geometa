@@ -9,10 +9,38 @@ import { db } from '@api/lib/drizzle';
 import { and, eq, getTableColumns, sql } from 'drizzle-orm';
 import { pick } from 'remeda';
 
+export const locationMetaSummariesSelect = db
+  .select({
+    id: syncedMetas.metaId,
+    metaName: syncedMetas.name,
+  })
+  .from(syncedMetas)
+  .innerJoin(
+    syncedMapMetas,
+    eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId),
+  )
+  .innerJoin(maps, eq(syncedMapMetas.mapId, maps.id))
+  .innerJoin(
+    syncedLocations,
+    eq(syncedLocations.syncedMetaId, syncedMetas.metaId),
+  )
+  .where(
+    and(
+      eq(maps.geoguessrId, sql.placeholder('mapId')),
+      eq(syncedLocations.panoId, sql.placeholder('panoId')),
+    ),
+  )
+  // Vary the first tab per pano while keeping it stable between requests.
+  .orderBy(
+    sql`md5(${syncedLocations}.pano_id || ${syncedMetas}.meta_id::text)`,
+    syncedMetas.metaId,
+  )
+  .prepare('userscript_get_location_meta_summaries');
+
 // only credit an original map when the played map itself is personal
 const originalMap = originalMapLateral(eq(maps.isPersonal, true));
 
-export const locationSelect = db
+export const locationMetaDetailSelect = db
   .select({
     ...pick(getTableColumns(syncedMetas), [
       'name',
@@ -50,18 +78,11 @@ export const locationSelect = db
     and(
       eq(maps.geoguessrId, sql.placeholder('mapId')),
       eq(syncedLocations.panoId, sql.placeholder('panoId')),
+      eq(syncedMetas.metaId, sql.placeholder('metaId')),
     ),
   )
-  // A location can carry several metas and players mostly read whichever tab
-  // opens first, so ordering by anything constant (a name) would bury the same
-  // meta on every location it appears on. Hashing the pano together with the
-  // meta varies the winner per location while staying identical every time the
-  // same location is served.
-  .orderBy(
-    sql`md5(${syncedLocations}.pano_id || ${syncedMetas}.meta_id::text)`,
-    syncedMetas.metaId,
-  )
-  .prepare('userscript_get_location');
+  .limit(1)
+  .prepare('userscript_get_location_meta_detail');
 
 // distinct: a pano shared by several of the map's metas must still be exported
 // once, or it gets extra chances of being drawn in game

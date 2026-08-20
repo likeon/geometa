@@ -36,6 +36,18 @@ async function requestLocation(mapId: string, panoId: string) {
   );
 }
 
+async function requestLocationMeta(
+  mapId: string,
+  panoId: string,
+  metaId: number,
+) {
+  return app.handle(
+    new Request(
+      `http://localhost/api/userscript/location/meta/${metaId}?mapId=${mapId}&panoId=${panoId}`,
+    ),
+  );
+}
+
 async function requestLocationsExport(
   geoguessrId: string,
   token?: string,
@@ -314,6 +326,7 @@ describe('GET /api/userscript/location/', () => {
 
       expect(response.status).toBe(200);
       const meta = {
+        id: 1001,
         country: '',
         metaName: 'Test Meta',
         note: 'Test note',
@@ -322,10 +335,13 @@ describe('GET /api/userscript/location/', () => {
         // no meta or map footer and no country: generic plonkit footer
         footer: plonkitFooter,
       };
-      expect(await response.json()).toEqual({ ...meta, metas: [meta] });
+      expect(await response.json()).toEqual({
+        ...meta,
+        metas: [{ id: 1001, metaName: 'Test Meta' }],
+      });
     });
 
-    test('returns every distinct meta for a pano with a stable primary meta', async () => {
+    test('returns lightweight tabs and guarded on-demand meta details', async () => {
       const mapId = await seedLocation({
         geoguessrId: 'map-multi',
         panoId: 'pano-multi',
@@ -378,8 +394,10 @@ describe('GET /api/userscript/location/', () => {
       const first = (await (
         await requestLocation('map-multi', 'pano-multi')
       ).json()) as {
+        id: number;
+        metaName: string;
         geoJson: MetaGeoJson;
-        metas: Array<Record<string, unknown> & { geoJson: MetaGeoJson }>;
+        metas: Array<{ id: number; metaName: string }>;
         [key: string]: unknown;
       };
       const second = await (
@@ -388,11 +406,41 @@ describe('GET /api/userscript/location/', () => {
 
       expect(second).toEqual(first);
       expect(first.metas).toHaveLength(2);
-      expect(first.metas.map((meta) => meta.geoJson)).toEqual(
-        expect.arrayContaining([mapArea, otherArea]),
+      expect(first.metas).toEqual(
+        expect.arrayContaining([
+          { id: 1101, metaName: 'Shared fields' },
+          { id: 1102, metaName: 'Shared fields' },
+        ]),
       );
-      const { metas: returnedMetas, ...primary } = first;
-      expect(primary).toEqual(returnedMetas[0]);
+      for (const meta of first.metas) {
+        expect(Object.keys(meta).sort()).toEqual(['id', 'metaName']);
+      }
+      expect(first.id).toBe(first.metas[0]!.id);
+      expect(first.metaName).toBe(first.metas[0]!.metaName);
+
+      const detailResponses = await Promise.all(
+        first.metas.map(({ id }) =>
+          requestLocationMeta('map-multi', 'pano-multi', id),
+        ),
+      );
+      expect(detailResponses.map(({ status }) => status)).toEqual([200, 200]);
+      const details = await Promise.all(
+        detailResponses.map((response) => response.json()),
+      );
+      expect(details).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 1101, geoJson: mapArea }),
+          expect.objectContaining({ id: 1102, geoJson: otherArea }),
+        ]),
+      );
+
+      const mismatched = await requestLocationMeta(
+        'map-multi',
+        'pano-missing',
+        1102,
+      );
+      expect(mismatched.status).toBe(404);
+      expect(await mismatched.json()).toEqual(['NOT_FOUND']);
     });
 
     test('appends original-map attribution for a personal map', async () => {

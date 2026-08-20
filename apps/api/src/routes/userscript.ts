@@ -8,7 +8,10 @@ import {
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { bearer } from '@api/lib/internal/auth';
-import { locationSelect } from '@api/lib/userscript/locations';
+import {
+  locationMetaDetailSelect,
+  locationMetaSummariesSelect,
+} from '@api/lib/userscript/locations';
 import { fingerprintMapCoordinates } from '@api/lib/userscript/map-fingerprint';
 import { getSynchronizedGroupMapSnapshots } from '@api/lib/userscript/map-snapshots';
 import { generateFooter } from '@api/lib/userscript/utils';
@@ -16,6 +19,32 @@ import { and, asc, eq, isNotNull, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 const userscriptVersion = '0.95';
+
+type LocationMeta = Awaited<
+  ReturnType<typeof locationMetaDetailSelect.execute>
+>[number];
+
+function formatLocationMeta(meta: LocationMeta) {
+  const country = meta.country || '';
+  let footer = generateFooter(
+    meta.noteFromPlonkit,
+    country,
+    meta.footer,
+    meta.mapFooter,
+  );
+  if (meta.isPersonalMap && meta.mapAuthors && meta.mapName) {
+    footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
+  }
+  return {
+    id: meta.syncedMetaId,
+    country,
+    metaName: meta.name,
+    note: meta.note,
+    images: meta.images,
+    ...(meta.geoJson ? { geoJson: meta.geoJson } : {}),
+    footer,
+  };
+}
 
 const mapInfoQuery = db.query.maps
   .findFirst({
@@ -51,8 +80,17 @@ export const userscriptRouter = new Elysia({
   .get(
     '/location/',
     async ({ query, set }) => {
-      const metaResult = await locationSelect.execute(query);
-      if (!metaResult.length) {
+      const metas = await locationMetaSummariesSelect.execute(query);
+      if (!metas.length) {
+        set.status = 404;
+        return ['NOT_FOUND'];
+      }
+
+      const [primary] = await locationMetaDetailSelect.execute({
+        ...query,
+        metaId: metas[0]!.id,
+      });
+      if (!primary) {
         set.status = 404;
         return ['NOT_FOUND'];
       }
@@ -62,44 +100,32 @@ export const userscriptRouter = new Elysia({
       // just keep to be safe
       set.status = 200;
 
-      const metaList = metaResult.map((meta) => {
-        const country = meta.country || '';
-        let footer = generateFooter(
-          meta.noteFromPlonkit,
-          country,
-          meta.footer,
-          meta.mapFooter,
-        );
-        if (meta.isPersonalMap && meta.mapAuthors && meta.mapName) {
-          footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
-        }
-        return {
-          country,
-          metaName: meta.name,
-          note: meta.note,
-          images: meta.images,
-          ...(meta.geoJson ? { geoJson: meta.geoJson } : {}),
-          footer,
-        };
-      });
-
-      const seen = new Set<string>();
-      const metas = metaList.filter((meta) => {
-        const key = JSON.stringify([
-          meta.country,
-          meta.metaName,
-          meta.note,
-          meta.images,
-          meta.geoJson,
-        ]);
-        if (seen.has(key)) return false;
-        seen.add(key);
-        return true;
-      });
-
-      return { ...metas[0], metas };
+      return { ...formatLocationMeta(primary), metas };
     },
     {
+      query: t.Object({
+        mapId: t.String(),
+        panoId: t.String(),
+      }),
+    },
+  )
+  .get(
+    '/location/meta/:metaId',
+    async ({ params: { metaId }, query, set }) => {
+      const [meta] = await locationMetaDetailSelect.execute({
+        ...query,
+        metaId,
+      });
+      if (!meta) {
+        set.status = 404;
+        return ['NOT_FOUND'];
+      }
+
+      set.status = 200;
+      return formatLocationMeta(meta);
+    },
+    {
+      params: t.Object({ metaId: t.Integer() }),
       query: t.Object({
         mapId: t.String(),
         panoId: t.String(),
