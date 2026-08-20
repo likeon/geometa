@@ -490,11 +490,11 @@ describe('GET /api/userscript/location/', () => {
       const [originalMap] = await db
         .insert(maps)
         .values({
-          name: 'Original Map',
-          geoguessrId: 'map-original',
+          name: 'Original <Map> & "Guide"',
+          geoguessrId: 'map/original?x="bad"',
           mapGroupId: group!.id,
           isPersonal: false,
-          authors: 'Original Author',
+          authors: "Author & <script>alert('x')</script>",
           footerHtml: '<p>Original footer</p>',
           numberOfGamesPlayed: 100,
         })
@@ -537,7 +537,7 @@ describe('GET /api/userscript/location/', () => {
       expect(body.country).toBe('Italy');
       expect(body.footer).toBe(
         'Shared meta footer' +
-          '<p>Meta taken from <a href="https://learnablemeta.com/maps/map-original" rel ="nofollow" target="_blank"> Original Map </a> by <b>Original Author</b></p>',
+          '<p>Meta taken from <a href="https://learnablemeta.com/maps/map%2Foriginal%3Fx%3D%22bad%22" rel ="nofollow" target="_blank"> Original &#60;Map&#62; &#38; &#34;Guide&#34; </a> by <b>Author &#38; &#60;script&#62;alert(&#39;x&#39;)&#60;/script&#62;</b></p>',
       );
     });
   });

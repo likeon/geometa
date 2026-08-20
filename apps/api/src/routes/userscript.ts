@@ -29,6 +29,9 @@ type LocationMeta = Awaited<
   ReturnType<typeof locationMetaDetailSelect.execute>
 >[number];
 
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, (character) => `&#${character.charCodeAt(0)};`);
+
 function formatLocationMeta(meta: LocationMeta) {
   const country = meta.country || '';
   let footer = generateFooter(
@@ -37,8 +40,13 @@ function formatLocationMeta(meta: LocationMeta) {
     meta.footer,
     meta.mapFooter,
   );
-  if (meta.isPersonalMap && meta.mapAuthors && meta.mapName) {
-    footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
+  if (
+    meta.isPersonalMap &&
+    meta.mapAuthors &&
+    meta.mapName &&
+    meta.mapGeoguessrId
+  ) {
+    footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${encodeURIComponent(meta.mapGeoguessrId)}" rel ="nofollow" target="_blank"> ${escapeHtml(meta.mapName)} </a> by <b>${escapeHtml(meta.mapAuthors)}</b></p>`;
   }
   return {
     id: meta.syncedMetaId,
