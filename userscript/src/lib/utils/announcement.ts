@@ -1,5 +1,5 @@
 import { GM_xmlhttpRequest } from '$';
-import { API_BASE_URL } from '../config';
+import { API_BASE_URL, CACHE_NAMESPACE } from '../config';
 
 interface Announcement {
   timestamp: number;
@@ -11,7 +11,7 @@ interface CachedItem {
   fetchedAt: number;
 }
 
-const ANNOUNCEMENT_CACHE_KEY = 'geometa:cached-announcement';
+const ANNOUNCEMENT_CACHE_KEY = `geometa:cached-announcement${CACHE_NAMESPACE}`;
 // 1 hour cache
 const ANNOUNCEMENT_CACHE_DURATION_MS = 60 * 60 * 1000;
 const ANNOUNCEMENT_API_URL = `${API_BASE_URL}/api/userscript/announcement/`;
@@ -94,7 +94,7 @@ export async function getAnnouncement(): Promise<Announcement | null> {
   });
 }
 
-const LAST_DISMISSED_ANNOUNCEMENT_TIMESTAMP_KEY = 'geometa:last-dismissed-announcement';
+const LAST_DISMISSED_ANNOUNCEMENT_TIMESTAMP_KEY = `geometa:last-dismissed-announcement${CACHE_NAMESPACE}`;
 
 export function getLastDismissedAnnouncementTimestamp(): number | null {
   try {

@@ -24,6 +24,7 @@
   } from './utils/announcement';
   import { modalDialog } from './utils/modalDialog';
   import { clearMapArea, showMapArea } from './mapArea';
+  import { API_BASE_URL, CACHE_NAMESPACE, SITE_BASE_URL } from './config';
 
   interface Props {
     panoId: string;
@@ -35,7 +36,7 @@
 
   let { panoId, mapId, userscriptVersion, source, roundNumber }: Props = $props();
 
-  type GeoInfo = {
+  type MetaInfo = {
     country: string;
     metaName: string;
     note: string;
@@ -43,15 +44,34 @@
     geoJson?: Record<string, unknown> | null;
     footer: string;
   };
+  type GeoInfo = MetaInfo & { metas?: MetaInfo[] };
 
   let geoInfo: GeoInfo | null = $state(null);
   let error: string | null = $state(null);
+  let selectedMetaIndex = $state(0);
+  const metas = $derived.by<MetaInfo[]>(() => (geoInfo ? (geoInfo.metas ?? [geoInfo]) : []));
+  const selectedMeta = $derived(metas[selectedMetaIndex] ?? metas[0]);
+  const tabIdPrefix = `geometa-${crypto.randomUUID()}`;
+
+  function onTabKeydown(event: KeyboardEvent) {
+    const last = metas.length - 1;
+    let next: number | null = null;
+    if (event.key === 'ArrowRight') next = selectedMetaIndex >= last ? 0 : selectedMetaIndex + 1;
+    else if (event.key === 'ArrowLeft')
+      next = selectedMetaIndex <= 0 ? last : selectedMetaIndex - 1;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = last;
+    if (next === null) return;
+    event.preventDefault();
+    selectedMetaIndex = next;
+    document.getElementById(`${tabIdPrefix}-tab-${next}`)?.focus();
+  }
 
   let container: HTMLDivElement;
   let header: HTMLDivElement;
 
   onMount(() => {
-    const cacheKey = `${mapId}_${panoId}`;
+    const cacheKey = `${CACHE_NAMESPACE}:${mapId}_${panoId}`;
 
     const cachedData = window.geometaMetaCache?.get(cacheKey);
     if (cachedData) {
@@ -63,7 +83,7 @@
         userscriptVersion,
         source
       }).toString();
-      const url = `https://learnablemeta.com/api/userscript/location?${urlParams}`;
+      const url = `${API_BASE_URL}/api/userscript/location?${urlParams}`;
 
       GM_xmlhttpRequest({
         method: 'GET',
@@ -163,7 +183,7 @@
   updateHelpClass();
 
   $effect(() => {
-    if (geoInfo) {
+    if (selectedMeta) {
       const links = document.querySelectorAll('.geometa-footer a, .geometa-note a');
       links.forEach((link) => {
         link.removeEventListener('click', confirmNavigation);
@@ -173,7 +193,7 @@
   });
 
   $effect(() => {
-    if (geoInfo?.geoJson) showMapArea(geoInfo.geoJson);
+    if (selectedMeta?.geoJson) showMapArea(selectedMeta.geoJson);
     else clearMapArea();
     return clearMapArea;
   });
@@ -205,13 +225,10 @@
   <div class="flex header" bind:this={header}>
     <h2>Learnable Meta</h2>
     <div class="icons">
-      <a
-        href={'https://learnablemeta.com/maps/' + mapId}
-        target="_blank"
-        aria-label="List of map metas">
+      <a href={`${SITE_BASE_URL}/maps/${mapId}`} target="_blank" aria-label="List of map metas">
         <span class="skill-icons--list"></span>
       </a>
-      <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website">
+      <a href={SITE_BASE_URL} target="_blank" aria-label="Learnable Meta website">
         <span class="flat-color-icons--globe"></span>
       </a>
       <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord">
@@ -224,23 +241,50 @@
   </div>
   {#if error}
     <p>Error: {error}</p>
-  {:else if geoInfo}
-    <p>
-      <CountryFlag countryName={geoInfo.country} />
-      <strong>{geoInfo.country}</strong> - {geoInfo.metaName}
-    </p>
-    <div class="geometa-note">
-      {@html geoInfo.note}
-    </div>
-    {#if geoInfo.footer}
-      <p class="geometa-footer">
-        {@html geoInfo.footer}
+  {:else if selectedMeta}
+    {#if metas.length > 1}
+      <div class="meta-tabs" role="tablist" aria-label="Metas at this location">
+        {#each metas as meta, index (index)}
+          <button
+            type="button"
+            role="tab"
+            id={`${tabIdPrefix}-tab-${index}`}
+            aria-controls={`${tabIdPrefix}-panel`}
+            class="meta-tab"
+            class:active={index === selectedMetaIndex}
+            aria-selected={index === selectedMetaIndex}
+            tabindex={index === selectedMetaIndex ? 0 : -1}
+            onkeydown={onTabKeydown}
+            onclick={() => (selectedMetaIndex = index)}>
+            {meta.metaName}
+          </button>
+        {/each}
+      </div>
+    {/if}
+    <div
+      class="meta-panel"
+      id={`${tabIdPrefix}-panel`}
+      role={metas.length > 1 ? 'tabpanel' : undefined}
+      aria-labelledby={metas.length > 1 ? `${tabIdPrefix}-tab-${selectedMetaIndex}` : undefined}>
+      <p>
+        <CountryFlag countryName={selectedMeta.country} />
+        <strong>{selectedMeta.country}</strong> - {selectedMeta.metaName}
       </p>
-    {/if}
-    {#if geoInfo.images && geoInfo.images.length}
-      <hr />
-      <Carousel images={geoInfo.images} />
-    {/if}
+      <div class="geometa-note">
+        {@html selectedMeta.note}
+      </div>
+      {#if selectedMeta.footer}
+        <p class="geometa-footer">
+          {@html selectedMeta.footer}
+        </p>
+      {/if}
+      {#if selectedMeta.images && selectedMeta.images.length}
+        <hr />
+        {#key selectedMetaIndex}
+          <Carousel images={selectedMeta.images} />
+        {/key}
+      {/if}
+    </div>
   {:else}
     <Spinner />
   {/if}
@@ -386,6 +430,49 @@
   .geometa-footer {
     color: #d3d3d3;
     font-size: small;
+  }
+
+  .meta-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .meta-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .meta-tab {
+    background: rgba(255, 255, 255, 0.08);
+    color: #d3d3d3;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.3;
+    text-transform: none;
+    cursor: pointer;
+  }
+
+  .meta-tab:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+  }
+
+  .meta-tab.active {
+    background: #188bd2;
+    color: #fff;
+  }
+
+  .meta-tab:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 1px;
   }
 
   .announcement {
