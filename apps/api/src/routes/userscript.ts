@@ -105,7 +105,7 @@ export const userscriptRouter = new Elysia({
       detail: {
         tags: ['Userscript'],
         operationId: 'getMapCompatibility',
-        summary: 'Check map compatibility',
+        summary: 'Check map',
         description:
           'Checks whether LearnableMeta supports a GeoGuessr map and returns the userscript data version.',
       },
@@ -123,7 +123,7 @@ export const userscriptRouter = new Elysia({
       detail: {
         tags: ['Userscript'],
         operationId: 'getUserscriptAnnouncement',
-        summary: 'Get userscript announcement',
+        summary: 'Get announcement',
         description:
           'Returns the current service announcement consumed by the userscript. The response is empty when no announcement is active.',
       },
@@ -198,7 +198,7 @@ export const userscriptRouter = new Elysia({
       detail: {
         tags: ['Userscript'],
         operationId: 'getLocationMeta',
-        summary: 'Get meta for a location',
+        summary: 'Get location meta',
         description:
           'Returns the synchronized meta note, images, attribution, and optional GeoJSON overlay for a panorama on a supported map.',
       },
@@ -271,7 +271,7 @@ export const userscriptRouter = new Elysia({
       detail: {
         tags: ['Map making tools'],
         operationId: 'listAccessibleMapGroups',
-        summary: 'List accessible map groups',
+        summary: 'List map groups',
         description:
           'Lists synchronized map groups that the API token can access and that contain at least one map.',
         security: tokenSecurity,
@@ -352,7 +352,7 @@ export const userscriptRouter = new Elysia({
       detail: {
         tags: ['Map making tools'],
         operationId: 'listMapGroupMaps',
-        summary: 'Get a map group manifest',
+        summary: 'Get group manifest',
         description:
           'Returns each map in a synchronized group with its location count and coordinate fingerprint.',
         security: tokenSecurity,
@@ -472,7 +472,7 @@ export const userscriptRouter = new Elysia({
       detail: {
         tags: ['Map making tools'],
         operationId: 'exportMapLocations',
-        summary: 'Export synchronized map locations',
+        summary: 'Export locations',
         description:
           'Returns synchronized locations for a map in the shape accepted by GeoGuessr. Supply the manifest fingerprint to reject stale exports.',
         security: tokenSecurity,

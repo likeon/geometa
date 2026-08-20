@@ -13,10 +13,12 @@ export default defineConfig({
         starlightOpenAPI([
           {
             base: 'api',
-            schema: 'https://learnablemeta.com/api/docs/json',
+            schema:
+              process.env.DOCS_OPENAPI_SCHEMA_URL ??
+              'https://learnablemeta.com/api/docs/json',
             sidebar: {
               label: 'API Reference',
-              operations: { badges: true }
+              operations: { badges: true, labels: 'summary' }
             }
           }
         ])
