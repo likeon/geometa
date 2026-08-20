@@ -43,8 +43,15 @@ export const app = new Elysia({
         info: {
           title: 'Learnable Meta API',
           version: '1',
-          description:
-            'Public endpoints used by the LearnableMeta userscript and map-making tools.',
+          description: `Public endpoints used by the LearnableMeta userscript and map-making tools.
+
+## Server
+
+\`https://learnablemeta.com\`
+
+## Client libraries
+
+There are no official client libraries yet. Each endpoint includes ready-to-copy cURL and JavaScript \`fetch\` examples.`,
         },
         servers: openApiServers,
         externalDocs: {
