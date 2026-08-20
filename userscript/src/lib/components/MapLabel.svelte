@@ -6,9 +6,7 @@
 
 <div class="geometa-map-label-container">
   <p>LearnableMeta Enabled</p>
-  <a href={`${SITE_BASE_URL}/maps/${mapId}`} target="_blank">
-    <button>Meta List</button>
-  </a>
+  <a href={`${SITE_BASE_URL}/maps/${mapId}`} target="_blank">Meta List</a>
 </div>
 
 <style>
@@ -34,12 +32,12 @@
     font-weight: bold;
   }
 
-  button {
+  a {
     padding: 6px 12px;
     font-size: 12px;
     color: #fff;
+    text-decoration: none;
     background-color: #4caf50;
-    border: none;
     border-radius: 4px;
     cursor: pointer;
   }
