@@ -62,27 +62,42 @@ export const userscriptRouter = new Elysia({
       // just keep to be safe
       set.status = 200;
 
-      const [meta] = metaResult;
-      // hack for now, should country be marked as not null in schema since we will always have it?
-      const country = meta.country || '';
+      const metaList = metaResult.map((meta) => {
+        const country = meta.country || '';
+        let footer = generateFooter(
+          meta.noteFromPlonkit,
+          country,
+          meta.footer,
+          meta.mapFooter,
+        );
+        if (meta.isPersonalMap && meta.mapAuthors && meta.mapName) {
+          footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
+        }
+        return {
+          country,
+          metaName: meta.name,
+          note: meta.note,
+          images: meta.images,
+          ...(meta.geoJson ? { geoJson: meta.geoJson } : {}),
+          footer,
+        };
+      });
 
-      let footer = generateFooter(
-        meta.noteFromPlonkit,
-        country,
-        meta.footer,
-        meta.mapFooter,
-      );
-      if (meta.isPersonalMap && meta.mapAuthors && meta.mapName) {
-        footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
-      }
-      return {
-        country: country,
-        metaName: meta.name,
-        note: meta.note,
-        images: meta.images,
-        ...(meta.geoJson ? { geoJson: meta.geoJson } : {}),
-        footer: footer,
-      };
+      const seen = new Set<string>();
+      const metas = metaList.filter((meta) => {
+        const key = JSON.stringify([
+          meta.country,
+          meta.metaName,
+          meta.note,
+          meta.images,
+          meta.geoJson,
+        ]);
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+
+      return { ...metas[0], metas };
     },
     {
       query: t.Object({
@@ -216,7 +231,7 @@ export const userscriptRouter = new Elysia({
         return status(403);
       }
       const locations = await db.$primary
-        .select({
+        .selectDistinctOn([syncedLocations.panoId], {
           panoId: syncedLocations.panoId,
           lat: syncedLocations.lat,
           lng: syncedLocations.lng,
@@ -229,7 +244,8 @@ export const userscriptRouter = new Elysia({
           syncedLocations,
           eq(syncedLocations.syncedMetaId, syncedMapMetas.syncedMetaId),
         )
-        .where(eq(syncedMapMetas.mapId, data.mapId));
+        .where(eq(syncedMapMetas.mapId, data.mapId))
+        .orderBy(syncedLocations.panoId, syncedLocations.syncedMetaId);
       if (
         query.expectedFingerprint !== undefined &&
         fingerprintMapCoordinates(locations) !== query.expectedFingerprint

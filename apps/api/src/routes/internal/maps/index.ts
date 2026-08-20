@@ -64,7 +64,7 @@ const syncedMetasPersonalStatement = db
   .where(eq(syncedMapMetas.mapId, sql.placeholder('mapId')))
   .prepare('get_synced_metas_by_personal_map_id');
 
-export const metasFromMapStatement = db
+export const metasFromMapStatement = db.$primary
   .select({
     id: metas.id,
     name: mapMetas.metaName,

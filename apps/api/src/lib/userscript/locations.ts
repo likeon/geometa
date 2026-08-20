@@ -66,7 +66,8 @@ export const locationSelect = db
 // distinct: a pano shared by several of the map's metas must still be exported
 // once, or it gets extra chances of being drawn in game
 export const mapLocationsExportSelect = db
-  .selectDistinct(
+  .selectDistinctOn(
+    [syncedLocations.panoId],
     pick(getTableColumns(syncedLocations), [
       'lat',
       'lng',
@@ -86,4 +87,5 @@ export const mapLocationsExportSelect = db
     eq(syncedLocations.syncedMetaId, syncedMetas.metaId),
   )
   .where(eq(syncedMapMetas.mapId, sql.placeholder('mapId')))
+  .orderBy(syncedLocations.panoId, syncedLocations.syncedMetaId)
   .prepare('userscript_map_get_locations');

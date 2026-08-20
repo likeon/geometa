@@ -91,26 +91,35 @@ async function copyMetaToGroup(
   }
 
   // Set-based so a meta with tens of thousands of locations can't blow the
-  // bind-parameter limit. Only locations this copy actually inserts get
-  // linked: a pano the target group already has belongs to some other meta
-  // there, framed for that meta, and hijacking it would hand the copied meta
-  // a mis-aimed round (the old per-row copy skipped those too).
+  // bind-parameter limit. Existing target panos keep their own framing but
+  // still gain the copied meta.
   await tx.execute(sql`
-    WITH inserted AS (
+    WITH source AS (
+      SELECT src.*
+      FROM ${mapGroupLocations} src
+      JOIN ${mapGroupLocationMetas} lm
+        ON lm.location_id = src.id AND lm.map_group_id = src.map_group_id
+      WHERE src.map_group_id = ${mapGroupId} AND lm.meta_id = ${id}
+    ), inserted AS (
       INSERT INTO ${mapGroupLocations}
         (map_group_id, lat, lng, heading, pitch, zoom, pano_id, extra_tag,
          extra_pano_id, extra_pano_date, updated_at, modified_at)
       SELECT ${targetGroupId}, src.lat, src.lng, src.heading, src.pitch, src.zoom,
              src.pano_id, ${meta.tagName}, src.extra_pano_id, src.extra_pano_date,
              ${currentTimestamp}, ${currentTimestamp}
-      FROM ${mapGroupLocations} src
-        JOIN ${mapGroupLocationMetas} lm ON lm.location_id = src.id
-      WHERE src.map_group_id = ${mapGroupId} AND lm.meta_id = ${id}
+      FROM source src
       ON CONFLICT DO NOTHING
-      RETURNING id
+      RETURNING id, pano_id
+    ), targets AS (
+      SELECT id FROM inserted
+      UNION
+      SELECT target.id
+      FROM ${mapGroupLocations} target
+      JOIN source src ON src.pano_id = target.pano_id
+      WHERE target.map_group_id = ${targetGroupId}
     )
-    INSERT INTO ${mapGroupLocationMetas} (location_id, meta_id)
-    SELECT inserted.id, ${newMetaId} FROM inserted
+    INSERT INTO ${mapGroupLocationMetas} (location_id, meta_id, map_group_id)
+    SELECT targets.id, ${newMetaId}, ${targetGroupId} FROM targets
     ON CONFLICT DO NOTHING
   `);
 
@@ -529,6 +538,11 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
               .returning({ insertedId: metas.id });
             metaId = insertResult[0].insertedId;
           } else {
+            if (savedData && savedData.mapGroupId !== body.mapGroupId) {
+              await tx
+                .delete(mapGroupLocationMetas)
+                .where(eq(mapGroupLocationMetas.metaId, id));
+            }
             await tx
               .update(metas)
               .set({

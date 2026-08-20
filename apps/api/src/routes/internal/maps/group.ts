@@ -420,7 +420,7 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
       // include edits that haven't been synced yet. Exclusivity is per map, not
       // per group: a location carrying three metas counts as exclusive here if
       // this map's filters and levels only let one of them through.
-      const rows = await db.execute<{
+      const rows = await db.$primary.execute<{
         meta_id: number;
         meta_name: string;
         tag_name: string;

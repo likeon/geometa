@@ -10,6 +10,7 @@ import {
   bigserial,
   boolean,
   check,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -72,13 +73,17 @@ export const mapGroupLocations = pgTable(
     updatedAt: integer('updated_at'),
     modifiedAt: integer('modified_at').default(1730419200).notNull(),
     // superseded by mapGroupLocationMetas and read by nothing. Uploads still
-    // write the first tag so pods running pre-0036 code stay coherent during a
-    // rolling deploy; migration 0037 drops the column and that write with it
+    // write the first tag so pods running pre-0041 code stay coherent during a
+    // rolling deploy; a later migration can drop the column and this write
     extraTag: text('extra_tag'),
     ...commonLocationFields,
   },
   (t) => [
     uniqueIndex('map_group_locations_unique').on(t.mapGroupId, t.panoId),
+    uniqueIndex('map_group_locations_id_map_group_unique').on(
+      t.id,
+      t.mapGroupId,
+    ),
     index('map_group_locations_map_group_tag_idx').on(t.mapGroupId, t.extraTag),
     index('map_group_locations_map_group_modified_idx').on(
       t.mapGroupId,
@@ -100,16 +105,23 @@ export const mapGroupLocationsRelations = relations(
 export const mapGroupLocationMetas = pgTable(
   'map_group_location_metas',
   {
-    locationId: bigint('location_id', { mode: 'number' })
-      .notNull()
-      .references(() => mapGroupLocations.id, { onDelete: 'cascade' }),
-    metaId: integer('meta_id')
-      .notNull()
-      .references(() => metas.id, { onDelete: 'cascade' }),
+    locationId: bigint('location_id', { mode: 'number' }).notNull(),
+    metaId: integer('meta_id').notNull(),
+    mapGroupId: integer('map_group_id').notNull(),
   },
   (t) => [
     primaryKey({ columns: [t.locationId, t.metaId] }),
     index('map_group_location_metas_meta_idx').on(t.metaId),
+    foreignKey({
+      columns: [t.locationId, t.mapGroupId],
+      foreignColumns: [mapGroupLocations.id, mapGroupLocations.mapGroupId],
+      name: 'map_group_location_metas_location_group_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [t.metaId, t.mapGroupId],
+      foreignColumns: [metas.id, metas.mapGroupId],
+      name: 'map_group_location_metas_meta_group_fk',
+    }).onDelete('cascade'),
   ],
 );
 
@@ -117,12 +129,15 @@ export const mapGroupLocationMetasRelations = relations(
   mapGroupLocationMetas,
   ({ one }) => ({
     location: one(mapGroupLocations, {
-      fields: [mapGroupLocationMetas.locationId],
-      references: [mapGroupLocations.id],
+      fields: [
+        mapGroupLocationMetas.locationId,
+        mapGroupLocationMetas.mapGroupId,
+      ],
+      references: [mapGroupLocations.id, mapGroupLocations.mapGroupId],
     }),
     meta: one(metas, {
-      fields: [mapGroupLocationMetas.metaId],
-      references: [metas.id],
+      fields: [mapGroupLocationMetas.metaId, mapGroupLocationMetas.mapGroupId],
+      references: [metas.id, metas.mapGroupId],
     }),
   }),
 );
@@ -325,6 +340,7 @@ export const metas = pgTable(
   },
   (t) => [
     uniqueIndex('metas_unique').on(t.mapGroupId, t.tagName),
+    uniqueIndex('metas_id_map_group_unique').on(t.id, t.mapGroupId),
     index('metas_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt),
   ],
 );
