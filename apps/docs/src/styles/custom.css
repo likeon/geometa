@@ -1,0 +1,54 @@
+:root {
+  --lm-radius: 0.5rem;
+
+  /* LearnableMeta green with slate neutrals, tuned for dark mode. */
+  --sl-color-accent-low: hsl(161, 65%, 16%);
+  --sl-color-accent: hsl(161, 72%, 42%);
+  --sl-color-accent-high: hsl(151, 75%, 85%);
+  --sl-color-white: hsl(210, 40%, 98%);
+  --sl-color-gray-1: hsl(214, 32%, 91%);
+  --sl-color-gray-2: hsl(213, 27%, 84%);
+  --sl-color-gray-3: hsl(215, 20%, 65%);
+  --sl-color-gray-4: hsl(215, 19%, 35%);
+  --sl-color-gray-5: hsl(217, 33%, 18%);
+  --sl-color-gray-6: hsl(222, 47%, 11%);
+  --sl-color-black: hsl(222, 47%, 8%);
+}
+
+:root[data-theme='light'] {
+  --sl-color-accent-high: hsl(161, 92%, 20%);
+  --sl-color-accent: hsl(161, 92%, 25%);
+  --sl-color-accent-low: hsl(152, 70%, 92%);
+  --sl-color-white: hsl(222, 47%, 11%);
+  --sl-color-gray-1: hsl(222, 47%, 11%);
+  --sl-color-gray-2: hsl(215, 25%, 27%);
+  --sl-color-gray-3: hsl(215, 19%, 35%);
+  --sl-color-gray-4: hsl(215, 16%, 47%);
+  --sl-color-gray-5: hsl(213, 27%, 84%);
+  --sl-color-gray-6: hsl(214, 32%, 91%);
+  --sl-color-gray-7: hsl(210, 40%, 96%);
+  --sl-color-black: hsl(0, 0%, 100%);
+}
+
+:where(.card, .sl-link-card) {
+  border-radius: var(--lm-radius);
+}
+
+.hero h1 {
+  color: var(--sl-color-accent-high);
+  background: linear-gradient(90deg, hsl(161, 72%, 42%), hsl(199, 89%, 60%));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+:root[data-theme='light'] .hero h1 {
+  background-image: linear-gradient(90deg, hsl(161, 92%, 25%), hsl(199, 89%, 32%));
+}
+
+@media (forced-colors: active) {
+  .hero h1 {
+    background: none;
+    -webkit-text-fill-color: currentColor;
+  }
+}

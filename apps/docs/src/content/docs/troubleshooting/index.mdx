@@ -1,0 +1,40 @@
+---
+title: Troubleshooting
+description: Resolve common LearnableMeta installation and userscript problems.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+## The installer downloads a file
+
+Your userscript manager did not claim the `.user.js` file. Confirm that Tampermonkey or Violentmonkey is installed and enabled, then open the [userscript installer](https://github.com/likeon/geometa/raw/main/dist/geometa.user.js) again.
+
+If it still downloads, follow the [manual installation video](https://www.youtube.com/watch?v=RpjvLpyiras).
+
+## LearnableMeta does not appear in GeoGuessr
+
+Try these checks in order:
+
+1. Open GeoGuessr in a completely new tab or restart the browser.
+2. Confirm that the LearnableMeta script is installed and enabled in your userscript manager.
+3. On Chrome or another Chromium browser, enable **Developer mode** and Tampermonkey's **Allow User Scripts** setting.
+4. Make sure you are using a browser, not the GeoGuessr mobile app.
+5. Open a map from the [LearnableMeta map list](https://learnablemeta.com/maps).
+
+See the platform-specific instructions for [Chrome](/getting-started/chrome/), [Firefox](/getting-started/firefox/), [Android](/getting-started/android/), or [iOS](/getting-started/ios/).
+
+## No note appears after a guess
+
+LearnableMeta notes appear on the results screen after a guess, not while the round is in progress. Confirm that the selected map is listed by LearnableMeta and that the current location has a configured meta.
+
+## Mobile layout is difficult to use
+
+LearnableMeta must run in a mobile browser. It does not support the native GeoGuessr app. Tablets generally provide a better experience than phones because GeoGuessr and the hint panel have more screen space.
+
+## Still need help?
+
+Join the [LearnableMeta Discord](https://discord.gg/AcXEWznYZe) and ask in `#help-desk`. Include your browser, device, userscript manager, and a short description of what happened.
+
+<Aside type="tip">
+  A screenshot of the browser console or userscript-manager error can make technical problems much easier to diagnose.
+</Aside>

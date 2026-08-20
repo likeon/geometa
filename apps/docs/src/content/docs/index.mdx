@@ -1,0 +1,63 @@
+---
+title: LearnableMeta documentation
+description: Install LearnableMeta, learn GeoGuessr country clues, and prepare maps for LearnableMeta players.
+template: splash
+hero:
+  title: LearnableMeta
+  tagline: Learn GeoGuessr country clues while you play.
+  image:
+    file: ../../assets/logo.png
+    alt: LearnableMeta globe pin
+  actions:
+    - text: Get started
+      link: /getting-started/
+      icon: right-arrow
+      variant: primary
+    - text: Open LearnableMeta
+      link: https://learnablemeta.com
+      icon: external
+      variant: minimal
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+LearnableMeta combines educational GeoGuessr maps with a browser userscript. After you guess, the script explains the useful clue at that location so you can learn landscapes, bollards, signs, road markings, Street View cars, and other country-identification clues in context.
+
+<CardGrid>
+  <LinkCard
+    title="Getting Started"
+    href="/getting-started/"
+    description="Understand how LearnableMeta works and what you need before playing."
+  />
+  <LinkCard
+    title="Installation"
+    href="/getting-started/installation/"
+    description="Install the userscript on desktop or mobile."
+  />
+  <LinkCard
+    title="Using LearnableMeta"
+    href="/using-learnable-meta/"
+    description="Choose a map, play a round, and review the clue after your guess."
+  />
+  <LinkCard
+    title="Map Creators"
+    href="/map-creators/getting-started/"
+    description="Tag locations and add educational notes to your own map."
+  />
+  <LinkCard
+    title="Troubleshooting"
+    href="/troubleshooting/"
+    description="Fix common userscript, browser, and installation problems."
+  />
+  <LinkCard
+    title="Reference"
+    href="/reference/"
+    description="Find product links, terminology, source code, and API documentation."
+  />
+</CardGrid>
+
+## Useful links
+
+- [Browse LearnableMeta maps](https://learnablemeta.com/maps)
+- [Join the LearnableMeta Discord](https://discord.gg/AcXEWznYZe) for help and feedback
+- [View the source code on GitHub](https://github.com/likeon/geometa)
