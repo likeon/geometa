@@ -4,27 +4,22 @@ drizzle-generate:
 drizzle-migrate:
   bunx drizzle-kit migrate
 
-database := "geometa"
 db-psql:
-  psql -h localhost -U postgres {{database}}
+  psql "{{ env_var_or_default('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/geometa') }}"
 
 alias db-shell := db-psql
-
-pgcli:
-  uvx pgcli postgresql://postgres:postgres@localhost:${TILT_PORT_POSTGRES:-5432}/geometa
-
-pgcli-prod:
-  uvx pgcli $PROD_POSTRGRES_URL
 
 environment := "local"
 db-dump:
   ./utils/db/backup.sh {{environment}}
 
 db-reset:
-  psql -h localhost -U postgres postgres -f utils/db/reset.sql
+  # abort if template database (geometa_backup) used by reset.sql does not exist
+  psql "{{ env_var_or_default('DATABASE_URL_POSTGRES_DB', 'postgresql://postgres:postgres@localhost:5432/postgres') }}" -tAc "SELECT 1 FROM pg_database WHERE datname = 'geometa_backup'" | grep -q 1 || (echo "Error: template database 'geometa_backup' does not exist, run 'just db-dump' first" && exit 1)
+  psql "{{ env_var_or_default('DATABASE_URL_POSTGRES_DB', 'postgresql://postgres:postgres@localhost:5432/postgres') }}" -f utils/db/reset.sql
 
 db-init:
-  psql -h localhost -U postgres geometa -f utils/db/init.sql
+  psql "{{ env_var_or_default('DATABASE_URL', 'postgresql://postgres:postgres@localhost:5432/geometa') }}" -f utils/db/init.sql
 
 build TAG:
   buildah bud --platform linux/arm64 -t {{TAG}}

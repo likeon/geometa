@@ -14,6 +14,7 @@
   const entityTypeLabels: Record<string, string> = {
     meta: 'Meta',
     meta_image: 'Image',
+    meta_geojson: 'Map area',
     meta_levels: 'Level assignment',
     location_batch: 'Locations',
     level: 'Level',

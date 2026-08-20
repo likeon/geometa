@@ -1,5 +1,5 @@
 {
-  "id": "83b160ae-d3d8-463f-a0ea-8640b5a17733",
+  "id": "ceffb441-8d62-45ae-8879-79070d8befc3",
   "prevId": "31f95612-5b3e-4bea-b773-8a8b2e7f29b2",
   "version": "7",
   "dialect": "postgresql",
@@ -81,64 +81,6 @@
           "tableFrom": "levels",
           "tableTo": "map_groups",
           "columnsFrom": ["map_group_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.map_data": {
-      "name": "map_data",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "bigserial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "map_id": {
-          "name": "map_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "last_updated_panoids": {
-          "name": "last_updated_panoids",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'[]'"
-        }
-      },
-      "indexes": {
-        "map_data_unique": {
-          "name": "map_data_unique",
-          "columns": [
-            {
-              "expression": "map_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "map_data_map_id_maps_id_fk": {
-          "name": "map_data_map_id_maps_id_fk",
-          "tableFrom": "map_data",
-          "tableTo": "maps",
-          "columnsFrom": ["map_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -340,71 +282,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.map_group_location_metas": {
-      "name": "map_group_location_metas",
-      "schema": "",
-      "columns": {
-        "location_id": {
-          "name": "location_id",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "meta_id": {
-          "name": "meta_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {
-        "map_group_location_metas_meta_idx": {
-          "name": "map_group_location_metas_meta_idx",
-          "columns": [
-            {
-              "expression": "meta_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "map_group_location_metas_location_id_map_group_locations_id_fk": {
-          "name": "map_group_location_metas_location_id_map_group_locations_id_fk",
-          "tableFrom": "map_group_location_metas",
-          "tableTo": "map_group_locations",
-          "columnsFrom": ["location_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "map_group_location_metas_meta_id_metas_id_fk": {
-          "name": "map_group_location_metas_meta_id_metas_id_fk",
-          "tableFrom": "map_group_location_metas",
-          "tableTo": "metas",
-          "columnsFrom": ["meta_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "map_group_location_metas_location_id_meta_id_pk": {
-          "name": "map_group_location_metas_location_id_meta_id_pk",
-          "columns": ["location_id", "meta_id"]
-        }
-      },
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.map_group_locations": {
       "name": "map_group_locations",
       "schema": "",
@@ -440,12 +317,6 @@
           "notNull": true,
           "default": 1730419200
         },
-        "extra_tag": {
-          "name": "extra_tag",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
         "lat": {
           "name": "lat",
           "type": "real",
@@ -478,6 +349,12 @@
         },
         "pano_id": {
           "name": "pano_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "extra_tag": {
+          "name": "extra_tag",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -912,13 +789,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": 0
-        },
-        "auto_update": {
-          "name": "auto_update",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": false
         },
         "footer": {
           "name": "footer",
@@ -1482,12 +1352,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "extra_tag": {
-          "name": "extra_tag",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "lat": {
           "name": "lat",
           "type": "real",
@@ -1520,6 +1384,12 @@
         },
         "pano_id": {
           "name": "pano_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "extra_tag": {
+          "name": "extra_tag",
           "type": "text",
           "primaryKey": false,
           "notNull": true

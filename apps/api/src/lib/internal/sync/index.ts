@@ -3,40 +3,42 @@ import { db } from '@api/lib/drizzle';
 import { and, eq, getTableColumns, sql } from 'drizzle-orm';
 import { getImageUrl } from './utils';
 
-const metasSelectStatement = db
-  .select({
-    ...getTableColumns(metas),
-    images: sql<string[]>`
-      COALESCE(
-        array_agg(${metaImages.image_url} ORDER BY ${metaImages.id})
-        FILTER (WHERE ${metaImages.image_url} IS NOT NULL),
-        '{}'
-      )
-    `,
-  })
-  .from(metas)
-  .leftJoin(metaImages, eq(metaImages.metaId, metas.id))
-  .where(
-    and(
-      eq(metas.mapGroupId, sql.placeholder('mapGroupId')),
-      sql`(${sql.placeholder('groupSyncedAt')}::bigint IS NULL OR
-      ${metas.modifiedAt} > ${sql.placeholder('groupSyncedAt')}::bigint)`,
-    ),
-  )
-  .groupBy(...Object.values(getTableColumns(metas)))
-  .prepare('metas_to_sync');
-
 export async function syncMapGroup(group: {
   id: number;
   syncedAt: number | null;
 }) {
-  const currentTimestamp = Math.floor(Date.now() / 1000);
-  await db.$primary.transaction(async (tx) => {
+  return db.$primary.transaction(async (tx) => {
+    const [storedGroup] = await tx
+      .select({ syncedAt: mapGroups.syncedAt })
+      .from(mapGroups)
+      .where(eq(mapGroups.id, group.id))
+      .for('update');
+    if (!storedGroup) throw new Error(`Map group ${group.id} not found`);
+
+    const groupSyncedAt = storedGroup.syncedAt;
+    const currentTimestamp = Math.floor(Date.now() / 1000);
     // metas
-    const metasToSync = await metasSelectStatement.execute({
-      mapGroupId: group.id,
-      groupSyncedAt: group.syncedAt,
-    });
+    const metasToSync = await tx
+      .select({
+        ...getTableColumns(metas),
+        images: sql<string[]>`
+          COALESCE(
+            array_agg(${metaImages.image_url} ORDER BY ${metaImages.id})
+            FILTER (WHERE ${metaImages.image_url} IS NOT NULL),
+            '{}'
+          )
+        `,
+      })
+      .from(metas)
+      .leftJoin(metaImages, eq(metaImages.metaId, metas.id))
+      .where(
+        and(
+          eq(metas.mapGroupId, group.id),
+          sql`(${groupSyncedAt}::bigint IS NULL OR
+            ${metas.modifiedAt} >= ${groupSyncedAt}::bigint)`,
+        ),
+      )
+      .groupBy(...Object.values(getTableColumns(metas)));
     const metaValuesSql = sql.join(
       metasToSync.map((meta) => {
         return sql`(
@@ -46,7 +48,8 @@ export async function syncMapGroup(group: {
           ${meta.noteHtml},
           ${meta.noteFromPlonkit},
           ${meta.footerHtml},
-          string_to_array(${meta.images.map(getImageUrl).join('|')}, '|')
+          string_to_array(${meta.images.map(getImageUrl).join('|')}, '|'),
+          ${meta.geoJson ? JSON.stringify(meta.geoJson) : null}::jsonb
         )`;
       }),
       sql.raw(', '),
@@ -56,7 +59,7 @@ export async function syncMapGroup(group: {
         MERGE INTO synced_metas sm
         USING (
           VALUES ${metaValuesSql}
-        ) as m(meta_id, map_group_id, name, note, note_from_plonkit, footer, images)
+        ) as m(meta_id, map_group_id, name, note, note_from_plonkit, footer, images, geojson)
         ON sm.meta_id = m.meta_id
         WHEN MATCHED THEN
           UPDATE SET
@@ -64,12 +67,13 @@ export async function syncMapGroup(group: {
             note = m.note,
             note_from_plonkit = m.note_from_plonkit,
             footer = m.footer,
-            images = m.images
+            images = m.images,
+            geojson = m.geojson
         WHEN NOT MATCHED BY TARGET THEN
           INSERT (meta_id, map_group_id, name, note,
-                  note_from_plonkit, footer, images)
+                  note_from_plonkit, footer, images, geojson)
           VALUES (m.meta_id, m.map_group_id, m.name, m.note,
-                  m.note_from_plonkit, m.footer, m.images)
+                  m.note_from_plonkit, m.footer, m.images, m.geojson)
         ;
     `);
     }
@@ -77,6 +81,22 @@ export async function syncMapGroup(group: {
       sql`${syncedMetas.mapGroupId} = ${group.id} AND
         ${syncedMetas.metaId} NOT IN (SELECT id FROM ${metas} WHERE ${metas.mapGroupId} = ${group.id})`,
     );
+
+    // remove locations that changed tag name
+
+    await tx.execute(sql`
+      DELETE FROM synced_locations sl
+      USING synced_metas sm,
+            map_group_locations mgl,
+            metas m
+      WHERE sl.synced_meta_id = sm.meta_id
+        AND sm.map_group_id = ${group.id}
+        AND mgl.map_group_id = sm.map_group_id
+        AND mgl.pano_id = sl.pano_id
+        AND m.map_group_id = sm.map_group_id
+        AND m.id = sl.synced_meta_id
+        AND mgl.extra_tag != m.tag_name
+    `);
 
     // locations
     await tx.execute(sql`
@@ -89,19 +109,15 @@ export async function syncMapGroup(group: {
           mgl.pitch,
           mgl.zoom,
           mgl.pano_id,
-          m.tag_name as extra_tag,
+          mgl.extra_tag,
           mgl.extra_pano_id,
           mgl.extra_pano_date,
-          get_country_from_tag_name(m.tag_name) as country
+          get_country_from_tag_name(mgl.extra_tag) as country
          from map_group_locations mgl
-         join map_group_location_metas lm on lm.location_id = mgl.id
-         join metas m on m.id = lm.meta_id
+         join metas m on m.map_group_id = mgl.map_group_id and m.tag_name = mgl.extra_tag
          join map_groups mg on mg.id = mgl.map_group_id
-         where mgl.map_group_id = ${group.id} and (${group.syncedAt}::bigint IS NULL OR
-            mgl.modified_at > ${group.syncedAt}::bigint OR
-            -- the snapshot denormalizes the meta's tag and country, so a
-            -- renamed meta has to refresh its locations too
-            m.modified_at > ${group.syncedAt}::bigint) and
+         where mgl.map_group_id = ${group.id} and (${groupSyncedAt}::bigint IS NULL OR
+            mgl.modified_at >= ${groupSyncedAt}::bigint) and
             (mg.sync_include_locations_not_on_street_view or mgl.is_on_street_view is not false)
       )
       MERGE INTO synced_locations sl
@@ -124,9 +140,6 @@ export async function syncMapGroup(group: {
         VALUES (l.synced_meta_id, l.lat, l.lng, l.heading, l.pitch, l.zoom, l.pano_id, l.extra_tag, l.extra_pano_id, l.extra_pano_date, l.country)
       ;
   `);
-    // one statement for everything the snapshot should no longer hold: metas
-    // detached from a location, locations deleted, and locations excluded by
-    // the group's street view setting
     await tx.execute(sql`
       DELETE FROM synced_locations sl
       USING synced_metas sm
@@ -134,12 +147,10 @@ export async function syncMapGroup(group: {
         AND sm.map_group_id = ${group.id}
         AND NOT EXISTS (
           SELECT 1
-          FROM   map_group_location_metas lm
-          JOIN map_group_locations mgl on mgl.id = lm.location_id
+          FROM   map_group_locations mgl
           JOIN map_groups mg on mg.id = mgl.map_group_id
           WHERE  mgl.map_group_id = sm.map_group_id
             AND  mgl.pano_id = sl.pano_id
-            AND  lm.meta_id = sl.synced_meta_id
             AND (mg.sync_include_locations_not_on_street_view or mgl.is_on_street_view is not false)
         );
     `);
@@ -206,6 +217,6 @@ export async function syncMapGroup(group: {
       .update(mapGroups)
       .set({ syncedAt: currentTimestamp })
       .where(eq(mapGroups.id, group.id));
+    return currentTimestamp;
   });
-  return currentTimestamp;
 }

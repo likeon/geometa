@@ -20,6 +20,24 @@ const imageUploadSchema = z.object({
 });
 export type ImageUploadSchema = typeof imageUploadSchema;
 
+const geoJsonUploadSchema = z.object({
+  metaId: z.number(),
+  file: z
+    .instanceof(File, { error: 'Please upload a GeoJSON file' })
+    .refine((file) => file.size <= 5 * 1024 * 1024, 'GeoJSON must be 5 MiB or smaller')
+});
+export type GeoJsonUploadSchema = typeof geoJsonUploadSchema;
+
+// ponytail: keep external previews URL-bounded; use a signed server-backed URL if larger previews are needed.
+const MAX_GEOJSON_PREVIEW_URL_LENGTH = 512 * 1024;
+
+function getFormId(data: FormData, name: string) {
+  const value = data.get(name);
+  const id = typeof value === 'string' ? Number(value) : NaN;
+  if (!Number.isSafeInteger(id) || id < 1) error(400, 'Invalid ID');
+  return id;
+}
+
 const imageOrderUpdateSchema = z.object({
   metaId: z.number(),
   updates: z
@@ -114,6 +132,7 @@ export const load = async ({ params, locals }) => {
   const mapUploadForm = await superValidate(zod4(mapUploadSchema));
   const metasUploadForm = await superValidate(zod4(metasUploadSchema));
   const imageUploadForm = await superValidate(zod4(imageUploadSchema));
+  const geoJsonUploadForm = await superValidate(zod4(geoJsonUploadSchema));
   const imageOrderUpdateForm = await superValidate(zod4(imageOrderUpdateSchema));
   const copyForm = await superValidate(zod4(copyMetaSchema));
 
@@ -125,6 +144,7 @@ export const load = async ({ params, locals }) => {
     mapUploadForm,
     metasUploadForm,
     imageUploadForm,
+    geoJsonUploadForm,
     imageOrderUpdateForm,
     user,
     copyForm
@@ -442,12 +462,57 @@ export const actions = {
         throw new Error('unexpected response');
     }
   },
+  uploadMetaGeoJson: async ({ request }) => {
+    const form = await superValidate(request, zod4(geoJsonUploadSchema));
+    if (!form.valid) {
+      return fail(400, withFiles({ form }));
+    }
+
+    const { data, error: apiError } = await api.internal
+      .metas({ id: form.data.metaId })
+      .geojson.put({ file: form.data.file });
+    if (apiError) {
+      const value = apiError.value as { message?: string } | undefined;
+      if ((apiError.status as number) === 400) {
+        return setError(form, 'file', value?.message ?? 'Invalid GeoJSON');
+      }
+      throwApiError(apiError, { 404: 'Meta not found', 500: 'Failed to upload map area' });
+    }
+    return message(form, `${data!.featureCount} feature${data!.featureCount === 1 ? '' : 's'}`);
+  },
+  previewMetaGeoJson: async ({ request }) => {
+    const data = await request.formData();
+    const metaId = getFormId(data, 'metaId');
+
+    const { data: geoJson, error: apiError } = await api.internal
+      .metas({ id: metaId })
+      .geojson.get();
+    if (apiError) {
+      throwApiError(apiError, { 404: 'Map area not found', 500: 'Failed to preview map area' });
+    }
+    const previewUrl = `https://geojson.io/#data=data:application/json,${encodeURIComponent(
+      JSON.stringify(geoJson)
+    )}`;
+    if (previewUrl.length > MAX_GEOJSON_PREVIEW_URL_LENGTH) {
+      return {
+        previewError: 'This map area is too large for the external preview (512 KiB URL limit).'
+      };
+    }
+    return { previewUrl };
+  },
+  deleteMetaGeoJson: async ({ request }) => {
+    const data = await request.formData();
+    const metaId = getFormId(data, 'metaId');
+
+    const { error: apiError } = await api.internal.metas({ id: metaId }).geojson.delete();
+    if (apiError) {
+      throwApiError(apiError, { 404: 'Map area not found', 500: 'Failed to remove map area' });
+    }
+    return { success: true, metaId };
+  },
   deleteMetaImage: async ({ request }) => {
     const data = await request.formData();
-    const imageId = parseInt((data.get('imageId') as string) || '', 10);
-    if (isNaN(imageId)) {
-      error(400, 'Invalid ID');
-    }
+    const imageId = getFormId(data, 'imageId');
 
     const { error: apiError } = await api.internal.metas.images({ imageId }).delete();
 
@@ -478,7 +543,7 @@ export const actions = {
   prepareUserScriptData: async (event) => {
     const groupId = getGroupId(event.params);
     // make it so every request has this user id as header
-    const { error: apiError } = await api.internal['map-groups']({ id: groupId }).sync.post(
+    const { data, error: apiError } = await api.internal['map-groups']({ id: groupId }).sync.post(
       undefined,
       {
         headers: {
@@ -489,5 +554,9 @@ export const actions = {
     if (apiError) {
       error(500);
     }
+    return {
+      hasMapUpdates: data?.hasMapUpdates ?? false,
+      mapUpdatesCount: data?.mapUpdatesCount ?? null
+    };
   }
 };

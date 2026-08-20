@@ -1,15 +1,21 @@
-import { mapGroupPermissions, maps, users } from '@api/lib/db/schema';
+import {
+  mapGroupPermissions,
+  mapGroups,
+  maps,
+  syncedLocations,
+  syncedMapMetas,
+  users,
+} from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { bearer } from '@api/lib/internal/auth';
-import {
-  locationSelect,
-  mapLocationsExportSelect,
-} from '@api/lib/userscript/locations';
+import { locationSelect } from '@api/lib/userscript/locations';
+import { fingerprintMapCoordinates } from '@api/lib/userscript/map-fingerprint';
+import { getSynchronizedGroupMapSnapshots } from '@api/lib/userscript/map-snapshots';
 import { generateFooter } from '@api/lib/userscript/utils';
-import { eq, sql } from 'drizzle-orm';
+import { and, asc, eq, isNotNull, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
-const userscriptVersion = '0.91';
+const userscriptVersion = '0.94';
 
 const mapInfoQuery = db.query.maps
   .findFirst({
@@ -56,50 +62,27 @@ export const userscriptRouter = new Elysia({
       // just keep to be safe
       set.status = 200;
 
-      const metaList = metaResult.map((meta) => {
-        // hack for now, should country be marked as not null in schema since we will always have it?
-        const country = meta.country || '';
+      const [meta] = metaResult;
+      // hack for now, should country be marked as not null in schema since we will always have it?
+      const country = meta.country || '';
 
-        let footer = generateFooter(
-          meta.noteFromPlonkit,
-          country,
-          meta.footer,
-          meta.mapFooter,
-        );
-        if (meta.isPersonalMap && meta.mapAuthors && meta.mapName) {
-          footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
-        }
-        return {
-          country: country,
-          metaName: meta.name,
-          note: meta.note,
-          images: meta.images,
-          footer: footer,
-        };
-      });
-
-      // Personal maps borrow the same meta from several source maps, giving
-      // one pano many synced_metas rows that differ only in the footer credit.
-      // Those would render as identical tabs, so collapse anything whose
-      // visible content matches (first one wins - the md5 order is stable).
-      const seen = new Set<string>();
-      const dedupedMetas = metaList.filter((meta) => {
-        const key = JSON.stringify([
-          meta.country,
-          meta.metaName,
-          meta.note,
-          meta.images,
-        ]);
-        if (seen.has(key)) {
-          return false;
-        }
-        seen.add(key);
-        return true;
-      });
-
-      // the top-level fields are the first meta, kept so userscripts predating
-      // the tab strip keep working - they never see `metas`
-      return { ...dedupedMetas[0], metas: dedupedMetas };
+      let footer = generateFooter(
+        meta.noteFromPlonkit,
+        country,
+        meta.footer,
+        meta.mapFooter,
+      );
+      if (meta.isPersonalMap && meta.mapAuthors && meta.mapName) {
+        footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
+      }
+      return {
+        country: country,
+        metaName: meta.name,
+        note: meta.note,
+        images: meta.images,
+        ...(meta.geoJson ? { geoJson: meta.geoJson } : {}),
+        footer: footer,
+      };
     },
     {
       query: t.Object({
@@ -109,16 +92,101 @@ export const userscriptRouter = new Elysia({
     },
   )
   .use(bearer())
+  .get('/map-groups', async ({ status, bearer }) => {
+    if (!bearer) {
+      return status(401);
+    }
+
+    const user = await db.$primary.query.users.findFirst({
+      where: eq(users.apiToken, bearer),
+      columns: { id: true },
+    });
+    if (!user) {
+      return status(401);
+    }
+
+    const groups = await db.$primary
+      .select({
+        id: mapGroups.id,
+        name: mapGroups.name,
+        syncedAt: mapGroups.syncedAt,
+        mapCount: sql<number>`count(${maps.id})::int`.mapWith(Number),
+      })
+      .from(mapGroupPermissions)
+      .innerJoin(mapGroups, eq(mapGroups.id, mapGroupPermissions.mapGroupId))
+      .innerJoin(maps, eq(maps.mapGroupId, mapGroups.id))
+      .where(
+        and(
+          eq(mapGroupPermissions.userId, user.id),
+          isNotNull(mapGroups.syncedAt),
+        ),
+      )
+      .groupBy(mapGroups.id, mapGroups.name, mapGroups.syncedAt)
+      .orderBy(asc(mapGroups.name), asc(mapGroups.id));
+
+    return { groups };
+  })
+  .get(
+    '/map-group/:groupId/maps',
+    async ({ params: { groupId }, status, bearer }) => {
+      if (!bearer) {
+        return status(401);
+      }
+
+      const user = await db.$primary.query.users.findFirst({
+        where: eq(users.apiToken, bearer),
+        columns: { id: true },
+      });
+      if (!user) {
+        return status(401);
+      }
+
+      const [group] = await db.$primary
+        .select({
+          id: mapGroups.id,
+          name: mapGroups.name,
+          syncedAt: mapGroups.syncedAt,
+        })
+        .from(mapGroupPermissions)
+        .innerJoin(mapGroups, eq(mapGroups.id, mapGroupPermissions.mapGroupId))
+        .where(
+          and(
+            eq(mapGroupPermissions.userId, user.id),
+            eq(mapGroups.id, groupId),
+          ),
+        );
+      if (!group) {
+        return status(404);
+      }
+      if (group.syncedAt === null) {
+        return status(409, { message: 'Map group has not been synchronized' });
+      }
+
+      const groupMaps = await getSynchronizedGroupMapSnapshots(groupId);
+
+      return {
+        group: {
+          id: group.id,
+          name: group.name,
+          syncedAt: group.syncedAt,
+        },
+        maps: groupMaps.map(({ mapId: _mapId, ...map }) => map),
+      };
+    },
+    {
+      params: t.Object({ groupId: t.Integer() }),
+    },
+  )
   .get(
     '/map/:geoguessrId/locations',
-    async ({ params: { geoguessrId }, status, bearer }) => {
+    async ({ params: { geoguessrId }, query, status, bearer }) => {
       if (!bearer) {
         return status(401);
       }
 
       // authorized = the token belongs to the personal map's owner, or to a
       // user with permissions on the map's group
-      const [data] = await db
+      const [data] = await db.$primary
         .select({
           mapId: maps.id,
           authorized: sql<boolean>`
@@ -147,9 +215,29 @@ export const userscriptRouter = new Elysia({
       if (!data.authorized) {
         return status(403);
       }
-      const locations = await mapLocationsExportSelect.execute({
-        mapId: data.mapId,
-      });
+      const locations = await db.$primary
+        .select({
+          panoId: syncedLocations.panoId,
+          lat: syncedLocations.lat,
+          lng: syncedLocations.lng,
+          heading: syncedLocations.heading,
+          pitch: syncedLocations.pitch,
+          zoom: syncedLocations.zoom,
+        })
+        .from(syncedMapMetas)
+        .innerJoin(
+          syncedLocations,
+          eq(syncedLocations.syncedMetaId, syncedMapMetas.syncedMetaId),
+        )
+        .where(eq(syncedMapMetas.mapId, data.mapId));
+      if (
+        query.expectedFingerprint !== undefined &&
+        fingerprintMapCoordinates(locations) !== query.expectedFingerprint
+      ) {
+        return status(409, {
+          message: 'Synchronized map data changed; scan the group again',
+        });
+      }
       return {
         customCoordinates: locations.map((location) => ({
           lat: location.lat,
@@ -162,5 +250,13 @@ export const userscriptRouter = new Elysia({
           stateCode: null,
         })),
       };
+    },
+    {
+      params: t.Object({ geoguessrId: t.String() }),
+      query: t.Object({
+        expectedFingerprint: t.Optional(
+          t.String({ pattern: '^[a-f0-9]{64}$' }),
+        ),
+      }),
     },
   );

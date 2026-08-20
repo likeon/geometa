@@ -52,7 +52,9 @@ export default [
         }
       ],
       'svelte/no-at-html-tags': 'off', // Disable XSS warning for {@html}
-      'svelte/no-navigation-without-resolve': 'off' // rule detection is unreliable
+      'svelte/no-navigation-without-resolve': 'off', // rule detection is unreliable
+      'no-useless-assignment': 'off', // false positives on write-only $bindable() props
+      'svelte/no-unused-svelte-ignore': 'off' // plugin doesn't recognize script-level svelte-ignore comments
     }
   },
   {

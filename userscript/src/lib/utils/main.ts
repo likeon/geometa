@@ -1,5 +1,5 @@
 import { GM_xmlhttpRequest, unsafeWindow, GM_info } from '$';
-import { API_BASE_URL, CACHE_NAMESPACE } from '../config';
+import { getLiveChallengeId } from './liveChallengeId';
 
 /**
  * Waits and returns an element with the specified selector.
@@ -129,7 +129,7 @@ function getCachedMapInfo(key: string): CachedMapInfo | null {
 }
 
 export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
-  const localStorageMapInfoKey = `geometa:map-info${CACHE_NAMESPACE}:${geoguessrId}`;
+  const localStorageMapInfoKey = `geometa:map-info:${geoguessrId}`;
   const cached = getCachedMapInfo(localStorageMapInfoKey);
   if (!forceUpdate && cached) {
     const ttl = cached.mapInfo.mapFound ? MAP_FOUND_CACHE_MS : MAP_NOT_FOUND_CACHE_MS;
@@ -138,7 +138,7 @@ export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
       return cached.mapInfo;
     }
   }
-  const url = `${API_BASE_URL}/api/userscript/map/${geoguessrId}`;
+  const url = `https://learnablemeta.com/api/userscript/map/${geoguessrId}`;
   let mapInfo: MapInfoResponse;
   try {
     mapInfo = await fetchMapInfo(url);
@@ -151,15 +151,12 @@ export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
   }
   const toCache: CachedMapInfo = { mapInfo, fetchedAt: Date.now() };
   unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(toCache));
-  unsafeWindow.localStorage.setItem(
-    `geometa:latest-version${CACHE_NAMESPACE}`,
-    mapInfo.userscriptVersion
-  );
+  unsafeWindow.localStorage.setItem('geometa:latest-version', mapInfo.userscriptVersion);
   return mapInfo;
 }
 
 export function getLatestVersionInfo() {
-  return unsafeWindow.localStorage.getItem(`geometa:latest-version${CACHE_NAMESPACE}`);
+  return unsafeWindow.localStorage.getItem('geometa:latest-version');
 }
 
 function isNewerVersion(candidate: string, current: string) {
@@ -188,14 +185,7 @@ export function wasHelpMessageRead(): boolean {
   return unsafeWindow.localStorage.getItem('geometa:help-message-read') == 'true';
 }
 
-export const getChallengeId = () => {
-  const regexp = /.*\/live-challenge\/(.*)/;
-  const matches = location.pathname.match(regexp);
-  if (matches && matches.length > 1) {
-    return matches[1];
-  }
-  return null;
-};
+export const getChallengeId = getLiveChallengeId;
 
 export async function getChallengeInfo(id: string) {
   const url = `https://game-server.geoguessr.com/api/live-challenge/${id}`;

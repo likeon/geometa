@@ -1,8 +1,8 @@
+use crate::Error;
 use crate::alm::api::Client;
 use crate::alm::api::client::PublishMapError;
-use crate::types::GeoGuessrMap;
-use crate::{Context, Error};
-use log::error;
+use crate::discord::{Context, geoguessr::GeoGuessrMap};
+use tracing::error;
 
 // make sure to restrict command usage via server permissions
 #[poise::command(slash_command, guild_only)]

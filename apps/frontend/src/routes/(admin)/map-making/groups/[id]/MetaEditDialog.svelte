@@ -15,15 +15,16 @@
   import { Checkbox } from '$lib/components/ui/checkbox';
   import FormLabelWithTooltip from '$lib/components/FormLabelWithTooltip.svelte';
   import MetaImages from '$routes/(admin)/map-making/groups/[id]/MetaImages.svelte';
+  import MetaMapArea from '$routes/(admin)/map-making/groups/[id]/MetaMapArea.svelte';
   import MultiSelect from '$lib/components/MultiSelect.svelte';
   import ConfirmationDialog from '$lib/components/ConfirmationDialog.svelte';
   import type {
+    GeoJsonUploadSchema,
     ImageOrderUpdateSchema,
     ImageUploadSchema
   } from '$routes/(admin)/map-making/groups/[id]/+page.server';
   import { Button } from '$lib/components/ui/button/index';
   import Icon from '@iconify/svelte';
-  import Tooltip from '$lib/components/Tooltip.svelte';
 
   let {
     isMetaDialogOpen = $bindable(),
@@ -32,6 +33,7 @@
     groupId,
     selectedMeta,
     imageUploadForm,
+    geoJsonUploadForm,
     imageOrderUpdateForm,
     selectedIds = [],
     selectedMetaId = $bindable()
@@ -42,6 +44,7 @@
     groupId: number;
     selectedMeta: PageData['group']['metas'][number] | null;
     imageUploadForm: SuperValidated<Infer<ImageUploadSchema>>;
+    geoJsonUploadForm: SuperValidated<Infer<GeoJsonUploadSchema>>;
     imageOrderUpdateForm: SuperValidated<Infer<ImageOrderUpdateSchema>>;
     selectedIds?: number[];
     selectedMetaId?: number;
@@ -124,7 +127,7 @@
   }
 
   function handleTabChange(newTab: string) {
-    if (currentTab === 'info' && newTab === 'images' && isTaintedMeta()) {
+    if (currentTab === 'info' && newTab !== 'info' && isTaintedMeta()) {
       savedForm = $formMetaData;
     }
     currentTab = newTab;
@@ -203,15 +206,23 @@
           <Tabs.Trigger value="images" onclick={() => handleTabChange('images')}
             >Images</Tabs.Trigger>
         {:else}
-          <Tooltip
-            content="Meta must be saved first before adding images"
-            side="right"
-            delayDuration={100}
-            disableCloseOnTriggerClick={true}>
-            <Tabs.Trigger value="images" disabled class="!pointer-events-auto cursor-not-allowed">
-              Images
-            </Tabs.Trigger>
-          </Tooltip>
+          <Tabs.Trigger
+            value="images"
+            disabled
+            title="Save the meta before adding images"
+            aria-label="Images — save the meta before adding images"
+            class="!pointer-events-auto cursor-not-allowed">Images</Tabs.Trigger>
+        {/if}
+        {#if selectedMeta?.id}
+          <Tabs.Trigger value="map-area" onclick={() => handleTabChange('map-area')}
+            >Map area</Tabs.Trigger>
+        {:else}
+          <Tabs.Trigger
+            value="map-area"
+            disabled
+            title="Save the meta before adding a map area"
+            aria-label="Map area — save the meta before adding a map area"
+            class="!pointer-events-auto cursor-not-allowed">Map area</Tabs.Trigger>
         {/if}
       </Tabs.List>
       <Tabs.Content value="info" class="h-[68vh] max-h-[650px] overflow-y-auto flex-none p-1">
@@ -328,6 +339,12 @@ Czechia - Arrow Signs" />
         <Tabs.Content value="images" class="h-[68vh] max-h-[650px] overflow-y-auto flex-none">
           <MetaImages {selectedMeta} {imageUploadForm} orderData={imageOrderUpdateForm}
           ></MetaImages>
+        </Tabs.Content>
+        <Tabs.Content value="map-area" class="h-[68vh] max-h-[650px] overflow-y-auto flex-none">
+          <MetaMapArea
+            {selectedMeta}
+            {geoJsonUploadForm}
+            isActive={isMetaDialogOpen && currentTab === 'map-area'} />
         </Tabs.Content>
       {/if}
     </Tabs.Root>

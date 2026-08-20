@@ -78,8 +78,7 @@
                   return async ({ result, update }) => {
                     if (result.type === 'failure') {
                       const failureData = result.data as
-                        | { errors?: Record<string, string[]> }
-                        | undefined;
+                        { errors?: Record<string, string[]> } | undefined;
                       toast.error(
                         Object.values(failureData?.errors ?? {}).flat()[0] ??
                           'Failed to update role'

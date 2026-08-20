@@ -257,8 +257,36 @@
     {
       "idx": 36,
       "version": "7",
-      "when": 1785049859779,
-      "tag": "0036_location_metas",
+      "when": 1785995428743,
+      "tag": "0036_sparkling_jack_flag",
+      "breakpoints": true
+    },
+    {
+      "idx": 37,
+      "version": "7",
+      "when": 1786515403879,
+      "tag": "0037_secret_sister_grimm",
+      "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "7",
+      "when": 1787010066108,
+      "tag": "0038_green_demogoblin",
+      "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1787056098377,
+      "tag": "0039_complex_hawkeye",
+      "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1787061140769,
+      "tag": "0040_flashy_reavers",
       "breakpoints": true
     }
   ]

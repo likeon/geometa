@@ -1,0 +1,69 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: discord-bot-challenge
+spec:
+  schedule: "0 12 * * *"
+  timeZone: Europe/Berlin
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 3600
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            app: discord-bot
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: registries
+          volumes:
+            - name: challenge-config
+              configMap:
+                name: discord-bot-config
+            - name: sa-token
+              projected:
+                sources:
+                  - serviceAccountToken:
+                      path: token
+                      audience: "api"
+          containers:
+            - name: challenge
+              image: ghcr.io/likeon/geometa-discord-bot:main-13d8e217-1787066845 # {"$imagepolicy": "geometa:discord-bot"}
+              imagePullPolicy: Always
+              args: ["challenge"]
+              resources:
+                requests:
+                  memory: 100Mi
+                  cpu: 100m
+                limits:
+                  memory: 100Mi
+                  cpu: 100m
+              env:
+                - name: DISCORD_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: discord-bot
+                      key: DISCORD_TOKEN
+                - name: API_HOST
+                  value: api
+              volumeMounts:
+                - name: challenge-config
+                  mountPath: /app/config.yaml
+                  subPath: config.yaml
+                  readOnly: true
+                - name: sa-token
+                  mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+                  readOnly: true
+              securityContext:
+                runAsNonRoot: true
+                runAsUser: 1000
+                runAsGroup: 1000
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop:
+                    - ALL
+          serviceAccountName: discord-bot

@@ -1,0 +1,21 @@
+---
+challenge:
+  channel_id: 1534189078155624538
+  time_limit: 0
+  game_mode: nm
+
+game_modes:
+  nm:
+    settings:
+      forbid_moving: true
+      forbid_rotating: false
+      forbid_zooming: false
+
+spam_detection:
+  mode: alert
+  guild_id: 1288588689546412032
+  moderation_channel_id: 1539008246440792124
+  onnx:
+    model: tanaos-spam-detection-v1
+    version: v1
+  openrouter: {}

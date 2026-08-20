@@ -14,36 +14,207 @@ spec:
       labels:
         app: discord-bot
     spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
       imagePullSecrets:
         - name: registries
       volumes:
+        - name: bot-config
+          configMap:
+            name: discord-bot-config
+        - name: model-cache
+          persistentVolumeClaim:
+            claimName: discord-bot-model-cache
+        - name: onnx-logs
+          emptyDir: {}
+        - name: evidence-tmp
+          emptyDir:
+            sizeLimit: 256Mi
         - name: sa-token
           projected:
             sources:
               - serviceAccountToken:
                   path: token
                   audience: "api"
+      initContainers:
+        - name: provision-spam-model
+          image: docker.io/curlimages/curl:8.21.0
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+
+              base_url="https://huggingface.co/onnx-community/tanaos-spam-detection-v1-ONNX/resolve/dac7281d03723c7024de552ddec6eac0b4d6fabf"
+
+              fetch() {
+                remote_path="$1"
+                destination="$2"
+                expected_sha="$3"
+
+                mkdir -p "$(dirname "${destination}")"
+                if [ -f "${destination}" ] &&
+                  echo "${expected_sha}  ${destination}" |
+                    sha256sum -c - >/dev/null 2>&1
+                then
+                  echo "[skip] ${destination} already valid"
+                  return
+                fi
+
+                temporary="${destination}.tmp"
+                rm -f "${temporary}"
+                curl \
+                  --fail \
+                  --location \
+                  --connect-timeout 15 \
+                  --max-time 600 \
+                  --proto '=https' \
+                  --proto-redir '=https' \
+                  --retry 3 \
+                  --retry-all-errors \
+                  --silent \
+                  --show-error \
+                  --output "${temporary}" \
+                  "${base_url}/${remote_path}"
+                echo "${expected_sha}  ${temporary}" | sha256sum -c -
+                mv -f "${temporary}" "${destination}"
+              }
+
+              fetch \
+                "tokenizer.json" \
+                "/model-cache/tokenizer.json" \
+                "bf1b59b7b11c95f194f51708d918eea378e09d05f84c0e1656dc5180e8117088"
+              fetch \
+                "onnx/model_quantized.onnx" \
+                "/model-cache/models/tanaos-spam-detection-v1/v1/model.onnx" \
+                "a19c00e35d3952880314d6ab51ebb54cdb0240c4e881de7d3ce540403f089802"
+          resources:
+            requests:
+              memory: 32Mi
+              cpu: 25m
+            limits:
+              memory: 64Mi
+              cpu: 200m
+          volumeMounts:
+            - name: model-cache
+              mountPath: /model-cache
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
       containers:
         - name: discord-bot
-          image: ghcr.io/likeon/geometa-discord-bot:main-471d62db-1779044848 # {"$imagepolicy": "geometa:discord-bot"}
+          image: ghcr.io/likeon/geometa-discord-bot:main-13d8e217-1787066845 # {"$imagepolicy": "geometa:discord-bot"}
           imagePullPolicy: Always
           resources:
             requests:
-              memory: 100Mi
+              memory: 128Mi
               cpu: 100m
             limits:
-              memory: 100Mi
-              cpu: 100m
+              memory: 256Mi
+              cpu: 500m
           env:
             - name: DISCORD_TOKEN
               valueFrom:
                 secretKeyRef:
                   name: discord-bot
                   key: DISCORD_TOKEN
+            - name: OPENROUTER_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: discord-bot
+                  key: OPENROUTER_API_KEY
             - name: API_HOST
               value: api
+            - name: SPAM_ONNX_API_URL
+              value: http://127.0.0.1:8080
+            - name: SPAM_ONNX_TOKENIZER_PATH
+              value: /model-cache/tokenizer.json
           volumeMounts:
+            - name: bot-config
+              mountPath: /app/config.yaml
+              subPath: config.yaml
+              readOnly: true
+            - name: model-cache
+              mountPath: /model-cache
+              readOnly: true
+            - name: evidence-tmp
+              mountPath: /tmp
             - name: sa-token
               mountPath: /var/run/secrets/kubernetes.io/serviceaccount
               readOnly: true
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+        - name: onnx-runtime
+          image: docker.io/kibaes/onnxruntime-server:1.29.0-linux-cpu
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: ONNX_SERVER_HTTP_PORT
+              value: "8080"
+            - name: ONNX_SERVER_PREPARE_MODEL
+              value: tanaos-spam-detection-v1:v1
+            - name: ONNX_SERVER_WORKERS
+              value: "4"
+            - name: ORT_DISABLE_TELEMETRY
+              value: "1"
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 30
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              memory: 384Mi
+              cpu: 250m
+            limits:
+              memory: 768Mi
+              cpu: "1"
+          volumeMounts:
+            - name: model-cache
+              mountPath: /app/models
+              subPath: models
+              readOnly: true
+            - name: onnx-logs
+              mountPath: /app/logs
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
       serviceAccountName: discord-bot

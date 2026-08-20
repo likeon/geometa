@@ -32,6 +32,7 @@
     user: PageData['user'];
   } = $props();
 
+  // svelte-ignore state_referenced_locally - mapForm is init-only; form is repopulated on open
   const formMap = superForm(mapForm, {
     validators: zod4Client(insertMapsSchema),
     resetForm: true,
@@ -58,7 +59,6 @@
           description: map.description,
           isPublished: map.isPublished,
           authors: map.authors,
-          autoUpdate: map.autoUpdate,
           levels: map.mapLevels.map((item) => item.levelId),
           regions: map.mapRegions.map((item) => item.regionId),
           difficulty: map.difficulty,
@@ -81,7 +81,6 @@
           description: '',
           isPublished: false,
           authors: '',
-          autoUpdate: false,
           levels: [],
           regions: [],
           includeFilters: [],
@@ -236,20 +235,6 @@
                   <Checkbox {...props} bind:checked={$formMapData.isVerified} />
                   <div class="space-y-1 leading-none">
                     <FormLabelWithTooltip label="Verified" tooltipContent="" />
-                  </div>
-                {/snippet}
-              </Form.Control>
-            </Form.Field>
-
-            <Form.Field
-              form={formMap}
-              name="autoUpdate"
-              class="flex flex-row items-start space-x-1 space-y-0">
-              <Form.Control>
-                {#snippet children({ props })}
-                  <Checkbox {...props} bind:checked={$formMapData.autoUpdate} />
-                  <div class="space-y-1 leading-none">
-                    <FormLabelWithTooltip label="Auto Update" tooltipContent="" />
                   </div>
                 {/snippet}
               </Form.Control>

@@ -1,0 +1,4 @@
+[env]
+API_DISABLE_K8S_AUTH = true
+SPAM_ONNX_API_URL = 'http://127.0.0.1:${PROCESS_COMPOSE_PORT_ONNX}'
+SPAM_ONNX_TOKENIZER_PATH = "../../.dev/data/onnx-runtime/tokenizer.json"

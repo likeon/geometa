@@ -1,4 +1,3 @@
-import { prod } from '@api/lib/utils/env';
 import * as Sentry from '@sentry/bun';
 import { Elysia, t } from 'elysia';
 import * as jose from 'jose';
@@ -43,13 +42,11 @@ export function bearer() {
     },
   );
 }
-const frontendToken = process.env.FRONTEND_API_TOKEN;
-
 export function auth(jwt?: boolean) {
   return new Elysia({ name: `geometa-auth`, seed: { jwt } })
     .use(bearer())
-    .onBeforeHandle(async ({ bearer, status }) => {
-      if (prod) {
+    .onBeforeHandle({ as: 'scoped' }, async ({ bearer, status }) => {
+      if (process.env.API_INTERNAL_AUTH_REQUIRED !== 'false') {
         if (!bearer) {
           return status(401);
         }
@@ -72,7 +69,7 @@ export function auth(jwt?: boolean) {
           }
         } else {
           // Regular token validation
-          if (bearer !== frontendToken) {
+          if (bearer !== process.env.FRONTEND_API_TOKEN) {
             return status(403);
           }
         }

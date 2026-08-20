@@ -3,16 +3,24 @@ import {
   type Meta,
   mapGroupLocationMetas,
   mapGroupLocations,
+  mapGroupPermissions,
   mapGroups,
   metaImages,
   metaLevels,
   metas,
+  users,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { logChange, metaSnapshot } from '@api/lib/internal/changes';
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { generateRandomString, isUniqueViolation } from '@api/lib/utils/common';
+import {
+  GeoJsonValidationError,
+  MAX_GEOJSON_BYTES,
+  normalizeGeoJson,
+  summarizeGeoJson,
+} from '@api/lib/utils/geojson';
 import { markdown2Html } from '@api/lib/utils/markdown';
 import { uploadImage } from '@api/lib/utils/s3';
 import { and, eq, inArray, not, sql } from 'drizzle-orm';
@@ -20,6 +28,24 @@ import { Elysia, t } from 'elysia';
 import sharp from 'sharp';
 
 type Tx = Parameters<Parameters<typeof db.$primary.transaction>[0]>[0];
+
+function authorizedMetaMutation(userId: string, mapGroupId: number) {
+  return and(
+    eq(metas.mapGroupId, mapGroupId),
+    sql`(
+      EXISTS (
+        SELECT 1 FROM ${mapGroupPermissions}
+        WHERE ${mapGroupPermissions.mapGroupId} = ${metas.mapGroupId}
+          AND ${mapGroupPermissions.userId} = ${userId}
+      )
+      OR EXISTS (
+        SELECT 1 FROM ${users}
+        WHERE ${users.id} = ${userId}
+          AND ${users.isSuperadmin} = true
+      )
+    )`,
+  );
+}
 
 // Copies a meta (its images, its tag's locations, and optionally its level
 // assignments) into another group inside the given transaction. Returns the new
@@ -272,6 +298,169 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           message: t.String(),
         }),
         404: t.Void(),
+      },
+    },
+  )
+  .get(
+    '/:id/geojson',
+    async ({ userId, params, status }) => {
+      const meta = await db.$primary.query.metas.findFirst({
+        where: eq(metas.id, params.id),
+      });
+      if (!meta) {
+        return status(404, { message: 'Meta not found' });
+      }
+      await ensurePermissions(userId, meta.mapGroupId);
+      if (!meta.geoJson) {
+        return status(404, { message: 'Map area not found' });
+      }
+      return meta.geoJson;
+    },
+    {
+      userId: true,
+      params: t.Object({ id: t.Integer() }),
+      response: {
+        200: t.Any(),
+        404: t.Object({ message: t.String() }),
+      },
+    },
+  )
+  .put(
+    '/:id/geojson',
+    async ({ body, userId, params, status }) => {
+      const meta = await db.$primary.query.metas.findFirst({
+        where: eq(metas.id, params.id),
+      });
+      if (!meta) {
+        return status(404, { message: 'Meta not found' });
+      }
+      await ensurePermissions(userId, meta.mapGroupId);
+
+      if (body.file.size > MAX_GEOJSON_BYTES) {
+        return status(400, { message: 'GeoJSON must be 5 MiB or smaller' });
+      }
+
+      let input: unknown;
+      try {
+        input = JSON.parse(await body.file.text());
+      } catch {
+        return status(400, { message: 'File is not valid JSON' });
+      }
+
+      let geoJson: ReturnType<typeof normalizeGeoJson>;
+      try {
+        geoJson = normalizeGeoJson(input);
+      } catch (error) {
+        if (error instanceof GeoJsonValidationError) {
+          return status(400, { message: error.message });
+        }
+        throw error;
+      }
+
+      const summary = summarizeGeoJson(geoJson);
+      const saved = await db.$primary.transaction(async (tx) => {
+        await tx
+          .select({ id: mapGroups.id })
+          .from(mapGroups)
+          .where(eq(mapGroups.id, meta.mapGroupId))
+          .for('update');
+        const updated = await tx
+          .update(metas)
+          .set({
+            geoJson,
+            modifiedAt: Math.floor(Date.now() / 1000),
+          })
+          .where(
+            and(
+              eq(metas.id, meta.id),
+              authorizedMetaMutation(userId, meta.mapGroupId),
+            ),
+          )
+          .returning({ id: metas.id });
+        if (updated.length === 0) return false;
+        await logChange(tx, {
+          mapGroupId: meta.mapGroupId,
+          userId,
+          entityType: 'meta_geojson',
+          entityId: meta.id,
+          entityLabel: meta.tagName,
+          operation: meta.geoJson ? 'update' : 'create',
+          newValue: summary,
+        });
+        return true;
+      });
+      if (!saved) return status(404, { message: 'Meta not found' });
+      return summary;
+    },
+    {
+      body: t.Object({ file: t.File() }),
+      userId: true,
+      params: t.Object({ id: t.Integer() }),
+      response: {
+        200: t.Object({
+          featureCount: t.Integer(),
+          polygonCount: t.Integer(),
+        }),
+        400: t.Object({ message: t.String() }),
+        404: t.Object({ message: t.String() }),
+      },
+    },
+  )
+  .delete(
+    '/:id/geojson',
+    async ({ userId, params, status }) => {
+      const meta = await db.$primary.query.metas.findFirst({
+        where: eq(metas.id, params.id),
+      });
+      if (!meta) {
+        return status(404, { message: 'Meta not found' });
+      }
+      await ensurePermissions(userId, meta.mapGroupId);
+      const geoJson = meta.geoJson;
+      if (!geoJson) {
+        return status(404, { message: 'Map area not found' });
+      }
+
+      const deleted = await db.$primary.transaction(async (tx) => {
+        await tx
+          .select({ id: mapGroups.id })
+          .from(mapGroups)
+          .where(eq(mapGroups.id, meta.mapGroupId))
+          .for('update');
+        const updated = await tx
+          .update(metas)
+          .set({
+            geoJson: null,
+            modifiedAt: Math.floor(Date.now() / 1000),
+          })
+          .where(
+            and(
+              eq(metas.id, meta.id),
+              authorizedMetaMutation(userId, meta.mapGroupId),
+            ),
+          )
+          .returning({ id: metas.id });
+        if (updated.length === 0) return false;
+        await logChange(tx, {
+          mapGroupId: meta.mapGroupId,
+          userId,
+          entityType: 'meta_geojson',
+          entityId: meta.id,
+          entityLabel: meta.tagName,
+          operation: 'delete',
+          oldValue: summarizeGeoJson(geoJson),
+        });
+        return true;
+      });
+      if (!deleted) return status(404, { message: 'Meta not found' });
+      return { deleted: true };
+    },
+    {
+      userId: true,
+      params: t.Object({ id: t.Integer() }),
+      response: {
+        200: t.Object({ deleted: t.Boolean() }),
+        404: t.Object({ message: t.String() }),
       },
     },
   )

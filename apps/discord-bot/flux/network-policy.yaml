@@ -39,6 +39,13 @@ spec:
     - toFQDNs:
         - matchName: gateway.discord.gg
         - matchName: discord.com
+        - matchName: cdn.discordapp.com
+        - matchName: media.discordapp.net
+        - matchName: openrouter.ai
+        - matchName: huggingface.co
+        - matchName: us.aws.cdn.hf.co
+        - matchPattern: "*.hf.co"
+        - matchPattern: "*.xethub.hf.co"
       toPorts:
         - ports:
             - port: "443"

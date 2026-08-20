@@ -3,6 +3,7 @@
 Thank you for your interest in contributing! We welcome contributions from the community to make this project better.
 
 ## Contribution Guidelines
+
 - If you plan to introduce breaking or intrusive changes, we recommend bringing them up in [Discord] or opening a [GitHub Discussion][gh-discussion] first.
 - Follow git Conventional Commits guidelines for consistent commit messages
 
@@ -10,29 +11,40 @@ Thank you for your interest in contributing! We welcome contributions from the c
 
 Installation is tested to work on Linux and Windows WSL. Mac OS should work too, but exact installations steps could differ.
 
-#### System dependencies
+### System dependencies
+
 1. Install [mise CLI][mise] and [activate][mise-activate] it in your shell
-2. Install [docker] or [podman] container engines
-  - Exact installation steps depend on your operating system
+2. Install [podman] or [docker]
 3. Install postgres client `psql`
 
-#### Project setup
+### Project setup
 
 Run the following installation commands in order.
 
 1. `mise install` - bun and nodejs runtimes + utilities (full list in [mise.toml](./mise.toml))
 2. `just install` - npm dependencies
-3. `just run` - starts a [kind] Kubernetes cluster using [Tilt]
-  - Open [http://localhost:10350/](http://localhost:10350/) and wait for applications to start
-    - You can find logs for `postgres`, `frontend` and `api` there
-  - Since this command occupies a session, you'll need to open a new terminal window or move it to background
+3. `just run` - starts local development using [Process Compose]
+   - PostgreSQL runs in Podman or Docker; API and frontend run as local processes
+   - PostgreSQL data lives in ignored `.dev/data/postgres`
+   - With Podman, user namespaces keep PostgreSQL files owned by your host user
+   - Use the Process Compose TUI to monitor `postgres`, `frontend`, and `api`
+   - `info` prints dynamically allocated ports and URLs at startup
+   - Allocated ports are saved under `[env]` in ignored `mise.local.toml`
+   - Since this command occupies a session, you'll need to open a new terminal window or move it to background
 4. `just api::db-init` - applies initial db data
-5. To avoid the hassle of setting up Discord auth which is enabled in production you can login under a development user account
-  - Create `.env.local` file in `./apps/frontend/` folder with the following content:
-    ```
-    ALLOW_LOGIN_BYPASS=true
-    ```
-  - Login by opening this url [http://localhost:5173/login/bypass?uid=1001][login-bypass-url]
+
+### Optional: local spam-detection model
+
+The Discord bot's spam pipeline needs a pinned ONNX model locally. This is
+your choice; normal frontend/API development does not need it.
+
+1. `scripts/process-compose/setup-discord-spam-model.sh` - downloads and
+   checksum-verifies the model/tokenizer into ignored `.dev/data/onnx-runtime/`
+   (idempotent, ~136 MB)
+2. Enable the `discord-bot-spam-detect-onnx` process in `process-compose.yaml`
+   (disabled by default)
+3. `just run` persists `SPAM_ONNX_API_URL` and `SPAM_ONNX_TOKENIZER_PATH` into
+   ignored `mise.local.toml` and prints the ONNX endpoint with `info`
 
 ## Pull Request Process
 
@@ -47,10 +59,8 @@ If you need assistance, have questions, or want to discuss ideas, you can join o
 
 [mise]: https://mise.jdx.dev/getting-started.html
 [mise-activate]: https://mise.jdx.dev/getting-started.html#activate-mise
-[docker]: https://docs.docker.com/get-docker/
 [podman]: https://podman.io/docs/installation
-[kind]: https://kind.sigs.k8s.io/docs/user/quick-start/
-[Tilt]: https://docs.tilt.dev/
+[docker]: https://docs.docker.com/get-docker/
+[Process Compose]: https://f1bonacc1.github.io/process-compose/
 [gh-discussion]: https://github.com/likeon/geometa/discussions
 [Discord]: https://discord.gg/AcXEWznYZe
-[login-bypass-url]: http://localhost:5173/login/bypass?uid=1001]

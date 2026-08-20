@@ -22,7 +22,8 @@
     getLastDismissedAnnouncementTimestamp,
     markAnnouncementAsDismissed
   } from './utils/announcement';
-  import { API_BASE_URL, SITE_BASE_URL } from './config';
+  import { modalDialog } from './utils/modalDialog';
+  import { clearMapArea, showMapArea } from './mapArea';
 
   interface Props {
     panoId: string;
@@ -34,38 +35,17 @@
 
   let { panoId, mapId, userscriptVersion, source, roundNumber }: Props = $props();
 
-  type MetaInfo = {
+  type GeoInfo = {
     country: string;
     metaName: string;
     note: string;
     images?: string[];
+    geoJson?: Record<string, unknown> | null;
     footer: string;
   };
-  // `metas` is absent when a 0.91+ script talks to an API that predates it
-  // (rolling deploy, or the script installed from GitHub before the API
-  // ships), so fall back to the top-level fields - always the first meta
-  type GeoInfo = MetaInfo & { metas?: MetaInfo[] };
 
   let geoInfo: GeoInfo | null = $state(null);
   let error: string | null = $state(null);
-  let selectedMetaIndex = $state(0);
-  const metas = $derived.by<MetaInfo[]>(() => (geoInfo ? (geoInfo.metas ?? [geoInfo]) : []));
-  const selectedMeta = $derived(metas[selectedMetaIndex] ?? metas[0]);
-
-  // the arrow-key handling role="tab" promises to assistive tech
-  function onTabKeydown(event: KeyboardEvent) {
-    const last = metas.length - 1;
-    let next: number | null = null;
-    if (event.key === 'ArrowRight') next = selectedMetaIndex >= last ? 0 : selectedMetaIndex + 1;
-    else if (event.key === 'ArrowLeft')
-      next = selectedMetaIndex <= 0 ? last : selectedMetaIndex - 1;
-    else if (event.key === 'Home') next = 0;
-    else if (event.key === 'End') next = last;
-    if (next === null) return;
-    event.preventDefault();
-    selectedMetaIndex = next;
-    document.getElementById(`geometa-tab-${next}`)?.focus();
-  }
 
   let container: HTMLDivElement;
   let header: HTMLDivElement;
@@ -83,7 +63,7 @@
         userscriptVersion,
         source
       }).toString();
-      const url = `${API_BASE_URL}/api/userscript/location?${urlParams}`;
+      const url = `https://learnablemeta.com/api/userscript/location?${urlParams}`;
 
       GM_xmlhttpRequest({
         method: 'GET',
@@ -183,14 +163,19 @@
   updateHelpClass();
 
   $effect(() => {
-    // re-runs on tab switch too, so links in the newly shown note get bound
-    if (selectedMeta) {
+    if (geoInfo) {
       const links = document.querySelectorAll('.geometa-footer a, .geometa-note a');
       links.forEach((link) => {
         link.removeEventListener('click', confirmNavigation);
         link.addEventListener('click', confirmNavigation);
       });
     }
+  });
+
+  $effect(() => {
+    if (geoInfo?.geoJson) showMapArea(geoInfo.geoJson);
+    else clearMapArea();
+    return clearMapArea;
   });
 
   let lastDismissedTimestamp = $state(getLastDismissedAnnouncementTimestamp());
@@ -220,123 +205,125 @@
   <div class="flex header" bind:this={header}>
     <h2>Learnable Meta</h2>
     <div class="icons">
-      <a href={`${SITE_BASE_URL}/maps/${mapId}`} target="_blank" aria-label="List of map metas">
+      <a
+        href={'https://learnablemeta.com/maps/' + mapId}
+        target="_blank"
+        aria-label="List of map metas">
         <span class="skill-icons--list"></span>
       </a>
-      <a href={SITE_BASE_URL} target="_blank" aria-label="Learnable Meta website">
+      <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website">
         <span class="flat-color-icons--globe"></span>
       </a>
       <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord">
         <span class="skill-icons--discord"></span>
       </a>
-      <button
-        onclick={togglePopup}
-        aria-label="More information"
-        style="background: none; border: none; padding: 0;">
+      <button class="help-toggle-button" onclick={togglePopup} aria-label="More information">
         <span class={helpClass}></span>
       </button>
     </div>
   </div>
   {#if error}
     <p>Error: {error}</p>
-  {:else if selectedMeta}
-    {#if metas.length > 1}
-      <div class="meta-tabs" role="tablist" aria-label="Metas at this location">
-        {#each metas as meta, index (index)}
-          <button
-            type="button"
-            role="tab"
-            id="geometa-tab-{index}"
-            aria-controls="geometa-tabpanel"
-            class="meta-tab"
-            class:active={index === selectedMetaIndex}
-            aria-selected={index === selectedMetaIndex}
-            tabindex={index === selectedMetaIndex ? 0 : -1}
-            onkeydown={onTabKeydown}
-            onclick={() => (selectedMetaIndex = index)}>
-            {meta.metaName}
-          </button>
-        {/each}
-      </div>
-    {/if}
-    <div
-      class="meta-panel"
-      id="geometa-tabpanel"
-      role={metas.length > 1 ? 'tabpanel' : undefined}
-      aria-labelledby={metas.length > 1 ? `geometa-tab-${selectedMetaIndex}` : undefined}>
-      <p>
-        <CountryFlag countryName={selectedMeta.country} />
-        <strong>{selectedMeta.country}</strong> - {selectedMeta.metaName}
-      </p>
-      <div class="geometa-note">
-        {@html selectedMeta.note}
-      </div>
-      {#if selectedMeta.footer}
-        <p class="geometa-footer">
-          {@html selectedMeta.footer}
-        </p>
-      {/if}
-      {#if selectedMeta.images && selectedMeta.images.length}
-        <hr />
-        <!-- keyed so switching tabs remounts the carousel: it tracks the current
-           slide internally and would otherwise keep an index the new tab's
-           shorter image list has no entry for, rendering nothing -->
-        {#key selectedMetaIndex}
-          <Carousel images={selectedMeta.images} />
-        {/key}
-      {/if}
+  {:else if geoInfo}
+    <p>
+      <CountryFlag countryName={geoInfo.country} />
+      <strong>{geoInfo.country}</strong> - {geoInfo.metaName}
+    </p>
+    <div class="geometa-note">
+      {@html geoInfo.note}
     </div>
+    {#if geoInfo.footer}
+      <p class="geometa-footer">
+        {@html geoInfo.footer}
+      </p>
+    {/if}
+    {#if geoInfo.images && geoInfo.images.length}
+      <hr />
+      <Carousel images={geoInfo.images} />
+    {/if}
   {:else}
     <Spinner />
   {/if}
 
   {#if showModal}
-    <div class="modal-backdrop">
-      <div class="modal">
-        <p>You are about to open this site in a new tab:</p>
-        <p class="modal-url">{currentUrl}</p>
-        <div class="modal-buttons">
-          <button onclick={proceed} class="proceed-btn">Continue</button>
-          <button onclick={cancel} class="close-btn">Cancel</button>
+    <div class="learnablemeta-modal-backdrop learnablemeta-ui" role="presentation">
+      <div
+        class="learnablemeta-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="external-link-title"
+        use:modalDialog={{ onClose: cancel }}>
+        <div class="learnablemeta-modal-header">
+          <p class="learnablemeta-modal-eyebrow">LearnableMeta</p>
+          <h2 class="learnablemeta-modal-title" id="external-link-title">Open external link?</h2>
+          <p class="learnablemeta-modal-description">This link will open in a new browser tab.</p>
+        </div>
+        <div class="learnablemeta-modal-body">
+          <p class="learnablemeta-modal-code">{currentUrl}</p>
+        </div>
+        <div class="learnablemeta-modal-actions">
+          <button
+            type="button"
+            onclick={cancel}
+            data-modal-initial-focus
+            class="learnablemeta-button learnablemeta-button--outline">Cancel</button>
+          <button
+            type="button"
+            onclick={proceed}
+            class="learnablemeta-button learnablemeta-button--primary">Continue</button>
         </div>
       </div>
     </div>
   {/if}
 
   {#if showHelpPopup}
-    <div class="modal-backdrop">
-      <div class="modal">
-        <div class="help-message">
+    <div class="learnablemeta-modal-backdrop learnablemeta-ui" role="presentation">
+      <div
+        class="learnablemeta-modal learnablemeta-modal--wide"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="learnablemeta-help-title"
+        use:modalDialog={{ onClose: togglePopup }}>
+        <div class="learnablemeta-modal-header">
+          <p class="learnablemeta-modal-eyebrow">LearnableMeta</p>
+          <h2 class="learnablemeta-modal-title" id="learnablemeta-help-title">Userscript guide</h2>
+          <p class="learnablemeta-modal-description">
+            Quick tips for using LearnableMeta while you play.
+          </p>
+        </div>
+        <div class="learnablemeta-modal-body">
           {#if checkIfOutdated()}
-            <p class="outdated">
-              <strong
-                >Your script version is out of date - please install the latest version ({getLatestVersionInfo()})!
-              </strong>
+            <p class="learnablemeta-modal-alert">
+              Your userscript is out of date. Install the latest version ({getLatestVersionInfo()}).
             </p>
           {/if}
-          <p>Welcome to LearnableMeta, we hope you are enjoying it, some quick info:</p>
-          <ul>
+          <ul class="learnablemeta-help-list">
             <li>
-              <strong>Drag to Move:</strong> Click and drag the top of the note to reposition it anywhere
+              <strong>Drag to move:</strong> Click and drag the top of the note to reposition it anywhere
               on your screen.
             </li>
             <li>
               <strong>Resize:</strong> Use the bottom-right corner to resize the note to your liking.
             </li>
             <li>
-              <strong>View Map meta list:</strong> Click the list icon to see all the metas included
+              <strong>View map meta list:</strong> Click the list icon to see all the metas included
               in the map you are currently playing.
             </li>
             <li>
-              <strong>Join the Community:</strong> Click the Discord icon to share feedback, suggest
+              <strong>Join the community:</strong> Click the Discord icon to share feedback, suggest
               improvements, or just say hi!
             </li>
             <li>
-              <strong>Outdated Script:</strong> The question mark icon will blink if the script is outdated.
+              <strong>Outdated script:</strong> The question mark icon blinks when an update is available.
             </li>
           </ul>
         </div>
-        <button class="close-btn" onclick={togglePopup}>Close</button>
+        <div class="learnablemeta-modal-actions">
+          <button
+            type="button"
+            class="learnablemeta-button learnablemeta-button--primary"
+            onclick={togglePopup}>Close</button>
+        </div>
       </div>
     </div>
   {/if}
@@ -399,51 +386,6 @@
   .geometa-footer {
     color: #d3d3d3;
     font-size: small;
-  }
-
-  .meta-tabs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    width: 100%;
-  }
-
-  /* mirrors the container's layout so wrapping the note in a tabpanel
-     doesn't change spacing */
-  .meta-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-    align-items: flex-start;
-    width: 100%;
-  }
-
-  .meta-tab {
-    background: rgba(255, 255, 255, 0.08);
-    color: #d3d3d3;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    padding: 2px 8px;
-    font-size: 14px;
-    line-height: 1.3;
-    /* geoguessr's stylesheet restyles every button on game pages (see
-       .vote-close-btn / the upload button, which carry the same overrides) */
-    text-transform: none;
-    font-family: inherit;
-    cursor: pointer;
-    transition:
-      background-color 0.2s ease,
-      color 0.2s ease;
-  }
-
-  .meta-tab:hover {
-    background: rgba(255, 255, 255, 0.16);
-    color: #fff;
-  }
-
-  .meta-tab.active {
-    background: #188bd2;
-    color: #fff;
   }
 
   .announcement {
@@ -595,104 +537,15 @@
     margin-left: 1rem;
   }
 
-  .modal-backdrop {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(30, 30, 30, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-  }
-
-  .modal {
-    background: var(--ds-color-purple-100, #1c1836);
-    padding: 15px 25px;
-    border-radius: 8px;
-    text-align: center;
-    width: 90%;
-    max-width: 600px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    color: #d3d3d3;
-  }
-
-  .modal p {
-    margin: 0 0 10px;
-    font-size: 17px;
-  }
-
-  .modal-url {
-    font-size: 15px;
-    font-weight: bold;
-    color: #188bd2;
-    word-break: break-word;
-    margin: 10px 0;
-  }
-
-  .modal-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin-top: 20px;
-  }
-
-  .proceed-btn {
-    background: #188bd2;
-    color: white;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 15px;
-    transition: background-color 0.2s ease-in-out;
-  }
-
-  .proceed-btn:hover {
-    background: #0056b3;
-  }
-
-  .close-btn {
+  .help-toggle-button {
     background: transparent;
-    color: #d3d3d3;
-    padding: 8px 16px;
-    border: 1px solid #d3d3d3;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 15px;
-    transition:
-      background-color 0.2s ease-in-out,
-      color 0.2s ease-in-out;
-  }
-
-  .close-btn:hover {
-    background: #d3d3d3;
-    color: var(--ds-color-purple-100, #1c1836);
-  }
-
-  button {
-    cursor: pointer;
-    background: none;
     border: none;
     padding: 0;
+    cursor: pointer;
   }
 
   .blink {
     animation: blink-animation 1s infinite;
-  }
-
-  .help-message {
-    padding: 12px;
-    font-size: 16px;
-    line-height: 1.5;
-    text-align: left;
-
-    strong {
-      color: #007bff; /* Slightly darker or brighter blue */
-      font-weight: bold;
-    }
   }
 
   @keyframes blink-animation {
@@ -706,10 +559,6 @@
     100% {
       filter: brightness(1);
     }
-  }
-
-  .outdated strong {
-    color: red !important;
   }
 
   :global(.geometa-meta-btn) {

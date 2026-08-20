@@ -1,4 +1,3 @@
-import { runMigrate } from '@api/lib/db/migrate';
 import { prod } from '@api/lib/utils/env';
 import { logger } from '@api/lib/utils/log';
 import { sentry } from '@api/lib/utils/sentry';
@@ -16,18 +15,7 @@ if (prod) {
   swaggerServers.push({ url: 'https://learnablemeta.com' });
 }
 
-if (prod) {
-  // block startup on migrations so the server never serves an old schema
-  try {
-    await runMigrate();
-  } catch (err) {
-    console.error('❌ Migration failed');
-    console.error(err);
-    process.exit(1);
-  }
-}
-
-const app = new Elysia({
+export const app = new Elysia({
   prefix: '/api',
   serve: { idleTimeout: 60 },
   handler: { standardHostname: false },
@@ -62,15 +50,6 @@ const app = new Elysia({
   )
   .use(userscriptRouter)
   .use(internalRouter)
-  .use(mapsRouter)
-  .listen(parseInt(process.env.SERVER_PORT || '3000', 10));
+  .use(mapsRouter);
 
 export type App = typeof app;
-
-const gracefulShutdown = async () => {
-  await app.stop();
-  process.exit(0);
-};
-
-process.on('SIGTERM', gracefulShutdown);
-process.on('SIGINT', gracefulShutdown);

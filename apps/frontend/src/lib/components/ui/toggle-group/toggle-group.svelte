@@ -31,8 +31,12 @@
   }: ToggleGroupPrimitive.RootProps & ToggleVariants & { allowDeselect?: boolean } = $props();
 
   setToggleGroupCtx({
-    variant,
-    size,
+    get variant() {
+      return variant;
+    },
+    get size() {
+      return size;
+    },
     getAllowDeselect: () => allowDeselect,
     getValue: () => value
   });

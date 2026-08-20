@@ -1,0 +1,53 @@
+.learnablemeta-ui {
+  --lm-background: hsl(0 0% 100%);
+  --lm-foreground: hsl(240 10% 3.9%);
+  --lm-card: hsl(0 0% 100%);
+  --lm-card-foreground: hsl(240 10% 3.9%);
+  --lm-primary: hsl(161 92% 25%);
+  --lm-primary-hover: hsl(161 92% 22%);
+  --lm-primary-foreground: hsl(355.7 100% 97.3%);
+  --lm-secondary: hsl(240 4.8% 95.9%);
+  --lm-secondary-foreground: hsl(240 5.9% 10%);
+  --lm-muted: hsl(240 4.8% 95.9%);
+  --lm-muted-foreground: hsl(240 3.8% 46.1%);
+  --lm-accent: hsl(240 4.8% 95.9%);
+  --lm-accent-foreground: hsl(240 5.9% 10%);
+  --lm-destructive: hsl(0 72.22% 50.59%);
+  --lm-border: hsl(240 5.9% 90%);
+  --lm-input: hsl(240 5.9% 90%);
+  --lm-ring: hsl(142.1 76.2% 36.3%);
+  --lm-link: hsl(220.3 82.9% 52.7%);
+  --lm-radius: 0.5rem;
+  color: var(--lm-foreground);
+  font-family:
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  .learnablemeta-ui {
+    --lm-background: hsl(0 0% 10%);
+    --lm-foreground: hsl(0 0% 95%);
+    --lm-card: hsl(24 9.8% 10%);
+    --lm-card-foreground: hsl(0 0% 95%);
+    --lm-primary: hsl(161 92% 25%);
+    --lm-primary-hover: hsl(161 92% 29%);
+    --lm-primary-foreground: hsl(0 0% 98%);
+    --lm-secondary: hsl(240 3.7% 20.9%);
+    --lm-secondary-foreground: hsl(0 0% 98%);
+    --lm-muted: hsl(0 0% 15%);
+    --lm-muted-foreground: hsl(240 5% 64.9%);
+    --lm-accent: hsl(12 6.5% 15.1%);
+    --lm-accent-foreground: hsl(0 0% 98%);
+    --lm-destructive: hsl(0 72% 60%);
+    --lm-border: hsl(240 3.7% 22%);
+    --lm-input: hsl(240 3.7% 25.5%);
+    --lm-ring: hsl(142.4 71.8% 35%);
+    --lm-link: hsl(217.1 92.7% 67.6%);
+    color-scheme: dark;
+  }
+}

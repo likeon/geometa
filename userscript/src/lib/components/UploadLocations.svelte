@@ -1,14 +1,11 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { uploadLocations } from '../utils/upload';
-  import { GM_setValue, GM_getValue } from '$';
   import ToastNotification from './ToastNotification.svelte';
-  import { SITE_BASE_URL } from '../config';
+  import { clearApiKey, getApiKey, saveApiKey, URL_TO_GENERATE_TOKEN } from '../utils/apiKey';
+  import { modalDialog } from '../utils/modalDialog';
 
   let { mapId }: { mapId: string } = $props();
-
-  const API_KEY_STORAGE_NAME = 'learnableMeta_apiKey';
-  const URL_TO_GENERATE_TOKEN = `${SITE_BASE_URL}/profile/token`;
 
   let showApiKeyModal = $state(false);
   let modalMode = $state<'upload' | 'manage'>('upload');
@@ -55,7 +52,7 @@
 
   function getApiKeyFromGM(): string | null {
     try {
-      return GM_getValue(API_KEY_STORAGE_NAME, null);
+      return getApiKey();
     } catch (e) {
       console.warn('GM_getValue is not available. API key functionality might be limited.', e);
       showCustomToast(
@@ -69,7 +66,7 @@
 
   function saveApiKeyToGM(key: string): void {
     try {
-      GM_setValue(API_KEY_STORAGE_NAME, key);
+      saveApiKey(key);
     } catch (e) {
       console.warn('GM_setValue is not available. API key functionality might be limited.', e);
       showCustomToast(
@@ -104,7 +101,7 @@
   }
 
   function handleClearApiKey() {
-    saveApiKeyToGM('');
+    clearApiKey();
     currentApiKey = null;
     showApiKeyModal = false;
     showCustomToast('LearnableMeta API Key cleared.', 'success');
@@ -158,12 +155,12 @@
   }
 </script>
 
-<div class="upload-label-container">
-  <button class="custom-yellow-button" onclick={handleUploadClick} disabled={isLoading}>
+<div class="upload-label-container learnablemeta-ui">
+  <button class="learnablemeta-geoguessr-button" onclick={handleUploadClick} disabled={isLoading}>
     {isLoading ? 'Uploading...' : 'LearnableMeta - Upload'}
   </button>
   <button
-    class="api-key-button"
+    class="learnablemeta-geoguessr-button learnablemeta-geoguessr-button--icon"
     onclick={openManageKeyModal}
     disabled={isLoading}
     title="Manage LearnableMeta API key"
@@ -173,43 +170,68 @@
 </div>
 
 {#if showApiKeyModal}
-  <div class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="apiKeyModalTitle">
-    <div class="modal-content">
-      <h2 id="apiKeyModalTitle">LearnableMeta API Key</h2>
-      {#if modalMode === 'upload'}
-        <p>An API key is required to upload locations. Please paste your key below.</p>
-      {:else if currentApiKey}
-        <p>
-          A key ending in <code>…{currentApiKey.slice(-4)}</code> is currently saved. Paste a new key
-          to replace it, or clear the saved key.
+  <div class="learnablemeta-modal-backdrop learnablemeta-ui" role="presentation">
+    <div
+      class="learnablemeta-modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="apiKeyModalTitle"
+      use:modalDialog={{ onClose: handleCancelModal }}>
+      <div class="learnablemeta-modal-header">
+        <p class="learnablemeta-modal-eyebrow">LearnableMeta</p>
+        <h2 class="learnablemeta-modal-title" id="apiKeyModalTitle">API token</h2>
+        <p class="learnablemeta-modal-description">
+          Manage the token used to download synchronized locations.
         </p>
-      {:else}
-        <p>No API key is saved yet. Paste your key below.</p>
-      {/if}
-      <p>
-        You can generate your API token on your
-        <a href={URL_TO_GENERATE_TOKEN} target="_blank" rel="noopener noreferrer">
-          LearnableMeta profile page</a
-        >.
-      </p>
-      <input
-        type="text"
-        bind:value={apiKeyInput}
-        placeholder="Paste your API key here"
-        aria-label="API Key Input"
-        class="modal-input" />
-      <div class="modal-actions">
-        {#if modalMode === 'manage' && currentApiKey}
-          <button onclick={handleClearApiKey} class="modal-button modal-button-clear"
-            >Clear Key</button>
-        {/if}
-        <button onclick={handleSaveApiKey} class="modal-button modal-button-save"
-          >{modalMode === 'upload' ? 'Save & Upload' : 'Save'}</button>
-        <button onclick={handleCancelModal} class="modal-button modal-button-cancel">Cancel</button>
       </div>
-      <p class="modal-note">
-        Your API key will be stored securely in your browser's userscript storage for future use.
-      </p>
+      <div class="learnablemeta-modal-body">
+        {#if modalMode === 'upload'}
+          <p>An API token is required before locations can be uploaded.</p>
+        {:else if currentApiKey}
+          <p>
+            A token ending in <code class="saved-key">…{currentApiKey.slice(-4)}</code> is saved. Paste
+            a new token to replace it, or clear the saved token.
+          </p>
+        {:else}
+          <p>No API token is saved yet.</p>
+        {/if}
+        <p>
+          Generate or replace your token on the
+          <a href={URL_TO_GENERATE_TOKEN} target="_blank" rel="noopener noreferrer">
+            LearnableMeta profile page</a
+          >.
+        </p>
+        <input
+          type="text"
+          bind:value={apiKeyInput}
+          placeholder="Paste your API token"
+          aria-label="LearnableMeta API token"
+          data-modal-initial-focus
+          class="learnablemeta-modal-input" />
+        <p class="learnablemeta-modal-note">
+          The token is stored only in your browser's userscript storage.
+        </p>
+      </div>
+      <div class="learnablemeta-modal-actions">
+        {#if modalMode === 'manage' && currentApiKey}
+          <button
+            type="button"
+            onclick={handleClearApiKey}
+            class="learnablemeta-button learnablemeta-button--destructive learnablemeta-modal-action-leading">
+            Clear token
+          </button>
+        {/if}
+        <button
+          type="button"
+          onclick={handleCancelModal}
+          class="learnablemeta-button learnablemeta-button--outline">Cancel</button>
+        <button
+          type="button"
+          onclick={handleSaveApiKey}
+          class="learnablemeta-button learnablemeta-button--primary">
+          {modalMode === 'upload' ? 'Save and upload' : 'Save'}
+        </button>
+      </div>
     </div>
   </div>
 {/if}
@@ -226,199 +248,15 @@
   .upload-label-container {
     display: flex;
     align-items: center;
+    gap: 6px;
   }
 
-  /* fully self-styled - geoguessr's hashed button classes change between deploys */
-  .custom-yellow-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 8px 16px;
-    font-family: inherit;
+  .saved-key {
+    border-radius: 4px;
+    padding: 2px 5px;
+    background: var(--lm-muted);
+    color: var(--lm-foreground);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: 12px;
-    font-weight: 700;
-    line-height: 1;
-    white-space: nowrap;
-    background: linear-gradient(180deg, #ffeb99 0%, #f5c542 100%);
-    border: 1px solid #e0b000;
-    color: #002147;
-    border-radius: 3.75rem;
-    box-shadow:
-      0 2px 4px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    cursor: pointer;
-    transition:
-      background 0.2s ease-in-out,
-      transform 0.1s ease,
-      box-shadow 0.2s ease-in-out;
-  }
-
-  .custom-yellow-button:hover:not(:disabled) {
-    background: linear-gradient(180deg, #ffe066 0%, #eab308 100%);
-    box-shadow:
-      0 4px 8px rgba(0, 0, 0, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.5);
-    transform: translateY(-1px);
-  }
-
-  .custom-yellow-button:active:not(:disabled) {
-    background: linear-gradient(180deg, #eab308 0%, #d39e00 100%);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) inset;
-    transform: translateY(1px);
-  }
-
-  .custom-yellow-button:focus {
-    outline: none;
-    box-shadow:
-      0 0 0 3px rgba(234, 179, 8, 0.5),
-      0 2px 4px rgba(0, 0, 0, 0.15);
-  }
-
-  .custom-yellow-button:disabled {
-    background: #e0e0e0;
-    border-color: #bbbbbb;
-    color: #888888;
-    box-shadow: none;
-    cursor: not-allowed;
-    transform: none;
-  }
-
-  .api-key-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-left: 6px;
-    width: 30px;
-    height: 30px;
-    padding: 0;
-    font-size: 14px;
-    line-height: 1;
-    background: linear-gradient(180deg, #ffeb99 0%, #f5c542 100%);
-    border: 1px solid #e0b000;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow:
-      0 2px 4px rgba(0, 0, 0, 0.15),
-      inset 0 1px 0 rgba(255, 255, 255, 0.4);
-    transition: background 0.2s ease-in-out;
-  }
-
-  .api-key-button:hover:not(:disabled) {
-    background: linear-gradient(180deg, #ffe066 0%, #eab308 100%);
-  }
-
-  .api-key-button:disabled {
-    background: #e0e0e0;
-    border-color: #bbbbbb;
-    cursor: not-allowed;
-  }
-
-  .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 10000;
-  }
-
-  .modal-content {
-    background-color: white;
-    padding: 25px 30px;
-    border-radius: 8px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-    width: 90%;
-    max-width: 450px;
-    color: #333;
-  }
-
-  .modal-content h2 {
-    margin-top: 0;
-    margin-bottom: 15px;
-    color: #2c3e50;
-  }
-
-  .modal-content p {
-    margin-bottom: 15px;
-    line-height: 1.6;
-  }
-
-  .modal-content p a {
-    color: #007bff;
-    text-decoration: underline;
-  }
-
-  .modal-content p a:hover {
-    color: #0056b3;
-  }
-
-  .modal-input {
-    width: calc(100% - 20px);
-    padding: 10px;
-    margin-bottom: 20px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    font-size: 1em;
-  }
-
-  .modal-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-  }
-
-  .modal-button {
-    padding: 10px 18px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.2s ease;
-  }
-
-  .modal-button-save {
-    background-color: #28a745;
-    color: white;
-  }
-
-  .modal-button-save:hover {
-    background-color: #218838;
-  }
-
-  .modal-button-cancel {
-    background-color: #6c757d;
-    color: white;
-  }
-
-  .modal-button-cancel:hover {
-    background-color: #5a6268;
-  }
-
-  .modal-button-clear {
-    background-color: #dc3545;
-    color: white;
-    margin-right: auto;
-  }
-
-  .modal-button-clear:hover {
-    background-color: #b02a37;
-  }
-
-  .modal-content code {
-    background-color: #f1f3f5;
-    padding: 1px 5px;
-    border-radius: 3px;
-    font-size: 0.9em;
-  }
-
-  .modal-note {
-    font-size: 0.85em;
-    color: #555;
-    margin-top: 15px;
-    text-align: center;
   }
 </style>

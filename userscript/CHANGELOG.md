@@ -1,24 +1,32 @@
 # Changelog
 
+## [0.94]
+
+- Added GeoJSON overlays to GeoGuessr round results
+
+## [0.93]
+
+- Added live challenge support for the new GeoGuessr party lobby
+
+## [0.92]
+
+- Fixed updated maps still appearing as changed after publishing
+
 ## [0.91]
 
-- A location can now have several metas: the note shows a tab for each one, so every meta for that spot is a click away
-- When a location has several metas, which one opens first varies from location to location, so no meta is always buried behind a click
-- Tabs can be switched with the arrow keys and announce themselves properly to screen readers
-- The "upload locations" button no longer uploads the same coordinate twice when several of a map's metas share it, so those spots stop being drawn more often than intended
+- Added map-group updates after syncing and from Creator Hub
+- Detects changed GeoGuessr maps before updating
+- Added map selection, publishing progress, and retries
+- Refreshed dialogs and API token management
 
 ## [0.90]
 
-- Added meta pins on challenge results pages (geoguessr.com/results/...), with support for any round count
-- Fixed memory leaks from meta windows never being unmounted (drag handlers piled up every round)
-- Fixed live challenge windows stacking up instead of replacing each other
-- Fixed the upload button possibly keeping a previous map's id after map-maker navigation
-- Moved the map label to the new GeoGuessr map page layout and darkened its background
-- Restyled the upload button and notifications for the new map-maker top bar
-- Upload errors now show a readable message with the technical error underneath for reports
-- Added an in-page 🔑 button to view, replace or clear the LearnableMeta API key
-- Features now initialize independently, so one failing no longer disables the rest
-- Moved this changelog to CHANGELOG.md
+- Added meta pins to challenge results
+- Fixed meta window leaks and live challenge stacking
+- Fixed stale map IDs after Map Maker navigation
+- Updated the map label and upload UI for new GeoGuessr layouts
+- Added API key management and clearer upload errors
+- Isolated features so one failure does not disable the rest
 
 ## [0.89]
 

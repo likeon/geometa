@@ -10,8 +10,13 @@ import { mountSummaryWindow, unmountSummaryWindow } from './utils/summaryWindow'
 export function initLiveChallenge() {
   logInfo('live challenge support enabled');
   let pinChanged = false;
+  let generation = 0;
   const observer = new MutationObserver(async () => {
     if (!document.querySelector('[class*=result-map_roundPin]')) {
+      if (pinChanged) {
+        generation += 1;
+        unmountSummaryWindow();
+      }
       pinChanged = false;
       return;
     }
@@ -19,16 +24,26 @@ export function initLiveChallenge() {
       return;
     }
     pinChanged = true;
+    const requestGeneration = ++generation;
     const challengeId = getChallengeId();
     if (!challengeId) {
+      // A party game may render before its live-challenge request has been
+      // observed. Keep trying while the result view changes.
+      pinChanged = false;
       return;
     }
     try {
       const { mapId, panoId } = await getChallengeInfo(challengeId);
+      if (requestGeneration !== generation) return;
       const mapInfo = await getMapInfo(mapId, false);
+      if (requestGeneration !== generation) return;
       if (!mapInfo.mapFound) return;
       const container = await waitForElement('[class*=game_container]');
-      if (!container) {
+      if (
+        !container ||
+        requestGeneration !== generation ||
+        !document.querySelector('[class*=result-map_roundPin]')
+      ) {
         return;
       }
       mountSummaryWindow(container, {
@@ -48,6 +63,7 @@ export function initLiveChallenge() {
     if (getChallengeId()) {
       return;
     }
+    generation += 1;
     pinChanged = false;
     unmountSummaryWindow();
   });

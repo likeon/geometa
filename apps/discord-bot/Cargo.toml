@@ -4,21 +4,35 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-env_logger = "0.11.8"
-log = "0.4.27"
+config = { version = "0.15.25", default-features = false, features = ["yaml"] }
 poise = "0.6.1"
 regex = "1.11.1"
 reqwest = { version = "0.13.1", default-features = false, features = [
   "json",
+  "query",
+  "rustls",
+  "stream",
 ] }
+# Serenity 0.12 depends on reqwest 0.12; this renamed direct dependency exists
+# solely to name the matching HeaderMap/HeaderValue types for the low-level
+# Discord ban request. It adds no second HTTP stack.
+reqwest012 = { package = "reqwest", version = "0.12", default-features = false }
+percent-encoding = "2.3"
 serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 serenity = { version = "0.12.4", features = ["rustls_backend"] }
+tokenizers = "0.23.1"
+futures-util = "0.3.31"
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter"] }
 tokio = { version = "1.46.0", features = [
   "fs",
+  "io-util",
   "macros",
   "rt-multi-thread",
-  "signal"
+  "signal",
+  "sync",
+  "time",
 ] }
 
 [profile.release]
