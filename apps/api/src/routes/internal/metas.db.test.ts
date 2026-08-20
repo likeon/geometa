@@ -172,6 +172,33 @@ async function getMetaLogs(groupId: number) {
     .orderBy(mapGroupChanges.id);
 }
 
+async function waitForBlockedQuery(...fragments: string[]) {
+  const deadline = Date.now() + 10_000;
+  for (;;) {
+    const rows = await db.$primary.$client`
+      SELECT query
+      FROM pg_stat_activity
+      WHERE datname = current_database()
+        AND state = 'active'
+        AND wait_event_type = 'Lock'
+        AND pid <> pg_backend_pid()
+    `;
+    if (
+      rows.some((row) =>
+        fragments.every((fragment) =>
+          String(row.query).toLowerCase().includes(fragment.toLowerCase()),
+        ),
+      )
+    ) {
+      return;
+    }
+    if (Date.now() > deadline) {
+      throw new Error(`timed out waiting for blocked query: ${fragments}`);
+    }
+    await Bun.sleep(0);
+  }
+}
+
 describe('PUT /api/internal/metas/', () => {
   test('create requires permission in the target group', async () => {
     await seedUser('owner-1');
@@ -1226,6 +1253,99 @@ describe('POST /api/internal/metas/copy', () => {
     ]);
     // nothing new was logged against the source group
     expect(await getMetaLogs(sourceGroup)).toHaveLength(1);
+  });
+
+  test('links a target pano committed while the copy is waiting', async () => {
+    await seedUser('copy-race-owner');
+    const sourceGroup = await seedGroup('Copy race source');
+    const targetGroup = await seedGroup('Copy race target');
+    await seedPermission('copy-race-owner', sourceGroup);
+    await seedPermission('copy-race-owner', targetGroup);
+    const sourceId = await seedMeta(
+      'copy-race-owner',
+      sourceGroup,
+      'copy-race',
+    );
+    const [sourceLocation] = await db
+      .insert(mapGroupLocations)
+      .values({
+        mapGroupId: sourceGroup,
+        panoId: 'copy-race-pano',
+        lat: 1,
+        lng: 2,
+        heading: 3,
+        pitch: 4,
+        zoom: 5,
+      })
+      .returning({ id: mapGroupLocations.id });
+    await db.insert(mapGroupLocationMetas).values({
+      locationId: sourceLocation!.id,
+      metaId: sourceId,
+      mapGroupId: sourceGroup,
+    });
+
+    let inserted!: () => void;
+    const insertedPromise = new Promise<void>((resolve) => {
+      inserted = resolve;
+    });
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const targetInsert = db.$primary.transaction(async (tx) => {
+      await tx.insert(mapGroupLocations).values({
+        mapGroupId: targetGroup,
+        panoId: 'copy-race-pano',
+        lat: 10,
+        lng: 20,
+        heading: 30,
+        pitch: 40,
+        zoom: 50,
+      });
+      inserted();
+      await gate;
+    });
+    await insertedPromise;
+
+    const copy = metaCopyRequest('copy-race-owner', {
+      metaId: sourceId,
+      targetGroupId: targetGroup,
+    });
+    await waitForBlockedQuery(
+      'insert into "map_group_locations"',
+      'map_group_location_metas',
+    );
+    release();
+    await targetInsert;
+
+    const response = await copy;
+    expect(response.status).toBe(200);
+    const [copiedMeta] = await db
+      .select({ id: metas.id })
+      .from(metas)
+      .where(
+        and(eq(metas.mapGroupId, targetGroup), eq(metas.tagName, 'copy-race')),
+      );
+    const [targetLocation] = await db
+      .select({ id: mapGroupLocations.id })
+      .from(mapGroupLocations)
+      .where(
+        and(
+          eq(mapGroupLocations.mapGroupId, targetGroup),
+          eq(mapGroupLocations.panoId, 'copy-race-pano'),
+        ),
+      );
+    expect(
+      await db
+        .select()
+        .from(mapGroupLocationMetas)
+        .where(
+          and(
+            eq(mapGroupLocationMetas.locationId, targetLocation!.id),
+            eq(mapGroupLocationMetas.metaId, copiedMeta!.id),
+          ),
+        ),
+    ).toHaveLength(1);
   });
 
   test('existing target tag is a no-op: returns 200 but copies nothing and writes no log', async () => {

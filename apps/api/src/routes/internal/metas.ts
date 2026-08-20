@@ -100,7 +100,7 @@ async function copyMetaToGroup(
       JOIN ${mapGroupLocationMetas} lm
         ON lm.location_id = src.id AND lm.map_group_id = src.map_group_id
       WHERE src.map_group_id = ${mapGroupId} AND lm.meta_id = ${id}
-    ), inserted AS (
+    ), targets AS (
       INSERT INTO ${mapGroupLocations}
         (map_group_id, lat, lng, heading, pitch, zoom, pano_id, extra_tag,
          extra_pano_id, extra_pano_date, updated_at, modified_at)
@@ -108,15 +108,9 @@ async function copyMetaToGroup(
              src.pano_id, ${meta.tagName}, src.extra_pano_id, src.extra_pano_date,
              ${currentTimestamp}, ${currentTimestamp}
       FROM source src
-      ON CONFLICT DO NOTHING
-      RETURNING id, pano_id
-    ), targets AS (
-      SELECT id FROM inserted
-      UNION
-      SELECT target.id
-      FROM ${mapGroupLocations} target
-      JOIN source src ON src.pano_id = target.pano_id
-      WHERE target.map_group_id = ${targetGroupId}
+      ON CONFLICT (map_group_id, pano_id)
+      DO UPDATE SET pano_id = EXCLUDED.pano_id
+      RETURNING id
     )
     INSERT INTO ${mapGroupLocationMetas} (location_id, meta_id, map_group_id)
     SELECT targets.id, ${newMetaId}, ${targetGroupId} FROM targets
