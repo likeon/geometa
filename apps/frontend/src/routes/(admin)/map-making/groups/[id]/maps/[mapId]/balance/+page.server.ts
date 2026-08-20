@@ -4,8 +4,8 @@ import { api, throwApiError } from '$lib/api';
 
 export const load = async ({ params }) => {
   const groupId = getGroupId(params);
-  const mapId = parseInt(params.mapId, 10);
-  if (isNaN(mapId)) {
+  const mapId = Number(params.mapId);
+  if (!/^\d+$/.test(params.mapId) || !Number.isSafeInteger(mapId) || mapId <= 0) {
     error(400, 'Invalid map ID');
   }
 

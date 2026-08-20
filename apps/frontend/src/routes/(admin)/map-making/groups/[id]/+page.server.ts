@@ -98,19 +98,6 @@ const mapJsonSchema = z.object({
       path: ['panoId']
     })
     .array()
-    .superRefine((coordinates, ctx) => {
-      const panoIds = coordinates.map((coord) => coord.panoId ?? coord.extra.panoId);
-      const uniquePanoIds = new Set(panoIds);
-
-      if (panoIds.length !== uniquePanoIds.size) {
-        const duplicateCount = panoIds.length - uniquePanoIds.size;
-        ctx.addIssue({
-          code: 'custom',
-          path: ['duplicates'],
-          message: `Duplicate locations found (${duplicateCount} total). Use <a href="https://map-making.app/" target="_blank" class="underline hover:text-primary">map-making.app</a> to find duplicates and remove them.`
-        });
-      }
-    })
 });
 export const load = async ({ params, locals }) => {
   if (!locals.user?.id) {
@@ -325,8 +312,6 @@ export const actions = {
           } else {
             return `Location ${locationNumber} ${message}`;
           }
-        } else if (issue.path.includes('duplicates')) {
-          return message;
         } else if (issue.path.includes('panoId') && issue.message === 'missing panoId') {
           const locationIndex = issue.path[1] as number;
           const location = jsonData.customCoordinates?.[locationIndex];
@@ -365,13 +350,6 @@ export const actions = {
     if (apiError || !data) {
       const status = apiError?.status as number;
       const value = apiError?.value as { message?: string } | undefined;
-      if (status === 409) {
-        return setError(
-          form,
-          'file',
-          'The uploaded file contains duplicate panoId values. Please remove duplicates and try again.'
-        );
-      }
       if ((status === 400 || status === 403) && value?.message) {
         return setError(form, 'file', escapeHtml(value.message));
       }
