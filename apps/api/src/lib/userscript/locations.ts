@@ -33,7 +33,7 @@ export const locationMetaSummariesSelect = db
   )
   // Vary the first tab per pano while keeping it stable between requests.
   .orderBy(
-    sql`md5(${syncedLocations}.pano_id || ${syncedMetas}.meta_id::text)`,
+    sql`md5(${syncedLocations.panoId} || ${syncedMetas.metaId}::text)`,
     syncedMetas.metaId,
   )
   .prepare('userscript_get_location_meta_summaries');
