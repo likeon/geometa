@@ -32,12 +32,14 @@ therefore built without `CONCURRENTLY`, and the backfill scans the locations tab
 3. Record the rollout start as an epoch second before starting the first new API pod.
 4. Do not run a map-group sync until every pre-0041 pod has drained. Old pods can still write
    `extra_tag` without creating a link, and syncing during that window could publish incomplete data.
+   Record the rollout finish as an epoch second when the last old pod drains.
 5. After the rollout, audit only zero-link locations written during the rollout window:
 
 ```sql
 SELECT mgl.id, mgl.map_group_id, mgl.pano_id, mgl.extra_tag, mgl.updated_at
 FROM map_group_locations mgl
 WHERE mgl.updated_at >= :rollout_started_at
+  AND mgl.updated_at < :rollout_finished_at
   AND NOT EXISTS (
     SELECT 1
     FROM map_group_location_metas lm
