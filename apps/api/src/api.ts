@@ -1,19 +1,14 @@
 import { prod } from '@api/lib/utils/env';
 import { logger } from '@api/lib/utils/log';
 import { sentry } from '@api/lib/utils/sentry';
+import { openapi } from '@elysia/openapi';
 import serverTiming from '@elysiajs/server-timing';
-import swagger from '@elysiajs/swagger';
 import { Elysia } from 'elysia';
 import { internalRouter } from './routes/internal';
 import { mapsRouter } from './routes/maps';
 import { userscriptRouter } from './routes/userscript';
 
-const swaggerExclude = [/^\/api\/health-check/];
-const swaggerServers = [];
-if (prod) {
-  swaggerExclude.push(/^\/api\/internal/);
-  swaggerServers.push({ url: 'https://learnablemeta.com' });
-}
+const openApiServers = prod ? [{ url: 'https://learnablemeta.com' }] : [];
 
 export const app = new Elysia({
   prefix: '/api',
@@ -36,9 +31,14 @@ export const app = new Elysia({
     return 'ok';
   })
   .use(
-    swagger({
+    openapi({
       path: '/docs',
-      exclude: swaggerExclude,
+      specPath: '/docs/json',
+      provider: null,
+      exclude: {
+        paths: ['/api/health-check'],
+        tags: prod ? ['internal'] : [],
+      },
       documentation: {
         info: {
           title: 'Learnable Meta API',
@@ -46,7 +46,7 @@ export const app = new Elysia({
           description:
             'Public endpoints used by the LearnableMeta userscript and map-making tools.',
         },
-        servers: swaggerServers,
+        servers: openApiServers,
         externalDocs: {
           description: 'LearnableMeta documentation',
           url: 'https://docs.learnablemeta.com/',
@@ -74,9 +74,6 @@ export const app = new Elysia({
             },
           },
         },
-      },
-      swaggerOptions: {
-        persistAuthorization: true,
       },
     }),
   )

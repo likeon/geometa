@@ -32,6 +32,13 @@ type OpenApiDocument = {
 };
 
 describe('public OpenAPI contract', () => {
+  test('does not expose the legacy documentation frontend', async () => {
+    for (const path of ['/api/docs', '/api/docs/']) {
+      const response = await app.handle(new Request(`http://localhost${path}`));
+      expect(response.status, path).toBe(404);
+    }
+  });
+
   test('documents every public operation', async () => {
     const response = await app.handle(
       new Request('http://localhost/api/docs/json'),
