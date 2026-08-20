@@ -36,22 +36,96 @@
 
   let { panoId, mapId, userscriptVersion, source, roundNumber }: Props = $props();
 
-  type MetaInfo = {
-    country: string;
+  type MetaSummary = {
+    id: number;
     metaName: string;
+  };
+  type MetaInfo = MetaSummary & {
+    country: string;
     note: string;
     images?: string[];
     geoJson?: Record<string, unknown> | null;
     footer: string;
   };
-  type GeoInfo = MetaInfo & { metas?: MetaInfo[] };
+  type LocationInfo = MetaInfo & { metas?: MetaSummary[] };
 
-  let geoInfo: GeoInfo | null = $state(null);
+  let metas = $state<MetaSummary[]>([]);
+  let metaDetails = $state<Array<MetaInfo | null>>([]);
   let error: string | null = $state(null);
+  let detailError: string | null = $state(null);
   let selectedMetaIndex = $state(0);
-  const metas = $derived.by<MetaInfo[]>(() => (geoInfo ? (geoInfo.metas ?? [geoInfo]) : []));
-  const selectedMeta = $derived(metas[selectedMetaIndex] ?? metas[0]);
+  const selectedMeta = $derived(metaDetails[selectedMetaIndex] ?? null);
   const tabIdPrefix = `geometa-${crypto.randomUUID()}`;
+  const cacheKey = `${CACHE_NAMESPACE}:${mapId}_${panoId}`;
+  const loadingMetaIds = new Set<number>();
+
+  function requestJson<T>(url: string): Promise<T> {
+    return new Promise((resolve, reject) => {
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url,
+        timeout: 10000,
+        onload: (response) => {
+          if (response.status === 200) {
+            try {
+              resolve(JSON.parse(response.responseText));
+            } catch {
+              reject(new Error('Failed to parse response'));
+            }
+          } else if (response.status === 404) {
+            reject(new Error('Meta for this location not found'));
+          } else {
+            reject(new Error(`HTTP error! status: ${response.status}`));
+          }
+        },
+        onerror: (event) => {
+          console.error('Error:', event);
+          reject(new Error('An error occurred while fetching data'));
+        },
+        ontimeout: () => reject(new Error('The request timed out - please try again'))
+      });
+    });
+  }
+
+  function setInitialMeta(data: LocationInfo) {
+    const { metas: summaries, ...primary } = data;
+    metas = summaries ?? [{ id: primary.id, metaName: primary.metaName }];
+    metaDetails = metas.map((_, index) => (index === 0 ? primary : null));
+  }
+
+  async function loadMeta(index: number) {
+    const summary = metas[index];
+    if (!summary || metaDetails[index] || loadingMetaIds.has(summary.id)) return;
+
+    const detailCacheKey = `${cacheKey}_${summary.id}`;
+    const cached = window.geometaMetaCache?.get(detailCacheKey) as MetaInfo | undefined;
+    if (cached) {
+      metaDetails[index] = cached;
+      return;
+    }
+
+    loadingMetaIds.add(summary.id);
+    try {
+      const query = new URLSearchParams({ panoId, mapId }).toString();
+      const data = await requestJson<MetaInfo>(
+        `${API_BASE_URL}/api/userscript/location/meta/${summary.id}?${query}`
+      );
+      metaDetails[index] = data;
+      (window.geometaMetaCache ??= new Map()).set(detailCacheKey, data);
+    } catch (cause) {
+      if (selectedMetaIndex === index) {
+        detailError = cause instanceof Error ? cause.message : String(cause);
+      }
+    } finally {
+      loadingMetaIds.delete(summary.id);
+    }
+  }
+
+  function selectMeta(index: number) {
+    selectedMetaIndex = index;
+    detailError = null;
+    void loadMeta(index);
+  }
 
   function onTabKeydown(event: KeyboardEvent) {
     const last = metas.length - 1;
@@ -63,7 +137,7 @@
     else if (event.key === 'End') next = last;
     if (next === null) return;
     event.preventDefault();
-    selectedMetaIndex = next;
+    selectMeta(next);
     document.getElementById(`${tabIdPrefix}-tab-${next}`)?.focus();
   }
 
@@ -71,11 +145,9 @@
   let header: HTMLDivElement;
 
   onMount(() => {
-    const cacheKey = `${CACHE_NAMESPACE}:${mapId}_${panoId}`;
-
-    const cachedData = window.geometaMetaCache?.get(cacheKey);
+    const cachedData = window.geometaMetaCache?.get(cacheKey) as LocationInfo | undefined;
     if (cachedData) {
-      geoInfo = cachedData;
+      setInitialMeta(cachedData);
     } else {
       const urlParams = new URLSearchParams({
         panoId,
@@ -85,37 +157,14 @@
       }).toString();
       const url = `${API_BASE_URL}/api/userscript/location?${urlParams}`;
 
-      GM_xmlhttpRequest({
-        method: 'GET',
-        url: url,
-        timeout: 10000,
-        onload: (response) => {
-          if (response.status === 200) {
-            try {
-              const data = JSON.parse(response.responseText);
-              geoInfo = data;
-
-              if (!window.geometaMetaCache) {
-                window.geometaMetaCache = new Map();
-              }
-              window.geometaMetaCache.set(cacheKey, data);
-            } catch (e) {
-              error = 'Failed to parse response';
-            }
-          } else if (response.status === 404) {
-            error = 'Meta for this location not found';
-          } else {
-            error = `HTTP error! status: ${response.status}`;
-          }
-        },
-        onerror: (e) => {
-          error = 'An error occurred while fetching data';
-          console.error('Error:', e);
-        },
-        ontimeout: () => {
-          error = 'The request timed out - please try again';
-        }
-      });
+      requestJson<LocationInfo>(url)
+        .then((data) => {
+          setInitialMeta(data);
+          (window.geometaMetaCache ??= new Map()).set(cacheKey, data);
+        })
+        .catch((cause) => {
+          error = cause instanceof Error ? cause.message : String(cause);
+        });
     }
 
     setContainerPosition(container);
@@ -241,10 +290,10 @@
   </div>
   {#if error}
     <p>Error: {error}</p>
-  {:else if selectedMeta}
+  {:else if metas.length}
     {#if metas.length > 1}
       <div class="meta-tabs" role="tablist" aria-label="Metas at this location">
-        {#each metas as meta, index (index)}
+        {#each metas as meta, index (meta.id)}
           <button
             type="button"
             role="tab"
@@ -255,7 +304,7 @@
             aria-selected={index === selectedMetaIndex}
             tabindex={index === selectedMetaIndex ? 0 : -1}
             onkeydown={onTabKeydown}
-            onclick={() => (selectedMetaIndex = index)}>
+            onclick={() => selectMeta(index)}>
             {meta.metaName}
           </button>
         {/each}
@@ -265,24 +314,31 @@
       class="meta-panel"
       id={`${tabIdPrefix}-panel`}
       role={metas.length > 1 ? 'tabpanel' : undefined}
-      aria-labelledby={metas.length > 1 ? `${tabIdPrefix}-tab-${selectedMetaIndex}` : undefined}>
-      <p>
-        <CountryFlag countryName={selectedMeta.country} />
-        <strong>{selectedMeta.country}</strong> - {selectedMeta.metaName}
-      </p>
-      <div class="geometa-note">
-        {@html selectedMeta.note}
-      </div>
-      {#if selectedMeta.footer}
-        <p class="geometa-footer">
-          {@html selectedMeta.footer}
+      aria-labelledby={metas.length > 1 ? `${tabIdPrefix}-tab-${selectedMetaIndex}` : undefined}
+      aria-busy={!selectedMeta && !detailError}>
+      {#if detailError}
+        <p>Error: {detailError}</p>
+      {:else if selectedMeta}
+        <p>
+          <CountryFlag countryName={selectedMeta.country} />
+          <strong>{selectedMeta.country}</strong> - {selectedMeta.metaName}
         </p>
-      {/if}
-      {#if selectedMeta.images && selectedMeta.images.length}
-        <hr />
-        {#key selectedMetaIndex}
-          <Carousel images={selectedMeta.images} />
-        {/key}
+        <div class="geometa-note">
+          {@html selectedMeta.note}
+        </div>
+        {#if selectedMeta.footer}
+          <p class="geometa-footer">
+            {@html selectedMeta.footer}
+          </p>
+        {/if}
+        {#if selectedMeta.images && selectedMeta.images.length}
+          <hr />
+          {#key selectedMeta.id}
+            <Carousel images={selectedMeta.images} />
+          {/key}
+        {/if}
+      {:else}
+        <Spinner />
       {/if}
     </div>
   {:else}

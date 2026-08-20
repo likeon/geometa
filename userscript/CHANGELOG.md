@@ -4,6 +4,7 @@
 
 - Added keyboard-accessible tabs for locations that belong to multiple metas
 - Show each meta's own images, links, and GeoJSON overlay
+- Load inactive meta details only when their tab is opened
 
 ## [0.94]
 
