@@ -37,7 +37,8 @@ export const handle: Handle = sequence(...sentryHandlers, async ({ event, resolv
 
   const isAdminUrl =
     event.url.pathname.startsWith('/map-making') ||
-    event.url.pathname.startsWith('/personal') ||
+    event.url.pathname === '/personal' ||
+    event.url.pathname.startsWith('/personal/') ||
     event.url.pathname.startsWith('/profile');
   let redirectToLogin = isAdminUrl;
 

@@ -22,7 +22,7 @@
       name: 'Map Creators'
     },
     {
-      url: '/personal-maps',
+      url: 'https://docs.learnablemeta.com/getting-started/personal-maps/',
       name: 'Personal Maps'
     },
     {
