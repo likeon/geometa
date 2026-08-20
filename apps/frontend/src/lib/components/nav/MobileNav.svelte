@@ -58,7 +58,7 @@
             open = false;
           }}>
           <enhanced:img src={logo} class="ml-1 h-7 w-auto pl-1.5 landscape:h-5" alt="Logo" />
-          <span class="text-lg font-bold landscape:text-sm">LearnableMeta</span>
+          <span class="text-lg font-bold landscape:text-sm">Learnable Meta</span>
         </a>
       </Sheet.Header>
       <ScrollArea

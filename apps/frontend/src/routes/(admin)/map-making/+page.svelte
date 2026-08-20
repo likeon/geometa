@@ -6,7 +6,6 @@
   import { Button } from '$lib/components/ui/button';
   import { Input } from '$lib/components/ui/input';
   import * as Dialog from '$lib/components/ui/dialog/index';
-  import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index';
   import * as Form from '$lib/components/ui/form/index';
   import { zod4Client } from 'sveltekit-superforms/adapters';
   import { insertMapGroupSchema } from '$lib/form-schema';
@@ -30,27 +29,11 @@
 <div class="container">
   <div class="flex flex-wrap items-center">
     <div class="grow flex items-center justify-end space-x-3">
-      <DropdownMenu.Root>
-        <DropdownMenu.Trigger>
-          <Button variant="outline">Documentation</Button>
-        </DropdownMenu.Trigger>
-        <DropdownMenu.Content>
-          <a
-            href="https://docs.google.com/document/d/15FMgCvyT5pn-U_Ckfd-hoezsWhZMR2NpKBkoiD1aN6Y"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="block">
-            <DropdownMenu.Item>Text</DropdownMenu.Item>
-          </a>
-          <a
-            href="https://youtu.be/0O2mg9G35xg"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="block">
-            <DropdownMenu.Item>Video</DropdownMenu.Item>
-          </a>
-        </DropdownMenu.Content>
-      </DropdownMenu.Root>
+      <Button
+        variant="outline"
+        href="https://docs.learnablemeta.com/map-creators/getting-started/"
+        target="_blank"
+        rel="noopener noreferrer">Documentation</Button>
       <Button
         onclick={() => {
           mapGroupCreationDialogOpen = true;

@@ -28,7 +28,7 @@
   <a href={resolve(linkHref)} class="mr-4 flex items-center gap-0 hover:no-underline lg:mr-6">
     <enhanced:img src={logo} class="h-6 sm:h-9 w-auto" alt="Logo" />
     <span class="self-center whitespace-nowrap text-xl font-semibold text-white">
-      LearnableMeta
+      Learnable Meta
     </span>
   </a>
   <nav class="flex items-center gap-2 text-sm">

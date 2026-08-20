@@ -14,20 +14,20 @@
       name: 'Home'
     },
     {
-      url: '/about',
-      name: 'How To'
-    },
-    {
       url: '/maps',
       name: 'Maps'
     },
     {
       url: '/for-map-creators',
-      name: 'For Map Creators'
+      name: 'Map Creators'
     },
     {
       url: '/personal-maps',
       name: 'Personal Maps'
+    },
+    {
+      url: 'https://docs.learnablemeta.com/',
+      name: 'Docs'
     }
   ];
 

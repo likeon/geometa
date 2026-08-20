@@ -423,12 +423,12 @@
       </Dialog.Title>
       <Dialog.Description>
         {#if mapUpdatesCount === null}
-          LearnableMeta has finished synchronizing this group.
+          Learnable Meta has finished synchronizing this group.
         {:else}
           Synchronization changed the managed locations for {mapUpdatesCount}
           {mapUpdatesCount === 1 ? 'map' : 'maps'}.
         {/if}
-        Continue to GeoGuessr to compare and publish changed map locations with the LearnableMeta userscript.
+        Continue to GeoGuessr to compare and publish changed map locations with the Learnable Meta userscript.
       </Dialog.Description>
     </Dialog.Header>
     <p class="text-sm text-muted-foreground">
