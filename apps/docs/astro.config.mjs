@@ -45,11 +45,16 @@ export default defineConfig({
           label: 'Getting Started',
           items: [
             { label: 'Overview', link: '/getting-started/' },
-            { label: 'Installation', link: '/getting-started/installation/' },
-            { label: 'Chrome and Chromium', link: '/getting-started/chrome/' },
-            { label: 'Firefox', link: '/getting-started/firefox/' },
-            { label: 'Android', link: '/getting-started/android/' },
-            { label: 'iOS and iPadOS', link: '/getting-started/ios/' }
+            {
+              label: 'Installation',
+              items: [
+                { label: 'Overview', link: '/getting-started/installation/' },
+                { label: 'Chrome and Chromium', link: '/getting-started/chrome/' },
+                { label: 'Firefox', link: '/getting-started/firefox/' },
+                { label: 'Android', link: '/getting-started/android/' },
+                { label: 'iOS and iPadOS', link: '/getting-started/ios/' }
+              ]
+            }
           ]
         },
         {
