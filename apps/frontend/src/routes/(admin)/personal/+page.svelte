@@ -29,12 +29,13 @@
 <div class="container">
   <div class="flex flex-wrap items-center">
     <div class="grow flex items-center justify-end space-x-3">
-      <a
+      <Button
+        variant="outline"
         href="https://docs.learnablemeta.com/getting-started/personal-maps/"
         target="_blank"
         rel="noopener noreferrer">
-        <Button variant="outline">What are personal maps?</Button>
-      </a>
+        What are personal maps?
+      </Button>
       <Button onclick={() => (personalMapCreationDialogOpen = true)}>Add personal map</Button>
     </div>
   </div>
