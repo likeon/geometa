@@ -45,7 +45,7 @@ async function seedOwnerGroup(userId: string, name: string) {
 }
 
 // minimal body accepted by the upload schema
-function locationBody(panoId: string) {
+function locationBody(panoId: string, extraTag = 'tag-a') {
   return {
     lat: 1,
     lng: 2,
@@ -53,7 +53,7 @@ function locationBody(panoId: string) {
     pitch: 4,
     zoom: 5,
     panoId,
-    extraTag: 'tag-a',
+    extraTag,
     extraPanoId: null,
   };
 }
@@ -147,5 +147,37 @@ describe('POST /api/internal/map-groups/:id/locations/upload duplicate panos acr
           .orderBy(metas.tagName)
       ).map((row) => row.tagName),
     ).toEqual(['tag-a', 'tag-b']);
+  });
+
+  test('resolves links across meta lookup batches', async () => {
+    const userId = 'batch-tags-owner';
+    await db.insert(users).values({ id: userId, username: userId });
+    const groupId = await seedOwnerGroup(userId, 'Cross-batch tags');
+    const locations = Array.from({ length: BATCH_SIZE + 1 }, (_, i) =>
+      locationBody(`tag-pano-${i}`, `tag-${i}`),
+    );
+
+    const response = await uploadRequest(userId, groupId, {
+      uploadMode: 'partial',
+      locations,
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      count: BATCH_SIZE + 1,
+      ignoredCount: 0,
+    });
+    expect(
+      await db
+        .select({ id: metas.id })
+        .from(metas)
+        .where(eq(metas.mapGroupId, groupId)),
+    ).toHaveLength(BATCH_SIZE + 1);
+    expect(
+      await db
+        .select({ locationId: mapGroupLocationMetas.locationId })
+        .from(mapGroupLocationMetas)
+        .where(eq(mapGroupLocationMetas.mapGroupId, groupId)),
+    ).toHaveLength(BATCH_SIZE + 1);
   });
 });

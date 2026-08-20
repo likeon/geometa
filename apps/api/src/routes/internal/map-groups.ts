@@ -856,6 +856,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         modifiedAt: currentTimestamp,
       }));
       const usedTags = new Set(locations.flatMap((location) => location.tags));
+      const usedTagNames = [...usedTags];
 
       const BATCH_SIZE = 1000;
       let affectedCount = 0;
@@ -897,7 +898,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         // Step 2: Create metas for any new tags
         // (skipped for scoped uploads - the target meta is validated to exist)
         if (!body.scopeTag && usedTags.size > 0) {
-          const metaInsertValues = Array.from(usedTags).map((tagName) => ({
+          const metaInsertValues = usedTagNames.map((tagName) => ({
             mapGroupId: groupId,
             tagName: tagName,
             name: '',
@@ -933,15 +934,19 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         }
 
         // Step 3: Link each location to every meta its tags name
-        const groupMetas = await trx
-          .select({ id: metas.id, tagName: metas.tagName })
-          .from(metas)
-          .where(
-            and(
-              eq(metas.mapGroupId, groupId),
-              inArray(metas.tagName, Array.from(usedTags)),
-            ),
-          );
+        const groupMetas: { id: number; tagName: string }[] = [];
+        for (let i = 0; i < usedTagNames.length; i += BATCH_SIZE) {
+          const batch = await trx
+            .select({ id: metas.id, tagName: metas.tagName })
+            .from(metas)
+            .where(
+              and(
+                eq(metas.mapGroupId, groupId),
+                inArray(metas.tagName, usedTagNames.slice(i, i + BATCH_SIZE)),
+              ),
+            );
+          groupMetas.push(...batch);
+        }
         const metaIdByTag = new Map(
           groupMetas.map((meta) => [meta.tagName, meta.id]),
         );
