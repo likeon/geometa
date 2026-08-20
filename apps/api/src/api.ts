@@ -43,7 +43,7 @@ export const app = new Elysia({
         info: {
           title: 'Learnable Meta API',
           version: '1',
-          description: `Public endpoints used by the LearnableMeta userscript and map-making tools.
+          description: `Public endpoints used by the Learnable Meta userscript and map-making tools.
 
 ## Server
 
@@ -55,15 +55,18 @@ There are no official client libraries yet. Each endpoint includes ready-to-copy
         },
         servers: openApiServers,
         externalDocs: {
-          description: 'LearnableMeta documentation',
+          description: 'Learnable Meta documentation',
           url: 'https://docs.learnablemeta.com/',
         },
         tags: [
-          { name: 'Maps', description: 'Browse published LearnableMeta maps.' },
+          {
+            name: 'Maps',
+            description: 'Browse published Learnable Meta maps.',
+          },
           {
             name: 'Userscript',
             description:
-              'Runtime data consumed by the LearnableMeta userscript.',
+              'Runtime data consumed by the Learnable Meta userscript.',
           },
           {
             name: 'Map making tools',
@@ -77,7 +80,7 @@ There are no official client libraries yet. Each endpoint includes ready-to-copy
               type: 'http',
               scheme: 'bearer',
               description:
-                'A LearnableMeta API token from https://learnablemeta.com/profile/token.',
+                'A Learnable Meta API token from https://learnablemeta.com/profile/token.',
             },
           },
         },

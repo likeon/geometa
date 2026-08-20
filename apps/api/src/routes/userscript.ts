@@ -19,7 +19,7 @@ const userscriptVersion = '0.94';
 const tokenSecurity = [{ learnableMetaToken: [] as string[] }];
 
 const mapGroup = t.Object({
-  id: t.Integer({ description: 'LearnableMeta map group ID.' }),
+  id: t.Integer({ description: 'Learnable Meta map group ID.' }),
   name: t.String({ description: 'Map group name.' }),
   syncedAt: t.Integer({
     description: 'Last synchronization time as a Unix timestamp.',
@@ -99,7 +99,7 @@ export const userscriptRouter = new Elysia({
             mapFound: t.Literal(false),
             userscriptVersion: t.Literal(userscriptVersion),
           },
-          { description: 'No LearnableMeta map uses this GeoGuessr ID.' },
+          { description: 'No Learnable Meta map uses this GeoGuessr ID.' },
         ),
       },
       detail: {
@@ -107,7 +107,7 @@ export const userscriptRouter = new Elysia({
         operationId: 'getMapCompatibility',
         summary: 'Check map',
         description:
-          'Checks whether LearnableMeta supports a GeoGuessr map and returns the userscript data version.',
+          'Checks whether Learnable Meta supports a GeoGuessr map and returns the userscript data version.',
       },
     },
   )
@@ -327,7 +327,7 @@ export const userscriptRouter = new Elysia({
     },
     {
       params: t.Object({
-        groupId: t.Integer({ description: 'LearnableMeta map group ID.' }),
+        groupId: t.Integer({ description: 'Learnable Meta map group ID.' }),
       }),
       response: {
         200: t.Object(

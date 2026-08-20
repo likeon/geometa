@@ -1,7 +1,7 @@
 :root {
   --lm-radius: 0.5rem;
 
-  /* LearnableMeta green with slate neutrals, tuned for dark mode. */
+  /* Learnable Meta green with slate neutrals, tuned for dark mode. */
   --sl-color-accent-low: hsl(161, 65%, 16%);
   --sl-color-accent: hsl(161, 72%, 42%);
   --sl-color-accent-high: hsl(151, 75%, 85%);

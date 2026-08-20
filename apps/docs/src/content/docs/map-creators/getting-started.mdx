@@ -1,11 +1,11 @@
 ---
 title: Map Creator Getting Started
-description: Prepare a tagged GeoGuessr map, write LearnableMeta notes, and publish them through the Creator Dashboard.
+description: Prepare a tagged GeoGuessr map, write Learnable Meta notes, and publish them through the Creator Dashboard.
 ---
 
 import { Aside, Steps } from '@astrojs/starlight/components';
 
-LearnableMeta lets map creators attach one or more educational notes to a location. Players see the relevant notes after guessing.
+Learnable Meta lets map creators attach one or more educational notes to a location. Players see the relevant notes after guessing.
 
 <Aside type="note">
   The [Creator Dashboard](https://learnablemeta.com/map-making) requires signing in with Discord.
@@ -19,7 +19,7 @@ LearnableMeta lets map creators attach one or more educational notes to a locati
 
    Create or open your map in [map-making.app](https://map-making.app/). In **Map settings**, enable **Use Pano ID locations by default**.
 
-   Every location must have a Pano ID before LearnableMeta can import it. Fix any older locations that do not have one before exporting.
+   Every location must have a Pano ID before Learnable Meta can import it. Fix any older locations that do not have one before exporting.
 
 2. **Tag the locations.**
 
@@ -31,28 +31,28 @@ LearnableMeta lets map creators attach one or more educational notes to a locati
 
    Export the locations JSON from map-making.app. In [GeoGuessr My Maps](https://www.geoguessr.com/me/maps), create a map with **Handpicked locations**, then publish the map-making.app locations using the Map Making Tools userscript workflow.
 
-4. **Create a LearnableMeta map group.**
+4. **Create a Learnable Meta map group.**
 
    Sign in to the [Creator Dashboard](https://learnablemeta.com/map-making) and create a group. A group can power one map or several related maps from the same uploaded locations.
 
 5. **Upload the locations.**
 
-   Open the group, choose **Upload Locations**, and upload the exported JSON. LearnableMeta creates a meta entry for each new tag.
+   Open the group, choose **Upload Locations**, and upload the exported JSON. Learnable Meta creates a meta entry for each new tag.
 
 6. **Write the explanations.**
 
    Open each meta and add its player-facing **Name** and **Note**. Notes support Markdown. Use **Note from Plonkit** when you used Plonk It descriptions or images so the source is credited automatically.
 
-   **Footer** and **Levels** are optional. After saving the meta, use the **Images** tab to upload images—LearnableMeta resizes and compresses them automatically—or the **Map area** tab to add a [GeoJSON overlay](/map-creators/geojson-overlays/).
+   **Footer** and **Levels** are optional. After saving the meta, use the **Images** tab to upload images—Learnable Meta resizes and compresses them automatically—or the **Map area** tab to add a [GeoJSON overlay](/map-creators/geojson-overlays/).
 
 7. **Connect the GeoGuessr map.**
 
    Open the group's **Maps** tab and choose **Add Map**. Enter a name and the GeoGuessr ID—the long value after `/maps/` in the map URL. The remaining fields are optional for a basic setup.
 
-8. **Publish LearnableMeta changes.**
+8. **Publish Learnable Meta changes.**
 
    Return to **Metas** and choose **Sync UserScript**. Sync again after changing locations, notes, images, map areas, or map settings; players do not see unsynchronized changes.
 
 </Steps>
 
-For bulk editing, LearnableMeta also supports the [meta JSON upload format](/map-creators/meta-uploads/).
+For bulk editing, Learnable Meta also supports the [meta JSON upload format](/map-creators/meta-uploads/).

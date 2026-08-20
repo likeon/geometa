@@ -6,9 +6,9 @@ export default defineConfig({
   site: 'https://docs.learnablemeta.com',
   integrations: [
     starlight({
-      title: 'LearnableMeta',
+      title: 'Learnable Meta',
       description:
-        'Learn how to install LearnableMeta, play educational GeoGuessr maps, and add LearnableMeta to your own maps.',
+        'Learn how to install Learnable Meta, play educational GeoGuessr maps, and add Learnable Meta to your own maps.',
       plugins: [
         starlightOpenAPI([
           {
@@ -17,7 +17,7 @@ export default defineConfig({
               process.env.DOCS_OPENAPI_SCHEMA_URL ??
               'https://learnablemeta.com/api/docs/json',
             sidebar: {
-              label: 'API Reference',
+              label: 'API Documentation',
               operations: { badges: true, labels: 'summary' }
             }
           }
@@ -25,7 +25,7 @@ export default defineConfig({
       ],
       logo: {
         src: './src/assets/logo.png',
-        alt: 'LearnableMeta logo'
+        alt: 'Learnable Meta logo'
       },
       favicon: '/favicon.png',
       editLink: {
@@ -53,12 +53,9 @@ export default defineConfig({
                 { label: 'Android', link: '/getting-started/android/' },
                 { label: 'iOS and iPadOS', link: '/getting-started/ios/' }
               ]
-            }
+            },
+            { label: 'Using Learnable Meta', link: '/using-learnable-meta/' }
           ]
-        },
-        {
-          label: 'Using LearnableMeta',
-          items: [{ label: 'How to use LearnableMeta', link: '/using-learnable-meta/' }]
         },
         {
           label: 'Map Creators',
@@ -78,10 +75,10 @@ export default defineConfig({
           ]
         },
         {
-          label: 'LearnableMeta',
+          label: 'Learnable Meta',
           collapsed: true,
           items: [
-            { label: 'Open LearnableMeta', link: 'https://learnablemeta.com' },
+            { label: 'Open Learnable Meta', link: 'https://learnablemeta.com' },
             { label: 'Browse maps', link: 'https://learnablemeta.com/maps' },
             { label: 'Creator dashboard', link: 'https://learnablemeta.com/map-making' }
           ]

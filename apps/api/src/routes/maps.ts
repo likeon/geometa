@@ -126,7 +126,7 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
         operationId: 'listMaps',
         summary: 'List maps',
         description:
-          'Returns published, non-personal LearnableMeta maps. Results are ordered by verification, editorial ordering, and popularity.',
+          'Returns published, non-personal Learnable Meta maps. Results are ordered by verification, editorial ordering, and popularity.',
       },
     },
   );

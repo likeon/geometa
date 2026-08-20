@@ -1,21 +1,21 @@
 ---
 title: Map JSON and Tags
-description: Prepare map-making.app JSON and LearnableMeta location tags for the Creator Dashboard.
+description: Prepare map-making.app JSON and Learnable Meta location tags for the Creator Dashboard.
 ---
 
 import { Aside } from '@astrojs/starlight/components';
 
-LearnableMeta accepts map JSON exported by [map-making.app](https://map-making.app/). You normally should not hand-write the location JSON; prepare the locations and tags in map-making.app, then export the file.
+Learnable Meta accepts map JSON exported by [map-making.app](https://map-making.app/). You normally should not hand-write the location JSON; prepare the locations and tags in map-making.app, then export the file.
 
 ## Require Pano IDs
 
 Every uploaded location must have a Pano ID. In map-making.app, enable **Use Pano ID locations by default** before adding locations and fix any existing locations without an ID before exporting.
 
-Coordinates alone are not enough: the Pano ID is how LearnableMeta matches a GeoGuessr round to the correct location.
+Coordinates alone are not enough: the Pano ID is how Learnable Meta matches a GeoGuessr round to the correct location.
 
 ## Tag every location
 
-Each uploaded location must have **at least one non-empty tag**. A tag connects the location to one LearnableMeta explanation.
+Each uploaded location must have **at least one non-empty tag**. A tag connects the location to one Learnable Meta explanation.
 
 Tags can be any internal name, but this format is recommended:
 
@@ -31,7 +31,7 @@ Portugal-LicensePlate
 Singapore-StreetSign
 ```
 
-The text before the first hyphen becomes the country name shown by LearnableMeta. A recognized country name also enables its flag. The remainder identifies the meta. Use the exact same spelling everywhere that clue applies.
+The text before the first hyphen becomes the country name shown by Learnable Meta. A recognized country name also enables its flag. The remainder identifies the meta. Use the exact same spelling everywhere that clue applies.
 
 The tag is an internal identifier; players see the meta's **Name** instead. Broader labels such as `Latin-UniqueLetters` are valid, but they do not produce a country flag.
 
@@ -44,10 +44,10 @@ Czechia-Bollard
 Czechia-UtilityPole
 ```
 
-LearnableMeta stores the panorama once and links it to both metas. The userscript displays a tab for each meta after the player guesses, and switching tabs changes the note, images, and any [GeoJSON map area](/map-creators/geojson-overlays/).
+Learnable Meta stores the panorama once and links it to both metas. The userscript displays a tab for each meta after the player guesses, and switching tabs changes the note, images, and any [GeoJSON map area](/map-creators/geojson-overlays/).
 
 <Aside type="note" title="Userscript compatibility">
-  Multi-meta locations require LearnableMeta userscript version 0.95 or newer.
+  Multi-meta locations require Learnable Meta userscript version 0.95 or newer.
 </Aside>
 
 ## Upload modes
