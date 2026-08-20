@@ -96,7 +96,7 @@ export function geoguessrMapJson(
     }
     byPano.set(key, {
       ...location,
-      tags: location.extraTag === undefined ? [] : [location.extraTag],
+      tags: location.extraTag ? [location.extraTag] : [],
     });
   }
 
