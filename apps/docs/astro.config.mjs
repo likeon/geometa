@@ -53,7 +53,8 @@ export default defineConfig({
                 { label: 'Android', link: '/getting-started/android/' },
                 { label: 'iOS and iPadOS', link: '/getting-started/ios/' }
               ]
-            }
+            },
+            { label: 'Personal Maps', link: '/getting-started/personal-maps/' }
           ]
         },
         {
