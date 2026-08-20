@@ -125,6 +125,22 @@ function metaShareRequest(userId: string, body: unknown) {
   );
 }
 
+function locationUploadRequest(userId: string, groupId: number, body: unknown) {
+  return app.handle(
+    new Request(
+      `http://localhost/api/internal/map-groups/${groupId}/locations/upload`,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-user-id': userId,
+        },
+        body: JSON.stringify(body),
+      },
+    ),
+  );
+}
+
 // Creates a meta via the PUT endpoint and returns its id.
 async function seedMeta(
   userId: string,
@@ -690,6 +706,78 @@ describe('PUT /api/internal/metas/', () => {
           createdAt: expect.any(Number),
         },
       ]);
+    });
+
+    test('blocks old-group links while moving a meta', async () => {
+      const userId = 'move-race-owner';
+      await seedUser(userId);
+      const sourceGroup = await seedGroup('Move race source');
+      const targetGroup = await seedGroup('Move race target');
+      await seedPermission(userId, sourceGroup);
+      await seedPermission(userId, targetGroup);
+      const id = await seedMeta(userId, sourceGroup, 'move-race');
+
+      let locked!: () => void;
+      const lockedPromise = new Promise<void>((resolve) => {
+        locked = resolve;
+      });
+      let release!: () => void;
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      const tableLock = db.$primary.transaction(async (tx) => {
+        await tx.execute(sql`LOCK TABLE ${metas} IN SHARE MODE`);
+        locked();
+        await gate;
+      });
+      await lockedPromise;
+
+      const move = metaPutRequest(
+        userId,
+        metaBody({
+          id,
+          mapGroupId: targetGroup,
+          tagName: 'move-race',
+          name: 'move-race',
+        }),
+      );
+      await waitForBlockedQuery('update "metas"');
+
+      const upload = locationUploadRequest(userId, sourceGroup, {
+        uploadMode: 'tagReplace',
+        scopeTag: 'move-race',
+        locations: [
+          {
+            panoId: 'move-race-pano',
+            lat: 1,
+            lng: 2,
+            heading: 3,
+            pitch: 4,
+            zoom: 5,
+            tags: ['move-race'],
+            extraPanoId: null,
+          },
+        ],
+      });
+      await waitForBlockedQuery('insert into "map_group_location_metas"');
+      release();
+      await tableLock;
+
+      const [moveResponse, uploadResponse] = await Promise.all([move, upload]);
+      expect(moveResponse.status).toBe(200);
+      expect(uploadResponse.status).not.toBe(200);
+      expect(
+        await db
+          .select({ mapGroupId: metas.mapGroupId })
+          .from(metas)
+          .where(eq(metas.id, id)),
+      ).toEqual([{ mapGroupId: targetGroup }]);
+      expect(
+        await db
+          .select()
+          .from(mapGroupLocationMetas)
+          .where(eq(mapGroupLocationMetas.metaId, id)),
+      ).toEqual([]);
     });
   });
 });

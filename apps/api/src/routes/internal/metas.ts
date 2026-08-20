@@ -490,35 +490,37 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           .sort();
 
       let savedData: Meta | undefined;
-      let savedLevelIds: number[] = [];
-      if (id !== undefined) {
-        savedData = await db.$primary.query.metas.findFirst({
-          where: eq(metas.id, id),
-        });
-        if (!savedData) {
-          return status(404);
-        }
-        await ensurePermissions(userId, savedData.mapGroupId);
-        savedLevelIds = (
-          await db.$primary
-            .select({ levelId: metaLevels.levelId })
-            .from(metaLevels)
-            .where(eq(metaLevels.metaId, id))
-        ).map((row) => row.levelId);
-        if (savedData.mapGroupId !== body.mapGroupId) {
-          // the old level assignments belong to the source group
-          const sourceGroupLevels = await db.$primary.query.levels.findMany({
-            where: eq(levels.mapGroupId, savedData.mapGroupId),
-            columns: { id: true, name: true },
-          });
-          for (const level of sourceGroupLevels) {
-            levelNameById.set(level.id, level.name);
-          }
-        }
-      }
 
       try {
         const metaId = await db.$primary.transaction(async (tx) => {
+          let savedLevelIds: number[] = [];
+          if (id !== undefined) {
+            const [currentData] = await tx
+              .select()
+              .from(metas)
+              .where(eq(metas.id, id))
+              .for('update');
+            if (!currentData) return null;
+
+            savedData = currentData;
+            await ensurePermissions(userId, savedData.mapGroupId);
+            savedLevelIds = (
+              await tx
+                .select({ levelId: metaLevels.levelId })
+                .from(metaLevels)
+                .where(eq(metaLevels.metaId, id))
+            ).map((row) => row.levelId);
+            if (savedData.mapGroupId !== body.mapGroupId) {
+              const sourceGroupLevels = await tx
+                .select({ id: levels.id, name: levels.name })
+                .from(levels)
+                .where(eq(levels.mapGroupId, savedData.mapGroupId));
+              for (const level of sourceGroupLevels) {
+                levelNameById.set(level.id, level.name);
+              }
+            }
+          }
+
           let metaId: number;
           if (id === undefined) {
             const insertResult = await tx
@@ -613,6 +615,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           }
           return metaId;
         });
+        if (metaId === null) return status(404);
         return { id: metaId };
       } catch (error) {
         if (isUniqueViolation(error, 'metas_unique')) {
