@@ -33,7 +33,8 @@ export default defineConfig({
       },
       social: [
         { icon: 'github', label: 'GitHub', href: 'https://github.com/likeon/geometa' },
-        { icon: 'discord', label: 'Discord', href: 'https://discord.gg/AcXEWznYZe' }
+        { icon: 'discord', label: 'Discord', href: 'https://discord.gg/AcXEWznYZe' },
+        { icon: 'external', label: 'Learnable Meta', href: 'https://learnablemeta.com' }
       ],
       customCss: ['./src/styles/custom.css'],
       expressiveCode: {
