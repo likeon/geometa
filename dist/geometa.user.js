@@ -7178,7 +7178,7 @@ roundNumber: 4,
     _GM_registerMenuCommand(
       `LearnableMeta - GeoJSON overlays: ${geoJsonEnabled ? "On" : "Off"}`,
       () => {
-        setGeoJsonEnabled(!geoJsonEnabled);
+        setGeoJsonEnabled(!isGeoJsonEnabled());
         window.location.reload();
       }
     );

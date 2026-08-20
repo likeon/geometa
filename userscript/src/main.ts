@@ -54,7 +54,7 @@ if (typeof GM_registerMenuCommand === 'function') {
   GM_registerMenuCommand(
     `LearnableMeta - GeoJSON overlays: ${geoJsonEnabled ? 'On' : 'Off'}`,
     () => {
-      setGeoJsonEnabled(!geoJsonEnabled);
+      setGeoJsonEnabled(!isGeoJsonEnabled());
       window.location.reload();
     }
   );
