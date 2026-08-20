@@ -18,14 +18,6 @@
       name: 'Maps'
     },
     {
-      url: '/for-map-creators',
-      name: 'Map Creators'
-    },
-    {
-      url: 'https://docs.learnablemeta.com/getting-started/personal-maps/',
-      name: 'Personal Maps'
-    },
-    {
       url: 'https://docs.learnablemeta.com/',
       name: 'Docs'
     }
