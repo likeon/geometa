@@ -211,7 +211,7 @@ async function waitForBlockedQuery(...fragments: string[]) {
     if (Date.now() > deadline) {
       throw new Error(`timed out waiting for blocked query: ${fragments}`);
     }
-    await Bun.sleep(0);
+    await Bun.sleep(10);
   }
 }
 
@@ -741,27 +741,30 @@ describe('PUT /api/internal/metas/', () => {
           name: 'move-race',
         }),
       );
-      await waitForBlockedQuery('update "metas"');
-
-      const upload = locationUploadRequest(userId, sourceGroup, {
-        uploadMode: 'tagReplace',
-        scopeTag: 'move-race',
-        locations: [
-          {
-            panoId: 'move-race-pano',
-            lat: 1,
-            lng: 2,
-            heading: 3,
-            pitch: 4,
-            zoom: 5,
-            tags: ['move-race'],
-            extraPanoId: null,
-          },
-        ],
-      });
-      await waitForBlockedQuery('insert into "map_group_location_metas"');
-      release();
-      await tableLock;
+      let upload!: ReturnType<typeof locationUploadRequest>;
+      try {
+        await waitForBlockedQuery('update "metas"');
+        upload = locationUploadRequest(userId, sourceGroup, {
+          uploadMode: 'tagReplace',
+          scopeTag: 'move-race',
+          locations: [
+            {
+              panoId: 'move-race-pano',
+              lat: 1,
+              lng: 2,
+              heading: 3,
+              pitch: 4,
+              zoom: 5,
+              tags: ['move-race'],
+              extraPanoId: null,
+            },
+          ],
+        });
+        await waitForBlockedQuery('insert into "map_group_location_metas"');
+      } finally {
+        release();
+        await tableLock;
+      }
 
       const [moveResponse, uploadResponse] = await Promise.all([move, upload]);
       expect(moveResponse.status).toBe(200);
@@ -1399,12 +1402,15 @@ describe('POST /api/internal/metas/copy', () => {
       metaId: sourceId,
       targetGroupId: targetGroup,
     });
-    await waitForBlockedQuery(
-      'insert into "map_group_locations"',
-      'map_group_location_metas',
-    );
-    release();
-    await targetInsert;
+    try {
+      await waitForBlockedQuery(
+        'insert into "map_group_locations"',
+        'map_group_location_metas',
+      );
+    } finally {
+      release();
+      await targetInsert;
+    }
 
     const response = await copy;
     expect(response.status).toBe(200);
