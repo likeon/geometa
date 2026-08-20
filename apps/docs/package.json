@@ -10,8 +10,7 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "check": "astro check",
-    "deploy": "npm run build && wrangler deploy"
+    "check": "astro check"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.41.7",
@@ -21,8 +20,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "typescript": "^6.0.3",
-    "wrangler": "^4.125.0"
+    "typescript": "^6.0.3"
   },
   "overrides": {
     "form-data": "4.0.6"
