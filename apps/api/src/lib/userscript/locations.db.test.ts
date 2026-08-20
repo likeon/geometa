@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { and, eq } from 'drizzle-orm';
 import {
   mapGroups,
   maps,
@@ -435,5 +436,28 @@ describe('userscript map locations export', () => {
       { lat: 1, lng: 2, heading: 3, pitch: 4, zoom: 5, panoId: 'pano-b-only' },
       { lat: 1, lng: 2, heading: 3, pitch: 4, zoom: 5, panoId: 'pano-shared' },
     ]);
+  });
+
+  test('exports a pano shared by multiple metas only once', async () => {
+    const { mapAId } = await seedTwoMaps();
+    await db.insert(syncedMapMetas).values({
+      mapId: mapAId,
+      syncedMetaId: 2002,
+    });
+    await db
+      .update(syncedLocations)
+      .set({ lat: 99 })
+      .where(
+        and(
+          eq(syncedLocations.syncedMetaId, 2002),
+          eq(syncedLocations.panoId, 'pano-shared'),
+        ),
+      );
+
+    const locations = await mapLocationsExportSelect.execute({ mapId: mapAId });
+    expect(locations).toHaveLength(3);
+    expect(
+      locations.find((location) => location.panoId === 'pano-shared'),
+    ).toEqual(expect.objectContaining({ lat: 1 }));
   });
 });

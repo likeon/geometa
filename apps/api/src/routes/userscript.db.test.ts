@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { eq } from 'drizzle-orm';
 import { app } from '../api';
 import {
   mapGroupLocations,
@@ -189,12 +190,14 @@ interface SeedExportLocationsInput {
   mapId: number;
   panoIds: string[];
   syncedMetaId?: number;
+  lat?: number;
 }
 
 async function seedExportLocations({
   mapId,
   panoIds,
   syncedMetaId = 9001,
+  lat = 1,
 }: SeedExportLocationsInput) {
   const [group] = await db
     .insert(mapGroups)
@@ -222,7 +225,7 @@ async function seedExportLocations({
       panoId,
       // internal fields that must never leak into the export response
       country: 'Czechia',
-      lat: 1,
+      lat,
       lng: 2,
       heading: 3,
       pitch: 4,
@@ -310,7 +313,7 @@ describe('GET /api/userscript/location/', () => {
       const response = await requestLocation('map-a', 'pano-null-country');
 
       expect(response.status).toBe(200);
-      expect(await response.json()).toEqual({
+      const meta = {
         country: '',
         metaName: 'Test Meta',
         note: 'Test note',
@@ -318,7 +321,78 @@ describe('GET /api/userscript/location/', () => {
         geoJson: mapArea,
         // no meta or map footer and no country: generic plonkit footer
         footer: plonkitFooter,
+      };
+      expect(await response.json()).toEqual({ ...meta, metas: [meta] });
+    });
+
+    test('returns every distinct meta for a pano with a stable primary meta', async () => {
+      const mapId = await seedLocation({
+        geoguessrId: 'map-multi',
+        panoId: 'pano-multi',
+        syncedMetaId: 1101,
+        metaName: 'Shared fields',
+        note: 'Same note',
+        geoJson: mapArea,
       });
+      const [map] = await db
+        .select({ mapGroupId: maps.mapGroupId })
+        .from(maps)
+        .where(eq(maps.id, mapId));
+      const otherArea = normalizeGeoJson({
+        type: 'Polygon',
+        coordinates: [
+          [
+            [30, 40],
+            [31, 40],
+            [31, 41],
+            [30, 40],
+          ],
+        ],
+      });
+      await db.insert(syncedMetas).values({
+        metaId: 1102,
+        mapGroupId: map!.mapGroupId!,
+        name: 'Shared fields',
+        note: 'Same note',
+        noteFromPlonkit: false,
+        footer: 'Meta footer',
+        images: ['img.jpg'],
+        geoJson: otherArea,
+      });
+      await db.insert(syncedMapMetas).values({
+        mapId,
+        syncedMetaId: 1102,
+      });
+      await db.insert(syncedLocations).values({
+        syncedMetaId: 1102,
+        panoId: 'pano-multi',
+        country: 'Czechia',
+        lat: 1,
+        lng: 2,
+        heading: 3,
+        pitch: 4,
+        zoom: 5,
+        extraTag: 'tag-2',
+      });
+
+      const first = (await (
+        await requestLocation('map-multi', 'pano-multi')
+      ).json()) as {
+        geoJson: MetaGeoJson;
+        metas: Array<Record<string, unknown> & { geoJson: MetaGeoJson }>;
+        [key: string]: unknown;
+      };
+      const second = await (
+        await requestLocation('map-multi', 'pano-multi')
+      ).json();
+
+      expect(second).toEqual(first);
+      expect(first.metas).toHaveLength(2);
+      expect(first.metas.map((meta) => meta.geoJson)).toEqual(
+        expect.arrayContaining([mapArea, otherArea]),
+      );
+      const { metas: returnedMetas, ...primary } = first;
+      expect(primary).toEqual(returnedMetas[0]);
     });
 
     test('appends original-map attribution for a personal map', async () => {
@@ -627,6 +701,13 @@ describe('GET /api/userscript/map-group/:groupId/maps', () => {
       mapId: populated.id,
       panoIds: ['pano-b', 'pano-a'],
       syncedMetaId: 9100,
+    });
+    // A shared pano under another meta must not inflate count or fingerprint.
+    await seedExportLocations({
+      mapId: populated.id,
+      panoIds: ['pano-a'],
+      syncedMetaId: 9101,
+      lat: 99,
     });
     return group!.id;
   }
