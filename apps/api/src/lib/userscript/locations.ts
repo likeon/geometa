@@ -6,6 +6,7 @@ import {
   syncedMetas,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
+import type { MetaGeoJson } from '@api/lib/utils/geojson';
 import { and, eq, getTableColumns, sql } from 'drizzle-orm';
 import { pick } from 'remeda';
 
@@ -47,9 +48,12 @@ export const locationMetaDetailSelect = db
       'note',
       'footer',
       'images',
-      'geoJson',
       'noteFromPlonkit',
     ]),
+    geoJson:
+      sql<MetaGeoJson | null>`CASE WHEN ${sql.placeholder('includeGeoJson')} THEN ${syncedMetas.geoJson} ELSE NULL END`.as(
+        'geo_json',
+      ),
     country: syncedLocations.country,
     isPersonalMap: maps.isPersonal,
     mapFooter:

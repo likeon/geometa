@@ -19,6 +19,11 @@ import { and, asc, eq, isNotNull, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 const userscriptVersion = '0.95';
+const locationQuery = t.Object({
+  mapId: t.String(),
+  panoId: t.String(),
+  includeGeoJson: t.Optional(t.Union([t.Literal('true'), t.Literal('false')])),
+});
 
 type LocationMeta = Awaited<
   ReturnType<typeof locationMetaDetailSelect.execute>
@@ -80,15 +85,17 @@ export const userscriptRouter = new Elysia({
   .get(
     '/location/',
     async ({ query, set }) => {
-      const metas = await locationMetaSummariesSelect.execute(query);
+      const { includeGeoJson = 'true', ...location } = query;
+      const metas = await locationMetaSummariesSelect.execute(location);
       if (!metas.length) {
         set.status = 404;
         return ['NOT_FOUND'];
       }
 
       const [primary] = await locationMetaDetailSelect.execute({
-        ...query,
+        ...location,
         metaId: metas[0]!.id,
+        includeGeoJson: includeGeoJson === 'true',
       });
       if (!primary) {
         set.status = 404;
@@ -103,18 +110,17 @@ export const userscriptRouter = new Elysia({
       return { ...formatLocationMeta(primary), metas };
     },
     {
-      query: t.Object({
-        mapId: t.String(),
-        panoId: t.String(),
-      }),
+      query: locationQuery,
     },
   )
   .get(
     '/location/meta/:metaId',
     async ({ params: { metaId }, query, set }) => {
+      const { includeGeoJson = 'true', ...location } = query;
       const [meta] = await locationMetaDetailSelect.execute({
-        ...query,
+        ...location,
         metaId,
+        includeGeoJson: includeGeoJson === 'true',
       });
       if (!meta) {
         set.status = 404;
@@ -126,10 +132,7 @@ export const userscriptRouter = new Elysia({
     },
     {
       params: t.Object({ metaId: t.Integer() }),
-      query: t.Object({
-        mapId: t.String(),
-        panoId: t.String(),
-      }),
+      query: locationQuery,
     },
   )
   .use(bearer())

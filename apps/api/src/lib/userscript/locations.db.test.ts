@@ -300,6 +300,7 @@ describe('userscript location lookup', () => {
       mapId: 'map-a',
       panoId: 'pano-shared',
       metaId: 1001,
+      includeGeoJson: true,
     });
 
     expect(result).toEqual({
@@ -328,6 +329,7 @@ describe('userscript location lookup', () => {
       mapId: 'map-a',
       panoId: 'pano-shared',
       metaId: 1001,
+      includeGeoJson: true,
     });
     expect(alphaLookup).toEqual(
       expect.objectContaining({
@@ -343,6 +345,7 @@ describe('userscript location lookup', () => {
       mapId: 'map-b',
       panoId: 'pano-shared',
       metaId: 2002,
+      includeGeoJson: true,
     });
     expect(betaLookup).toEqual(
       expect.objectContaining({
@@ -361,6 +364,7 @@ describe('userscript location lookup', () => {
         mapId: 'map-a',
         panoId: 'pano-b-only',
         metaId: 2002,
+        includeGeoJson: true,
       }),
     ).toEqual([]);
     expect(
@@ -368,6 +372,7 @@ describe('userscript location lookup', () => {
         mapId: 'map-b',
         panoId: 'pano-a-only',
         metaId: 1001,
+        includeGeoJson: true,
       }),
     ).toEqual([]);
   });
@@ -380,6 +385,7 @@ describe('userscript location lookup', () => {
       mapId: 'map-personal',
       panoId: 'pano-personal-shared',
       metaId: 3003,
+      includeGeoJson: true,
     });
     expect(highest).toEqual(
       expect.objectContaining({
@@ -398,6 +404,7 @@ describe('userscript location lookup', () => {
       mapId: 'map-personal',
       panoId: 'pano-personal-tie',
       metaId: 4004,
+      includeGeoJson: true,
     });
     expect(tie).toEqual(
       expect.objectContaining({
@@ -418,6 +425,7 @@ describe('userscript location lookup', () => {
       mapId: 'map-personal-orphan',
       panoId: 'pano-orphan',
       metaId: 5005,
+      includeGeoJson: true,
     });
 
     expect(result).toEqual({

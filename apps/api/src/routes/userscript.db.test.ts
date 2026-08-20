@@ -28,10 +28,16 @@ const mapArea = normalizeGeoJson({
   ],
 });
 
-async function requestLocation(mapId: string, panoId: string) {
+async function requestLocation(
+  mapId: string,
+  panoId: string,
+  includeGeoJson?: boolean,
+) {
+  const geoJsonQuery =
+    includeGeoJson === undefined ? '' : `&includeGeoJson=${includeGeoJson}`;
   return app.handle(
     new Request(
-      `http://localhost/api/userscript/location/?mapId=${mapId}&panoId=${panoId}`,
+      `http://localhost/api/userscript/location/?mapId=${mapId}&panoId=${panoId}${geoJsonQuery}`,
     ),
   );
 }
@@ -40,10 +46,13 @@ async function requestLocationMeta(
   mapId: string,
   panoId: string,
   metaId: number,
+  includeGeoJson?: boolean,
 ) {
+  const geoJsonQuery =
+    includeGeoJson === undefined ? '' : `&includeGeoJson=${includeGeoJson}`;
   return app.handle(
     new Request(
-      `http://localhost/api/userscript/location/meta/${metaId}?mapId=${mapId}&panoId=${panoId}`,
+      `http://localhost/api/userscript/location/meta/${metaId}?mapId=${mapId}&panoId=${panoId}${geoJsonQuery}`,
     ),
   );
 }
@@ -339,6 +348,14 @@ describe('GET /api/userscript/location/', () => {
         ...meta,
         metas: [{ id: 1001, metaName: 'Test Meta' }],
       });
+
+      const withoutGeoJson = await requestLocation(
+        'map-a',
+        'pano-null-country',
+        false,
+      );
+      expect(withoutGeoJson.status).toBe(200);
+      expect(await withoutGeoJson.json()).not.toHaveProperty('geoJson');
     });
 
     test('returns lightweight tabs and guarded on-demand meta details', async () => {
@@ -433,6 +450,15 @@ describe('GET /api/userscript/location/', () => {
           expect.objectContaining({ id: 1102, geoJson: otherArea }),
         ]),
       );
+
+      const withoutGeoJson = await requestLocationMeta(
+        'map-multi',
+        'pano-multi',
+        1101,
+        false,
+      );
+      expect(withoutGeoJson.status).toBe(200);
+      expect(await withoutGeoJson.json()).not.toHaveProperty('geoJson');
 
       const mismatched = await requestLocationMeta(
         'map-multi',
