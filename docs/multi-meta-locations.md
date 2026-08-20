@@ -50,8 +50,8 @@ ORDER BY mgl.updated_at, mgl.id;
 
 Existing zero-link rows are not evidence of rollout loss: deleting a meta intentionally leaves its
 locations orphaned. Do not run a blanket `extra_tag` backfill after deployment. Review candidates
-against rollout activity, then pause location uploads for affected groups and backfill only confirmed
-location IDs:
+against rollout activity, then pause every operation that writes location-meta links for affected
+groups and backfill only confirmed location IDs:
 
 ```sql
 WITH reviewed(location_id) AS (
@@ -74,8 +74,10 @@ WHERE NOT EXISTS (
 ON CONFLICT DO NOTHING;
 ```
 
-Keep those uploads paused and verify the reviewed IDs have links before re-enabling uploads and sync.
-If no rollout candidates exist, no repair query is needed.
+Keep those writes paused. For every reviewed ID, resolve the expected meta with the same group/tag
+join and verify that exact `(location_id, meta_id)` pair exists; a different link is not success.
+Re-review any row skipped by the zero-link guard before re-enabling writes and sync. If no rollout
+candidates exist, no repair query is needed.
 
 ## Removing `extra_tag` later
 
