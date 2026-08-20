@@ -1,5 +1,6 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import starlightOpenAPI, { openAPISidebarGroups } from 'starlight-openapi';
 
 export default defineConfig({
   site: 'https://docs.learnablemeta.com',
@@ -8,6 +9,18 @@ export default defineConfig({
       title: 'LearnableMeta',
       description:
         'Learn how to install LearnableMeta, play educational GeoGuessr maps, and add LearnableMeta to your own maps.',
+      plugins: [
+        starlightOpenAPI([
+          {
+            base: 'api',
+            schema: 'https://learnablemeta.com/api/docs/json',
+            sidebar: {
+              label: 'API Reference',
+              operations: { badges: true }
+            }
+          }
+        ])
+      ],
       logo: {
         src: './src/assets/logo.png',
         alt: 'LearnableMeta logo'
@@ -50,6 +63,7 @@ export default defineConfig({
             { label: 'Meta uploads', link: '/map-creators/meta-uploads/' }
           ]
         },
+        ...openAPISidebarGroups,
         {
           label: 'Help',
           items: [
@@ -63,8 +77,7 @@ export default defineConfig({
           items: [
             { label: 'Open LearnableMeta', link: 'https://learnablemeta.com' },
             { label: 'Browse maps', link: 'https://learnablemeta.com/maps' },
-            { label: 'Creator dashboard', link: 'https://learnablemeta.com/map-making' },
-            { label: 'API documentation', link: 'https://learnablemeta.com/api/docs' }
+            { label: 'Creator dashboard', link: 'https://learnablemeta.com/map-making' }
           ]
         }
       ]

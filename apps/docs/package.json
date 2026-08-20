@@ -16,11 +16,15 @@
   "dependencies": {
     "@astrojs/starlight": "^0.41.7",
     "astro": "^7.2.4",
-    "sharp": "^0.35.3"
+    "sharp": "^0.35.3",
+    "starlight-openapi": "^0.26.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "typescript": "^6.0.3",
     "wrangler": "^4.125.0"
+  },
+  "overrides": {
+    "form-data": "4.0.6"
   }
 }
