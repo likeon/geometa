@@ -1,0 +1,36 @@
+---
+title: Install on Chrome and Chromium
+description: Install Learnable Meta on Chrome, Edge, Brave, Opera, and other Chromium browsers.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+These instructions apply to Chrome and most Chromium-based desktop browsers, including Edge, Brave, and Opera.
+
+<Steps>
+
+1. **Install Tampermonkey.**
+
+   Install [Tampermonkey from the Chrome Web Store](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo).
+
+2. **Enable browser support for userscripts.**
+
+   Open your browser's extensions settings and enable **Developer mode**. Then open Tampermonkey's details and enable **Allow User Scripts**. Tampermonkey also maintains [browser-specific instructions](https://www.tampermonkey.net/faq.php?locale=en#Q209).
+
+   ![The Allow User Scripts option enabled in Tampermonkey's Chrome extension settings.](/images/allow-user-scripts.png)
+
+   <Aside type="caution" title="Required on Chromium browsers">
+     Learnable Meta will not run unless userscripts are allowed for Tampermonkey.
+   </Aside>
+
+3. **Install Learnable Meta.**
+
+   Open the [Learnable Meta userscript installer](https://github.com/likeon/geometa/raw/main/dist/geometa.user.js), then confirm the installation in Tampermonkey.
+
+4. **Open a fresh GeoGuessr tab.**
+
+   Restart your browser or open a new tab, then choose a map from the [Learnable Meta map list](https://learnablemeta.com/maps).
+
+</Steps>
+
+If the installer downloads a file instead of opening Tampermonkey, use the [manual installation video](https://www.youtube.com/watch?v=RpjvLpyiras).

@@ -20,8 +20,11 @@
           <span class="whitespace-nowrap">New way to learn</span>
           <span class="whitespace-nowrap">Geoguessr</span>
         </h1>
-        <div class="mt-10 flex items-center gap-x-6">
-          <Button href="/about">Learn more</Button>
+        <div class="mt-10 flex flex-wrap items-center gap-3">
+          <Button href="/maps">Browse maps</Button>
+          <Button variant="secondary" href="https://docs.learnablemeta.com/getting-started/">
+            Get started
+          </Button>
         </div>
       </div>
 

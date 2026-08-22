@@ -1,0 +1,57 @@
+---
+title: Personal Maps
+description: Build a focused GeoGuessr practice map from shared Learnable Meta clues.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+Personal Maps let you create a focused practice set from metas you have not mastered yet. You can select individual metas from a community map or combine metas from several maps into one GeoGuessr map.
+
+<Aside type="note">
+  You can only add metas from maps whose creator has enabled sharing. Look for the **Shared** badge or enable the
+  **Shared** filter on the [maps page](https://learnablemeta.com/maps).
+</Aside>
+
+## Before you start
+
+You need:
+
+- A Learnable Meta account
+- The [Learnable Meta userscript](/getting-started/) installed
+- A dedicated GeoGuessr map that you own
+
+## Create a Personal Map
+
+<Steps>
+
+1. **Create a GeoGuessr map.**
+
+   Open the [GeoGuessr Map Maker](https://www.geoguessr.com/map-maker) and create a map. Copy its ID from the end of the Map Maker URL.
+
+2. **Register it with Learnable Meta.**
+
+   Open the [Personal Maps dashboard](https://learnablemeta.com/personal), select **Add personal map**, and enter a name and the GeoGuessr map ID.
+
+3. **Choose shared metas.**
+
+   Browse [Learnable Meta maps](https://learnablemeta.com/maps), enable the **Shared** filter, and open a source map. Select the metas you want, choose **Add to Personal Map**, and select your destination map.
+
+4. **Review your selection.**
+
+   Return to the [Personal Maps dashboard](https://learnablemeta.com/personal) and open your map. You can review the selected metas or remove ones you no longer want to practice.
+
+5. **Upload the locations to GeoGuessr.**
+
+   Select **Upload to GeoGuessr** from your Personal Map, then click **LearnableMeta - Upload** in GeoGuessr's Map Maker. The userscript uploads the selected locations and publishes the map.
+
+</Steps>
+
+<Aside type="caution">
+  Use a dedicated GeoGuessr map. Uploading replaces that map's locations with the current Personal Map selection.
+</Aside>
+
+The first upload asks for an API token. Follow the prompt to the [API token page](https://learnablemeta.com/profile/token), generate a token, and paste it into the userscript. The token is stored in your browser's userscript storage.
+
+Repeat the upload after adding or removing metas so the GeoGuessr map stays in sync.
+
+Need help? Ask in the [Learnable Meta Discord](https://discord.gg/AcXEWznYZe).

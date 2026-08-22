@@ -1,0 +1,59 @@
+---
+title: Reference
+description: Learnable Meta terminology, product links, userscript source, and API documentation.
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+## Terminology
+
+- **Meta:** A recognizable clue that can help identify a country or region in GeoGuessr.
+- **Userscript:** The browser script that displays Learnable Meta notes inside GeoGuessr.
+- **Location tag:** One of the internal labels connecting a map location to a meta. A location can have more than one.
+- **Map group:** A set of related locations, metas, and published maps managed together in the Creator Dashboard.
+- **Level:** A creator-defined grouping that can organize metas by difficulty or learning stage.
+
+## Product and community
+
+<CardGrid>
+  <LinkCard
+    title="Learnable Meta"
+    href="https://learnablemeta.com"
+    description="Open the main product."
+  />
+  <LinkCard
+    title="Maps"
+    href="https://learnablemeta.com/maps"
+    description="Browse educational GeoGuessr maps."
+  />
+  <LinkCard
+    title="Creator Dashboard"
+    href="https://learnablemeta.com/map-making"
+    description="Manage map groups, locations, and metas. Discord sign-in is required."
+  />
+  <LinkCard
+    title="Discord support"
+    href="https://discord.gg/AcXEWznYZe"
+    description="Ask for help or share feedback."
+  />
+</CardGrid>
+
+## Technical links
+
+<CardGrid>
+  <LinkCard
+    title="Install the userscript"
+    href="https://github.com/likeon/geometa/raw/main/dist/geometa.user.js"
+    description="Open the current Learnable Meta userscript installer."
+  />
+  <LinkCard
+    title="Source code"
+    href="https://github.com/likeon/geometa"
+    description="Learnable Meta is open source on GitHub."
+  />
+  <LinkCard
+    title="API Documentation"
+    href="/api/"
+    description="Browse endpoints, parameters, response schemas, and code examples."
+  />
+</CardGrid>

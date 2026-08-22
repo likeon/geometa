@@ -48,7 +48,7 @@
       <div>
         <Button href={`https://www.geoguessr.com/map-maker/${geoguessrId}`} target="_blank">
           <Tooltip
-            content="This will take you to geoguessr website where you can upload locations using our script, just press the LearnableMeta - upload button and it's all done! If you don't see a button your userscript is probably not updated">
+            content="This will take you to geoguessr website where you can upload locations using our script, just press the LearnableMeta - Upload button and it's all done! If you don't see a button your userscript is probably not updated">
             Upload to Geoguessr
           </Tooltip>
         </Button>

@@ -1,0 +1,44 @@
+---
+title: Install on iOS and iPadOS
+description: Community-tested ways to run the Learnable Meta userscript on iPhone and iPad.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Browser only">
+  Learnable Meta does not run in the GeoGuessr iOS app. You must play GeoGuessr in a browser.
+</Aside>
+
+iOS has more limited userscript support than desktop browsers. The following approaches have worked for Learnable Meta community members, but browser and extension updates may affect them.
+
+## Safari with Tampermonkey
+
+Tampermonkey for Safari is a paid App Store application.
+
+<Steps>
+
+1. Install and open Tampermonkey from the App Store.
+2. In iOS Settings, open Safari settings and temporarily disable **Block Pop-ups**. Re-enable it after you install the userscript.
+3. Allow Tampermonkey to access Safari websites.
+4. In Safari, open the extensions menu and enable Tampermonkey.
+5. Open the [Learnable Meta userscript](https://github.com/likeon/geometa/raw/main/dist/geometa.user.js) and add it to Tampermonkey as directed by the extension.
+6. Open a new GeoGuessr tab and verify that Learnable Meta is enabled.
+
+</Steps>
+
+On iPad, also make sure Tampermonkey has access to all websites and that Safari's **Hide Distracting Items** feature is disabled for GeoGuessr. If the script stops after a page reload, enable Tampermonkey's automatic reload setting in advanced configuration mode, then toggle the script off and on.
+
+## Orion with Violentmonkey
+
+As a free alternative, community members have used Orion Browser with the Violentmonkey extension:
+
+<Steps>
+
+1. Install Orion Browser from the App Store.
+2. Install Violentmonkey from the Firefox Add-ons catalog inside Orion.
+3. Add the [Learnable Meta userscript](https://github.com/likeon/geometa/raw/main/dist/geometa.user.js) to Violentmonkey.
+4. Open GeoGuessr in a fresh tab and choose a [Learnable Meta map](https://learnablemeta.com/maps).
+
+</Steps>
+
+If the script does not start, refresh the page or restart the browser before beginning a new game.

@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { resolve } from '$app/paths';
   import { columns } from './columns';
   import BaseTable from '$lib/components/BaseTable/BaseTable.svelte';
   import { superForm } from 'sveltekit-superforms';
@@ -30,9 +29,13 @@
 <div class="container">
   <div class="flex flex-wrap items-center">
     <div class="grow flex items-center justify-end space-x-3">
-      <a href={resolve('/personal-maps')} target="_blank" rel="noopener noreferrer">
-        <Button variant="outline">What are personal maps?</Button>
-      </a>
+      <Button
+        variant="outline"
+        href="https://docs.learnablemeta.com/getting-started/personal-maps/"
+        target="_blank"
+        rel="noopener noreferrer">
+        What are personal maps?
+      </Button>
       <Button onclick={() => (personalMapCreationDialogOpen = true)}>Add personal map</Button>
     </div>
   </div>

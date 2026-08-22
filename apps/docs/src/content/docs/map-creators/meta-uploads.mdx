@@ -1,0 +1,71 @@
+---
+title: Meta Uploads
+description: Upload Learnable Meta names, notes, levels, footers, and images from JSON.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+The Creator Dashboard can create or update multiple metas from a JSON array. This is useful when descriptions are maintained outside the dashboard.
+
+## JSON format
+
+```json title="metas.json"
+[
+  {
+    "tagName": "Czechia-Bollard",
+    "metaName": "Czech bollard",
+    "note": "Look for the two black rectangular reflectors on the front.",
+    "footer": "Descriptions support **Markdown**.",
+    "levels": ["Beginner"],
+    "images": ["https://example.com/czech-bollard.jpg"]
+  },
+  {
+    "tagName": "Portugal-LicensePlate",
+    "metaName": "Portuguese license plate",
+    "note": "Older Portuguese plates have a yellow date band on the right."
+  }
+]
+```
+
+### Required fields
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `tagName` | string | Must match the location tag used in the uploaded map JSON. |
+| `metaName` | string | The readable clue name shown to players and creators. |
+| `note` | string | The explanation shown after a guess. Markdown is supported. |
+
+### Optional fields
+
+| Field | Type | Purpose |
+| --- | --- | --- |
+| `footer` | string or `null` | Extra Markdown content displayed after the main note. |
+| `levels` | array of strings or `null` | Level names assigned to the meta. |
+| `images` | array of strings or `null` | Image URLs assigned to the meta. |
+
+## Omitted values and empty arrays
+
+For `levels` and `images`:
+
+- Omitting the field or setting it to `null` preserves existing assignments.
+- Supplying an empty array (`[]`) removes all existing assignments for that field.
+
+<Aside type="caution" title="Empty is not null">
+  Use `[]` only when you intend to clear existing level or image assignments.
+</Aside>
+
+The current importer treats an omitted, `null`, or empty `footer` as a blank footer. Include the existing footer text when an upload should retain it.
+
+## Upload metas
+
+<Steps>
+
+1. Open the relevant group in the [Creator Dashboard](https://learnablemeta.com/map-making).
+2. Choose **Upload Metas**.
+3. Leave **Keep existing metas** enabled for a partial upload, or disable it only when the file should fully replace the group's metas.
+4. Choose whether missing level names should be created automatically.
+5. Select the JSON file. You can also paste the JSON into the open dialog.
+
+</Steps>
+
+When full replacement is selected, metas omitted from the uploaded file are deleted. Review the file before confirming that mode.

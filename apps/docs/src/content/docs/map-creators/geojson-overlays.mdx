@@ -1,0 +1,57 @@
+---
+title: GeoJSON Map Areas
+description: Attach point or polygon overlays to a meta for the GeoGuessr round-results map.
+---
+
+import { Aside, Steps } from '@astrojs/starlight/components';
+
+A map area gives players geographic context for a clue. It belongs to a meta and appears on the GeoGuessr round-results map whenever that meta is shown.
+
+## Supported GeoJSON
+
+Learnable Meta accepts a GeoJSON geometry, Feature, or non-empty FeatureCollection containing:
+
+- `Point`
+- `MultiPoint`
+- `Polygon`
+- `MultiPolygon`
+
+Files must be no larger than 5 MiB. Coordinates use GeoJSON order: longitude first, then latitude. Polygon rings must be closed.
+
+```json title="area.geojson"
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "Point",
+        "coordinates": [14.4208, 50.088]
+      }
+    }
+  ]
+}
+```
+
+<Aside type="caution">
+  LineString, MultiLineString, and GeometryCollection are not supported.
+</Aside>
+
+## Add a map area
+
+<Steps>
+
+1. Save the meta once so it has an **Images** tab and a **Map area** tab.
+2. Edit the meta and open **Map area**.
+3. Drag and drop a `.geojson` or `.json` file, select one from disk, or paste GeoJSON from the clipboard.
+4. Use **Preview** to inspect the saved area. You can replace or remove it from the same tab.
+5. Choose **Sync UserScript** on the group's **Metas** page to publish the change.
+
+</Steps>
+
+## What players see
+
+The userscript draws the point or polygon in green on the round-results map and expands the map view to include it. At a location with multiple metas, selecting another meta tab also switches to that meta's map area.
+
+Players can disable these overlays from their userscript manager with **Learnable Meta - GeoJSON overlays: On/Off**.

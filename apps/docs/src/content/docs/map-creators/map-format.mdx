@@ -1,0 +1,65 @@
+---
+title: Map JSON and Tags
+description: Prepare map-making.app JSON and Learnable Meta location tags for the Creator Dashboard.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+
+Learnable Meta accepts map JSON exported by [map-making.app](https://map-making.app/). You normally should not hand-write the location JSON; prepare the locations and tags in map-making.app, then export the file.
+
+## Require Pano IDs
+
+Every uploaded location must have a Pano ID. In map-making.app, enable **Use Pano ID locations by default** before adding locations and fix any existing locations without an ID before exporting.
+
+Coordinates alone are not enough: the Pano ID is how Learnable Meta matches a GeoGuessr round to the correct location.
+
+## Tag every location
+
+Each uploaded location must have **at least one non-empty tag**. A tag connects the location to one Learnable Meta explanation.
+
+Tags can be any internal name, but this format is recommended:
+
+```text
+CountryName-Your Meta Name
+```
+
+Examples:
+
+```text
+Czechia-Bollard
+Portugal-LicensePlate
+Singapore-StreetSign
+```
+
+The text before the first hyphen becomes the country name shown by Learnable Meta. A recognized country name also enables its flag. The remainder identifies the meta. Use the exact same spelling everywhere that clue applies.
+
+The tag is an internal identifier; players see the meta's **Name** instead. Broader labels such as `Latin-UniqueLetters` are valid, but they do not produce a country flag.
+
+## Multiple metas at one location
+
+A location can have multiple tags when the same panorama contains more than one useful clue. For example:
+
+```text
+Czechia-Bollard
+Czechia-UtilityPole
+```
+
+Learnable Meta stores the panorama once and links it to both metas. The userscript displays a tab for each meta after the player guesses, and switching tabs changes the note, images, and any [GeoJSON map area](/map-creators/geojson-overlays/).
+
+<Aside type="note" title="Userscript compatibility">
+  Multi-meta locations require Learnable Meta userscript version 0.95 or newer.
+</Aside>
+
+## Upload modes
+
+The Creator Dashboard offers three location upload modes:
+
+- **Partial upload** adds new locations and updates matching locations without removing existing ones. This is the safest default.
+- **Tag-based replacement** replaces location assignments for the tags present in the upload. Links to other metas on a shared location remain intact.
+- **Full replacement** replaces all locations in the map group. Existing meta names and descriptions remain, but locations not present in the new file are removed.
+
+Review the selected mode before confirming a replacement upload.
+
+## Upload the export
+
+Open the map group in the [Creator Dashboard](https://learnablemeta.com/map-making), choose **Upload Locations**, select the upload mode, and upload the exported JSON file. You can also paste locations copied from map-making.app directly into the open upload dialog.

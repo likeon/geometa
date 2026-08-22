@@ -3,5 +3,6 @@ kind: Kustomization
 resources:
   - common/flux
   - frontend/flux
+  - docs/flux
   - api/flux
   - discord-bot/flux

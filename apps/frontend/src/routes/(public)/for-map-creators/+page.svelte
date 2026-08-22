@@ -55,8 +55,8 @@
     <IconListItem>
       <span
         ><strong class="font-semibold text-foreground">Adjust your map.</strong>
-        First, you need to tag your locations in the map-making app. Only one tag per location in
-        <span class="italic">CountryName-Any tag name</span> format.</span>
+        Tag your locations in map-making.app. Each location needs a Pano ID and at least one tag in
+        <span class="italic">CountryName-Any tag name</span> format. Multiple tags are supported.</span>
     </IconListItem>
     <IconListItem>
       <span
@@ -67,9 +67,14 @@
       </span>
     </IconListItem>
   </IconList>
-  <div class="mt-3 w-full flex justify-center">
+  <div class="mt-3 flex w-full flex-wrap justify-center gap-3">
     <Button href="/map-making"
       ><Icon icon="gis:poi-map" color="white" class="mr-3 h-4 w-4" />Open Creator Dashboard</Button>
+    <Button
+      variant="outline"
+      href="https://docs.learnablemeta.com/map-creators/getting-started/"
+      target="_blank"
+      rel="noopener noreferrer">Read the docs</Button>
   </div>
   <div class="w-full flex justify-center mb-10 mt-2">
     <p class="text-sm">Requires login with Discord</p>

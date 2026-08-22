@@ -1,0 +1,88 @@
+---
+title: Getting Started
+description: Learn what Learnable Meta does and how to start using it with GeoGuessr.
+---
+
+import { Aside, CardGrid, LinkCard, Steps } from '@astrojs/starlight/components';
+
+Learnable Meta teaches useful GeoGuessr clues while you play. Its maps contain tagged locations, and its browser userscript displays an explanation after each guess.
+
+## What you need
+
+- A GeoGuessr account
+- A supported browser
+- A userscript manager such as Tampermonkey
+- The Learnable Meta userscript
+
+## Install Learnable Meta
+
+Learnable Meta runs as a userscript inside GeoGuessr. Choose your browser or device to install a supported userscript manager:
+
+<CardGrid>
+  <LinkCard
+    title="Chrome and Chromium"
+    href="/getting-started/chrome/"
+    description="Chrome, Edge, Brave, Opera, and other Chromium-based browsers."
+  />
+  <LinkCard
+    title="Firefox"
+    href="/getting-started/firefox/"
+    description="Firefox on desktop."
+  />
+  <LinkCard
+    title="Android"
+    href="/getting-started/android/"
+    description="Use Firefox for Android; the GeoGuessr app is not supported."
+  />
+  <LinkCard
+    title="iOS and iPadOS"
+    href="/getting-started/ios/"
+    description="Community-tested Safari and Orion options."
+  />
+</CardGrid>
+
+## Start learning
+
+Learnable Meta teaches clues in context instead of asking you to memorize long lists. A supported map associates each location with a short explanation of the clue worth noticing there.
+
+<Steps>
+
+1. **Install a userscript manager.**
+
+   Follow the guide for your browser or device above.
+
+2. **Install Learnable Meta.**
+
+   Open the [Learnable Meta userscript installer](https://github.com/likeon/geometa/raw/main/dist/geometa.user.js) and confirm the installation in your userscript manager.
+
+3. **Open a fresh browser tab.**
+
+   Tabs that were already open during installation may not load the userscript. Restarting the browser is the safest option.
+
+4. **Choose a Learnable Meta map.**
+
+   Browse the [available maps](https://learnablemeta.com/maps) and open one in GeoGuessr.
+
+5. **Play and review each clue.**
+
+   Make your guess normally. On the results screen, read the Learnable Meta note and compare it with the panorama before moving to the next round.
+
+</Steps>
+
+<Aside type="caution">
+  The script will not load in tabs that were open before installation. Open a new GeoGuessr tab or restart your browser before testing it.
+</Aside>
+
+If the userscript downloads as a file instead of opening an installation window, follow the [manual installation video](https://www.youtube.com/watch?v=RpjvLpyiras).
+
+The maps are especially useful in **No Move** games: recognizing the Google car, poles, road lines, bollards, signs, and landscape without searching around is an important part of the skill being trained.
+
+<Aside type="tip">
+  Pause after each guess and locate the documented clue in the panorama. Connecting the explanation to what you just saw is more memorable than reading the note alone.
+</Aside>
+
+## Where hints appear
+
+Learnable Meta displays its note after you submit a guess. It does not reveal the answer while you are still choosing a location.
+
+If no note appears, first confirm that you opened GeoGuessr in a new tab after installing the script. Then work through the [troubleshooting guide](/troubleshooting/).

@@ -2,24 +2,22 @@
   import { resolve } from '$app/paths';
 </script>
 
-<footer>
-  <div class="mx-auto max-w-7xl px-6 py-16 sm:py-24 lg:px-8 lg:py-32">
-    <div class="xl:grid xl:grid-cols-3 xl:gap-8">
-      <div class="mt-16 grid grid-cols-2 gap-8 xl:col-span-2 xl:mt-0">
-        <div class="md:grid md:grid-cols-2 md:gap-8">
-          <div class="mt-10 md:mt-0">
-            <h3 class="text-sm/6 font-semibold text-gray-900 dark:text-white">Legal</h3>
-            <ul role="list" class="mt-6 space-y-4">
-              <li>
-                <a
-                  href={resolve('/privacy')}
-                  class="text-sm/6 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white"
-                  >Privacy policy</a>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
+<footer class="border-t">
+  <nav
+    class="mx-auto flex max-w-7xl flex-wrap justify-center gap-x-6 gap-y-3 px-6 py-10 text-sm text-muted-foreground"
+    aria-label="Footer">
+    <a href={resolve('/about')} class="hover:text-foreground">About</a>
+    <a href="https://docs.learnablemeta.com/" class="hover:text-foreground">Documentation</a>
+    <a
+      href="https://github.com/likeon/geometa"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="hover:text-foreground">GitHub</a>
+    <a
+      href="https://discord.gg/AcXEWznYZe"
+      target="_blank"
+      rel="noopener noreferrer"
+      class="hover:text-foreground">Discord</a>
+    <a href={resolve('/privacy')} class="hover:text-foreground">Privacy</a>
+  </nav>
 </footer>
