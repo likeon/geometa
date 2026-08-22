@@ -16,6 +16,7 @@ spec:
         metadata:
           labels:
             app: discord-bot
+            component: challenge
         spec:
           restartPolicy: Never
           imagePullSecrets:
@@ -32,7 +33,9 @@ spec:
                       audience: "api"
           containers:
             - name: challenge
+              # yamllint disable rule:line-length
               image: ghcr.io/likeon/geometa-discord-bot:main-193b7b30-1787416881 # {"$imagepolicy": "geometa:discord-bot"}
+              # yamllint enable rule:line-length
               imagePullPolicy: Always
               args: ["challenge"]
               resources:
