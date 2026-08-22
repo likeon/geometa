@@ -10,6 +10,7 @@ import {
   bigserial,
   boolean,
   check,
+  foreignKey,
   index,
   integer,
   jsonb,
@@ -57,7 +58,6 @@ const commonLocationFields = {
   pitch: real('pitch').notNull(),
   zoom: real('zoom').notNull(),
   panoId: text('pano_id').notNull(),
-  extraTag: text('extra_tag').notNull(),
   extraPanoId: text('extra_pano_id'),
   extraPanoDate: text('extra_pano_date'),
 };
@@ -72,10 +72,18 @@ export const mapGroupLocations = pgTable(
     isOnStreetView: boolean('is_on_street_view'),
     updatedAt: integer('updated_at'),
     modifiedAt: integer('modified_at').default(1730419200).notNull(),
+    // superseded by mapGroupLocationMetas and read by nothing. Uploads still
+    // write the first tag so pods running pre-0041 code stay coherent during a
+    // rolling deploy; a later migration can drop the column and this write
+    extraTag: text('extra_tag'),
     ...commonLocationFields,
   },
   (t) => [
     uniqueIndex('map_group_locations_unique').on(t.mapGroupId, t.panoId),
+    uniqueIndex('map_group_locations_id_map_group_unique').on(
+      t.id,
+      t.mapGroupId,
+    ),
     index('map_group_locations_map_group_tag_idx').on(t.mapGroupId, t.extraTag),
     index('map_group_locations_map_group_modified_idx').on(
       t.mapGroupId,
@@ -85,10 +93,51 @@ export const mapGroupLocations = pgTable(
 );
 export const mapGroupLocationsRelations = relations(
   mapGroupLocations,
-  ({ one }) => ({
+  ({ one, many }) => ({
     mapGroup: one(mapGroups, {
       fields: [mapGroupLocations.mapGroupId],
       references: [mapGroups.id],
+    }),
+    metas: many(mapGroupLocationMetas),
+  }),
+);
+
+export const mapGroupLocationMetas = pgTable(
+  'map_group_location_metas',
+  {
+    locationId: bigint('location_id', { mode: 'number' }).notNull(),
+    metaId: integer('meta_id').notNull(),
+    mapGroupId: integer('map_group_id').notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.locationId, t.metaId] }),
+    index('map_group_location_metas_meta_idx').on(t.metaId),
+    foreignKey({
+      columns: [t.locationId, t.mapGroupId],
+      foreignColumns: [mapGroupLocations.id, mapGroupLocations.mapGroupId],
+      name: 'map_group_location_metas_location_group_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [t.metaId, t.mapGroupId],
+      foreignColumns: [metas.id, metas.mapGroupId],
+      name: 'map_group_location_metas_meta_group_fk',
+    }).onDelete('cascade'),
+  ],
+);
+
+export const mapGroupLocationMetasRelations = relations(
+  mapGroupLocationMetas,
+  ({ one }) => ({
+    location: one(mapGroupLocations, {
+      fields: [
+        mapGroupLocationMetas.locationId,
+        mapGroupLocationMetas.mapGroupId,
+      ],
+      references: [mapGroupLocations.id, mapGroupLocations.mapGroupId],
+    }),
+    meta: one(metas, {
+      fields: [mapGroupLocationMetas.metaId, mapGroupLocationMetas.mapGroupId],
+      references: [metas.id, metas.mapGroupId],
     }),
   }),
 );
@@ -291,6 +340,7 @@ export const metas = pgTable(
   },
   (t) => [
     uniqueIndex('metas_unique').on(t.mapGroupId, t.tagName),
+    uniqueIndex('metas_id_map_group_unique').on(t.id, t.mapGroupId),
     index('metas_map_group_modified_idx').on(t.mapGroupId, t.modifiedAt),
   ],
 );
@@ -519,6 +569,7 @@ export const syncedLocations = pgTable(
     // keep country here because we might use geospatial data in the future
     // different countries per meta are possible
     country: text(),
+    extraTag: text('extra_tag').notNull(),
     ...commonLocationFields,
   },
   (t) => [primaryKey({ columns: [t.syncedMetaId, t.panoId] })],
@@ -555,7 +606,7 @@ export const locationMetas = pgView('location_metas_view', {
   panoId: text('pano_id'),
   extraTag: text('extra_tag').notNull(),
   extraPanoId: text('extra_pano_id'),
-  extraPanoDate: text('extra_pano_date').notNull(),
+  extraPanoDate: text('extra_pano_date'),
   modifiedAt: integer('modified_at').notNull(),
   metaModifiedAt: integer('meta_modified_at').notNull(),
 }).existing();
@@ -570,7 +621,7 @@ export const mapLocations = pgView('map_locations_view', {
   panoId: text('pano_id'),
   metaName: text('meta_name').notNull(),
   extraPanoId: text('extra_pano_id'),
-  extraPanoDate: text('extra_pano_date').notNull(),
+  extraPanoDate: text('extra_pano_date'),
   tagName: text('tag_name').notNull(),
   metaNote: text('meta_note').notNull(),
   metaNoteHtml: text('meta_note_html').notNull(),

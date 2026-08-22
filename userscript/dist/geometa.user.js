@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.94
+// @version      0.95
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
 // @downloadURL  https://github.com/likeon/geometa/raw/main/userscript/dist/geometa.user.js
@@ -22,6 +22,13 @@
 
 /*
 # Changelog
+
+## [0.95]
+
+- Added keyboard-accessible tabs for locations that belong to multiple metas
+- Show each meta's own images, links, and GeoJSON overlay
+- Load inactive meta details only when their tab is opened
+- Allow GeoJSON overlays and downloads to be disabled from the userscript menu
 
 ## [0.94]
 
@@ -186,7 +193,7 @@
 
   const d=new Set;const importCSS = async e=>{d.has(e)||(d.add(e),(t=>{typeof GM_addStyle=="function"?GM_addStyle(t):(document.head||document.documentElement).appendChild(document.createElement("style")).append(t);})(e));};
 
-  importCSS(` .loadership_ZOJAQ.svelte-f4erjd{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-f4erjd-loadership_ZOJAQ_scale 1.2s infinite,svelte-f4erjd-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-f4erjd-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-f4erjd-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-tdzec4{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.carousel.svelte-8ojyxu{position:relative;overflow:hidden;margin:0 auto}.image-wrapper.svelte-8ojyxu{width:100%;height:100%;display:flex;justify-content:center;align-items:center;cursor:zoom-in}.responsive-image.svelte-8ojyxu{max-width:100%;height:100%;display:block;object-fit:contain}.lens.svelte-8ojyxu{position:absolute;pointer-events:none;border:2px solid #aaa;border-radius:50%;box-shadow:0 0 8px #00000080}.click-area.svelte-8ojyxu{position:absolute;top:0;bottom:0;width:1.4em;cursor:pointer}.prev-area.svelte-8ojyxu{left:0}.next-area.svelte-8ojyxu{right:0}.prev.svelte-8ojyxu,.next.svelte-8ojyxu{background-color:#00000080;color:#fff;border:none;font-size:1.2em;padding:.2em;cursor:pointer;pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%)}.prev.svelte-8ojyxu{left:0}.next.svelte-8ojyxu{right:0}.indicators.svelte-8ojyxu{position:absolute;bottom:15px;left:50%;transform:translate(-50%);display:flex;justify-content:center;align-items:center;gap:8px}.indicator.svelte-8ojyxu{width:12px;height:12px;background-color:#ffffff80;border-radius:50%;cursor:pointer;border:none;padding:0;flex-shrink:0}.indicator.active.svelte-8ojyxu{background-color:#fff}.geometa-footer a{color:#188bd2;text-decoration:none}.geometa-footer a:hover{text-decoration:underline}.geometa-container.svelte-1j2rmt2{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100, #1c1836);color:#fff;padding:6px 10px;border-radius:5px;font-size:17px;line-height:1.4;width:min(25%,500px);resize:both;overflow:auto}.geometa-container.svelte-1j2rmt2 h2:where(.svelte-1j2rmt2){margin:0;font-size:1.2rem;font-weight:700}.geometa-container.svelte-1j2rmt2 p{margin:0}.geometa-container.svelte-1j2rmt2 ul,.geometa-container.svelte-1j2rmt2 ol{margin:0;padding:0;list-style:none}.geometa-container.svelte-1j2rmt2>.header:where(.svelte-1j2rmt2){margin-top:0}.geometa-footer.svelte-1j2rmt2{color:#d3d3d3;font-size:small}.announcement.svelte-1j2rmt2{background-color:#e6f7ff;color:#0050b3;padding:8px 12px;border-radius:4px;font-size:14px;display:flex;justify-content:space-between;align-items:center;width:100%;box-sizing:border-box;margin-bottom:8px;border:1px solid #91d5ff}.announcement a{color:#0050b3;font-weight:700;text-decoration:underline}.announcement a:hover{color:#003a8c}.vote-close-btn.svelte-1j2rmt2{background-color:#b3d9ff;border:1px solid #0050b3;color:#0050b3;font-size:12px;cursor:pointer;padding:1px 10px;border-radius:4px;line-height:1;margin-left:5px;text-transform:none;transition:background-color .2s ease,color .2s ease,border-color .2s ease}.vote-close-btn.svelte-1j2rmt2:hover,.vote-close-btn.svelte-1j2rmt2:focus{background-color:#0050b3;color:#fff;border-color:#036;outline:none}a.svelte-1j2rmt2{color:#188bd2}a.svelte-1j2rmt2:hover{text-decoration:underline}.skill-icons--discord.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--list.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E")}.question-mark-icon.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");cursor:pointer}.icons.svelte-1j2rmt2{display:inline-block;vertical-align:middle}.flex.svelte-1j2rmt2{display:flex;align-items:center}.icons.svelte-1j2rmt2 a:where(.svelte-1j2rmt2) span:where(.svelte-1j2rmt2){align-items:center;justify-content:center}hr.svelte-1j2rmt2{border:0;border-top:1px solid white;width:100%}.header.svelte-1j2rmt2{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center;touch-action:none;-webkit-user-select:none;user-select:none}.geometa-note a{color:#188bd2}.geometa-note a:hover{text-decoration:underline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem}.help-toggle-button.svelte-1j2rmt2{background:transparent;border:none;padding:0;cursor:pointer}.blink.svelte-1j2rmt2{animation:svelte-1j2rmt2-blink-animation 1s infinite}@keyframes svelte-1j2rmt2-blink-animation{0%{filter:brightness(1)}50%{filter:brightness(2);background-color:#004779}to{filter:brightness(1)}}.geometa-meta-btn{background:#188bd2;color:#fff;border:none;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;margin-left:10px;transition:background-color .2s ease;font-weight:700;z-index:1000;pointer-events:auto;display:inline-block}.result-list_listItemWrapper___XCGn{display:flex!important;justify-content:space-between!important;align-items:center!important}.geometa-meta-btn:hover{background:#0056b3}.geometa-pin-question{position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:#188bd2;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;z-index:10000;transition:background-color .2s ease;border:1px solid white;box-shadow:0 1px 3px #0000004d}.geometa-pin-question:hover{background:#0056b3;transform:scale(1.1)}.geometa-map-label-container.svelte-1y99qco{background-color:#000000a6;color:#fff;text-align:center;z-index:100;position:absolute;bottom:4px;right:4px;box-sizing:border-box;border-radius:8px;padding:8px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;gap:8px}p.svelte-1y99qco{font-size:14px;font-weight:700}button.svelte-1y99qco{padding:6px 12px;font-size:12px;color:#fff;background-color:#4caf50;border:none;border-radius:4px;cursor:pointer}.toast-notification.svelte-w17ltc{position:fixed;top:72px;right:16px;z-index:10001;min-width:250px;max-width:400px;padding:14px 22px;border-radius:8px;box-shadow:0 5px 15px #0003;color:#fff;display:flex;align-items:flex-start;justify-content:space-between;font-size:.95em;line-height:1.4}.toast-success.svelte-w17ltc{background-color:#28a745;border-left:5px solid #1e7e34}.toast-error.svelte-w17ltc{background-color:#dc3545;border-left:5px solid #b02a37}.toast-info.svelte-w17ltc{background-color:#17a2b8;border-left:5px solid #117a8b}.toast-warning.svelte-w17ltc{background-color:#ffc107;color:#212529;border-left:5px solid #d39e00}.toast-content.svelte-w17ltc{flex-grow:1;margin-right:10px;display:flex;flex-direction:column;gap:6px}.toast-detail.svelte-w17ltc{font-size:.8em;line-height:1.35;opacity:.85;word-break:break-word;padding-top:6px;border-top:1px solid rgba(255,255,255,.35);-webkit-user-select:text;user-select:text}.toast-close-button.svelte-w17ltc{background:transparent;border:none;color:inherit;font-size:1.6em;font-weight:700;margin-left:10px;cursor:pointer;padding:0;line-height:1;opacity:.7;transition:opacity .2s ease}.toast-close-button.svelte-w17ltc:hover{opacity:1}.upload-label-container.svelte-1plj3lz{display:flex;align-items:center;gap:6px}.saved-key.svelte-1plj3lz{border-radius:4px;padding:2px 5px;background:var(--lm-muted);color:var(--lm-foreground);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px}.subtitle.svelte-axobi4{margin:6px 0 0;color:var(--lm-muted-foreground);font-size:14px}.map-update-close.svelte-axobi4{width:32px;height:32px;padding:0}.map-update-close.svelte-axobi4 svg:where(.svelte-axobi4){width:18px;height:18px;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:2}.notice.svelte-axobi4,.fatal.svelte-axobi4,.summary.svelte-axobi4{margin:18px 24px 0;padding:13px 15px;border:1px solid var(--lm-border);border-radius:var(--lm-radius);background:var(--lm-muted);color:var(--lm-muted-foreground);font-size:14px;line-height:1.45}.fatal.svelte-axobi4{display:grid;gap:10px;border-color:#dc262659;background:#dc262617;color:var(--lm-destructive)}.fatal.svelte-axobi4 .learnablemeta-button:where(.svelte-axobi4){justify-self:start}.summary.svelte-axobi4{border-color:#16a34a4d;background:#16a34a1a;color:#166534}.toolbar.svelte-axobi4{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 24px 10px;color:var(--lm-muted-foreground);font-size:13px;font-weight:500}.toolbar.svelte-axobi4>div:where(.svelte-axobi4){display:flex;gap:4px}.group-list.svelte-axobi4{display:grid;gap:8px;overflow-y:auto;max-height:390px;margin:14px 24px 0;padding:1px}.group-row.svelte-axobi4{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:62px;border:1px solid var(--lm-border);border-radius:var(--lm-radius);padding:12px 14px;background:var(--lm-card);color:var(--lm-card-foreground);box-shadow:0 1px 2px #0000000d;text-align:left;cursor:pointer;transition:border-color .15s ease,background-color .15s ease,box-shadow .15s ease}.group-row.svelte-axobi4:hover{border-color:var(--lm-ring);background:color-mix(in srgb,var(--lm-primary) 6%,var(--lm-card));box-shadow:0 1px 4px #0000001a}.group-row.svelte-axobi4:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--lm-ring) 30%,transparent)}.group-details.svelte-axobi4{display:grid;min-width:0;gap:3px}.group-details.svelte-axobi4 strong:where(.svelte-axobi4){overflow:hidden;font-size:14px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}.group-details.svelte-axobi4>span:where(.svelte-axobi4){color:var(--lm-muted-foreground);font-size:12px}.group-count.svelte-axobi4{display:inline-flex;flex:none;align-items:center;gap:6px;color:var(--lm-muted-foreground);font-size:12px;font-weight:500}.group-count.svelte-axobi4 svg:where(.svelte-axobi4){width:16px;height:16px;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:2}.map-list.svelte-axobi4{overflow-y:auto;margin:0 24px;border:1px solid var(--lm-border);border-radius:var(--lm-radius);background:var(--lm-card)}.map-row.svelte-axobi4{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--lm-border);color:var(--lm-card-foreground);transition:background-color .15s ease}.map-row.svelte-axobi4:hover{background:var(--lm-muted)}.map-row.selected.svelte-axobi4{background:color-mix(in srgb,var(--lm-primary) 7%,var(--lm-card))}.map-row.svelte-axobi4:last-child{border-bottom:0}.map-row.error-row.svelte-axobi4{background:#dc26260f}.map-row.svelte-axobi4 input[type=checkbox]:where(.svelte-axobi4){width:16px;height:16px;accent-color:var(--lm-primary)}.map-details.svelte-axobi4{display:grid;min-width:0;gap:3px}.map-details.svelte-axobi4 strong:where(.svelte-axobi4){overflow:hidden;font-size:14px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}.map-details.svelte-axobi4>span:where(.svelte-axobi4){color:var(--lm-muted-foreground);font-size:12px}.map-details.svelte-axobi4 .row-error:where(.svelte-axobi4){color:var(--lm-destructive);white-space:normal}.status.svelte-axobi4{padding:3px 8px;border:1px solid transparent;border-radius:calc(var(--lm-radius) - 2px);font-size:12px;font-weight:500;white-space:nowrap}.status.good.svelte-axobi4{border-color:#bbf7d0;background:#dcfce7;color:#166534}.status.warning.svelte-axobi4{border-color:#fde68a;background:#fef3c7;color:#854d0e}.status.bad.svelte-axobi4{border-color:#fecaca;background:#fee2e2;color:#991b1b}.status.working.svelte-axobi4{border-color:#bfdbfe;background:#dbeafe;color:#1e40af}.status.neutral.svelte-axobi4{border-color:var(--lm-border);background:var(--lm-muted);color:var(--lm-muted-foreground)}.token-form.svelte-axobi4{display:grid;gap:12px;padding:22px 24px 0}.token-form.svelte-axobi4 p:where(.svelte-axobi4){margin:0;font-size:14px;line-height:1.5}.token-form.svelte-axobi4 .small:where(.svelte-axobi4){color:var(--lm-muted-foreground);font-size:13px}.token-form.svelte-axobi4 a:where(.svelte-axobi4){color:var(--lm-link);text-underline-offset:3px}.token-actions.svelte-axobi4{margin:8px -24px 0}.error-text.svelte-axobi4{margin:0;color:var(--lm-destructive);font-size:13px}@media(prefers-color-scheme:dark){.summary.svelte-axobi4{color:#86efac}.status.good.svelte-axobi4{border-color:#22c55e66;background:#16a34a2e;color:#86efac}.status.warning.svelte-axobi4{border-color:#f59e0b66;background:#b4530933;color:#fde68a}.status.bad.svelte-axobi4{border-color:#ef444466;background:#b91c1c33;color:#fca5a5}.status.working.svelte-axobi4{border-color:#3b82f666;background:#1e40af38;color:#93c5fd}}@media(max-width:620px){.map-row.svelte-axobi4{grid-template-columns:22px minmax(0,1fr)}.group-details.svelte-axobi4>span:where(.svelte-axobi4){display:none}.status.svelte-axobi4{grid-column:2;justify-self:start}} `);
+  importCSS(` .loadership_ZOJAQ.svelte-f4erjd{display:flex;position:relative;width:72px;height:72px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd){position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;animation:svelte-f4erjd-loadership_ZOJAQ_scale 1.2s infinite,svelte-f4erjd-loadership_ZOJAQ_fade 1.2s infinite;animation-timing-function:linear}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(1){animation-delay:0s;top:62px;left:32px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(2){animation-delay:-.1s;top:58px;left:47px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(3){animation-delay:-.2s;top:47px;left:58px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(4){animation-delay:-.3s;top:32px;left:62px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(5){animation-delay:-.4s;top:17px;left:58px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(6){animation-delay:-.5s;top:6px;left:47px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(7){animation-delay:-.6s;top:2px;left:32px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(8){animation-delay:-.7s;top:6px;left:17px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(9){animation-delay:-.8s;top:17px;left:6px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(10){animation-delay:-.9s;top:32px;left:2px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(11){animation-delay:-1s;top:47px;left:6px}.loadership_ZOJAQ.svelte-f4erjd div:where(.svelte-f4erjd):nth-child(12){animation-delay:-1.1s;top:58px;left:17px}@keyframes svelte-f4erjd-loadership_ZOJAQ_scale{0%,20%,80%,to{transform:scale(1)}50%{transform:scale(1.5)}}@keyframes svelte-f4erjd-loadership_ZOJAQ_fade{0%,20%,80%,to{opacity:.8}50%{opacity:1}}.fi.svelte-tdzec4{width:1.5em;height:1em;display:inline-block;vertical-align:middle;padding-right:3px}.carousel.svelte-8ojyxu{position:relative;overflow:hidden;margin:0 auto}.image-wrapper.svelte-8ojyxu{width:100%;height:100%;display:flex;justify-content:center;align-items:center;cursor:zoom-in}.responsive-image.svelte-8ojyxu{max-width:100%;height:100%;display:block;object-fit:contain}.lens.svelte-8ojyxu{position:absolute;pointer-events:none;border:2px solid #aaa;border-radius:50%;box-shadow:0 0 8px #00000080}.click-area.svelte-8ojyxu{position:absolute;top:0;bottom:0;width:1.4em;cursor:pointer}.prev-area.svelte-8ojyxu{left:0}.next-area.svelte-8ojyxu{right:0}.prev.svelte-8ojyxu,.next.svelte-8ojyxu{background-color:#00000080;color:#fff;border:none;font-size:1.2em;padding:.2em;cursor:pointer;pointer-events:auto;position:absolute;top:50%;transform:translateY(-50%)}.prev.svelte-8ojyxu{left:0}.next.svelte-8ojyxu{right:0}.indicators.svelte-8ojyxu{position:absolute;bottom:15px;left:50%;transform:translate(-50%);display:flex;justify-content:center;align-items:center;gap:8px}.indicator.svelte-8ojyxu{width:12px;height:12px;background-color:#ffffff80;border-radius:50%;cursor:pointer;border:none;padding:0;flex-shrink:0}.indicator.active.svelte-8ojyxu{background-color:#fff}.geometa-footer a{color:#188bd2;text-decoration:none}.geometa-footer a:hover{text-decoration:underline}.geometa-container.svelte-1j2rmt2{position:absolute;top:13rem;left:1rem;z-index:50;display:flex;flex-direction:column;gap:5px;align-items:flex-start;background:var(--ds-color-purple-100, #1c1836);color:#fff;padding:6px 10px;border-radius:5px;font-size:17px;line-height:1.4;width:min(25%,500px);resize:both;overflow:auto}.geometa-container.svelte-1j2rmt2 h2:where(.svelte-1j2rmt2){margin:0;font-size:1.2rem;font-weight:700}.geometa-container.svelte-1j2rmt2 p{margin:0}.geometa-container.svelte-1j2rmt2 ul,.geometa-container.svelte-1j2rmt2 ol{margin:0;padding:0;list-style:none}.geometa-container.svelte-1j2rmt2>.header:where(.svelte-1j2rmt2){margin-top:0}.geometa-footer.svelte-1j2rmt2{color:#d3d3d3;font-size:small}.meta-tabs.svelte-1j2rmt2{display:flex;flex-wrap:wrap;gap:4px;width:100%}.meta-panel.svelte-1j2rmt2{display:flex;flex-direction:column;gap:5px;align-items:flex-start;width:100%}.meta-tab.svelte-1j2rmt2{background:#ffffff14;color:#d3d3d3;border:1px solid transparent;border-radius:4px;padding:2px 8px;font:inherit;font-size:14px;line-height:1.3;text-transform:none;cursor:pointer}.meta-tab.svelte-1j2rmt2:hover{background:#ffffff29;color:#fff}.meta-tab.active.svelte-1j2rmt2{background:#188bd2;color:#fff}.meta-tab.svelte-1j2rmt2:focus-visible{outline:2px solid #fff;outline-offset:1px}.announcement.svelte-1j2rmt2{background-color:#e6f7ff;color:#0050b3;padding:8px 12px;border-radius:4px;font-size:14px;display:flex;justify-content:space-between;align-items:center;width:100%;box-sizing:border-box;margin-bottom:8px;border:1px solid #91d5ff}.announcement a{color:#0050b3;font-weight:700;text-decoration:underline}.announcement a:hover{color:#003a8c}.vote-close-btn.svelte-1j2rmt2{background-color:#b3d9ff;border:1px solid #0050b3;color:#0050b3;font-size:12px;cursor:pointer;padding:1px 10px;border-radius:4px;line-height:1;margin-left:5px;text-transform:none;transition:background-color .2s ease,color .2s ease,border-color .2s ease}.vote-close-btn.svelte-1j2rmt2:hover,.vote-close-btn.svelte-1j2rmt2:focus{background-color:#0050b3;color:#fff;border-color:#036;outline:none}a.svelte-1j2rmt2{color:#188bd2}a.svelte-1j2rmt2:hover{text-decoration:underline}.skill-icons--discord.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 256 256'%3E%3Cg fill='none'%3E%3Crect width='256' height='256' fill='%235865f2' rx='60'/%3E%3Cg clip-path='url(%23skillIconsDiscord0)'%3E%3Cpath fill='%23ffffff' d='M197.308 64.797a165 165 0 0 0-40.709-12.627a.62.62 0 0 0-.654.31c-1.758 3.126-3.706 7.206-5.069 10.412c-15.373-2.302-30.666-2.302-45.723 0c-1.364-3.278-3.382-7.286-5.148-10.412a.64.64 0 0 0-.655-.31a164.5 164.5 0 0 0-40.709 12.627a.6.6 0 0 0-.268.23c-25.928 38.736-33.03 76.52-29.546 113.836a.7.7 0 0 0 .26.468c17.106 12.563 33.677 20.19 49.94 25.245a.65.65 0 0 0 .702-.23c3.847-5.254 7.276-10.793 10.217-16.618a.633.633 0 0 0-.347-.881c-5.44-2.064-10.619-4.579-15.601-7.436a.642.642 0 0 1-.063-1.064a86 86 0 0 0 3.098-2.428a.62.62 0 0 1 .646-.088c32.732 14.944 68.167 14.944 100.512 0a.62.62 0 0 1 .655.08a80 80 0 0 0 3.106 2.436a.642.642 0 0 1-.055 1.064a102.6 102.6 0 0 1-15.609 7.428a.64.64 0 0 0-.339.889a133 133 0 0 0 10.208 16.61a.64.64 0 0 0 .702.238c16.342-5.055 32.913-12.682 50.02-25.245a.65.65 0 0 0 .26-.46c4.17-43.141-6.985-80.616-29.571-113.836a.5.5 0 0 0-.26-.238M94.834 156.142c-9.855 0-17.975-9.047-17.975-20.158s7.963-20.158 17.975-20.158c10.09 0 18.131 9.127 17.973 20.158c0 11.111-7.962 20.158-17.973 20.158m66.456 0c-9.855 0-17.974-9.047-17.974-20.158s7.962-20.158 17.974-20.158c10.09 0 18.131 9.127 17.974 20.158c0 11.111-7.884 20.158-17.974 20.158'/%3E%3C/g%3E%3Cdefs%3E%3CclipPath id='skillIconsDiscord0'%3E%3Cpath fill='%23ffffff' d='M28 51h200v154.93H28z'/%3E%3C/clipPath%3E%3C/defs%3E%3C/g%3E%3C/svg%3E")}.flat-color-icons--globe.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48'%3E%3Cpath fill='%237cb342' d='M24 4C13 4 4 13 4 24s9 20 20 20s20-9 20-20S35 4 24 4'/%3E%3Cpath fill='%230277bd' d='M45 24c0 11.7-9.5 21-21 21S3 35.7 3 24S12.3 3 24 3s21 9.3 21 21m-21.2 9.7c0-.4-.2-.6-.6-.8c-1.3-.4-2.5-.4-3.6-1.5c-.2-.4-.2-.8-.4-1.3c-.4-.4-1.5-.6-2.1-.8h-4.2c-.6-.2-1.1-1.1-1.5-1.7c0-.2 0-.6-.4-.6c-.4-.2-.8.2-1.3 0c-.2-.2-.2-.4-.2-.6c0-.6.4-1.3.8-1.7c.6-.4 1.3.2 1.9.2c.2 0 .2 0 .4.2c.6.2.8 1 .8 1.7v.4c0 .2.2.2.4.2c.2-1.1.2-2.1.4-3.2c0-1.3 1.3-2.5 2.3-2.9c.4-.2.6.2 1.1 0c1.3-.4 4.4-1.7 3.8-3.4c-.4-1.5-1.7-2.9-3.4-2.7c-.4.2-.6.4-1 .6c-.6.4-1.9 1.7-2.5 1.7c-1.1-.2-1.1-1.7-.8-2.3c.2-.8 2.1-3.6 3.4-3.1l.8.8c.4.2 1.1.2 1.7.2c.2 0 .4 0 .6-.2s.2-.2.2-.4c0-.6-.6-1.3-1-1.7s-1.1-.8-1.7-1.1c-2.1-.6-5.5.2-7.1 1.7s-2.9 4-3.8 6.1c-.4 1.3-.8 2.9-1 4.4c-.2 1-.4 1.9.2 2.9c.6 1.3 1.9 2.5 3.2 3.4c.8.6 2.5.6 3.4 1.7c.6.8.4 1.9.4 2.9c0 1.3.8 2.3 1.3 3.4c.2.6.4 1.5.6 2.1c0 .2.2 1.5.2 1.7c1.3.6 2.3 1.3 3.8 1.7c.2 0 1-1.3 1-1.5c.6-.6 1.1-1.5 1.7-1.9c.4-.2.8-.4 1.3-.8c.4-.4.6-1.3.8-1.9c.1-.5.3-1.3.1-1.9m.4-19.4c.2 0 .4-.2.8-.4c.6-.4 1.3-1.1 1.9-1.5s1.3-1.1 1.7-1.5c.6-.4 1.1-1.3 1.3-1.9c.2-.4.8-1.3.6-1.9c-.2-.4-1.3-.6-1.7-.8c-1.7-.4-3.1-.6-4.8-.6c-.6 0-1.5.2-1.7.8c-.2 1.1.6.8 1.5 1.1c0 0 .2 1.7.2 1.9c.2 1-.4 1.7-.4 2.7c0 .6 0 1.7.4 2.1zM41.8 29c.2-.4.2-1.1.4-1.5c.2-1 .2-2.1.2-3.1c0-2.1-.2-4.2-.8-6.1c-.4-.6-.6-1.3-.8-1.9c-.4-1.1-1-2.1-1.9-2.9c-.8-1.1-1.9-4-3.8-3.1c-.6.2-1 1-1.5 1.5c-.4.6-.8 1.3-1.3 1.9c-.2.2-.4.6-.2.8c0 .2.2.2.4.2c.4.2.6.2 1 .4c.2 0 .4.2.2.4c0 0 0 .2-.2.2c-1 1.1-2.1 1.9-3.1 2.9c-.2.2-.4.6-.4.8s.2.2.2.4s-.2.2-.4.4c-.4.2-.8.4-1.1.6c-.2.4 0 1.1-.2 1.5c-.2 1.1-.8 1.9-1.3 2.9c-.4.6-.6 1.3-1 1.9c0 .8-.2 1.5.2 2.1c1 1.5 2.9.6 4.4 1.3c.4.2.8.2 1.1.6c.6.6.6 1.7.8 2.3c.2.8.4 1.7.8 2.5c.2 1 .6 2.1.8 2.9c1.9-1.5 3.6-3.1 4.8-5.2c1.5-1.3 2.1-3 2.7-4.7'/%3E%3C/svg%3E")}.skill-icons--list.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%235865f2' d='M4 3h13.17c.41 0 .8.16 1.09.44l3.3 3.3c.29.29.44.68.44 1.09V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z'/%3E%3Cpath fill='%23ffffff' d='M14 2v4h4l-4-4zM7 9h10v2H7V9zm0 4h7v2H7v-2z'/%3E%3C/svg%3E")}.question-mark-icon.svelte-1j2rmt2{display:inline-block;width:1.2rem;height:1.2rem;margin-left:2px;background-repeat:no-repeat;background-size:100% 100%;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23188bd2' d='M21 2H3c-.55 0-1 .45-1 1v18c0 .55.45 1 1 1h18c.55 0 1-.45 1-1V3c0-.55-.45-1-1-1ZM12 18a1 1 0 1 1 1-1a1 1 0 0 1-1 1Zm2.07-5.25c-.9.52-.98 1.26-.98 1.75h-2c0-1.12.46-2.21 1.78-2.91c.9-.52 1.22-.87 1.22-1.34a1.5 1.5 0 0 0-3 0H9a3.5 3.5 0 0 1 7 0c0 1.63-1.28 2.41-1.93 2.75Z'/%3E%3C/svg%3E");cursor:pointer}.icons.svelte-1j2rmt2{display:inline-block;vertical-align:middle}.flex.svelte-1j2rmt2{display:flex;align-items:center}.icons.svelte-1j2rmt2 a:where(.svelte-1j2rmt2) span:where(.svelte-1j2rmt2){align-items:center;justify-content:center}hr.svelte-1j2rmt2{border:0;border-top:1px solid white;width:100%}.header.svelte-1j2rmt2{cursor:move;border-bottom:1px solid #aaa;width:100%;display:flex;justify-content:space-between;align-items:center;touch-action:none;-webkit-user-select:none;user-select:none}.geometa-note a{color:#188bd2}.geometa-note a:hover{text-decoration:underline}.geometa-note ul li{list-style-type:disc;margin-left:1rem}.geometa-note ol li{list-style-type:decimal;margin-left:1rem}.help-toggle-button.svelte-1j2rmt2{background:transparent;border:none;padding:0;cursor:pointer}.blink.svelte-1j2rmt2{animation:svelte-1j2rmt2-blink-animation 1s infinite}@keyframes svelte-1j2rmt2-blink-animation{0%{filter:brightness(1)}50%{filter:brightness(2);background-color:#004779}to{filter:brightness(1)}}.geometa-meta-btn{background:#188bd2;color:#fff;border:none;border-radius:3px;padding:2px 6px;font-size:11px;cursor:pointer;margin-left:10px;transition:background-color .2s ease;font-weight:700;z-index:1000;pointer-events:auto;display:inline-block}.result-list_listItemWrapper___XCGn{display:flex!important;justify-content:space-between!important;align-items:center!important}.geometa-meta-btn:hover{background:#0056b3}.geometa-pin-question{position:absolute;top:-8px;right:-8px;width:16px;height:16px;background:#188bd2;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;cursor:pointer;z-index:10000;transition:background-color .2s ease;border:1px solid white;box-shadow:0 1px 3px #0000004d}.geometa-pin-question:hover{background:#0056b3;transform:scale(1.1)}.geometa-map-label-container.svelte-1y99qco{background-color:#000000a6;color:#fff;text-align:center;z-index:100;position:absolute;bottom:4px;right:4px;box-sizing:border-box;border-radius:8px;padding:8px;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;gap:8px}p.svelte-1y99qco{font-size:14px;font-weight:700}a.svelte-1y99qco{padding:6px 12px;font-size:12px;color:#fff;text-decoration:none;background-color:#4caf50;border-radius:4px;cursor:pointer}.toast-notification.svelte-w17ltc{position:fixed;top:72px;right:16px;z-index:10001;min-width:250px;max-width:400px;padding:14px 22px;border-radius:8px;box-shadow:0 5px 15px #0003;color:#fff;display:flex;align-items:flex-start;justify-content:space-between;font-size:.95em;line-height:1.4}.toast-success.svelte-w17ltc{background-color:#28a745;border-left:5px solid #1e7e34}.toast-error.svelte-w17ltc{background-color:#dc3545;border-left:5px solid #b02a37}.toast-info.svelte-w17ltc{background-color:#17a2b8;border-left:5px solid #117a8b}.toast-warning.svelte-w17ltc{background-color:#ffc107;color:#212529;border-left:5px solid #d39e00}.toast-content.svelte-w17ltc{flex-grow:1;margin-right:10px;display:flex;flex-direction:column;gap:6px}.toast-detail.svelte-w17ltc{font-size:.8em;line-height:1.35;opacity:.85;word-break:break-word;padding-top:6px;border-top:1px solid rgba(255,255,255,.35);-webkit-user-select:text;user-select:text}.toast-close-button.svelte-w17ltc{background:transparent;border:none;color:inherit;font-size:1.6em;font-weight:700;margin-left:10px;cursor:pointer;padding:0;line-height:1;opacity:.7;transition:opacity .2s ease}.toast-close-button.svelte-w17ltc:hover{opacity:1}.upload-label-container.svelte-1plj3lz{display:flex;align-items:center;gap:6px}.saved-key.svelte-1plj3lz{border-radius:4px;padding:2px 5px;background:var(--lm-muted);color:var(--lm-foreground);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px}.subtitle.svelte-axobi4{margin:6px 0 0;color:var(--lm-muted-foreground);font-size:14px}.map-update-close.svelte-axobi4{width:32px;height:32px;padding:0}.map-update-close.svelte-axobi4 svg:where(.svelte-axobi4){width:18px;height:18px;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:2}.notice.svelte-axobi4,.fatal.svelte-axobi4,.summary.svelte-axobi4{margin:18px 24px 0;padding:13px 15px;border:1px solid var(--lm-border);border-radius:var(--lm-radius);background:var(--lm-muted);color:var(--lm-muted-foreground);font-size:14px;line-height:1.45}.fatal.svelte-axobi4{display:grid;gap:10px;border-color:#dc262659;background:#dc262617;color:var(--lm-destructive)}.fatal.svelte-axobi4 .learnablemeta-button:where(.svelte-axobi4){justify-self:start}.summary.svelte-axobi4{border-color:#16a34a4d;background:#16a34a1a;color:#166534}.toolbar.svelte-axobi4{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:18px 24px 10px;color:var(--lm-muted-foreground);font-size:13px;font-weight:500}.toolbar.svelte-axobi4>div:where(.svelte-axobi4){display:flex;gap:4px}.group-list.svelte-axobi4{display:grid;gap:8px;overflow-y:auto;max-height:390px;margin:14px 24px 0;padding:1px}.group-row.svelte-axobi4{display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;min-height:62px;border:1px solid var(--lm-border);border-radius:var(--lm-radius);padding:12px 14px;background:var(--lm-card);color:var(--lm-card-foreground);box-shadow:0 1px 2px #0000000d;text-align:left;cursor:pointer;transition:border-color .15s ease,background-color .15s ease,box-shadow .15s ease}.group-row.svelte-axobi4:hover{border-color:var(--lm-ring);background:color-mix(in srgb,var(--lm-primary) 6%,var(--lm-card));box-shadow:0 1px 4px #0000001a}.group-row.svelte-axobi4:focus-visible{outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--lm-ring) 30%,transparent)}.group-details.svelte-axobi4{display:grid;min-width:0;gap:3px}.group-details.svelte-axobi4 strong:where(.svelte-axobi4){overflow:hidden;font-size:14px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}.group-details.svelte-axobi4>span:where(.svelte-axobi4){color:var(--lm-muted-foreground);font-size:12px}.group-count.svelte-axobi4{display:inline-flex;flex:none;align-items:center;gap:6px;color:var(--lm-muted-foreground);font-size:12px;font-weight:500}.group-count.svelte-axobi4 svg:where(.svelte-axobi4){width:16px;height:16px;fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round;stroke-width:2}.map-list.svelte-axobi4{overflow-y:auto;margin:0 24px;border:1px solid var(--lm-border);border-radius:var(--lm-radius);background:var(--lm-card)}.map-row.svelte-axobi4{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--lm-border);color:var(--lm-card-foreground);transition:background-color .15s ease}.map-row.svelte-axobi4:hover{background:var(--lm-muted)}.map-row.selected.svelte-axobi4{background:color-mix(in srgb,var(--lm-primary) 7%,var(--lm-card))}.map-row.svelte-axobi4:last-child{border-bottom:0}.map-row.error-row.svelte-axobi4{background:#dc26260f}.map-row.svelte-axobi4 input[type=checkbox]:where(.svelte-axobi4){width:16px;height:16px;accent-color:var(--lm-primary)}.map-details.svelte-axobi4{display:grid;min-width:0;gap:3px}.map-details.svelte-axobi4 strong:where(.svelte-axobi4){overflow:hidden;font-size:14px;font-weight:600;text-overflow:ellipsis;white-space:nowrap}.map-details.svelte-axobi4>span:where(.svelte-axobi4){color:var(--lm-muted-foreground);font-size:12px}.map-details.svelte-axobi4 .row-error:where(.svelte-axobi4){color:var(--lm-destructive);white-space:normal}.status.svelte-axobi4{padding:3px 8px;border:1px solid transparent;border-radius:calc(var(--lm-radius) - 2px);font-size:12px;font-weight:500;white-space:nowrap}.status.good.svelte-axobi4{border-color:#bbf7d0;background:#dcfce7;color:#166534}.status.warning.svelte-axobi4{border-color:#fde68a;background:#fef3c7;color:#854d0e}.status.bad.svelte-axobi4{border-color:#fecaca;background:#fee2e2;color:#991b1b}.status.working.svelte-axobi4{border-color:#bfdbfe;background:#dbeafe;color:#1e40af}.status.neutral.svelte-axobi4{border-color:var(--lm-border);background:var(--lm-muted);color:var(--lm-muted-foreground)}.token-form.svelte-axobi4{display:grid;gap:12px;padding:22px 24px 0}.token-form.svelte-axobi4 p:where(.svelte-axobi4){margin:0;font-size:14px;line-height:1.5}.token-form.svelte-axobi4 .small:where(.svelte-axobi4){color:var(--lm-muted-foreground);font-size:13px}.token-form.svelte-axobi4 a:where(.svelte-axobi4){color:var(--lm-link);text-underline-offset:3px}.token-actions.svelte-axobi4{margin:8px -24px 0}.error-text.svelte-axobi4{margin:0;color:var(--lm-destructive);font-size:13px}@media(prefers-color-scheme:dark){.summary.svelte-axobi4{color:#86efac}.status.good.svelte-axobi4{border-color:#22c55e66;background:#16a34a2e;color:#86efac}.status.warning.svelte-axobi4{border-color:#f59e0b66;background:#b4530933;color:#fde68a}.status.bad.svelte-axobi4{border-color:#ef444466;background:#b91c1c33;color:#fca5a5}.status.working.svelte-axobi4{border-color:#3b82f666;background:#1e40af38;color:#93c5fd}}@media(max-width:620px){.map-row.svelte-axobi4{grid-template-columns:22px minmax(0,1fr)}.group-details.svelte-axobi4>span:where(.svelte-axobi4){display:none}.status.svelte-axobi4{grid-column:2;justify-self:start}} `);
 
   var _GM_getValue = (() => typeof GM_getValue != "undefined" ? GM_getValue : void 0)();
   var _GM_info = (() => typeof GM_info != "undefined" ? GM_info : void 0)();
@@ -290,7 +297,7 @@
       throw new Error(`https://svelte.dev/e/effect_update_depth_exceeded`);
     }
   }
-  function props_invalid_value(key) {
+  function props_invalid_value(key2) {
     {
       throw new Error(`https://svelte.dev/e/props_invalid_value`);
     }
@@ -1662,13 +1669,13 @@ sources.get("length")
         },
         ownKeys(target) {
           get(version);
-          var own_keys = Reflect.ownKeys(target).filter((key2) => {
-            var source3 = sources.get(key2);
+          var own_keys = Reflect.ownKeys(target).filter((key3) => {
+            var source3 = sources.get(key3);
             return source3 === void 0 || source3.v !== UNINITIALIZED;
           });
-          for (var [key, source2] of sources) {
-            if (source2.v !== UNINITIALIZED && !(key in target)) {
-              own_keys.push(key);
+          for (var [key2, source2] of sources) {
+            if (source2.v !== UNINITIALIZED && !(key2 in target)) {
+              own_keys.push(key2);
             }
           }
           return own_keys;
@@ -2480,8 +2487,8 @@ dep
     if (STATE_SYMBOL in value) {
       deep_read(value);
     } else if (!Array.isArray(value)) {
-      for (let key in value) {
-        const prop2 = value[key];
+      for (let key2 in value) {
+        const prop2 = value[key2];
         if (typeof prop2 === "object" && prop2 && STATE_SYMBOL in prop2) {
           deep_read(prop2);
         }
@@ -2495,17 +2502,17 @@ dep
       if (value instanceof Date) {
         value.getTime();
       }
-      for (let key in value) {
+      for (let key2 in value) {
         try {
-          deep_read(value[key], visited);
+          deep_read(value[key2], visited);
         } catch (e) {
         }
       }
       const proto = get_prototype_of(value);
       if (proto !== Object.prototype && proto !== Array.prototype && proto !== Map.prototype && proto !== Set.prototype && proto !== Date.prototype) {
         const descriptors = get_descriptors(proto);
-        for (let key in descriptors) {
-          const get2 = descriptors[key].get;
+        for (let key2 in descriptors) {
+          const get2 = descriptors[key2].get;
           if (get2) {
             try {
               get2.call(value);
@@ -2812,17 +2819,17 @@ constructor(anchor, transition2 = true) {
 current_batch
       );
       if (!this.#batches.has(batch)) return;
-      var key = (
+      var key2 = (
 this.#batches.get(batch)
       );
-      var onscreen = this.#onscreen.get(key);
+      var onscreen = this.#onscreen.get(key2);
       if (onscreen) {
         resume_effect(onscreen);
       } else {
-        var offscreen = this.#offscreen.get(key);
+        var offscreen = this.#offscreen.get(key2);
         if (offscreen) {
-          this.#onscreen.set(key, offscreen.effect);
-          this.#offscreen.delete(key);
+          this.#onscreen.set(key2, offscreen.effect);
+          this.#offscreen.delete(key2);
           offscreen.fragment.lastChild.remove();
           this.anchor.before(offscreen.fragment);
           onscreen = offscreen.effect;
@@ -2840,7 +2847,7 @@ this.#batches.get(batch)
         }
       }
       for (const [k, effect2] of this.#onscreen) {
-        if (k === key) continue;
+        if (k === key2) continue;
         const on_destroy = () => {
           const keys = Array.from(this.#batches.values());
           if (keys.includes(k)) {
@@ -2870,19 +2877,19 @@ this.#batches.get(batch)
         }
       }
     };
-ensure(key, fn) {
+ensure(key2, fn) {
       var batch = (
 current_batch
       );
-      if (fn && !this.#onscreen.has(key) && !this.#offscreen.has(key)) {
+      if (fn && !this.#onscreen.has(key2) && !this.#offscreen.has(key2)) {
         {
           this.#onscreen.set(
-            key,
+            key2,
             branch(() => fn(this.anchor))
           );
         }
       }
-      this.#batches.set(batch, key);
+      this.#batches.set(batch, key2);
       {
         this.#commit();
       }
@@ -2967,6 +2974,18 @@ UNINITIALIZED
         update_branch(false, null);
       }
     }, flags2);
+  }
+  function key(node, get_key, render_fn) {
+    var branches = new BranchManager(node);
+    var legacy = !is_runes();
+    block(() => {
+      var key2 = get_key();
+      if (legacy && key2 !== null && typeof key2 === "object") {
+        key2 =
+{};
+      }
+      branches.ensure(key2, render_fn);
+    });
   }
   function index(_, i) {
     return i;
@@ -3078,14 +3097,14 @@ get(each_array);
     var matched = [];
     var stashed = [];
     var value;
-    var key;
+    var key2;
     var item;
     var i;
     if (is_animated) {
       for (i = 0; i < length; i += 1) {
         value = array[i];
-        key = get_key(value, i);
-        item = items.get(key);
+        key2 = get_key(value, i);
+        item = items.get(key2);
         if (item !== void 0) {
           item.a?.measure();
           (to_animate ??= new Set()).add(item);
@@ -3094,13 +3113,13 @@ get(each_array);
     }
     for (i = 0; i < length; i += 1) {
       value = array[i];
-      key = get_key(value, i);
-      item = items.get(key);
+      key2 = get_key(value, i);
+      item = items.get(key2);
       if (item === void 0) {
-        var pending = offscreen_items.get(key);
+        var pending = offscreen_items.get(key2);
         if (pending !== void 0) {
-          offscreen_items.delete(key);
-          items.set(key, pending);
+          offscreen_items.delete(key2);
+          items.set(key2, pending);
           var next = prev ? prev.next : current;
           link(state2, prev, pending);
           link(state2, pending, next);
@@ -3116,14 +3135,14 @@ current.e.nodes_start
             prev,
             prev === null ? state2.first : prev.next,
             value,
-            key,
+            key2,
             i,
             render_fn,
             flags2,
             get_collection
           );
         }
-        items.set(key, prev);
+        items.set(key2, prev);
         matched = [];
         stashed = [];
         current = prev.next;
@@ -3173,7 +3192,7 @@ current.e.nodes_start
         }
         matched = [];
         stashed = [];
-        while (current !== null && current.k !== key) {
+        while (current !== null && current.k !== key2) {
           if ((current.e.f & INERT) === 0) {
             (seen ??= new Set()).add(current);
           }
@@ -3239,7 +3258,7 @@ item.i,
       item.i = index2;
     }
   }
-  function create_item(anchor, state2, prev, next, value, key, index2, render_fn, flags2, get_collection, deferred2) {
+  function create_item(anchor, state2, prev, next, value, key2, index2, render_fn, flags2, get_collection, deferred2) {
     var reactive = (flags2 & EACH_ITEM_REACTIVE) !== 0;
     var mutable = (flags2 & EACH_ITEM_IMMUTABLE) === 0;
     var v = reactive ? mutable ? mutable_source(value, false, false) : source(value) : value;
@@ -3247,7 +3266,7 @@ item.i,
     var item = {
       i,
       v,
-      k: key,
+      k: key2,
       a: null,
 e: null,
       prev,
@@ -3409,13 +3428,13 @@ payload.destroy()
       classname = classname ? classname + " " + hash : hash;
     }
     if (directives) {
-      for (var key in directives) {
-        if (directives[key]) {
-          classname = classname ? classname + " " + key : key;
+      for (var key2 in directives) {
+        if (directives[key2]) {
+          classname = classname ? classname + " " + key2 : key2;
         } else if (classname.length) {
-          var len = key.length;
+          var len = key2.length;
           var a = 0;
-          while ((a = classname.indexOf(key, a)) >= 0) {
+          while ((a = classname.indexOf(key2, a)) >= 0) {
             var b = a + len;
             if ((a === 0 || whitespace.includes(classname[a - 1])) && (b === classname.length || whitespace.includes(classname[b]))) {
               classname = (a === 0 ? "" : classname.substring(0, a)) + classname.substring(b + 1);
@@ -3444,10 +3463,10 @@ payload.destroy()
       }
       dom.__className = value;
     } else if (next_classes && prev_classes !== next_classes) {
-      for (var key in next_classes) {
-        var is_present = !!next_classes[key];
-        if (prev_classes == null || is_present !== !!prev_classes[key]) {
-          dom.classList.toggle(key, is_present);
+      for (var key2 in next_classes) {
+        var is_present = !!next_classes[key2];
+        if (prev_classes == null || is_present !== !!prev_classes[key2]) {
+          dom.classList.toggle(key2, is_present);
         }
       }
     }
@@ -3504,9 +3523,9 @@ element.__attributes ??= {
     var element_proto = Element.prototype;
     while (element_proto !== proto) {
       descriptors = get_descriptors(proto);
-      for (var key in descriptors) {
-        if (descriptors[key].set) {
-          setters.push(key);
+      for (var key2 in descriptors) {
+        if (descriptors[key2].set) {
+          setters.push(key2);
         }
       }
       proto = get_prototype_of(proto);
@@ -3892,9 +3911,9 @@ component_context
       const d = derived(() => {
         let changed = false;
         const props2 = context.s;
-        for (const key in props2) {
-          if (props2[key] !== prev[key]) {
-            prev[key] = props2[key];
+        for (const key2 in props2) {
+          if (props2[key2] !== prev[key2]) {
+            prev[key2] = props2[key2];
             changed = true;
           }
         }
@@ -3942,7 +3961,7 @@ component_context
       is_store_binding = previous_is_store_binding;
     }
   }
-  function prop(props, key, flags2, fallback) {
+  function prop(props, key2, flags2, fallback) {
     var runes = !legacy_mode_flag || (flags2 & PROPS_IS_RUNES) !== 0;
     var bindable = (flags2 & PROPS_IS_BINDABLE) !== 0;
     var lazy = (flags2 & PROPS_IS_LAZY_INITIAL) !== 0;
@@ -3964,17 +3983,17 @@ fallback
     var setter;
     if (bindable) {
       var is_entry_props = STATE_SYMBOL in props || LEGACY_PROPS in props;
-      setter = get_descriptor(props, key)?.set ?? (is_entry_props && key in props ? (v) => props[key] = v : void 0);
+      setter = get_descriptor(props, key2)?.set ?? (is_entry_props && key2 in props ? (v) => props[key2] = v : void 0);
     }
     var initial_value;
     var is_store_sub = false;
     if (bindable) {
       [initial_value, is_store_sub] = capture_store_binding(() => (
-props[key]
+props[key2]
       ));
     } else {
       initial_value =
-props[key];
+props[key2];
     }
     if (initial_value === void 0 && fallback !== void 0) {
       initial_value = get_fallback();
@@ -3987,7 +4006,7 @@ props[key];
     if (runes) {
       getter = () => {
         var value = (
-props[key]
+props[key2]
         );
         if (value === void 0) return get_fallback();
         fallback_dirty = true;
@@ -3996,7 +4015,7 @@ props[key]
     } else {
       getter = () => {
         var value = (
-props[key]
+props[key2]
         );
         if (value !== void 0) {
           fallback_value =
@@ -4070,6 +4089,9 @@ context.l
     );
     return l.u ??= { a: [], b: [], m: [] };
   }
+  const API_BASE_URL = "https://learnablemeta.com";
+  const SITE_BASE_URL = "https://learnablemeta.com";
+  const CACHE_NAMESPACE = "";
   const LIVE_CHALLENGE_PATH = /^\/(?:api\/)?live-challenge\/([^/?#]+)\/?$/;
   const PARTY_LOBBY_PATH = /^\/party\/lobby\/[^/?#]+\/?$/;
   let trackedPartyChallenge = null;
@@ -4215,8 +4237,8 @@ context.l
   }
   const MAP_FOUND_CACHE_MS = 24 * 60 * 60 * 1e3;
   const MAP_NOT_FOUND_CACHE_MS = 60 * 60 * 1e3;
-  function getCachedMapInfo(key) {
-    const savedMapInfo = _unsafeWindow.localStorage.getItem(key);
+  function getCachedMapInfo(key2) {
+    const savedMapInfo = _unsafeWindow.localStorage.getItem(key2);
     if (!savedMapInfo) {
       return null;
     }
@@ -4230,7 +4252,7 @@ context.l
     return null;
   }
   async function getMapInfo(geoguessrId, forceUpdate) {
-    const localStorageMapInfoKey = `geometa:map-info:${geoguessrId}`;
+    const localStorageMapInfoKey = `geometa:map-info${CACHE_NAMESPACE}:${geoguessrId}`;
     const cached = getCachedMapInfo(localStorageMapInfoKey);
     if (!forceUpdate && cached) {
       const ttl = cached.mapInfo.mapFound ? MAP_FOUND_CACHE_MS : MAP_NOT_FOUND_CACHE_MS;
@@ -4239,7 +4261,7 @@ context.l
         return cached.mapInfo;
       }
     }
-    const url = `https://learnablemeta.com/api/userscript/map/${geoguessrId}`;
+    const url = `${API_BASE_URL}/api/userscript/map/${geoguessrId}`;
     let mapInfo;
     try {
       mapInfo = await fetchMapInfo(url);
@@ -4252,11 +4274,14 @@ context.l
     }
     const toCache = { mapInfo, fetchedAt: Date.now() };
     _unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(toCache));
-    _unsafeWindow.localStorage.setItem("geometa:latest-version", mapInfo.userscriptVersion);
+    _unsafeWindow.localStorage.setItem(
+      `geometa:latest-version${CACHE_NAMESPACE}`,
+      mapInfo.userscriptVersion
+    );
     return mapInfo;
   }
   function getLatestVersionInfo() {
-    return _unsafeWindow.localStorage.getItem("geometa:latest-version");
+    return _unsafeWindow.localStorage.getItem(`geometa:latest-version${CACHE_NAMESPACE}`);
   }
   function isNewerVersion(candidate, current) {
     const a = candidate.split(".").map(Number);
@@ -4548,8 +4573,8 @@ context.l
   const topKey = "geometa:containerStyleTop";
   let isDragging = false;
   let dragOffset = { x: 0, y: 0 };
-  function getSavedPosition(key) {
-    const value = localStorage.getItem(key);
+  function getSavedPosition(key2) {
+    const value = localStorage.getItem(key2);
     if (value && value.startsWith("-")) {
       return null;
     }
@@ -4745,9 +4770,9 @@ context.l
     pop();
   }
   delegate(["mousemove", "click"]);
-  const ANNOUNCEMENT_CACHE_KEY = "geometa:cached-announcement";
+  const ANNOUNCEMENT_CACHE_KEY = `geometa:cached-announcement${CACHE_NAMESPACE}`;
   const ANNOUNCEMENT_CACHE_DURATION_MS = 60 * 60 * 1e3;
-  const ANNOUNCEMENT_API_URL = "https://learnablemeta.com/api/userscript/announcement/";
+  const ANNOUNCEMENT_API_URL = `${API_BASE_URL}/api/userscript/announcement/`;
   async function getAnnouncement() {
     try {
       const cachedItemString = localStorage.getItem(ANNOUNCEMENT_CACHE_KEY);
@@ -4815,7 +4840,7 @@ context.l
       });
     });
   }
-  const LAST_DISMISSED_ANNOUNCEMENT_TIMESTAMP_KEY = "geometa:last-dismissed-announcement";
+  const LAST_DISMISSED_ANNOUNCEMENT_TIMESTAMP_KEY = `geometa:last-dismissed-announcement${CACHE_NAMESPACE}`;
   function getLastDismissedAnnouncementTimestamp() {
     try {
       const storedValue = localStorage.getItem(LAST_DISMISSED_ANNOUNCEMENT_TIMESTAMP_KEY);
@@ -4943,8 +4968,8 @@ context.l
   }
   function mapFromReact(element) {
     if (!element) return null;
-    const key = Object.keys(element).find((name) => name.startsWith("__reactFiber"));
-    const fiber = key ? element[key] : null;
+    const key2 = Object.keys(element).find((name) => name.startsWith("__reactFiber"));
+    const fiber = key2 ? element[key2] : null;
     const map = fiber?.return?.memoizedState?.memoizedState?.current?.instance ?? fiber?.return?.updateQueue?.lastEffect?.deps?.[0];
     return map && typeof map.fitBounds === "function" && typeof map.getBounds === "function" && typeof map.getDiv === "function" ? map : null;
   }
@@ -5115,37 +5140,43 @@ context.l
       }
     }
   }
+  const STORAGE_KEY = "learnableMeta_geoJsonEnabled";
+  function isGeoJsonEnabled() {
+    return _GM_getValue(STORAGE_KEY, true);
+  }
+  function setGeoJsonEnabled(enabled) {
+    _GM_setValue(STORAGE_KEY, enabled);
+  }
   var root_2$2 = from_html(`<div class="announcement svelte-1j2rmt2"><div class="svelte-1j2rmt2"><!></div> <button class="vote-close-btn svelte-1j2rmt2" aria-label="Dismiss announcement">Dismiss</button></div>`);
   var root_3$1 = from_html(`<p class="svelte-1j2rmt2"> </p>`);
-  var root_6$2 = from_html(`<p class="geometa-footer svelte-1j2rmt2"><!></p>`);
-  var root_7 = from_html(`<hr class="svelte-1j2rmt2"/> <!>`, 1);
-  var root_5$2 = from_html(`<p class="svelte-1j2rmt2"><!> <strong class="svelte-1j2rmt2"> </strong> </p> <div class="geometa-note svelte-1j2rmt2"><!></div> <!> <!>`, 1);
-  var root_9 = from_html(`<div class="learnablemeta-modal-backdrop learnablemeta-ui svelte-1j2rmt2" role="presentation"><div class="learnablemeta-modal svelte-1j2rmt2" role="dialog" aria-modal="true" aria-labelledby="external-link-title"><div class="learnablemeta-modal-header svelte-1j2rmt2"><p class="learnablemeta-modal-eyebrow svelte-1j2rmt2">LearnableMeta</p> <h2 class="learnablemeta-modal-title svelte-1j2rmt2" id="external-link-title">Open external link?</h2> <p class="learnablemeta-modal-description svelte-1j2rmt2">This link will open in a new browser tab.</p></div> <div class="learnablemeta-modal-body svelte-1j2rmt2"><p class="learnablemeta-modal-code svelte-1j2rmt2"> </p></div> <div class="learnablemeta-modal-actions svelte-1j2rmt2"><button type="button" data-modal-initial-focus="" class="learnablemeta-button learnablemeta-button--outline svelte-1j2rmt2">Cancel</button> <button type="button" class="learnablemeta-button learnablemeta-button--primary svelte-1j2rmt2">Continue</button></div></div></div>`);
-  var root_11$1 = from_html(`<p class="learnablemeta-modal-alert svelte-1j2rmt2"> </p>`);
-  var root_10$1 = from_html(`<div class="learnablemeta-modal-backdrop learnablemeta-ui svelte-1j2rmt2" role="presentation"><div class="learnablemeta-modal learnablemeta-modal--wide svelte-1j2rmt2" role="dialog" aria-modal="true" aria-labelledby="learnablemeta-help-title"><div class="learnablemeta-modal-header svelte-1j2rmt2"><p class="learnablemeta-modal-eyebrow svelte-1j2rmt2">LearnableMeta</p> <h2 class="learnablemeta-modal-title svelte-1j2rmt2" id="learnablemeta-help-title">Userscript guide</h2> <p class="learnablemeta-modal-description svelte-1j2rmt2">Quick tips for using LearnableMeta while you play.</p></div> <div class="learnablemeta-modal-body svelte-1j2rmt2"><!> <ul class="learnablemeta-help-list svelte-1j2rmt2"><li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Drag to move:</strong> Click and drag the top of the note to reposition it anywhere
+  var root_7 = from_html(`<button type="button" role="tab"> </button>`);
+  var root_6$2 = from_html(`<div class="meta-tabs svelte-1j2rmt2" role="tablist" aria-label="Metas at this location"></div>`);
+  var root_8$1 = from_html(`<p class="svelte-1j2rmt2"> </p>`);
+  var root_11$1 = from_html(`<p class="geometa-footer svelte-1j2rmt2"><!></p>`);
+  var root_12$1 = from_html(`<hr class="svelte-1j2rmt2"/> <!>`, 1);
+  var root_10$1 = from_html(`<p class="svelte-1j2rmt2"><!> <strong class="svelte-1j2rmt2"> </strong> </p> <div class="geometa-note svelte-1j2rmt2"><!></div> <!> <!>`, 1);
+  var root_5$2 = from_html(`<!> <div class="meta-panel svelte-1j2rmt2"><!></div>`, 1);
+  var root_16$1 = from_html(`<div class="learnablemeta-modal-backdrop learnablemeta-ui svelte-1j2rmt2" role="presentation"><div class="learnablemeta-modal svelte-1j2rmt2" role="dialog" aria-modal="true" aria-labelledby="external-link-title"><div class="learnablemeta-modal-header svelte-1j2rmt2"><p class="learnablemeta-modal-eyebrow svelte-1j2rmt2">LearnableMeta</p> <h2 class="learnablemeta-modal-title svelte-1j2rmt2" id="external-link-title">Open external link?</h2> <p class="learnablemeta-modal-description svelte-1j2rmt2">This link will open in a new browser tab.</p></div> <div class="learnablemeta-modal-body svelte-1j2rmt2"><p class="learnablemeta-modal-code svelte-1j2rmt2"> </p></div> <div class="learnablemeta-modal-actions svelte-1j2rmt2"><button type="button" data-modal-initial-focus="" class="learnablemeta-button learnablemeta-button--outline svelte-1j2rmt2">Cancel</button> <button type="button" class="learnablemeta-button learnablemeta-button--primary svelte-1j2rmt2">Continue</button></div></div></div>`);
+  var root_18$1 = from_html(`<p class="learnablemeta-modal-alert svelte-1j2rmt2"> </p>`);
+  var root_17$1 = from_html(`<div class="learnablemeta-modal-backdrop learnablemeta-ui svelte-1j2rmt2" role="presentation"><div class="learnablemeta-modal learnablemeta-modal--wide svelte-1j2rmt2" role="dialog" aria-modal="true" aria-labelledby="learnablemeta-help-title"><div class="learnablemeta-modal-header svelte-1j2rmt2"><p class="learnablemeta-modal-eyebrow svelte-1j2rmt2">LearnableMeta</p> <h2 class="learnablemeta-modal-title svelte-1j2rmt2" id="learnablemeta-help-title">Userscript guide</h2> <p class="learnablemeta-modal-description svelte-1j2rmt2">Quick tips for using LearnableMeta while you play.</p></div> <div class="learnablemeta-modal-body svelte-1j2rmt2"><!> <ul class="learnablemeta-help-list svelte-1j2rmt2"><li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Drag to move:</strong> Click and drag the top of the note to reposition it anywhere
               on your screen.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Resize:</strong> Use the bottom-right corner to resize the note to your liking.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">View map meta list:</strong> Click the list icon to see all the metas included
               in the map you are currently playing.</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Join the community:</strong> Click the Discord icon to share feedback, suggest
               improvements, or just say hi!</li> <li class="svelte-1j2rmt2"><strong class="svelte-1j2rmt2">Outdated script:</strong> The question mark icon blinks when an update is available.</li></ul></div> <div class="learnablemeta-modal-actions svelte-1j2rmt2"><button type="button" class="learnablemeta-button learnablemeta-button--primary svelte-1j2rmt2">Close</button></div></div></div>`);
-  var root$5 = from_html(`<div class="geometa-container svelte-1j2rmt2"><!> <div class="flex header svelte-1j2rmt2"><h2 class="svelte-1j2rmt2">Learnable Meta</h2> <div class="icons svelte-1j2rmt2"><a target="_blank" aria-label="List of map metas" class="svelte-1j2rmt2"><span class="skill-icons--list svelte-1j2rmt2"></span></a> <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-1j2rmt2"><span class="flat-color-icons--globe svelte-1j2rmt2"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-1j2rmt2"><span class="skill-icons--discord svelte-1j2rmt2"></span></a> <button class="help-toggle-button svelte-1j2rmt2" aria-label="More information"><span></span></button></div></div> <!> <!> <!></div>`);
+  var root$5 = from_html(`<div class="geometa-container svelte-1j2rmt2"><!> <div class="flex header svelte-1j2rmt2"><h2 class="svelte-1j2rmt2">Learnable Meta</h2> <div class="icons svelte-1j2rmt2"><a target="_blank" aria-label="List of map metas" class="svelte-1j2rmt2"><span class="skill-icons--list svelte-1j2rmt2"></span></a> <a target="_blank" aria-label="Learnable Meta website" class="svelte-1j2rmt2"><span class="flat-color-icons--globe svelte-1j2rmt2"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-1j2rmt2"><span class="skill-icons--discord svelte-1j2rmt2"></span></a> <button class="help-toggle-button svelte-1j2rmt2" aria-label="More information"><span></span></button></div></div> <!> <!> <!></div>`);
   function App($$anchor, $$props) {
     push($$props, true);
-    let geoInfo = state(null);
+    let metas = state(proxy([]));
+    let metaDetails = state(proxy([]));
     let error = state(null);
-    let container;
-    let header;
-    onMount(() => {
-      const cacheKey = `${$$props.mapId}_${$$props.panoId}`;
-      const cachedData = window.geometaMetaCache?.get(cacheKey);
-      if (cachedData) {
-        set(geoInfo, cachedData, true);
-      } else {
-        const urlParams = new URLSearchParams({
-          panoId: $$props.panoId,
-          mapId: $$props.mapId,
-          userscriptVersion: $$props.userscriptVersion,
-          source: $$props.source
-        }).toString();
-        const url = `https://learnablemeta.com/api/userscript/location?${urlParams}`;
+    let detailError = state(null);
+    let selectedMetaIndex = state(0);
+    const selectedMeta = user_derived(() => get(metaDetails)[get(selectedMetaIndex)] ?? null);
+    const tabIdPrefix = `geometa-${crypto.randomUUID()}`;
+    const cacheKey = `${CACHE_NAMESPACE}:${$$props.mapId}_${$$props.panoId}`;
+    const geoJsonEnabled2 = isGeoJsonEnabled();
+    const loadingMetaIds = new Set();
+    function requestJson2(url) {
+      return new Promise((resolve, reject) => {
         _GM_xmlhttpRequest({
           method: "GET",
           url,
@@ -5153,28 +5184,93 @@ context.l
           onload: (response) => {
             if (response.status === 200) {
               try {
-                const data = JSON.parse(response.responseText);
-                set(geoInfo, data, true);
-                if (!window.geometaMetaCache) {
-                  window.geometaMetaCache = new Map();
-                }
-                window.geometaMetaCache.set(cacheKey, data);
-              } catch (e) {
-                set(error, "Failed to parse response");
+                resolve(JSON.parse(response.responseText));
+              } catch {
+                reject(new Error("Failed to parse response"));
               }
             } else if (response.status === 404) {
-              set(error, "Meta for this location not found");
+              reject(new Error("Meta for this location not found"));
             } else {
-              set(error, `HTTP error! status: ${response.status}`);
+              reject(new Error(`HTTP error! status: ${response.status}`));
             }
           },
-          onerror: (e) => {
-            set(error, "An error occurred while fetching data");
-            console.error("Error:", e);
+          onerror: (event2) => {
+            console.error("Error:", event2);
+            reject(new Error("An error occurred while fetching data"));
           },
-          ontimeout: () => {
-            set(error, "The request timed out - please try again");
-          }
+          ontimeout: () => reject(new Error("The request timed out - please try again"))
+        });
+      });
+    }
+    function setInitialMeta(data) {
+      const { metas: summaries, ...primary } = data;
+      set(metas, summaries ?? [{ id: primary.id, metaName: primary.metaName }], true);
+      set(metaDetails, get(metas).map((_, index2) => index2 === 0 ? primary : null), true);
+    }
+    async function loadMeta(index2) {
+      const summary = get(metas)[index2];
+      if (!summary || get(metaDetails)[index2] || loadingMetaIds.has(summary.id)) return;
+      const detailCacheKey = `${cacheKey}_${summary.id}`;
+      const cached = window.geometaMetaCache?.get(detailCacheKey);
+      if (cached) {
+        get(metaDetails)[index2] = cached;
+        return;
+      }
+      loadingMetaIds.add(summary.id);
+      try {
+        const query = new URLSearchParams({
+          panoId: $$props.panoId,
+          mapId: $$props.mapId,
+          includeGeoJson: String(geoJsonEnabled2)
+        }).toString();
+        const data = await requestJson2(`${API_BASE_URL}/api/userscript/location/meta/${summary.id}?${query}`);
+        get(metaDetails)[index2] = data;
+        (window.geometaMetaCache ??= new Map()).set(detailCacheKey, data);
+      } catch (cause) {
+        if (get(selectedMetaIndex) === index2) {
+          set(detailError, cause instanceof Error ? cause.message : String(cause), true);
+        }
+      } finally {
+        loadingMetaIds.delete(summary.id);
+      }
+    }
+    function selectMeta(index2) {
+      set(selectedMetaIndex, index2, true);
+      set(detailError, null);
+      void loadMeta(index2);
+    }
+    function onTabKeydown(event2) {
+      const last = get(metas).length - 1;
+      let next = null;
+      if (event2.key === "ArrowRight") next = get(selectedMetaIndex) >= last ? 0 : get(selectedMetaIndex) + 1;
+      else if (event2.key === "ArrowLeft") next = get(selectedMetaIndex) <= 0 ? last : get(selectedMetaIndex) - 1;
+      else if (event2.key === "Home") next = 0;
+      else if (event2.key === "End") next = last;
+      if (next === null) return;
+      event2.preventDefault();
+      selectMeta(next);
+      document.getElementById(`${tabIdPrefix}-tab-${next}`)?.focus();
+    }
+    let container;
+    let header;
+    onMount(() => {
+      const cachedData = window.geometaMetaCache?.get(cacheKey);
+      if (cachedData) {
+        setInitialMeta(cachedData);
+      } else {
+        const urlParams = new URLSearchParams({
+          panoId: $$props.panoId,
+          mapId: $$props.mapId,
+          userscriptVersion: $$props.userscriptVersion,
+          source: $$props.source,
+          includeGeoJson: String(geoJsonEnabled2)
+        }).toString();
+        const url = `${API_BASE_URL}/api/userscript/location?${urlParams}`;
+        requestJson2(url).then((data) => {
+          setInitialMeta(data);
+          (window.geometaMetaCache ??= new Map()).set(cacheKey, data);
+        }).catch((cause) => {
+          set(error, cause instanceof Error ? cause.message : String(cause), true);
         });
       }
       setContainerPosition(container);
@@ -5229,7 +5325,7 @@ context.l
     }
     updateHelpClass();
     user_effect(() => {
-      if (get(geoInfo)) {
+      if (get(selectedMeta)) {
         const links = document.querySelectorAll(".geometa-footer a, .geometa-note a");
         links.forEach((link2) => {
           link2.removeEventListener("click", confirmNavigation);
@@ -5238,7 +5334,7 @@ context.l
       }
     });
     user_effect(() => {
-      if (get(geoInfo)?.geoJson) showMapArea(get(geoInfo).geoJson);
+      if (geoJsonEnabled2 && get(selectedMeta)?.geoJson) showMapArea(get(selectedMeta).geoJson);
       else clearMapArea();
       return clearMapArea;
     });
@@ -5270,7 +5366,8 @@ context.l
     var div_3 = sibling(node, 2);
     var div_4 = sibling(child(div_3), 2);
     var a = child(div_4);
-    var button_1 = sibling(a, 6);
+    var a_1 = sibling(a, 2);
+    var button_1 = sibling(a_1, 4);
     button_1.__click = togglePopup;
     var span = child(button_1);
     bind_this(div_3, ($$value) => header = $$value, () => header);
@@ -5282,67 +5379,137 @@ context.l
         template_effect(() => set_text(text, `Error: ${get(error) ?? ""}`));
         append($$anchor2, p);
       };
-      var alternate_1 = ($$anchor2) => {
+      var alternate_3 = ($$anchor2) => {
         var fragment_1 = comment();
         var node_4 = first_child(fragment_1);
         {
-          var consequent_4 = ($$anchor3) => {
+          var consequent_7 = ($$anchor3) => {
             var fragment_2 = root_5$2();
-            var p_1 = first_child(fragment_2);
-            var node_5 = child(p_1);
-            CountryFlag(node_5, {
-              get countryName() {
-                return get(geoInfo).country;
-              }
-            });
-            var strong = sibling(node_5, 2);
-            var text_1 = child(strong);
-            var text_2 = sibling(strong);
-            var div_5 = sibling(p_1, 2);
-            var node_6 = child(div_5);
-            html(node_6, () => get(geoInfo).note);
-            var node_7 = sibling(div_5, 2);
+            var node_5 = first_child(fragment_2);
             {
               var consequent_2 = ($$anchor4) => {
-                var p_2 = root_6$2();
-                var node_8 = child(p_2);
-                html(node_8, () => get(geoInfo).footer);
-                append($$anchor4, p_2);
+                var div_5 = root_6$2();
+                each(div_5, 23, () => get(metas), (meta) => meta.id, ($$anchor5, meta, index2) => {
+                  var button_2 = root_7();
+                  let classes;
+                  button_2.__keydown = onTabKeydown;
+                  button_2.__click = () => selectMeta(get(index2));
+                  var text_1 = child(button_2);
+                  template_effect(() => {
+                    set_attribute(button_2, "id", `${tabIdPrefix}-tab-${get(index2)}`);
+                    set_attribute(button_2, "aria-controls", `${tabIdPrefix}-panel`);
+                    classes = set_class(button_2, 1, "meta-tab svelte-1j2rmt2", null, classes, { active: get(index2) === get(selectedMetaIndex) });
+                    set_attribute(button_2, "aria-selected", get(index2) === get(selectedMetaIndex));
+                    set_attribute(button_2, "tabindex", get(index2) === get(selectedMetaIndex) ? 0 : -1);
+                    set_text(text_1, get(meta).metaName);
+                  });
+                  append($$anchor5, button_2);
+                });
+                append($$anchor4, div_5);
               };
-              if_block(node_7, ($$render) => {
-                if (get(geoInfo).footer) $$render(consequent_2);
+              if_block(node_5, ($$render) => {
+                if (get(metas).length > 1) $$render(consequent_2);
               });
             }
-            var node_9 = sibling(node_7, 2);
+            var div_6 = sibling(node_5, 2);
+            var node_6 = child(div_6);
             {
               var consequent_3 = ($$anchor4) => {
-                var fragment_3 = root_7();
-                var node_10 = sibling(first_child(fragment_3), 2);
-                Carousel(node_10, {
-                  get images() {
-                    return get(geoInfo).images;
-                  }
-                });
+                var p_1 = root_8$1();
+                var text_2 = child(p_1);
+                template_effect(() => set_text(text_2, `Error: ${get(detailError) ?? ""}`));
+                append($$anchor4, p_1);
+              };
+              var alternate_1 = ($$anchor4) => {
+                var fragment_3 = comment();
+                var node_7 = first_child(fragment_3);
+                {
+                  var consequent_6 = ($$anchor5) => {
+                    var fragment_4 = root_10$1();
+                    var p_2 = first_child(fragment_4);
+                    var node_8 = child(p_2);
+                    CountryFlag(node_8, {
+                      get countryName() {
+                        return get(selectedMeta).country;
+                      }
+                    });
+                    var strong = sibling(node_8, 2);
+                    var text_3 = child(strong);
+                    var text_4 = sibling(strong);
+                    var div_7 = sibling(p_2, 2);
+                    var node_9 = child(div_7);
+                    html(node_9, () => get(selectedMeta).note);
+                    var node_10 = sibling(div_7, 2);
+                    {
+                      var consequent_4 = ($$anchor6) => {
+                        var p_3 = root_11$1();
+                        var node_11 = child(p_3);
+                        html(node_11, () => get(selectedMeta).footer);
+                        append($$anchor6, p_3);
+                      };
+                      if_block(node_10, ($$render) => {
+                        if (get(selectedMeta).footer) $$render(consequent_4);
+                      });
+                    }
+                    var node_12 = sibling(node_10, 2);
+                    {
+                      var consequent_5 = ($$anchor6) => {
+                        var fragment_5 = root_12$1();
+                        var node_13 = sibling(first_child(fragment_5), 2);
+                        key(node_13, () => get(selectedMeta).id, ($$anchor7) => {
+                          Carousel($$anchor7, {
+                            get images() {
+                              return get(selectedMeta).images;
+                            }
+                          });
+                        });
+                        append($$anchor6, fragment_5);
+                      };
+                      if_block(node_12, ($$render) => {
+                        if (get(selectedMeta).images && get(selectedMeta).images.length) $$render(consequent_5);
+                      });
+                    }
+                    template_effect(() => {
+                      set_text(text_3, get(selectedMeta).country);
+                      set_text(text_4, ` - ${get(selectedMeta).metaName ?? ""}`);
+                    });
+                    append($$anchor5, fragment_4);
+                  };
+                  var alternate = ($$anchor5) => {
+                    Spinner($$anchor5);
+                  };
+                  if_block(
+                    node_7,
+                    ($$render) => {
+                      if (get(selectedMeta)) $$render(consequent_6);
+                      else $$render(alternate, false);
+                    },
+                    true
+                  );
+                }
                 append($$anchor4, fragment_3);
               };
-              if_block(node_9, ($$render) => {
-                if (get(geoInfo).images && get(geoInfo).images.length) $$render(consequent_3);
+              if_block(node_6, ($$render) => {
+                if (get(detailError)) $$render(consequent_3);
+                else $$render(alternate_1, false);
               });
             }
             template_effect(() => {
-              set_text(text_1, get(geoInfo).country);
-              set_text(text_2, ` - ${get(geoInfo).metaName ?? ""}`);
+              set_attribute(div_6, "id", `${tabIdPrefix}-panel`);
+              set_attribute(div_6, "role", get(metas).length > 1 ? "tabpanel" : void 0);
+              set_attribute(div_6, "aria-labelledby", get(metas).length > 1 ? `${tabIdPrefix}-tab-${get(selectedMetaIndex)}` : void 0);
+              set_attribute(div_6, "aria-busy", !get(selectedMeta) && !get(detailError));
             });
             append($$anchor3, fragment_2);
           };
-          var alternate = ($$anchor3) => {
+          var alternate_2 = ($$anchor3) => {
             Spinner($$anchor3);
           };
           if_block(
             node_4,
             ($$render) => {
-              if (get(geoInfo)) $$render(consequent_4);
-              else $$render(alternate, false);
+              if (get(metas).length) $$render(consequent_7);
+              else $$render(alternate_2, false);
             },
             true
           );
@@ -5351,67 +5518,68 @@ context.l
       };
       if_block(node_3, ($$render) => {
         if (get(error)) $$render(consequent_1);
-        else $$render(alternate_1, false);
+        else $$render(alternate_3, false);
       });
     }
-    var node_11 = sibling(node_3, 2);
+    var node_14 = sibling(node_3, 2);
     {
-      var consequent_5 = ($$anchor2) => {
-        var div_6 = root_9();
-        var div_7 = child(div_6);
-        var div_8 = sibling(child(div_7), 2);
-        var p_3 = child(div_8);
-        var text_3 = child(p_3);
-        var div_9 = sibling(div_8, 2);
-        var button_2 = child(div_9);
-        button_2.__click = cancel;
-        var button_3 = sibling(button_2, 2);
-        button_3.__click = proceed;
-        action(div_7, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({ onClose: cancel }));
-        template_effect(() => set_text(text_3, get(currentUrl)));
-        append($$anchor2, div_6);
+      var consequent_8 = ($$anchor2) => {
+        var div_8 = root_16$1();
+        var div_9 = child(div_8);
+        var div_10 = sibling(child(div_9), 2);
+        var p_4 = child(div_10);
+        var text_5 = child(p_4);
+        var div_11 = sibling(div_10, 2);
+        var button_3 = child(div_11);
+        button_3.__click = cancel;
+        var button_4 = sibling(button_3, 2);
+        button_4.__click = proceed;
+        action(div_9, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({ onClose: cancel }));
+        template_effect(() => set_text(text_5, get(currentUrl)));
+        append($$anchor2, div_8);
       };
-      if_block(node_11, ($$render) => {
-        if (get(showModal)) $$render(consequent_5);
+      if_block(node_14, ($$render) => {
+        if (get(showModal)) $$render(consequent_8);
       });
     }
-    var node_12 = sibling(node_11, 2);
+    var node_15 = sibling(node_14, 2);
     {
-      var consequent_7 = ($$anchor2) => {
-        var div_10 = root_10$1();
-        var div_11 = child(div_10);
-        var div_12 = sibling(child(div_11), 2);
-        var node_13 = child(div_12);
+      var consequent_10 = ($$anchor2) => {
+        var div_12 = root_17$1();
+        var div_13 = child(div_12);
+        var div_14 = sibling(child(div_13), 2);
+        var node_16 = child(div_14);
         {
-          var consequent_6 = ($$anchor3) => {
-            var p_4 = root_11$1();
-            var text_4 = child(p_4);
-            template_effect(($0) => set_text(text_4, `Your userscript is out of date. Install the latest version (${$0 ?? ""}).`), [getLatestVersionInfo]);
-            append($$anchor3, p_4);
+          var consequent_9 = ($$anchor3) => {
+            var p_5 = root_18$1();
+            var text_6 = child(p_5);
+            template_effect(($0) => set_text(text_6, `Your userscript is out of date. Install the latest version (${$0 ?? ""}).`), [getLatestVersionInfo]);
+            append($$anchor3, p_5);
           };
-          if_block(node_13, ($$render) => {
-            if (checkIfOutdated()) $$render(consequent_6);
+          if_block(node_16, ($$render) => {
+            if (checkIfOutdated()) $$render(consequent_9);
           });
         }
-        var div_13 = sibling(div_12, 2);
-        var button_4 = child(div_13);
-        button_4.__click = togglePopup;
-        action(div_11, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({ onClose: togglePopup }));
-        append($$anchor2, div_10);
+        var div_15 = sibling(div_14, 2);
+        var button_5 = child(div_15);
+        button_5.__click = togglePopup;
+        action(div_13, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({ onClose: togglePopup }));
+        append($$anchor2, div_12);
       };
-      if_block(node_12, ($$render) => {
-        if (get(showHelpPopup)) $$render(consequent_7);
+      if_block(node_15, ($$render) => {
+        if (get(showHelpPopup)) $$render(consequent_10);
       });
     }
     bind_this(div, ($$value) => container = $$value, () => container);
     template_effect(() => {
-      set_attribute(a, "href", "https://learnablemeta.com/maps/" + $$props.mapId);
+      set_attribute(a, "href", `${SITE_BASE_URL}/maps/${$$props.mapId}`);
+      set_attribute(a_1, "href", SITE_BASE_URL);
       set_class(span, 1, clsx(get(helpClass)), "svelte-1j2rmt2");
     });
     append($$anchor, div);
     pop();
   }
-  delegate(["click"]);
+  delegate(["click", "keydown"]);
   let currentApp = null;
   function unmountSummaryWindow() {
     if (currentApp) {
@@ -5660,11 +5828,11 @@ roundNumber: 4,
       return result;
     };
   }
-  var root$4 = from_html(`<div class="geometa-map-label-container svelte-1y99qco"><p class="svelte-1y99qco">LearnableMeta Enabled</p> <a target="_blank"><button class="svelte-1y99qco">Meta List</button></a></div>`);
+  var root$4 = from_html(`<div class="geometa-map-label-container svelte-1y99qco"><p class="svelte-1y99qco">LearnableMeta Enabled</p> <a target="_blank" class="svelte-1y99qco">Meta List</a></div>`);
   function MapLabel($$anchor, $$props) {
     var div = root$4();
     var a = sibling(child(div), 2);
-    template_effect(() => set_attribute(a, "href", `https://learnablemeta.com/maps/${$$props.mapId}`));
+    template_effect(() => set_attribute(a, "href", `${SITE_BASE_URL}/maps/${$$props.mapId}`));
     append($$anchor, div);
   }
   function initMapLabel() {
@@ -5754,14 +5922,11 @@ roundNumber: 4,
     });
   }
   function fetchMapGroupManifest(groupId, apiToken) {
-    return requestJson(
-      `https://learnablemeta.com/api/userscript/map-group/${groupId}/maps`,
-      apiToken
-    );
+    return requestJson(`${API_BASE_URL}/api/userscript/map-group/${groupId}/maps`, apiToken);
   }
   async function fetchAccessibleMapGroups(apiToken) {
     const data = await requestJson(
-      "https://learnablemeta.com/api/userscript/map-groups",
+      `${API_BASE_URL}/api/userscript/map-groups`,
       apiToken
     );
     if (!Array.isArray(data.groups)) {
@@ -5772,7 +5937,7 @@ roundNumber: 4,
   async function fetchSyncedMapLocations(geoguessrId, apiToken, expectedFingerprint) {
     const query = expectedFingerprint ? `?expectedFingerprint=${encodeURIComponent(expectedFingerprint)}` : "";
     const data = await requestJson(
-      `https://learnablemeta.com/api/userscript/map/${geoguessrId}/locations${query}`,
+      `${API_BASE_URL}/api/userscript/map/${geoguessrId}/locations${query}`,
       apiToken
     );
     if (!Array.isArray(data.customCoordinates)) {
@@ -5931,13 +6096,13 @@ roundNumber: 4,
   }
   delegate(["click"]);
   const API_KEY_STORAGE_NAME = "learnableMeta_apiKey";
-  const URL_TO_GENERATE_TOKEN = "https://learnablemeta.com/profile/token";
+  const URL_TO_GENERATE_TOKEN = `${SITE_BASE_URL}/profile/token`;
   function getApiKey() {
-    const key = _GM_getValue(API_KEY_STORAGE_NAME, null);
-    return key?.trim() || null;
+    const key2 = _GM_getValue(API_KEY_STORAGE_NAME, null);
+    return key2?.trim() || null;
   }
-  function saveApiKey(key) {
-    _GM_setValue(API_KEY_STORAGE_NAME, key.trim());
+  function saveApiKey(key2) {
+    _GM_setValue(API_KEY_STORAGE_NAME, key2.trim());
   }
   function clearApiKey() {
     _GM_setValue(API_KEY_STORAGE_NAME, "");
@@ -5995,9 +6160,9 @@ roundNumber: 4,
         return null;
       }
     }
-    function saveApiKeyToGM(key) {
+    function saveApiKeyToGM(key2) {
       try {
-        saveApiKey(key);
+        saveApiKey(key2);
       } catch (e) {
         console.warn("GM_setValue is not available. API key functionality might be limited.", e);
         showCustomToast("Userscript storage (GM_setValue) is not available. Please ensure Tampermonkey/Violentmonkey is correctly configured.", "error", 0);
@@ -6983,7 +7148,8 @@ roundNumber: 4,
   const modalsCss = '.learnablemeta-modal-backdrop{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;box-sizing:border-box;padding:24px;background:#000000c2;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}.learnablemeta-modal,.learnablemeta-modal *{box-sizing:border-box}.learnablemeta-modal{position:relative;width:min(460px,100%);max-height:calc(100vh - 48px);overflow-y:auto;border:1px solid var(--lm-border);border-radius:calc(var(--lm-radius) + 4px);background:var(--lm-background);color:var(--lm-foreground);box-shadow:0 24px 70px #00000080;text-align:left}.learnablemeta-modal--wide{width:min(600px,100%)}.learnablemeta-modal--map-update{width:min(780px,100%);max-height:min(760px,calc(100vh - 48px));display:flex;flex-direction:column;overflow:hidden}.learnablemeta-modal:before{position:absolute;inset:0 0 auto;height:4px;background:linear-gradient(90deg,#057a55,#0b87c1);content:""}.learnablemeta-modal-header{display:grid;gap:6px;padding:26px 24px 0}.learnablemeta-modal-header--row{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding:26px 24px 20px;border-bottom:1px solid var(--lm-border);background:var(--lm-card)}.learnablemeta-modal-eyebrow{margin:0;color:var(--lm-primary);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}.learnablemeta-modal-title{margin:0;color:var(--lm-foreground);font-size:20px;font-weight:650;line-height:1.3;letter-spacing:-.025em}.learnablemeta-modal-title--large{margin-top:4px;color:var(--lm-card-foreground);font-size:22px;line-height:1.25}.learnablemeta-modal-description{margin:0;color:var(--lm-muted-foreground);font-size:14px;line-height:1.5}.learnablemeta-modal-body{display:grid;gap:14px;padding:20px 24px 0;color:var(--lm-foreground);font-size:14px;line-height:1.5}.learnablemeta-modal-body p{margin:0}.learnablemeta-modal-body a{color:var(--lm-link);text-decoration:underline;text-underline-offset:3px}.learnablemeta-modal-input{width:100%;height:38px;border:1px solid var(--lm-input);border-radius:var(--lm-radius);padding:7px 12px;outline:none;background:var(--lm-background);color:var(--lm-foreground);font:inherit;font-size:14px;box-shadow:0 1px 2px #0000000a;transition:border-color .15s ease,box-shadow .15s ease}.learnablemeta-modal-input::placeholder{color:var(--lm-muted-foreground)}.learnablemeta-modal-input:focus-visible{border-color:var(--lm-ring);box-shadow:0 0 0 3px color-mix(in srgb,var(--lm-ring) 25%,transparent)}.learnablemeta-modal-code{overflow-wrap:anywhere;border:1px solid var(--lm-border);border-radius:var(--lm-radius);padding:10px 12px;background:var(--lm-muted);color:var(--lm-link);font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;font-size:12px;line-height:1.45;-webkit-user-select:text;user-select:text}.learnablemeta-modal-note{color:var(--lm-muted-foreground);font-size:12px;line-height:1.45}.learnablemeta-modal-actions{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:20px;padding:16px 24px;border-top:1px solid var(--lm-border);background:var(--lm-card)}.learnablemeta-modal-action-leading{margin-right:auto}.learnablemeta-modal-alert{border:1px solid rgba(220,38,38,.3);border-radius:var(--lm-radius);padding:12px 14px;background:#dc262617;color:var(--lm-destructive);font-size:13px}.learnablemeta-modal .learnablemeta-modal-body .learnablemeta-help-list{display:grid;gap:10px;margin:0;padding-left:20px;list-style:disc}.learnablemeta-modal .learnablemeta-help-list strong{color:var(--lm-foreground);font-weight:600}@media(max-width:620px){.learnablemeta-modal-backdrop{padding:8px}.learnablemeta-modal{max-height:calc(100vh - 16px)}.learnablemeta-modal-actions{flex-wrap:wrap}.learnablemeta-modal-action-leading{width:100%;margin-right:0}.learnablemeta-modal-actions .learnablemeta-button--primary,.learnablemeta-modal-actions .learnablemeta-button--outline,.learnablemeta-modal-actions .learnablemeta-button--destructive{flex:1}}';
   importCSS(modalsCss);
   let resetDialogApp = null;
-  initMapArea();
+  const geoJsonEnabled = isGeoJsonEnabled();
+  if (geoJsonEnabled) initMapArea();
   function openResetLayoutDialog() {
     if (resetDialogApp) return;
     const target = document.createElement("div");
@@ -7009,6 +7175,13 @@ roundNumber: 4,
   }
   if (typeof _GM_registerMenuCommand === "function") {
     _GM_registerMenuCommand("LearnableMeta - Reset Meta Window Layout", openResetLayoutDialog);
+    _GM_registerMenuCommand(
+      `LearnableMeta - GeoJSON overlays: ${geoJsonEnabled ? "On" : "Off"}`,
+      () => {
+        setGeoJsonEnabled(!isGeoJsonEnabled());
+        window.location.reload();
+      }
+    );
   }
   initURLChangeEvent();
   initLiveChallengeIdTracking();

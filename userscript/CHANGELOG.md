@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.95]
+
+- Added keyboard-accessible tabs for locations that belong to multiple metas
+- Show each meta's own images, links, and GeoJSON overlay
+- Load inactive meta details only when their tab is opened
+- Allow GeoJSON overlays and downloads to be disabled from the userscript menu
+
 ## [0.94]
 
 - Added GeoJSON overlays to GeoGuessr round results

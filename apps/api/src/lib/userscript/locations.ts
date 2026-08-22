@@ -6,22 +6,54 @@ import {
   syncedMetas,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
+import type { MetaGeoJson } from '@api/lib/utils/geojson';
 import { and, eq, getTableColumns, sql } from 'drizzle-orm';
 import { pick } from 'remeda';
+
+export const locationMetaSummariesSelect = db
+  .select({
+    id: syncedMetas.metaId,
+    metaName: syncedMetas.name,
+  })
+  .from(syncedMetas)
+  .innerJoin(
+    syncedMapMetas,
+    eq(syncedMapMetas.syncedMetaId, syncedMetas.metaId),
+  )
+  .innerJoin(maps, eq(syncedMapMetas.mapId, maps.id))
+  .innerJoin(
+    syncedLocations,
+    eq(syncedLocations.syncedMetaId, syncedMetas.metaId),
+  )
+  .where(
+    and(
+      eq(maps.geoguessrId, sql.placeholder('mapId')),
+      eq(syncedLocations.panoId, sql.placeholder('panoId')),
+    ),
+  )
+  // Vary the first tab per pano while keeping it stable between requests.
+  .orderBy(
+    sql`md5(${syncedLocations.panoId} || ${syncedMetas.metaId}::text)`,
+    syncedMetas.metaId,
+  )
+  .prepare('userscript_get_location_meta_summaries');
 
 // only credit an original map when the played map itself is personal
 const originalMap = originalMapLateral(eq(maps.isPersonal, true));
 
-export const locationSelect = db
+export const locationMetaDetailSelect = db
   .select({
     ...pick(getTableColumns(syncedMetas), [
       'name',
       'note',
       'footer',
       'images',
-      'geoJson',
       'noteFromPlonkit',
     ]),
+    geoJson:
+      sql<MetaGeoJson | null>`CASE WHEN ${sql.placeholder('includeGeoJson')} THEN ${syncedMetas.geoJson} ELSE NULL END`.as(
+        'geo_json',
+      ),
     country: syncedLocations.country,
     isPersonalMap: maps.isPersonal,
     mapFooter:
@@ -50,13 +82,17 @@ export const locationSelect = db
     and(
       eq(maps.geoguessrId, sql.placeholder('mapId')),
       eq(syncedLocations.panoId, sql.placeholder('panoId')),
+      eq(syncedMetas.metaId, sql.placeholder('metaId')),
     ),
   )
   .limit(1)
-  .prepare('userscript_get_location');
+  .prepare('userscript_get_location_meta_detail');
 
+// distinct: a pano shared by several of the map's metas must still be exported
+// once, or it gets extra chances of being drawn in game
 export const mapLocationsExportSelect = db
-  .select(
+  .selectDistinctOn(
+    [syncedLocations.panoId],
     pick(getTableColumns(syncedLocations), [
       'lat',
       'lng',
@@ -76,4 +112,5 @@ export const mapLocationsExportSelect = db
     eq(syncedLocations.syncedMetaId, syncedMetas.metaId),
   )
   .where(eq(syncedMapMetas.mapId, sql.placeholder('mapId')))
+  .orderBy(syncedLocations.panoId, syncedLocations.syncedMetaId)
   .prepare('userscript_map_get_locations');

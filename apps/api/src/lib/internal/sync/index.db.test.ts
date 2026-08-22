@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import {
   levels,
   mapFilters,
+  mapGroupLocationMetas,
   mapGroupLocations,
   mapGroups,
   mapLevels,
@@ -29,6 +30,19 @@ const mapArea = normalizeGeoJson({
     ],
   ],
 });
+
+async function linkLocationsByTag(groupId: number) {
+  await db.$primary.execute(sql`
+    INSERT INTO ${mapGroupLocationMetas} (location_id, meta_id, map_group_id)
+    SELECT location.id, meta.id, location.map_group_id
+    FROM ${mapGroupLocations} location
+    JOIN ${metas} meta
+      ON meta.map_group_id = location.map_group_id
+     AND meta.tag_name = location.extra_tag
+    WHERE location.map_group_id = ${groupId}
+    ON CONFLICT DO NOTHING
+  `);
+}
 
 async function seedNullSyncedAtFixture(geoguessrId = 'full-sync-map') {
   const [group] = await db
@@ -111,6 +125,7 @@ async function seedNullSyncedAtFixture(geoguessrId = 'full-sync-map') {
       modifiedAt: 300,
     },
   ]);
+  await linkLocationsByTag(groupId);
 
   // Map without levels or filters: every meta in the group is eligible.
   const [map] = await db
@@ -223,6 +238,58 @@ describe('syncMapGroup null syncedAt', () => {
       { mapId, syncedMetaId: jpMetaId },
     ]);
   });
+
+  test('syncs every linked meta and removes or renames relationships incrementally', async () => {
+    const { groupId, usMetaId, jpMetaId } = await seedNullSyncedAtFixture();
+    const [location] = await db
+      .select({ id: mapGroupLocations.id })
+      .from(mapGroupLocations)
+      .where(eq(mapGroupLocations.panoId, 'pano-us-1'));
+    await db.insert(mapGroupLocationMetas).values({
+      locationId: location!.id,
+      metaId: jpMetaId,
+      mapGroupId: groupId,
+    });
+
+    const syncedAt = await syncMapGroup({ id: groupId, syncedAt: null });
+    expect(
+      await db
+        .select({
+          metaId: syncedLocations.syncedMetaId,
+          extraTag: syncedLocations.extraTag,
+        })
+        .from(syncedLocations)
+        .where(eq(syncedLocations.panoId, 'pano-us-1'))
+        .orderBy(syncedLocations.syncedMetaId),
+    ).toEqual([
+      { metaId: usMetaId, extraTag: 'us' },
+      { metaId: jpMetaId, extraTag: 'Japan' },
+    ]);
+
+    await db
+      .delete(mapGroupLocationMetas)
+      .where(
+        and(
+          eq(mapGroupLocationMetas.locationId, location!.id),
+          eq(mapGroupLocationMetas.metaId, usMetaId),
+        ),
+      );
+    await db
+      .update(metas)
+      .set({ tagName: 'Japan v2', modifiedAt: syncedAt + 1 })
+      .where(eq(metas.id, jpMetaId));
+    await syncMapGroup({ id: groupId, syncedAt });
+
+    expect(
+      await db
+        .select({
+          metaId: syncedLocations.syncedMetaId,
+          extraTag: syncedLocations.extraTag,
+        })
+        .from(syncedLocations)
+        .where(eq(syncedLocations.panoId, 'pano-us-1')),
+    ).toEqual([{ metaId: jpMetaId, extraTag: 'Japan v2' }]);
+  });
 });
 
 describe('syncMapGroup incremental modifiedAt boundary', () => {
@@ -303,6 +370,7 @@ describe('syncMapGroup incremental modifiedAt boundary', () => {
         modifiedAt: syncedAt + 10,
       },
     ]);
+    await linkLocationsByTag(groupId);
 
     await syncMapGroup({ id: groupId, syncedAt });
 
@@ -401,6 +469,7 @@ describe('syncMapGroup street view setting', () => {
         modifiedAt: 100,
       },
     ]);
+    await linkLocationsByTag(groupId);
 
     return { groupId };
   }
@@ -563,6 +632,7 @@ describe('syncMapGroup incremental update/delete propagation', () => {
       extraTag: 'us',
       modifiedAt: 100,
     });
+    await linkLocationsByTag(target.groupId);
 
     const targetSyncedAt = await syncMapGroup({
       id: target.groupId,
@@ -785,6 +855,7 @@ describe('syncMapGroup source tag/pano reassignment', () => {
       extraTag: 'Japan',
       modifiedAt: targetSyncedAt + 10,
     });
+    await linkLocationsByTag(target.groupId);
 
     await syncMapGroup({ id: target.groupId, syncedAt: targetSyncedAt });
 

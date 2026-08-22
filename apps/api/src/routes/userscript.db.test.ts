@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { eq } from 'drizzle-orm';
 import { app } from '../api';
 import {
   mapGroupLocations,
@@ -27,10 +28,31 @@ const mapArea = normalizeGeoJson({
   ],
 });
 
-async function requestLocation(mapId: string, panoId: string) {
+async function requestLocation(
+  mapId: string,
+  panoId: string,
+  includeGeoJson?: boolean,
+) {
+  const geoJsonQuery =
+    includeGeoJson === undefined ? '' : `&includeGeoJson=${includeGeoJson}`;
   return app.handle(
     new Request(
-      `http://localhost/api/userscript/location/?mapId=${mapId}&panoId=${panoId}`,
+      `http://localhost/api/userscript/location/?mapId=${mapId}&panoId=${panoId}${geoJsonQuery}`,
+    ),
+  );
+}
+
+async function requestLocationMeta(
+  mapId: string,
+  panoId: string,
+  metaId: number,
+  includeGeoJson?: boolean,
+) {
+  const geoJsonQuery =
+    includeGeoJson === undefined ? '' : `&includeGeoJson=${includeGeoJson}`;
+  return app.handle(
+    new Request(
+      `http://localhost/api/userscript/location/meta/${metaId}?mapId=${mapId}&panoId=${panoId}${geoJsonQuery}`,
     ),
   );
 }
@@ -189,12 +211,14 @@ interface SeedExportLocationsInput {
   mapId: number;
   panoIds: string[];
   syncedMetaId?: number;
+  lat?: number;
 }
 
 async function seedExportLocations({
   mapId,
   panoIds,
   syncedMetaId = 9001,
+  lat = 1,
 }: SeedExportLocationsInput) {
   const [group] = await db
     .insert(mapGroups)
@@ -222,7 +246,7 @@ async function seedExportLocations({
       panoId,
       // internal fields that must never leak into the export response
       country: 'Czechia',
-      lat: 1,
+      lat,
       lng: 2,
       heading: 3,
       pitch: 4,
@@ -310,7 +334,8 @@ describe('GET /api/userscript/location/', () => {
       const response = await requestLocation('map-a', 'pano-null-country');
 
       expect(response.status).toBe(200);
-      expect(await response.json()).toEqual({
+      const meta = {
+        id: 1001,
         country: '',
         metaName: 'Test Meta',
         note: 'Test note',
@@ -318,7 +343,130 @@ describe('GET /api/userscript/location/', () => {
         geoJson: mapArea,
         // no meta or map footer and no country: generic plonkit footer
         footer: plonkitFooter,
+      };
+      expect(await response.json()).toEqual({
+        ...meta,
+        metas: [{ id: 1001, metaName: 'Test Meta' }],
       });
+
+      const withoutGeoJson = await requestLocation(
+        'map-a',
+        'pano-null-country',
+        false,
+      );
+      expect(withoutGeoJson.status).toBe(200);
+      expect(await withoutGeoJson.json()).not.toHaveProperty('geoJson');
+    });
+
+    test('returns lightweight tabs and guarded on-demand meta details', async () => {
+      const mapId = await seedLocation({
+        geoguessrId: 'map-multi',
+        panoId: 'pano-multi',
+        syncedMetaId: 1101,
+        metaName: 'Shared fields',
+        note: 'Same note',
+        geoJson: mapArea,
+      });
+      const [map] = await db
+        .select({ mapGroupId: maps.mapGroupId })
+        .from(maps)
+        .where(eq(maps.id, mapId));
+      const otherArea = normalizeGeoJson({
+        type: 'Polygon',
+        coordinates: [
+          [
+            [30, 40],
+            [31, 40],
+            [31, 41],
+            [30, 40],
+          ],
+        ],
+      });
+      await db.insert(syncedMetas).values({
+        metaId: 1102,
+        mapGroupId: map!.mapGroupId!,
+        name: 'Shared fields',
+        note: 'Same note',
+        noteFromPlonkit: false,
+        footer: 'Meta footer',
+        images: ['img.jpg'],
+        geoJson: otherArea,
+      });
+      await db.insert(syncedMapMetas).values({
+        mapId,
+        syncedMetaId: 1102,
+      });
+      await db.insert(syncedLocations).values({
+        syncedMetaId: 1102,
+        panoId: 'pano-multi',
+        country: 'Czechia',
+        lat: 1,
+        lng: 2,
+        heading: 3,
+        pitch: 4,
+        zoom: 5,
+        extraTag: 'tag-2',
+      });
+
+      const first = (await (
+        await requestLocation('map-multi', 'pano-multi')
+      ).json()) as {
+        id: number;
+        metaName: string;
+        geoJson: MetaGeoJson;
+        metas: Array<{ id: number; metaName: string }>;
+        [key: string]: unknown;
+      };
+      const second = await (
+        await requestLocation('map-multi', 'pano-multi')
+      ).json();
+
+      expect(second).toEqual(first);
+      expect(first.metas).toHaveLength(2);
+      expect(first.metas).toEqual(
+        expect.arrayContaining([
+          { id: 1101, metaName: 'Shared fields' },
+          { id: 1102, metaName: 'Shared fields' },
+        ]),
+      );
+      for (const meta of first.metas) {
+        expect(Object.keys(meta).sort()).toEqual(['id', 'metaName']);
+      }
+      expect(first.id).toBe(first.metas[0]!.id);
+      expect(first.metaName).toBe(first.metas[0]!.metaName);
+
+      const detailResponses = await Promise.all(
+        first.metas.map(({ id }) =>
+          requestLocationMeta('map-multi', 'pano-multi', id),
+        ),
+      );
+      expect(detailResponses.map(({ status }) => status)).toEqual([200, 200]);
+      const details = await Promise.all(
+        detailResponses.map((response) => response.json()),
+      );
+      expect(details).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({ id: 1101, geoJson: mapArea }),
+          expect.objectContaining({ id: 1102, geoJson: otherArea }),
+        ]),
+      );
+
+      const withoutGeoJson = await requestLocationMeta(
+        'map-multi',
+        'pano-multi',
+        1101,
+        false,
+      );
+      expect(withoutGeoJson.status).toBe(200);
+      expect(await withoutGeoJson.json()).not.toHaveProperty('geoJson');
+
+      const mismatched = await requestLocationMeta(
+        'map-multi',
+        'pano-missing',
+        1102,
+      );
+      expect(mismatched.status).toBe(404);
+      expect(await mismatched.json()).toEqual(['NOT_FOUND']);
     });
 
     test('appends original-map attribution for a personal map', async () => {
@@ -342,11 +490,11 @@ describe('GET /api/userscript/location/', () => {
       const [originalMap] = await db
         .insert(maps)
         .values({
-          name: 'Original Map',
-          geoguessrId: 'map-original',
+          name: 'Original <Map> & "Guide"',
+          geoguessrId: 'map/original?x="bad"',
           mapGroupId: group!.id,
           isPersonal: false,
-          authors: 'Original Author',
+          authors: "Author & <script>alert('x')</script>",
           footerHtml: '<p>Original footer</p>',
           numberOfGamesPlayed: 100,
         })
@@ -389,7 +537,7 @@ describe('GET /api/userscript/location/', () => {
       expect(body.country).toBe('Italy');
       expect(body.footer).toBe(
         'Shared meta footer' +
-          '<p>Meta taken from <a href="https://learnablemeta.com/maps/map-original" rel ="nofollow" target="_blank"> Original Map </a> by <b>Original Author</b></p>',
+          '<p>Meta taken from <a href="https://learnablemeta.com/maps/map%2Foriginal%3Fx%3D%22bad%22" rel ="nofollow" target="_blank"> Original &#60;Map&#62; &#38; &#34;Guide&#34; </a> by <b>Author &#38; &#60;script&#62;alert(&#39;x&#39;)&#60;/script&#62;</b></p>',
       );
     });
   });
@@ -628,6 +776,13 @@ describe('GET /api/userscript/map-group/:groupId/maps', () => {
       panoIds: ['pano-b', 'pano-a'],
       syncedMetaId: 9100,
     });
+    // A shared pano under another meta must not inflate count or fingerprint.
+    await seedExportLocations({
+      mapId: populated.id,
+      panoIds: ['pano-a'],
+      syncedMetaId: 9101,
+      lat: 99,
+    });
     return group!.id;
   }
 
@@ -834,7 +989,7 @@ describe('GET /api/userscript/map/:geoguessrId', () => {
     expect(await response.json()).toEqual({
       mapFound: true,
       isPersonal: true,
-      userscriptVersion: '0.94',
+      userscriptVersion: '0.95',
     });
   });
 
@@ -858,7 +1013,7 @@ describe('GET /api/userscript/map/:geoguessrId', () => {
     expect(await response.json()).toEqual({
       mapFound: true,
       isPersonal: false,
-      userscriptVersion: '0.94',
+      userscriptVersion: '0.95',
     });
   });
 
@@ -878,7 +1033,7 @@ describe('GET /api/userscript/map/:geoguessrId', () => {
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({
       mapFound: false,
-      userscriptVersion: '0.94',
+      userscriptVersion: '0.95',
     });
   });
 });

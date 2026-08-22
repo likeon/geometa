@@ -63,7 +63,9 @@ export async function isPopularMap(geoguessrId: string): Promise<boolean> {
 }
 
 // GeoGuessr "map JSON" download payload, shared by the location-export
-// endpoints. Locations without an extraTag get an empty tag list.
+// endpoints. Callers feed one row per (location, meta) pair, so rows are merged
+// by panoId into a single coordinate carrying every tag - emitting a pano twice
+// would double its odds of being drawn in game.
 export function geoguessrMapJson(
   name: string,
   locations: {
@@ -78,9 +80,29 @@ export function geoguessrMapJson(
     extraTag?: string;
   }[],
 ) {
+  const byPano = new Map<
+    string | symbol,
+    (typeof locations)[number] & { tags: string[] }
+  >();
+  for (const location of locations) {
+    // a null panoId can't be deduplicated, so keep those rows distinct
+    const key = location.panoId ?? Symbol();
+    const existing = byPano.get(key);
+    if (existing) {
+      if (location.extraTag && !existing.tags.includes(location.extraTag)) {
+        existing.tags.push(location.extraTag);
+      }
+      continue;
+    }
+    byPano.set(key, {
+      ...location,
+      tags: location.extraTag ? [location.extraTag] : [],
+    });
+  }
+
   return {
     name,
-    customCoordinates: locations.map((location) => ({
+    customCoordinates: [...byPano.values()].map((location) => ({
       lat: location.lat,
       lng: location.lng,
       heading: location.heading,
@@ -90,7 +112,7 @@ export function geoguessrMapJson(
       countryCode: null,
       stateCode: null,
       extra: {
-        tags: location.extraTag === undefined ? [] : [location.extraTag],
+        tags: location.tags,
         panoDate: location.extraPanoDate,
         panoId: location.extraPanoId,
       },

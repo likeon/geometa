@@ -1,6 +1,7 @@
 import {
   levels,
   type Meta,
+  mapGroupLocationMetas,
   mapGroupLocations,
   mapGroupPermissions,
   mapGroups,
@@ -89,38 +90,32 @@ async function copyMetaToGroup(
       .onConflictDoNothing();
   }
 
-  const sourceLocations = await tx
-    .select({
-      lat: mapGroupLocations.lat,
-      lng: mapGroupLocations.lng,
-      heading: mapGroupLocations.heading,
-      pitch: mapGroupLocations.pitch,
-      zoom: mapGroupLocations.zoom,
-      panoId: mapGroupLocations.panoId,
-      extraTag: mapGroupLocations.extraTag,
-      extraPanoId: mapGroupLocations.extraPanoId,
-      extraPanoDate: mapGroupLocations.extraPanoDate,
-    })
-    .from(mapGroupLocations)
-    .where(
-      and(
-        eq(mapGroupLocations.mapGroupId, mapGroupId),
-        eq(mapGroupLocations.extraTag, meta.tagName),
-      ),
-    );
-  if (sourceLocations.length > 0) {
-    await tx
-      .insert(mapGroupLocations)
-      .values(
-        sourceLocations.map((location) => ({
-          ...location,
-          mapGroupId: targetGroupId,
-          updatedAt: currentTimestamp,
-          modifiedAt: currentTimestamp,
-        })),
-      )
-      .onConflictDoNothing();
-  }
+  // Set-based so a meta with tens of thousands of locations can't blow the
+  // bind-parameter limit. Existing target panos keep their own framing but
+  // still gain the copied meta.
+  await tx.execute(sql`
+    WITH source AS (
+      SELECT src.*
+      FROM ${mapGroupLocations} src
+      JOIN ${mapGroupLocationMetas} lm
+        ON lm.location_id = src.id AND lm.map_group_id = src.map_group_id
+      WHERE src.map_group_id = ${mapGroupId} AND lm.meta_id = ${id}
+    ), targets AS (
+      INSERT INTO ${mapGroupLocations}
+        (map_group_id, lat, lng, heading, pitch, zoom, pano_id, extra_tag,
+         extra_pano_id, extra_pano_date, updated_at, modified_at)
+      SELECT ${targetGroupId}, src.lat, src.lng, src.heading, src.pitch, src.zoom,
+             src.pano_id, ${meta.tagName}, src.extra_pano_id, src.extra_pano_date,
+             ${currentTimestamp}, ${currentTimestamp}
+      FROM source src
+      ON CONFLICT (map_group_id, pano_id)
+      DO UPDATE SET pano_id = EXCLUDED.pano_id
+      RETURNING id
+    )
+    INSERT INTO ${mapGroupLocationMetas} (location_id, meta_id, map_group_id)
+    SELECT targets.id, ${newMetaId}, ${targetGroupId} FROM targets
+    ON CONFLICT DO NOTHING
+  `);
 
   if (copyLevels) {
     const sourceMetaLevels = await tx
@@ -495,35 +490,37 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           .sort();
 
       let savedData: Meta | undefined;
-      let savedLevelIds: number[] = [];
-      if (id !== undefined) {
-        savedData = await db.$primary.query.metas.findFirst({
-          where: eq(metas.id, id),
-        });
-        if (!savedData) {
-          return status(404);
-        }
-        await ensurePermissions(userId, savedData.mapGroupId);
-        savedLevelIds = (
-          await db.$primary
-            .select({ levelId: metaLevels.levelId })
-            .from(metaLevels)
-            .where(eq(metaLevels.metaId, id))
-        ).map((row) => row.levelId);
-        if (savedData.mapGroupId !== body.mapGroupId) {
-          // the old level assignments belong to the source group
-          const sourceGroupLevels = await db.$primary.query.levels.findMany({
-            where: eq(levels.mapGroupId, savedData.mapGroupId),
-            columns: { id: true, name: true },
-          });
-          for (const level of sourceGroupLevels) {
-            levelNameById.set(level.id, level.name);
-          }
-        }
-      }
 
       try {
         const metaId = await db.$primary.transaction(async (tx) => {
+          let savedLevelIds: number[] = [];
+          if (id !== undefined) {
+            const [currentData] = await tx
+              .select()
+              .from(metas)
+              .where(eq(metas.id, id))
+              .for('update');
+            if (!currentData) return null;
+
+            savedData = currentData;
+            await ensurePermissions(userId, savedData.mapGroupId);
+            savedLevelIds = (
+              await tx
+                .select({ levelId: metaLevels.levelId })
+                .from(metaLevels)
+                .where(eq(metaLevels.metaId, id))
+            ).map((row) => row.levelId);
+            if (savedData.mapGroupId !== body.mapGroupId) {
+              const sourceGroupLevels = await tx
+                .select({ id: levels.id, name: levels.name })
+                .from(levels)
+                .where(eq(levels.mapGroupId, savedData.mapGroupId));
+              for (const level of sourceGroupLevels) {
+                levelNameById.set(level.id, level.name);
+              }
+            }
+          }
+
           let metaId: number;
           if (id === undefined) {
             const insertResult = await tx
@@ -537,6 +534,11 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
               .returning({ insertedId: metas.id });
             metaId = insertResult[0].insertedId;
           } else {
+            if (savedData && savedData.mapGroupId !== body.mapGroupId) {
+              await tx
+                .delete(mapGroupLocationMetas)
+                .where(eq(mapGroupLocationMetas.metaId, id));
+            }
             await tx
               .update(metas)
               .set({
@@ -613,6 +615,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           }
           return metaId;
         });
+        if (metaId === null) return status(404);
         return { id: metaId };
       } catch (error) {
         if (isUniqueViolation(error, 'metas_unique')) {

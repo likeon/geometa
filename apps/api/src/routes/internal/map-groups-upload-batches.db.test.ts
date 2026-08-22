@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { app } from '@api/api';
 import {
   mapGroupChanges,
+  mapGroupLocationMetas,
   mapGroupLocations,
   mapGroupPermissions,
   mapGroups,
@@ -9,15 +10,9 @@ import {
   users,
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
-import { eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 
-// The upload handler chunks its upsert into BATCH_SIZE = 1000-row INSERT
-// statements. A duplicate split across statements never triggers PostgreSQL's
-// same-statement cardinality violation: the later batch silently updates the
-// row inserted by the earlier batch.
 const BATCH_SIZE = 1000;
-const DUPLICATE_MESSAGE =
-  'The uploaded file contains duplicate panoId values. Please remove duplicates and try again.';
 
 function uploadRequest(userId: string, groupId: number, body: unknown) {
   return app.handle(
@@ -50,7 +45,7 @@ async function seedOwnerGroup(userId: string, name: string) {
 }
 
 // minimal body accepted by the upload schema
-function locationBody(panoId: string) {
+function locationBody(panoId: string, extraTag = 'tag-a') {
   return {
     lat: 1,
     lng: 2,
@@ -58,7 +53,7 @@ function locationBody(panoId: string) {
     pitch: 4,
     zoom: 5,
     panoId,
-    extraTag: 'tag-a',
+    extraTag,
     extraPanoId: null,
   };
 }
@@ -96,24 +91,18 @@ async function groupState(groupId: number) {
 }
 
 describe('POST /api/internal/map-groups/:id/locations/upload duplicate panos across 1000-row batches', () => {
-  // todo: the handler runs each 1000-row chunk as its own INSERT statement, so
-  // a duplicate straddling the boundary (last row of batch 0, first row of
-  // batch 1) never collides inside one statement. Batch 1's ON CONFLICT DO
-  // UPDATE silently overwrites the row batch 0 inserted and the whole
-  // transaction commits. Observed instead of the 409: a 200 with count 1001 /
-  // conflictCount 0, a single merged pano-dup row, a created tag-a meta, and
-  // a location_batch change entry. Cross-batch duplicates should surface as
-  // the same 409 and roll back every batch atomically.
-  test.todo('rejects a duplicate pano split across the 1000-row batch boundary with 409 and leaves the group untouched', async () => {
+  test('merges a duplicate before chunking so behavior is independent of batch boundaries', async () => {
     const userId = 'batch-cross-owner';
     await db.insert(users).values({ id: userId, username: userId });
     const groupId = await seedOwnerGroup(userId, 'Cross-batch duplicate');
 
-    // batch 0 = indices 0..999, batch 1 = index 1000; pano-dup sits on both
-    // sides of the production chunk boundary
     const locations = distinctLocations(BATCH_SIZE);
-    locations[BATCH_SIZE - 1] = locationBody('pano-dup');
-    locations.push(locationBody('pano-dup'));
+    locations[BATCH_SIZE - 1] = { ...locationBody('pano-dup'), lat: 10 };
+    locations.push({
+      ...locationBody('pano-dup'),
+      extraTag: 'tag-b',
+      lat: 20,
+    });
     expect(locations).toHaveLength(BATCH_SIZE + 1);
 
     const response = await uploadRequest(userId, groupId, {
@@ -121,13 +110,74 @@ describe('POST /api/internal/map-groups/:id/locations/upload duplicate panos acr
       locations,
     });
 
-    expect(response.status).toBe(409);
-    expect(await response.json()).toEqual({ message: DUPLICATE_MESSAGE });
-    // atomic: no row, no meta, and no change-log entry survive the rollback
-    expect(await groupState(groupId)).toEqual({
-      locations: [],
-      metas: [],
-      changes: [],
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      count: BATCH_SIZE,
+      ignoredCount: 0,
     });
+
+    const state = await groupState(groupId);
+    expect(state.locations).toHaveLength(BATCH_SIZE);
+    expect(state.metas).toEqual([{ tagName: 'tag-a' }, { tagName: 'tag-b' }]);
+    expect(state.changes).toHaveLength(3);
+    expect(
+      state.changes.filter((change) => change.entityType === 'location_batch'),
+    ).toEqual([
+      expect.objectContaining({
+        operation: 'update',
+      }),
+    ]);
+    const [duplicate] = await db
+      .select({ id: mapGroupLocations.id, lat: mapGroupLocations.lat })
+      .from(mapGroupLocations)
+      .where(
+        and(
+          eq(mapGroupLocations.mapGroupId, groupId),
+          eq(mapGroupLocations.panoId, 'pano-dup'),
+        ),
+      );
+    expect(duplicate).toEqual(expect.objectContaining({ lat: 20 }));
+    expect(
+      (
+        await db
+          .select({ tagName: metas.tagName })
+          .from(mapGroupLocationMetas)
+          .innerJoin(metas, eq(metas.id, mapGroupLocationMetas.metaId))
+          .where(eq(mapGroupLocationMetas.locationId, duplicate!.id))
+          .orderBy(metas.tagName)
+      ).map((row) => row.tagName),
+    ).toEqual(['tag-a', 'tag-b']);
+  });
+
+  test('resolves links across meta lookup batches', async () => {
+    const userId = 'batch-tags-owner';
+    await db.insert(users).values({ id: userId, username: userId });
+    const groupId = await seedOwnerGroup(userId, 'Cross-batch tags');
+    const locations = Array.from({ length: BATCH_SIZE + 1 }, (_, i) =>
+      locationBody(`tag-pano-${i}`, `tag-${i}`),
+    );
+
+    const response = await uploadRequest(userId, groupId, {
+      uploadMode: 'partial',
+      locations,
+    });
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      count: BATCH_SIZE + 1,
+      ignoredCount: 0,
+    });
+    expect(
+      await db
+        .select({ id: metas.id })
+        .from(metas)
+        .where(eq(metas.mapGroupId, groupId)),
+    ).toHaveLength(BATCH_SIZE + 1);
+    expect(
+      await db
+        .select({ locationId: mapGroupLocationMetas.locationId })
+        .from(mapGroupLocationMetas)
+        .where(eq(mapGroupLocationMetas.mapGroupId, groupId)),
+    ).toHaveLength(BATCH_SIZE + 1);
   });
 });
