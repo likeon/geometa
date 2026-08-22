@@ -874,15 +874,19 @@ async fn process_message(
         }
     }
 
-    // Structured diagnostics only: no raw content or secrets.
+    // ONNX diagnostics include tested message for classifier observability.
     let diagnostics = &classified.diagnostics;
     let onnx_detail = diagnostics
         .onnx
         .as_ref()
         .map(|onnx| {
             format!(
-                "onnx_model={} onnx_version={} onnx_probability={:.4} onnx_threshold={}",
-                onnx.model, onnx.version, onnx.spam_probability, onnx.spam_threshold
+                "onnx_model={} onnx_version={} onnx_probability={:.4} onnx_threshold={} onnx_tested_message={:?}",
+                onnx.model,
+                onnx.version,
+                onnx.spam_probability,
+                onnx.spam_threshold,
+                snapshot.content
             )
         })
         .unwrap_or_else(|| "onnx_model=none".to_string());
