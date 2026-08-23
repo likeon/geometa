@@ -557,8 +557,8 @@ fn invalid(message: impl Into<String>) -> Error {
 #[cfg(test)]
 mod tests {
     use super::{
-        api_client_config_from, parse_config, parse_config_with_environment, BotConfig,
-        DEFAULT_OPENROUTER_MODEL,
+        BotConfig, DEFAULT_OPENROUTER_MODEL, api_client_config_from, parse_config,
+        parse_config_with_environment,
     };
 
     const CONFIG: &str = r#"
@@ -598,10 +598,10 @@ spam_detection:
             parse_config(&CONFIG.replace("  time_limit: 0", "  time_limit: 0\n  rounds: 10"))
                 .is_err()
         );
-        assert!(parse_config(
-            &CONFIG.replace("  time_limit: 0", "  time_limit: 0\n  post_time: 12:00")
-        )
-        .is_err());
+        assert!(
+            parse_config(&CONFIG.replace("  time_limit: 0", "  time_limit: 0\n  post_time: 12:00"))
+                .is_err()
+        );
         assert!(parse_config(&format!("{CONFIG}\npools: []\n")).is_err());
     }
 
@@ -811,15 +811,19 @@ spam_detection:
         use std::os::unix::ffi::OsStringExt;
 
         let non_utf8 = std::ffi::OsString::from_vec(vec![0xff]);
-        assert!(api_client_config_from(
-            Err(std::env::VarError::NotUnicode(non_utf8.clone())),
-            Err(std::env::VarError::NotPresent),
-        )
-        .is_err());
-        assert!(api_client_config_from(
-            Err(std::env::VarError::NotPresent),
-            Err(std::env::VarError::NotUnicode(non_utf8)),
-        )
-        .is_err());
+        assert!(
+            api_client_config_from(
+                Err(std::env::VarError::NotUnicode(non_utf8.clone())),
+                Err(std::env::VarError::NotPresent),
+            )
+            .is_err()
+        );
+        assert!(
+            api_client_config_from(
+                Err(std::env::VarError::NotPresent),
+                Err(std::env::VarError::NotUnicode(non_utf8)),
+            )
+            .is_err()
+        );
     }
 }
