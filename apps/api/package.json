@@ -14,7 +14,7 @@
     "format": "biome format --write .",
     "check": "biome check .",
     "fix": "biome check --write .",
-    "type-check": "tsc --noEmit; rm tsconfig.tsbuildinfo",
+    "type-check": "tsc --noEmit && rm -f tsconfig.tsbuildinfo",
     "sanity": "bun run format && bun run fix && bun run type-check"
   },
   "dependencies": {
