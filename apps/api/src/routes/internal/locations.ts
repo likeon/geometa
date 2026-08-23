@@ -1,7 +1,9 @@
+import { buildResponses } from '@api/lib/api/response-schemas';
 import { mapGroupLocations } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensurePermissions } from '@api/lib/internal/permissions';
+import { Type } from '@sinclair/typebox';
 import { and, count, eq, isNull } from 'drizzle-orm';
 import { Elysia, type Static, t } from 'elysia';
 import { pick } from 'remeda';
@@ -67,6 +69,26 @@ export const locationsRouter = new Elysia({ prefix: '/locations' })
     {
       query: querySchema,
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Array(
+            t.Object({
+              lat: t.Number(),
+              lng: t.Number(),
+              heading: t.Number(),
+              pitch: t.Number(),
+              zoom: t.Number(),
+              panoId: t.String(),
+              extra: t.Object({
+                tag: t.Union([t.String(), t.Null()]),
+                panoId: t.Union([t.String(), t.Null()]),
+                panoDate: t.Union([t.String(), t.Null()]),
+              }),
+            }),
+          ),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .get(
@@ -84,5 +106,9 @@ export const locationsRouter = new Elysia({ prefix: '/locations' })
     {
       query: querySchema,
       userId: true,
+      response: buildResponses(
+        { 200: t.Object({ count: Type.Integer() }) },
+        { forbidden: true, validation: true },
+      ),
     },
   );

@@ -1,4 +1,8 @@
 import { type ApplicationConfig, config } from '@api/config';
+import {
+  forbiddenResponse,
+  unauthorizedResponse,
+} from '@api/lib/api/response-schemas';
 import * as Sentry from '@sentry/bun';
 import { Elysia, t } from 'elysia';
 import * as jose from 'jose';
@@ -32,16 +36,20 @@ const getJWKS = memoizeOne(async () => {
 });
 
 export function bearer() {
-  return new Elysia({ name: 'bearer' }).derive(
-    { as: 'global' },
-    function deriveBearer({ headers }) {
+  return new Elysia({ name: 'bearer' })
+    .guard({
+      headers: t.Object({
+        authorization: t.Optional(t.String()),
+      }),
+      detail: { security: [{ bearerAuth: [] }] },
+    })
+    .derive({ as: 'global' }, function deriveBearer({ headers }) {
       const auth = headers.authorization;
 
       return {
         bearer: auth?.startsWith('Bearer ') ? auth.slice(7) : null,
       };
-    },
-  );
+    });
 }
 type AuthConfig = Pick<
   ApplicationConfig,
@@ -54,7 +62,7 @@ export function auth(jwt?: boolean, authConfig: AuthConfig = config) {
     .onBeforeHandle({ as: 'scoped' }, async ({ bearer, status }) => {
       if (authConfig.API_INTERNAL_AUTH_REQUIRED) {
         if (!bearer) {
-          return status(401);
+          return status(401, unauthorizedResponse);
         }
 
         if (jwt) {
@@ -68,7 +76,7 @@ export function auth(jwt?: boolean, authConfig: AuthConfig = config) {
           } catch (error) {
             if (error instanceof jose.errors.JWTClaimValidationFailed) {
               Sentry.captureException(error);
-              return status(403, ['JWT validation failed']);
+              return status(403, { message: 'JWT validation failed' });
             } else {
               throw error;
             }
@@ -76,25 +84,24 @@ export function auth(jwt?: boolean, authConfig: AuthConfig = config) {
         } else {
           // Regular token validation
           if (bearer !== authConfig.FRONTEND_API_TOKEN) {
-            return status(403);
+            return status(403, forbiddenResponse);
           }
         }
       }
     })
     .macro({
       userId: {
+        headers: t.Object({
+          'x-api-user-id': t.Optional(t.String()),
+        }),
         async resolve({ status, request: { headers } }) {
           const userId = headers.get('x-api-user-id');
           if (!userId) {
-            return status(401);
+            return status(401, unauthorizedResponse);
           }
 
           return { userId };
         },
       },
-    })
-    .model({
-      UnauthenticatedResponse: t.Void(),
-      InvalidAuthTokenResponse: t.Void(),
     });
 }

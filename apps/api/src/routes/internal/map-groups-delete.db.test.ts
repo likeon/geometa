@@ -195,9 +195,9 @@ describe('DELETE /api/internal/map-groups/:id', () => {
     const response = await deleteGroupRequest('del-editor-2', groupId);
 
     expect(response.status).toBe(403);
-    expect(await response.json()).toEqual([
-      "You don't have permissions for this",
-    ]);
+    expect(await response.json()).toEqual({
+      message: "You don't have permissions for this",
+    });
     expect(await ownedSnapshot(groupId)).toEqual(before);
   });
 });

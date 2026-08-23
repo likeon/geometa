@@ -1,4 +1,10 @@
 import {
+  buildResponses,
+  forbiddenResponse,
+  notFoundResponse,
+  unauthorizedResponse,
+} from '@api/lib/api/response-schemas';
+import {
   mapGroupPermissions,
   mapGroups,
   maps,
@@ -12,43 +18,12 @@ import { locationSelect } from '@api/lib/userscript/locations';
 import { fingerprintMapCoordinates } from '@api/lib/userscript/map-fingerprint';
 import { getSynchronizedGroupMapSnapshots } from '@api/lib/userscript/map-snapshots';
 import { generateFooter } from '@api/lib/userscript/utils';
+import { Type } from '@sinclair/typebox';
 import { and, asc, eq, isNotNull, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 const userscriptVersion = '0.94';
 const tokenSecurity = [{ learnableMetaToken: [] as string[] }];
-
-const mapGroup = t.Object({
-  id: t.Integer({ description: 'Learnable Meta map group ID.' }),
-  name: t.String({ description: 'Map group name.' }),
-  syncedAt: t.Integer({
-    description: 'Last synchronization time as a Unix timestamp.',
-  }),
-});
-
-const mapManifest = t.Object({
-  name: t.String({ description: 'Map name.' }),
-  geoguessrId: t.String({ description: 'GeoGuessr map ID.' }),
-  locationCount: t.Integer({
-    minimum: 0,
-    description: 'Number of synchronized locations in the map.',
-  }),
-  fingerprint: t.String({
-    pattern: '^[a-f0-9]{64}$',
-    description: 'SHA-256 fingerprint of the synchronized coordinates.',
-  }),
-});
-
-const exportedLocation = t.Object({
-  lat: t.Number({ description: 'Latitude.' }),
-  lng: t.Number({ description: 'Longitude.' }),
-  heading: t.Number({ description: 'Street View heading.' }),
-  pitch: t.Number({ description: 'Street View pitch.' }),
-  zoom: t.Number({ description: 'Street View zoom.' }),
-  panoId: t.String({ description: 'Google Street View panorama ID.' }),
-  countryCode: t.Null({ description: 'Reserved for GeoGuessr imports.' }),
-  stateCode: t.Null({ description: 'Reserved for GeoGuessr imports.' }),
-});
 
 const mapInfoQuery = db.query.maps
   .findFirst({
@@ -61,6 +36,7 @@ const mapInfoQuery = db.query.maps
 
 export const userscriptRouter = new Elysia({
   prefix: '/userscript',
+  detail: { tags: ['userscript'] },
 })
   .get(
     '/map/:geoguessrId',
@@ -80,28 +56,21 @@ export const userscriptRouter = new Elysia({
       };
     },
     {
-      params: t.Object({
-        geoguessrId: t.String({ description: 'GeoGuessr map ID.' }),
-      }),
-      response: {
-        200: t.Object(
-          {
+      params: t.Object({ geoguessrId: t.String() }),
+      response: buildResponses(
+        {
+          200: t.Object({
             mapFound: t.Literal(true),
-            isPersonal: t.Boolean({
-              description: 'Whether this is a personal map.',
-            }),
-            userscriptVersion: t.Literal(userscriptVersion),
-          },
-          { description: 'The map is available to the userscript.' },
-        ),
-        404: t.Object(
-          {
+            isPersonal: t.Boolean(),
+            userscriptVersion: t.String(),
+          }),
+          404: t.Object({
             mapFound: t.Literal(false),
-            userscriptVersion: t.Literal(userscriptVersion),
-          },
-          { description: 'No Learnable Meta map uses this GeoGuessr ID.' },
-        ),
-      },
+            userscriptVersion: t.String(),
+          }),
+        },
+        { public: true, validation: true },
+      ),
       detail: {
         tags: ['Userscript'],
         operationId: 'getMapCompatibility',
@@ -117,9 +86,7 @@ export const userscriptRouter = new Elysia({
       return;
     },
     {
-      response: {
-        200: t.Void({ description: 'No active announcement.' }),
-      },
+      response: buildResponses({ 200: t.Void() }, { public: true }),
       detail: {
         tags: ['Userscript'],
         operationId: 'getUserscriptAnnouncement',
@@ -167,34 +134,23 @@ export const userscriptRouter = new Elysia({
     },
     {
       query: t.Object({
-        mapId: t.String({ description: 'GeoGuessr map ID.' }),
-        panoId: t.String({
-          description: 'Google Street View panorama ID for the location.',
-        }),
+        mapId: t.String(),
+        panoId: t.String(),
       }),
-      response: {
-        200: t.Object(
-          {
-            country: t.String({ description: 'Location country name.' }),
-            metaName: t.String({ description: 'Public meta name.' }),
-            note: t.String({ description: 'Rendered meta note HTML.' }),
-            images: t.Array(t.String(), {
-              description: 'Meta image URLs.',
-            }),
-            geoJson: t.Optional(
-              t.Unknown({
-                description: 'GeoJSON overlay associated with the meta.',
-              }),
-            ),
-            footer: t.String({ description: 'Rendered attribution HTML.' }),
-          },
-          { description: 'Meta content for this map location.' },
-        ),
-        404: t.Tuple([t.Literal('NOT_FOUND')], {
-          description: 'No synchronized meta matches the location.',
-        }),
-        422: t.Unknown({ description: 'The query parameters are invalid.' }),
-      },
+      response: buildResponses(
+        {
+          200: t.Object({
+            country: t.String(),
+            metaName: t.String(),
+            note: t.String(),
+            images: t.Array(t.String()),
+            geoJson: t.Optional(t.Unknown()),
+            footer: t.String(),
+          }),
+          404: t.Array(t.String()),
+        },
+        { public: true, validation: true },
+      ),
       detail: {
         tags: ['Userscript'],
         operationId: 'getLocationMeta',
@@ -205,11 +161,17 @@ export const userscriptRouter = new Elysia({
     },
   )
   .use(bearer())
+  .guard({
+    headers: t.Object({
+      authorization: t.Optional(t.String()),
+    }),
+    detail: { security: tokenSecurity },
+  })
   .get(
     '/map-groups',
     async ({ status, bearer }) => {
       if (!bearer) {
-        return status(401, 'Unauthorized');
+        return status(401, unauthorizedResponse);
       }
 
       const user = await db.$primary.query.users.findFirst({
@@ -217,7 +179,7 @@ export const userscriptRouter = new Elysia({
         columns: { id: true },
       });
       if (!user) {
-        return status(401, 'Unauthorized');
+        return status(401, unauthorizedResponse);
       }
 
       const groups = await db.$primary
@@ -239,35 +201,24 @@ export const userscriptRouter = new Elysia({
         .groupBy(mapGroups.id, mapGroups.name, mapGroups.syncedAt)
         .orderBy(asc(mapGroups.name), asc(mapGroups.id));
 
-      return {
-        groups: groups.map((group) => ({
-          ...group,
-          syncedAt: group.syncedAt!,
-        })),
-      };
+      return { groups };
     },
     {
-      response: {
-        200: t.Object(
-          {
+      response: buildResponses(
+        {
+          200: t.Object({
             groups: t.Array(
-              t.Composite([
-                mapGroup,
-                t.Object({
-                  mapCount: t.Integer({
-                    minimum: 0,
-                    description: 'Number of maps in the group.',
-                  }),
-                }),
-              ]),
+              t.Object({
+                id: Type.Integer(),
+                name: t.String(),
+                syncedAt: t.Union([Type.Integer(), t.Null()]),
+                mapCount: Type.Integer(),
+              }),
             ),
-          },
-          { description: 'Synchronized map groups accessible to the token.' },
-        ),
-        401: t.Literal('Unauthorized', {
-          description: 'The API token is missing or invalid.',
-        }),
-      },
+          }),
+        },
+        { unauthorized: true },
+      ),
       detail: {
         tags: ['Map making tools'],
         operationId: 'listAccessibleMapGroups',
@@ -282,7 +233,7 @@ export const userscriptRouter = new Elysia({
     '/map-group/:groupId/maps',
     async ({ params: { groupId }, status, bearer }) => {
       if (!bearer) {
-        return status(401, 'Unauthorized');
+        return status(401, unauthorizedResponse);
       }
 
       const user = await db.$primary.query.users.findFirst({
@@ -290,7 +241,7 @@ export const userscriptRouter = new Elysia({
         columns: { id: true },
       });
       if (!user) {
-        return status(401, 'Unauthorized');
+        return status(401, unauthorizedResponse);
       }
 
       const [group] = await db.$primary
@@ -308,7 +259,7 @@ export const userscriptRouter = new Elysia({
           ),
         );
       if (!group) {
-        return status(404, 'Not Found');
+        return status(404, notFoundResponse);
       }
       if (group.syncedAt === null) {
         return status(409, { message: 'Map group has not been synchronized' });
@@ -326,29 +277,28 @@ export const userscriptRouter = new Elysia({
       };
     },
     {
-      params: t.Object({
-        groupId: t.Integer({ description: 'Learnable Meta map group ID.' }),
-      }),
-      response: {
-        200: t.Object(
-          {
-            group: mapGroup,
-            maps: t.Array(mapManifest),
-          },
-          { description: 'Map manifest for the synchronized group.' },
-        ),
-        401: t.Literal('Unauthorized', {
-          description: 'The API token is missing or invalid.',
-        }),
-        404: t.Literal('Not Found', {
-          description: 'The map group does not exist or is not accessible.',
-        }),
-        409: t.Object(
-          { message: t.String() },
-          { description: 'The map group has not been synchronized.' },
-        ),
-        422: t.Unknown({ description: 'The map group ID is invalid.' }),
-      },
+      params: t.Object({ groupId: t.Integer() }),
+      response: buildResponses(
+        {
+          200: t.Object({
+            group: t.Object({
+              id: Type.Integer(),
+              name: t.String(),
+              syncedAt: t.Union([Type.Integer(), t.Null()]),
+            }),
+            maps: t.Array(
+              t.Object({
+                name: t.String(),
+                geoguessrId: t.String(),
+                locationCount: Type.Integer(),
+                fingerprint: t.String(),
+              }),
+            ),
+          }),
+          409: t.Object({ message: t.String() }),
+        },
+        { unauthorized: true, notFound: true, validation: true },
+      ),
       detail: {
         tags: ['Map making tools'],
         operationId: 'listMapGroupMaps',
@@ -363,7 +313,7 @@ export const userscriptRouter = new Elysia({
     '/map/:geoguessrId/locations',
     async ({ params: { geoguessrId }, query, status, bearer }) => {
       if (!bearer) {
-        return status(401, 'Unauthorized');
+        return status(401, unauthorizedResponse);
       }
 
       // authorized = the token belongs to the personal map's owner, or to a
@@ -392,10 +342,10 @@ export const userscriptRouter = new Elysia({
         .where(eq(maps.geoguessrId, geoguessrId));
 
       if (!data) {
-        return status(404, 'Not Found');
+        return status(404, notFoundResponse);
       }
       if (!data.authorized) {
-        return status(403, 'Forbidden');
+        return status(403, forbiddenResponse);
       }
       const locations = await db.$primary
         .select({
@@ -434,41 +384,37 @@ export const userscriptRouter = new Elysia({
       };
     },
     {
-      params: t.Object({
-        geoguessrId: t.String({ description: 'GeoGuessr map ID.' }),
-      }),
+      params: t.Object({ geoguessrId: t.String() }),
       query: t.Object({
         expectedFingerprint: t.Optional(
-          t.String({
-            pattern: '^[a-f0-9]{64}$',
-            description:
-              'Expected SHA-256 coordinate fingerprint from the group manifest.',
-          }),
+          t.String({ pattern: '^[a-f0-9]{64}$' }),
         ),
       }),
-      response: {
-        200: t.Object(
-          { customCoordinates: t.Array(exportedLocation) },
-          { description: 'Locations in GeoGuessr custom-coordinate format.' },
-        ),
-        401: t.Literal('Unauthorized', {
-          description: 'The API token is missing.',
-        }),
-        403: t.Literal('Forbidden', {
-          description: 'The API token cannot access this map.',
-        }),
-        404: t.Literal('Not Found', {
-          description: 'The map does not exist.',
-        }),
-        409: t.Object(
-          { message: t.String() },
-          {
-            description:
-              'The map changed after the supplied fingerprint was created.',
-          },
-        ),
-        422: t.Unknown({ description: 'The request parameters are invalid.' }),
-      },
+      response: buildResponses(
+        {
+          200: t.Object({
+            customCoordinates: t.Array(
+              t.Object({
+                lat: t.Number(),
+                lng: t.Number(),
+                heading: t.Number(),
+                pitch: t.Number(),
+                zoom: t.Number(),
+                panoId: t.Union([t.String(), t.Null()]),
+                countryCode: t.Null(),
+                stateCode: t.Null(),
+              }),
+            ),
+          }),
+          409: t.Object({ message: t.String() }),
+        },
+        {
+          unauthorized: true,
+          forbidden: true,
+          notFound: true,
+          validation: true,
+        },
+      ),
       detail: {
         tags: ['Map making tools'],
         operationId: 'exportMapLocations',
