@@ -16,10 +16,8 @@ import {
 import { eq } from 'drizzle-orm';
 import { discordBotRouter } from './discord-bot';
 
-const RECENCY_FILTER_ENV = 'DISCORD_CHALLENGE_RECENCY_FILTER_ENABLED';
 const originalFetch = globalThis.fetch;
 const originalNfcaToken = process.env.NFCA_TOKEN;
-const originalRecencyFilter = process.env[RECENCY_FILTER_ENV];
 
 afterEach(() => {
   globalThis.fetch = originalFetch;
@@ -27,11 +25,6 @@ afterEach(() => {
     delete process.env.NFCA_TOKEN;
   } else {
     process.env.NFCA_TOKEN = originalNfcaToken;
-  }
-  if (originalRecencyFilter === undefined) {
-    delete process.env[RECENCY_FILTER_ENV];
-  } else {
-    process.env[RECENCY_FILTER_ENV] = originalRecencyFilter;
   }
 });
 
@@ -169,7 +162,6 @@ function mockSuccessfulChallengeGeneration(calls: string[]) {
 
 describe('POST /discord-bot/daily-challenges', () => {
   test('creates once and replays the completed daily batch', async () => {
-    delete process.env[RECENCY_FILTER_ENV];
     await seedChallengeMaps();
     const generatedMaps: string[] = [];
     mockSuccessfulChallengeGeneration(generatedMaps);
@@ -225,7 +217,6 @@ describe('POST /discord-bot/daily-challenges', () => {
   });
 
   test('allows maps from groups synced within four months', async () => {
-    delete process.env[RECENCY_FILTER_ENV];
     await seedChallengeMaps(Math.floor(Date.now() / 1000) - 100 * 86_400);
     mockSuccessfulChallengeGeneration([]);
 
@@ -236,18 +227,18 @@ describe('POST /discord-bot/daily-challenges', () => {
   });
 
   test('allows stale maps when the recency filter is disabled', async () => {
-    process.env[RECENCY_FILTER_ENV] = 'false';
     await seedChallengeMaps(Math.floor(Date.now() / 1000) - 150 * 86_400);
-    mockSuccessfulChallengeGeneration([]);
 
-    const response = await dailyChallengesRequest();
+    const batch = await getOrCreateDailyChallengeBatch(
+      DEFAULT_CHALLENGE_SETTINGS,
+      new Date(),
+      false,
+    );
 
-    expect(response.status).toBe(200);
-    expect(await db.select().from(discordChallengeMapHistory)).toHaveLength(6);
+    expect(batch.maps).toHaveLength(6);
   });
 
   test('persists successful URLs and resumes only missing generation', async () => {
-    delete process.env[RECENCY_FILTER_ENV];
     await seedChallengeMaps();
     process.env.NFCA_TOKEN = 'test';
     const generatedMaps: string[] = [];
@@ -393,7 +384,6 @@ describe('POST /discord-bot/daily-challenges', () => {
   });
 
   test('rolls back when a difficulty has fewer than two eligible maps', async () => {
-    delete process.env[RECENCY_FILTER_ENV];
     const [group] = await db
       .insert(mapGroups)
       .values({

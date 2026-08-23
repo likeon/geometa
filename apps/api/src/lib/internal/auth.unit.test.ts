@@ -9,8 +9,6 @@ import {
 } from 'bun:test';
 import { Elysia } from 'elysia';
 
-const originalAuthRequired = process.env.API_INTERNAL_AUTH_REQUIRED;
-const originalFrontendToken = process.env.FRONTEND_API_TOKEN;
 const originalBunFile = globalThis.Bun.file;
 const originalFetch = globalThis.fetch;
 const capturedErrors: unknown[] = [];
@@ -27,13 +25,14 @@ mock.module('@sentry/bun', async () => ({
 const { auth, bearer } = await import('./auth');
 const jose = await import('jose');
 
-function restoreEnv(name: string, value: string | undefined) {
-  if (value === undefined) {
-    delete process.env[name];
-  } else {
-    process.env[name] = value;
-  }
-}
+const authDisabled = {
+  API_INTERNAL_AUTH_REQUIRED: false,
+  FRONTEND_API_TOKEN: undefined,
+};
+const tokenAuth = {
+  API_INTERNAL_AUTH_REQUIRED: true,
+  FRONTEND_API_TOKEN: 'correct-token',
+};
 
 function bearerApp() {
   return new Elysia().use(bearer()).get('/', ({ bearer }) => ({ bearer }));
@@ -66,9 +65,11 @@ describe('bearer parsing', () => {
 });
 
 function userIdApp() {
-  return new Elysia().use(auth()).get('/', ({ userId }) => ({ userId }), {
-    userId: true,
-  });
+  return new Elysia()
+    .use(auth(undefined, authDisabled))
+    .get('/', ({ userId }) => ({ userId }), {
+      userId: true,
+    });
 }
 
 async function requestUserId(headers: Record<string, string>) {
@@ -90,14 +91,11 @@ describe('userId macro', () => {
   });
 });
 
-// The auth gate is default-enabled: auth() rejects unless
-// API_INTERNAL_AUTH_REQUIRED is exactly 'false'. The run command disables it
-// globally so the suites above exercise bearer parsing and the userId macro
-// without auth. These tests re-enable the default gate per test and exercise
-// the real `.use(auth())` composition.
+// Token-auth tests inject enabled config while application routes use central
+// startup config by default.
 function prodTokenApp() {
   return new Elysia()
-    .use(auth())
+    .use(auth(undefined, tokenAuth))
     .get('/', ({ userId }) => ({ userId }), { userId: true });
 }
 
@@ -106,16 +104,6 @@ async function requestProdToken(headers: Record<string, string>) {
 }
 
 describe('frontend token contract', () => {
-  beforeEach(() => {
-    process.env.FRONTEND_API_TOKEN = 'correct-token';
-    delete process.env.API_INTERNAL_AUTH_REQUIRED;
-  });
-
-  afterEach(() => {
-    restoreEnv('API_INTERNAL_AUTH_REQUIRED', originalAuthRequired);
-    restoreEnv('FRONTEND_API_TOKEN', originalFrontendToken);
-  });
-
   test('rejects missing bearer with 401', async () => {
     const response = await requestProdToken({
       'x-api-user-id': 'discord-user-123',
@@ -144,8 +132,7 @@ describe('frontend token contract', () => {
 // Production JWT contract: auth(true) verifies Kubernetes JWTs against the
 // remote JWKS. These tests run the real `.use(auth(true))` flow with only
 // external boundaries mocked: service-account files (Bun.file), the JWKS
-// endpoint (fetch), and Sentry capture. The auth gate is re-enabled per test
-// (API_INTERNAL_AUTH_REQUIRED unset).
+// endpoint (fetch), and Sentry capture.
 //
 // The JWKS endpoint fetch count is shared across every test in this suite:
 // the memoized construction reuses one remote JWKS set, so the whole process
@@ -173,13 +160,12 @@ const sign = (claims: Record<string, unknown>) =>
 
 function jwtApp() {
   return new Elysia()
-    .use(auth(true))
+    .use(auth(true, tokenAuth))
     .get('/', ({ userId }) => ({ userId }), { userId: true });
 }
 
 describe('production JWT contract', () => {
   beforeEach(() => {
-    delete process.env.API_INTERNAL_AUTH_REQUIRED;
     capturedErrors.length = 0;
     globalThis.Bun.file = ((_path: string) => ({
       text: async () => 'test-ca',
@@ -199,13 +185,11 @@ describe('production JWT contract', () => {
   });
 
   afterEach(() => {
-    restoreEnv('API_INTERNAL_AUTH_REQUIRED', originalAuthRequired);
     globalThis.Bun.file = originalBunFile;
     globalThis.fetch = originalFetch;
   });
 
   const hit = (token: string) => {
-    delete process.env.API_INTERNAL_AUTH_REQUIRED;
     return jwtApp().handle(
       new Request('http://localhost/', {
         headers: {
@@ -255,8 +239,6 @@ describe('production JWT contract', () => {
 // must remain open.
 describe('auth gate scope', () => {
   beforeEach(() => {
-    process.env.FRONTEND_API_TOKEN = 'correct-token';
-    delete process.env.API_INTERNAL_AUTH_REQUIRED;
     capturedErrors.length = 0;
     globalThis.Bun.file = ((_path: string) => ({
       text: async () => 'test-ca',
@@ -273,8 +255,6 @@ describe('auth gate scope', () => {
   });
 
   afterEach(() => {
-    restoreEnv('API_INTERNAL_AUTH_REQUIRED', originalAuthRequired);
-    restoreEnv('FRONTEND_API_TOKEN', originalFrontendToken);
     globalThis.Bun.file = originalBunFile;
     globalThis.fetch = originalFetch;
   });
@@ -283,8 +263,10 @@ describe('auth gate scope', () => {
   // sub-routers that each mount auth, next to a public router with no auth.
   function scopedGateApp() {
     const internal = new Elysia({ prefix: '/internal' })
-      .use(new Elysia().use(auth()).get('/metas', () => 'ok'))
-      .use(new Elysia().use(auth(true)).get('/discord', () => 'ok'));
+      .use(
+        new Elysia().use(auth(undefined, tokenAuth)).get('/metas', () => 'ok'),
+      )
+      .use(new Elysia().use(auth(true, tokenAuth)).get('/discord', () => 'ok'));
 
     return new Elysia().use(internal).get('/maps', () => 'public');
   }

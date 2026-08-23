@@ -1,3 +1,4 @@
+import { type ApplicationConfig, config } from '@api/config';
 import * as Sentry from '@sentry/bun';
 import { Elysia, t } from 'elysia';
 import * as jose from 'jose';
@@ -9,7 +10,7 @@ const getJWKS = memoizeOne(async () => {
   ).text();
 
   return jose.createRemoteJWKSet(
-    new URL('https://kubernetes.default.svc/openid/v1/jwks'),
+    URL.parse('https://kubernetes.default.svc/openid/v1/jwks')!,
     {
       [jose.customFetch]: async (url: URL | string, options?: RequestInit) => {
         const bearer = await Bun.file(
@@ -42,11 +43,16 @@ export function bearer() {
     },
   );
 }
-export function auth(jwt?: boolean) {
+type AuthConfig = Pick<
+  ApplicationConfig,
+  'API_INTERNAL_AUTH_REQUIRED' | 'FRONTEND_API_TOKEN'
+>;
+
+export function auth(jwt?: boolean, authConfig: AuthConfig = config) {
   return new Elysia({ name: `geometa-auth`, seed: { jwt } })
     .use(bearer())
     .onBeforeHandle({ as: 'scoped' }, async ({ bearer, status }) => {
-      if (process.env.API_INTERNAL_AUTH_REQUIRED !== 'false') {
+      if (authConfig.API_INTERNAL_AUTH_REQUIRED) {
         if (!bearer) {
           return status(401);
         }
@@ -69,7 +75,7 @@ export function auth(jwt?: boolean) {
           }
         } else {
           // Regular token validation
-          if (bearer !== process.env.FRONTEND_API_TOKEN) {
+          if (bearer !== authConfig.FRONTEND_API_TOKEN) {
             return status(403);
           }
         }

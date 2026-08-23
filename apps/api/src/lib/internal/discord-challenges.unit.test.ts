@@ -3,7 +3,6 @@ import {
   type ChallengeMapCandidate,
   challengeDailyKey,
   formatChallengeDate,
-  isRecencyFilterEnabled,
   recencyWeight,
   selectWeightedMaps,
 } from './discord-challenges';
@@ -30,20 +29,6 @@ describe('daily challenge date', () => {
     const date = new Date('2026-08-17T22:30:00Z');
     expect(formatChallengeDate(date)).toBe('18 August 2026');
     expect(challengeDailyKey(date)).toBe('2026-08-18');
-  });
-});
-
-describe('daily challenge recency filter setting', () => {
-  test('defaults to enabled and parses boolean values', () => {
-    expect(isRecencyFilterEnabled(undefined)).toBe(true);
-    expect(isRecencyFilterEnabled('true')).toBe(true);
-    expect(isRecencyFilterEnabled('false')).toBe(false);
-  });
-
-  test('rejects invalid values', () => {
-    expect(() => isRecencyFilterEnabled('TRUE')).toThrow(
-      'DISCORD_CHALLENGE_RECENCY_FILTER_ENABLED must be true or false',
-    );
   });
 });
 

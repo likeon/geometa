@@ -1,6 +1,8 @@
+import { validateConfigProfile } from '@api/config';
 import { command, positional, run, string, subcommands } from 'cmd-ts';
 
 const startApi = async () => {
+  const config = validateConfigProfile('api');
   const [{ app }, { runMigrate }, { prod }] = await Promise.all([
     import('./api'),
     import('./lib/db/migrate'),
@@ -18,7 +20,7 @@ const startApi = async () => {
     }
   }
 
-  app.listen(parseInt(process.env.SERVER_PORT || '3000', 10));
+  app.listen(config.SERVER_PORT);
 
   const gracefulShutdown = async () => {
     await app.stop();
@@ -47,6 +49,7 @@ const scriptCommand = command({
   handler: async ({ scriptName }) => {
     switch (scriptName) {
       case 'validate_street_view_locations':
+        validateConfigProfile('street-view');
         await import('./scripts/validate_street_view_locations');
         break;
       default:

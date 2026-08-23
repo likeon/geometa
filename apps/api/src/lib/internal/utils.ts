@@ -1,8 +1,10 @@
+import { config } from '@api/config';
+
 export async function geoguessrAPIFetch(
   url: string,
   { method = 'GET', headers, ...restOptions }: RequestInit = {},
 ) {
-  const ncfaToken = process.env.NFCA_TOKEN || null;
+  const ncfaToken = config.NFCA_TOKEN ?? null;
 
   if (ncfaToken == null) {
     throw new Error('NFCA_TOKEN IS MISSING');

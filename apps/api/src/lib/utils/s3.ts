@@ -1,14 +1,13 @@
+import { config } from '@api/config';
 import { AwsClient } from 'aws4fetch';
 
-const s3Url = process.env.IMAGES_S3_URL;
-const s3AccessKey = process.env.IMAGES_S3_ACCESS_KEY;
-const s3SecretKey = process.env.IMAGES_S3_SECRET_KEY;
+const { IMAGES_S3_URL, IMAGES_S3_ACCESS_KEY, IMAGES_S3_SECRET_KEY } = config;
 
 let client: AwsClient | undefined;
-if (s3Url && s3AccessKey && s3SecretKey) {
+if (IMAGES_S3_URL && IMAGES_S3_ACCESS_KEY && IMAGES_S3_SECRET_KEY) {
   client = new AwsClient({
-    accessKeyId: s3AccessKey,
-    secretAccessKey: s3SecretKey,
+    accessKeyId: IMAGES_S3_ACCESS_KEY,
+    secretAccessKey: IMAGES_S3_SECRET_KEY,
     region: 'something',
     service: 's3',
   });
@@ -20,7 +19,7 @@ export async function uploadImage(file: ArrayBuffer, name: string) {
   if (!client) {
     throw new Error('s3 details missing');
   }
-  const s3ImageUrl = `${s3Url}/${name}`;
+  const s3ImageUrl = `${IMAGES_S3_URL}/${name}`;
   const { status } = await client.fetch(s3ImageUrl, {
     method: 'PUT',
     body: file,

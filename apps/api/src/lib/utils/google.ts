@@ -1,3 +1,4 @@
+import { config } from '@api/config';
 import retry from 'async-retry';
 
 type StreetViewMeta = {
@@ -9,11 +10,15 @@ type StreetViewMeta = {
 };
 
 export async function streetViewFromPanoid(panoId: string) {
-  const url = new URL(
+  const url = URL.parse(
     'https://maps.googleapis.com/maps/api/streetview/metadata',
-  );
+  )!;
   url.searchParams.set('pano', panoId);
-  url.searchParams.set('key', process.env.GOOGLE_MAPS_API_KEY!);
+  const apiKey = config.GOOGLE_MAPS_API_KEY;
+  if (apiKey === undefined) {
+    throw new Error('GOOGLE_MAPS_API_KEY is missing');
+  }
+  url.searchParams.set('key', apiKey);
 
   const meta = await retry<StreetViewMeta>(
     async (bail) => {

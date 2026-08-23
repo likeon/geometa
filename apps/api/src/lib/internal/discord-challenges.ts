@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { config } from '@api/config';
 import {
   discordChallengeBatches,
   discordChallengeMapHistory,
@@ -22,7 +23,6 @@ import {
 } from 'drizzle-orm';
 
 const CHALLENGE_SELECTION_LOCK_ID = 1_534_189_078;
-const RECENCY_FILTER_ENV = 'DISCORD_CHALLENGE_RECENCY_FILTER_ENABLED';
 const MAPS_PER_DIFFICULTY = 2;
 const MAX_WEIGHT_AGE_DAYS = 90;
 const SECONDS_PER_DAY = 86_400;
@@ -92,19 +92,6 @@ export function challengeDailyKey(date = new Date()): string {
     parts.map((part) => [part.type, part.value]),
   );
   return `${values.year}-${values.month}-${values.day}`;
-}
-
-export function isRecencyFilterEnabled(value: string | undefined): boolean {
-  if (value === undefined) {
-    return true;
-  }
-  if (value === 'true') {
-    return true;
-  }
-  if (value === 'false') {
-    return false;
-  }
-  throw new Error(`${RECENCY_FILTER_ENV} must be true or false`);
 }
 
 export class InsufficientChallengeMapsError extends Error {
@@ -202,6 +189,7 @@ function batchDate(dailyKey: string): string {
 export async function getOrCreateDailyChallengeBatch(
   settings: ChallengeSettings,
   date = new Date(),
+  recencyFilterEnabled = config.DISCORD_CHALLENGE_RECENCY_FILTER_ENABLED,
 ): Promise<DailyChallengeBatch> {
   const dailyKey = challengeDailyKey(date);
   return db.$primary.transaction(async (tx) => {
@@ -236,9 +224,7 @@ export async function getOrCreateDailyChallengeBatch(
     }
 
     const selectedAt = Math.floor(date.getTime() / 1000);
-    const recencyCondition = isRecencyFilterEnabled(
-      process.env[RECENCY_FILTER_ENV],
-    )
+    const recencyCondition = recencyFilterEnabled
       ? gte(
           mapGroups.syncedAt,
           sql<number>`EXTRACT(EPOCH FROM NOW() - INTERVAL '4 months')::integer`,

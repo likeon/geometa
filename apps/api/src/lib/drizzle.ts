@@ -1,3 +1,4 @@
+import { config, getDatabaseConfig } from '@api/config';
 import { withReplicas } from 'drizzle-orm/pg-core';
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
@@ -6,27 +7,15 @@ import * as schema from './db/schema';
 const poolSize = 10;
 
 function createDbInstance() {
-  // without replica db has different type
-  // so have to specify main db as replica for local development
-  let databaseURL: string;
-  let replicaURL: string;
-  if (process.env.DATABASE_URL) {
-    databaseURL = process.env.DATABASE_URL;
-    replicaURL = databaseURL;
-  } else if (process.env.DATABASE_PASSWORD) {
-    databaseURL = `postgresql://geometa:${process.env.DATABASE_PASSWORD}@postgres/geometa?sslmode=require`;
-    replicaURL = `postgresql://geometa:${process.env.DATABASE_PASSWORD}@postgres-repl/geometa?sslmode=require`;
-  } else {
-    databaseURL = 'postgresql://postgres:postgres@localhost/geometa';
-    replicaURL = databaseURL;
-  }
-  const leader = drizzle(postgres(databaseURL, { max: poolSize }), {
+  // Without a distinct replica, use leader as replica to preserve one DB type.
+  const { leaderUrl, replicaUrl } = getDatabaseConfig();
+  const leader = drizzle(postgres(leaderUrl, { max: poolSize }), {
     schema,
-    logger: process.env.DRIZZLE_LOGGER === 'true',
+    logger: config.DRIZZLE_LOGGER,
   });
-  const replica = drizzle(postgres(replicaURL, { max: poolSize }), {
+  const replica = drizzle(postgres(replicaUrl, { max: poolSize }), {
     schema,
-    logger: process.env.DRIZZLE_LOGGER === 'true',
+    logger: config.DRIZZLE_LOGGER,
   });
   return withReplicas(leader, [replica]);
 }
