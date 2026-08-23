@@ -37,10 +37,17 @@ interface DatabaseUserAttributes {
   username: string;
 }
 
+function requireEnvironmentVariable(value: string | undefined, name: string): string {
+  if (!value) {
+    throw new Error(`${name} is not configured`);
+  }
+  return value;
+}
+
 export function getDiscord() {
   return new Discord(
-    env.DISCORD_APPLICATION_ID,
-    env.DISCORD_SECRET_ID,
+    requireEnvironmentVariable(env.DISCORD_APPLICATION_ID, 'DISCORD_APPLICATION_ID'),
+    requireEnvironmentVariable(env.DISCORD_SECRET_ID, 'DISCORD_SECRET_ID'),
     env.LOGIN_RETURN_URL ?? 'http://localhost:5173/login/callback'
   );
 }
