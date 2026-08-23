@@ -191,7 +191,7 @@ describe('POST /api/internal/maps/personal', () => {
       });
 
       expect(response.status).toBe(403);
-      expect(await response.text()).toBe(popularMapMessage);
+      expect(await response.json()).toEqual({ message: popularMapMessage });
       expect(await db.select().from(maps)).toEqual([]);
     });
 
@@ -211,9 +211,9 @@ describe('POST /api/internal/maps/personal', () => {
         geoguessrId: 'my-map',
       });
       expect(second.status).toBe(409);
-      expect(await second.text()).toBe(
-        'Map with this GeoGuessr ID already exists.',
-      );
+      expect(await second.json()).toEqual({
+        message: 'Map with this GeoGuessr ID already exists.',
+      });
       expect(await db.select().from(maps)).toHaveLength(1);
     });
   });
@@ -357,9 +357,9 @@ describe('PATCH /api/internal/maps/personal/:id', () => {
     });
 
     expect(response.status).toBe(409);
-    expect(await response.text()).toBe(
-      'Map with this GeoGuessr ID already exists.',
-    );
+    expect(await response.json()).toEqual({
+      message: 'Map with this GeoGuessr ID already exists.',
+    });
     // The whole update rolled back: neither the name nor the geoguessrId changed.
     const [row] = await db.select().from(maps).where(eq(maps.id, otherId));
     expect(row).toEqual(

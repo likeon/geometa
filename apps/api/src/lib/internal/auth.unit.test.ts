@@ -203,7 +203,9 @@ describe('production JWT contract', () => {
   test('verifies JWTs through the production JWKS flow', async () => {
     const wrongAudience = await hit(await sign({ aud: 'not-the-api' }));
     expect(wrongAudience.status).toBe(403);
-    expect(await wrongAudience.json()).toEqual(['JWT validation failed']);
+    expect(await wrongAudience.json()).toEqual({
+      message: 'JWT validation failed',
+    });
     expect(capturedErrors).toHaveLength(1);
 
     const malformed = await hit('not-a-jwt');
