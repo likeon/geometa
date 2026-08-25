@@ -3,7 +3,49 @@ import { expect, mock, test } from 'bun:test';
 const pageWindow: Record<string, any> = {};
 mock.module('$', () => ({ unsafeWindow: pageWindow }));
 
-const { clearMapArea, showMapArea } = await import('../src/lib/mapArea');
+const { clearMapArea, initMapArea, showMapArea } = await import('../src/lib/mapArea');
+
+test('Map constructor composes with legacy userscript wrappers that call apply', () => {
+  const listeners: string[] = [];
+
+  function NativeMap(this: Record<string, unknown>, div: unknown) {
+    this.div = div;
+  }
+  Object.assign(NativeMap.prototype, {
+    addListener(event: string) {
+      listeners.push(event);
+    },
+    fitBounds() {},
+    getBounds() {},
+    getDiv(this: { div: unknown }) {
+      return this.div;
+    }
+  });
+
+  pageWindow.google = { maps: { Map: NativeMap } };
+  initMapArea();
+
+  const learnableMetaMap = pageWindow.google.maps.Map;
+  const PathLoggerMap = Object.assign(
+    function (this: { addListener(event: string, callback: VoidFunction): void }, ...args: any[]) {
+      const result = learnableMetaMap.apply(this, args);
+      this.addListener('idle', () => {});
+      return result;
+    },
+    { prototype: Object.create(learnableMetaMap.prototype) }
+  );
+  pageWindow.google.maps.Map = PathLoggerMap;
+
+  // The Maps API load event can make ALM observe the constructor again after another
+  // userscript has wrapped it, recreating the real-world three-wrapper load order.
+  initMapArea();
+
+  const div = {};
+  const map = new pageWindow.google.maps.Map(div);
+  expect(map).toBeInstanceOf(NativeMap);
+  expect(map.getDiv()).toBe(div);
+  expect(listeners).toEqual(['idle']);
+});
 
 test('React fallback rendering settles its queues', () => {
   const microtasks: VoidFunction[] = [];

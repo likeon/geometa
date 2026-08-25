@@ -834,7 +834,7 @@ describe('GET /api/userscript/map/:geoguessrId', () => {
     expect(await response.json()).toEqual({
       mapFound: true,
       isPersonal: true,
-      userscriptVersion: '0.94',
+      userscriptVersion: '0.95',
     });
   });
 
@@ -858,7 +858,7 @@ describe('GET /api/userscript/map/:geoguessrId', () => {
     expect(await response.json()).toEqual({
       mapFound: true,
       isPersonal: false,
-      userscriptVersion: '0.94',
+      userscriptVersion: '0.95',
     });
   });
 
@@ -878,7 +878,7 @@ describe('GET /api/userscript/map/:geoguessrId', () => {
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({
       mapFound: false,
-      userscriptVersion: '0.94',
+      userscriptVersion: '0.95',
     });
   });
 });

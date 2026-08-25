@@ -198,12 +198,17 @@ function wrapGoogleMaps() {
 
   if (wrappedMapConstructors.has(OriginalMap)) return true;
 
-  const WrappedMap = class extends OriginalMap {
-    constructor(...args: any[]) {
-      super(...args);
-      trackMap(this);
-    }
-  };
+  // Some GeoGuessr userscripts wrap Map with `oldMap.apply(this, args)`. Keep this
+  // wrapper callable as well as constructable so those wrappers can compose with us.
+  const WrappedMap = function (this: GoogleMap, ...args: any[]) {
+    const map = new.target
+      ? (Reflect.construct(OriginalMap, args, new.target) as GoogleMap)
+      : ((Reflect.apply(OriginalMap as unknown as Function, this, args) ?? this) as GoogleMap);
+    trackMap(map);
+    return map;
+  } as unknown as MapConstructor;
+  Object.setPrototypeOf(WrappedMap, OriginalMap);
+  Object.setPrototypeOf(WrappedMap.prototype, OriginalMap.prototype);
   wrappedMapConstructors.add(WrappedMap);
   mapsApi.Map = WrappedMap;
   return true;

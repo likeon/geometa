@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.95]
+
+- Fixed GeoJSON overlays conflicting with userscripts that also wrap Google Maps
+
 ## [0.94]
 
 - Added GeoJSON overlays to GeoGuessr round results

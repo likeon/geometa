@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.94
+// @version      0.95
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
 // @downloadURL  https://github.com/likeon/geometa/raw/main/userscript/dist/geometa.user.js
@@ -22,6 +22,10 @@
 
 /*
 # Changelog
+
+## [0.95]
+
+- Fixed GeoJSON overlays conflicting with userscripts that also wrap Google Maps
 
 ## [0.94]
 
@@ -5048,12 +5052,13 @@ context.l
     if (!mapsApi || !OriginalMap) return false;
     wrapFitBounds(OriginalMap.prototype);
     if (wrappedMapConstructors.has(OriginalMap)) return true;
-    const WrappedMap = class extends OriginalMap {
-      constructor(...args) {
-        super(...args);
-        trackMap(this);
-      }
+    const WrappedMap = function(...args) {
+      const map = new.target ? Reflect.construct(OriginalMap, args, new.target) : Reflect.apply(OriginalMap, this, args) ?? this;
+      trackMap(map);
+      return map;
     };
+    Object.setPrototypeOf(WrappedMap, OriginalMap);
+    Object.setPrototypeOf(WrappedMap.prototype, OriginalMap.prototype);
     wrappedMapConstructors.add(WrappedMap);
     mapsApi.Map = WrappedMap;
     return true;
