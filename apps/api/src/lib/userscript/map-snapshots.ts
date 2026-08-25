@@ -23,7 +23,7 @@ export async function getSynchronizedGroupMapSnapshots(groupId: number) {
 
   if (groupMaps.length !== 0) {
     const locationRows = await db.$primary
-      .select({
+      .selectDistinctOn([syncedMapMetas.mapId, syncedLocations.panoId], {
         mapId: syncedMapMetas.mapId,
         panoId: syncedLocations.panoId,
         lat: syncedLocations.lat,
@@ -42,6 +42,11 @@ export async function getSynchronizedGroupMapSnapshots(groupId: number) {
           syncedMapMetas.mapId,
           groupMaps.map((map) => map.id),
         ),
+      )
+      .orderBy(
+        syncedMapMetas.mapId,
+        syncedLocations.panoId,
+        syncedLocations.syncedMetaId,
       );
 
     for (const row of locationRows) {

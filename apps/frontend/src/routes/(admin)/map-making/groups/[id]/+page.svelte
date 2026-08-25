@@ -51,20 +51,15 @@
   let selectedMeta = $derived(metas.find((meta) => meta.id == selectedMetaId) ?? null);
   let metaIds = $derived(metas.map((m) => m.id));
 
-  type UploadResult = { count: number; ignoredCount: number; conflictCount: number };
+  type UploadResult = { count: number; ignoredCount: number };
   let uploadResult = $state<UploadResult | null>(null);
   let isOwner = $derived(data.role === 'owner');
 
   $effect(() => {
     if (!uploadResult) return;
-    const { count, ignoredCount, conflictCount } = uploadResult;
-    const suffixes = [
-      ignoredCount > 0 ? `${ignoredCount} locations with other tags were ignored` : '',
-      conflictCount > 0
-        ? `${conflictCount} locations were skipped because they already belong to another meta`
-        : ''
-    ].filter(Boolean);
-    const suffix = suffixes.length ? ` (${suffixes.join('; ')})` : '';
+    const { count, ignoredCount } = uploadResult;
+    const suffix =
+      ignoredCount > 0 ? ` (${ignoredCount} locations without this tag were ignored)` : '';
     if (count === 0) {
       toast.push(`No locations were uploaded${suffix}`, {
         duration: 8000,

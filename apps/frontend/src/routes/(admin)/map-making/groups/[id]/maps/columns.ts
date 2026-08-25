@@ -57,6 +57,18 @@ export const columns: ColumnDef<PageData['group']['maps'][number]>[] = [
     }
   },
   {
+    id: 'balance',
+    header: '',
+    cell: ({ row }) =>
+      renderComponent(BaseTableLink, {
+        link: `/map-making/groups/${row.original.mapGroupId}/maps/${row.original.id}/balance`,
+        name: 'Balance'
+      }),
+    meta: {
+      class: 'whitespace-nowrap'
+    }
+  },
+  {
     accessorKey: 'geoguessrLink',
     header: 'Geo Map-Maker',
     cell: ({ row }) =>

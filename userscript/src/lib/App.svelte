@@ -24,6 +24,8 @@
   } from './utils/announcement';
   import { modalDialog } from './utils/modalDialog';
   import { clearMapArea, showMapArea } from './mapArea';
+  import { API_BASE_URL, CACHE_NAMESPACE, SITE_BASE_URL } from './config';
+  import { isGeoJsonEnabled } from './utils/geoJsonSetting';
 
   interface Props {
     panoId: string;
@@ -35,67 +37,141 @@
 
   let { panoId, mapId, userscriptVersion, source, roundNumber }: Props = $props();
 
-  type GeoInfo = {
-    country: string;
+  type MetaSummary = {
+    id: number;
     metaName: string;
+  };
+  type MetaInfo = MetaSummary & {
+    country: string;
     note: string;
     images?: string[];
     geoJson?: Record<string, unknown> | null;
     footer: string;
   };
+  type LocationInfo = MetaInfo & { metas?: MetaSummary[] };
 
-  let geoInfo: GeoInfo | null = $state(null);
+  let metas = $state<MetaSummary[]>([]);
+  let metaDetails = $state<Array<MetaInfo | null>>([]);
   let error: string | null = $state(null);
+  let detailError: string | null = $state(null);
+  let selectedMetaIndex = $state(0);
+  const selectedMeta = $derived(metaDetails[selectedMetaIndex] ?? null);
+  const tabIdPrefix = `geometa-${crypto.randomUUID()}`;
+  const cacheKey = `${CACHE_NAMESPACE}:${mapId}_${panoId}`;
+  const geoJsonEnabled = isGeoJsonEnabled();
+  const loadingMetaIds = new Set<number>();
+
+  function requestJson<T>(url: string): Promise<T> {
+    return new Promise((resolve, reject) => {
+      GM_xmlhttpRequest({
+        method: 'GET',
+        url,
+        timeout: 10000,
+        onload: (response) => {
+          if (response.status === 200) {
+            try {
+              resolve(JSON.parse(response.responseText));
+            } catch {
+              reject(new Error('Failed to parse response'));
+            }
+          } else if (response.status === 404) {
+            reject(new Error('Meta for this location not found'));
+          } else {
+            reject(new Error(`HTTP error! status: ${response.status}`));
+          }
+        },
+        onerror: (event) => {
+          console.error('Error:', event);
+          reject(new Error('An error occurred while fetching data'));
+        },
+        ontimeout: () => reject(new Error('The request timed out - please try again'))
+      });
+    });
+  }
+
+  function setInitialMeta(data: LocationInfo) {
+    const { metas: summaries, ...primary } = data;
+    metas = summaries ?? [{ id: primary.id, metaName: primary.metaName }];
+    metaDetails = metas.map((_, index) => (index === 0 ? primary : null));
+  }
+
+  async function loadMeta(index: number) {
+    const summary = metas[index];
+    if (!summary || metaDetails[index] || loadingMetaIds.has(summary.id)) return;
+
+    const detailCacheKey = `${cacheKey}_${summary.id}`;
+    const cached = window.geometaMetaCache?.get(detailCacheKey) as MetaInfo | undefined;
+    if (cached) {
+      metaDetails[index] = cached;
+      return;
+    }
+
+    loadingMetaIds.add(summary.id);
+    try {
+      const query = new URLSearchParams({
+        panoId,
+        mapId,
+        includeGeoJson: String(geoJsonEnabled)
+      }).toString();
+      const data = await requestJson<MetaInfo>(
+        `${API_BASE_URL}/api/userscript/location/meta/${summary.id}?${query}`
+      );
+      metaDetails[index] = data;
+      (window.geometaMetaCache ??= new Map()).set(detailCacheKey, data);
+    } catch (cause) {
+      if (selectedMetaIndex === index) {
+        detailError = cause instanceof Error ? cause.message : String(cause);
+      }
+    } finally {
+      loadingMetaIds.delete(summary.id);
+    }
+  }
+
+  function selectMeta(index: number) {
+    selectedMetaIndex = index;
+    detailError = null;
+    void loadMeta(index);
+  }
+
+  function onTabKeydown(event: KeyboardEvent) {
+    const last = metas.length - 1;
+    let next: number | null = null;
+    if (event.key === 'ArrowRight') next = selectedMetaIndex >= last ? 0 : selectedMetaIndex + 1;
+    else if (event.key === 'ArrowLeft')
+      next = selectedMetaIndex <= 0 ? last : selectedMetaIndex - 1;
+    else if (event.key === 'Home') next = 0;
+    else if (event.key === 'End') next = last;
+    if (next === null) return;
+    event.preventDefault();
+    selectMeta(next);
+    document.getElementById(`${tabIdPrefix}-tab-${next}`)?.focus();
+  }
 
   let container: HTMLDivElement;
   let header: HTMLDivElement;
 
   onMount(() => {
-    const cacheKey = `${mapId}_${panoId}`;
-
-    const cachedData = window.geometaMetaCache?.get(cacheKey);
+    const cachedData = window.geometaMetaCache?.get(cacheKey) as LocationInfo | undefined;
     if (cachedData) {
-      geoInfo = cachedData;
+      setInitialMeta(cachedData);
     } else {
       const urlParams = new URLSearchParams({
         panoId,
         mapId,
         userscriptVersion,
-        source
+        source,
+        includeGeoJson: String(geoJsonEnabled)
       }).toString();
-      const url = `https://learnablemeta.com/api/userscript/location?${urlParams}`;
+      const url = `${API_BASE_URL}/api/userscript/location?${urlParams}`;
 
-      GM_xmlhttpRequest({
-        method: 'GET',
-        url: url,
-        timeout: 10000,
-        onload: (response) => {
-          if (response.status === 200) {
-            try {
-              const data = JSON.parse(response.responseText);
-              geoInfo = data;
-
-              if (!window.geometaMetaCache) {
-                window.geometaMetaCache = new Map();
-              }
-              window.geometaMetaCache.set(cacheKey, data);
-            } catch (e) {
-              error = 'Failed to parse response';
-            }
-          } else if (response.status === 404) {
-            error = 'Meta for this location not found';
-          } else {
-            error = `HTTP error! status: ${response.status}`;
-          }
-        },
-        onerror: (e) => {
-          error = 'An error occurred while fetching data';
-          console.error('Error:', e);
-        },
-        ontimeout: () => {
-          error = 'The request timed out - please try again';
-        }
-      });
+      requestJson<LocationInfo>(url)
+        .then((data) => {
+          setInitialMeta(data);
+          (window.geometaMetaCache ??= new Map()).set(cacheKey, data);
+        })
+        .catch((cause) => {
+          error = cause instanceof Error ? cause.message : String(cause);
+        });
     }
 
     setContainerPosition(container);
@@ -163,7 +239,7 @@
   updateHelpClass();
 
   $effect(() => {
-    if (geoInfo) {
+    if (selectedMeta) {
       const links = document.querySelectorAll('.geometa-footer a, .geometa-note a');
       links.forEach((link) => {
         link.removeEventListener('click', confirmNavigation);
@@ -173,7 +249,7 @@
   });
 
   $effect(() => {
-    if (geoInfo?.geoJson) showMapArea(geoInfo.geoJson);
+    if (geoJsonEnabled && selectedMeta?.geoJson) showMapArea(selectedMeta.geoJson);
     else clearMapArea();
     return clearMapArea;
   });
@@ -205,13 +281,10 @@
   <div class="flex header" bind:this={header}>
     <h2>Learnable Meta</h2>
     <div class="icons">
-      <a
-        href={'https://learnablemeta.com/maps/' + mapId}
-        target="_blank"
-        aria-label="List of map metas">
+      <a href={`${SITE_BASE_URL}/maps/${mapId}`} target="_blank" aria-label="List of map metas">
         <span class="skill-icons--list"></span>
       </a>
-      <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website">
+      <a href={SITE_BASE_URL} target="_blank" aria-label="Learnable Meta website">
         <span class="flat-color-icons--globe"></span>
       </a>
       <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord">
@@ -224,23 +297,57 @@
   </div>
   {#if error}
     <p>Error: {error}</p>
-  {:else if geoInfo}
-    <p>
-      <CountryFlag countryName={geoInfo.country} />
-      <strong>{geoInfo.country}</strong> - {geoInfo.metaName}
-    </p>
-    <div class="geometa-note">
-      {@html geoInfo.note}
+  {:else if metas.length}
+    {#if metas.length > 1}
+      <div class="meta-tabs" role="tablist" aria-label="Metas at this location">
+        {#each metas as meta, index (meta.id)}
+          <button
+            type="button"
+            role="tab"
+            id={`${tabIdPrefix}-tab-${index}`}
+            aria-controls={`${tabIdPrefix}-panel`}
+            class="meta-tab"
+            class:active={index === selectedMetaIndex}
+            aria-selected={index === selectedMetaIndex}
+            tabindex={index === selectedMetaIndex ? 0 : -1}
+            onkeydown={onTabKeydown}
+            onclick={() => selectMeta(index)}>
+            {meta.metaName}
+          </button>
+        {/each}
+      </div>
+    {/if}
+    <div
+      class="meta-panel"
+      id={`${tabIdPrefix}-panel`}
+      role={metas.length > 1 ? 'tabpanel' : undefined}
+      aria-labelledby={metas.length > 1 ? `${tabIdPrefix}-tab-${selectedMetaIndex}` : undefined}
+      aria-busy={!selectedMeta && !detailError}>
+      {#if detailError}
+        <p>Error: {detailError}</p>
+      {:else if selectedMeta}
+        <p>
+          <CountryFlag countryName={selectedMeta.country} />
+          <strong>{selectedMeta.country}</strong> - {selectedMeta.metaName}
+        </p>
+        <div class="geometa-note">
+          {@html selectedMeta.note}
+        </div>
+        {#if selectedMeta.footer}
+          <p class="geometa-footer">
+            {@html selectedMeta.footer}
+          </p>
+        {/if}
+        {#if selectedMeta.images && selectedMeta.images.length}
+          <hr />
+          {#key selectedMeta.id}
+            <Carousel images={selectedMeta.images} />
+          {/key}
+        {/if}
+      {:else}
+        <Spinner />
+      {/if}
     </div>
-    {#if geoInfo.footer}
-      <p class="geometa-footer">
-        {@html geoInfo.footer}
-      </p>
-    {/if}
-    {#if geoInfo.images && geoInfo.images.length}
-      <hr />
-      <Carousel images={geoInfo.images} />
-    {/if}
   {:else}
     <Spinner />
   {/if}
@@ -386,6 +493,49 @@
   .geometa-footer {
     color: #d3d3d3;
     font-size: small;
+  }
+
+  .meta-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    width: 100%;
+  }
+
+  .meta-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-start;
+    width: 100%;
+  }
+
+  .meta-tab {
+    background: rgba(255, 255, 255, 0.08);
+    color: #d3d3d3;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 2px 8px;
+    font: inherit;
+    font-size: 14px;
+    line-height: 1.3;
+    text-transform: none;
+    cursor: pointer;
+  }
+
+  .meta-tab:hover {
+    background: rgba(255, 255, 255, 0.16);
+    color: #fff;
+  }
+
+  .meta-tab.active {
+    background: #188bd2;
+    color: #fff;
+  }
+
+  .meta-tab:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 1px;
   }
 
   .announcement {

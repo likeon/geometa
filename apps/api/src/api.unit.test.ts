@@ -5,6 +5,7 @@ const methods = ['get', 'post', 'put', 'patch', 'delete'] as const;
 const expectedOperations = [
   'exportMapLocations',
   'getLocationMeta',
+  'getLocationMetaDetail',
   'getMapCompatibility',
   'getUserscriptAnnouncement',
   'listAccessibleMapGroups',

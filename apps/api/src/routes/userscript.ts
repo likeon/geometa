@@ -8,7 +8,10 @@ import {
 } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { bearer } from '@api/lib/internal/auth';
-import { locationSelect } from '@api/lib/userscript/locations';
+import {
+  locationMetaDetailSelect,
+  locationMetaSummariesSelect,
+} from '@api/lib/userscript/locations';
 import { fingerprintMapCoordinates } from '@api/lib/userscript/map-fingerprint';
 import { getSynchronizedGroupMapSnapshots } from '@api/lib/userscript/map-snapshots';
 import { generateFooter } from '@api/lib/userscript/utils';
@@ -17,6 +20,69 @@ import { Elysia, t } from 'elysia';
 
 const userscriptVersion = '0.95';
 const tokenSecurity = [{ learnableMetaToken: [] as string[] }];
+
+const locationQuery = t.Object({
+  mapId: t.String({ description: 'GeoGuessr map ID.' }),
+  panoId: t.String({
+    description: 'Google Street View panorama ID for the location.',
+  }),
+  includeGeoJson: t.Optional(
+    t.Union([t.Literal('true'), t.Literal('false')], {
+      description: 'Whether to include the meta GeoJSON overlay.',
+    }),
+  ),
+});
+
+const locationMetaProperties = {
+  id: t.Integer({ description: 'Synchronized meta ID.' }),
+  country: t.String({ description: 'Location country name.' }),
+  metaName: t.String({ description: 'Public meta name.' }),
+  note: t.String({ description: 'Rendered meta note HTML.' }),
+  images: t.Array(t.String(), { description: 'Meta image URLs.' }),
+  geoJson: t.Optional(
+    t.Unknown({ description: 'GeoJSON overlay associated with the meta.' }),
+  ),
+  footer: t.String({ description: 'Rendered attribution HTML.' }),
+};
+
+const locationMetaSummary = t.Object({
+  id: t.Integer({ description: 'Synchronized meta ID.' }),
+  metaName: t.String({ description: 'Public meta name.' }),
+});
+
+type LocationMeta = Awaited<
+  ReturnType<typeof locationMetaDetailSelect.execute>
+>[number];
+
+const escapeHtml = (value: string) =>
+  value.replace(/[&<>"']/g, (character) => `&#${character.charCodeAt(0)};`);
+
+function formatLocationMeta(meta: LocationMeta) {
+  const country = meta.country || '';
+  let footer = generateFooter(
+    meta.noteFromPlonkit,
+    country,
+    meta.footer,
+    meta.mapFooter,
+  );
+  if (
+    meta.isPersonalMap &&
+    meta.mapAuthors &&
+    meta.mapName &&
+    meta.mapGeoguessrId
+  ) {
+    footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${encodeURIComponent(meta.mapGeoguessrId)}" rel ="nofollow" target="_blank"> ${escapeHtml(meta.mapName)} </a> by <b>${escapeHtml(meta.mapAuthors)}</b></p>`;
+  }
+  return {
+    id: meta.syncedMetaId,
+    country,
+    metaName: meta.name,
+    note: meta.note,
+    images: meta.images,
+    ...(meta.geoJson ? { geoJson: meta.geoJson } : {}),
+    footer,
+  };
+}
 
 const mapGroup = t.Object({
   id: t.Integer({ description: 'Learnable Meta map group ID.' }),
@@ -132,8 +198,19 @@ export const userscriptRouter = new Elysia({
   .get(
     '/location/',
     async ({ query, set }) => {
-      const metaResult = await locationSelect.execute(query);
-      if (!metaResult.length) {
+      const { includeGeoJson = 'true', ...location } = query;
+      const metas = await locationMetaSummariesSelect.execute(location);
+      if (!metas.length) {
+        set.status = 404;
+        return ['NOT_FOUND'];
+      }
+
+      const [primary] = await locationMetaDetailSelect.execute({
+        ...location,
+        metaId: metas[0]!.id,
+        includeGeoJson: includeGeoJson === 'true',
+      });
+      if (!primary) {
         set.status = 404;
         return ['NOT_FOUND'];
       }
@@ -143,52 +220,19 @@ export const userscriptRouter = new Elysia({
       // just keep to be safe
       set.status = 200;
 
-      const [meta] = metaResult;
-      // hack for now, should country be marked as not null in schema since we will always have it?
-      const country = meta.country || '';
-
-      let footer = generateFooter(
-        meta.noteFromPlonkit,
-        country,
-        meta.footer,
-        meta.mapFooter,
-      );
-      if (meta.isPersonalMap && meta.mapAuthors && meta.mapName) {
-        footer += `<p>Meta taken from <a href="https://learnablemeta.com/maps/${meta.mapGeoguessrId}" rel ="nofollow" target="_blank"> ${meta.mapName} </a> by <b>${meta.mapAuthors}</b></p>`;
-      }
-      return {
-        country: country,
-        metaName: meta.name,
-        note: meta.note,
-        images: meta.images,
-        ...(meta.geoJson ? { geoJson: meta.geoJson } : {}),
-        footer: footer,
-      };
+      return { ...formatLocationMeta(primary), metas };
     },
     {
-      query: t.Object({
-        mapId: t.String({ description: 'GeoGuessr map ID.' }),
-        panoId: t.String({
-          description: 'Google Street View panorama ID for the location.',
-        }),
-      }),
+      query: locationQuery,
       response: {
         200: t.Object(
           {
-            country: t.String({ description: 'Location country name.' }),
-            metaName: t.String({ description: 'Public meta name.' }),
-            note: t.String({ description: 'Rendered meta note HTML.' }),
-            images: t.Array(t.String(), {
-              description: 'Meta image URLs.',
+            ...locationMetaProperties,
+            metas: t.Array(locationMetaSummary, {
+              description: 'Metas assigned to this map location.',
             }),
-            geoJson: t.Optional(
-              t.Unknown({
-                description: 'GeoJSON overlay associated with the meta.',
-              }),
-            ),
-            footer: t.String({ description: 'Rendered attribution HTML.' }),
           },
-          { description: 'Meta content for this map location.' },
+          { description: 'Meta content and tabs for this map location.' },
         ),
         404: t.Tuple([t.Literal('NOT_FOUND')], {
           description: 'No synchronized meta matches the location.',
@@ -200,7 +244,49 @@ export const userscriptRouter = new Elysia({
         operationId: 'getLocationMeta',
         summary: 'Get location meta',
         description:
-          'Returns the synchronized meta note, images, attribution, and optional GeoJSON overlay for a panorama on a supported map.',
+          'Returns one synchronized meta and the available meta tabs for a panorama on a supported map.',
+      },
+    },
+  )
+  .get(
+    '/location/meta/:metaId',
+    async ({ params: { metaId }, query, set }) => {
+      const { includeGeoJson = 'true', ...location } = query;
+      const [meta] = await locationMetaDetailSelect.execute({
+        ...location,
+        metaId,
+        includeGeoJson: includeGeoJson === 'true',
+      });
+      if (!meta) {
+        set.status = 404;
+        return ['NOT_FOUND'];
+      }
+
+      set.status = 200;
+      return formatLocationMeta(meta);
+    },
+    {
+      params: t.Object({
+        metaId: t.Integer({ description: 'Synchronized meta ID.' }),
+      }),
+      query: locationQuery,
+      response: {
+        200: t.Object(locationMetaProperties, {
+          description: 'The requested meta content.',
+        }),
+        404: t.Tuple([t.Literal('NOT_FOUND')], {
+          description: 'The meta is not assigned to this map location.',
+        }),
+        422: t.Unknown({
+          description: 'The path or query parameters are invalid.',
+        }),
+      },
+      detail: {
+        tags: ['Userscript'],
+        operationId: 'getLocationMetaDetail',
+        summary: 'Get meta detail',
+        description:
+          'Returns one assigned meta, including its images, attribution, and optional GeoJSON overlay.',
       },
     },
   )
@@ -398,7 +484,7 @@ export const userscriptRouter = new Elysia({
         return status(403, 'Forbidden');
       }
       const locations = await db.$primary
-        .select({
+        .selectDistinctOn([syncedLocations.panoId], {
           panoId: syncedLocations.panoId,
           lat: syncedLocations.lat,
           lng: syncedLocations.lng,
@@ -411,7 +497,8 @@ export const userscriptRouter = new Elysia({
           syncedLocations,
           eq(syncedLocations.syncedMetaId, syncedMapMetas.syncedMetaId),
         )
-        .where(eq(syncedMapMetas.mapId, data.mapId));
+        .where(eq(syncedMapMetas.mapId, data.mapId))
+        .orderBy(syncedLocations.panoId, syncedLocations.syncedMetaId);
       if (
         query.expectedFingerprint !== undefined &&
         fingerprintMapCoordinates(locations) !== query.expectedFingerprint

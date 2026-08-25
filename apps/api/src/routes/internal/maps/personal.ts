@@ -30,9 +30,11 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
             sql<number>`COUNT(DISTINCT ${syncedMapMetas.syncedMetaId})`.as(
               'syncedMetasCount',
             ),
-          locationsCount: sql<number>`COUNT(${syncedLocations.panoId})`.as(
-            'syncedLocationsCount',
-          ),
+          // distinct: a pano shared by several picked metas is one location
+          locationsCount:
+            sql<number>`COUNT(DISTINCT ${syncedLocations.panoId})`.as(
+              'syncedLocationsCount',
+            ),
         })
         .from(maps)
         .leftJoin(syncedMapMetas, eq(syncedMapMetas.mapId, maps.id))

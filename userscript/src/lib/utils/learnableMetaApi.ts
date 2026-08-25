@@ -1,4 +1,5 @@
 import { GM_xmlhttpRequest } from '$';
+import { API_BASE_URL } from '../config';
 import type { ManagedMapCoordinate } from './mapFingerprint';
 
 export class LearnableMetaApiError extends Error {
@@ -81,15 +82,12 @@ export function fetchMapGroupManifest(
   groupId: number,
   apiToken: string
 ): Promise<MapGroupManifest> {
-  return requestJson(
-    `https://learnablemeta.com/api/userscript/map-group/${groupId}/maps`,
-    apiToken
-  );
+  return requestJson(`${API_BASE_URL}/api/userscript/map-group/${groupId}/maps`, apiToken);
 }
 
 export async function fetchAccessibleMapGroups(apiToken: string): Promise<AccessibleMapGroup[]> {
   const data = await requestJson<{ groups: AccessibleMapGroup[] }>(
-    'https://learnablemeta.com/api/userscript/map-groups',
+    `${API_BASE_URL}/api/userscript/map-groups`,
     apiToken
   );
   if (!Array.isArray(data.groups)) {
@@ -107,7 +105,7 @@ export async function fetchSyncedMapLocations(
     ? `?expectedFingerprint=${encodeURIComponent(expectedFingerprint)}`
     : '';
   const data = await requestJson<{ customCoordinates: SyncedMapCoordinate[] }>(
-    `https://learnablemeta.com/api/userscript/map/${geoguessrId}/locations${query}`,
+    `${API_BASE_URL}/api/userscript/map/${geoguessrId}/locations${query}`,
     apiToken
   );
   if (!Array.isArray(data.customCoordinates)) {

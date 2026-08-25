@@ -18,7 +18,7 @@ import {
 } from '@api/lib/internal/utils';
 import { isUniqueViolation } from '@api/lib/utils/common';
 import { markdown2Html } from '@api/lib/utils/markdown';
-import { and, eq, inArray, not } from 'drizzle-orm';
+import { and, eq, inArray, not, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
 export const groupMapsRouter = new Elysia({ prefix: '/group' })
@@ -397,6 +397,74 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
         `attachment; filename="${map.name}.json"`;
 
       return mapData;
+    },
+    {
+      params: t.Object({ id: t.Integer() }),
+      query: t.Object({ groupId: t.Integer() }),
+      userId: true,
+    },
+  )
+  .get(
+    '/:id/meta-balance',
+    async ({ params: { id: mapId }, query, userId, status }) => {
+      // permissions first so an outsider can't probe which group a map is in
+      await ensurePermissions(userId, query.groupId);
+      const map = await db.$primary.query.maps.findFirst({
+        where: and(eq(maps.id, mapId), eq(maps.mapGroupId, query.groupId)),
+      });
+      if (!map) {
+        return status(404, { error: 'Map not found' });
+      }
+
+      // Counted from live data through map_locations_view, so the numbers
+      // include edits that haven't been synced yet. Exclusivity is per map, not
+      // per group: a location carrying three metas counts as exclusive here if
+      // this map's filters and levels only let one of them through.
+      const rows = await db.$primary.execute<{
+        meta_id: number;
+        meta_name: string;
+        tag_name: string;
+        links: number;
+        exclusive: number;
+        total_locations: number;
+      }>(sql`
+        WITH pair AS (
+          -- distinct because map_locations_view repeats a row per matching
+          -- include filter, so overlapping patterns would inflate the counts
+          SELECT DISTINCT pano_id, meta_id, meta_name, tag_name
+          FROM map_locations_view
+          WHERE map_id = ${mapId}
+        ), loc AS (
+          SELECT pano_id, meta_id, meta_name, tag_name,
+                 count(*) OVER (PARTITION BY pano_id) AS metas_here
+          FROM pair
+        )
+        SELECT meta_id::int,
+               meta_name,
+               tag_name,
+               count(*)::int AS links,
+               count(*) FILTER (WHERE metas_here = 1)::int AS exclusive,
+               (SELECT count(DISTINCT pano_id)::int FROM loc) AS total_locations
+        FROM loc
+        GROUP BY meta_id, meta_name, tag_name
+        ORDER BY count(*) DESC, tag_name
+      `);
+
+      const totalLocations = rows[0]?.total_locations ?? 0;
+      return {
+        mapName: map.name,
+        totalLocations,
+        metas: rows.map((row) => ({
+          id: row.meta_id,
+          name: row.meta_name,
+          tagName: row.tag_name,
+          links: row.links,
+          exclusive: row.exclusive,
+          shared: row.links - row.exclusive,
+          // chance a randomly drawn location in this map shows this meta
+          share: totalLocations ? row.links / totalLocations : 0,
+        })),
+      };
     },
     {
       params: t.Object({ id: t.Integer() }),

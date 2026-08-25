@@ -288,6 +288,13 @@
       "when": 1787061140769,
       "tag": "0040_flashy_reavers",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1787230895578,
+      "tag": "0041_location_metas",
+      "breakpoints": true
     }
   ]
 }

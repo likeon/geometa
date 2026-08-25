@@ -5,6 +5,7 @@ import { db } from '../drizzle';
 import {
   levels,
   mapFilters,
+  mapGroupLocationMetas,
   mapGroupLocations,
   mapGroups,
   mapLevels,
@@ -153,6 +154,50 @@ describe('unique location constraints', () => {
       await db.insert(metas).values(meta).returning();
     }, 'metas_unique');
   });
+
+  test('junction links cannot cross map groups and cascade with their owners', async () => {
+    const [groupA, groupB] = await db
+      .insert(mapGroups)
+      .values([{ name: 'Group A' }, { name: 'Group B' }])
+      .returning({ id: mapGroups.id });
+    const [metaA, metaB] = await db
+      .insert(metas)
+      .values([
+        { mapGroupId: groupA!.id, tagName: 'a', name: 'A', note: '' },
+        { mapGroupId: groupB!.id, tagName: 'b', name: 'B', note: '' },
+      ])
+      .returning({ id: metas.id });
+    const [locationA] = await db
+      .insert(mapGroupLocations)
+      .values({
+        mapGroupId: groupA!.id,
+        lat: 1,
+        lng: 2,
+        heading: 3,
+        pitch: 4,
+        zoom: 5,
+        panoId: 'pano-a',
+      })
+      .returning({ id: mapGroupLocations.id });
+
+    await db.insert(mapGroupLocationMetas).values({
+      locationId: locationA!.id,
+      metaId: metaA!.id,
+      mapGroupId: groupA!.id,
+    });
+    await rejectsWith(
+      () =>
+        db.insert(mapGroupLocationMetas).values({
+          locationId: locationA!.id,
+          metaId: metaB!.id,
+          mapGroupId: groupA!.id,
+        }),
+      'map_group_location_metas_meta_group_fk',
+    );
+
+    await db.delete(metas).where(eq(metas.id, metaA!.id));
+    expect(await countRows(mapGroupLocationMetas)).toBe(0);
+  });
 });
 
 describe('group deletion cascade', () => {
@@ -197,15 +242,23 @@ describe('group deletion cascade', () => {
       .values({ name: 'Unrelated region' })
       .returning({ id: regions.id });
 
-    await db.insert(mapGroupLocations).values({
+    const [location] = await db
+      .insert(mapGroupLocations)
+      .values({
+        mapGroupId: groupId,
+        lat: 1,
+        lng: 2,
+        heading: 3,
+        pitch: 4,
+        zoom: 5,
+        panoId: 'cascade-pano',
+        extraTag: 'cascade-tag',
+      })
+      .returning({ id: mapGroupLocations.id });
+    await db.insert(mapGroupLocationMetas).values({
+      locationId: location!.id,
+      metaId,
       mapGroupId: groupId,
-      lat: 1,
-      lng: 2,
-      heading: 3,
-      pitch: 4,
-      zoom: 5,
-      panoId: 'cascade-pano',
-      extraTag: 'cascade-tag',
     });
 
     // Map-owned relations.
@@ -249,6 +302,7 @@ describe('group deletion cascade', () => {
       ['maps', maps],
       ['metas', metas],
       ['map_group_locations', mapGroupLocations],
+      ['map_group_location_metas', mapGroupLocationMetas],
       ['levels', levels],
       ['map_levels', mapLevels],
       ['map_filters', mapFilters],
@@ -301,13 +355,15 @@ describe('mapLocations view', () => {
       .insert(metas)
       .values({ mapGroupId: groupId, tagName: 'beta', name: 'Beta', note: '' })
       .returning({ id: metas.id });
-    // metaC has no levels and needs no returned id.
-    await db.insert(metas).values({
-      mapGroupId: groupId,
-      tagName: 'gamma',
-      name: 'Gamma',
-      note: '',
-    });
+    const [metaC] = await db
+      .insert(metas)
+      .values({
+        mapGroupId: groupId,
+        tagName: 'gamma',
+        name: 'Gamma',
+        note: '',
+      })
+      .returning({ id: metas.id });
 
     await db
       .insert(metaLevels)
@@ -316,17 +372,33 @@ describe('mapLocations view', () => {
       .insert(metaLevels)
       .values({ metaId: metaB!.id, levelId: levelBId });
 
+    const metaIdByTag = new Map([
+      ['alpha', metaA!.id],
+      ['beta', metaB!.id],
+      ['gamma', metaC!.id],
+    ]);
     async function insertLocation(extraTag: string, panoId: string) {
-      await db.insert(mapGroupLocations).values({
-        mapGroupId: groupId,
-        extraTag,
-        panoId,
-        lat: 1,
-        lng: 2,
-        heading: 3,
-        pitch: 4,
-        zoom: 5,
-      });
+      const [location] = await db
+        .insert(mapGroupLocations)
+        .values({
+          mapGroupId: groupId,
+          extraTag,
+          panoId,
+          lat: 1,
+          lng: 2,
+          heading: 3,
+          pitch: 4,
+          zoom: 5,
+        })
+        .returning({ id: mapGroupLocations.id });
+      const metaId = metaIdByTag.get(extraTag);
+      if (metaId) {
+        await db.insert(mapGroupLocationMetas).values({
+          locationId: location!.id,
+          metaId,
+          mapGroupId: groupId,
+        });
+      }
     }
     await insertLocation('alpha', 'pano-alpha');
     await insertLocation('beta', 'pano-beta');
@@ -422,18 +494,26 @@ describe('mapLocations view', () => {
       })
       .returning({ id: maps.id });
 
-    await db.insert(mapGroupLocations).values({
+    const [location] = await db
+      .insert(mapGroupLocations)
+      .values({
+        mapGroupId: groupId,
+        lat: 1.5,
+        lng: 2.5,
+        heading: 3.5,
+        pitch: 4.5,
+        zoom: 5.5,
+        panoId: 'pano-alpha',
+        extraTag: 'alpha',
+        extraPanoId: 'extra-pano',
+        extraPanoDate: '2020-01-01',
+        modifiedAt: 1000,
+      })
+      .returning({ id: mapGroupLocations.id });
+    await db.insert(mapGroupLocationMetas).values({
+      locationId: location!.id,
+      metaId: meta!.id,
       mapGroupId: groupId,
-      lat: 1.5,
-      lng: 2.5,
-      heading: 3.5,
-      pitch: 4.5,
-      zoom: 5.5,
-      panoId: 'pano-alpha',
-      extraTag: 'alpha',
-      extraPanoId: 'extra-pano',
-      extraPanoDate: '2020-01-01',
-      modifiedAt: 1000,
     });
 
     const [row] = await db

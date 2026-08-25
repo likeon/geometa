@@ -1,8 +1,12 @@
-import { mapGroupLocations } from '@api/lib/db/schema';
+import {
+  mapGroupLocationMetas,
+  mapGroupLocations,
+  metas,
+} from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { ensurePermissions } from '@api/lib/internal/permissions';
-import { and, count, eq, isNull } from 'drizzle-orm';
+import { and, count, eq, exists, isNull, sql } from 'drizzle-orm';
 import { Elysia, type Static, t } from 'elysia';
 import { pick } from 'remeda';
 
@@ -13,7 +17,18 @@ const querySchema = t.Object({
 export type QuerySchema = Static<typeof querySchema>;
 
 const buildWhere = (query: QuerySchema) => {
-  const conditions = [eq(mapGroupLocations.mapGroupId, query.groupId)];
+  const conditions = [
+    eq(mapGroupLocations.mapGroupId, query.groupId),
+    // locations whose meta was deleted can't sync or be played; exporting
+    // them would only produce tagless rows that block re-upload. Shared by
+    // the count endpoint so the displayed number matches the download.
+    exists(
+      db
+        .select({ one: sql`1` })
+        .from(mapGroupLocationMetas)
+        .where(eq(mapGroupLocationMetas.locationId, mapGroupLocations.id)),
+    ),
+  ];
 
   if (query.isOnStreetView !== undefined) {
     conditions.push(
@@ -34,19 +49,27 @@ export const locationsRouter = new Elysia({ prefix: '/locations' })
       await ensurePermissions(userId, query.groupId);
 
       const locations = await db
-        .select(
-          pick(mapGroupLocations, [
+        .select({
+          ...pick(mapGroupLocations, [
             'lat',
             'lng',
             'heading',
             'pitch',
             'zoom',
             'panoId',
-            'extraTag',
             'extraPanoId',
             'extraPanoDate',
           ]),
-        )
+          tags: sql<string[]>`
+            ARRAY(
+              SELECT m.tag_name
+              FROM ${mapGroupLocationMetas} lm
+                JOIN ${metas} m ON m.id = lm.meta_id
+              WHERE lm.location_id = ${mapGroupLocations}.id
+              ORDER BY m.tag_name
+            )
+          `,
+        })
         .from(mapGroupLocations)
         .where(buildWhere(query));
 
@@ -58,7 +81,7 @@ export const locationsRouter = new Elysia({ prefix: '/locations' })
         zoom: location.zoom,
         panoId: location.panoId,
         extra: {
-          tag: location.extraTag,
+          tags: location.tags,
           panoId: location.extraPanoId,
           panoDate: location.extraPanoDate,
         },

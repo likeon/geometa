@@ -86,7 +86,9 @@ const mapJsonSchema = z.object({
       zoom: z.number(),
       panoId: z.string().nullable(),
       extra: z.object({
-        tags: z.string().array().length(1),
+        // element min(1): the API rejects empty-string tags with a bare 422,
+        // so catch them here where we can name the offending location
+        tags: z.string().min(1).array().min(1),
         panoId: z.string().optional().nullable(),
         panoDate: z.string().optional().nullable()
       })
@@ -96,19 +98,6 @@ const mapJsonSchema = z.object({
       path: ['panoId']
     })
     .array()
-    .superRefine((coordinates, ctx) => {
-      const panoIds = coordinates.map((coord) => coord.panoId ?? coord.extra.panoId);
-      const uniquePanoIds = new Set(panoIds);
-
-      if (panoIds.length !== uniquePanoIds.size) {
-        const duplicateCount = panoIds.length - uniquePanoIds.size;
-        ctx.addIssue({
-          code: 'custom',
-          path: ['duplicates'],
-          message: `Duplicate locations found (${duplicateCount} total). Use <a href="https://map-making.app/" target="_blank" class="underline hover:text-primary">map-making.app</a> to find duplicates and remove them.`
-        });
-      }
-    })
 });
 export const load = async ({ params, locals }) => {
   if (!locals.user?.id) {
@@ -307,11 +296,14 @@ export const actions = {
           const location = jsonData.customCoordinates?.[locationIndex];
           const panoId = location?.panoId || location?.extra?.panoId || null;
           const locationNumber = locationIndex + 1;
-          if (issue.code === 'too_small' || issue.message === 'Required') {
-            message = `doesn't have a tag`;
-          } else if (issue.code === 'too_big') {
-            message = `has more than one tag`;
-          }
+          // a numeric last path segment means a specific tag is malformed;
+          // anything else is the tags array itself being absent or empty
+          message =
+            typeof issue.path[issue.path.length - 1] === 'number'
+              ? issue.code === 'too_small'
+                ? 'has an empty tag'
+                : 'has a tag that is not text'
+              : `doesn't have a tag`;
 
           // Return HTML with link if panoId exists
           if (panoId) {
@@ -320,8 +312,6 @@ export const actions = {
           } else {
             return `Location ${locationNumber} ${message}`;
           }
-        } else if (issue.path.includes('duplicates')) {
-          return message;
         } else if (issue.path.includes('panoId') && issue.message === 'missing panoId') {
           const locationIndex = issue.path[1] as number;
           const location = jsonData.customCoordinates?.[locationIndex];
@@ -344,7 +334,7 @@ export const actions = {
       pitch: location.pitch,
       zoom: location.zoom,
       panoId: location.panoId ?? location.extra.panoId!,
-      extraTag: location.extra.tags[0],
+      tags: location.extra.tags,
       extraPanoId: location.extra.panoId || null,
       extraPanoDate: location.extra.panoDate
     }));
@@ -360,13 +350,6 @@ export const actions = {
     if (apiError || !data) {
       const status = apiError?.status as number;
       const value = apiError?.value as { message?: string } | undefined;
-      if (status === 409) {
-        return setError(
-          form,
-          'file',
-          'The uploaded file contains duplicate panoId values. Please remove duplicates and try again.'
-        );
-      }
       if ((status === 400 || status === 403) && value?.message) {
         return setError(form, 'file', escapeHtml(value.message));
       }
@@ -375,8 +358,7 @@ export const actions = {
 
     return message(form, {
       numberOfLocations: data.count,
-      ignoredCount: data.ignoredCount,
-      conflictCount: data.conflictCount
+      ignoredCount: data.ignoredCount
     });
   },
   uploadMetas: async ({ request, params }) => {

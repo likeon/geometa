@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'bun:test';
+import { and, eq } from 'drizzle-orm';
 import {
   mapGroups,
   maps,
@@ -7,7 +8,11 @@ import {
   syncedMetas,
 } from '../db/schema';
 import { db } from '../drizzle';
-import { locationSelect, mapLocationsExportSelect } from './locations';
+import {
+  locationMetaDetailSelect,
+  locationMetaSummariesSelect,
+  mapLocationsExportSelect,
+} from './locations';
 
 async function seedTwoMaps() {
   const [groupA] = await db
@@ -277,12 +282,25 @@ async function seedPersonalMapWithoutOriginal() {
 }
 
 describe('userscript location lookup', () => {
+  test('returns lightweight meta summaries for the exact map and pano', async () => {
+    await seedTwoMaps();
+
+    expect(
+      await locationMetaSummariesSelect.execute({
+        mapId: 'map-a',
+        panoId: 'pano-shared',
+      }),
+    ).toEqual([{ id: 1001, metaName: 'Alpha Meta' }]);
+  });
+
   test('exact map+pano lookup returns the selected public fields', async () => {
     await seedTwoMaps();
 
-    const [result] = await locationSelect.execute({
+    const [result] = await locationMetaDetailSelect.execute({
       mapId: 'map-a',
       panoId: 'pano-shared',
+      metaId: 1001,
+      includeGeoJson: true,
     });
 
     expect(result).toEqual({
@@ -307,9 +325,11 @@ describe('userscript location lookup', () => {
   test('same pano in another map/group does not leak across maps', async () => {
     const { mapAId, mapBId } = await seedTwoMaps();
 
-    const [alphaLookup] = await locationSelect.execute({
+    const [alphaLookup] = await locationMetaDetailSelect.execute({
       mapId: 'map-a',
       panoId: 'pano-shared',
+      metaId: 1001,
+      includeGeoJson: true,
     });
     expect(alphaLookup).toEqual(
       expect.objectContaining({
@@ -321,9 +341,11 @@ describe('userscript location lookup', () => {
       }),
     );
 
-    const [betaLookup] = await locationSelect.execute({
+    const [betaLookup] = await locationMetaDetailSelect.execute({
       mapId: 'map-b',
       panoId: 'pano-shared',
+      metaId: 2002,
+      includeGeoJson: true,
     });
     expect(betaLookup).toEqual(
       expect.objectContaining({
@@ -338,10 +360,20 @@ describe('userscript location lookup', () => {
 
     // a pano that exists only in the other map is invisible under this map
     expect(
-      await locationSelect.execute({ mapId: 'map-a', panoId: 'pano-b-only' }),
+      await locationMetaDetailSelect.execute({
+        mapId: 'map-a',
+        panoId: 'pano-b-only',
+        metaId: 2002,
+        includeGeoJson: true,
+      }),
     ).toEqual([]);
     expect(
-      await locationSelect.execute({ mapId: 'map-b', panoId: 'pano-a-only' }),
+      await locationMetaDetailSelect.execute({
+        mapId: 'map-b',
+        panoId: 'pano-a-only',
+        metaId: 1001,
+        includeGeoJson: true,
+      }),
     ).toEqual([]);
   });
 
@@ -349,9 +381,11 @@ describe('userscript location lookup', () => {
     const { tieFirstId, tieSecondId } = await seedPersonalMapAttribution();
 
     // highest-played nonpersonal map wins
-    const [highest] = await locationSelect.execute({
+    const [highest] = await locationMetaDetailSelect.execute({
       mapId: 'map-personal',
       panoId: 'pano-personal-shared',
+      metaId: 3003,
+      includeGeoJson: true,
     });
     expect(highest).toEqual(
       expect.objectContaining({
@@ -366,9 +400,11 @@ describe('userscript location lookup', () => {
 
     // equal play counts resolve deterministically to the lower original id
     expect(tieFirstId).toBeLessThan(tieSecondId);
-    const [tie] = await locationSelect.execute({
+    const [tie] = await locationMetaDetailSelect.execute({
       mapId: 'map-personal',
       panoId: 'pano-personal-tie',
+      metaId: 4004,
+      includeGeoJson: true,
     });
     expect(tie).toEqual(
       expect.objectContaining({
@@ -385,9 +421,11 @@ describe('userscript location lookup', () => {
   test('personal map without nonpersonal original uses own footer and null attribution', async () => {
     const { personalMapId } = await seedPersonalMapWithoutOriginal();
 
-    const [result] = await locationSelect.execute({
+    const [result] = await locationMetaDetailSelect.execute({
       mapId: 'map-personal-orphan',
       panoId: 'pano-orphan',
+      metaId: 5005,
+      includeGeoJson: true,
     });
 
     expect(result).toEqual({
@@ -435,5 +473,28 @@ describe('userscript map locations export', () => {
       { lat: 1, lng: 2, heading: 3, pitch: 4, zoom: 5, panoId: 'pano-b-only' },
       { lat: 1, lng: 2, heading: 3, pitch: 4, zoom: 5, panoId: 'pano-shared' },
     ]);
+  });
+
+  test('exports a pano shared by multiple metas only once', async () => {
+    const { mapAId } = await seedTwoMaps();
+    await db.insert(syncedMapMetas).values({
+      mapId: mapAId,
+      syncedMetaId: 2002,
+    });
+    await db
+      .update(syncedLocations)
+      .set({ lat: 99 })
+      .where(
+        and(
+          eq(syncedLocations.syncedMetaId, 2002),
+          eq(syncedLocations.panoId, 'pano-shared'),
+        ),
+      );
+
+    const locations = await mapLocationsExportSelect.execute({ mapId: mapAId });
+    expect(locations).toHaveLength(3);
+    expect(
+      locations.find((location) => location.panoId === 'pano-shared'),
+    ).toEqual(expect.objectContaining({ lat: 1 }));
   });
 });

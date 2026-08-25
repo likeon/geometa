@@ -3,6 +3,7 @@ import { app } from '@api/api';
 import {
   levels,
   mapGroupChanges,
+  mapGroupLocationMetas,
   mapGroupLocations,
   mapGroupPermissions,
   mapGroups,
@@ -124,6 +125,22 @@ function metaShareRequest(userId: string, body: unknown) {
   );
 }
 
+function locationUploadRequest(userId: string, groupId: number, body: unknown) {
+  return app.handle(
+    new Request(
+      `http://localhost/api/internal/map-groups/${groupId}/locations/upload`,
+      {
+        method: 'POST',
+        headers: {
+          'content-type': 'application/json',
+          'x-api-user-id': userId,
+        },
+        body: JSON.stringify(body),
+      },
+    ),
+  );
+}
+
 // Creates a meta via the PUT endpoint and returns its id.
 async function seedMeta(
   userId: string,
@@ -169,6 +186,33 @@ async function getMetaLogs(groupId: number) {
     .from(mapGroupChanges)
     .where(eq(mapGroupChanges.mapGroupId, groupId))
     .orderBy(mapGroupChanges.id);
+}
+
+async function waitForBlockedQuery(...fragments: string[]) {
+  const deadline = Date.now() + 10_000;
+  for (;;) {
+    const rows = await db.$primary.$client`
+      SELECT query
+      FROM pg_stat_activity
+      WHERE datname = current_database()
+        AND state = 'active'
+        AND wait_event_type = 'Lock'
+        AND pid <> pg_backend_pid()
+    `;
+    if (
+      rows.some((row) =>
+        fragments.every((fragment) =>
+          String(row.query).toLowerCase().includes(fragment.toLowerCase()),
+        ),
+      )
+    ) {
+      return;
+    }
+    if (Date.now() > deadline) {
+      throw new Error(`timed out waiting for blocked query: ${fragments}`);
+    }
+    await Bun.sleep(10);
+  }
 }
 
 describe('PUT /api/internal/metas/', () => {
@@ -548,6 +592,24 @@ describe('PUT /api/internal/metas/', () => {
       );
       expect(created.status).toBe(200);
       const { id } = (await created.json()) as { id: number };
+      const [location] = await db
+        .insert(mapGroupLocations)
+        .values({
+          mapGroupId: sourceGroup,
+          panoId: 'pano-france',
+          lat: 1,
+          lng: 2,
+          heading: 3,
+          pitch: 4,
+          zoom: 5,
+          extraTag: 'france',
+        })
+        .returning({ id: mapGroupLocations.id });
+      await db.insert(mapGroupLocationMetas).values({
+        locationId: location!.id,
+        metaId: id,
+        mapGroupId: sourceGroup,
+      });
 
       const moved = await metaPutRequest(
         'owner-1',
@@ -570,6 +632,18 @@ describe('PUT /api/internal/metas/', () => {
         { levelId: novice },
         { levelId: expert },
       ]);
+      expect(
+        await db
+          .select()
+          .from(mapGroupLocationMetas)
+          .where(eq(mapGroupLocationMetas.metaId, id)),
+      ).toEqual([]);
+      expect(
+        await db
+          .select({ mapGroupId: mapGroupLocations.mapGroupId })
+          .from(mapGroupLocations)
+          .where(eq(mapGroupLocations.id, location!.id)),
+      ).toEqual([{ mapGroupId: sourceGroup }]);
 
       // the original create log plus the departure logged against the source
       // group; the arrival is logged against the target group
@@ -632,6 +706,81 @@ describe('PUT /api/internal/metas/', () => {
           createdAt: expect.any(Number),
         },
       ]);
+    });
+
+    test('blocks old-group links while moving a meta', async () => {
+      const userId = 'move-race-owner';
+      await seedUser(userId);
+      const sourceGroup = await seedGroup('Move race source');
+      const targetGroup = await seedGroup('Move race target');
+      await seedPermission(userId, sourceGroup);
+      await seedPermission(userId, targetGroup);
+      const id = await seedMeta(userId, sourceGroup, 'move-race');
+
+      let locked!: () => void;
+      const lockedPromise = new Promise<void>((resolve) => {
+        locked = resolve;
+      });
+      let release!: () => void;
+      const gate = new Promise<void>((resolve) => {
+        release = resolve;
+      });
+      const tableLock = db.$primary.transaction(async (tx) => {
+        await tx.execute(sql`LOCK TABLE ${metas} IN SHARE MODE`);
+        locked();
+        await gate;
+      });
+      await lockedPromise;
+
+      const move = metaPutRequest(
+        userId,
+        metaBody({
+          id,
+          mapGroupId: targetGroup,
+          tagName: 'move-race',
+          name: 'move-race',
+        }),
+      );
+      let upload!: ReturnType<typeof locationUploadRequest>;
+      try {
+        await waitForBlockedQuery('update "metas"');
+        upload = locationUploadRequest(userId, sourceGroup, {
+          uploadMode: 'tagReplace',
+          scopeTag: 'move-race',
+          locations: [
+            {
+              panoId: 'move-race-pano',
+              lat: 1,
+              lng: 2,
+              heading: 3,
+              pitch: 4,
+              zoom: 5,
+              tags: ['move-race'],
+              extraPanoId: null,
+            },
+          ],
+        });
+        await waitForBlockedQuery('insert into "map_group_location_metas"');
+      } finally {
+        release();
+        await tableLock;
+      }
+
+      const [moveResponse, uploadResponse] = await Promise.all([move, upload]);
+      expect(moveResponse.status).toBe(200);
+      expect(uploadResponse.status).not.toBe(200);
+      expect(
+        await db
+          .select({ mapGroupId: metas.mapGroupId })
+          .from(metas)
+          .where(eq(metas.id, id)),
+      ).toEqual([{ mapGroupId: targetGroup }]);
+      expect(
+        await db
+          .select()
+          .from(mapGroupLocationMetas)
+          .where(eq(mapGroupLocationMetas.metaId, id)),
+      ).toEqual([]);
     });
   });
 });
@@ -1036,17 +1185,55 @@ describe('POST /api/internal/metas/copy', () => {
       metaId: sourceId,
       image_url: 'https://img.example/france.jpg',
     });
-    await db.insert(mapGroupLocations).values({
+    const [sourceLocation] = await db
+      .insert(mapGroupLocations)
+      .values({
+        mapGroupId: sourceGroup,
+        lat: 48.85,
+        lng: 2.35,
+        heading: 1,
+        pitch: 2,
+        zoom: 3,
+        panoId: 'pano-france-1',
+        extraTag: 'france',
+        extraPanoId: 'extra-1',
+        extraPanoDate: '2024-01-01',
+      })
+      .returning({ id: mapGroupLocations.id });
+    await db.insert(mapGroupLocationMetas).values({
+      locationId: sourceLocation!.id,
+      metaId: sourceId,
       mapGroupId: sourceGroup,
-      lat: 48.85,
-      lng: 2.35,
-      heading: 1,
-      pitch: 2,
-      zoom: 3,
-      panoId: 'pano-france-1',
-      extraTag: 'france',
-      extraPanoId: 'extra-1',
-      extraPanoDate: '2024-01-01',
+    });
+
+    const [existingMeta] = await db
+      .insert(metas)
+      .values({
+        mapGroupId: targetGroup,
+        tagName: 'existing',
+        name: 'Existing',
+        note: '',
+      })
+      .returning({ id: metas.id });
+    const [targetLocation] = await db
+      .insert(mapGroupLocations)
+      .values({
+        mapGroupId: targetGroup,
+        lat: 40,
+        lng: -3,
+        heading: 90,
+        pitch: 0,
+        zoom: 1,
+        panoId: 'pano-france-1',
+        extraTag: 'existing',
+        extraPanoId: 'target-extra',
+        extraPanoDate: '2025-01-01',
+      })
+      .returning({ id: mapGroupLocations.id });
+    await db.insert(mapGroupLocationMetas).values({
+      locationId: targetLocation!.id,
+      metaId: existingMeta!.id,
+      mapGroupId: targetGroup,
     });
 
     const response = await metaCopyRequest('owner-1', {
@@ -1090,7 +1277,8 @@ describe('POST /api/internal/metas/copy', () => {
       { levelId: advanced },
     ]);
 
-    // images and the meta's tag locations follow the copy into the target group
+    // images and the meta's location relationship follow the copy; an existing
+    // target pano keeps its own coordinates and camera framing
     const copiedImages = await db
       .select()
       .from(metaImages)
@@ -1104,24 +1292,34 @@ describe('POST /api/internal/metas/copy', () => {
       .where(
         and(
           eq(mapGroupLocations.mapGroupId, targetGroup),
-          eq(mapGroupLocations.extraTag, 'france'),
+          eq(mapGroupLocations.panoId, 'pano-france-1'),
         ),
       );
     expect(copiedLocations).toHaveLength(1);
     expect(copiedLocations[0]).toEqual(
       expect.objectContaining({
         mapGroupId: targetGroup,
-        lat: 48.85,
-        lng: 2.35,
-        heading: 1,
-        pitch: 2,
-        zoom: 3,
+        lat: 40,
+        lng: -3,
+        heading: 90,
+        pitch: 0,
+        zoom: 1,
         panoId: 'pano-france-1',
-        extraTag: 'france',
-        extraPanoId: 'extra-1',
-        extraPanoDate: '2024-01-01',
+        extraTag: 'existing',
+        extraPanoId: 'target-extra',
+        extraPanoDate: '2025-01-01',
       }),
     );
+    expect(
+      (
+        await db
+          .select({ tagName: metas.tagName })
+          .from(mapGroupLocationMetas)
+          .innerJoin(metas, eq(metas.id, mapGroupLocationMetas.metaId))
+          .where(eq(mapGroupLocationMetas.locationId, targetLocation!.id))
+          .orderBy(metas.tagName)
+      ).map((row) => row.tagName),
+    ).toEqual(['existing', 'france']);
 
     // one create log against the target group marking the shared origin
     expect(await getMetaLogs(targetGroup)).toEqual([
@@ -1146,6 +1344,102 @@ describe('POST /api/internal/metas/copy', () => {
     ]);
     // nothing new was logged against the source group
     expect(await getMetaLogs(sourceGroup)).toHaveLength(1);
+  });
+
+  test('links a target pano committed while the copy is waiting', async () => {
+    await seedUser('copy-race-owner');
+    const sourceGroup = await seedGroup('Copy race source');
+    const targetGroup = await seedGroup('Copy race target');
+    await seedPermission('copy-race-owner', sourceGroup);
+    await seedPermission('copy-race-owner', targetGroup);
+    const sourceId = await seedMeta(
+      'copy-race-owner',
+      sourceGroup,
+      'copy-race',
+    );
+    const [sourceLocation] = await db
+      .insert(mapGroupLocations)
+      .values({
+        mapGroupId: sourceGroup,
+        panoId: 'copy-race-pano',
+        lat: 1,
+        lng: 2,
+        heading: 3,
+        pitch: 4,
+        zoom: 5,
+      })
+      .returning({ id: mapGroupLocations.id });
+    await db.insert(mapGroupLocationMetas).values({
+      locationId: sourceLocation!.id,
+      metaId: sourceId,
+      mapGroupId: sourceGroup,
+    });
+
+    let inserted!: () => void;
+    const insertedPromise = new Promise<void>((resolve) => {
+      inserted = resolve;
+    });
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const targetInsert = db.$primary.transaction(async (tx) => {
+      await tx.insert(mapGroupLocations).values({
+        mapGroupId: targetGroup,
+        panoId: 'copy-race-pano',
+        lat: 10,
+        lng: 20,
+        heading: 30,
+        pitch: 40,
+        zoom: 50,
+      });
+      inserted();
+      await gate;
+    });
+    await insertedPromise;
+
+    const copy = metaCopyRequest('copy-race-owner', {
+      metaId: sourceId,
+      targetGroupId: targetGroup,
+    });
+    try {
+      await waitForBlockedQuery(
+        'insert into "map_group_locations"',
+        'map_group_location_metas',
+      );
+    } finally {
+      release();
+      await targetInsert;
+    }
+
+    const response = await copy;
+    expect(response.status).toBe(200);
+    const [copiedMeta] = await db
+      .select({ id: metas.id })
+      .from(metas)
+      .where(
+        and(eq(metas.mapGroupId, targetGroup), eq(metas.tagName, 'copy-race')),
+      );
+    const [targetLocation] = await db
+      .select({ id: mapGroupLocations.id })
+      .from(mapGroupLocations)
+      .where(
+        and(
+          eq(mapGroupLocations.mapGroupId, targetGroup),
+          eq(mapGroupLocations.panoId, 'copy-race-pano'),
+        ),
+      );
+    expect(
+      await db
+        .select()
+        .from(mapGroupLocationMetas)
+        .where(
+          and(
+            eq(mapGroupLocationMetas.locationId, targetLocation!.id),
+            eq(mapGroupLocationMetas.metaId, copiedMeta!.id),
+          ),
+        ),
+    ).toHaveLength(1);
   });
 
   test('existing target tag is a no-op: returns 200 but copies nothing and writes no log', async () => {
@@ -1244,17 +1538,25 @@ describe('POST /api/internal/metas/share', () => {
       { metaId: franceId, image_url: 'https://img.example/france.jpg' },
       { metaId: germanyId, image_url: 'https://img.example/germany.jpg' },
     ]);
-    await db.insert(mapGroupLocations).values({
+    const [sourceLocation] = await db
+      .insert(mapGroupLocations)
+      .values({
+        mapGroupId: sourceGroup,
+        lat: 48.85,
+        lng: 2.35,
+        heading: 1,
+        pitch: 2,
+        zoom: 3,
+        panoId: 'pano-france-1',
+        extraTag: 'france',
+        extraPanoId: 'extra-1',
+        extraPanoDate: '2024-01-01',
+      })
+      .returning({ id: mapGroupLocations.id });
+    await db.insert(mapGroupLocationMetas).values({
+      locationId: sourceLocation!.id,
+      metaId: franceId,
       mapGroupId: sourceGroup,
-      lat: 48.85,
-      lng: 2.35,
-      heading: 1,
-      pitch: 2,
-      zoom: 3,
-      panoId: 'pano-france-1',
-      extraTag: 'france',
-      extraPanoId: 'extra-1',
-      extraPanoDate: '2024-01-01',
     });
 
     const response = await metaShareRequest('owner-1', {

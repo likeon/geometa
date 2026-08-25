@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { app } from '@api/api';
 import {
   mapGroupChanges,
+  mapGroupLocationMetas,
   mapGroupLocations,
   mapGroupPermissions,
   mapGroups,
@@ -236,17 +237,55 @@ function locationUploadRequest(userId: string, groupId: number, body: unknown) {
 // seeded before an upload so the row is not part of the current batch and its
 // stale updatedAt exposes it to full/tagReplace deletion
 async function seedLocation(groupId: number, panoId: string, extraTag: string) {
-  await db.insert(mapGroupLocations).values({
+  const meta =
+    (await db.$primary.query.metas.findFirst({
+      where: and(eq(metas.mapGroupId, groupId), eq(metas.tagName, extraTag)),
+    })) ??
+    (
+      await db
+        .insert(metas)
+        .values({ mapGroupId: groupId, tagName: extraTag, name: '', note: '' })
+        .returning()
+    )[0]!;
+  const [location] = await db
+    .insert(mapGroupLocations)
+    .values({
+      mapGroupId: groupId,
+      panoId,
+      extraTag,
+      lat: 1,
+      lng: 2,
+      heading: 3,
+      pitch: 4,
+      zoom: 5,
+      updatedAt: syncedAt,
+    })
+    .returning({ id: mapGroupLocations.id });
+  await db.insert(mapGroupLocationMetas).values({
+    locationId: location!.id,
+    metaId: meta.id,
     mapGroupId: groupId,
-    panoId,
-    extraTag,
-    lat: 1,
-    lng: 2,
-    heading: 3,
-    pitch: 4,
-    zoom: 5,
-    updatedAt: syncedAt,
   });
+}
+
+async function locationTags(groupId: number, panoId: string) {
+  return (
+    await db
+      .select({ tagName: metas.tagName })
+      .from(mapGroupLocationMetas)
+      .innerJoin(metas, eq(metas.id, mapGroupLocationMetas.metaId))
+      .innerJoin(
+        mapGroupLocations,
+        eq(mapGroupLocations.id, mapGroupLocationMetas.locationId),
+      )
+      .where(
+        and(
+          eq(mapGroupLocations.mapGroupId, groupId),
+          eq(mapGroupLocations.panoId, panoId),
+        ),
+      )
+      .orderBy(metas.tagName)
+  ).map((row) => row.tagName);
 }
 
 function locationBody(panoId: string, extraTag: string) {
@@ -685,7 +724,6 @@ describe('location upload deletion semantics', () => {
     expect(await response.json()).toEqual({
       count: 1,
       ignoredCount: 0,
-      conflictCount: 0,
     });
     // only pano-a is upserted; the omitted pano-b row survives untouched
     expect(await locationSnapshot(groupId)).toEqual([
@@ -712,7 +750,6 @@ describe('location upload deletion semantics', () => {
     expect(await response.json()).toEqual({
       count: 1,
       ignoredCount: 0,
-      conflictCount: 0,
     });
     // every row not in the upload is deleted, regardless of tag
     expect(await locationSnapshot(groupId)).toEqual([
@@ -747,7 +784,6 @@ describe('location upload deletion semantics', () => {
     expect(await partial.json()).toEqual({
       count: 0,
       ignoredCount: 0,
-      conflictCount: 0,
     });
     // empty partial upload is a no-op: every row survives untouched
     expect(await locationSnapshot(groupId)).toEqual([
@@ -763,7 +799,6 @@ describe('location upload deletion semantics', () => {
     expect(await full.json()).toEqual({
       count: 0,
       ignoredCount: 0,
-      conflictCount: 0,
     });
     // empty full upload replaces the group with nothing: all rows deleted
     expect(await locationSnapshot(groupId)).toEqual([]);
@@ -801,7 +836,6 @@ describe('location upload deletion semantics', () => {
     expect(await response.json()).toEqual({
       count: 1,
       ignoredCount: 0,
-      conflictCount: 0,
     });
     // omitted tag-a row is deleted, omitted tag-b row is preserved, and the
     // newly uploaded pano-x survives
@@ -855,7 +889,7 @@ describe('location upload editor scope and scoped semantics', () => {
     expect(await locationSnapshot(groupId)).toEqual(before);
   });
 
-  test('scoped tagReplace ignores out-of-scope rows and conflicts on panos owned by another tag', async () => {
+  test('scoped tagReplace ignores out-of-scope rows and adds its meta to shared panos', async () => {
     await seedUser('scope-editor-owner-2');
     await seedUser('scope-editor-2');
     const groupId = await seedOwnerGroup(
@@ -875,8 +909,8 @@ describe('location upload editor scope and scoped semantics', () => {
       note: '',
       modifiedAt: syncedAt,
     });
-    // pano-a already belongs to tag-b; re-uploading it under tag-a must
-    // conflict and leave the existing row untouched
+    // pano-a already belongs to tag-b; the scoped upload adds tag-a without
+    // stripping the existing relationship
     await seedLocation(groupId, 'pano-a', 'tag-b');
 
     const response = await locationUploadRequest('scope-editor-2', groupId, {
@@ -891,81 +925,47 @@ describe('location upload editor scope and scoped semantics', () => {
 
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
-      count: 1,
+      count: 2,
       ignoredCount: 1,
-      conflictCount: 1,
     });
-    // pano-a stays on tag-b, pano-x is inserted, and the out-of-scope pano-z
-    // is neither inserted nor deleted (tag-b rows are untouched)
+    // pano-a gains tag-a, pano-x is inserted, and the out-of-scope pano-z is
+    // neither inserted nor deleted (tag-b relationships are untouched)
     expect(await locationSnapshot(groupId)).toEqual([
-      { panoId: 'pano-a', extraTag: 'tag-b', extraPanoId: null },
+      { panoId: 'pano-a', extraTag: 'tag-a', extraPanoId: null },
       { panoId: 'pano-x', extraTag: 'tag-a', extraPanoId: null },
     ]);
+    expect(await locationTags(groupId, 'pano-a')).toEqual(['tag-a', 'tag-b']);
   });
 });
 
-describe('location upload duplicate pano rollback', () => {
-  test('same-batch duplicate pano returns 409 and rolls back earlier upsert and delete work', async () => {
+describe('location upload duplicate pano merge', () => {
+  test('same-pano rows merge their tags and keep the last coordinates', async () => {
     await seedUser('dup-owner-1');
-    const groupId = await seedOwnerGroup('dup-owner-1', 'Duplicate rollback', {
-      syncedAt,
+    const groupId = await seedOwnerGroup('dup-owner-1', 'Duplicate merge', {
+      syncedAt: null,
       syncIncludeLocationsNotOnStreetView: true,
     });
-    // stale updatedAt marks these as victims of the full upload's delete step
-    await seedLocation(groupId, 'dup-seed-a', 'tag-seed-a');
-    await seedLocation(groupId, 'dup-seed-b', 'tag-seed-b');
-
-    // a full batch (BATCH_SIZE = 1000) of genuine new upserts first, then the
-    // duplicate pano pair in the following batch, so the 21000 cardinality
-    // error fires only after real work happened inside the transaction
-    const locations = Array.from({ length: 1000 }, (_, i) =>
-      locationBody(`pano-batch-${i}`, 'tag-upload'),
-    );
-    locations.push(locationBody('dup-pano', 'tag-upload'));
-    locations.push(locationBody('dup-pano', 'tag-upload'));
 
     const response = await locationUploadRequest('dup-owner-1', groupId, {
-      uploadMode: 'full',
-      locations,
+      uploadMode: 'partial',
+      locations: [
+        { ...locationBody('dup-pano', 'tag-a'), lat: 10 },
+        { ...locationBody('dup-pano', 'tag-b'), lat: 20 },
+      ],
     });
 
-    expect(response.status).toBe(409);
+    expect(response.status).toBe(200);
     expect(await response.json()).toEqual({
-      message:
-        'The uploaded file contains duplicate panoId values. Please remove duplicates and try again.',
+      count: 1,
+      ignoredCount: 0,
     });
-    // neither the batch-1 upserts nor the full-replacement delete survived:
-    // only the seeded rows remain, untouched
-    expect(await locationSnapshot(groupId)).toEqual([
-      { panoId: 'dup-seed-a', extraTag: 'tag-seed-a', extraPanoId: null },
-      { panoId: 'dup-seed-b', extraTag: 'tag-seed-b', extraPanoId: null },
-    ]);
-    // the rolled-back upsert did not even stamp the seeded rows' timestamps
-    const remaining = await db
-      .select({
-        panoId: mapGroupLocations.panoId,
-        updatedAt: mapGroupLocations.updatedAt,
-      })
-      .from(mapGroupLocations)
-      .where(eq(mapGroupLocations.mapGroupId, groupId))
-      .orderBy(mapGroupLocations.panoId);
-    expect(remaining).toEqual([
-      { panoId: 'dup-seed-a', updatedAt: syncedAt },
-      { panoId: 'dup-seed-b', updatedAt: syncedAt },
-    ]);
-    // the auto-created meta and the location_batch/meta audit logs are gone too
     expect(
       await db
-        .select({ id: metas.id })
-        .from(metas)
-        .where(eq(metas.mapGroupId, groupId)),
-    ).toEqual([]);
-    expect(
-      await db
-        .select({ id: mapGroupChanges.id })
-        .from(mapGroupChanges)
-        .where(eq(mapGroupChanges.mapGroupId, groupId)),
-    ).toEqual([]);
+        .select({ lat: mapGroupLocations.lat })
+        .from(mapGroupLocations)
+        .where(eq(mapGroupLocations.mapGroupId, groupId)),
+    ).toEqual([{ lat: 20 }]);
+    expect(await locationTags(groupId, 'dup-pano')).toEqual(['tag-a', 'tag-b']);
   });
 });
 
@@ -1011,7 +1011,6 @@ describe('location upload unscoped meta auto-creation', () => {
     expect(await response.json()).toEqual({
       count: 1,
       ignoredCount: 0,
-      conflictCount: 0,
     });
 
     // the unseen tag is auto-created as an empty meta row
@@ -1035,8 +1034,19 @@ describe('location upload unscoped meta auto-creation', () => {
     expect(meta!.modifiedAt).toBeGreaterThanOrEqual(before);
     expect(meta!.modifiedAt).toBeLessThanOrEqual(after);
 
-    // exact audit snapshot: the batch marker plus the meta create entry
+    // exact audit snapshot: the meta create entry plus the batch marker
     expect(await getUploadLogs(groupId)).toEqual([
+      {
+        mapGroupId: groupId,
+        userId: 'upload-owner-5',
+        entityType: 'meta',
+        entityId: meta!.id,
+        entityLabel: 'tag-new',
+        operation: 'create',
+        oldValue: null,
+        newValue: { tagName: 'tag-new', createdByLocationUpload: true },
+        createdAt: expect.any(Number),
+      },
       {
         mapGroupId: groupId,
         userId: 'upload-owner-5',
@@ -1050,20 +1060,9 @@ describe('location upload unscoped meta auto-creation', () => {
           count: 1,
           deletedCount: 0,
           ignoredCount: 0,
-          conflictCount: 0,
+          unlinkedCount: 0,
           tags: ['tag-new'],
         },
-        createdAt: expect.any(Number),
-      },
-      {
-        mapGroupId: groupId,
-        userId: 'upload-owner-5',
-        entityType: 'meta',
-        entityId: meta!.id,
-        entityLabel: 'tag-new',
-        operation: 'create',
-        oldValue: null,
-        newValue: { tagName: 'tag-new', createdByLocationUpload: true },
         createdAt: expect.any(Number),
       },
     ]);
@@ -1078,7 +1077,6 @@ describe('location upload unscoped meta auto-creation', () => {
     expect(await second.json()).toEqual({
       count: 1,
       ignoredCount: 0,
-      conflictCount: 0,
     });
 
     expect(
@@ -1303,16 +1301,24 @@ describe('POST /api/internal/map-groups/:id/sync', () => {
     });
 
     const secondGroup = await getGroup(groupId);
-    await db.insert(mapGroupLocations).values({
+    const [location] = await db
+      .insert(mapGroupLocations)
+      .values({
+        mapGroupId: groupId,
+        panoId: 'pano-added-after-meta-sync',
+        extraTag: 'us',
+        lat: 9,
+        lng: 8,
+        heading: 7,
+        pitch: 6,
+        zoom: 5,
+        modifiedAt: secondGroup.syncedAt! + 1,
+      })
+      .returning({ id: mapGroupLocations.id });
+    await db.insert(mapGroupLocationMetas).values({
+      locationId: location!.id,
+      metaId,
       mapGroupId: groupId,
-      panoId: 'pano-added-after-meta-sync',
-      extraTag: 'us',
-      lat: 9,
-      lng: 8,
-      heading: 7,
-      pitch: 6,
-      zoom: 5,
-      modifiedAt: secondGroup.syncedAt! + 1,
     });
     expect(
       await db

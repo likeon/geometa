@@ -4,6 +4,7 @@ import {
   levels,
   mapFilters,
   mapGroupChanges,
+  mapGroupLocationMetas,
   mapGroupLocations,
   mapGroupPermissions,
   mapGroups,
@@ -154,6 +155,19 @@ function groupMapDownloadRequest(
   return app.handle(
     new Request(
       `http://localhost/api/internal/maps/group/${mapId}/download?groupId=${groupId}`,
+      { headers: { 'x-api-user-id': userId } },
+    ),
+  );
+}
+
+function groupMapBalanceRequest(
+  userId: string,
+  mapId: number,
+  groupId: number,
+) {
+  return app.handle(
+    new Request(
+      `http://localhost/api/internal/maps/group/${mapId}/meta-balance?groupId=${groupId}`,
       { headers: { 'x-api-user-id': userId } },
     ),
   );
@@ -1324,12 +1338,15 @@ describe('GET /api/internal/maps/group/:id/download', () => {
       .returning({ id: mapGroups.id });
     const groupId = group!.id;
 
-    await db.insert(metas).values({
-      mapGroupId: groupId,
-      tagName: 'alpha',
-      name: 'Alpha meta',
-      note: 'Meta note',
-    });
+    const [meta] = await db
+      .insert(metas)
+      .values({
+        mapGroupId: groupId,
+        tagName: 'alpha',
+        name: 'Alpha meta',
+        note: 'Meta note',
+      })
+      .returning({ id: metas.id });
 
     const [map] = await db
       .insert(maps)
@@ -1341,32 +1358,42 @@ describe('GET /api/internal/maps/group/:id/download', () => {
       })
       .returning({ id: maps.id });
 
-    await db.insert(mapGroupLocations).values([
-      {
+    const locations = await db
+      .insert(mapGroupLocations)
+      .values([
+        {
+          mapGroupId: groupId,
+          extraTag: 'alpha',
+          panoId: 'pano-a',
+          lat: 1,
+          lng: 2,
+          heading: 3,
+          pitch: 4,
+          zoom: 5,
+          extraPanoId: 'extra-a',
+          extraPanoDate: '2020-01-01',
+        },
+        {
+          mapGroupId: groupId,
+          extraTag: 'alpha',
+          panoId: 'pano-b',
+          lat: 1.5,
+          lng: 2.5,
+          heading: 3.5,
+          pitch: 4.5,
+          zoom: 5.5,
+          extraPanoId: null,
+          extraPanoDate: null,
+        },
+      ])
+      .returning({ id: mapGroupLocations.id });
+    await db.insert(mapGroupLocationMetas).values(
+      locations.map((location) => ({
+        locationId: location.id,
+        metaId: meta!.id,
         mapGroupId: groupId,
-        extraTag: 'alpha',
-        panoId: 'pano-a',
-        lat: 1,
-        lng: 2,
-        heading: 3,
-        pitch: 4,
-        zoom: 5,
-        extraPanoId: 'extra-a',
-        extraPanoDate: '2020-01-01',
-      },
-      {
-        mapGroupId: groupId,
-        extraTag: 'alpha',
-        panoId: 'pano-b',
-        lat: 1.5,
-        lng: 2.5,
-        heading: 3.5,
-        pitch: 4.5,
-        zoom: 5.5,
-        extraPanoId: null,
-        extraPanoDate: null,
-      },
-    ]);
+      })),
+    );
 
     return { groupId, mapId: map!.id };
   }
@@ -1503,5 +1530,115 @@ describe('GET /api/internal/maps/group/:id/download', () => {
 
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({ error: 'Map not found' });
+  });
+});
+
+describe('GET /api/internal/maps/group/:id/meta-balance', () => {
+  test('counts exclusive and shared relationships without duplicating locations', async () => {
+    await seedUser('balance-owner');
+    const [group] = await db
+      .insert(mapGroups)
+      .values({ name: 'Balance group' })
+      .returning({ id: mapGroups.id });
+    const groupId = group!.id;
+    await seedGroupOwner('balance-owner', groupId);
+    const [map] = await db
+      .insert(maps)
+      .values({
+        mapGroupId: groupId,
+        name: 'Balance Map',
+        geoguessrId: 'balance-map',
+      })
+      .returning({ id: maps.id });
+    const insertedMetas = await db
+      .insert(metas)
+      .values([
+        { mapGroupId: groupId, tagName: 'a', name: 'A', note: '' },
+        { mapGroupId: groupId, tagName: 'b', name: 'B', note: '' },
+      ])
+      .returning({ id: metas.id, tagName: metas.tagName });
+    const metaByTag = new Map(
+      insertedMetas.map((meta) => [meta.tagName, meta.id]),
+    );
+    const locations = await db
+      .insert(mapGroupLocations)
+      .values([
+        {
+          mapGroupId: groupId,
+          panoId: 'shared',
+          extraTag: 'a',
+          lat: 1,
+          lng: 2,
+          heading: 3,
+          pitch: 4,
+          zoom: 5,
+        },
+        {
+          mapGroupId: groupId,
+          panoId: 'exclusive-a',
+          extraTag: 'a',
+          lat: 6,
+          lng: 7,
+          heading: 8,
+          pitch: 9,
+          zoom: 10,
+        },
+      ])
+      .returning({
+        id: mapGroupLocations.id,
+        panoId: mapGroupLocations.panoId,
+      });
+    const locationByPano = new Map(
+      locations.map((location) => [location.panoId, location.id]),
+    );
+    await db.insert(mapGroupLocationMetas).values([
+      {
+        locationId: locationByPano.get('shared')!,
+        metaId: metaByTag.get('a')!,
+        mapGroupId: groupId,
+      },
+      {
+        locationId: locationByPano.get('shared')!,
+        metaId: metaByTag.get('b')!,
+        mapGroupId: groupId,
+      },
+      {
+        locationId: locationByPano.get('exclusive-a')!,
+        metaId: metaByTag.get('a')!,
+        mapGroupId: groupId,
+      },
+    ]);
+
+    const response = await groupMapBalanceRequest(
+      'balance-owner',
+      map!.id,
+      groupId,
+    );
+
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({
+      mapName: 'Balance Map',
+      totalLocations: 2,
+      metas: [
+        {
+          id: metaByTag.get('a'),
+          name: 'A',
+          tagName: 'a',
+          links: 2,
+          exclusive: 1,
+          shared: 1,
+          share: 1,
+        },
+        {
+          id: metaByTag.get('b'),
+          name: 'B',
+          tagName: 'b',
+          links: 1,
+          exclusive: 0,
+          shared: 1,
+          share: 0.5,
+        },
+      ],
+    });
   });
 });

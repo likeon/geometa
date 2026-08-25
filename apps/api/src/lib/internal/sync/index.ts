@@ -82,22 +82,6 @@ export async function syncMapGroup(group: {
         ${syncedMetas.metaId} NOT IN (SELECT id FROM ${metas} WHERE ${metas.mapGroupId} = ${group.id})`,
     );
 
-    // remove locations that changed tag name
-
-    await tx.execute(sql`
-      DELETE FROM synced_locations sl
-      USING synced_metas sm,
-            map_group_locations mgl,
-            metas m
-      WHERE sl.synced_meta_id = sm.meta_id
-        AND sm.map_group_id = ${group.id}
-        AND mgl.map_group_id = sm.map_group_id
-        AND mgl.pano_id = sl.pano_id
-        AND m.map_group_id = sm.map_group_id
-        AND m.id = sl.synced_meta_id
-        AND mgl.extra_tag != m.tag_name
-    `);
-
     // locations
     await tx.execute(sql`
       WITH l AS (
@@ -109,15 +93,18 @@ export async function syncMapGroup(group: {
           mgl.pitch,
           mgl.zoom,
           mgl.pano_id,
-          mgl.extra_tag,
+          m.tag_name as extra_tag,
           mgl.extra_pano_id,
           mgl.extra_pano_date,
-          get_country_from_tag_name(mgl.extra_tag) as country
+          get_country_from_tag_name(m.tag_name) as country
          from map_group_locations mgl
-         join metas m on m.map_group_id = mgl.map_group_id and m.tag_name = mgl.extra_tag
+         join map_group_location_metas lm
+           on lm.location_id = mgl.id and lm.map_group_id = mgl.map_group_id
+         join metas m on m.id = lm.meta_id and m.map_group_id = lm.map_group_id
          join map_groups mg on mg.id = mgl.map_group_id
          where mgl.map_group_id = ${group.id} and (${groupSyncedAt}::bigint IS NULL OR
-            mgl.modified_at >= ${groupSyncedAt}::bigint) and
+            mgl.modified_at >= ${groupSyncedAt}::bigint OR
+            m.modified_at >= ${groupSyncedAt}::bigint) and
             (mg.sync_include_locations_not_on_street_view or mgl.is_on_street_view is not false)
       )
       MERGE INTO synced_locations sl
@@ -147,10 +134,13 @@ export async function syncMapGroup(group: {
         AND sm.map_group_id = ${group.id}
         AND NOT EXISTS (
           SELECT 1
-          FROM   map_group_locations mgl
+          FROM   map_group_location_metas lm
+          JOIN map_group_locations mgl
+            ON mgl.id = lm.location_id AND mgl.map_group_id = lm.map_group_id
           JOIN map_groups mg on mg.id = mgl.map_group_id
           WHERE  mgl.map_group_id = sm.map_group_id
             AND  mgl.pano_id = sl.pano_id
+            AND  lm.meta_id = sl.synced_meta_id
             AND (mg.sync_include_locations_not_on_street_view or mgl.is_on_street_view is not false)
         );
     `);

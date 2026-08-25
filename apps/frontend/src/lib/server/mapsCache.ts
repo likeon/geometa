@@ -9,7 +9,7 @@ export async function getDbData() {
   const regionsListPromise = db.select().from(regions).orderBy(asc(regions.ordering));
   const allMapsPromise = db.query.maps.findMany({
     extras: {
-      locationsCount: sql<number>`(SELECT COUNT(*)
+      locationsCount: sql<number>`(SELECT COUNT(DISTINCT ml.pano_id)
                                    FROM map_locations_view ml
                                    WHERE ml.map_id = "maps"."id")`.as('locations_count'),
       regions: sql<string>`(SELECT STRING_AGG(r.name, ', ' ORDER BY r.name)
