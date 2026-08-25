@@ -3,6 +3,7 @@
 ## [0.95]
 
 - Fixed GeoJSON overlays conflicting with userscripts that also wrap Google Maps
+- Fixed meta popups closing when another userscript checks the current game
 
 ## [0.94]
 

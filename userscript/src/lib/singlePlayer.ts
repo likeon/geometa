@@ -1,5 +1,9 @@
 import { getMapInfo, logInfo, waitForElement } from './utils/main';
-import { mountSummaryWindow, unmountSummaryWindow } from './utils/summaryWindow';
+import {
+  mountSummaryWindow,
+  unmountSummaryWindow,
+  unmountSummaryWindowOnRoundStart
+} from './utils/summaryWindow';
 import { createPinObserver, showMetaForRound } from './roundPins';
 import { unsafeWindow } from '$';
 
@@ -46,7 +50,10 @@ export function initSinglePlayer() {
         clearMetaCache();
         await getMapInfo(event.detail.map.id, true);
       });
-      GeoGuessrEventFramework.events.addEventListener('round_start', unmountSummaryWindow);
+      GeoGuessrEventFramework.events.addEventListener(
+        'round_start',
+        unmountSummaryWindowOnRoundStart
+      );
       GeoGuessrEventFramework.events.addEventListener('round_end', async (event: GGEvent) => {
         unmountSummaryWindow();
 
