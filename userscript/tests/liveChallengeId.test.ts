@@ -16,10 +16,22 @@ describe('live challenge IDs', () => {
     ).toBe('game-id');
   });
 
+  test('extracts an ID from a locale-prefixed live-challenge route', () => {
+    expect(extractLiveChallengeId('/fr/live-challenge/game-id')).toBe('game-id');
+  });
+
+  test('extracts an ID from a region-locale-prefixed live-challenge route', () => {
+    expect(extractLiveChallengeId('/fr-FR/live-challenge/game-id')).toBe('game-id');
+  });
+
   test('recognizes party lobby routes with query strings', () => {
     expect(isPartyLobbyPath(new URL('https://www.geoguessr.com/party/lobby/WGUL5?j=1').pathname)).toBe(
       true
     );
+  });
+
+  test('recognizes locale-prefixed party lobby routes', () => {
+    expect(isPartyLobbyPath('/fr/party/lobby/WGUL5')).toBe(true);
   });
 
   test('uses the newest live-challenge request while on a party lobby route', () => {
