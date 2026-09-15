@@ -1,5 +1,6 @@
-const LIVE_CHALLENGE_PATH = /^\/(?:api\/)?live-challenge\/([^/?#]+)\/?$/;
-const PARTY_LOBBY_PATH = /^\/party\/lobby\/[^/?#]+\/?$/;
+const LIVE_CHALLENGE_PATH =
+  /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:api\/)?live-challenge\/([^/?#]+)\/?$/;
+const PARTY_LOBBY_PATH = /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?party\/lobby\/[^/?#]+\/?$/;
 
 type TrackedChallenge = {
   id: string;
