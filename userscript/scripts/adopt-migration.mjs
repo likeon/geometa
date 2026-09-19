@@ -39,6 +39,4 @@ assert.equal(
 );
 
 for (const path of paths) writeFileSync(path, content);
-console.log(
-  'Migration snapshots staged in working tree. Update install links and API version next.'
-);
+console.log('Migration snapshots updated in working tree.');

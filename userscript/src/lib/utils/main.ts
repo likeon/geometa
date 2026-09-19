@@ -1,4 +1,4 @@
-import { GM_xmlhttpRequest, unsafeWindow, GM_info } from '$';
+import { GM_xmlhttpRequest, unsafeWindow } from '$';
 import { getLiveChallengeId } from './liveChallengeId';
 
 /**
@@ -74,7 +74,6 @@ export function localStorageGetInt(name: string) {
 
 type MapInfoResponse = {
   mapFound: boolean;
-  userscriptVersion: string;
 };
 
 async function fetchMapInfo(url: string): Promise<MapInfoResponse> {
@@ -151,30 +150,7 @@ export async function getMapInfo(geoguessrId: string, forceUpdate: boolean) {
   }
   const toCache: CachedMapInfo = { mapInfo, fetchedAt: Date.now() };
   unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(toCache));
-  unsafeWindow.localStorage.setItem('geometa:latest-version', mapInfo.userscriptVersion);
   return mapInfo;
-}
-
-export function getLatestVersionInfo() {
-  return unsafeWindow.localStorage.getItem('geometa:latest-version');
-}
-
-function isNewerVersion(candidate: string, current: string) {
-  const a = candidate.split('.').map(Number);
-  const b = current.split('.').map(Number);
-  for (let i = 0; i < Math.max(a.length, b.length); i++) {
-    const diff = (a[i] || 0) - (b[i] || 0);
-    if (diff) return diff > 0;
-  }
-  return false;
-}
-
-export function checkIfOutdated() {
-  const latest = getLatestVersionInfo();
-  if (!latest) {
-    return false;
-  }
-  return isNewerVersion(latest, GM_info.script.version);
 }
 
 export function markHelpMessageAsRead() {
@@ -216,6 +192,6 @@ export function logInfo(name: string, data?: any) {
 }
 
 export function extractMapIdFromUrl(url: string) {
-  const match = url.match(/\/maps\/([^\/]+)/);
+  const match = url.match(/\/maps\/([^/]+)/);
   return match ? match[1] : null;
 }

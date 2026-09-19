@@ -15,7 +15,6 @@ import { generateFooter } from '@api/lib/userscript/utils';
 import { and, asc, eq, isNotNull, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
-const userscriptVersion = '0.95';
 const tokenSecurity = [{ learnableMetaToken: [] as string[] }];
 
 const mapGroup = t.Object({
@@ -69,14 +68,12 @@ export const userscriptRouter = new Elysia({
       if (!map) {
         return status(404, {
           mapFound: false,
-          userscriptVersion: userscriptVersion,
         });
       }
 
       return {
         mapFound: true,
         isPersonal: map.isPersonal,
-        userscriptVersion: userscriptVersion,
       };
     },
     {
@@ -90,14 +87,12 @@ export const userscriptRouter = new Elysia({
             isPersonal: t.Boolean({
               description: 'Whether this is a personal map.',
             }),
-            userscriptVersion: t.Literal(userscriptVersion),
           },
           { description: 'The map is available to the userscript.' },
         ),
         404: t.Object(
           {
             mapFound: t.Literal(false),
-            userscriptVersion: t.Literal(userscriptVersion),
           },
           { description: 'No Learnable Meta map uses this GeoGuessr ID.' },
         ),
@@ -106,8 +101,7 @@ export const userscriptRouter = new Elysia({
         tags: ['Userscript'],
         operationId: 'getMapCompatibility',
         summary: 'Check map',
-        description:
-          'Checks whether Learnable Meta supports a GeoGuessr map and returns the userscript data version.',
+        description: 'Checks whether Learnable Meta supports a GeoGuessr map.',
       },
     },
   )

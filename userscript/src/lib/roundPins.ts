@@ -1,18 +1,12 @@
 import { mountSummaryWindow } from './utils/summaryWindow';
 
-export function showMetaForRound(
-  panoId: string,
-  mapId: string,
-  userscriptVersion: string,
-  roundNumber: number
-) {
+export function showMetaForRound(panoId: string, mapId: string, roundNumber: number) {
   const container = document.querySelector('div[data-qa="result-view-top"]') || document.body;
 
   mountSummaryWindow(container, {
     roundNumber,
     panoId,
     mapId,
-    userscriptVersion,
     source: window.location.href.includes('challenge') ? 'challenge' : 'map'
   });
 }
@@ -22,11 +16,7 @@ export function showMetaForRound(
  * that open the meta window for that round. Returns the observer so the
  * caller can disconnect it on navigation.
  */
-export function createPinObserver(
-  panoIds: string[],
-  mapId: string,
-  userscriptVersion: string
-): MutationObserver {
+export function createPinObserver(panoIds: string[], mapId: string): MutationObserver {
   const observer = new MutationObserver(() => {
     const pins = document.querySelectorAll('[class*="map-pin_mapPin"]');
     pins.forEach((pin) => {
@@ -48,7 +38,7 @@ export function createPinObserver(
         questionIcon.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          showMetaForRound(panoIds[roundNumber - 1], mapId, userscriptVersion, roundNumber);
+          showMetaForRound(panoIds[roundNumber - 1], mapId, roundNumber);
         });
 
         const pinElement = pin as HTMLElement;

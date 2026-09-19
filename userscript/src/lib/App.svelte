@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { GM_xmlhttpRequest } from '$';
+  import { GM_info, GM_xmlhttpRequest } from '$';
   import Spinner from './components/Spinner.svelte';
   import CountryFlag from './components/CountryFlag.svelte';
   import {
@@ -11,12 +11,8 @@
   } from './utils/dragging';
   import { saveContainerDimensions, setContainerDimensions } from './utils/resizing';
   import Carousel from './components/Carousel.svelte';
-  import {
-    checkIfOutdated,
-    getLatestVersionInfo,
-    markHelpMessageAsRead,
-    wasHelpMessageRead
-  } from './utils/main';
+  import { markHelpMessageAsRead, wasHelpMessageRead } from './utils/main';
+  import { isNewerVersion, latestVersion, refreshLatestVersion } from './utils/version';
   import {
     getAnnouncement,
     getLastDismissedAnnouncementTimestamp,
@@ -28,12 +24,11 @@
   interface Props {
     panoId: string;
     mapId: string;
-    userscriptVersion: string;
     source: 'map' | 'challenge' | 'liveChallenge';
     roundNumber: number;
   }
 
-  let { panoId, mapId, userscriptVersion, source, roundNumber }: Props = $props();
+  let { panoId, mapId, source, roundNumber }: Props = $props();
 
   type GeoInfo = {
     country: string;
@@ -51,6 +46,7 @@
   let header: HTMLDivElement;
 
   onMount(() => {
+    void refreshLatestVersion();
     const cacheKey = `${mapId}_${panoId}`;
 
     const cachedData = window.geometaMetaCache?.get(cacheKey);
@@ -60,7 +56,6 @@
       const urlParams = new URLSearchParams({
         panoId,
         mapId,
-        userscriptVersion,
         source
       }).toString();
       const url = `https://learnablemeta.com/api/userscript/location?${urlParams}`;
@@ -142,25 +137,21 @@
   let showModal = $state(false);
   let currentUrl = $state('');
   let showHelpPopup = $state(false);
-  let helpClass = $state('question-mark-icon');
-
-  function shouldBlink() {
-    return !wasHelpMessageRead() || checkIfOutdated();
-  }
-
-  function updateHelpClass() {
-    helpClass = shouldBlink() ? 'question-mark-icon blink' : 'question-mark-icon';
-  }
+  let helpRead = $state(wasHelpMessageRead());
+  let outdated = $derived(
+    $latestVersion !== null && isNewerVersion($latestVersion, GM_info.script.version)
+  );
+  let helpClass = $derived(
+    !helpRead || outdated ? 'question-mark-icon blink' : 'question-mark-icon'
+  );
 
   function togglePopup() {
     showHelpPopup = !showHelpPopup;
     if (showHelpPopup) {
       markHelpMessageAsRead();
-      updateHelpClass();
+      helpRead = true;
     }
   }
-
-  updateHelpClass();
 
   $effect(() => {
     if (geoInfo) {
@@ -292,9 +283,9 @@
           </p>
         </div>
         <div class="learnablemeta-modal-body">
-          {#if checkIfOutdated()}
+          {#if outdated}
             <p class="learnablemeta-modal-alert">
-              Your userscript is out of date. Install the latest version ({getLatestVersionInfo()}).
+              Your userscript is out of date. Install the latest version ({$latestVersion}).
             </p>
           {/if}
           <ul class="learnablemeta-help-list">

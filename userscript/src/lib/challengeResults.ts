@@ -2,7 +2,7 @@ import { decodePanoId, getMapInfo, logInfo } from './utils/main';
 import { createPinObserver } from './roundPins';
 
 export function extractResultsTokenFromUrl(url: string) {
-  const match = url.match(/\/results\/([^\/?#]+)/);
+  const match = url.match(/\/results\/([^/?#]+)/);
   return match ? match[1] : null;
 }
 
@@ -53,7 +53,7 @@ async function addChallengeResultsPins() {
 
     const panoIds = game.rounds.map((round: { panoId: string }) => decodePanoId(round.panoId));
     logInfo(`adding meta pins for challenge results (${panoIds.length} rounds)`);
-    pinObserver = createPinObserver(panoIds, game.map, mapInfo.userscriptVersion);
+    pinObserver = createPinObserver(panoIds, game.map);
   } catch (e) {
     logInfo('failed to add meta pins on challenge results', e);
   }
