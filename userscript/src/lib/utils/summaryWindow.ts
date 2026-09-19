@@ -5,7 +5,6 @@ type SummaryProps = {
   roundNumber: number;
   panoId: string;
   mapId: string;
-  userscriptVersion: string;
   source: 'map' | 'challenge' | 'liveChallenge';
 };
 

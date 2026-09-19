@@ -7,7 +7,7 @@ import {
 import { createPinObserver, showMetaForRound } from './roundPins';
 import { unsafeWindow } from '$';
 
-//@ts-ignore
+//@ts-expect-error
 const GeoGuessrEventFramework = unsafeWindow.GeoGuessrEventFramework;
 type GGEvent = {
   detail: {
@@ -74,7 +74,6 @@ export function initSinglePlayer() {
             roundNumber: event.detail.rounds.length,
             panoId: lastRound.location.panoId,
             mapId: event.detail.map.id,
-            userscriptVersion: mapInfo.userscriptVersion,
             source: window.location.href.includes('challenge') ? 'challenge' : 'map'
           });
         });
@@ -90,15 +89,14 @@ export function initSinglePlayer() {
 
         const roundData = {
           rounds: event.detail.rounds,
-          mapId: event.detail.map.id,
-          userscriptVersion: mapInfo.userscriptVersion
+          mapId: event.detail.map.id
         };
 
         waitForElement('.result-list_listWrapper__7SmiM').then((listWrapper) => {
           if (!listWrapper) {
             return;
           }
-          addMetaButtonsToRounds(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
+          addMetaButtonsToRounds(roundData.rounds, roundData.mapId);
         });
 
         if (currentObserver) {
@@ -108,7 +106,7 @@ export function initSinglePlayer() {
         currentObserver = new MutationObserver(() => {
           const listWrapper = document.querySelector('.result-list_listWrapper__7SmiM');
           if (listWrapper && !listWrapper.querySelector('.geometa-meta-btn')) {
-            addMetaButtonsToRounds(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
+            addMetaButtonsToRounds(roundData.rounds, roundData.mapId);
           }
         });
 
@@ -122,8 +120,7 @@ export function initSinglePlayer() {
         }
         currentPinObserver = createPinObserver(
           roundData.rounds.map((round) => round.location.panoId),
-          roundData.mapId,
-          roundData.userscriptVersion
+          roundData.mapId
         );
       });
 
@@ -145,11 +142,7 @@ export function initSinglePlayer() {
     });
 }
 
-function addMetaButtonsToRounds(
-  rounds: GGEvent['detail']['rounds'],
-  mapId: string,
-  userscriptVersion: string
-) {
+function addMetaButtonsToRounds(rounds: GGEvent['detail']['rounds'], mapId: string) {
   const roundItems = document.querySelectorAll('.result-list_listItemWrapper___XCGn');
 
   // pair rows with rounds by the round number each row displays, so the
@@ -170,7 +163,7 @@ function addMetaButtonsToRounds(
     metaButton.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      showMetaForRound(round.location.panoId, mapId, userscriptVersion, roundNumber);
+      showMetaForRound(round.location.panoId, mapId, roundNumber);
     });
 
     roundItem.appendChild(metaButton);

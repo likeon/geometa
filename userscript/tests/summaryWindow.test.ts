@@ -58,7 +58,6 @@ test('keeps the summary open until the visible round result is removed', () => {
       roundNumber: 1,
       panoId: 'pano',
       mapId: 'map',
-      userscriptVersion: 'test',
       source: 'map'
     });
     unmountSummaryWindowOnRoundStart();

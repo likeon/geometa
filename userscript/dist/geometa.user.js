@@ -861,14 +861,14 @@ dep,
   }
   function createSubscriber(start) {
     let subscribers = 0;
-    let version = source(0);
+    let version2 = source(0);
     let stop;
     return () => {
       if (effect_tracking()) {
-        get(version);
+        get$1(version2);
         render_effect(() => {
           if (subscribers === 0) {
-            stop = untrack(() => start(() => increment(version)));
+            stop = untrack(() => start(() => increment(version2)));
           }
           subscribers += 1;
           return () => {
@@ -877,7 +877,7 @@ dep,
               if (subscribers === 0) {
                 stop?.();
                 stop = void 0;
-                increment(version);
+                increment(version2);
               }
             });
           };
@@ -948,11 +948,11 @@ active_effect.b;
       this.#pending = false;
     }
     #hydrate_pending_content() {
-      const pending = this.#props.pending;
-      if (!pending) {
+      const pending2 = this.#props.pending;
+      if (!pending2) {
         return;
       }
-      this.#pending_effect = branch(() => pending(this.#anchor));
+      this.#pending_effect = branch(() => pending2(this.#anchor));
       Batch.enqueue(() => {
         var anchor = this.#get_anchor();
         this.#main_effect = this.#run(() => {
@@ -1006,7 +1006,7 @@ is_pending() {
       }
     }
     #show_pending_snippet() {
-      const pending = (
+      const pending2 = (
 this.#props.pending
       );
       if (this.#main_effect !== null) {
@@ -1017,7 +1017,7 @@ this.#pending_anchor
         move_effect(this.#main_effect, this.#offscreen_fragment);
       }
       if (this.#pending_effect === null) {
-        this.#pending_effect = branch(() => pending(this.#anchor));
+        this.#pending_effect = branch(() => pending2(this.#anchor));
       }
     }
 #update_pending_count(d) {
@@ -1050,7 +1050,7 @@ update_pending_count(d) {
     }
     get_effect_pending() {
       this.#effect_pending_subscriber();
-      return get(
+      return get$1(
 this.#effect_pending
       );
     }
@@ -1513,19 +1513,19 @@ reaction
     }
     var sources = new Map();
     var is_proxied_array = is_array(value);
-    var version = state(0);
+    var version2 = state(0);
     var parent_version = update_version;
     var with_parent = (fn) => {
       if (update_version === parent_version) {
         return fn();
       }
       var reaction = active_reaction;
-      var version2 = update_version;
+      var version3 = update_version;
       set_active_reaction(null);
       set_update_version(parent_version);
       var result = fn();
       set_active_reaction(reaction);
-      set_update_version(version2);
+      set_update_version(version3);
       return result;
     };
     if (is_proxied_array) {
@@ -1558,11 +1558,11 @@ value,
             if (prop2 in target) {
               const s2 = with_parent(() => state(UNINITIALIZED));
               sources.set(prop2, s2);
-              increment(version);
+              increment(version2);
             }
           } else {
             set(s, UNINITIALIZED);
-            increment(version);
+            increment(version2);
           }
           return true;
         },
@@ -1581,7 +1581,7 @@ value,
             sources.set(prop2, s);
           }
           if (s !== void 0) {
-            var v = get(s);
+            var v = get$1(s);
             return v === UNINITIALIZED ? void 0 : v;
           }
           return Reflect.get(target, prop2, receiver);
@@ -1590,7 +1590,7 @@ value,
           var descriptor = Reflect.getOwnPropertyDescriptor(target, prop2);
           if (descriptor && "value" in descriptor) {
             var s = sources.get(prop2);
-            if (s) descriptor.value = get(s);
+            if (s) descriptor.value = get$1(s);
           } else if (descriptor === void 0) {
             var source2 = sources.get(prop2);
             var value2 = source2?.v;
@@ -1620,7 +1620,7 @@ value,
               });
               sources.set(prop2, s);
             }
-            var value2 = get(s);
+            var value2 = get$1(s);
             if (value2 === UNINITIALIZED) {
               return false;
             }
@@ -1667,12 +1667,12 @@ sources.get("length")
                 set(ls, n + 1);
               }
             }
-            increment(version);
+            increment(version2);
           }
           return true;
         },
         ownKeys(target) {
-          get(version);
+          get$1(version2);
           var own_keys = Reflect.ownKeys(target).filter((key2) => {
             var source3 = sources.get(key2);
             return source3 === void 0 || source3.v !== UNINITIALIZED;
@@ -1941,7 +1941,7 @@ component_context
   }
   function template_effect(fn, sync = [], async = [], blockers = [], defer = false) {
     flatten(blockers, sync, async, (values) => {
-      create_effect(defer ? EFFECT : RENDER_EFFECT, () => fn(...values.map(get)), true);
+      create_effect(defer ? EFFECT : RENDER_EFFECT, () => fn(...values.map(get$1)), true);
     });
   }
   function block(fn, flags2 = 0) {
@@ -2380,7 +2380,7 @@ dependency,
     await Promise.resolve();
     flushSync();
   }
-  function get(signal) {
+  function get$1(signal) {
     var flags2 = signal.f;
     var is_derived = (flags2 & DERIVED) !== 0;
     if (active_reaction !== null && !untracking) {
@@ -3062,7 +3062,7 @@ node
       each_effect ??=
 active_effect;
       array =
-get(each_array);
+get$1(each_array);
       var length = array.length;
       if (was_empty && length === 0) {
         return;
@@ -3073,7 +3073,7 @@ get(each_array);
           commit();
         }
       }
-      get(each_array);
+      get$1(each_array);
     });
   }
   function reconcile(each_effect, array, state2, offscreen_items, anchor, render_fn, flags2, get_key, get_collection) {
@@ -3108,15 +3108,15 @@ get(each_array);
       key = get_key(value, i);
       item = items.get(key);
       if (item === void 0) {
-        var pending = offscreen_items.get(key);
-        if (pending !== void 0) {
+        var pending2 = offscreen_items.get(key);
+        if (pending2 !== void 0) {
           offscreen_items.delete(key);
-          items.set(key, pending);
+          items.set(key, pending2);
           var next = prev ? prev.next : current;
-          link(state2, prev, pending);
-          link(state2, pending, next);
-          move(pending, next, anchor);
-          prev = pending;
+          link(state2, prev, pending2);
+          link(state2, pending2, next);
+          move(pending2, next, anchor);
+          prev = pending2;
         } else {
           var child_anchor = current ? (
 current.e.nodes_start
@@ -3896,7 +3896,7 @@ component_context
     if (!callbacks) return;
     let props = () => deep_read_state(context.s);
     if (immutable) {
-      let version = 0;
+      let version2 = 0;
       let prev = (
 {}
       );
@@ -3909,10 +3909,10 @@ component_context
             changed = true;
           }
         }
-        if (changed) version++;
-        return version;
+        if (changed) version2++;
+        return version2;
       });
-      props = () => get(d);
+      props = () => get$1(d);
     }
     if (callbacks.b.length) {
       user_pre_effect(() => {
@@ -3939,11 +3939,126 @@ component_context
   }
   function observe_all(context, props) {
     if (context.l.s) {
-      for (const signal of context.l.s) get(signal);
+      for (const signal of context.l.s) get$1(signal);
     }
     props();
   }
+  function subscribe_to_store(store, run2, invalidate) {
+    if (store == null) {
+      run2(void 0);
+      return noop;
+    }
+    const unsub = untrack(
+      () => store.subscribe(
+        run2,
+invalidate
+      )
+    );
+    return unsub.unsubscribe ? () => unsub.unsubscribe() : unsub;
+  }
+  const subscriber_queue = [];
+  function writable(value, start = noop) {
+    let stop = null;
+    const subscribers = new Set();
+    function set2(new_value) {
+      if (safe_not_equal(value, new_value)) {
+        value = new_value;
+        if (stop) {
+          const run_queue = !subscriber_queue.length;
+          for (const subscriber of subscribers) {
+            subscriber[1]();
+            subscriber_queue.push(subscriber, value);
+          }
+          if (run_queue) {
+            for (let i = 0; i < subscriber_queue.length; i += 2) {
+              subscriber_queue[i][0](subscriber_queue[i + 1]);
+            }
+            subscriber_queue.length = 0;
+          }
+        }
+      }
+    }
+    function update(fn) {
+      set2(fn(
+value
+      ));
+    }
+    function subscribe(run2, invalidate = noop) {
+      const subscriber = [run2, invalidate];
+      subscribers.add(subscriber);
+      if (subscribers.size === 1) {
+        stop = start(set2, update) || noop;
+      }
+      run2(
+value
+      );
+      return () => {
+        subscribers.delete(subscriber);
+        if (subscribers.size === 0 && stop) {
+          stop();
+          stop = null;
+        }
+      };
+    }
+    return { set: set2, update, subscribe };
+  }
+  function readonly(store) {
+    return {
+subscribe: store.subscribe.bind(store)
+    };
+  }
+  function get(store) {
+    let value;
+    subscribe_to_store(store, (_) => value = _)();
+    return value;
+  }
   let is_store_binding = false;
+  let IS_UNMOUNTED = Symbol();
+  function store_get(store, store_name, stores) {
+    const entry = stores[store_name] ??= {
+      store: null,
+      source: mutable_source(void 0),
+      unsubscribe: noop
+    };
+    if (entry.store !== store && !(IS_UNMOUNTED in stores)) {
+      entry.unsubscribe();
+      entry.store = store ?? null;
+      if (store == null) {
+        entry.source.v = void 0;
+        entry.unsubscribe = noop;
+      } else {
+        var is_synchronous_callback = true;
+        entry.unsubscribe = subscribe_to_store(store, (v) => {
+          if (is_synchronous_callback) {
+            entry.source.v = v;
+          } else {
+            set(entry.source, v);
+          }
+        });
+        is_synchronous_callback = false;
+      }
+    }
+    if (store && IS_UNMOUNTED in stores) {
+      return get(store);
+    }
+    return get$1(entry.source);
+  }
+  function setup_stores() {
+    const stores = {};
+    function cleanup() {
+      teardown(() => {
+        for (var store_name in stores) {
+          const ref = stores[store_name];
+          ref.unsubscribe();
+        }
+        define_property(stores, IS_UNMOUNTED, {
+          enumerable: false,
+          value: true
+        });
+      });
+    }
+    return [stores, cleanup];
+  }
   function capture_store_binding(fn) {
     var previous_is_store_binding = is_store_binding;
     try {
@@ -4038,14 +4153,14 @@ void 0;
       overridden = false;
       return getter();
     });
-    if (bindable) get(d);
+    if (bindable) get$1(d);
     var parent_effect = (
 active_effect
     );
     return (
 (function(value, mutation) {
         if (arguments.length > 0) {
-          const new_value = mutation ? get(d) : runes && bindable ? proxy(value) : value;
+          const new_value = mutation ? get$1(d) : runes && bindable ? proxy(value) : value;
           set(d, new_value);
           overridden = true;
           if (fallback_value !== void 0) {
@@ -4056,7 +4171,7 @@ active_effect
         if (is_destroying_effect && overridden || (parent_effect.f & DESTROYED) !== 0) {
           return d.v;
         }
-        return get(d);
+        return get$1(d);
       })
     );
   }
@@ -4263,27 +4378,7 @@ context.l
     }
     const toCache = { mapInfo, fetchedAt: Date.now() };
     _unsafeWindow.localStorage.setItem(localStorageMapInfoKey, JSON.stringify(toCache));
-    _unsafeWindow.localStorage.setItem("geometa:latest-version", mapInfo.userscriptVersion);
     return mapInfo;
-  }
-  function getLatestVersionInfo() {
-    return _unsafeWindow.localStorage.getItem("geometa:latest-version");
-  }
-  function isNewerVersion(candidate, current) {
-    const a = candidate.split(".").map(Number);
-    const b = current.split(".").map(Number);
-    for (let i = 0; i < Math.max(a.length, b.length); i++) {
-      const diff = (a[i] || 0) - (b[i] || 0);
-      if (diff) return diff > 0;
-    }
-    return false;
-  }
-  function checkIfOutdated() {
-    const latest = getLatestVersionInfo();
-    if (!latest) {
-      return false;
-    }
-    return isNewerVersion(latest, _GM_info.script.version);
   }
   function markHelpMessageAsRead() {
     _unsafeWindow.localStorage.setItem("geometa:help-message-read", "true");
@@ -4318,7 +4413,7 @@ context.l
     console.log(`ALM: ${name}`, data);
   }
   function extractMapIdFromUrl(url) {
-    const match = url.match(/\/maps\/([^\/]+)/);
+    const match = url.match(/\/maps\/([^/]+)/);
     return match ? match[1] : null;
   }
   const PUBLIC_VERSION = "5";
@@ -4649,10 +4744,10 @@ context.l
     let images = prop($$props, "images", 24, () => []);
     let currentIndex = mutable_source(0);
     function prev() {
-      set(currentIndex, (get(currentIndex) - 1 + images().length) % images().length);
+      set(currentIndex, (get$1(currentIndex) - 1 + images().length) % images().length);
     }
     function next() {
-      set(currentIndex, (get(currentIndex) + 1) % images().length);
+      set(currentIndex, (get$1(currentIndex) + 1) % images().length);
     }
     let containerRef = mutable_source(null);
     let imageRef = mutable_source(null);
@@ -4668,8 +4763,8 @@ context.l
       set(isZoomed, false);
     }
     function handleMouseMove(event2) {
-      if (!get(containerRef)) return;
-      const rect = get(containerRef).getBoundingClientRect();
+      if (!get$1(containerRef)) return;
+      const rect = get$1(containerRef).getBoundingClientRect();
       set(lensX, event2.clientX - rect.left);
       set(lensY, event2.clientY - rect.top);
     }
@@ -4689,36 +4784,36 @@ context.l
               div_1.__mousemove = handleMouseMove;
               var img = child(div_1);
               set_attribute(img, "alt", `Image ${index2 + 1}`);
-              bind_this(img, ($$value) => set(imageRef, $$value), () => get(imageRef));
+              bind_this(img, ($$value) => set(imageRef, $$value), () => get$1(imageRef));
               var node_3 = sibling(img, 2);
               {
                 var consequent = ($$anchor5) => {
                   var div_2 = root_4$1();
                   template_effect(() => set_style(div_2, `
                 /* Position the lens so the mouse is in its center */
-                top: ${get(lensY) - lensSize / 2}px;
-                left: ${get(lensX) - lensSize / 2}px;
+                top: ${get$1(lensY) - lensSize / 2}px;
+                left: ${get$1(lensX) - lensSize / 2}px;
                 width: 150px;
                 height: 150px;
-                background-image: url(${get(image) ?? ""});
+                background-image: url(${get$1(image) ?? ""});
                 background-repeat: no-repeat;
-                background-size: ${(get(imageRef), untrack(() => get(imageRef).width * scale)) ?? ""}px ${(get(imageRef), untrack(() => get(imageRef).height * scale)) ?? ""}px;
-                background-position: ${-(get(lensX) * scale - lensSize / 2)}px ${-(get(lensY) * scale - lensSize / 2)}px;
+                background-size: ${(get$1(imageRef), untrack(() => get$1(imageRef).width * scale)) ?? ""}px ${(get$1(imageRef), untrack(() => get$1(imageRef).height * scale)) ?? ""}px;
+                background-position: ${-(get$1(lensX) * scale - lensSize / 2)}px ${-(get$1(lensY) * scale - lensSize / 2)}px;
               `));
                   append($$anchor5, div_2);
                 };
                 if_block(node_3, ($$render) => {
-                  if (get(isZoomed) && get(imageRef)) $$render(consequent);
+                  if (get$1(isZoomed) && get$1(imageRef)) $$render(consequent);
                 });
               }
-              bind_this(div_1, ($$value) => set(containerRef, $$value), () => get(containerRef));
-              template_effect(() => set_attribute(img, "src", get(image)));
+              bind_this(div_1, ($$value) => set(containerRef, $$value), () => get$1(containerRef));
+              template_effect(() => set_attribute(img, "src", get$1(image)));
               event("mouseenter", div_1, handleMouseEnter);
               event("mouseleave", div_1, handleMouseLeave);
               append($$anchor4, div_1);
             };
             if_block(node_2, ($$render) => {
-              if (index2 === get(currentIndex)) $$render(consequent_1);
+              if (index2 === get$1(currentIndex)) $$render(consequent_1);
             });
           }
           append($$anchor3, fragment_1);
@@ -4743,7 +4838,7 @@ context.l
           var button_2 = root_6$3();
           set_attribute(button_2, "aria-label", `Switch to image ${index2 + 1}`);
           button_2.__click = () => set(currentIndex, index2);
-          template_effect(() => set_class(button_2, 1, `indicator ${index2 === get(currentIndex) ? "active" : ""}`, "svelte-8ojyxu"));
+          template_effect(() => set_class(button_2, 1, `indicator ${index2 === get$1(currentIndex) ? "active" : ""}`, "svelte-8ojyxu"));
           append($$anchor3, button_2);
         });
         append($$anchor2, fragment_2);
@@ -4756,6 +4851,82 @@ context.l
     pop();
   }
   delegate(["mousemove", "click"]);
+  const MANIFEST_URL = "https://userscript.learnablemeta.com/manifest.json";
+  const CACHE_KEY = "geometa:release-manifest";
+  const CACHE_MS = 10 * 60 * 1e3;
+  function isVersion(value) {
+    return typeof value === "string" && /^\d+(?:\.\d+)*$/.test(value) && value.split(".").every((part) => Number.isSafeInteger(Number(part)));
+  }
+  function readCache() {
+    try {
+      const saved = _unsafeWindow.localStorage.getItem(CACHE_KEY);
+      if (!saved) return null;
+      const parsed = JSON.parse(saved);
+      if (isVersion(parsed?.version) && Number.isFinite(parsed.fetchedAt) && parsed.fetchedAt >= 0 && parsed.fetchedAt <= Date.now()) {
+        return { version: parsed.version, fetchedAt: parsed.fetchedAt };
+      }
+    } catch {
+    }
+    return null;
+  }
+  let cache = readCache();
+  const version = writable(cache?.version ?? null);
+  const latestVersion = readonly(version);
+  let pending = null;
+  function fetchVersion() {
+    return new Promise((resolve, reject) => {
+      _GM_xmlhttpRequest({
+        method: "GET",
+        url: MANIFEST_URL,
+        anonymous: true,
+        timeout: 1e4,
+        onload: (response) => {
+          if (response.status !== 200) {
+            reject(new Error(`Manifest HTTP error: ${response.status}`));
+            return;
+          }
+          try {
+            const manifest = JSON.parse(response.responseText);
+            if (!isVersion(manifest?.version)) throw new Error("Invalid manifest version");
+            resolve(manifest.version);
+          } catch (error) {
+            reject(error);
+          }
+        },
+        onerror: () => reject(new Error("Failed to fetch userscript manifest")),
+        ontimeout: () => reject(new Error("Userscript manifest request timed out")),
+        onabort: () => reject(new Error("Userscript manifest request aborted"))
+      });
+    });
+  }
+  function refreshLatestVersion() {
+    if (pending) return pending;
+    const age = cache ? Date.now() - cache.fetchedAt : Infinity;
+    if (age >= 0 && age < CACHE_MS) return Promise.resolve();
+    pending = fetchVersion().then((latest) => {
+      cache = { version: latest, fetchedAt: Date.now() };
+      version.set(latest);
+      try {
+        _unsafeWindow.localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+      } catch {
+      }
+    }).catch((error) => {
+      console.warn("ALM: failed to check userscript version", error);
+    }).finally(() => {
+      pending = null;
+    });
+    return pending;
+  }
+  function isNewerVersion(candidate, current) {
+    if (!isVersion(candidate) || !isVersion(current)) return false;
+    const a = candidate.split(".").map(Number);
+    const b = current.split(".").map(Number);
+    for (let i = 0; i < Math.max(a.length, b.length); i++) {
+      const diff = (a[i] ?? 0) - (b[i] ?? 0);
+      if (diff) return diff > 0;
+    }
+    return false;
+  }
   const ANNOUNCEMENT_CACHE_KEY = "geometa:cached-announcement";
   const ANNOUNCEMENT_CACHE_DURATION_MS = 60 * 60 * 1e3;
   const ANNOUNCEMENT_API_URL = "https://learnablemeta.com/api/userscript/announcement/";
@@ -5141,11 +5312,14 @@ context.l
   var root$5 = from_html(`<div class="geometa-container svelte-1j2rmt2"><!> <div class="flex header svelte-1j2rmt2"><h2 class="svelte-1j2rmt2">Learnable Meta</h2> <div class="icons svelte-1j2rmt2"><a target="_blank" aria-label="List of map metas" class="svelte-1j2rmt2"><span class="skill-icons--list svelte-1j2rmt2"></span></a> <a href="https://learnablemeta.com/" target="_blank" aria-label="Learnable Meta website" class="svelte-1j2rmt2"><span class="flat-color-icons--globe svelte-1j2rmt2"></span></a> <a href="https://discord.gg/AcXEWznYZe" target="_blank" aria-label="Learnable Meta discord" class="svelte-1j2rmt2"><span class="skill-icons--discord svelte-1j2rmt2"></span></a> <button class="help-toggle-button svelte-1j2rmt2" aria-label="More information"><span></span></button></div></div> <!> <!> <!></div>`);
   function App($$anchor, $$props) {
     push($$props, true);
+    const $latestVersion = () => store_get(latestVersion, "$latestVersion", $$stores);
+    const [$$stores, $$cleanup] = setup_stores();
     let geoInfo = state(null);
     let error = state(null);
     let container;
     let header;
     onMount(() => {
+      void refreshLatestVersion();
       const cacheKey = `${$$props.mapId}_${$$props.panoId}`;
       const cachedData = window.geometaMetaCache?.get(cacheKey);
       if (cachedData) {
@@ -5154,7 +5328,6 @@ context.l
         const urlParams = new URLSearchParams({
           panoId: $$props.panoId,
           mapId: $$props.mapId,
-          userscriptVersion: $$props.userscriptVersion,
           source: $$props.source
         }).toString();
         const url = `https://learnablemeta.com/api/userscript/location?${urlParams}`;
@@ -5217,7 +5390,7 @@ context.l
     }
     function proceed() {
       set(showModal, false);
-      window.open(get(currentUrl), "_blank");
+      window.open(get$1(currentUrl), "_blank");
     }
     function cancel() {
       set(showModal, false);
@@ -5225,23 +5398,18 @@ context.l
     let showModal = state(false);
     let currentUrl = state("");
     let showHelpPopup = state(false);
-    let helpClass = state("question-mark-icon");
-    function shouldBlink() {
-      return !wasHelpMessageRead() || checkIfOutdated();
-    }
-    function updateHelpClass() {
-      set(helpClass, shouldBlink() ? "question-mark-icon blink" : "question-mark-icon", true);
-    }
+    let helpRead = state(proxy(wasHelpMessageRead()));
+    let outdated = user_derived(() => $latestVersion() !== null && isNewerVersion($latestVersion(), _GM_info.script.version));
+    let helpClass = user_derived(() => !get$1(helpRead) || get$1(outdated) ? "question-mark-icon blink" : "question-mark-icon");
     function togglePopup() {
-      set(showHelpPopup, !get(showHelpPopup));
-      if (get(showHelpPopup)) {
+      set(showHelpPopup, !get$1(showHelpPopup));
+      if (get$1(showHelpPopup)) {
         markHelpMessageAsRead();
-        updateHelpClass();
+        set(helpRead, true);
       }
     }
-    updateHelpClass();
     user_effect(() => {
-      if (get(geoInfo)) {
+      if (get$1(geoInfo)) {
         const links = document.querySelectorAll(".geometa-footer a, .geometa-note a");
         links.forEach((link2) => {
           link2.removeEventListener("click", confirmNavigation);
@@ -5250,7 +5418,7 @@ context.l
       }
     });
     user_effect(() => {
-      if (get(geoInfo)?.geoJson) showMapArea(get(geoInfo).geoJson);
+      if (get$1(geoInfo)?.geoJson) showMapArea(get$1(geoInfo).geoJson);
       else clearMapArea();
       return clearMapArea;
     });
@@ -5265,16 +5433,16 @@ context.l
           var div_1 = root_2$2();
           var div_2 = child(div_1);
           var node_2 = child(div_2);
-          html(node_2, () => get(announcement).htmlMessage);
+          html(node_2, () => get$1(announcement).htmlMessage);
           var button = sibling(div_2, 2);
           button.__click = () => {
-            markAnnouncementAsDismissed(get(announcement).timestamp);
-            set(lastDismissedTimestamp, get(announcement).timestamp, true);
+            markAnnouncementAsDismissed(get$1(announcement).timestamp);
+            set(lastDismissedTimestamp, get$1(announcement).timestamp, true);
           };
           append($$anchor3, div_1);
         };
         if_block(node_1, ($$render) => {
-          if ($$props.roundNumber >= 4 && get(announcement) && (!get(lastDismissedTimestamp) || get(announcement).timestamp > get(lastDismissedTimestamp))) $$render(consequent);
+          if ($$props.roundNumber >= 4 && get$1(announcement) && (!get$1(lastDismissedTimestamp) || get$1(announcement).timestamp > get$1(lastDismissedTimestamp))) $$render(consequent);
         });
       }
       append($$anchor2, fragment);
@@ -5291,7 +5459,7 @@ context.l
       var consequent_1 = ($$anchor2) => {
         var p = root_3$1();
         var text = child(p);
-        template_effect(() => set_text(text, `Error: ${get(error) ?? ""}`));
+        template_effect(() => set_text(text, `Error: ${get$1(error) ?? ""}`));
         append($$anchor2, p);
       };
       var alternate_1 = ($$anchor2) => {
@@ -5304,7 +5472,7 @@ context.l
             var node_5 = child(p_1);
             CountryFlag(node_5, {
               get countryName() {
-                return get(geoInfo).country;
+                return get$1(geoInfo).country;
               }
             });
             var strong = sibling(node_5, 2);
@@ -5312,17 +5480,17 @@ context.l
             var text_2 = sibling(strong);
             var div_5 = sibling(p_1, 2);
             var node_6 = child(div_5);
-            html(node_6, () => get(geoInfo).note);
+            html(node_6, () => get$1(geoInfo).note);
             var node_7 = sibling(div_5, 2);
             {
               var consequent_2 = ($$anchor4) => {
                 var p_2 = root_6$2();
                 var node_8 = child(p_2);
-                html(node_8, () => get(geoInfo).footer);
+                html(node_8, () => get$1(geoInfo).footer);
                 append($$anchor4, p_2);
               };
               if_block(node_7, ($$render) => {
-                if (get(geoInfo).footer) $$render(consequent_2);
+                if (get$1(geoInfo).footer) $$render(consequent_2);
               });
             }
             var node_9 = sibling(node_7, 2);
@@ -5332,18 +5500,18 @@ context.l
                 var node_10 = sibling(first_child(fragment_3), 2);
                 Carousel(node_10, {
                   get images() {
-                    return get(geoInfo).images;
+                    return get$1(geoInfo).images;
                   }
                 });
                 append($$anchor4, fragment_3);
               };
               if_block(node_9, ($$render) => {
-                if (get(geoInfo).images && get(geoInfo).images.length) $$render(consequent_3);
+                if (get$1(geoInfo).images && get$1(geoInfo).images.length) $$render(consequent_3);
               });
             }
             template_effect(() => {
-              set_text(text_1, get(geoInfo).country);
-              set_text(text_2, ` - ${get(geoInfo).metaName ?? ""}`);
+              set_text(text_1, get$1(geoInfo).country);
+              set_text(text_2, ` - ${get$1(geoInfo).metaName ?? ""}`);
             });
             append($$anchor3, fragment_2);
           };
@@ -5353,7 +5521,7 @@ context.l
           if_block(
             node_4,
             ($$render) => {
-              if (get(geoInfo)) $$render(consequent_4);
+              if (get$1(geoInfo)) $$render(consequent_4);
               else $$render(alternate, false);
             },
             true
@@ -5362,7 +5530,7 @@ context.l
         append($$anchor2, fragment_1);
       };
       if_block(node_3, ($$render) => {
-        if (get(error)) $$render(consequent_1);
+        if (get$1(error)) $$render(consequent_1);
         else $$render(alternate_1, false);
       });
     }
@@ -5380,11 +5548,11 @@ context.l
         var button_3 = sibling(button_2, 2);
         button_3.__click = proceed;
         action(div_7, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({ onClose: cancel }));
-        template_effect(() => set_text(text_3, get(currentUrl)));
+        template_effect(() => set_text(text_3, get$1(currentUrl)));
         append($$anchor2, div_6);
       };
       if_block(node_11, ($$render) => {
-        if (get(showModal)) $$render(consequent_5);
+        if (get$1(showModal)) $$render(consequent_5);
       });
     }
     var node_12 = sibling(node_11, 2);
@@ -5398,11 +5566,11 @@ context.l
           var consequent_6 = ($$anchor3) => {
             var p_4 = root_11$1();
             var text_4 = child(p_4);
-            template_effect(($0) => set_text(text_4, `Your userscript is out of date. Install the latest version (${$0 ?? ""}).`), [getLatestVersionInfo]);
+            template_effect(() => set_text(text_4, `Your userscript is out of date. Install the latest version (${$latestVersion() ?? ""}).`));
             append($$anchor3, p_4);
           };
           if_block(node_13, ($$render) => {
-            if (checkIfOutdated()) $$render(consequent_6);
+            if (get$1(outdated)) $$render(consequent_6);
           });
         }
         var div_13 = sibling(div_12, 2);
@@ -5412,16 +5580,17 @@ context.l
         append($$anchor2, div_10);
       };
       if_block(node_12, ($$render) => {
-        if (get(showHelpPopup)) $$render(consequent_7);
+        if (get$1(showHelpPopup)) $$render(consequent_7);
       });
     }
     bind_this(div, ($$value) => container = $$value, () => container);
     template_effect(() => {
       set_attribute(a, "href", "https://learnablemeta.com/maps/" + $$props.mapId);
-      set_class(span, 1, clsx(get(helpClass)), "svelte-1j2rmt2");
+      set_class(span, 1, clsx(get$1(helpClass)), "svelte-1j2rmt2");
     });
     append($$anchor, div);
     pop();
+    $$cleanup();
   }
   delegate(["click"]);
   let currentApp = null;
@@ -5468,17 +5637,16 @@ context.l
     currentElement = element;
     currentApp = mount(App, { target: element, props });
   }
-  function showMetaForRound(panoId, mapId, userscriptVersion, roundNumber) {
+  function showMetaForRound(panoId, mapId, roundNumber) {
     const container = document.querySelector('div[data-qa="result-view-top"]') || document.body;
     mountSummaryWindow(container, {
       roundNumber,
       panoId,
       mapId,
-      userscriptVersion,
       source: window.location.href.includes("challenge") ? "challenge" : "map"
     });
   }
-  function createPinObserver(panoIds, mapId, userscriptVersion) {
+  function createPinObserver(panoIds, mapId) {
     const observer = new MutationObserver(() => {
       const pins = document.querySelectorAll('[class*="map-pin_mapPin"]');
       pins.forEach((pin) => {
@@ -5493,7 +5661,7 @@ context.l
           questionIcon.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            showMetaForRound(panoIds[roundNumber - 1], mapId, userscriptVersion, roundNumber);
+            showMetaForRound(panoIds[roundNumber - 1], mapId, roundNumber);
           });
           const pinElement = pin;
           if (pinElement.style.position === "" || pinElement.style.position === "static") {
@@ -5550,7 +5718,6 @@ context.l
             roundNumber: event2.detail.rounds.length,
             panoId: lastRound.location.panoId,
             mapId: event2.detail.map.id,
-            userscriptVersion: mapInfo.userscriptVersion,
             source: window.location.href.includes("challenge") ? "challenge" : "map"
           });
         });
@@ -5564,14 +5731,13 @@ context.l
         }
         const roundData = {
           rounds: event2.detail.rounds,
-          mapId: event2.detail.map.id,
-          userscriptVersion: mapInfo.userscriptVersion
+          mapId: event2.detail.map.id
         };
         waitForElement(".result-list_listWrapper__7SmiM").then((listWrapper) => {
           if (!listWrapper) {
             return;
           }
-          addMetaButtonsToRounds(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
+          addMetaButtonsToRounds(roundData.rounds, roundData.mapId);
         });
         if (currentObserver) {
           currentObserver.disconnect();
@@ -5579,7 +5745,7 @@ context.l
         currentObserver = new MutationObserver(() => {
           const listWrapper = document.querySelector(".result-list_listWrapper__7SmiM");
           if (listWrapper && !listWrapper.querySelector(".geometa-meta-btn")) {
-            addMetaButtonsToRounds(roundData.rounds, roundData.mapId, roundData.userscriptVersion);
+            addMetaButtonsToRounds(roundData.rounds, roundData.mapId);
           }
         });
         currentObserver.observe(document.body, {
@@ -5591,8 +5757,7 @@ context.l
         }
         currentPinObserver = createPinObserver(
           roundData.rounds.map((round) => round.location.panoId),
-          roundData.mapId,
-          roundData.userscriptVersion
+          roundData.mapId
         );
       });
       window.addEventListener("urlchange", () => {
@@ -5611,7 +5776,7 @@ context.l
       console.error("ALM: GeoGuessrEventFramework failed to initialize", e);
     });
   }
-  function addMetaButtonsToRounds(rounds, mapId, userscriptVersion) {
+  function addMetaButtonsToRounds(rounds, mapId) {
     const roundItems = document.querySelectorAll(".result-list_listItemWrapper___XCGn");
     roundItems.forEach((roundItem) => {
       const roundNumberText = roundItem.querySelector(".result-list_roundNumber__RlIKm")?.textContent;
@@ -5626,7 +5791,7 @@ context.l
       metaButton.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        showMetaForRound(round.location.panoId, mapId, userscriptVersion, roundNumber);
+        showMetaForRound(round.location.panoId, mapId, roundNumber);
       });
       roundItem.appendChild(metaButton);
     });
@@ -5668,7 +5833,6 @@ context.l
 roundNumber: 4,
           panoId,
           mapId,
-          userscriptVersion: mapInfo.userscriptVersion,
           source: "liveChallenge"
         });
       } catch (e) {
@@ -5874,7 +6038,7 @@ roundNumber: 4,
     return response.json();
   }
   async function updateGeoguessrDraft(geoguessrId, draft, customCoordinates) {
-    const { avatar, description, highlighted, name, version } = draft;
+    const { avatar, description, highlighted, name, version: version2 } = draft;
     await geoguessrAPIFetch(draftUrl(geoguessrId), {
       method: "PUT",
       body: JSON.stringify({
@@ -5883,7 +6047,7 @@ roundNumber: 4,
         highlighted,
         name,
         customCoordinates,
-        version: version + 1
+        version: version2 + 1
       })
     });
   }
@@ -6003,7 +6167,7 @@ roundNumber: 4,
     let toastState = state(null);
     let toastTimer = state(void 0);
     function showCustomToast(message, type = "info", duration = 3e3, detail) {
-      clearTimeout(get(toastTimer));
+      clearTimeout(get$1(toastTimer));
       const displayToast = () => {
         set(toastState, { message, detail, type }, true);
         if (duration > 0) {
@@ -6019,7 +6183,7 @@ roundNumber: 4,
           );
         }
       };
-      if (get(toastState)) {
+      if (get$1(toastState)) {
         hideCustomToast();
         setTimeout(displayToast, 350);
       } else {
@@ -6027,7 +6191,7 @@ roundNumber: 4,
       }
     }
     function hideCustomToast() {
-      clearTimeout(get(toastTimer));
+      clearTimeout(get$1(toastTimer));
       set(toastState, null);
     }
     function getApiKeyFromGM() {
@@ -6051,14 +6215,14 @@ roundNumber: 4,
       set(currentApiKey, getApiKeyFromGM(), true);
     });
     async function handleUploadClick() {
-      if (get(isLoading)) return;
+      if (get$1(isLoading)) return;
       set(currentApiKey, getApiKeyFromGM(), true);
-      if (!get(currentApiKey) || get(currentApiKey).trim() === "") {
+      if (!get$1(currentApiKey) || get$1(currentApiKey).trim() === "") {
         set(apiKeyInput, "");
         set(modalMode, "upload");
         set(showApiKeyModal, true);
       } else {
-        await performUpload(get(currentApiKey));
+        await performUpload(get$1(currentApiKey));
       }
     }
     function openManageKeyModal() {
@@ -6094,7 +6258,7 @@ roundNumber: 4,
       }
     }
     function handleSaveApiKey() {
-      const trimmedKey = get(apiKeyInput).trim();
+      const trimmedKey = get$1(apiKeyInput).trim();
       if (!trimmedKey) {
         showCustomToast("Please enter a valid API key.", "error", 3e3);
         return;
@@ -6103,7 +6267,7 @@ roundNumber: 4,
       set(currentApiKey, trimmedKey, true);
       set(showApiKeyModal, false);
       showCustomToast("API Key saved!", "success", 2e3);
-      if (get(modalMode) === "upload") {
+      if (get$1(modalMode) === "upload") {
         performUpload(trimmedKey);
       }
     }
@@ -6138,7 +6302,7 @@ roundNumber: 4,
                 var p_1 = root_4();
                 var code = sibling(child(p_1));
                 var text_1 = child(code);
-                template_effect(($0) => set_text(text_1, `…${$0 ?? ""}`), [() => get(currentApiKey).slice(-4)]);
+                template_effect(($0) => set_text(text_1, `…${$0 ?? ""}`), [() => get$1(currentApiKey).slice(-4)]);
                 append($$anchor4, p_1);
               };
               var alternate = ($$anchor4) => {
@@ -6148,7 +6312,7 @@ roundNumber: 4,
               if_block(
                 node_2,
                 ($$render) => {
-                  if (get(currentApiKey)) $$render(consequent_1);
+                  if (get$1(currentApiKey)) $$render(consequent_1);
                   else $$render(alternate, false);
                 },
                 true
@@ -6157,7 +6321,7 @@ roundNumber: 4,
             append($$anchor3, fragment_1);
           };
           if_block(node_1, ($$render) => {
-            if (get(modalMode) === "upload") $$render(consequent);
+            if (get$1(modalMode) === "upload") $$render(consequent);
             else $$render(alternate_1, false);
           });
         }
@@ -6173,7 +6337,7 @@ roundNumber: 4,
             append($$anchor3, button_2);
           };
           if_block(node_3, ($$render) => {
-            if (get(modalMode) === "manage" && get(currentApiKey)) $$render(consequent_2);
+            if (get$1(modalMode) === "manage" && get$1(currentApiKey)) $$render(consequent_2);
           });
         }
         var button_3 = sibling(node_3, 2);
@@ -6184,13 +6348,13 @@ roundNumber: 4,
         action(div_2, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({ onClose: handleCancelModal }));
         template_effect(() => {
           set_attribute(a, "href", URL_TO_GENERATE_TOKEN);
-          set_text(text_2, get(modalMode) === "upload" ? "Save and upload" : "Save");
+          set_text(text_2, get$1(modalMode) === "upload" ? "Save and upload" : "Save");
         });
-        bind_value(input, () => get(apiKeyInput), ($$value) => set(apiKeyInput, $$value));
+        bind_value(input, () => get$1(apiKeyInput), ($$value) => set(apiKeyInput, $$value));
         append($$anchor2, div_1);
       };
       if_block(node, ($$render) => {
-        if (get(showApiKeyModal)) $$render(consequent_3);
+        if (get$1(showApiKeyModal)) $$render(consequent_3);
       });
     }
     var node_4 = sibling(node, 2);
@@ -6198,25 +6362,25 @@ roundNumber: 4,
       var consequent_4 = ($$anchor2) => {
         ToastNotification($$anchor2, {
           get message() {
-            return get(toastState).message;
+            return get$1(toastState).message;
           },
           get detail() {
-            return get(toastState).detail;
+            return get$1(toastState).detail;
           },
           get type() {
-            return get(toastState).type;
+            return get$1(toastState).type;
           },
           onClose: hideCustomToast
         });
       };
       if_block(node_4, ($$render) => {
-        if (get(toastState)) $$render(consequent_4);
+        if (get$1(toastState)) $$render(consequent_4);
       });
     }
     template_effect(() => {
-      button.disabled = get(isLoading);
-      set_text(text, get(isLoading) ? "Uploading..." : "LearnableMeta - Upload");
-      button_1.disabled = get(isLoading);
+      button.disabled = get$1(isLoading);
+      set_text(text, get$1(isLoading) ? "Uploading..." : "LearnableMeta - Upload");
+      button_1.disabled = get$1(isLoading);
     });
     append($$anchor, fragment);
     pop();
@@ -6267,7 +6431,7 @@ roundNumber: 4,
     }
   }
   function extractResultsTokenFromUrl(url) {
-    const match = url.match(/\/results\/([^\/?#]+)/);
+    const match = url.match(/\/results\/([^/?#]+)/);
     return match ? match[1] : null;
   }
   let pinObserver = null;
@@ -6310,7 +6474,7 @@ roundNumber: 4,
       }
       const panoIds = game.rounds.map((round) => decodePanoId(round.panoId));
       logInfo(`adding meta pins for challenge results (${panoIds.length} rounds)`);
-      pinObserver = createPinObserver(panoIds, game.map, mapInfo.userscriptVersion);
+      pinObserver = createPinObserver(panoIds, game.map);
     } catch (e) {
       logInfo("failed to add meta pins on challenge results", e);
     }
@@ -6370,10 +6534,10 @@ roundNumber: 4,
     let rows = state(proxy([]));
     let fatalError = state("");
     let finishedRun = state(false);
-    let selectedCount = user_derived(() => get(rows).filter((row) => row.status === "changed" && row.selected).length);
-    let failureCount = user_derived(() => get(rows).filter((row) => ["scan-error", "update-error", "publish-error"].includes(row.status)).length);
-    let successCount = user_derived(() => get(rows).filter((row) => row.status === "success").length);
-    let changedCount = user_derived(() => get(rows).filter((row) => row.status === "changed").length);
+    let selectedCount = user_derived(() => get$1(rows).filter((row) => row.status === "changed" && row.selected).length);
+    let failureCount = user_derived(() => get$1(rows).filter((row) => ["scan-error", "update-error", "publish-error"].includes(row.status)).length);
+    let successCount = user_derived(() => get$1(rows).filter((row) => row.status === "success").length);
+    let changedCount = user_derived(() => get$1(rows).filter((row) => row.status === "changed").length);
     onMount(() => {
       try {
         const savedToken = getApiKey();
@@ -6392,11 +6556,11 @@ roundNumber: 4,
       return error instanceof Error ? error.message : String(error);
     }
     function replaceRow(geoguessrId, update) {
-      const index2 = get(rows).findIndex((row) => row.geoguessrId === geoguessrId);
-      if (index2 !== -1) get(rows)[index2] = { ...get(rows)[index2], ...update };
+      const index2 = get$1(rows).findIndex((row) => row.geoguessrId === geoguessrId);
+      if (index2 !== -1) get$1(rows)[index2] = { ...get$1(rows)[index2], ...update };
     }
     async function saveTokenAndContinue() {
-      const trimmed = get(tokenInput).trim();
+      const trimmed = get$1(tokenInput).trim();
       if (!trimmed) {
         set(tokenError, "Paste a valid LearnableMeta API token.");
         return;
@@ -6413,7 +6577,7 @@ roundNumber: 4,
       set(phase, "token");
     }
     async function continueWithToken() {
-      if (get(activeGroupId) === null) {
+      if (get$1(activeGroupId) === null) {
         await loadAccessibleGroups();
       } else {
         await scanGroup();
@@ -6428,7 +6592,7 @@ roundNumber: 4,
       set(accessibleGroups, [], true);
       set(groupsLoading, true);
       try {
-        set(accessibleGroups, await fetchAccessibleMapGroups(get(apiToken)), true);
+        set(accessibleGroups, await fetchAccessibleMapGroups(get$1(apiToken)), true);
       } catch (error) {
         if (error instanceof LearnableMetaApiError && error.status === 401) {
           clearApiKey();
@@ -6451,7 +6615,7 @@ roundNumber: 4,
       void loadAccessibleGroups();
     }
     async function scanGroup() {
-      if (get(activeGroupId) === null) {
+      if (get$1(activeGroupId) === null) {
         await loadAccessibleGroups();
         return;
       }
@@ -6461,7 +6625,7 @@ roundNumber: 4,
       set(groupName, "");
       set(rows, [], true);
       try {
-        const manifest = await fetchMapGroupManifest(get(activeGroupId), get(apiToken));
+        const manifest = await fetchMapGroupManifest(get$1(activeGroupId), get$1(apiToken));
         set(groupName, manifest.group.name, true);
         set(
           rows,
@@ -6474,12 +6638,12 @@ roundNumber: 4,
         );
         let nextIndex = 0;
         async function worker() {
-          while (nextIndex < get(rows).length) {
-            const row = get(rows)[nextIndex++];
+          while (nextIndex < get$1(rows).length) {
+            const row = get$1(rows)[nextIndex++];
             if (row.status === "scanning") await scanMap(row);
           }
         }
-        await Promise.all(Array.from({ length: Math.min(3, get(rows).length) }, () => worker()));
+        await Promise.all(Array.from({ length: Math.min(3, get$1(rows).length) }, () => worker()));
         set(phase, "review");
       } catch (error) {
         if (error instanceof LearnableMetaApiError && error.status === 401) {
@@ -6509,15 +6673,15 @@ roundNumber: 4,
       }
     }
     function selectChanged(selected) {
-      set(rows, get(rows).map((row) => row.status === "changed" ? { ...row, selected } : row), true);
+      set(rows, get$1(rows).map((row) => row.status === "changed" ? { ...row, selected } : row), true);
     }
     async function updateSelected() {
-      const selectedIds = get(rows).filter((row) => row.status === "changed" && row.selected).map((row) => row.geoguessrId);
+      const selectedIds = get$1(rows).filter((row) => row.status === "changed" && row.selected).map((row) => row.geoguessrId);
       if (selectedIds.length === 0) return;
       set(phase, "updating");
       set(finishedRun, false);
       for (const geoguessrId of selectedIds) {
-        const row = get(rows).find((candidate) => candidate.geoguessrId === geoguessrId);
+        const row = get$1(rows).find((candidate) => candidate.geoguessrId === geoguessrId);
         if (row) await updateMap(row);
       }
       set(finishedRun, true);
@@ -6533,7 +6697,7 @@ roundNumber: 4,
           replaceRow(row.geoguessrId, { status: "current", selected: false });
           return;
         }
-        const coordinates = await fetchSyncedMapLocations(row.geoguessrId, get(apiToken), row.fingerprint);
+        const coordinates = await fetchSyncedMapLocations(row.geoguessrId, get$1(apiToken), row.fingerprint);
         if (coordinates.length === 0) throw new Error("Cannot publish an empty map");
         await updateGeoguessrDraft(row.geoguessrId, draft, coordinates);
       } catch (error) {
@@ -6551,9 +6715,9 @@ roundNumber: 4,
     async function retryFailures() {
       set(phase, "updating");
       set(finishedRun, false);
-      const failedIds = get(rows).filter((row) => ["scan-error", "update-error", "publish-error"].includes(row.status)).map((row) => row.geoguessrId);
+      const failedIds = get$1(rows).filter((row) => ["scan-error", "update-error", "publish-error"].includes(row.status)).map((row) => row.geoguessrId);
       for (const geoguessrId of failedIds) {
-        const row = get(rows).find((candidate) => candidate.geoguessrId === geoguessrId);
+        const row = get$1(rows).find((candidate) => candidate.geoguessrId === geoguessrId);
         if (!row) continue;
         if (row.status === "scan-error") {
           await scanMap(row);
@@ -6605,11 +6769,11 @@ roundNumber: 4,
       var consequent = ($$anchor2) => {
         var p = root_1();
         var text_1 = child(p);
-        template_effect(() => set_text(text_1, get(groupName)));
+        template_effect(() => set_text(text_1, get$1(groupName)));
         append($$anchor2, p);
       };
       if_block(node, ($$render) => {
-        if (get(groupName)) $$render(consequent);
+        if (get$1(groupName)) $$render(consequent);
       });
     }
     var button = sibling(div_2, 2);
@@ -6629,11 +6793,11 @@ roundNumber: 4,
           var consequent_1 = ($$anchor3) => {
             var p_2 = root_3();
             var text_2 = child(p_2);
-            template_effect(() => set_text(text_2, get(tokenError)));
+            template_effect(() => set_text(text_2, get$1(tokenError)));
             append($$anchor3, p_2);
           };
           if_block(node_2, ($$render) => {
-            if (get(tokenError)) $$render(consequent_1);
+            if (get$1(tokenError)) $$render(consequent_1);
           });
         }
         var div_4 = sibling(node_2, 2);
@@ -6644,7 +6808,7 @@ roundNumber: 4,
         var button_2 = sibling(button_1, 2);
         button_2.__click = saveTokenAndContinue;
         template_effect(() => set_attribute(a, "href", URL_TO_GENERATE_TOKEN));
-        bind_value(input, () => get(tokenInput), ($$value) => set(tokenInput, $$value));
+        bind_value(input, () => get$1(tokenInput), ($$value) => set(tokenInput, $$value));
         append($$anchor2, div_3);
       };
       var alternate_5 = ($$anchor2) => {
@@ -6669,7 +6833,7 @@ roundNumber: 4,
                     var text_3 = child(span);
                     var button_3 = sibling(span, 2);
                     button_3.__click = loadAccessibleGroups;
-                    template_effect(() => set_text(text_3, get(fatalError)));
+                    template_effect(() => set_text(text_3, get$1(fatalError)));
                     append($$anchor5, div_6);
                   };
                   var alternate_1 = ($$anchor5) => {
@@ -6679,17 +6843,17 @@ roundNumber: 4,
                       var consequent_5 = ($$anchor6) => {
                         var fragment_4 = root_10();
                         var div_7 = sibling(first_child(fragment_4), 2);
-                        each(div_7, 21, () => get(accessibleGroups), (group) => group.id, ($$anchor7, group) => {
+                        each(div_7, 21, () => get$1(accessibleGroups), (group) => group.id, ($$anchor7, group) => {
                           var button_4 = root_11();
-                          button_4.__click = () => selectGroup(get(group).id);
+                          button_4.__click = () => selectGroup(get$1(group).id);
                           var span_1 = child(button_4);
                           var strong = child(span_1);
                           var text_4 = child(strong);
                           var span_2 = sibling(span_1, 2);
                           var text_5 = child(span_2);
                           template_effect(() => {
-                            set_text(text_4, get(group).name);
-                            set_text(text_5, `${get(group).mapCount ?? ""} map${get(group).mapCount === 1 ? "" : "s"} `);
+                            set_text(text_4, get$1(group).name);
+                            set_text(text_5, `${get$1(group).mapCount ?? ""} map${get$1(group).mapCount === 1 ? "" : "s"} `);
                           });
                           append($$anchor7, button_4);
                         });
@@ -6702,7 +6866,7 @@ roundNumber: 4,
                       if_block(
                         node_6,
                         ($$render) => {
-                          if (get(accessibleGroups).length > 0) $$render(consequent_5);
+                          if (get$1(accessibleGroups).length > 0) $$render(consequent_5);
                           else $$render(alternate, false);
                         },
                         true
@@ -6713,7 +6877,7 @@ roundNumber: 4,
                   if_block(
                     node_5,
                     ($$render) => {
-                      if (get(fatalError)) $$render(consequent_4);
+                      if (get$1(fatalError)) $$render(consequent_4);
                       else $$render(alternate_1, false);
                     },
                     true
@@ -6722,7 +6886,7 @@ roundNumber: 4,
                 append($$anchor4, fragment_2);
               };
               if_block(node_4, ($$render) => {
-                if (get(groupsLoading)) $$render(consequent_3);
+                if (get$1(groupsLoading)) $$render(consequent_3);
                 else $$render(alternate_2, false);
               });
             }
@@ -6744,7 +6908,7 @@ roundNumber: 4,
                 append($$anchor4, div_9);
               };
               if_block(node_7, ($$render) => {
-                if (get(phase) === "scanning") $$render(consequent_7);
+                if (get$1(phase) === "scanning") $$render(consequent_7);
               });
             }
             var node_8 = sibling(node_7, 2);
@@ -6755,11 +6919,11 @@ roundNumber: 4,
                 var text_6 = child(span_3);
                 var button_7 = sibling(span_3, 2);
                 button_7.__click = scanGroup;
-                template_effect(() => set_text(text_6, get(fatalError)));
+                template_effect(() => set_text(text_6, get$1(fatalError)));
                 append($$anchor4, div_10);
               };
               if_block(node_8, ($$render) => {
-                if (get(fatalError)) $$render(consequent_8);
+                if (get$1(fatalError)) $$render(consequent_8);
               });
             }
             var node_9 = sibling(node_8, 2);
@@ -6775,7 +6939,7 @@ roundNumber: 4,
                 var button_9 = sibling(button_8, 2);
                 button_9.__click = () => selectChanged(false);
                 var div_13 = sibling(div_11, 2);
-                each(div_13, 21, () => get(rows), (row) => row.geoguessrId, ($$anchor5, row, $$index_1) => {
+                each(div_13, 21, () => get$1(rows), (row) => row.geoguessrId, ($$anchor5, row, $$index_1) => {
                   var label = root_17();
                   let classes;
                   var input_1 = child(label);
@@ -6789,34 +6953,34 @@ roundNumber: 4,
                     var consequent_9 = ($$anchor6) => {
                       var span_7 = root_18();
                       var text_10 = child(span_7);
-                      template_effect(() => set_text(text_10, get(row).error));
+                      template_effect(() => set_text(text_10, get$1(row).error));
                       append($$anchor6, span_7);
                     };
                     if_block(node_10, ($$render) => {
-                      if (get(row).error) $$render(consequent_9);
+                      if (get$1(row).error) $$render(consequent_9);
                     });
                   }
                   var span_8 = sibling(span_5, 2);
                   var text_11 = child(span_8);
                   template_effect(
                     ($0, $1, $2) => {
-                      classes = set_class(label, 1, "map-row svelte-axobi4", null, classes, { "error-row": get(row).error, selected: get(row).selected });
-                      input_1.disabled = get(row).status !== "changed" || get(phase) === "updating";
-                      set_text(text_8, get(row).name);
+                      classes = set_class(label, 1, "map-row svelte-axobi4", null, classes, { "error-row": get$1(row).error, selected: get$1(row).selected });
+                      input_1.disabled = get$1(row).status !== "changed" || get$1(phase) === "updating";
+                      set_text(text_8, get$1(row).name);
                       set_text(text_9, `${$0 ?? ""} synchronized locations`);
                       set_class(span_8, 1, `status ${$1 ?? ""}`, "svelte-axobi4");
                       set_text(text_11, $2);
                     },
                     [
-                      () => get(row).locationCount.toLocaleString(),
-                      () => statusTone(get(row)),
-                      () => statusLabel(get(row))
+                      () => get$1(row).locationCount.toLocaleString(),
+                      () => statusTone(get$1(row)),
+                      () => statusLabel(get$1(row))
                     ]
                   );
-                  bind_checked(input_1, () => get(row).selected, ($$value) => get(row).selected = $$value);
+                  bind_checked(input_1, () => get$1(row).selected, ($$value) => get$1(row).selected = $$value);
                   append($$anchor5, label);
                 });
-                template_effect(() => set_text(text_7, `${get(rows).length ?? ""} map${get(rows).length === 1 ? "" : "s"}`));
+                template_effect(() => set_text(text_7, `${get$1(rows).length ?? ""} map${get$1(rows).length === 1 ? "" : "s"}`));
                 append($$anchor4, fragment_6);
               };
               var alternate_3 = ($$anchor4) => {
@@ -6830,7 +6994,7 @@ roundNumber: 4,
                   if_block(
                     node_11,
                     ($$render) => {
-                      if (get(phase) === "review" && !get(fatalError)) $$render(consequent_11);
+                      if (get$1(phase) === "review" && !get$1(fatalError)) $$render(consequent_11);
                     },
                     true
                   );
@@ -6838,7 +7002,7 @@ roundNumber: 4,
                 append($$anchor4, fragment_7);
               };
               if_block(node_9, ($$render) => {
-                if (get(rows).length > 0) $$render(consequent_10);
+                if (get$1(rows).length > 0) $$render(consequent_10);
                 else $$render(alternate_3, false);
               });
             }
@@ -6847,11 +7011,11 @@ roundNumber: 4,
               var consequent_12 = ($$anchor4) => {
                 var div_15 = root_21();
                 var text_12 = child(div_15);
-                template_effect(() => set_text(text_12, `Finished: ${get(successCount) ?? ""} published, ${get(failureCount) ?? ""} failed, ${get(changedCount) ?? ""} still available.`));
+                template_effect(() => set_text(text_12, `Finished: ${get$1(successCount) ?? ""} published, ${get$1(failureCount) ?? ""} failed, ${get$1(changedCount) ?? ""} still available.`));
                 append($$anchor4, div_15);
               };
               if_block(node_12, ($$render) => {
-                if (get(finishedRun)) $$render(consequent_12);
+                if (get$1(finishedRun)) $$render(consequent_12);
               });
             }
             var footer_1 = sibling(node_12, 2);
@@ -6862,7 +7026,7 @@ roundNumber: 4,
               var consequent_13 = ($$anchor4) => {
                 var button_11 = root_22();
                 button_11.__click = changeGroup;
-                template_effect(() => button_11.disabled = get(phase) === "updating");
+                template_effect(() => button_11.disabled = get$1(phase) === "updating");
                 append($$anchor4, button_11);
               };
               if_block(node_13, ($$render) => {
@@ -6880,30 +7044,30 @@ roundNumber: 4,
                 button_13.__click = retryFailures;
                 var text_13 = child(button_13);
                 template_effect(() => {
-                  button_13.disabled = get(phase) === "updating";
-                  set_text(text_13, `Retry failed (${get(failureCount) ?? ""})`);
+                  button_13.disabled = get$1(phase) === "updating";
+                  set_text(text_13, `Retry failed (${get$1(failureCount) ?? ""})`);
                 });
                 append($$anchor4, button_13);
               };
               if_block(node_14, ($$render) => {
-                if (get(failureCount) > 0) $$render(consequent_14);
+                if (get$1(failureCount) > 0) $$render(consequent_14);
               });
             }
             var button_14 = sibling(node_14, 2);
             button_14.__click = updateSelected;
             var text_14 = child(button_14);
             template_effect(() => {
-              button_10.disabled = get(phase) === "updating";
-              button_12.disabled = get(phase) === "updating";
-              button_14.disabled = get(phase) !== "review" || get(selectedCount) === 0;
-              set_text(text_14, get(phase) === "updating" ? "Updating…" : `Update and publish (${get(selectedCount)})`);
+              button_10.disabled = get$1(phase) === "updating";
+              button_12.disabled = get$1(phase) === "updating";
+              button_14.disabled = get$1(phase) !== "review" || get$1(selectedCount) === 0;
+              set_text(text_14, get$1(phase) === "updating" ? "Updating…" : `Update and publish (${get$1(selectedCount)})`);
             });
             append($$anchor3, fragment_5);
           };
           if_block(
             node_3,
             ($$render) => {
-              if (get(phase) === "groups") $$render(consequent_6);
+              if (get$1(phase) === "groups") $$render(consequent_6);
               else $$render(alternate_4, false);
             },
             true
@@ -6912,17 +7076,17 @@ roundNumber: 4,
         append($$anchor2, fragment);
       };
       if_block(node_1, ($$render) => {
-        if (get(phase) === "token") $$render(consequent_2);
+        if (get$1(phase) === "token") $$render(consequent_2);
         else $$render(alternate_5, false);
       });
     }
     action(div_1, ($$node, $$action_arg) => modalDialog?.($$node, $$action_arg), () => ({
       onClose: $$props.onClose,
-      closeOnEscape: get(phase) !== "updating"
+      closeOnEscape: get$1(phase) !== "updating"
     }));
     template_effect(() => {
-      set_text(text, get(phase) === "groups" ? "Choose a map group" : "Update GeoGuessr maps");
-      button.disabled = get(phase) === "updating";
+      set_text(text, get$1(phase) === "groups" ? "Choose a map group" : "Update GeoGuessr maps");
+      button.disabled = get$1(phase) === "updating";
     });
     append($$anchor, div);
     pop();
@@ -7028,6 +7192,7 @@ roundNumber: 4,
   importCSS(modalsCss);
   let resetDialogApp = null;
   initMapArea();
+  void refreshLatestVersion();
   function openResetLayoutDialog() {
     if (resetDialogApp) return;
     const target = document.createElement("div");

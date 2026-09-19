@@ -51,7 +51,6 @@ export function initLiveChallenge() {
         roundNumber: 4,
         panoId,
         mapId,
-        userscriptVersion: mapInfo.userscriptVersion,
         source: 'liveChallenge'
       });
     } catch (e) {
