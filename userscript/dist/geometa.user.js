@@ -25,42 +25,43 @@
 
 ## [0.96]
 
-- Move installs and updates to stable GitHub Pages URL
-- Build published userscript from source through GitHub Actions
+- Move installs and updates to stable GitHub Pages URL by @likeon
+  - Read more: <https://learnablemeta.com/docs/userscript-security>
+- Build published userscript from source through GitHub Actions by @likeon
 - Fix: support locale-prefixed URLs in party lobby detection by @Graiiig
 
 ## [0.95]
 
-- Fixed GeoJSON overlays conflicting with userscripts that also wrap Google Maps
-- Fixed meta popups closing when another userscript checks the current game
+- Fixed GeoJSON overlays conflicting with userscripts that also wrap Google Maps by @Lonanche
+- Fixed meta popups closing when another userscript checks the current game by @Lonanche
 
 ## [0.94]
 
-- Added GeoJSON overlays to GeoGuessr round results
+- Added GeoJSON overlays to GeoGuessr round results by @ohne-b
 
 ## [0.93]
 
-- Added live challenge support for the new GeoGuessr party lobby
+- Added live challenge support for the new GeoGuessr party lobby by @Lonanche
 
 ## [0.92]
 
-- Fixed updated maps still appearing as changed after publishing
+- Fixed updated maps still appearing as changed after publishing by @Lonanche
 
 ## [0.91]
 
-- Added map-group updates after syncing and from Creator Hub
-- Detects changed GeoGuessr maps before updating
-- Added map selection, publishing progress, and retries
-- Refreshed dialogs and API token management
+- Added map-group updates after syncing and from Creator Hub by @Lonanche
+- Detects changed GeoGuessr maps before updating by @Lonanche
+- Added map selection, publishing progress, and retries by @Lonanche
+- Refreshed dialogs and API token management by @Lonanche
 
 ## [0.90]
 
-- Added meta pins to challenge results
-- Fixed meta window leaks and live challenge stacking
-- Fixed stale map IDs after Map Maker navigation
-- Updated the map label and upload UI for new GeoGuessr layouts
-- Added API key management and clearer upload errors
-- Isolated features so one failure does not disable the rest
+- Added meta pins to challenge results by @Lonanche
+- Fixed meta window leaks and live challenge stacking by @Lonanche
+- Fixed stale map IDs after Map Maker navigation by @Lonanche
+- Updated the map label and upload UI for new GeoGuessr layouts by @Lonanche
+- Added API key management and clearer upload errors by @Lonanche
+- Isolated features so one failure does not disable the rest by @Lonanche
 
 ## [0.89]
 
