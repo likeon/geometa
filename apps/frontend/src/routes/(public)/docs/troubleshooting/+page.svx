@@ -9,7 +9,7 @@ description: Resolve common Learnable Meta installation and userscript problems.
 
 ## The installer downloads a file
 
-Your userscript manager did not claim the `.user.js` file. Confirm that Tampermonkey or Violentmonkey is installed and enabled, then open the [userscript installer](https://github.com/likeon/geometa/raw/main/dist/geometa.user.js) again.
+Your userscript manager did not claim the `.user.js` file. Confirm that Tampermonkey or Violentmonkey is installed and enabled, then open the [userscript installer](https://userscript.learnablemeta.com/geometa.user.js) again.
 
 If it still downloads, follow the [manual installation video](https://www.youtube.com/watch?v=RpjvLpyiras).
 

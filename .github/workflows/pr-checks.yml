@@ -20,6 +20,7 @@ jobs:
       api: ${{ steps.filter.outputs.api }}
       frontend: ${{ steps.filter.outputs.frontend }}
       discord_bot: ${{ steps.filter.outputs.discord_bot }}
+      userscript: ${{ steps.filter.outputs.userscript }}
     steps:
       - name: Detect changed apps
         id: filter
@@ -38,6 +39,13 @@ jobs:
             discord_bot:
               - 'apps/discord-bot/**'
               - 'mise.toml'
+              - '.github/workflows/pr-checks.yml'
+            userscript:
+              - 'userscript/**'
+              - 'dist/**'
+              - 'mise.toml'
+              - '.github/workflows/userscript-build.yml'
+              - '.github/workflows/publish-userscript.yml'
               - '.github/workflows/pr-checks.yml'
 
   hygiene:
@@ -165,9 +173,17 @@ jobs:
       - name: Clippy
         run: cargo clippy --locked --all-targets --all-features -- -D warnings
 
+  userscript:
+    name: Userscript checks
+    needs: changes
+    if: ${{ needs.changes.outputs.userscript == 'true' }}
+    uses: ./.github/workflows/userscript-build.yml
+    permissions:
+      contents: read
+
   pr-checks:
     name: PR checks
-    needs: [changes, hygiene, api, frontend, discord-bot]
+    needs: [changes, hygiene, api, frontend, discord-bot, userscript]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     steps:
@@ -178,6 +194,7 @@ jobs:
           API_RESULT: ${{ needs.api.result }}
           FRONTEND_RESULT: ${{ needs.frontend.result }}
           DISCORD_BOT_RESULT: ${{ needs.discord-bot.result }}
+          USERSCRIPT_RESULT: ${{ needs.userscript.result }}
         run: |
           results=(
             "$CHANGES_RESULT"
@@ -185,6 +202,7 @@ jobs:
             "$API_RESULT"
             "$FRONTEND_RESULT"
             "$DISCORD_BOT_RESULT"
+            "$USERSCRIPT_RESULT"
           )
           for result in "${results[@]}"; do
             if [[ "$result" != "success" && "$result" != "skipped" ]]; then

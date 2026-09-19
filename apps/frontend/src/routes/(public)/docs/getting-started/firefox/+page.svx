@@ -15,7 +15,7 @@ description: Install Tampermonkey and the Learnable Meta userscript on Firefox.
 
 2. **Install Learnable Meta.**
 
-   Open the [Learnable Meta userscript installer](https://github.com/likeon/geometa/raw/main/dist/geometa.user.js), then confirm the installation in Tampermonkey.
+   Open the [Learnable Meta userscript installer](https://userscript.learnablemeta.com/geometa.user.js), then confirm the installation in Tampermonkey.
 
 3. **Open a fresh GeoGuessr tab.**
 

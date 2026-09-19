@@ -1,9 +1,8 @@
-import { expect, mock, test } from 'bun:test';
+import { expect, test, vi } from 'vitest';
+import { clearMapArea, initMapArea, showMapArea } from '../src/lib/mapArea';
 
-const pageWindow: Record<string, any> = {};
-mock.module('$', () => ({ unsafeWindow: pageWindow }));
-
-const { clearMapArea, initMapArea, showMapArea } = await import('../src/lib/mapArea');
+const { pageWindow } = vi.hoisted(() => ({ pageWindow: {} as Record<string, any> }));
+vi.mock('$', () => ({ unsafeWindow: pageWindow }));
 
 test('Map constructor composes with legacy userscript wrappers that call apply', () => {
   const listeners: string[] = [];

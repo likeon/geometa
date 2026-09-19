@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.96]
+
+- Move installs and updates to stable GitHub Pages URL
+- Build published userscript from source through GitHub Actions
+- Fix: support locale-prefixed URLs in party lobby detection by @Graiiig
+
 ## [0.95]
 
 - Fixed GeoJSON overlays conflicting with userscripts that also wrap Google Maps
