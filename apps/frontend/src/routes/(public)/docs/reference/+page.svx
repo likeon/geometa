@@ -49,6 +49,11 @@ description: Learnable Meta terminology, product links, and userscript source.
     description="Open the current Learnable Meta userscript installer."
   />
   <LinkCard
+    title="Userscript Security"
+    href="/docs/userscript-security"
+    description="Review permissions, release safeguards, and code verification steps."
+  />
+  <LinkCard
     title="Source code"
     href="https://github.com/likeon/geometa"
     description="Learnable Meta is open source on GitHub."

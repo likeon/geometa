@@ -1,0 +1,78 @@
+---
+title: Userscript Security
+description: Learnable Meta permissions, release safeguards, and steps to verify userscript updates.
+---
+
+<script>
+  import { Aside } from '$lib/components/docs';
+</script>
+
+
+<Aside type="caution">
+
+Userscripts run code in your browser, which can potentially do harm. We take security seriously and make it easy to verify what goes into our userscript. Still, you should check what you install and understand the potential risks.
+
+</Aside>
+
+## High level overview
+
+- **Open source:** the userscript and the entire project are available on [GitHub](https://github.com/likeon/geometa/tree/main/userscript).
+- **Transparent builds:** GitHub Actions builds the script from source code in an isolated environment. You can inspect the build steps and resulting files.
+- **Only necessary permissions:** the script requests only the access it needs.
+  - The userscript manager enforces permissions for privileged features.
+  - Changes to declarations such as `@grant`, `@match`, or `@require` can trigger an approval request in Tampermonkey.
+
+You can check what access the script requests and where each release comes from, rather than relying on our reputation alone.
+
+## Permissions and their limits
+
+Published script lists its access in its metadata header. We keep requested access tied to features, rather than requesting every available capability. Tampermonkey controls which privileged APIs the script receives.
+
+| Declaration | Purpose and scope |
+| --- | --- |
+| `@match *://*.geoguessr.com/*` | Run on GeoGuessr and its subdomains. With this rule unchanged, manager does not inject script into unrelated sites. |
+| `GM_xmlhttpRequest` and `@connect learnablemeta.com` | Fetch Learnable Meta notes, map data, announcements, and release information. Tampermonkey's domain rule includes subdomains, covering `userscript.learnablemeta.com/manifest.json`. |
+| `GM_getValue`, `GM_setValue` | Read and save Learnable Meta API token in userscript storage for map uploads and updates. |
+| `GM_addStyle` | Style Learnable Meta interface. |
+| `GM_registerMenuCommand` | Add window-layout reset command to manager menu. |
+| `GM_info` | Read installed script version for update notice. |
+| `unsafeWindow` | Access GeoGuessr page objects, game-event framework, map integration, and page storage. |
+
+**`@connect` is not a network firewall.** In Tampermonkey, it controls privileged `GM_xmlhttpRequest` destinations, not ordinary page requests. It allows `learnablemeta.com` and subdomains—not just API paths. Other destinations can require additional approval; user settings can broaden access. See [Tampermonkey's connection rules](https://www.tampermonkey.net/documentation.php?locale=en&q=connect). Normal GeoGuessr requests still work under browser rules.
+
+Header also declares an external `@require`: [GeoGuessr Event Framework](https://github.com/miraclewhips/geoguessr-event-framework/tree/5e449d6b64c828fce5d2915772d61c7f95263e34), pinned to a specific Git commit rather than a moving branch. Manager downloads and runs this dependency too; include it when reviewing code.
+
+**Source code:** [`userscript/vite.config.ts`](https://github.com/likeon/geometa/blob/main/userscript/vite.config.ts)
+
+## Releases built from public source
+
+[Dedicated installer](https://userscript.learnablemeta.com/geometa.user.js) serves releases through GitHub Pages.
+
+Source, workflow definitions, and run logs are public. Build actions are pinned to commit IDs.
+
+We use Svelte frontend framework to build the script's interface. It converts source code into JavaScript bundle that browsers can run. Resulting JavaScript is **unminified and human-readable**, though generated framework code still takes more effort to review than handwritten JavaScript.
+
+**Source code:** [Build workflow](https://github.com/likeon/geometa/blob/main/.github/workflows/userscript-build.yml) · [Publish workflow](https://github.com/likeon/geometa/blob/main/.github/workflows/publish-userscript.yml)
+
+## Verify an install or update
+
+### Keep control of updates
+
+Managers can install updates automatically. Review your manager's update settings; disable automatic updates for this script if you want to inspect every release before it runs. Review permission prompts when shown, but do not rely on a mandatory confirmation for every permission increase across manager versions and settings.
+
+### Why a custom domain?
+
+`userscript.learnablemeta.com` gives installs and updates a dedicated address. While hosted on GitHub Pages, it could later point elsewhere; userscript manager would not detect that change or require GitHub Actions provenance. Keep reviewing code when updating.
+
+We chose this address rather than `likeon.github.io`: a GitHub-owned hostname still would not prove which branch or workflow produced a release as it can be switched at any moment. Neither replaces source and artifact verification.
+
+## People behind releases
+
+Only two people are trusted to release new userscript versions:
+
+- [likeon](https://github.com/likeon): professional software engineer with an established career and over 15 years of experience.
+- [trausi](https://www.twitch.tv/trausi): longtime Twitch streamer with over 15,000 hours on air and more than 50,000 viewers at his peak.
+
+A good reputation is no guarantee against future wrongdoing, but our income depends on that reputation, so risking it through malicious script changes simply makes no financial sense.
+
+Restricted access, public builds, and your own checks matter alongside who maintains the project.

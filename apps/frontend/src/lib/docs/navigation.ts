@@ -31,6 +31,7 @@ export const docSections: readonly DocSection[] = [
           { title: 'iOS and iPadOS', href: '/docs/getting-started/ios' }
         ]
       },
+      { title: 'Userscript Security', href: '/docs/userscript-security' },
       { title: 'Personal Maps', href: '/docs/getting-started/personal-maps' }
     ]
   },

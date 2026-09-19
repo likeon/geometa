@@ -16,7 +16,7 @@ Learnable Meta teaches useful GeoGuessr clues while you play. Its maps contain t
 
 ## Install Learnable Meta
 
-Learnable Meta runs as a userscript inside GeoGuessr. Choose your browser or device to install a supported userscript manager:
+Learnable Meta runs as a userscript inside GeoGuessr. Before installing, we recommend getting familiar with [Userscript Security](/docs/userscript-security).
 
 <div class="docs-grid">
   <LinkCard
@@ -84,6 +84,12 @@ The maps are especially useful in **No Move** games: recognizing the Google car,
 Pause after each guess and locate the documented clue in the panorama. Connecting the explanation to what you just saw is more memorable than reading the note alone.
 
 </Aside>
+
+## Userscript releases and updates
+
+Installs and updates use [dedicated installer URL](https://userscript.learnablemeta.com/geometa.user.js). Releases are built from public source through GitHub Actions and published to GitHub Pages. Old repository bundles remain for migration, not current releases.
+
+Userscript manager checks for updates according to its settings; Learnable Meta also checks published release manifest for its update notice. Neither check verifies build provenance. Review code and permissions before updating; see [verification and update controls](/docs/userscript-security#verify-an-install-or-update).
 
 ## Where hints appear
 
