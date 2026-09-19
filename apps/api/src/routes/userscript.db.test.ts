@@ -818,7 +818,7 @@ describe('GET /api/userscript/map-groups', () => {
 });
 
 describe('GET /api/userscript/map/:geoguessrId', () => {
-  test('personal map returns mapFound true and isPersonal true without release version', async () => {
+  test('personal map returns mapFound true, isPersonal true, and legacy update version', async () => {
     await db.insert(maps).values({
       name: 'Personal Map',
       geoguessrId: 'map-lookup-personal',
@@ -834,10 +834,11 @@ describe('GET /api/userscript/map/:geoguessrId', () => {
     expect(await response.json()).toEqual({
       mapFound: true,
       isPersonal: true,
+      userscriptVersion: '0.96',
     });
   });
 
-  test('group map returns mapFound true and isPersonal false', async () => {
+  test('group map returns mapFound true, isPersonal false, and legacy update version', async () => {
     const [group] = await db
       .insert(mapGroups)
       .values({ name: 'Lookup Group' })
@@ -857,10 +858,11 @@ describe('GET /api/userscript/map/:geoguessrId', () => {
     expect(await response.json()).toEqual({
       mapFound: true,
       isPersonal: false,
+      userscriptVersion: '0.96',
     });
   });
 
-  test('missing map returns 404 with mapFound false without release version', async () => {
+  test('missing map returns 404 with mapFound false and legacy update version', async () => {
     // an unrelated map exists, so the 404 proves the lookup is by geoguessrId
     await db.insert(maps).values({
       name: 'Existing Map',
@@ -876,6 +878,7 @@ describe('GET /api/userscript/map/:geoguessrId', () => {
     expect(response.status).toBe(404);
     expect(await response.json()).toEqual({
       mapFound: false,
+      userscriptVersion: '0.96',
     });
   });
 });
