@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test';
+import { describe, expect, test } from 'vitest';
 import {
   extractLiveChallengeId,
   findPartyLiveChallengeId,
@@ -25,9 +25,9 @@ describe('live challenge IDs', () => {
   });
 
   test('recognizes party lobby routes with query strings', () => {
-    expect(isPartyLobbyPath(new URL('https://www.geoguessr.com/party/lobby/WGUL5?j=1').pathname)).toBe(
-      true
-    );
+    expect(
+      isPartyLobbyPath(new URL('https://www.geoguessr.com/party/lobby/WGUL5?j=1').pathname)
+    ).toBe(true);
   });
 
   test('recognizes locale-prefixed party lobby routes', () => {

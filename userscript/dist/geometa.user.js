@@ -1,11 +1,11 @@
 // ==UserScript==
 // @name         GeoGuessr Learnable Meta
 // @namespace    geometa
-// @version      0.95
+// @version      0.96
 // @description  UserScript for GeoGuessr Learnable Meta maps
 // @icon         https://learnablemeta.com/favicon.png
-// @downloadURL  https://github.com/likeon/geometa/raw/main/userscript/dist/geometa.user.js
-// @updateURL    https://github.com/likeon/geometa/raw/main/userscript/dist/geometa.user.js
+// @downloadURL  https://userscript.learnablemeta.com/geometa.user.js
+// @updateURL    https://userscript.learnablemeta.com/geometa.user.js
 // @match        *://*.geoguessr.com/*
 // @require      https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/5e449d6b64c828fce5d2915772d61c7f95263e34/geoguessr-event-framework.js
 // @connect      learnablemeta.com
@@ -22,6 +22,12 @@
 
 /*
 # Changelog
+
+## [0.96]
+
+- Move installs and updates to stable GitHub Pages URL
+- Build published userscript from source through GitHub Actions
+- Fix: support locale-prefixed URLs in party lobby detection by @Graiiig
 
 ## [0.95]
 
@@ -4075,8 +4081,8 @@ context.l
     );
     return l.u ??= { a: [], b: [], m: [] };
   }
-  const LIVE_CHALLENGE_PATH = /^\/(?:api\/)?live-challenge\/([^/?#]+)\/?$/;
-  const PARTY_LOBBY_PATH = /^\/party\/lobby\/[^/?#]+\/?$/;
+  const LIVE_CHALLENGE_PATH = /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?(?:api\/)?live-challenge\/([^/?#]+)\/?$/;
+  const PARTY_LOBBY_PATH = /^\/(?:[a-z]{2}(?:-[A-Z]{2})?\/)?party\/lobby\/[^/?#]+\/?$/;
   let trackedPartyChallenge = null;
   let resourceObserver = null;
   function pathnameFromUrl(url) {

@@ -1,0 +1,56 @@
+name: Userscript build
+
+on:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Check and build userscript
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: userscript
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up userscript tools
+        uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4
+        with:
+          version: "2026.9.3"
+          working_directory: userscript
+          install_args: node pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Check formatting
+        run: pnpm lint
+
+      - name: Type-check
+        run: pnpm check
+
+      - name: Test userscript
+        run: pnpm test
+
+      - name: Build and verify metadata
+        run: pnpm build
+
+      - name: Verify build leaves legacy bundles untouched
+        run: git diff --exit-code -- ../dist dist
+
+      - name: Record build provenance
+        if: ${{ github.event_name == 'workflow_dispatch' && startsWith(github.ref, 'refs/heads/') }}
+        run: node scripts/verify-build.mjs --manifest
+
+      - name: Upload fresh build
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: userscript-build
+          path: userscript/build/
+          if-no-files-found: error

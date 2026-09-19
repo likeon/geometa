@@ -1,5 +1,6 @@
-# Build output
+# Build output; frozen legacy snapshot
 dist/
+build/
 
 # Dependencies
 node_modules/

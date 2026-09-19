@@ -45,7 +45,7 @@ description: Learnable Meta terminology, product links, and userscript source.
 <div class="docs-grid">
   <LinkCard
     title="Install the userscript"
-    href="https://github.com/likeon/geometa/raw/main/dist/geometa.user.js"
+    href="https://userscript.learnablemeta.com/geometa.user.js"
     description="Open the current Learnable Meta userscript installer."
   />
   <LinkCard

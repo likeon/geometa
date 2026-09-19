@@ -1,12 +1,13 @@
-import { expect, mock, test } from 'bun:test';
+import { expect, test, vi } from 'vitest';
+import {
+  mountSummaryWindow,
+  unmountSummaryWindow,
+  unmountSummaryWindowOnRoundStart
+} from '../src/lib/utils/summaryWindow';
 
-const svelteUnmount = mock(() => {});
-mock.module('svelte', () => ({ mount: () => ({}), unmount: svelteUnmount }));
-mock.module('../src/lib/App.svelte', () => ({ default: {} }));
-
-const { mountSummaryWindow, unmountSummaryWindow, unmountSummaryWindowOnRoundStart } = await import(
-  '../src/lib/utils/summaryWindow'
-);
+const { svelteUnmount } = vi.hoisted(() => ({ svelteUnmount: vi.fn() }));
+vi.mock('svelte', () => ({ mount: () => ({}), unmount: svelteUnmount }));
+vi.mock('../src/lib/App.svelte', () => ({ default: {} }));
 
 test('keeps the summary open until the visible round result is removed', () => {
   let removed = false;
@@ -61,7 +62,7 @@ test('keeps the summary open until the visible round result is removed', () => {
       source: 'map'
     });
     unmountSummaryWindowOnRoundStart();
-    expect(removed).toBeFalse();
+    expect(removed).toBe(false);
     expect(svelteUnmount).toHaveBeenCalledTimes(0);
     expect(callbacks).toHaveLength(1);
 
@@ -69,7 +70,7 @@ test('keeps the summary open until the visible round result is removed', () => {
     summary.isConnected = false;
     expect(document.getElementById('geometa-summary')).toBeNull();
     callbacks[0]([], {} as MutationObserver);
-    expect(removed).toBeTrue();
+    expect(removed).toBe(true);
     expect(svelteUnmount).toHaveBeenCalledTimes(1);
   } finally {
     unmountSummaryWindow();

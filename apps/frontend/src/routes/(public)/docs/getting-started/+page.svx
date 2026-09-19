@@ -53,7 +53,7 @@ Learnable Meta teaches clues in context instead of asking you to memorize long l
 
 2. **Install Learnable Meta.**
 
-   Open the [Learnable Meta userscript installer](https://github.com/likeon/geometa/raw/main/dist/geometa.user.js) and confirm the installation in your userscript manager.
+   Open the [Learnable Meta userscript installer](https://userscript.learnablemeta.com/geometa.user.js) and confirm the installation in your userscript manager.
 
 3. **Open a fresh browser tab.**
 

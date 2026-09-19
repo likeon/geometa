@@ -1,7 +1,11 @@
 monorepo_root = true
 
 [settings]
+experimental = true
 env_shell_expand = true
+
+[monorepo]
+config_roots = ["apps/*", "userscript"]
 
 [tools]
 # languages

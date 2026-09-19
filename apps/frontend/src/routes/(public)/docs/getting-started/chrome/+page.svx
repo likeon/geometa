@@ -33,7 +33,7 @@ These instructions apply to Chrome and most Chromium-based desktop browsers, inc
 
 3. **Install Learnable Meta.**
 
-   Open the [Learnable Meta userscript installer](https://github.com/likeon/geometa/raw/main/dist/geometa.user.js), then confirm the installation in Tampermonkey.
+   Open the [Learnable Meta userscript installer](https://userscript.learnablemeta.com/geometa.user.js), then confirm the installation in Tampermonkey.
 
 4. **Open a fresh GeoGuessr tab.**
 

@@ -19,7 +19,7 @@ Firefox for Android supports the browser extensions needed to run Learnable Meta
 
 1. Install Firefox on your Android device.
 2. In Firefox, install [Tampermonkey from Firefox Add-ons](https://addons.mozilla.org/firefox/addon/tampermonkey/).
-3. Open the [Learnable Meta userscript installer](https://github.com/likeon/geometa/raw/main/dist/geometa.user.js) and confirm the installation.
+3. Open the [Learnable Meta userscript installer](https://userscript.learnablemeta.com/geometa.user.js) and confirm the installation.
 4. Open a fresh GeoGuessr tab in Firefox and choose a [Learnable Meta map](https://learnablemeta.com/maps).
 
 </div>

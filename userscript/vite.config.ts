@@ -1,21 +1,23 @@
-import { defineConfig } from 'vite';
+import { defineConfig, type Plugin } from 'vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import monkey from 'vite-plugin-monkey';
 import { readFileSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 
-function injectChangelog() {
+function injectChangelog(): Plugin {
+  let buildPath: string;
   return {
     name: 'inject-changelog',
-    // closeBundle also fires when the dev server shuts down, which would
-    // append a second changelog to the existing dist file
-    apply: 'build' as const,
+    // Skip dev shutdown; preserve existing build.
+    apply: 'build',
+    configResolved(config) {
+      buildPath = resolve(config.root, config.build.outDir, 'geometa.user.js');
+    },
     closeBundle() {
       const changelogPath = resolve(__dirname, 'CHANGELOG.md');
-      const distPath = resolve(__dirname, 'dist/geometa.user.js');
 
       const changelog = readFileSync(changelogPath, 'utf-8');
-      const distContent = readFileSync(distPath, 'utf-8');
+      const distContent = readFileSync(buildPath, 'utf-8');
 
       const lines = distContent.split('\n');
       const userScriptEndIndex = lines.findIndex((line) => line.trim() === '// ==/UserScript==');
@@ -31,29 +33,31 @@ function injectChangelog() {
         modifiedContent += '\n';
       }
 
-      writeFileSync(distPath, modifiedContent, 'utf-8');
-      console.log('✓ Changelog injected into dist/geometa.user.js');
+      writeFileSync(buildPath, modifiedContent, 'utf-8');
+      console.log(`✓ Changelog injected into ${buildPath}`);
     }
   };
 }
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  build: { outDir: 'build' },
   plugins: [
     svelte(),
     injectChangelog(),
     monkey({
       entry: 'src/main.ts',
+      build: { fileName: 'geometa.user.js' },
       userscript: {
         icon: 'https://learnablemeta.com/favicon.png',
-        version: '0.95',
+        version: '0.96',
         namespace: 'geometa',
         name: 'GeoGuessr Learnable Meta',
         description: 'UserScript for GeoGuessr Learnable Meta maps',
         match: ['*://*.geoguessr.com/*'],
         connect: ['learnablemeta.com'],
-        updateURL: 'https://github.com/likeon/geometa/raw/main/userscript/dist/geometa.user.js',
-        downloadURL: 'https://github.com/likeon/geometa/raw/main/userscript/dist/geometa.user.js',
+        updateURL: 'https://userscript.learnablemeta.com/geometa.user.js',
+        downloadURL: 'https://userscript.learnablemeta.com/geometa.user.js',
         'run-at': 'document-start',
         require: [
           'https://raw.githubusercontent.com/miraclewhips/geoguessr-event-framework/5e449d6b64c828fce5d2915772d61c7f95263e34/geoguessr-event-framework.js'
