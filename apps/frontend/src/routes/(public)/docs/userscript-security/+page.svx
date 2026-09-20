@@ -65,14 +65,3 @@ Managers can install updates automatically. Review your manager's update setting
 `userscript.learnablemeta.com` gives installs and updates a dedicated address. While hosted on GitHub Pages, it could later point elsewhere; userscript manager would not detect that change or require GitHub Actions provenance. Keep reviewing code when updating.
 
 We chose this address rather than `likeon.github.io`: a GitHub-owned hostname still would not prove which branch or workflow produced a release as it can be switched at any moment. Neither replaces source and artifact verification.
-
-## People behind releases
-
-Only two people are trusted to release new userscript versions:
-
-- [likeon](https://github.com/likeon): professional software engineer with an established career and over 15 years of experience.
-- [trausi](https://www.twitch.tv/trausi): longtime Twitch streamer with over 15,000 hours on air and more than 50,000 viewers at his peak.
-
-A good reputation is no guarantee against future wrongdoing, but our income depends on that reputation, so risking it through malicious script changes simply makes no financial sense.
-
-Restricted access, public builds, and your own checks matter alongside who maintains the project.
