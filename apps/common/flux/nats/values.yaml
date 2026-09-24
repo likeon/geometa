@@ -1,0 +1,108 @@
+config:
+  cluster:
+    enabled: true
+    routeURLs:
+      useFQDN: true
+    tls:
+      enabled: true
+      secretName: nats-tls
+      cert: cluster.crt
+      key: cluster.key
+      merge:
+        verify: true
+  jetstream:
+    enabled: true
+    fileStore:
+      maxSize: 8Gi
+    merge:
+      sync_interval: always
+  nats:
+    tls:
+      enabled: true
+      secretName: nats-tls
+      cert: server.crt
+      key: server.key
+      merge:
+        min_version: "1.2"
+  merge:
+    accounts:
+      GEOMETA:
+        jetstream: enabled
+        users:
+          - user: geometa
+            password: << $NATS_PASSWORD >>
+    max_payload: 1048576
+
+tlsCA:
+  enabled: true
+  configMapName: nats-ca
+
+container:
+  env:
+    GOMEMLIMIT: 800MiB
+    NATS_PASSWORD:
+      valueFrom:
+        secretKeyRef:
+          name: nats-auth
+          key: password
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: "1"
+      memory: 1Gi
+  merge:
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: [ALL]
+
+reloader:
+  merge:
+    resources:
+      requests:
+        cpu: 10m
+        memory: 32Mi
+      limits:
+        cpu: 100m
+        memory: 64Mi
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: true
+      capabilities:
+        drop: [ALL]
+
+podTemplate:
+  configChecksumAnnotation: true
+  merge:
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - topologyKey: kubernetes.io/hostname
+              labelSelector:
+                matchLabels:
+                  app.kubernetes.io/name: nats
+                  app.kubernetes.io/instance: nats
+                  app.kubernetes.io/component: nats
+
+statefulSet:
+  merge:
+    spec:
+      persistentVolumeClaimRetentionPolicy:
+        whenDeleted: Retain
+        whenScaled: Retain
+
+natsBox:
+  enabled: false

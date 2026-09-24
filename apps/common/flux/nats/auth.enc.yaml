@@ -1,0 +1,22 @@
+apiVersion: v1
+data:
+  password: ENC[AES256_GCM,data:zQL7XNnRZBx/K5vZaYg2iwnCK41vJyzK4GaMELZVDuVAL5NCQlGEDEdQGqoRWCrjaD4i6F+adUgdveFjyCjEzuQWTSBaMlxgikcScoCfbaX2QHnI+1pn2g==,iv:fqkDrP+V4krgKN7eqndH81W865shGYhiYsZYFj82Kro=,tag:cnREjUKyugQ9M4JI0raMhQ==,type:str]
+  username: ENC[AES256_GCM,data:xW8p0toURettlK9E,iv:RInOFzh0bn7Jp3HVwlYfRmecs1/rrj0nFYy4LEtxGH8=,tag:/LS19sIexNur6H7eHmp3Cw==,type:str]
+kind: Secret
+metadata:
+  name: nats-auth
+sops:
+  age:
+    - enc: |
+        -----BEGIN AGE ENCRYPTED FILE-----
+        YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBhTllXZG9qd1RrcmxlQWVW
+        OEc0bFlaUGdzMXdudzFJZjBlVTJiZW0rbFE4CjNnRHRqZ1gzd0g0M01QdWt5NEE0
+        K1J0ZDJ0ZmttSk9rL0RpQmZHbldVckUKLS0tIGgyczdZRnVIYjhibTJIZlZpTmhF
+        c2dBTW9RZmRacENOR1dVUzI5YmJqMkkK8yO6lrCRwbuUMlv6X89BEI3zvie3X6gu
+        ZO+sB0Lfcpsop8IEvuUbJTjAEVnMkTTQjr96jOEF9NHhvMtWTkw2DQ==
+        -----END AGE ENCRYPTED FILE-----
+      recipient: age1nmyhrpnparuwdkny03zxc52gn488qumxw865ss3vavkqxvauhfwq0e7y34
+  encrypted_regex: ^(data|stringData)$
+  lastmodified: "2026-09-24T13:56:16Z"
+  mac: ENC[AES256_GCM,data:Is1PjkXKj2sViE8W40EbNBsXJJtaBIJSKTkBPskUG4wmseZvdvLKTMEuN4l6r5gErjunwVhvENL+uRT2YkaFG/X11Rk6ASxv+zGyQLVWF6TfYV6mUxrz1dXP69ixkPBUiyIxRbjIy2B0hhylEbeXB7ii+twN19wUe6ZQa+BYl8o=,iv:H8OnxuwR36Y8geZie3fFdhP4YJHPb1Zkq7uoYg7i++w=,tag:TM7Winp8hz8u8a3hTwVY5w==,type:str]
+  version: 3.13.3

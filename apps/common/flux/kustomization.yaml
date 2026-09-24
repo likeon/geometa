@@ -13,3 +13,4 @@ resources:
   - image-proxy-network-policy.yaml
   - cloudflared-network-policy.yaml
   - rbac.yaml
+  - nats

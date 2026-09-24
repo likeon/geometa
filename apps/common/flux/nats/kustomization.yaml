@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - helm-repository.yaml
+  - helm-release.yaml
+  - network-policy.yaml
+  - auth.enc.yaml
+  - tls.enc.yaml
+  - ca.yaml
+configMapGenerator:
+  - name: nats-values
+    files:
+      - values.yaml
+    options:
+      disableNameSuffixHash: true
+      labels:
+        reconcile.fluxcd.io/watch: Enabled
