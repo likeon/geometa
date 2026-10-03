@@ -2,7 +2,7 @@ import type { Config } from 'drizzle-kit';
 
 const databaseUrl =
   process.env.DATABASE_URL ??
-  `postgresql://postgres:postgres@localhost:${process.env.PROCESS_COMPOSE_PORT_POSTGRES ?? '5432'}/geometa`;
+  `postgresql://postgres:postgres@localhost:${process.env.PORT_POSTGRES ?? '5432'}/geometa`;
 
 export default {
   schema: './src/lib/db/schema.ts',

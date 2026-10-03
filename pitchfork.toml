@@ -1,0 +1,97 @@
+#:schema https://pitchfork.jdx.dev/schema.json
+
+[settings.general]
+mise = true
+
+[settings.logs]
+time_retention = "7d"
+
+[groups.minimal]
+daemons = ["00-info", "postgres", "api", "frontend"]
+
+[groups.all]
+daemons = ["00-info", "postgres", "api", "frontend", "discord-bot-spam-detect-onnx", "discord"]
+
+# print active ports/urls
+[daemons.00-info]
+oneshot = true
+depends = ["api", "frontend", "postgres"]
+run = '''
+printf '%s\n' \
+  'api: http://127.0.0.1:{{ daemons.api.port }}/api/docs' \
+  'frontend: http://127.0.0.1:{{ daemons.frontend.port }}/' \
+  'postgres: 127.0.0.1:{{ daemons.postgres.port }}'
+'''
+
+[daemons.postgres]
+port = { expect = [5432], bump = true }
+run = '''
+./scripts/pitchfork/container.sh '{{ id }}' \
+  --env POSTGRES_PASSWORD=postgres --env POSTGRES_DB=geometa \
+  --publish "127.0.0.1:${PORT}:5432" \
+  --volume "$DATA_DIR/postgres:/var/lib/postgresql/data:Z" \
+  docker.io/library/postgres:17
+'''
+env = { PODMAN_USERNS = "keep-id:uid=999,gid=999" }
+ready_output = "database system is ready to accept connections"
+retry = 10
+stop_signal = "SIGINT"
+hooks = {
+  on_ready = "mise set --file $PROJECT_ROOT/mise.local.toml PORT_POSTGRES={{ daemons.postgres.port }} DATABASE_URL=postgresql://postgres:postgres@localhost:{{ daemons.postgres.port }}/geometa DATABASE_URL_POSTGRES_DB=postgresql://postgres:postgres@localhost:{{ daemons.postgres.port }}/postgres"
+}
+
+[daemons.api]
+port = { expect = [3000], bump = true }
+dir = "apps/api"
+run = 'env SERVER_PORT="$PORT" bun run dev'
+ready_cmd = "curl -fs http://127.0.0.1:$PORT/api/health-check"
+depends = ["postgres"]
+watch = ["apps/api/bun.lock"]
+env = {
+  DATABASE_URL = "postgresql://postgres:postgres@localhost:{{ daemons.postgres.port }}/geometa",
+  DATABASE_URL_POSTGRES_DB = "postgresql://postgres:postgres@localhost:{{ daemons.postgres.port }}/postgres"
+}
+hooks = { on_ready = "mise set --file $PROJECT_ROOT/mise.local.toml PORT_API={{ daemons.api.port }}" }
+
+[daemons.frontend]
+port = { expect = [5173], bump = true }
+dir = "apps/frontend"
+run = 'npm run dev -- --port "$PORT" --strictPort'
+depends = ["postgres", "api"]
+watch = ["apps/frontend/package-lock.json"]
+env = {
+  API_URL = "http://localhost:{{ daemons.api.port }}",
+  API_HOST = "localhost:{{ daemons.api.port }}",
+  DATABASE_URL = "postgresql://postgres:postgres@localhost:{{ daemons.postgres.port }}/geometa"
+}
+hooks = { on_ready = "mise set --file $PROJECT_ROOT/mise.local.toml PORT_FRONTEND={{ daemons.frontend.port }}" }
+
+[daemons.discord-bot-spam-detect-onnx]
+port = { expect = [37080], bump = true }
+run = '''
+./scripts/pitchfork/container.sh '{{ id }}' \
+  --publish "127.0.0.1:${PORT}:8080" \
+  --volume "$PWD/.dev/data/onnx-runtime/models:/app/models:ro,Z" \
+  --env ONNX_SERVER_HTTP_PORT=8080 \
+  --env ONNX_SERVER_PREPARE_MODEL=tanaos-spam-detection-v1:v1 \
+  --env ORT_DISABLE_TELEMETRY=1 \
+  docker.io/kibaes/onnxruntime-server:1.29.0-linux-cpu
+'''
+env = { PODMAN_USERNS = "keep-id:uid=999,gid=999" }
+ready_cmd = "curl -fs http://127.0.0.1:$PORT/health"
+retry = true
+stop_signal = { signal = "SIGTERM", timeout = "15s" }
+hooks = {
+  on_ready = 'mise set --file $PROJECT_ROOT/mise.local.toml PORT_DISCORD_BOT_SPAM_DETECT_ONNX={{ daemons["discord-bot-spam-detect-onnx"].port }}'
+}
+
+[daemons.discord-bot]
+dir = "apps/discord-bot"
+run = "cargo run --locked"
+depends = ["api", "discord-bot-spam-detect-onnx"]
+watch = ["apps/discord-bot/Cargo.toml", "apps/discord-bot/Cargo.lock"]
+env = {
+  API_URL = "http://127.0.0.1:{{ daemons.api.port }}",
+  API_HOST = "127.0.0.1:{{ daemons.api.port }}",
+  SPAM_ONNX_API_URL = 'http://127.0.0.1:{{ daemons["discord-bot-spam-detect-onnx"].port }}'
+}

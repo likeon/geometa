@@ -1,11 +1,16 @@
 monorepo_root = true
 
+[monorepo]
+config_roots = ["apps/*", "userscript"]
+
 [settings]
 experimental = true
 env_shell_expand = true
 
-[monorepo]
-config_roots = ["apps/*", "userscript"]
+[env]
+PROJECT_ROOT = "{{ config_root }}"
+DATA_DIR = "{{ config_root }}/.dev/data"
+SPAM_ONNX_TOKENIZER_PATH = "$DATA_DIR/onnx-runtime/tokenizer.json"
 
 [tools]
 # languages
@@ -15,5 +20,29 @@ node = "24"
 # tools
 just = "latest"
 prek = "latest"
-process-compose = "latest"
-"npm:get-port-cli" = "latest"
+"aqua:pitchfork" = "latest"
+
+[tasks.bootstrap]
+description = "Install monorepo tools, Git hooks, and package dependencies"
+run = [
+  '''
+if [ -z "${CONTAINER_ENGINE:-}" ]; then
+    if command -v podman >/dev/null 2>&1; then
+        mise set -E local CONTAINER_ENGINE=podman
+    elif command -v docker >/dev/null 2>&1; then
+        mise set -E local CONTAINER_ENGINE=docker
+    else
+        echo "No container engine found. Install podman or docker, or set CONTAINER_ENGINE." >&2
+        exit 1
+    fi
+fi
+''',
+  "mise install --monorepo",
+  "prek install -t pre-commit -t pre-push",
+  "mise deps --monorepo",
+]
+
+[tasks.run]
+description = "Start local services and open Pitchfork TUI"
+run = "./scripts/pitchfork/run.sh"
+raw = true

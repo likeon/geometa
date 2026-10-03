@@ -1,2 +1,7 @@
 [env]
 LOGIN_BYPASS_ALLOW = "true"
+SHARP_IGNORE_GLOBAL_LIBVIPS = "1"
+
+[deps.npm]
+auto = true
+run = "npm ci"

@@ -93,18 +93,23 @@ indeterminate.
 Provision the pinned model artifacts (idempotent, checksum-verified):
 
 ```bash
-scripts/process-compose/setup-discord-spam-model.sh
+scripts/pitchfork/setup-discord-spam-model.sh
 ```
 
-The `discord-bot-spam-detect-onnx` process in `process-compose.yaml` is
-**disabled by default** (the model is ~136 MB and optional for ordinary
-development). To run it, first run the setup script, then enable the process
-(remove `disabled: true` or start it from the Process Compose TUI). The
-service runs `kibaes/onnxruntime-server:1.29.0-linux-cpu`, preloads
-`tanaos-spam-detection-v1:v1`, disables ONNX Runtime telemetry, and mounts
-`.dev/data/onnx-runtime/models` read-only. `scripts/process-compose/run.sh`
-allocates a dynamic port and persists `SPAM_ONNX_API_URL` and
-`SPAM_ONNX_TOKENIZER_PATH` into the ignored `mise.local.toml`.
+`discord-bot-spam-detect-onnx` in `pitchfork.toml` stays **stopped by default**;
+model ~136 MB, optional for ordinary development. Provision artifacts first,
+then start service from Pitchfork TUI or `pitchfork start discord-bot-spam-detect-onnx`
+during `mise run run` session. No config edit needed; service excluded from dev group.
+
+Service runs `kibaes/onnxruntime-server:1.29.0-linux-cpu`, preloads
+`tanaos-spam-detection-v1:v1`, disables ONNX Runtime telemetry, mounts
+`.dev/data/onnx-runtime/models` read-only. `scripts/pitchfork/run.sh` allocates
+preferred port or random fallback, persists `SPAM_ONNX_API_URL` and
+`SPAM_ONNX_TOKENIZER_PATH` into ignored `mise.local.toml`.
+
+Discord bot also manual-only. Start from TUI or `pitchfork start discord-bot`;
+API readiness gates startup. Running bot restarts on Cargo manifest/lockfile
+changes with `cargo run --locked`; stopped bot stays stopped.
 
 ### Discord requirements
 

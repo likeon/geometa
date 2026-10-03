@@ -21,17 +21,9 @@ Installation is tested to work on Linux and Windows WSL. Mac OS should work too,
 
 Run the following installation commands in order.
 
-1. `mise install` - bun and nodejs runtimes + utilities (full list in [mise.toml](./mise.toml))
-2. `just install` - npm dependencies
-3. `just run` - starts local development using [Process Compose]
-   - PostgreSQL runs in Podman or Docker; API and frontend run as local processes
-   - PostgreSQL data lives in ignored `.dev/data/postgres`
-   - With Podman, user namespaces keep PostgreSQL files owned by your host user
-   - Use the Process Compose TUI to monitor `postgres`, `frontend`, and `api`
-   - `info` prints dynamically allocated ports and URLs at startup
-   - Allocated ports are saved under `[env]` in ignored `mise.local.toml`
-   - Since this command occupies a session, you'll need to open a new terminal window or move it to background
-4. `just api::db-init` - applies initial db data
+1. `mise bootstrap` — install monorepo runtimes + tools from [mise.toml](./mise.toml), Git hooks, lockfile-based package dependencies;
+2. `just run` — start local services
+3. In another mise-activated terminal: `just api::db-init` — apply initial DB data.
 
 ### Product documentation
 
@@ -46,13 +38,12 @@ the OpenAPI document served at `/api/docs/json`.
 The Discord bot's spam pipeline needs a pinned ONNX model locally. This is
 your choice; normal frontend/API development does not need it.
 
-1. `scripts/process-compose/setup-discord-spam-model.sh` - downloads and
-   checksum-verifies the model/tokenizer into ignored `.dev/data/onnx-runtime/`
-   (idempotent, ~136 MB)
-2. Enable the `discord-bot-spam-detect-onnx` process in `process-compose.yaml`
-   (disabled by default)
-3. `just run` persists `SPAM_ONNX_API_URL` and `SPAM_ONNX_TOKENIZER_PATH` into
-   ignored `mise.local.toml` and prints the ONNX endpoint with `info`
+1. `scripts/pitchfork/setup-discord-spam-model.sh` — download and checksum-verify
+   model/tokenizer into ignored `.dev/data/onnx-runtime/` (idempotent, ~136 MB).
+2. During run session, start `discord-bot-spam-detect-onnx` from Pitchfork TUI or
+   `pitchfork start discord-bot-spam-detect-onnx`; excluded from default dev group.
+3. Runner persists `SPAM_ONNX_API_URL` and `SPAM_ONNX_TOKENIZER_PATH` into ignored
+   `mise.local.toml` and prints ONNX endpoint.
 
 ## Pull Request Process
 
@@ -69,6 +60,5 @@ If you need assistance, have questions, or want to discuss ideas, you can join o
 [mise-activate]: https://mise.jdx.dev/getting-started.html#activate-mise
 [podman]: https://podman.io/docs/installation
 [docker]: https://docs.docker.com/get-docker/
-[Process Compose]: https://f1bonacc1.github.io/process-compose/
 [gh-discussion]: https://github.com/likeon/geometa/discussions
 [Discord]: https://discord.gg/AcXEWznYZe
