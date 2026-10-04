@@ -37,7 +37,7 @@ ready_output = "database system is ready to accept connections"
 retry = 10
 stop_signal = "SIGINT"
 hooks = {
-  on_ready = "mise set --file $PROJECT_ROOT/mise.local.toml PORT_POSTGRES={{ daemons.postgres.port }} DATABASE_URL=postgresql://postgres:postgres@localhost:{{ daemons.postgres.port }}/geometa DATABASE_URL_POSTGRES_DB=postgresql://postgres:postgres@localhost:{{ daemons.postgres.port }}/postgres"
+  on_ready = "mise exec --no-deps -- sh -c 'mise set --file \"$PROJECT_ROOT/mise.local.toml\" PORT_POSTGRES={{ daemons.postgres.port }} DATABASE_URL=postgresql://postgres:postgres@localhost:{{ daemons.postgres.port }}/geometa DATABASE_URL_POSTGRES_DB=postgresql://postgres:postgres@localhost:{{ daemons.postgres.port }}/postgres'"
 }
 
 [daemons.api]
@@ -51,7 +51,7 @@ env = {
   DATABASE_URL = "postgresql://postgres:postgres@localhost:{{ daemons.postgres.port }}/geometa",
   DATABASE_URL_POSTGRES_DB = "postgresql://postgres:postgres@localhost:{{ daemons.postgres.port }}/postgres"
 }
-hooks = { on_ready = "mise set --file $PROJECT_ROOT/mise.local.toml PORT_API={{ daemons.api.port }}" }
+hooks = { on_ready = "mise exec --no-deps -- sh -c 'mise set --file \"$PROJECT_ROOT/mise.local.toml\" PORT_API={{ daemons.api.port }}'" }
 
 [daemons.frontend]
 port = { expect = [5173], bump = true }
@@ -64,7 +64,7 @@ env = {
   API_HOST = "localhost:{{ daemons.api.port }}",
   DATABASE_URL = "postgresql://postgres:postgres@localhost:{{ daemons.postgres.port }}/geometa"
 }
-hooks = { on_ready = "mise set --file $PROJECT_ROOT/mise.local.toml PORT_FRONTEND={{ daemons.frontend.port }}" }
+hooks = { on_ready = "mise exec --no-deps -- sh -c 'mise set --file \"$PROJECT_ROOT/mise.local.toml\" PORT_FRONTEND={{ daemons.frontend.port }}'" }
 
 [daemons.discord-bot-spam-detect-onnx]
 port = { expect = [37080], bump = true }
@@ -82,7 +82,7 @@ ready_cmd = "curl -fs http://127.0.0.1:$PORT/health"
 retry = true
 stop_signal = { signal = "SIGTERM", timeout = "15s" }
 hooks = {
-  on_ready = 'mise set --file $PROJECT_ROOT/mise.local.toml PORT_DISCORD_BOT_SPAM_DETECT_ONNX={{ daemons["discord-bot-spam-detect-onnx"].port }}'
+  on_ready = "mise exec --no-deps -- sh -c 'mise set --file \"$PROJECT_ROOT/mise.local.toml\" PORT_DISCORD_BOT_SPAM_DETECT_ONNX={{ daemons[\"discord-bot-spam-detect-onnx\"].port }}'"
 }
 
 [daemons.discord-bot]
