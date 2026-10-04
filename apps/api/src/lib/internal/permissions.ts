@@ -65,7 +65,7 @@ export function permissionErrorCatcher() {
     .onError(({ code, set }) => {
       if (code === 'PermissionsDeniedError') {
         set.status = 403;
-        return ["You don't have permissions for this"];
+        return { message: "You don't have permissions for this" };
       }
     })
     .as('global');
