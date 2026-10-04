@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test';
+import { beforeAll, describe, expect, test } from 'bun:test';
 import { app } from '../api';
 
 type JsonSchema = {
@@ -83,8 +83,11 @@ function operations(doc: Awaited<ReturnType<typeof loadOpenApiDocument>>) {
 describe('OpenAPI schema contract', () => {
   let doc: Awaited<ReturnType<typeof loadOpenApiDocument>>;
 
-  test('documents every application endpoint', async () => {
+  beforeAll(async () => {
     doc = await loadOpenApiDocument();
+  });
+
+  test('documents every application endpoint', async () => {
     const appOperations = operations(doc);
     expect(appOperations).toHaveLength(63);
     expect(appOperations.some(({ path }) => path === '/api/health-check')).toBe(

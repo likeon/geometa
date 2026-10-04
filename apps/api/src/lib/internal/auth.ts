@@ -74,6 +74,10 @@ export function auth(jwt?: boolean, authConfig: AuthConfig = config) {
               audience: 'api',
             });
           } catch (error) {
+            if (error instanceof jose.errors.JWTExpired) {
+              Sentry.captureException(error);
+              return status(403, forbiddenResponse);
+            }
             if (error instanceof jose.errors.JWTClaimValidationFailed) {
               Sentry.captureException(error);
               return status(403, { message: 'JWT validation failed' });
