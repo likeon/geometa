@@ -34,7 +34,12 @@ export const app = new Elysia({
     openapi({
       path: '/docs',
       specPath: '/docs/json',
-      provider: null,
+      provider: prod ? null : 'scalar',
+      scalar: {
+        hideClientButton: true,
+        showToolbar: 'never',
+        theme: 'elysiajs',
+      },
       exclude: {
         paths: ['/api/health-check'],
         tags: prod ? ['internal'] : [],
@@ -43,15 +48,6 @@ export const app = new Elysia({
         info: {
           title: 'Learnable Meta API',
           version: '1',
-          description: `Public endpoints used by the Learnable Meta userscript and map-making tools.
-
-## Server
-
-\`https://learnablemeta.com\`
-
-## Client libraries
-
-There are no official client libraries yet. Each endpoint includes ready-to-copy cURL and JavaScript \`fetch\` examples.`,
         },
         servers: openApiServers,
         externalDocs: {
@@ -87,12 +83,20 @@ There are no official client libraries yet. Each endpoint includes ready-to-copy
       },
     }),
   )
-  .get(
-    '/docs',
-    () =>
-      new Response(null, { status: 308, headers: { location: '/docs/api' } }),
-    { detail: { hide: true } },
-  )
+  .use((app) => {
+    if (prod) {
+      app.get(
+        '/docs',
+        () =>
+          new Response(null, {
+            status: 308,
+            headers: { location: '/docs/api' },
+          }),
+        { detail: { hide: true } },
+      );
+    }
+    return app;
+  })
   .use(userscriptRouter)
   .use(internalRouter)
   .use(mapsRouter);
