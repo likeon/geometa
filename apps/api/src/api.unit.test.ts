@@ -32,11 +32,13 @@ type OpenApiDocument = {
 };
 
 describe('public OpenAPI contract', () => {
-  test('redirects to the integrated API reference', async () => {
+  test('serves Scalar UI outside production', async () => {
     const response = await app.handle(new Request('http://localhost/api/docs'));
 
-    expect(response.status).toBe(308);
-    expect(response.headers.get('location')).toBe('/docs/api');
+    expect(response.status).toBe(200);
+    expect(response.headers.get('location')).toBeNull();
+    expect(response.headers.get('content-type')).toContain('text/html');
+    expect(await response.text()).toContain('@scalar/api-reference');
   });
 
   test('documents every public operation', async () => {
