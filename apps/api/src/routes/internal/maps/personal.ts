@@ -1,3 +1,8 @@
+import {
+  buildResponses,
+  internalErrorResponse,
+  notFoundResponse,
+} from '@api/lib/api/response-schemas';
 import { originalMapLateral } from '@api/lib/db/original-map';
 import {
   maps,
@@ -12,6 +17,7 @@ import { ensureMapAccess } from '@api/lib/internal/permissions';
 import { isPopularMap, popularMapMessage } from '@api/lib/internal/utils';
 import { generateFooter } from '@api/lib/userscript/utils';
 import { isUniqueViolation } from '@api/lib/utils/common';
+import { Type } from '@sinclair/typebox';
 import { and, eq, getTableColumns, inArray, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import { pick } from 'remeda';
@@ -27,12 +33,12 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
           name: maps.name,
           geoguessrId: maps.geoguessrId,
           metasCount:
-            sql<number>`COUNT(DISTINCT ${syncedMapMetas.syncedMetaId})`.as(
-              'syncedMetasCount',
-            ),
-          locationsCount: sql<number>`COUNT(${syncedLocations.panoId})`.as(
-            'syncedLocationsCount',
-          ),
+            sql<number>`COUNT(DISTINCT ${syncedMapMetas.syncedMetaId})`
+              .mapWith(Number)
+              .as('syncedMetasCount'),
+          locationsCount: sql<number>`COUNT(${syncedLocations.panoId})`
+            .mapWith(Number)
+            .as('syncedLocationsCount'),
         })
         .from(maps)
         .leftJoin(syncedMapMetas, eq(syncedMapMetas.mapId, maps.id))
@@ -45,21 +51,17 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
     },
     {
       userId: true,
-      response: {
+      response: buildResponses({
         200: t.Array(
-          t.Object(
-            {
-              id: t.Integer(),
-              name: t.String(),
-              geoguessrId: t.String(),
-              metasCount: t.Integer(),
-              locationsCount: t.Integer(),
-            },
-            { description: 'PersonalMap object' },
-          ),
-          { description: 'Array of personal maps' },
+          t.Object({
+            id: Type.Integer(),
+            name: t.String(),
+            geoguessrId: t.String(),
+            metasCount: Type.Integer(),
+            locationsCount: Type.Integer(),
+          }),
         ),
-      },
+      }),
     },
   )
   .post(
@@ -70,10 +72,10 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
         where: eq(users.id, userId),
       });
       if (!user) {
-        return status(500);
+        return status(500, internalErrorResponse);
       }
       if (!user.isSuperadmin && (await isPopularMap(geoguessrId))) {
-        return status(403, popularMapMessage);
+        return status(403, { message: popularMapMessage });
       }
 
       try {
@@ -90,7 +92,9 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
         return { id: result[0].id };
       } catch (e) {
         if (isUniqueViolation(e, 'maps_geoguessr_id_unique')) {
-          return status(409, 'Map with this GeoGuessr ID already exists.');
+          return status(409, {
+            message: 'Map with this GeoGuessr ID already exists.',
+          });
         }
         throw e;
       }
@@ -101,6 +105,13 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
         geoguessrId: t.String({ minLength: 1 }),
       }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({ id: Type.Integer() }),
+          409: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .get(
@@ -118,7 +129,7 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
       });
 
       if (!map) {
-        return status(404, 'Map not found');
+        return status(404, notFoundResponse);
       }
 
       const originalMap = originalMapLateral();
@@ -145,7 +156,7 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
                                         SELECT COUNT(*)
                                         FROM ${syncedLocations} sl
                                         WHERE sl.synced_meta_id = ${syncedMetas.metaId}
-                                      )`,
+                                      )`.mapWith(Number),
           usedInMapName: originalMap.name,
           usedInMapAuthors: originalMap.authors,
           usedInMapGeoguessrId: originalMap.geoguessrId,
@@ -187,6 +198,32 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
     {
       userId: true,
       params: t.Object({ id: t.Integer() }),
+      response: buildResponses(
+        {
+          200: t.Object({
+            geoguessrId: t.String(),
+            name: t.String(),
+            metas: t.Array(
+              t.Object({
+                metaId: Type.Integer(),
+                name: t.String(),
+                note: t.String(),
+                footer: t.String(),
+                images: t.Array(t.String()),
+                noteFromPlonkit: t.Boolean(),
+                countries: t.Array(t.String()),
+                locationsCount: Type.Integer(),
+                usedInMapName: t.Union([t.String(), t.Null()]),
+                usedInMapAuthors: t.Union([t.String(), t.Null()]),
+                usedInMapGeoguessrId: t.Union([t.String(), t.Null()]),
+                usedInMapFooter: t.String(),
+                generatedFooter: t.String(),
+              }),
+            ),
+          }),
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .patch(
@@ -199,14 +236,14 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
         where: eq(users.id, userId),
       });
       if (!user) {
-        return status(500);
+        return status(500, internalErrorResponse);
       }
       if (
         !user.isSuperadmin &&
         geoguessrId &&
         (await isPopularMap(geoguessrId))
       ) {
-        return status(403, popularMapMessage);
+        return status(403, { message: popularMapMessage });
       }
 
       try {
@@ -226,13 +263,15 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
           .returning({ id: maps.id });
 
         if (result.length === 0) {
-          return status(404, 'Map not found');
+          return status(404, notFoundResponse);
         }
 
         return { id: result[0].id };
       } catch (e) {
         if (isUniqueViolation(e, 'maps_geoguessr_id_unique')) {
-          return status(409, 'Map with this GeoGuessr ID already exists.');
+          return status(409, {
+            message: 'Map with this GeoGuessr ID already exists.',
+          });
         }
         throw e;
       }
@@ -246,6 +285,13 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
         geoguessrId: t.Optional(t.String({ minLength: 1 })),
       }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({ id: Type.Integer() }),
+          409: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .delete(
@@ -260,6 +306,10 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
         id: t.Integer(),
       }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Void() },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .post(
@@ -283,7 +333,7 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
 
       const validIdsSet = new Set(validMetaIds.map((m) => m.syncedMetaId));
       if (validIdsSet.size === 0) {
-        return status(400, 'No valid metaIds provided');
+        return status(400, { message: 'No valid metaIds provided' });
       }
 
       const valuesToInsert = Array.from(validIdsSet).map((syncedMetaId) => ({
@@ -304,6 +354,16 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
         metaIds: t.Array(t.Integer()),
       }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({
+            success: t.Literal(true),
+            inserted: Type.Integer(),
+          }),
+          400: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .delete(
@@ -328,5 +388,9 @@ export const personalMapsRouter = new Elysia({ prefix: '/personal' })
         metaIds: t.Array(t.Integer()),
       }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Void() },
+        { forbidden: true, validation: true },
+      ),
     },
   );

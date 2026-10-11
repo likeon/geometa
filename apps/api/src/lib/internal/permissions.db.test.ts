@@ -141,7 +141,7 @@ describe('permissionErrorCatcher', () => {
 
     expect(response.status).toBe(403);
     expect(await response.text()).toBe(
-      JSON.stringify([permissionDeniedMessage]),
+      JSON.stringify({ message: permissionDeniedMessage }),
     );
   });
 

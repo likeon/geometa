@@ -1,4 +1,8 @@
 import {
+  buildResponses,
+  notFoundResponse,
+} from '@api/lib/api/response-schemas';
+import {
   levels,
   locationMetas,
   mapGroupChanges,
@@ -27,6 +31,7 @@ import {
   getSynchronizedGroupMapSnapshots,
 } from '@api/lib/userscript/map-snapshots';
 import { isPgError } from '@api/lib/utils/common';
+import { Type } from '@sinclair/typebox';
 import {
   and,
   asc,
@@ -41,6 +46,164 @@ import {
   sql,
 } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
+
+const nullableString = t.Union([t.String(), t.Null()]);
+const nullableInteger = t.Union([Type.Integer(), t.Null()]);
+const userRole = t.Union([t.Literal('owner'), t.Literal('editor')]);
+
+const levelSchema = t.Object({
+  id: Type.Integer(),
+  mapGroupId: Type.Integer(),
+  name: t.String(),
+});
+
+const regionSchema = t.Object({
+  id: Type.Integer(),
+  name: t.String(),
+  ordering: Type.Integer(),
+});
+
+const metaImageSchema = t.Object({
+  id: Type.Integer(),
+  metaId: Type.Integer(),
+  image_url: t.String(),
+  order: Type.Integer(),
+});
+
+const metaLevelWithLevelSchema = t.Object({
+  id: Type.Integer(),
+  metaId: Type.Integer(),
+  levelId: Type.Integer(),
+  level: levelSchema,
+});
+
+const metaLocationsCountSchema = t.Object({
+  metaId: Type.Integer(),
+  total: Type.Integer(),
+});
+
+const userCoreSchema = t.Object({
+  id: t.String(),
+  username: t.String(),
+  isTrusted: t.Boolean(),
+  isSuperadmin: t.Boolean(),
+  isDiscordVerified: t.Boolean(),
+  discordVerifiedMessages: nullableInteger,
+});
+
+const mapGroupCoreSchema = t.Object({
+  id: Type.Integer(),
+  name: t.String(),
+  syncedAt: nullableInteger,
+  syncIncludeLocationsNotOnStreetView: t.Boolean(),
+});
+
+// a map as returned inside /map-groups/:id/maps-page; map_levels rows carry
+// mapId (not metaId like meta_levels rows)
+const groupMapSchema = t.Object({
+  id: Type.Integer(),
+  mapGroupId: nullableInteger,
+  name: t.String(),
+  geoguessrId: t.String(),
+  description: nullableString,
+  isPublished: t.Boolean(),
+  isShared: t.Boolean(),
+  isPersonal: t.Boolean(),
+  userId: nullableString,
+  authors: nullableString,
+  ordering: Type.Integer(),
+  footer: t.String(),
+  footerHtml: t.String(),
+  modifiedAt: Type.Integer(),
+  difficulty: Type.Integer(),
+  isVerified: t.Boolean(),
+  numberOfGamesPlayed: nullableInteger,
+  numberOfGamesPlayedDiminished: nullableInteger,
+  locationsCount: Type.Integer(),
+  metasCount: Type.Integer(),
+  mapLevels: t.Array(
+    t.Object({
+      id: Type.Integer(),
+      mapId: Type.Integer(),
+      levelId: Type.Integer(),
+      level: levelSchema,
+    }),
+  ),
+  mapRegions: t.Array(
+    t.Object({
+      id: Type.Integer(),
+      mapId: Type.Integer(),
+      regionId: Type.Integer(),
+      region: regionSchema,
+    }),
+  ),
+  filters: t.Array(
+    t.Object({
+      id: Type.Integer(),
+      mapId: Type.Integer(),
+      tagLike: nullableString,
+      isExclude: t.Boolean(),
+    }),
+  ),
+});
+
+const groupPageMetaSchema = t.Object({
+  id: Type.Integer(),
+  mapGroupId: Type.Integer(),
+  tagName: t.String(),
+  name: t.String(),
+  note: t.String(),
+  footer: t.String(),
+  noteFromPlonkit: t.Boolean(),
+  hasImage: t.Boolean(),
+  modifiedAt: Type.Integer(),
+  hasGeoJson: t.Boolean(),
+  metaLevels: t.Array(metaLevelWithLevelSchema),
+  images: t.Array(metaImageSchema),
+  locationsCount: t.Union([t.Null(), metaLocationsCountSchema]),
+});
+
+const changeEntityTypeSchema = t.Union([
+  t.Literal('meta'),
+  t.Literal('meta_image'),
+  t.Literal('meta_geojson'),
+  t.Literal('meta_levels'),
+  t.Literal('location_batch'),
+  t.Literal('level'),
+  t.Literal('map'),
+  t.Literal('group'),
+  t.Literal('settings'),
+  t.Literal('sync'),
+]);
+
+const changeOperationSchema = t.Union([
+  t.Literal('create'),
+  t.Literal('update'),
+  t.Literal('delete'),
+]);
+
+const groupChangeSchema = t.Object({
+  id: Type.Integer(),
+  mapGroupId: Type.Integer(),
+  userId: t.String(),
+  entityType: changeEntityTypeSchema,
+  entityId: nullableInteger,
+  entityLabel: nullableString,
+  operation: changeOperationSchema,
+  oldValue: t.Union([t.Unknown(), t.Null()]),
+  newValue: t.Union([t.Unknown(), t.Null()]),
+  createdAt: Type.Integer(),
+  user: t.Object({
+    id: t.String(),
+    username: t.String(),
+  }),
+});
+
+const messageErrorSchema = t.Object({ message: t.String() });
+const fieldErrorSchema = t.Object({
+  field: t.String(),
+  message: t.String(),
+});
 
 export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
   .use(auth())
@@ -107,7 +270,34 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
 
       return { userGroups, allGroups };
     },
-    { userId: true },
+    {
+      userId: true,
+      response: buildResponses({
+        200: t.Object({
+          userGroups: t.Array(
+            t.Object({
+              id: Type.Integer(),
+              name: t.String(),
+              locationCount: Type.Integer(),
+              metasCount: Type.Integer(),
+              mapsCount: Type.Integer(),
+              gamesPlayed: Type.Integer(),
+            }),
+          ),
+          allGroups: t.Union([
+            t.Null(),
+            t.Array(
+              t.Object({
+                id: Type.Integer(),
+                name: t.String(),
+                authors: t.Union([t.String(), t.Null()]),
+                locationCount: Type.Integer(),
+              }),
+            ),
+          ]),
+        }),
+      }),
+    },
   )
   .post(
     '/',
@@ -118,6 +308,10 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     {
       body: t.Object({ name: t.String({ minLength: 1 }) }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Object({ id: Type.Integer() }) },
+        { validation: true },
+      ),
     },
   )
   .get(
@@ -173,7 +367,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       ]);
 
       if (!group) {
-        return status(404);
+        return status(404, notFoundResponse);
       }
 
       return { group, user, role };
@@ -181,6 +375,38 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     {
       params: t.Object({ id: t.Integer() }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({
+            group: t.Intersect([
+              mapGroupCoreSchema,
+              t.Object({
+                metas: t.Array(groupPageMetaSchema),
+                levels: t.Array(levelSchema),
+                hasUnsyncedData: t.Boolean(),
+              }),
+            ]),
+            user: t.Optional(
+              t.Intersect([
+                userCoreSchema,
+                t.Object({
+                  permissions: t.Array(
+                    t.Object({
+                      id: Type.Integer(),
+                      mapGroupId: Type.Integer(),
+                      userId: t.String(),
+                      role: userRole,
+                      mapGroup: mapGroupCoreSchema,
+                    }),
+                  ),
+                }),
+              ]),
+            ),
+            role: userRole,
+          }),
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .get(
@@ -212,7 +438,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       });
 
       if (!group) {
-        return status(404);
+        return status(404, notFoundResponse);
       }
 
       const [levelList, regionList, user] = await Promise.all([
@@ -229,7 +455,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       ]);
 
       if (!user) {
-        return status(500);
+        return status(500, { message: 'Internal Server Error' });
       }
 
       return { group, levelList, regionList, user, role };
@@ -237,6 +463,21 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     {
       params: t.Object({ id: t.Integer() }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({
+            group: t.Intersect([
+              mapGroupCoreSchema,
+              t.Object({ maps: t.Array(groupMapSchema) }),
+            ]),
+            levelList: t.Array(levelSchema),
+            regionList: t.Array(regionSchema),
+            user: userCoreSchema,
+            role: userRole,
+          }),
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .get(
@@ -254,7 +495,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       });
 
       if (!group) {
-        return status(404);
+        return status(404, notFoundResponse);
       }
 
       return { group, role };
@@ -262,6 +503,18 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     {
       params: t.Object({ id: t.Integer() }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({
+            group: t.Intersect([
+              mapGroupCoreSchema,
+              t.Object({ levels: t.Array(levelSchema) }),
+            ]),
+            role: userRole,
+          }),
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .put(
@@ -320,6 +573,10 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         name: t.String({ minLength: 1 }),
       }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Void() },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .delete(
@@ -346,13 +603,17 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         return deletedRows;
       });
       if (deleted.length === 0) {
-        return status(404);
+        return status(404, notFoundResponse);
       }
-      return status(200);
+      return;
     },
     {
       params: t.Object({ id: t.Integer(), levelId: t.Integer() }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Void() },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .get(
@@ -365,7 +626,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         where: eq(mapGroups.id, groupId),
       });
       if (!group) {
-        return status(404);
+        return status(404, notFoundResponse);
       }
 
       const PAGE_SIZE = 100;
@@ -420,7 +681,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         where: and(...pageConditions),
         orderBy: [desc(mapGroupChanges.createdAt), desc(mapGroupChanges.id)],
         limit: PAGE_SIZE + 1,
-        with: { user: { columns: { username: true } } },
+        with: { user: { columns: { username: true, id: true } } },
       });
       const hasMore = page.length > PAGE_SIZE;
 
@@ -436,7 +697,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
           where: and(...unsyncedConditions),
           orderBy: [desc(mapGroupChanges.createdAt), desc(mapGroupChanges.id)],
           limit: 500,
-          with: { user: { columns: { username: true } } },
+          with: { user: { columns: { username: true, id: true } } },
         });
       }
 
@@ -452,6 +713,23 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       params: t.Object({ id: t.Integer() }),
       query: t.Object({ before: t.Optional(t.String()) }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({
+            group: t.Object({
+              id: Type.Integer(),
+              name: t.String(),
+              syncedAt: nullableInteger,
+            }),
+            role: userRole,
+            unsyncedChanges: t.Array(groupChangeSchema),
+            changes: t.Array(groupChangeSchema),
+            hasMore: t.Boolean(),
+          }),
+          400: messageErrorSchema,
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .get(
@@ -463,14 +741,14 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         extras: {
           metasCount: sql<number>`(SELECT COUNT(*)
                                    FROM metas m
-                                   WHERE m.map_group_id = ${groupId})`.as(
-            'metas_count',
-          ),
+                                   WHERE m.map_group_id = ${groupId})`
+            .mapWith(Number)
+            .as('metas_count'),
           locationsCount: sql<number>`(SELECT COUNT(*)
                                        FROM map_group_locations mgl
-                                       WHERE mgl.map_group_id = ${groupId})`.as(
-            'locations_count',
-          ),
+                                       WHERE mgl.map_group_id = ${groupId})`
+            .mapWith(Number)
+            .as('locations_count'),
         },
         with: {
           permissions: {
@@ -481,7 +759,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       });
 
       if (!group) {
-        return status(404);
+        return status(404, notFoundResponse);
       }
 
       return { group, role };
@@ -489,18 +767,46 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     {
       params: t.Object({ id: t.Integer() }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({
+            group: t.Intersect([
+              mapGroupCoreSchema,
+              t.Object({
+                metasCount: Type.Integer(),
+                locationsCount: Type.Integer(),
+                permissions: t.Array(
+                  t.Object({
+                    id: Type.Integer(),
+                    mapGroupId: Type.Integer(),
+                    userId: t.String(),
+                    role: userRole,
+                    user: userCoreSchema,
+                  }),
+                ),
+              }),
+            ]),
+            role: userRole,
+          }),
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .delete(
     '/:id',
-    async ({ params: { id: groupId }, userId, status }) => {
+    async ({ params: { id: groupId }, userId }) => {
       await ensureOwner(userId, groupId);
       await db.delete(mapGroups).where(eq(mapGroups.id, groupId));
-      return status(200);
+      return;
     },
     {
       params: t.Object({ id: t.Integer() }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Void() },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .post(
@@ -550,7 +856,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         userId: user.id,
         role,
       });
-      return status(200);
+      return;
     },
     {
       params: t.Object({ id: t.Integer() }),
@@ -559,6 +865,10 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         role: t.Optional(t.Union([t.Literal('owner'), t.Literal('editor')])),
       }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Void(), 400: fieldErrorSchema },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .patch(
@@ -599,7 +909,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       if (failure) {
         return status(400, { field: 'permissionId', message: failure });
       }
-      return status(200);
+      return;
     },
     {
       params: t.Object({ id: t.Integer(), permissionId: t.Integer() }),
@@ -607,6 +917,10 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         role: t.Union([t.Literal('owner'), t.Literal('editor')]),
       }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Void(), 400: fieldErrorSchema },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .delete(
@@ -644,11 +958,15 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       if (failure) {
         return status(400, { field: 'permissionId', message: failure });
       }
-      return status(200);
+      return;
     },
     {
       params: t.Object({ id: t.Integer(), permissionId: t.Integer() }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Void(), 400: fieldErrorSchema },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .get(
@@ -661,7 +979,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
       });
 
       if (!group) {
-        return status(404);
+        return status(404, notFoundResponse);
       }
 
       return { ...group, role };
@@ -669,6 +987,12 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     {
       params: t.Object({ id: t.Integer() }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Intersect([mapGroupCoreSchema, t.Object({ role: userRole })]),
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .patch(
@@ -679,7 +1003,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         where: eq(mapGroups.id, groupId),
       });
       if (!oldGroup) {
-        return status(404);
+        return status(404, notFoundResponse);
       }
       await db.$primary.transaction(async (tx) => {
         await tx
@@ -697,12 +1021,16 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
           newValue: { name: body.name },
         });
       });
-      return status(200);
+      return;
     },
     {
       params: t.Object({ id: t.Integer() }),
       body: t.Object({ name: t.String({ minLength: 1 }) }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Void() },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .post(
@@ -930,6 +1258,18 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         ),
       }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({
+            count: Type.Integer(),
+            ignoredCount: Type.Integer(),
+            conflictCount: Type.Integer(),
+          }),
+          400: messageErrorSchema,
+          409: messageErrorSchema,
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .post(
@@ -951,7 +1291,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         }
         throw error;
       }
-      return status(200);
+      return;
     },
     {
       params: t.Object({ id: t.Integer() }),
@@ -971,6 +1311,10 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         ),
       }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Void(), 400: messageErrorSchema },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .post(
@@ -981,7 +1325,7 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         where: eq(mapGroups.id, groupId),
       });
       if (!group) {
-        return status(404);
+        return status(404, notFoundResponse);
       }
       const snapshotsBeforeSync =
         await getSynchronizedGroupMapSnapshots(groupId);
@@ -1011,6 +1355,15 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
     {
       params: t.Object({ id: t.Integer() }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({
+            hasMapUpdates: t.Boolean(),
+            mapUpdatesCount: Type.Integer(),
+          }),
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .post(
@@ -1062,33 +1415,36 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         metaIds: t.Optional(t.Array(t.Integer())),
       }),
       userId: true,
-      response: {
-        200: t.Object({
-          name: t.String(),
-          customCoordinates: t.Array(
-            t.Object({
-              lat: t.Number(),
-              lng: t.Number(),
-              heading: t.Number(),
-              pitch: t.Number(),
-              zoom: t.Number(),
-              panoId: t.Union([t.String(), t.Null()]),
-              countryCode: t.Union([t.String(), t.Null()]),
-              stateCode: t.Union([t.String(), t.Null()]),
-              extra: t.Object({
+      response: buildResponses(
+        {
+          200: t.Object({
+            name: t.String(),
+            customCoordinates: t.Array(
+              t.Object({
+                lat: t.Number(),
+                lng: t.Number(),
+                heading: t.Number(),
+                pitch: t.Number(),
+                zoom: t.Number(),
                 panoId: t.Union([t.String(), t.Null()]),
-                tags: t.Array(t.String()),
-                panoDate: t.Union([t.String(), t.Null()]),
+                countryCode: t.Null(),
+                stateCode: t.Null(),
+                extra: t.Object({
+                  tags: t.Array(t.String()),
+                  panoDate: t.Union([t.String(), t.Null()]),
+                  panoId: t.Union([t.String(), t.Null()]),
+                }),
               }),
+            ),
+            extra: t.Object({
+              tags: t.Record(t.String(), t.Any()),
+              infoCoordinates: t.Array(t.Any()),
             }),
-          ),
-          extra: t.Object({
-            tags: t.Object({}),
-            infoCoordinates: t.Array(t.Any()),
           }),
-        }),
-        404: t.Object({ error: t.String() }),
-      },
+          404: t.Object({ error: t.String() }),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .post(
@@ -1154,22 +1510,25 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         metaIds: t.Optional(t.Array(t.Integer())),
       }),
       userId: true,
-      response: {
-        200: t.Object({
-          name: t.String(),
-          metas: t.Array(
-            t.Object({
-              tagName: t.String(),
-              metaName: t.String(),
-              note: t.String(),
-              footer: t.String(),
-              levels: t.Array(t.String()),
-              images: t.Array(t.String()),
-            }),
-          ),
-        }),
-        404: t.Object({ error: t.String() }),
-      },
+      response: buildResponses(
+        {
+          200: t.Object({
+            name: t.String(),
+            metas: t.Array(
+              t.Object({
+                tagName: t.String(),
+                metaName: t.String(),
+                note: t.String(),
+                footer: nullableString,
+                levels: t.Array(t.String()),
+                images: t.Array(t.String()),
+              }),
+            ),
+          }),
+          404: t.Object({ error: t.String() }),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .post(
@@ -1180,14 +1539,14 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
         where: eq(mapGroups.id, groupId),
       });
       if (!oldGroup) {
-        return status(404);
+        return status(404, notFoundResponse);
       }
       // a no-op save must not invalidate the group's sync state
       if (
         oldGroup.syncIncludeLocationsNotOnStreetView ===
         body.syncIncludeLocationsNotOnStreetView
       ) {
-        return status(200);
+        return;
       }
       await db.$primary.transaction(async (tx) => {
         await tx
@@ -1211,11 +1570,15 @@ export const mapGroupsRouter = new Elysia({ prefix: '/map-groups' })
           },
         });
       });
-      return status(200);
+      return;
     },
     {
-      params: t.Object({ id: t.Number() }),
+      params: t.Object({ id: t.Integer() }),
       body: t.Object({ syncIncludeLocationsNotOnStreetView: t.Boolean() }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Void() },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   );

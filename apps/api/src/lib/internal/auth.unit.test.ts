@@ -151,11 +151,14 @@ beforeAll(async () => {
   jwks = () => ({ keys: [{ ...jwk, kid: 'test-key' }] });
 });
 
-const sign = (claims: Record<string, unknown>) =>
+const sign = (
+  claims: Record<string, unknown>,
+  expirationTime: string | number = '1h',
+) =>
   new jose.SignJWT(claims)
     .setProtectedHeader({ alg: 'RS256', kid: 'test-key' })
     .setIssuedAt()
-    .setExpirationTime('1h')
+    .setExpirationTime(expirationTime)
     .sign(privateKey);
 
 function jwtApp() {
@@ -203,7 +206,9 @@ describe('production JWT contract', () => {
   test('verifies JWTs through the production JWKS flow', async () => {
     const wrongAudience = await hit(await sign({ aud: 'not-the-api' }));
     expect(wrongAudience.status).toBe(403);
-    expect(await wrongAudience.json()).toEqual(['JWT validation failed']);
+    expect(await wrongAudience.json()).toEqual({
+      message: 'JWT validation failed',
+    });
     expect(capturedErrors).toHaveLength(1);
 
     const malformed = await hit('not-a-jwt');
@@ -214,6 +219,13 @@ describe('production JWT contract', () => {
     expect(valid.status).toBe(200);
     expect(await valid.json()).toEqual({ userId: 'discord-user-123' });
     expect(capturedErrors).toHaveLength(1);
+
+    const expired = await hit(
+      await sign({ aud: 'api' }, Math.floor(Date.now() / 1000) - 60),
+    );
+    expect(expired.status).toBe(403);
+    expect(await expired.json()).toEqual({ message: 'Forbidden' });
+    expect(capturedErrors.at(-1)).toBeInstanceOf(jose.errors.JWTExpired);
   });
 
   test('memoizes JWKS construction across concurrent auth(true) requests', async () => {
