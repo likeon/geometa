@@ -115,7 +115,7 @@ spec:
       containers:
         - name: discord-bot
           # yamllint disable rule:line-length
-          image: ghcr.io/likeon/geometa-discord-bot:main-038248ae-1791055299 # {"$imagepolicy": "geometa:discord-bot"}
+          image: ghcr.io/likeon/geometa-discord-bot:main-e1e882cb-1791748675 # {"$imagepolicy": "geometa:discord-bot"}
           # yamllint enable rule:line-length
           imagePullPolicy: Always
           resources:
