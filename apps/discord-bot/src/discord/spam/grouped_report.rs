@@ -121,7 +121,11 @@ impl ReportGroup {
             Enforcement::NotApplied("see occurrences".to_string())
         };
         let mut embed = build_alert_embed(meta, &summary_action)
-            .title(format!("{heading} — {} messages", state.occurrences.len()))
+            .title({
+                let count = state.occurrences.len();
+                let noun = if count == 1 { "message" } else { "messages" };
+                format!("{heading} — {count} {noun}")
+            })
             .colour(if disagreement { 0xF0B232 } else { 0xED4245 })
             .field("Final verdict", verdict_label(classified.verdict), true);
         let stage = classified

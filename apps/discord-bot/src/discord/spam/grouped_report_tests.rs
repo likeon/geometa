@@ -296,6 +296,25 @@ fn classified(disagreement: bool) -> Classified {
 }
 
 #[test]
+fn report_titles_use_singular_and_plural_for_both_headings() {
+    for (disagreement, heading) in [
+        (false, "🚨 Spam detected"),
+        (true, "⚖ Classification disagreement"),
+    ] {
+        let group = ReportGroup::new(1);
+        for (count, noun) in [(1, "message"), (2, "messages")] {
+            group.record(
+                &meta(count),
+                &classified(disagreement),
+                &Enforcement::AlertOnly,
+            );
+            let value = serde_json::to_value(group.render().embed).unwrap();
+            assert_eq!(value["title"], format!("{heading} — {count} {noun}"));
+        }
+    }
+}
+
+#[test]
 fn replays_do_not_add_occurrences_and_action_changes_update_report() {
     let group = ReportGroup::new(1);
     group.record(&meta(1), &classified(false), &Enforcement::AlertOnly);
