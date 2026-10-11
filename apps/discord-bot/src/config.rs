@@ -12,6 +12,11 @@ use std::sync::LazyLock;
 use config::{Config, Environment, File, FileFormat};
 use serde::Deserialize;
 
+mod council;
+mod prompt;
+pub use council::{Consensus, CouncilConfig, CouncilMemberConfig, ModelKind, RecentChecksConfig};
+pub use prompt::SpamPromptConfig;
+
 use crate::Error;
 
 pub const CONFIG_PATH: &str = "config.yaml";
@@ -25,7 +30,8 @@ const DEFAULT_QUEUE_CAPACITY: usize = 256;
 const DEFAULT_SPAM_THRESHOLD: f64 = 0.5;
 const DEFAULT_ONNX_MAX_CONCURRENCY: usize = 4;
 const DEFAULT_ONNX_TIMEOUT_SECONDS: u64 = 10;
-pub const DEFAULT_OPENROUTER_MODEL: &str = "xiaomi/mimo-v2.5";
+pub const DEFAULT_OPENROUTER_MODEL: &str = "openai/gpt-6-luna-decisions";
+const DEFAULT_OPENROUTER_SPAM_THRESHOLD: f64 = 0.9;
 const DEFAULT_OPENROUTER_MAX_CONCURRENCY: usize = 2;
 const DEFAULT_OPENROUTER_TIMEOUT_SECONDS: u64 = 30;
 const DEFAULT_MAX_IMAGES_PER_REQUEST: usize = 8;
@@ -157,6 +163,11 @@ pub struct SpamDetection {
     pub queue_capacity: usize,
     pub onnx: OnnxConfig,
     pub openrouter: OpenRouterClassifierConfig,
+    pub council: CouncilConfig,
+    #[serde(default)]
+    pub prompt: SpamPromptConfig,
+    #[serde(default)]
+    pub recent_checks: RecentChecksConfig,
 }
 
 #[derive(Debug, Deserialize)]
@@ -172,11 +183,13 @@ pub struct OnnxConfig {
     pub timeout_seconds: u64,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Clone, Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct OpenRouterClassifierConfig {
     #[serde(default = "default_openrouter_model")]
     pub model: String,
+    #[serde(default = "default_openrouter_spam_threshold")]
+    pub spam_threshold: f64,
     #[serde(default = "default_openrouter_max_concurrency")]
     pub max_concurrency: usize,
     #[serde(default = "default_openrouter_timeout_seconds")]
@@ -185,6 +198,19 @@ pub struct OpenRouterClassifierConfig {
     pub max_images_per_request: usize,
     #[serde(default = "default_max_image_bytes")]
     pub max_image_bytes: u64,
+}
+
+impl Default for OpenRouterClassifierConfig {
+    fn default() -> Self {
+        Self {
+            model: default_openrouter_model(),
+            spam_threshold: default_openrouter_spam_threshold(),
+            max_concurrency: default_openrouter_max_concurrency(),
+            timeout_seconds: default_openrouter_timeout_seconds(),
+            max_images_per_request: default_max_images_per_request(),
+            max_image_bytes: default_max_image_bytes(),
+        }
+    }
 }
 
 pub fn load_config() -> Result<BotConfig, Error> {
@@ -460,40 +486,54 @@ fn validate_spam_detection(spam: &SpamDetection) -> Result<(), Error> {
         )));
     }
 
-    if spam.openrouter.model.trim().is_empty() {
-        return Err(invalid("spam_detection.openrouter.model must be set"));
+    spam.openrouter.validate()?;
+    spam.council.validate()?;
+    spam.prompt.validate()?;
+    spam.recent_checks.validate()
+}
+
+impl OpenRouterClassifierConfig {
+    pub fn validate(&self) -> Result<(), Error> {
+        if self.model.trim().is_empty() {
+            return Err(invalid("spam_detection.openrouter.model must be set"));
+        }
+        let threshold = self.spam_threshold;
+        if !threshold.is_finite() || !(0.0..=1.0).contains(&threshold) {
+            return Err(invalid(
+                "spam_detection.openrouter.spam_threshold must be finite and between 0 and 1",
+            ));
+        }
+        validate_health(
+            self.max_concurrency,
+            "spam_detection.openrouter.max_concurrency",
+        )?;
+        if self.max_concurrency > MAX_CONCURRENCY {
+            return Err(invalid(format!(
+                "spam_detection.openrouter.max_concurrency must not exceed {}",
+                MAX_CONCURRENCY
+            )));
+        }
+        if !(1..=MAX_DEPENDENCY_TIMEOUT_SECONDS).contains(&self.timeout_seconds) {
+            return Err(invalid(format!(
+                "spam_detection.openrouter.timeout_seconds must be between 1 and {}",
+                MAX_DEPENDENCY_TIMEOUT_SECONDS
+            )));
+        }
+        if self.max_images_per_request == 0 || self.max_images_per_request > MAX_IMAGES_PER_REQUEST
+        {
+            return Err(invalid(format!(
+                "spam_detection.openrouter.max_images_per_request must be between 1 and {}",
+                MAX_IMAGES_PER_REQUEST
+            )));
+        }
+        if self.max_image_bytes == 0 || self.max_image_bytes > MAX_IMAGE_BYTES {
+            return Err(invalid(format!(
+                "spam_detection.openrouter.max_image_bytes must be between 1 and {}",
+                MAX_IMAGE_BYTES
+            )));
+        }
+        Ok(())
     }
-    validate_health(
-        spam.openrouter.max_concurrency,
-        "spam_detection.openrouter.max_concurrency",
-    )?;
-    if spam.openrouter.max_concurrency > MAX_CONCURRENCY {
-        return Err(invalid(format!(
-            "spam_detection.openrouter.max_concurrency must not exceed {}",
-            MAX_CONCURRENCY
-        )));
-    }
-    if !(1..=MAX_DEPENDENCY_TIMEOUT_SECONDS).contains(&spam.openrouter.timeout_seconds) {
-        return Err(invalid(format!(
-            "spam_detection.openrouter.timeout_seconds must be between 1 and {}",
-            MAX_DEPENDENCY_TIMEOUT_SECONDS
-        )));
-    }
-    if spam.openrouter.max_images_per_request == 0
-        || spam.openrouter.max_images_per_request > MAX_IMAGES_PER_REQUEST
-    {
-        return Err(invalid(format!(
-            "spam_detection.openrouter.max_images_per_request must be between 1 and {}",
-            MAX_IMAGES_PER_REQUEST
-        )));
-    }
-    if spam.openrouter.max_image_bytes == 0 || spam.openrouter.max_image_bytes > MAX_IMAGE_BYTES {
-        return Err(invalid(format!(
-            "spam_detection.openrouter.max_image_bytes must be between 1 and {}",
-            MAX_IMAGE_BYTES
-        )));
-    }
-    Ok(())
 }
 
 fn validate_modes(
@@ -532,6 +572,10 @@ fn default_onnx_timeout_seconds() -> u64 {
 
 fn default_openrouter_model() -> String {
     DEFAULT_OPENROUTER_MODEL.to_string()
+}
+
+fn default_openrouter_spam_threshold() -> f64 {
+    DEFAULT_OPENROUTER_SPAM_THRESHOLD
 }
 
 fn default_openrouter_max_concurrency() -> usize {
@@ -584,6 +628,12 @@ spam_detection:
     version: v1
     spam_threshold: 0.5
   openrouter: {}
+  council:
+    members:
+      - name: review
+        type: decisions
+        model: openai/gpt-6-luna-decisions
+        spam_threshold: 0.9
 "#;
 
     fn parse_spam(source: &str) -> Result<BotConfig, crate::Error> {
@@ -666,6 +716,96 @@ spam_detection:
         assert_eq!(
             config.spam_detection.expect("spam config").openrouter.model,
             "example/custom-vision-model"
+        );
+    }
+
+    #[test]
+    fn parses_default_and_configured_openrouter_threshold() {
+        let config = parse_spam(SPAM).expect("default threshold");
+        assert_eq!(
+            config.spam_detection.unwrap().openrouter.spam_threshold,
+            0.9
+        );
+        for threshold in [0.0, 0.75, 1.0] {
+            let source = SPAM.replace(
+                "  openrouter: {}",
+                &format!("  openrouter:\n    spam_threshold: {threshold}"),
+            );
+            let config = parse_spam(&source).expect("configured threshold");
+            assert_eq!(
+                config.spam_detection.unwrap().openrouter.spam_threshold,
+                threshold
+            );
+        }
+    }
+
+    #[test]
+    fn standalone_openrouter_defaults_match_yaml_defaults() {
+        let defaults = super::OpenRouterClassifierConfig::default();
+        let yaml = parse_spam(SPAM).unwrap().spam_detection.unwrap().openrouter;
+        assert_eq!(defaults.model, yaml.model);
+        assert_eq!(defaults.spam_threshold, yaml.spam_threshold);
+        assert_eq!(defaults.max_concurrency, yaml.max_concurrency);
+        assert_eq!(defaults.timeout_seconds, yaml.timeout_seconds);
+        assert_eq!(defaults.max_images_per_request, yaml.max_images_per_request);
+        assert_eq!(defaults.max_image_bytes, yaml.max_image_bytes);
+        assert!(defaults.validate().is_ok());
+    }
+
+    #[test]
+    fn rejects_invalid_openrouter_threshold() {
+        for threshold in ["-0.1", "1.1", ".nan", ".inf", "-.inf"] {
+            let source = SPAM.replace(
+                "  openrouter: {}",
+                &format!("  openrouter:\n    spam_threshold: {threshold}"),
+            );
+            assert!(parse_spam(&source).is_err(), "threshold {threshold}");
+        }
+    }
+
+    #[test]
+    fn requires_explicit_nonempty_council_for_gateway_config() {
+        let source = SPAM.split("  council:").next().unwrap();
+        assert!(parse_spam(source).is_err());
+        let source = format!("{source}  council:\n    members: []\n");
+        assert!(parse_spam(&source).is_err());
+    }
+
+    #[test]
+    fn example_config_validates_new_council_and_cache_settings() {
+        let source =
+            include_str!("../config.example.yaml").replace("channel_id: 0", "channel_id: 123");
+        let config = parse_config(&source).unwrap();
+        let spam = config.spam_detection.unwrap();
+        assert_eq!(spam.council.members.len(), 2);
+        assert_eq!(spam.recent_checks.ttl_seconds, 600);
+    }
+
+    #[test]
+    fn shared_prompt_defaults_overrides_and_validation() {
+        let defaults = super::SpamPromptConfig::default();
+        assert_eq!(
+            parse_spam(SPAM).unwrap().spam_detection.unwrap().prompt,
+            defaults
+        );
+        let source = SPAM.replace(
+            "  openrouter: {}",
+            "  prompt:\n    instructions: Custom policy\n  openrouter: {}",
+        );
+        let prompt = parse_spam(&source).unwrap().spam_detection.unwrap().prompt;
+        assert_eq!(prompt.instructions, "Custom policy");
+        assert_eq!(prompt.spam_criteria, defaults.spam_criteria);
+        assert_eq!(prompt.safe_criteria, defaults.safe_criteria);
+        let source = SPAM.replace(
+            "  openrouter: {}",
+            "  prompt:\n    safe_criteria: '  '\n  openrouter: {}",
+        );
+        assert!(
+            parse_spam(&source)
+                .err()
+                .expect("blank prompt must fail")
+                .to_string()
+                .contains("spam_detection.prompt.safe_criteria")
         );
     }
 

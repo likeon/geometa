@@ -1,6 +1,6 @@
 mod commands;
 mod geoguessr;
-mod spam;
+pub(crate) mod spam;
 
 use std::path::Path;
 use std::sync::Arc;
@@ -14,10 +14,11 @@ use tracing::{error, info};
 use crate::Error;
 use crate::config::{CONFIG, ServicesConfig, SpamDetection, load_api_client_config};
 use commands::publish;
+use spam::council::CouncilWorkflow;
 use spam::dispatch::{EditWork, MessageSnapshot, Pipeline, QueuedEvent, SpamService};
 use spam::evidence::{AlertReporter, EvidenceStorage};
 use spam::onnx::OnnxClassifier;
-use spam::openrouter::OpenRouterClassifier;
+use spam::recent::RecentChecks;
 
 struct Data {
     spam: Option<SpamService>,
@@ -107,8 +108,8 @@ struct PreparedSpam {
     onnx: Arc<OnnxClassifier>,
     onnx_semaphore: Arc<Semaphore>,
     onnx_concurrency: usize,
-    classifier: Arc<OpenRouterClassifier>,
-    classifier_semaphore: Arc<Semaphore>,
+    classifier: Arc<CouncilWorkflow>,
+    recent_checks: RecentChecks,
     classifier_concurrency: usize,
     evidence: Arc<EvidenceStorage>,
     max_image_bytes: u64,
@@ -129,12 +130,11 @@ impl PreparedSpam {
             spam.onnx.spam_threshold,
             Duration::from_secs(spam.onnx.timeout_seconds),
         )?);
-        let classifier = Arc::new(OpenRouterClassifier::new(
-            spam.openrouter.model.clone(),
-            openrouter_api_key.to_owned(),
-            Duration::from_secs(spam.openrouter.timeout_seconds),
-            spam.openrouter.max_images_per_request,
-            spam.openrouter.max_image_bytes,
+        let classifier = Arc::new(CouncilWorkflow::new(
+            &spam.openrouter,
+            &spam.council,
+            &spam.prompt,
+            openrouter_api_key,
         )?);
 
         let evidence = Arc::new(EvidenceStorage::create_private()?);
@@ -149,7 +149,7 @@ impl PreparedSpam {
             onnx_semaphore: Arc::new(Semaphore::new(spam.onnx.max_concurrency)),
             onnx_concurrency: spam.onnx.max_concurrency,
             classifier,
-            classifier_semaphore: Arc::new(Semaphore::new(spam.openrouter.max_concurrency)),
+            recent_checks: RecentChecks::new(spam.recent_checks.clone()),
             classifier_concurrency: spam.openrouter.max_concurrency,
             evidence,
             max_image_bytes: spam.openrouter.max_image_bytes,
@@ -171,7 +171,7 @@ impl PreparedSpam {
             onnx_semaphore: self.onnx_semaphore,
             onnx_concurrency: self.onnx_concurrency,
             classifier: self.classifier.clone(),
-            classifier_semaphore: self.classifier_semaphore,
+            recent_checks: self.recent_checks,
             classifier_concurrency: self.classifier_concurrency,
             evidence: self.evidence.clone(),
             evidence_semaphore: Arc::new(Semaphore::new(1)),

@@ -31,4 +31,23 @@ spam_detection:
   onnx:
     model: tanaos-spam-detection-v1
     version: v1
-  openrouter: {}
+  # Shared policy for stage two + council; omitted fields use built-in defaults.
+  # Override instructions, spam_criteria, safe_criteria with YAML |- blocks.
+  prompt: {}
+  openrouter:
+    model: openai/gpt-6-luna-decisions
+    spam_threshold: 0.9
+  council:
+    consensus: unanimous
+    members:
+      - name: chat-review
+        type: chat
+        model: xiaomi/mimo-v2.5
+      - name: decision-review
+        type: decisions
+        model: openai/gpt-6-luna-decisions
+        spam_threshold: 0.9
+  recent_checks:
+    ttl_seconds: 600
+    failure_cooldown_seconds: 30
+    max_entries: 1024

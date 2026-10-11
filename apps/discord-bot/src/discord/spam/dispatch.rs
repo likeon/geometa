@@ -16,15 +16,18 @@ use serenity::model::id::{ChannelId, GuildId, MessageId, UserId};
 use tokio::sync::mpsc::error::TrySendError;
 use tokio::sync::{Notify, OwnedSemaphorePermit, Semaphore, mpsc};
 
+use super::council::CouncilWorkflow;
+use super::input::PreparedInput;
+use super::recent::{Case, RecentChecks};
 use crate::Error;
 use crate::alm::api::client::Client;
 use crate::config::SpamDetectionMode;
 use crate::discord::spam::evidence::{
-    AlertReporter, Enforcement, EvidenceMeta, EvidenceStorage, build_alert_embed, case_id,
+    AlertReporter, Enforcement, EvidenceMeta, EvidenceStorage, case_id,
 };
 use crate::discord::spam::moderation::ban_user_with_cleanup;
 use crate::discord::spam::onnx::{OnnxClassifier, OnnxVerdict};
-use crate::discord::spam::openrouter::{IMAGE_EXTENSIONS, OpenRouterClassifier, OpenRouterResult};
+use crate::discord::spam::openrouter::IMAGE_EXTENSIONS;
 use crate::discord::spam::{Classified, ClassifierDiagnostics, ImageRef, Verdict};
 
 pub(crate) const CREDIT_DEDUP_TTL: Duration = Duration::from_secs(3600);
@@ -258,8 +261,8 @@ pub struct Pipeline {
     pub onnx: Arc<OnnxClassifier>,
     pub onnx_semaphore: Arc<Semaphore>,
     pub onnx_concurrency: usize,
-    pub classifier: Arc<OpenRouterClassifier>,
-    pub classifier_semaphore: Arc<Semaphore>,
+    pub classifier: Arc<CouncilWorkflow>,
+    pub recent_checks: RecentChecks,
     pub classifier_concurrency: usize,
     pub evidence: Arc<EvidenceStorage>,
     /// Held from image download through ban/report and `StoredImage` drops:
@@ -279,7 +282,7 @@ impl Pipeline {
     }
 
     /// Operational failures stay in application logs; moderator channel only
-    /// receives confirmed spam alerts.
+    /// receives confirmed spam and classification disagreements.
     fn report_error(&self, key: &'static str, detail: impl AsRef<str>) {
         tracing::error!(
             error_key = key,
@@ -837,7 +840,70 @@ async fn process_message(
     }
 
     let classification_started = Instant::now();
-    let classified = classify_message(pipeline, &snapshot.content, &images).await;
+    // One image-bearing input at a time bounds temp disk through reporting.
+    let _image_permit = if images.is_empty() {
+        None
+    } else {
+        let Some(permit) = acquire_owned_permit(&pipeline.evidence_semaphore).await else {
+            pipeline
+                .fingerprint_dedup
+                .release(snapshot.message_id.get(), &fingerprint);
+            return Ok(());
+        };
+        Some(permit)
+    };
+    let input = if images.is_empty() {
+        PreparedInput::text(&snapshot.content)
+    } else {
+        let id = case_id(pipeline.guild_id.get(), snapshot.message_id.get());
+        let (stored, failures) = pipeline
+            .evidence
+            .download_all(
+                &id,
+                &images,
+                pipeline.max_image_bytes,
+                MAX_DISCORD_ATTACHMENTS * pipeline.max_image_bytes,
+            )
+            .await;
+        if !failures.is_empty() {
+            pipeline.report_error("input", failures.join("; "));
+            pipeline
+                .fingerprint_dedup
+                .release(snapshot.message_id.get(), &fingerprint);
+            return Ok(());
+        }
+        match PreparedInput::from_stored(
+            &snapshot.content,
+            images,
+            stored,
+            pipeline.max_image_bytes,
+        )
+        .await
+        {
+            Ok(input) => input,
+            Err(error) => {
+                pipeline.report_error("input", error.to_string());
+                pipeline
+                    .fingerprint_dedup
+                    .release(snapshot.message_id.get(), &fingerprint);
+                return Ok(());
+            }
+        }
+    };
+    let case = match pipeline.recent_checks.get(
+        input.key(pipeline.guild_id.get()),
+        snapshot.message_id.get(),
+    ) {
+        Ok(case) => case,
+        Err(reason) => {
+            pipeline.report_error("recent-checks", reason);
+            pipeline
+                .fingerprint_dedup
+                .release(snapshot.message_id.get(), &fingerprint);
+            return Ok(());
+        }
+    };
+    let classified = case.check(|| classify_message(pipeline, &input)).await;
     let classify_elapsed = classification_started.elapsed();
     // Indeterminate work made no durable decision. Release before the stale
     // check so a refetch outage cannot suppress retry for the full dedup TTL.
@@ -858,9 +924,31 @@ async fn process_message(
                 snapshot.channel_id.get(),
                 snapshot.message_id.get()
             );
+            if classified.verdict == Verdict::Spam || classified.diagnostics.disagreement {
+                report_occurrence(
+                    pipeline,
+                    snapshot,
+                    &input,
+                    &case,
+                    &classified,
+                    Enforcement::NotApplied("message changed/deleted; no action".to_string()),
+                )
+                .await;
+            }
             return Ok(());
         }
         CurrentMessageStatus::Unavailable(detail) => {
+            if classified.verdict == Verdict::Spam || classified.diagnostics.disagreement {
+                report_occurrence(
+                    pipeline,
+                    snapshot,
+                    &input,
+                    &case,
+                    &classified,
+                    Enforcement::NotApplied("freshness unavailable; no action".to_string()),
+                )
+                .await;
+            }
             pipeline.report_error(
                 "discord-fetch",
                 format!(
@@ -909,6 +997,18 @@ async fn process_message(
         diagnostics.failures.len(),
     );
 
+    tracing::info!(council = ?diagnostics.council, disagreement = diagnostics.disagreement, "spam council result");
+    if diagnostics.disagreement && classified.verdict != Verdict::Spam {
+        report_occurrence(
+            pipeline,
+            snapshot,
+            &input,
+            &case,
+            &classified,
+            Enforcement::NotApplied("council disagreement; no enforcement".to_string()),
+        )
+        .await;
+    }
     match classified.verdict {
         Verdict::Accepted => {
             if kind == WorkKind::Create
@@ -939,7 +1039,7 @@ async fn process_message(
             }
         }
         Verdict::Spam => {
-            moderate_spam(kind, snapshot, &images, pipeline).await?;
+            moderate_spam(snapshot, &input, &case, &classified, pipeline).await?;
         }
         Verdict::Indeterminate => {
             if !classified.diagnostics.failures.is_empty() {
@@ -958,31 +1058,37 @@ async fn process_message(
     Ok(())
 }
 
-async fn classify_message(pipeline: &Pipeline, text: &str, images: &[ImageRef]) -> Classified {
-    let mut diagnostics = ClassifierDiagnostics::default();
-    let verdict = if images.is_empty() {
-        let outcome = onnx_infer(pipeline, text).await;
-        match outcome {
+async fn classify_message(pipeline: &Pipeline, input: &PreparedInput) -> Classified {
+    let onnx = if input.images.is_empty() {
+        match onnx_infer(pipeline, &input.text).await {
             Ok(outcome) => {
-                diagnostics.onnx = Some(outcome.diagnostic.clone());
-                if matches!(outcome.verdict, OnnxVerdict::Escalate) {
-                    classify_with_openrouter(pipeline, text, &[], &mut diagnostics).await
-                } else {
-                    Verdict::Accepted
+                if !matches!(outcome.verdict, OnnxVerdict::Escalate) {
+                    return Classified {
+                        verdict: Verdict::Accepted,
+                        diagnostics: ClassifierDiagnostics {
+                            onnx: Some(outcome.diagnostic),
+                            ..Default::default()
+                        },
+                    };
                 }
+                Some(outcome.diagnostic)
             }
             Err(error) => {
-                diagnostics.failures.push(format!("onnx: {error}"));
-                Verdict::Indeterminate
+                return Classified {
+                    verdict: Verdict::Indeterminate,
+                    diagnostics: ClassifierDiagnostics {
+                        failures: vec![format!("onnx: {error}")],
+                        ..Default::default()
+                    },
+                };
             }
         }
     } else {
-        classify_with_openrouter(pipeline, text, images, &mut diagnostics).await
+        None
     };
-    Classified {
-        verdict,
-        diagnostics,
-    }
+    let mut result = pipeline.classifier.classify(input).await;
+    result.diagnostics.onnx = onnx;
+    result
 }
 
 async fn acquire_owned_permit(semaphore: &Arc<Semaphore>) -> Option<OwnedSemaphorePermit> {
@@ -1004,153 +1110,98 @@ async fn onnx_infer(
         .map_err(|error| error.to_string())
 }
 
-async fn classify_with_openrouter(
-    pipeline: &Pipeline,
-    text: &str,
-    images: &[ImageRef],
-    diagnostics: &mut ClassifierDiagnostics,
-) -> Verdict {
-    let result = {
-        let _permit = match pipeline.classifier_semaphore.clone().acquire_owned().await {
-            Ok(permit) => permit,
-            Err(_) => {
-                diagnostics
-                    .failures
-                    .push("OpenRouter classifier concurrency semaphore closed".to_string());
-                return Verdict::Indeterminate;
-            }
-        };
-        pipeline.classifier.classify_message(text, images).await
-    };
-    match result {
-        OpenRouterResult::Spam { batches } => {
-            diagnostics.openrouter.extend(batches);
-            Verdict::Spam
-        }
-        OpenRouterResult::Accepted { batches } => {
-            diagnostics.openrouter.extend(batches);
-            Verdict::Accepted
-        }
-        OpenRouterResult::Indeterminate { batches, failures } => {
-            diagnostics.openrouter.extend(batches);
-            diagnostics.failures.extend(failures);
-            Verdict::Indeterminate
-        }
-    }
-}
-
-/// Evidence, enforcement, report. Re-checks staleness after downloads and
-/// before every action; ban mode re-checks verification right before the ban.
+/// Per-occurrence safety checks stay separate from shared model work.
 async fn moderate_spam(
-    kind: WorkKind,
     snapshot: &MessageSnapshot,
-    images: &[ImageRef],
+    input: &PreparedInput,
+    case: &Case,
+    classified: &Classified,
     pipeline: &Pipeline,
 ) -> Result<(), Error> {
-    let case = case_id(pipeline.guild_id.get(), snapshot.message_id.get());
-
-    // One case at a time globally bounds temp disk (download -> ban -> drops).
-    let Some(_evidence_permit) = acquire_owned_permit(&pipeline.evidence_semaphore).await else {
-        pipeline.report_error(
-            "evidence",
-            format!("case {case}: evidence capacity exhausted; skipping moderation (fail open)"),
-        );
-        return Ok(());
-    };
-
-    // Staleness gate before any moderation side effect; an outage is not a
-    // deletion.
     match current_message_status(pipeline, snapshot).await {
         CurrentMessageStatus::Matches => {}
         status => {
             abort_moderation_for_status(pipeline, snapshot, "pre-moderation", status);
+            report_occurrence(
+                pipeline,
+                snapshot,
+                input,
+                case,
+                classified,
+                Enforcement::NotApplied(
+                    "message changed/deleted or freshness unavailable".to_string(),
+                ),
+            )
+            .await;
             return Ok(());
         }
     }
 
-    let (stored, download_failures) = pipeline
-        .evidence
-        .download_all(
-            &case,
-            images,
-            pipeline.max_image_bytes,
-            MAX_DISCORD_ATTACHMENTS * pipeline.max_image_bytes,
-        )
-        .await;
-    for failure in &download_failures {
-        tracing::error!(%failure, "spam evidence download failed");
-    }
-
-    // Re-check after the downloads; an outage fails open.
-    match current_message_status(pipeline, snapshot).await {
-        CurrentMessageStatus::Matches => {}
-        status => {
-            abort_moderation_for_status(pipeline, snapshot, "post-download", status);
-            return Ok(());
-        }
-    }
-
-    // Verified or unavailable API fails open (no ban, no alert).
-    let can_ban = match pipeline.mode {
-        SpamDetectionMode::Alert => false,
-        SpamDetectionMode::Ban => match Client::is_discord_verified(snapshot.author_id.get()).await
-        {
-            Ok(false) => true,
-            Ok(true) => {
-                tracing::info!(
-                    "spam stage=recheck user={} message={} result=became-verified",
-                    snapshot.author_id.get(),
-                    snapshot.message_id.get()
-                );
-                return Ok(());
-            }
+    let enforcement = if pipeline.mode == SpamDetectionMode::Alert {
+        Enforcement::AlertOnly
+    } else {
+        match Client::is_discord_verified(snapshot.author_id.get()).await {
+            Ok(true) => return Ok(()),
             Err(error) => {
                 pipeline.report_error(
                     "internal-api",
-                    format!("verification recheck failed: {error} (ban skipped)"),
+                    format!("verification recheck failed: {error}"),
                 );
-                false
+                Enforcement::NotApplied("verification unavailable; ban skipped".to_string())
             }
-        },
-    };
-
-    let enforcement = if can_ban {
-        // Final fingerprint refetch before the ban.
-        match current_message_status(pipeline, snapshot).await {
-            CurrentMessageStatus::Matches => {}
-            status => {
-                abort_moderation_for_status(pipeline, snapshot, "pre-ban", status);
-                return Ok(());
+            Ok(false) => {
+                let mut banned = case.banned_authors.lock().await;
+                if banned.contains(&snapshot.author_id.get()) {
+                    Enforcement::ConfirmedBan
+                } else {
+                    match current_message_status(pipeline, snapshot).await {
+                        CurrentMessageStatus::Matches => {
+                            let reason = format!(
+                                "GeoMeta spam moderation case {}",
+                                case_id(pipeline.guild_id.get(), snapshot.message_id.get())
+                            );
+                            match ban_user_with_cleanup(
+                                pipeline.ctx.http.as_ref(),
+                                pipeline.guild_id,
+                                snapshot.author_id,
+                                pipeline.ban_delete_message_seconds,
+                                &reason,
+                            )
+                            .await
+                            {
+                                Ok(_) => {
+                                    banned.insert(snapshot.author_id.get());
+                                    Enforcement::ConfirmedBan
+                                }
+                                Err(failure) => {
+                                    tracing::error!(user_id = snapshot.author_id.get(), detail = %failure.detail, "spam ban failed");
+                                    Enforcement::BanFailed(failure.detail)
+                                }
+                            }
+                        }
+                        status => {
+                            abort_moderation_for_status(pipeline, snapshot, "pre-ban", status);
+                            Enforcement::NotApplied(
+                                "message changed/deleted or freshness unavailable".to_string(),
+                            )
+                        }
+                    }
+                }
             }
         }
-        let reason = format!("GeoMeta spam moderation case {case}");
-        match ban_user_with_cleanup(
-            pipeline.ctx.http.as_ref(),
-            pipeline.guild_id,
-            snapshot.author_id,
-            pipeline.ban_delete_message_seconds,
-            &reason,
-        )
-        .await
-        {
-            Ok(_) => Enforcement::ConfirmedBan,
-            Err(failure) => {
-                tracing::error!(
-                    user_id = snapshot.author_id.get(),
-                    message_id = snapshot.message_id.get(),
-                    failure_kind = ?failure.kind,
-                    detail = %failure.detail,
-                    "spam ban failed"
-                );
-                Enforcement::BanFailed(failure.detail)
-            }
-        }
-    } else if pipeline.mode == SpamDetectionMode::Ban {
-        Enforcement::NotApplied("verification recheck failed; ban skipped".to_string())
-    } else {
-        Enforcement::AlertOnly
     };
+    report_occurrence(pipeline, snapshot, input, case, classified, enforcement).await;
+    Ok(())
+}
 
+async fn report_occurrence(
+    pipeline: &Pipeline,
+    snapshot: &MessageSnapshot,
+    input: &PreparedInput,
+    case: &Case,
+    classified: &Classified,
+    enforcement: Enforcement,
+) {
     let meta = EvidenceMeta {
         guild_id: pipeline.guild_id.get(),
         channel_id: snapshot.channel_id.get(),
@@ -1161,26 +1212,21 @@ async fn moderate_spam(
             .map(|channel| channel.name.clone()),
         timestamp: snapshot.timestamp.clone(),
         content: snapshot.content.clone(),
-        images: images.to_vec(),
+        images: input.images.clone(),
     };
-
-    let alert = build_alert_embed(&meta, &enforcement);
-    let outcome = pipeline.reporter.report(alert, &stored).await;
-
+    let outcome = pipeline
+        .reporter
+        .report_group(&case.report, &meta, classified, &enforcement, &input.stored)
+        .await;
     if let Some(error) = &outcome.post_error {
-        tracing::error!("spam evidence post failed stage=report case={case} error={error}");
+        pipeline.report_error("report", error);
+        pipeline
+            .fingerprint_dedup
+            .release(snapshot.message_id.get(), &snapshot.fingerprint());
     }
     for error in &outcome.image_errors {
-        tracing::error!(case, %error, "spam evidence image post failed");
+        pipeline.report_error("evidence", error);
     }
-    tracing::info!(
-        "spam event={kind:?} stage=message user={} channel={} message={} verdict=spam posts={}",
-        snapshot.author_id.get(),
-        snapshot.channel_id.get(),
-        snapshot.message_id.get(),
-        outcome.posts_sent
-    );
-    Ok(())
 }
 
 /// How the authoritative refetch compares to the classified snapshot.

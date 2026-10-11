@@ -1,11 +1,16 @@
-//! Spam classification: `onnx` first stage, OpenRouter authoritative second
-//! stage, `dispatch` orchestration, `evidence`/`moderation` actions.
+//! ONNX screening, decision model, mixed-model council, grouped moderation.
 
+mod chat;
+pub mod council;
 pub mod dispatch;
 pub mod evidence;
+pub mod grouped_report;
+mod image_input;
+pub mod input;
 pub mod moderation;
 pub mod onnx;
 pub mod openrouter;
+pub mod recent;
 
 #[cfg(test)]
 pub(crate) mod test_support;
@@ -32,14 +37,16 @@ pub enum Verdict {
     Indeterminate,
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct ClassifierDiagnostics {
     pub onnx: Option<onnx::OnnxDiagnostic>,
     pub openrouter: Vec<openrouter::OpenRouterBatchOutcome>,
+    pub council: Vec<council::CouncilVote>,
+    pub disagreement: bool,
     pub failures: Vec<String>,
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Classified {
     pub verdict: Verdict,
     pub diagnostics: ClassifierDiagnostics,

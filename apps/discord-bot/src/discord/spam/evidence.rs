@@ -7,9 +7,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use poise::serenity_prelude as serenity;
-use serenity::builder::{
-    CreateAllowedMentions, CreateAttachment, CreateEmbed, CreateEmbedFooter, CreateMessage,
-};
+use serenity::builder::{CreateAllowedMentions, CreateEmbed, CreateEmbedFooter};
 use serenity::http::Http;
 use serenity::model::{Timestamp, id::ChannelId};
 
@@ -207,6 +205,19 @@ pub struct EvidenceStorage {
 }
 
 impl EvidenceStorage {
+    #[cfg(test)]
+    pub async fn fixture(&self, filename: &str, bytes: &[u8]) -> StoredImage {
+        let directory = self.root.join(format!("{filename}-fixture"));
+        tokio::fs::create_dir(&directory).await.unwrap();
+        let path = directory.join(filename);
+        tokio::fs::write(&path, bytes).await.unwrap();
+        StoredImage::new(
+            path,
+            filename.to_owned(),
+            Arc::new(CaseDirGuard::new(directory)),
+        )
+    }
+
     #[cfg(test)]
     pub fn root(&self) -> &Path {
         &self.root
@@ -693,8 +704,8 @@ pub struct ReportOutcome {
 /// bounded by the largest capped image.
 #[derive(Clone)]
 pub struct AlertReporter {
-    http: Arc<Http>,
-    moderation_channel: ChannelId,
+    pub(super) http: Arc<Http>,
+    pub(super) moderation_channel: ChannelId,
 }
 
 impl AlertReporter {
@@ -703,61 +714,6 @@ impl AlertReporter {
             http,
             moderation_channel,
         }
-    }
-
-    pub async fn report(&self, alert: CreateEmbed, images: &[StoredImage]) -> ReportOutcome {
-        let mut outcome = ReportOutcome::default();
-        let allowed = no_mentions();
-        let message = CreateMessage::new()
-            .embed(alert)
-            .allowed_mentions(allowed.clone());
-        match self
-            .moderation_channel
-            .send_message(&self.http, message)
-            .await
-        {
-            Ok(_) => outcome.posts_sent = 1,
-            Err(error) => {
-                outcome.post_error = Some(format!("cannot post moderation alert: {error}"));
-                return outcome;
-            }
-        }
-
-        for (index, image) in images.iter().enumerate() {
-            let attachment = match CreateAttachment::path(image.path()).await {
-                Ok(attachment) => attachment,
-                Err(error) => {
-                    outcome.image_errors.push(format!(
-                        "cannot read preserved image {} ({}): {error}",
-                        index + 1,
-                        image.filename()
-                    ));
-                    continue;
-                }
-            };
-            let caption = format!(
-                "Preserved spam evidence — image {} of {}: {}",
-                index + 1,
-                images.len(),
-                image.filename()
-            );
-            let message = CreateMessage::new()
-                .content(caption)
-                .allowed_mentions(allowed.clone())
-                .add_file(attachment);
-            if let Err(error) = self
-                .moderation_channel
-                .send_message(&self.http, message)
-                .await
-            {
-                outcome.image_errors.push(format!(
-                    "cannot post preserved image {}: {error}",
-                    index + 1
-                ));
-            }
-        }
-
-        outcome
     }
 }
 
