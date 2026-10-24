@@ -14,6 +14,7 @@ COPY . .
 RUN cargo build --release --bin discord-bot
 
 FROM gcr.io/distroless/cc-debian13 AS runtime
+ENV SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 WORKDIR /app
 USER 1000
 COPY --from=builder --chown=1000:1000 /app/target/release/discord-bot /usr/local/bin/discord-bot

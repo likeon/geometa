@@ -8,7 +8,9 @@ use tracing::error;
 #[poise::command(slash_command, guild_only)]
 pub async fn publish(
     ctx: Context<'_>,
-    #[description = "GeoGuessr map URL or ID"] map: GeoGuessrMap,
+    #[description = "GeoGuessr map URL or ID"]
+    #[string]
+    map: GeoGuessrMap,
 ) -> Result<(), Error> {
     let channel_id = ctx.channel_id();
     let channel = channel_id.to_channel(&ctx).await?;
@@ -47,4 +49,23 @@ pub async fn publish(
     }
 
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::publish;
+
+    #[test]
+    fn registers_map_as_required_string_argument() {
+        let command = publish()
+            .create_as_slash_command()
+            .expect("publish must register as slash command");
+        let command = serde_json::to_value(command).unwrap();
+        let options = command["options"].as_array().unwrap();
+
+        assert_eq!(options.len(), 1);
+        assert_eq!(options[0]["name"], "map");
+        assert_eq!(options[0]["type"], 3);
+        assert_eq!(options[0]["required"], true);
+    }
 }

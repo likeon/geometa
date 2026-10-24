@@ -49,9 +49,7 @@ pub(crate) async fn run() -> Result<(), Error> {
     let framework = poise::Framework::builder()
         .options(poise::FrameworkOptions {
             commands: vec![publish()],
-            event_handler: |ctx, event, framework, data| {
-                Box::pin(handle_event(ctx, event, framework, data))
-            },
+            event_handler: |framework, event| Box::pin(handle_event(framework, event)),
             ..Default::default()
         })
         .setup(move |ctx, _ready, framework| {
@@ -193,12 +191,10 @@ impl PreparedSpam {
 }
 
 async fn handle_event(
-    _ctx: &serenity::Context,
+    framework: FrameworkContext<'_>,
     event: &serenity::FullEvent,
-    _framework: FrameworkContext<'_>,
-    data: &Data,
 ) -> Result<(), Error> {
-    let Some(service) = &data.spam else {
+    let Some(service) = &framework.user_data.spam else {
         return Ok(());
     };
 
