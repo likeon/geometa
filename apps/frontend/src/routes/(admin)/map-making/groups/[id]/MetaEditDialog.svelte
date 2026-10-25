@@ -51,20 +51,29 @@
   } = $props();
 
   let saveWithoutClose = $state(false);
+  let saveError = $state<string | null>(null);
 
   // svelte-ignore state_referenced_locally
   const formMeta = superForm(metaForm, {
     validators: zod4Client(insertMetasSchema),
     resetForm: false,
     dataType: 'json',
-    onResult({ result }) {
-      if (result.type === 'success') {
-        if (saveWithoutClose) {
-          saveWithoutClose = false;
-        } else {
-          isMetaDialogOpen = false;
-        }
+    onSubmit({ submitter }) {
+      saveWithoutClose = submitter?.getAttribute('value') === 'save';
+      saveError = null;
+    },
+    onUpdated({ form }) {
+      if (!form.valid) return;
+
+      savedForm = null;
+      if (saveWithoutClose) {
+        selectedMetaId = form.data.id;
+      } else {
+        isMetaDialogOpen = false;
       }
+    },
+    onError() {
+      saveError = 'Could not save meta. Check connection and try again.';
     }
   });
 
@@ -73,7 +82,6 @@
     enhance: enhanceMeta,
     isTainted: isTaintedMeta,
     reset,
-    submit,
     submitting
   } = formMeta;
   type MetaFormDataType = Infer<InsertMetasSchema>;
@@ -161,6 +169,7 @@
   $effect(() => {
     if (isMetaDialogOpen) {
       savedForm = null;
+      saveError = null;
       currentTab = 'info';
     }
   });
@@ -199,7 +208,7 @@
         </div>
       {/if}
     </Dialog.Header>
-    <Tabs.Root bind:value={currentTab} class="w-full max-w-3xl">
+    <Tabs.Root bind:value={currentTab} class="min-w-0 w-full max-w-3xl">
       <Tabs.List>
         <Tabs.Trigger value="info" onclick={() => handleTabChange('info')}>Info</Tabs.Trigger>
         {#if selectedMeta?.id}
@@ -225,7 +234,9 @@
             class="!pointer-events-auto cursor-not-allowed">Map area</Tabs.Trigger>
         {/if}
       </Tabs.List>
-      <Tabs.Content value="info" class="h-[68vh] max-h-[650px] overflow-y-auto flex-none p-1">
+      <Tabs.Content
+        value="info"
+        class="min-w-0 h-[68vh] max-h-[650px] overflow-y-auto flex-none p-1">
         <form method="POST" use:enhanceMeta action="?/updateMeta">
           <Input type="hidden" name="id" bind:value={$formMetaData.id} />
           <Input type="hidden" name="mapGroupId" bind:value={$formMetaData.mapGroupId} />
@@ -318,18 +329,19 @@ Czechia - Arrow Signs" />
             </Form.Control>
             <Form.FieldErrors />
           </Form.Field>
+          {#if saveError}
+            <p role="alert" class="text-sm text-destructive mb-2">{saveError}</p>
+          {/if}
           <div class="flex gap-2">
             <Button
-              type="button"
-              onclick={() => {
-                saveWithoutClose = true;
-                submit();
-              }}
+              type="submit"
+              name="intent"
+              value="save"
               variant="outline"
               disabled={$submitting}>
               {$submitting && saveWithoutClose ? 'Saving...' : 'Save'}
             </Button>
-            <Form.Button disabled={$submitting}>
+            <Form.Button name="intent" value="close" disabled={$submitting}>
               {$submitting && !saveWithoutClose ? 'Saving...' : 'Save & Close'}
             </Form.Button>
           </div>

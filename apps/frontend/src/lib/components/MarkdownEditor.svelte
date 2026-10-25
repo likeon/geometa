@@ -178,10 +178,10 @@
 </script>
 
 <div
-  class="border border-input rounded-md bg-background shadow-xs transition-all focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
-  <Tabs.Root bind:value={currentTab} class="w-full !gap-0">
+  class="min-w-0 border border-input rounded-md bg-background shadow-xs transition-all focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
+  <Tabs.Root bind:value={currentTab} class="min-w-0 w-full !gap-0">
     <div
-      class="flex items-center justify-between border-b border-input px-2 py-1 bg-muted/30 rounded-t-md">
+      class="flex flex-wrap items-center justify-between gap-1 border-b border-input px-2 py-1 bg-muted/30 rounded-t-md">
       <Tabs.List class="h-7 p-0 bg-transparent">
         <Tabs.Trigger
           value="edit"
@@ -193,7 +193,7 @@
           >Preview</Tabs.Trigger>
       </Tabs.List>
 
-      <div class="flex items-center gap-0.5">
+      <div class="flex flex-wrap items-center gap-0.5">
         <Button
           variant="ghost"
           size="icon"
@@ -281,7 +281,7 @@
       </div>
     </div>
 
-    <Tabs.Content value="edit" class="mt-0 p-0">
+    <Tabs.Content value="edit" class="min-w-0 mt-0 p-0">
       <Textarea
         bind:ref={textareaElement}
         bind:value
@@ -290,7 +290,7 @@
         {...props} />
     </Tabs.Content>
 
-    <Tabs.Content value="preview" class="mt-0 p-0">
+    <Tabs.Content value="preview" class="min-w-0 mt-0 p-0">
       <div
         class="prose prose-sm max-w-none px-3 pb-3 pt-2 overflow-y-auto dark:prose-invert rounded-b-md"
         style="height: {height}; min-height: {minHeight}; max-height: {maxHeight};">

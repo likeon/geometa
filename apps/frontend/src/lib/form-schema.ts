@@ -12,8 +12,14 @@ export type InsertMetasSchema = typeof insertMetasSchema;
 export const insertMetasSchema = z.object({
   id: z.number().optional(),
   mapGroupId: z.number().prefault(-1),
-  tagName: z.string().min(1, 'Tag cannot be empty').prefault(''),
-  name: z.string().min(1, 'Name cannot be empty').prefault(''),
+  tagName: z
+    .string()
+    .refine((value) => value.trim().length > 0, 'Tag cannot be empty')
+    .prefault(''),
+  name: z
+    .string()
+    .refine((value) => value.trim().length > 0, 'Name cannot be empty')
+    .prefault(''),
   note: z.string().prefault(''),
   noteFromPlonkit: z.boolean().prefault(false),
   levels: z.array(z.number()).prefault([]),

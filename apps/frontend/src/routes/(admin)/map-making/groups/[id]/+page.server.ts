@@ -157,10 +157,10 @@ export const actions = {
       return fail(400, { form });
     }
 
-    const { error: apiError } = await api.internal.metas.put(form.data);
+    const { data, error: apiError } = await api.internal.metas.put(form.data);
 
-    if (apiError) {
-      if ((apiError.status as number) === 409) {
+    if (apiError || !data) {
+      if ((apiError?.status as number) === 409) {
         return setError(
           form,
           'tagName',
@@ -169,6 +169,9 @@ export const actions = {
       }
       throwApiError(apiError, { 404: 'Meta not found', 500: 'Failed to save meta' });
     }
+
+    form.data.id = data.id;
+    return { form };
   },
   deleteMetas: async ({ request }) => {
     const data = await request.formData();
