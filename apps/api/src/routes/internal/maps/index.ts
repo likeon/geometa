@@ -1,3 +1,4 @@
+import { buildResponses } from '@api/lib/api/response-schemas';
 import { originalMapLateral } from '@api/lib/db/original-map';
 import {
   mapGroupLocations,
@@ -13,6 +14,7 @@ import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { maybeWrapImageUrl } from '@api/lib/internal/utils';
 import { generateFooter } from '@api/lib/userscript/utils';
+import { Type } from '@sinclair/typebox';
 import { and, eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import { groupMapsRouter } from './group';
@@ -37,7 +39,7 @@ const syncedMetaFields = {
     SELECT COUNT(*)
     FROM ${syncedLocations}
     WHERE ${syncedLocations.syncedMetaId} = ${syncedMetas.metaId}
-  )`,
+  )`.mapWith(Number),
 };
 
 const syncedMetasStatement = db
@@ -97,7 +99,7 @@ export const metasFromMapStatement = db
         WHERE m.id = ${mapMetas.mapId}
           AND mgl.extra_tag = ${mapMetas.metaTag}
       )
-    `,
+    `.mapWith(Number),
   })
   .from(mapMetas)
   .innerJoin(
@@ -123,7 +125,7 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
       });
 
       if (!user || !user.isSuperadmin) {
-        return status(403, 'Forbidden: Admin access required');
+        return status(403, { message: 'Forbidden: Admin access required' });
       }
 
       const map = await db.$primary.query.maps.findFirst({
@@ -133,7 +135,8 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
             with: {
               permissions: {
                 with: {
-                  user: true,
+                  // never expose the user's api token outside the api
+                  user: { columns: { apiToken: false } },
                 },
               },
             },
@@ -142,7 +145,7 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
       });
 
       if (!map) {
-        return status(404, 'Map not found');
+        return status(404, { message: 'Map not found' });
       }
 
       // Check if it's a personal map
@@ -161,7 +164,7 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
       }
 
       if (!map.mapGroup) {
-        return status(404, 'Map has no associated mapgroup');
+        return status(404, { message: 'Map has no associated mapgroup' });
       }
 
       const owners = map.mapGroup.permissions
@@ -177,6 +180,50 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
     {
       params: t.Object({ geoguessrId: t.String() }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Union([
+            // personal branch
+            t.Object({
+              isPersonal: t.Literal(true),
+              id: Type.Integer(),
+              name: t.String(),
+              owner: t.String(),
+              userId: t.Union([t.String(), t.Null()]),
+            }),
+            // group branch: full group row + owners summary, nested users
+            // carry no api token (handler selects apiToken: false)
+            t.Object({
+              isPersonal: t.Literal(false),
+              id: Type.Integer(),
+              name: t.String(),
+              syncedAt: t.Union([Type.Integer(), t.Null()]),
+              syncIncludeLocationsNotOnStreetView: t.Boolean(),
+              permissions: t.Array(
+                t.Object({
+                  id: Type.Integer(),
+                  mapGroupId: Type.Integer(),
+                  userId: t.String(),
+                  role: t.Union([t.Literal('owner'), t.Literal('editor')]),
+                  user: t.Object({
+                    id: t.String(),
+                    username: t.String(),
+                    isTrusted: t.Boolean(),
+                    isSuperadmin: t.Boolean(),
+                    isDiscordVerified: t.Boolean(),
+                    discordVerifiedMessages: t.Union([
+                      Type.Integer(),
+                      t.Null(),
+                    ]),
+                  }),
+                }),
+              ),
+              owners: t.String(),
+            }),
+          ]),
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .get(
@@ -240,6 +287,21 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
     },
     {
       params: t.Object({ mapId: t.Integer() }),
+      response: buildResponses(
+        {
+          200: t.Array(
+            t.Object({
+              id: Type.Integer(),
+              name: t.String(),
+              note: t.String(),
+              images: t.Array(t.String()),
+              locationsCount: Type.Integer(),
+              footer: t.String(),
+            }),
+          ),
+        },
+        { validation: true },
+      ),
     },
   )
   .get(
@@ -249,12 +311,37 @@ export const mapsRouter = new Elysia({ prefix: '/maps' })
         where: eq(maps.geoguessrId, geoguessrId),
       });
       if (!map) {
-        return status(404, 'Map not found');
+        return status(404, { message: 'Map not found' });
       }
       return map;
     },
     {
       params: t.Object({ geoguessrId: t.String() }),
+      response: buildResponses(
+        {
+          200: t.Object({
+            id: Type.Integer(),
+            mapGroupId: t.Union([Type.Integer(), t.Null()]),
+            name: t.String(),
+            geoguessrId: t.String(),
+            description: t.Union([t.String(), t.Null()]),
+            isPublished: t.Boolean(),
+            isShared: t.Boolean(),
+            isPersonal: t.Boolean(),
+            userId: t.Union([t.String(), t.Null()]),
+            authors: t.Union([t.String(), t.Null()]),
+            ordering: Type.Integer(),
+            footer: t.String(),
+            footerHtml: t.String(),
+            modifiedAt: Type.Integer(),
+            difficulty: Type.Integer(),
+            isVerified: t.Boolean(),
+            numberOfGamesPlayed: t.Union([Type.Integer(), t.Null()]),
+            numberOfGamesPlayedDiminished: t.Union([Type.Integer(), t.Null()]),
+          }),
+        },
+        { notFound: true, validation: true },
+      ),
     },
   )
   .use(personalMapsRouter)

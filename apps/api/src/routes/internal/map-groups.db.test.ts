@@ -1353,9 +1353,9 @@ describe('POST /api/internal/map-groups/:id/sync', () => {
     const response = await syncRequest('sync-editor-2', groupId);
 
     expect(response.status).toBe(403);
-    expect(await response.json()).toEqual([
-      "You don't have permissions for this",
-    ]);
+    expect(await response.json()).toEqual({
+      message: "You don't have permissions for this",
+    });
     expect(await getGroup(groupId)).toEqual({
       syncedAt: null,
       syncIncludeLocationsNotOnStreetView: true,
