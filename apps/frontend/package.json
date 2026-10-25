@@ -49,7 +49,7 @@
     "mdsvex": "^0.12.8",
     "mode-watcher": "^1.1.0",
     "paneforge": "^1.0.2",
-    "postcss": "^8.5.25",
+    "postcss": "^8.5.26",
     "prettier": "^3.9.6",
     "prettier-plugin-svelte": "^4.1.1",
     "svelte": "^5.56.8",
@@ -64,7 +64,7 @@
     "typescript-svelte-plugin": "^0.3.52",
     "unplugin-icons": "^23.0.1",
     "vaul-svelte": "^1.0.0-next.7",
-    "vite": "^8"
+    "vite": "^8.2.4"
   },
   "type": "module",
   "dependencies": {
@@ -91,7 +91,27 @@
     "svelte-sonner": "^1.1.1",
     "unified": "^11.0.5",
     "valibot": "^1.4.2",
-    "zod": "^4.4.3"
+    "zod": "^4.6.6"
+  },
+  "overrides": {
+    "@ai-sdk/provider-utils": "4.0.33",
+    "@esbuild-kit/core-utils": {
+      "esbuild": "0.25.0"
+    },
+    "@sveltejs/kit": {
+      "cookie": "0.7.0"
+    },
+    "brace-expansion": "5.0.12",
+    "devalue": "5.9.3",
+    "joi": "17.13.8",
+    "postcss": {
+      "nanoid": "3.3.18"
+    },
+    "postcss-selector-parser": "7.1.6",
+    "rolldown": "1.2.4",
+    "sharp": "0.35.5",
+    "source-map-js": "1.2.2",
+    "vue": "3.5.42"
   },
   "allowScripts": {
     "esbuild": true,

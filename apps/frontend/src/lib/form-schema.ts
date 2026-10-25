@@ -17,7 +17,7 @@ export const insertMetasSchema = z.object({
   note: z.string().prefault(''),
   noteFromPlonkit: z.boolean().prefault(false),
   levels: z.array(z.number()).prefault([]),
-  footer: z.string().optional().prefault('')
+  footer: z.string().prefault('')
 });
 
 // Schema for generating defaults without validation constraints
