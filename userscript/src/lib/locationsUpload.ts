@@ -1,4 +1,4 @@
-import { getMapInfo } from './utils/main';
+import { getMapInfo, waitForElement } from './utils/main';
 import UploadLocations from './components/UploadLocations.svelte';
 import { mount, unmount } from 'svelte';
 
@@ -42,7 +42,10 @@ async function addLocationsUploadButtons() {
     return;
   }
 
-  const container = document.querySelector('.top-bar-menu_topBarMenu__kd9zX');
+  const container = await waitForElement('[class*="top-bar-menu_topBarMenu__"]');
+  if (token !== runToken) {
+    return;
+  }
 
   if (container) {
     const target = document.createElement('div');

@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.97]
+
+- Fixed the LearnableMeta upload button missing from the map maker after a GeoGuessr update by @Lonanche
+
 ## [0.96]
 
 - Move installs and updates to stable GitHub Pages URL by @likeon
