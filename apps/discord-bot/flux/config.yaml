@@ -65,7 +65,7 @@ spam_detection:
         model: deepseek/deepseek-v4.1-flash
       - name: perplexity-decider
         type: decisions
-        model: perplexity/pplx-decider-v1.1-27b
+        model: perplexity/pplx-decider-v1.2
         spam_threshold: 0.8
   recent_checks:
     ttl_seconds: 600
