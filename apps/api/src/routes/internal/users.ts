@@ -1,10 +1,12 @@
+import { buildResponses } from '@api/lib/api/response-schemas';
 import { mapGroupPermissions, users } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
 import { createMapGroup } from '@api/lib/internal/map-groups';
 import { assertNotNullish, generateRandomString } from '@api/lib/utils/common';
+import { Type } from '@sinclair/typebox';
 import { eq } from 'drizzle-orm';
-import { Elysia } from 'elysia';
+import { Elysia, t } from 'elysia';
 
 export const usersRouter = new Elysia({ prefix: '/users' })
   .use(auth())
@@ -20,7 +22,12 @@ export const usersRouter = new Elysia({ prefix: '/users' })
         hasApiToken: user.apiToken !== null,
       };
     },
-    { userId: true },
+    {
+      userId: true,
+      response: buildResponses({
+        200: t.Object({ hasApiToken: t.Boolean() }),
+      }),
+    },
   )
   .post(
     '/profile/regenerate-api-token',
@@ -35,6 +42,9 @@ export const usersRouter = new Elysia({ prefix: '/users' })
     },
     {
       userId: true,
+      response: buildResponses({
+        200: t.Object({ apiToken: t.String() }),
+      }),
     },
   )
   .post(
@@ -54,5 +64,8 @@ export const usersRouter = new Elysia({ prefix: '/users' })
     },
     {
       userId: true,
+      response: buildResponses({
+        200: t.Object({ mapGroupId: Type.Integer() }),
+      }),
     },
   );

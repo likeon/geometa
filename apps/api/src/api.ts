@@ -1,14 +1,16 @@
+import { buildResponses, commonModels } from '@api/lib/api/response-schemas';
 import { prod } from '@api/lib/utils/env';
 import { logger } from '@api/lib/utils/log';
 import { sentry } from '@api/lib/utils/sentry';
 import { openapi } from '@elysia/openapi';
 import serverTiming from '@elysiajs/server-timing';
-import { Elysia } from 'elysia';
+import { Elysia, t } from 'elysia';
 import { internalRouter } from './routes/internal';
 import { mapsRouter } from './routes/maps';
 import { userscriptRouter } from './routes/userscript';
 
 const openApiServers = prod ? [{ url: 'https://learnablemeta.com' }] : [];
+const openApiExcludedPaths = prod ? ['/api/health-check'] : [];
 
 export const app = new Elysia({
   prefix: '/api',
@@ -18,6 +20,7 @@ export const app = new Elysia({
   .use(sentry())
   .use(logger())
   .use(serverTiming())
+  .model(commonModels)
   .onError(({ code, status }) => {
     switch (code) {
       case 'INTERNAL_SERVER_ERROR':
@@ -27,9 +30,15 @@ export const app = new Elysia({
         break;
     }
   })
-  .get('/health-check', () => {
-    return 'ok';
-  })
+  .get(
+    '/health-check',
+    () => {
+      return 'ok' as const;
+    },
+    {
+      response: buildResponses({ 200: t.Literal('ok') }, { public: true }),
+    },
+  )
   .use(
     openapi({
       path: '/docs',
@@ -41,7 +50,7 @@ export const app = new Elysia({
         theme: 'elysiajs',
       },
       exclude: {
-        paths: ['/api/health-check'],
+        paths: openApiExcludedPaths,
         tags: prod ? ['internal'] : [],
       },
       documentation: {
@@ -72,6 +81,11 @@ export const app = new Elysia({
         ],
         components: {
           securitySchemes: {
+            bearerAuth: {
+              type: 'http',
+              scheme: 'bearer',
+              bearerFormat: 'JWT',
+            },
             learnableMetaToken: {
               type: 'http',
               scheme: 'bearer',

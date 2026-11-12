@@ -103,7 +103,9 @@ describe('GET /api/internal/maps/mapgroup/:geoguessrId', () => {
     const response = await mapGroupRequest('group-map', 'user-1');
 
     expect(response.status).toBe(403);
-    expect(await response.text()).toBe('Forbidden: Admin access required');
+    expect(await response.json()).toEqual({
+      message: 'Forbidden: Admin access required',
+    });
   });
 
   test('superadmin gets 404 for a missing map', async () => {
@@ -112,7 +114,7 @@ describe('GET /api/internal/maps/mapgroup/:geoguessrId', () => {
     const response = await mapGroupRequest('no-such-map', 'admin-1');
 
     expect(response.status).toBe(404);
-    expect(await response.text()).toBe('Map not found');
+    expect(await response.json()).toEqual({ message: 'Map not found' });
   });
 
   test('superadmin gets the personal map branch', async () => {

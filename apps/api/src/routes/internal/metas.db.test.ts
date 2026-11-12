@@ -648,7 +648,7 @@ describe('DELETE /api/internal/metas/', () => {
     });
 
     expect(response.status).toBe(404);
-    expect(await response.text()).toBe('Some metas not found');
+    expect(await response.json()).toEqual({ message: 'Some metas not found' });
     expect(
       await db.select().from(metas).where(eq(metas.id, franceId)),
     ).toHaveLength(1);
@@ -670,7 +670,7 @@ describe('DELETE /api/internal/metas/', () => {
     });
 
     expect(response.status).toBe(404);
-    expect(await response.text()).toBe('Some metas not found');
+    expect(await response.json()).toEqual({ message: 'Some metas not found' });
     expect(
       await db.select().from(metas).where(eq(metas.id, franceId)),
     ).toHaveLength(1);
@@ -694,9 +694,9 @@ describe('DELETE /api/internal/metas/', () => {
     });
 
     expect(response.status).toBe(400);
-    expect(await response.text()).toBe(
-      'All metas must belong to the same map group',
-    );
+    expect(await response.json()).toEqual({
+      message: 'All metas must belong to the same map group',
+    });
     expect(
       await db.select().from(metas).where(eq(metas.id, groupAMetaId)),
     ).toHaveLength(1);

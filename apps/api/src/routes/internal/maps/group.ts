@@ -1,4 +1,9 @@
 import {
+  buildResponses,
+  internalErrorResponse,
+  notFoundResponse,
+} from '@api/lib/api/response-schemas';
+import {
   levels,
   mapFilters,
   mapLevels,
@@ -18,6 +23,7 @@ import {
 } from '@api/lib/internal/utils';
 import { isUniqueViolation } from '@api/lib/utils/common';
 import { markdown2Html } from '@api/lib/utils/markdown';
+import { Type } from '@sinclair/typebox';
 import { and, eq, inArray, not } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 
@@ -45,7 +51,7 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
         where: eq(users.id, userId),
       });
       if (!user) {
-        return status(500);
+        return status(500, internalErrorResponse);
       }
 
       const [groupLevels, allRegions] = await Promise.all([
@@ -80,7 +86,7 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
           where: eq(maps.id, id),
         });
         if (!savedData || savedData.mapGroupId === null) {
-          return status(404);
+          return status(404, notFoundResponse);
         }
         // also require permission on the map's current group, not just the target
         await ensureOwner(userId, savedData.mapGroupId);
@@ -333,6 +339,13 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
         difficulty: t.Number(),
       }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({ id: Type.Integer() }),
+          409: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .delete(
@@ -342,7 +355,7 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
         where: eq(maps.id, mapId),
       });
       if (!map || map.mapGroupId === null) {
-        return status(404);
+        return status(404, notFoundResponse);
       }
       await ensureOwner(userId, map.mapGroupId);
 
@@ -363,11 +376,15 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
           },
         });
       });
-      return status(200);
+      return;
     },
     {
       params: t.Object({ id: t.Integer() }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Void() },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .get(
@@ -402,5 +419,35 @@ export const groupMapsRouter = new Elysia({ prefix: '/group' })
       params: t.Object({ id: t.Integer() }),
       query: t.Object({ groupId: t.Integer() }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({
+            name: t.String(),
+            customCoordinates: t.Array(
+              t.Object({
+                lat: t.Number(),
+                lng: t.Number(),
+                heading: t.Number(),
+                pitch: t.Number(),
+                zoom: t.Number(),
+                panoId: t.Union([t.String(), t.Null()]),
+                countryCode: t.Null(),
+                stateCode: t.Null(),
+                extra: t.Object({
+                  tags: t.Array(t.String()),
+                  panoDate: t.Union([t.String(), t.Null()]),
+                  panoId: t.Union([t.String(), t.Null()]),
+                }),
+              }),
+            ),
+            extra: t.Object({
+              tags: t.Record(t.String(), t.Any()),
+              infoCoordinates: t.Array(t.Any()),
+            }),
+          }),
+          404: t.Object({ error: t.String() }),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   );
