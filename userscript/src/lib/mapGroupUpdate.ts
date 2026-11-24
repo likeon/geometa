@@ -5,6 +5,8 @@ const queryParameter = 'learnableMetaGroupId';
 const containerId = 'learnablemeta-map-group-update';
 const launcherButtonId = 'learnablemeta-update-maps-button';
 const mapActionsClass = 'learnablemeta-map-actions';
+export const CREATE_MAP_BUTTON_SELECTOR =
+  '[class*="_createMapButton_"], [class*="creators-hub_createMapButton"]';
 let app: Record<string, any> | null = null;
 let launcherObserver: MutationObserver | null = null;
 
@@ -47,7 +49,7 @@ function ensureLauncherButton() {
     return;
   }
 
-  const createMapContainer = document.querySelector('[class*="creators-hub_createMapButton"]');
+  const createMapContainer = document.querySelector(CREATE_MAP_BUTTON_SELECTOR);
   const createMapButton = createMapContainer?.querySelector(`button:not(#${launcherButtonId})`);
   if (!createMapContainer || !createMapButton) return;
 

@@ -2,6 +2,9 @@ import { extractMapIdFromUrl, getMapInfo, waitForElement } from './utils/main';
 import { mount, unmount } from 'svelte';
 import MapLabel from './components/MapLabel.svelte';
 
+export const MAP_AVATAR_CONTAINER_SELECTOR =
+  '[class*="_heroImageArea_"], [class*="_mapImageContainer_"]';
+
 export function initMapLabel() {
   addMapLabel();
   window.addEventListener('urlchange', () => {
@@ -29,9 +32,7 @@ async function addMapLabel() {
   }
 
   // new map detail page layout first, old layout as fallback
-  const mapAvatarContainer = await waitForElement(
-    '[class*=map-detail-page_heroImageArea], [class*=map-block_mapImageContainer]'
-  );
+  const mapAvatarContainer = await waitForElement(MAP_AVATAR_CONTAINER_SELECTOR);
   if (token !== runToken || !mapAvatarContainer) {
     return;
   }

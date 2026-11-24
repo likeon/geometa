@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.98]
+
+- Updated selectors for GeoGuessr's new site layout and CSS classes so buttons, badges, pins, and overlays work again by @Lonanche
+
 ## [0.97]
 
 - Fixed the LearnableMeta upload button missing from the map maker after a GeoGuessr update by @Lonanche
