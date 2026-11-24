@@ -30,6 +30,19 @@ declare global {
   }
 }
 
+export const RESULT_LIST_WRAPPER_SELECTOR = '[class*="_listWrapper_"]';
+export const RESULT_LIST_ITEM_SELECTOR = '[class*="_listItemWrapper_"]';
+export const RESULT_LIST_ROUND_NUMBER_SELECTOR = '[class*="_roundNumber_"]';
+
+export function findBreakdownListWrapper(root: ParentNode = document): Element | null {
+  for (const wrapper of root.querySelectorAll(RESULT_LIST_WRAPPER_SELECTOR)) {
+    if (wrapper.querySelector(RESULT_LIST_ROUND_NUMBER_SELECTOR)) {
+      return wrapper;
+    }
+  }
+  return null;
+}
+
 let currentObserver: MutationObserver | null = null;
 let currentPinObserver: MutationObserver | null = null;
 
@@ -92,11 +105,15 @@ export function initSinglePlayer() {
           mapId: event.detail.map.id
         };
 
-        waitForElement('.result-list_listWrapper__7SmiM').then((listWrapper) => {
-          if (!listWrapper) {
+        waitForElement(RESULT_LIST_ROUND_NUMBER_SELECTOR).then((roundNumberEl) => {
+          if (!roundNumberEl) {
             return;
           }
-          addMetaButtonsToRounds(roundData.rounds, roundData.mapId);
+          addMetaButtonsToRounds(
+            roundData.rounds,
+            roundData.mapId,
+            findBreakdownListWrapper() ?? document
+          );
         });
 
         if (currentObserver) {
@@ -104,9 +121,9 @@ export function initSinglePlayer() {
         }
 
         currentObserver = new MutationObserver(() => {
-          const listWrapper = document.querySelector('.result-list_listWrapper__7SmiM');
+          const listWrapper = findBreakdownListWrapper();
           if (listWrapper && !listWrapper.querySelector('.geometa-meta-btn')) {
-            addMetaButtonsToRounds(roundData.rounds, roundData.mapId);
+            addMetaButtonsToRounds(roundData.rounds, roundData.mapId, listWrapper);
           }
         });
 
@@ -142,18 +159,24 @@ export function initSinglePlayer() {
     });
 }
 
-function addMetaButtonsToRounds(rounds: GGEvent['detail']['rounds'], mapId: string) {
-  const roundItems = document.querySelectorAll('.result-list_listItemWrapper___XCGn');
+export function addMetaButtonsToRounds(
+  rounds: GGEvent['detail']['rounds'],
+  mapId: string,
+  root: ParentNode = document
+) {
+  const roundItems = root.querySelectorAll(RESULT_LIST_ITEM_SELECTOR);
 
   // pair rows with rounds by the round number each row displays, so the
   // "Total" row's position (or any reordering) cannot misalign the buttons
   roundItems.forEach((roundItem) => {
-    const roundNumberText = roundItem.querySelector('.result-list_roundNumber__RlIKm')?.textContent;
+    const roundNumberText = roundItem.querySelector(RESULT_LIST_ROUND_NUMBER_SELECTOR)?.textContent;
     const roundNumber = parseInt(roundNumberText || '');
     const round = rounds[roundNumber - 1];
     if (!round) return;
 
     if (roundItem.querySelector('.geometa-meta-btn')) return;
+
+    roundItem.classList.add('geometa-round-item');
 
     const metaButton = document.createElement('button');
     metaButton.className = 'geometa-meta-btn';

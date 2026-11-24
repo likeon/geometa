@@ -11,14 +11,16 @@ export function showMetaForRound(panoId: string, mapId: string, roundNumber: num
   });
 }
 
+export const MAP_PIN_SELECTOR = '[class*="_mapPin_"]';
+
 /**
  * Watches for round pins on a results map and adds clickable "?" icons
  * that open the meta window for that round. Returns the observer so the
  * caller can disconnect it on navigation.
  */
 export function createPinObserver(panoIds: string[], mapId: string): MutationObserver {
-  const observer = new MutationObserver(() => {
-    const pins = document.querySelectorAll('[class*="map-pin_mapPin"]');
+  const processPins = () => {
+    const pins = document.querySelectorAll(MAP_PIN_SELECTOR);
     pins.forEach((pin) => {
       const pinText = pin.textContent?.trim();
       const roundNumber = parseInt(pinText || '');
@@ -49,7 +51,10 @@ export function createPinObserver(panoIds: string[], mapId: string): MutationObs
         pinElement.appendChild(questionIcon);
       }
     });
-  });
+  };
+
+  const observer = new MutationObserver(processPins);
+  processPins();
 
   // childList is enough - pins arrive as new nodes, and observing attributes
   // makes the callback re-trigger on its own setAttribute calls

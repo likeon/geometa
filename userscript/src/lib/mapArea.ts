@@ -88,12 +88,28 @@ function mapFromReact(element: Element | null) {
     : null;
 }
 
+export const RESULT_MAP_SELECTOR = '[class*="coordinate-result-map_map"], [class*="_map_"]';
+
+function findReactResultMap(resultView: Element): GoogleMap | null {
+  const candidates =
+    typeof resultView.querySelectorAll === 'function'
+      ? Array.from(resultView.querySelectorAll(RESULT_MAP_SELECTOR))
+      : [resultView.querySelector(RESULT_MAP_SELECTOR)];
+  for (const candidate of candidates) {
+    const reactMap = mapFromReact(candidate);
+    if (reactMap && isVisibleMap(reactMap)) {
+      return reactMap;
+    }
+  }
+  return null;
+}
+
 function currentResultMap() {
   const visibleMaps = maps.filter(isVisibleMap);
   const resultView = pageWindow.document.querySelector('div[data-qa="result-view-top"]');
   if (resultView) {
-    const reactMap = mapFromReact(resultView.querySelector('[class*="coordinate-result-map_map"]'));
-    if (reactMap && isVisibleMap(reactMap)) {
+    const reactMap = findReactResultMap(resultView);
+    if (reactMap) {
       wrapFitBounds(reactMap);
       if (!maps.includes(reactMap)) maps.push(reactMap);
       return reactMap;

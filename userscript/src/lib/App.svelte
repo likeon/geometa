@@ -568,7 +568,7 @@
     display: inline-block;
   }
 
-  :global(.result-list_listItemWrapper___XCGn) {
+  :global(.geometa-round-item) {
     display: flex !important;
     justify-content: space-between !important;
     align-items: center !important;

@@ -68,8 +68,10 @@ test('React fallback rendering settles its queues', () => {
       return: { memoizedState: { memoizedState: { current: { instance: map } } } }
     }
   };
+  const wrapperWithoutMap = {};
   const resultView = {
     querySelector: () => mapElement,
+    querySelectorAll: () => [wrapperWithoutMap, mapElement],
     contains: () => false
   };
   const documentMock = {

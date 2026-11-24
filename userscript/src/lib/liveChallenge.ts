@@ -7,12 +7,16 @@ import {
 } from './utils/main';
 import { mountSummaryWindow, unmountSummaryWindow } from './utils/summaryWindow';
 
+export const ROUND_PIN_SELECTOR = '[class*="_roundPin_"]';
+export const LIVE_CHALLENGE_CONTAINER_SELECTOR =
+  '[class*="game_container"], [data-game-hud][class*="_backdrop_"] ~ [class*="_container_"]';
+
 export function initLiveChallenge() {
   logInfo('live challenge support enabled');
   let pinChanged = false;
   let generation = 0;
   const observer = new MutationObserver(async () => {
-    if (!document.querySelector('[class*=result-map_roundPin]')) {
+    if (!document.querySelector(ROUND_PIN_SELECTOR)) {
       if (pinChanged) {
         generation += 1;
         unmountSummaryWindow();
@@ -38,11 +42,11 @@ export function initLiveChallenge() {
       const mapInfo = await getMapInfo(mapId, false);
       if (requestGeneration !== generation) return;
       if (!mapInfo.mapFound) return;
-      const container = await waitForElement('[class*=game_container]');
+      const container = await waitForElement(LIVE_CHALLENGE_CONTAINER_SELECTOR);
       if (
         !container ||
         requestGeneration !== generation ||
-        !document.querySelector('[class*=result-map_roundPin]')
+        !document.querySelector(ROUND_PIN_SELECTOR)
       ) {
         return;
       }

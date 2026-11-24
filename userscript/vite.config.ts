@@ -50,7 +50,7 @@ export default defineConfig({
       build: { fileName: 'geometa.user.js' },
       userscript: {
         icon: 'https://learnablemeta.com/favicon.png',
-        version: '0.97',
+        version: '0.98',
         namespace: 'geometa',
         name: 'GeoGuessr Learnable Meta',
         description: 'UserScript for GeoGuessr Learnable Meta maps',
