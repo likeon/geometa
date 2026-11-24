@@ -2,6 +2,11 @@ name: Userscript build
 
 on:
   workflow_call:
+    inputs:
+      upload-pages-artifact:
+        description: Upload the build directly as the GitHub Pages artifact
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -49,8 +54,15 @@ jobs:
         run: node scripts/verify-build.mjs --manifest
 
       - name: Upload fresh build
+        if: ${{ !inputs.upload-pages-artifact }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: userscript-build
           path: userscript/build/
           if-no-files-found: error
+
+      - name: Upload Pages artifact
+        if: ${{ inputs.upload-pages-artifact }}
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: userscript/build
