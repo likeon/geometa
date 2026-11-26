@@ -1,3 +1,4 @@
+import { buildResponses } from '@api/lib/api/response-schemas';
 import { maps, users } from '@api/lib/db/schema';
 import { db } from '@api/lib/drizzle';
 import { auth } from '@api/lib/internal/auth';
@@ -16,6 +17,7 @@ import {
 } from '@api/lib/internal/discord-challenges';
 import { ensurePermissions } from '@api/lib/internal/permissions';
 import { geoguessrAPIFetch } from '@api/lib/internal/utils';
+import { Type } from '@sinclair/typebox';
 import { eq, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import { TypeCompiler } from 'elysia/type-system';
@@ -29,12 +31,15 @@ const challengeResponseValidator = TypeCompiler.Compile(
     { additionalProperties: true },
   ),
 );
-const challengeSettingsSchema = t.Object({
-  time_limit: t.Integer({ minimum: 0 }),
-  forbid_moving: t.Boolean(),
-  forbid_rotating: t.Boolean(),
-  forbid_zooming: t.Boolean(),
-});
+// fresh instance per route: Elysia's schema registry collides when the same
+// object is registered on two routes, corrupting the first route's body
+const challengeSettingsSchema = () =>
+  t.Object({
+    time_limit: t.Integer({ minimum: 0 }),
+    forbid_moving: t.Boolean(),
+    forbid_rotating: t.Boolean(),
+    forbid_zooming: t.Boolean(),
+  });
 
 function dailyChallengeResponse(batch: DailyChallengeBatch) {
   return {
@@ -116,9 +121,16 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
     },
     {
       body: t.Intersect([
-        challengeSettingsSchema,
+        challengeSettingsSchema(),
         t.Object({ geoguessr_map_id: t.String({ minLength: 1 }) }),
       ]),
+      response: buildResponses(
+        {
+          200: t.Object({ url: t.String() }),
+          502: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .post(
@@ -174,7 +186,29 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
       batch = await loadDailyChallengeBatch(batch.batchId);
       return dailyChallengeResponse(batch);
     },
-    { body: challengeSettingsSchema },
+    {
+      body: challengeSettingsSchema(),
+      response: buildResponses(
+        {
+          200: t.Object({
+            batchId: t.String(),
+            date: t.String(),
+            challenges: t.Array(
+              t.Object({
+                geoguessrId: t.String(),
+                name: t.String(),
+                authors: t.Union([t.String(), t.Null()]),
+                difficulty: Type.Integer(),
+                url: t.String(),
+              }),
+            ),
+          }),
+          409: t.Object({ message: t.String() }),
+          502: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, validation: true },
+      ),
+    },
   )
   .post(
     'maps/:geoguessrId/publish',
@@ -184,7 +218,7 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
         with: { mapRegions: true },
       });
       if (!map) {
-        return status(404);
+        return status(404, { message: 'Map not found' });
       }
 
       if (map.isPersonal) {
@@ -241,10 +275,17 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
           newValue: { isPublished: true },
         });
       });
-      return status(200);
+      return;
     },
     {
       body: t.Object({ discord_thread_author_id: t.String() }),
+      response: buildResponses(
+        {
+          200: t.Void(),
+          400: t.Object({ errors: t.Array(t.String()) }),
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .get(
@@ -258,6 +299,10 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
     },
     {
       params: t.Object({ id: t.String({ minLength: 1 }) }),
+      response: buildResponses(
+        { 200: t.Object({ isDiscordVerified: t.Boolean() }) },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .post(
@@ -294,5 +339,14 @@ export const discordBotRouter = new Elysia({ prefix: '/discord-bot' })
     },
     {
       params: t.Object({ id: t.String({ minLength: 1 }) }),
+      response: buildResponses(
+        {
+          200: t.Object({
+            isDiscordVerified: t.Boolean(),
+            discordVerifiedMessages: Type.Integer(),
+          }),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   );

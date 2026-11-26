@@ -1,4 +1,8 @@
 import {
+  buildResponses,
+  notFoundResponse,
+} from '@api/lib/api/response-schemas';
+import {
   levels,
   type Meta,
   mapGroupLocations,
@@ -22,6 +26,7 @@ import {
 } from '@api/lib/utils/geojson';
 import { markdown2Html } from '@api/lib/utils/markdown';
 import { uploadImage } from '@api/lib/utils/s3';
+import { Type } from '@sinclair/typebox';
 import { and, eq, inArray, not, sql } from 'drizzle-orm';
 import { Elysia, t } from 'elysia';
 import sharp from 'sharp';
@@ -163,7 +168,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
         where: eq(metas.id, params.id),
       });
       if (!meta) {
-        return status(404, undefined);
+        return status(404, { message: 'Meta not found' });
       }
 
       await ensurePermissions(userId, meta.mapGroupId);
@@ -180,7 +185,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           })
           .toBuffer();
       } catch (_e) {
-        return status(400, undefined);
+        return status(400, { message: 'Invalid image file' });
       }
 
       const imageName = `${Date.now()}-${generateRandomString(3)}.avif`;
@@ -223,19 +228,19 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       params: t.Object({
         id: t.Integer(),
       }),
-      response: {
-        200: t.Object({
-          imageUrl: t.String(),
-        }),
-        400: t.Void(),
-        404: t.Void(),
-      },
+      response: buildResponses(
+        {
+          200: t.Object({ imageUrl: t.String() }),
+          400: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .error({ ImageNotFoundError })
   .onError(({ code, status }) => {
     if (code === 'ImageNotFoundError') {
-      return status(404);
+      return status(404, notFoundResponse);
     }
   })
   .put(
@@ -246,7 +251,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       });
 
       if (!meta) {
-        return status(404, undefined);
+        return status(404, notFoundResponse);
       }
 
       await ensurePermissions(userId, meta.mapGroupId);
@@ -301,12 +306,10 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       params: t.Object({
         id: t.Integer(),
       }),
-      response: {
-        200: t.Object({
-          message: t.String(),
-        }),
-        404: t.Void(),
-      },
+      response: buildResponses(
+        { 200: t.Object({ message: t.String() }) },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .get(
@@ -327,10 +330,34 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
     {
       userId: true,
       params: t.Object({ id: t.Integer() }),
-      response: {
-        200: t.Any(),
-        404: t.Object({ message: t.String() }),
-      },
+      response: buildResponses(
+        {
+          200: t.Object({
+            type: t.Literal('FeatureCollection'),
+            features: t.Array(
+              t.Object({
+                type: t.Literal('Feature'),
+                properties: t.Union([
+                  t.Record(t.String(), t.Unknown()),
+                  t.Null(),
+                ]),
+                geometry: t.Object({
+                  type: t.Union([
+                    t.Literal('Point'),
+                    t.Literal('MultiPoint'),
+                    t.Literal('Polygon'),
+                    t.Literal('MultiPolygon'),
+                  ]),
+                  coordinates: t.Any(),
+                }),
+                id: t.Optional(t.Union([t.String(), t.Number()])),
+              }),
+            ),
+          }),
+          404: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .put(
@@ -404,14 +431,17 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       body: t.Object({ file: t.File() }),
       userId: true,
       params: t.Object({ id: t.Integer() }),
-      response: {
-        200: t.Object({
-          featureCount: t.Integer(),
-          polygonCount: t.Integer(),
-        }),
-        400: t.Object({ message: t.String() }),
-        404: t.Object({ message: t.String() }),
-      },
+      response: buildResponses(
+        {
+          200: t.Object({
+            featureCount: Type.Integer(),
+            polygonCount: Type.Integer(),
+          }),
+          400: t.Object({ message: t.String() }),
+          404: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .delete(
@@ -466,10 +496,13 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
     {
       userId: true,
       params: t.Object({ id: t.Integer() }),
-      response: {
-        200: t.Object({ deleted: t.Boolean() }),
-        404: t.Object({ message: t.String() }),
-      },
+      response: buildResponses(
+        {
+          200: t.Object({ deleted: t.Boolean() }),
+          404: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .put(
@@ -501,7 +534,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           where: eq(metas.id, id),
         });
         if (!savedData) {
-          return status(404);
+          return status(404, notFoundResponse);
         }
         await ensurePermissions(userId, savedData.mapGroupId);
         savedLevelIds = (
@@ -636,6 +669,13 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
         footer: t.String(),
       }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({ id: Type.Integer() }),
+          409: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .delete(
@@ -646,14 +686,16 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
       });
 
       if (metasToDelete.length !== body.ids.length) {
-        return status(404, 'Some metas not found');
+        return status(404, { message: 'Some metas not found' });
       }
 
       const mapGroupIds = [
         ...new Set(metasToDelete.map((meta) => meta.mapGroupId)),
       ];
       if (mapGroupIds.length !== 1) {
-        return status(400, 'All metas must belong to the same map group');
+        return status(400, {
+          message: 'All metas must belong to the same map group',
+        });
       }
       await ensurePermissions(userId, mapGroupIds[0]);
 
@@ -672,13 +714,21 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           })),
         );
       });
-      return status(200);
+      return;
     },
     {
       body: t.Object({
         ids: t.Array(t.Integer(), { minItems: 1 }),
       }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Void(),
+          400: t.Object({ message: t.String() }),
+          404: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .post(
@@ -814,6 +864,17 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
         levelIds: t.Array(t.Integer(), { minItems: 1 }),
       }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({
+            message: t.String(),
+            addedCount: Type.Integer(),
+          }),
+          400: t.Object({ message: t.String() }),
+          404: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .post(
@@ -890,6 +951,17 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
         targetGroupId: t.Integer(),
       }),
       userId: true,
+      response: buildResponses(
+        {
+          200: t.Object({
+            copiedCount: Type.Integer(),
+            totalRequested: Type.Integer(),
+            message: t.String(),
+          }),
+          404: t.Object({ message: t.String() }),
+        },
+        { forbidden: true, validation: true },
+      ),
     },
   )
   .post(
@@ -901,7 +973,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
         where: eq(metas.id, metaId),
       });
       if (!meta) {
-        return status(404, 'No meta found for this id');
+        return status(404, { message: 'No meta found for this id' });
       }
       await ensurePermissions(userId, meta.mapGroupId);
       await ensurePermissions(userId, targetGroupId);
@@ -932,7 +1004,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
           });
         }
       });
-      return status(200);
+      return;
     },
     {
       body: t.Object({
@@ -940,6 +1012,10 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
         targetGroupId: t.Integer(),
       }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Void() },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   )
   .delete(
@@ -952,7 +1028,7 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
         .where(eq(metaImages.id, imageId));
 
       if (savedImage.length === 0) {
-        return status(404);
+        return status(404, { message: 'Image not found' });
       }
       await ensurePermissions(userId, savedImage[0].metas.mapGroupId);
 
@@ -978,5 +1054,9 @@ export const metasRouter = new Elysia({ prefix: '/metas' })
     {
       params: t.Object({ imageId: t.Integer() }),
       userId: true,
+      response: buildResponses(
+        { 200: t.Object({ imageId: Type.Integer() }) },
+        { forbidden: true, notFound: true, validation: true },
+      ),
     },
   );
